@@ -6,7 +6,7 @@ System to manage leaves.
 
 1. Clone the project
 
-2. Open a terminal and move to the directory with the project `cd LeaveSystem\LeaveSystem`
+2. Open a terminal and move to the directory with the project `cd LeaveSystem\LeaveSystem.Web`
 
 3. Use the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli) to log in to Azure `az login --allow-no-subscriptions`
 
@@ -34,7 +34,7 @@ System to manage leaves.
    options.ProviderOptions.DefaultAccessTokenScopes.Add("User.Read");
    ```
 
-7. Go to Azure and find the registered application named `LeaveSystem`. Open the Authentication tab and click `This app has implicit grant settings enabled. If you are using any of these URIs in a SPA with MSAL.js 2.0, you should migrate URIs.`.
+7. Go to Azure and find the registered application named `LeaveSystem.Web`. Open the Authentication tab and click `This app has implicit grant settings enabled. If you are using any of these URIs in a SPA with MSAL.js 2.0, you should migrate URIs.`.
    
    ![Azure app registration](./AzureAppRegistration.png)
 
