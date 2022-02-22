@@ -1,0 +1,78 @@
+﻿@page "/addleaverequest"
+@using LeaveSystem.Web.Models
+@using Microsoft.Extensions.Logging
+@inject ILogger<AddLeaveRequest> Logger
+
+<PageTitle>Add leave request</PageTitle>
+
+<h1>Add leave request</h1>
+
+<EditForm Model="@leaveRequest" OnValidSubmit="@HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <p>
+        <label>
+            Date from:
+            <InputDate @bind-Value="leaveRequest.DateFrom" />
+        </label>
+    </p>
+    <p>
+        <label>
+            Date from:
+            <InputDate @bind-Value="leaveRequest.DateTo" />
+        </label>
+    </p>
+    <p>
+        <label>
+            Hours:
+            <InputNumber @bind-Value="leaveRequest.Hours" />
+        </label>
+    </p>
+    <p>
+        <label>
+            Primary Classification:
+            <InputSelect @bind-Value="leaveRequest.Type">
+                <option value="">Select classification ...</option>
+                <option value="Exploration">Exploration</option>
+                <option value="Diplomacy">Diplomacy</option>
+                <option value="Defense">Defense</option>
+            </InputSelect>
+        </label>
+    </p>
+    <p>
+        <label>
+            Remarks (optional):
+            <InputTextArea @bind-Value="leaveRequest.Remarks" />
+        </label>
+    </p>
+
+    <button type="submit">Submit</button>
+</EditForm>
+
+@code {
+    private LeaveRequestModel leaveRequest = new() { DateFrom = DateTime.UtcNow, DateTo = DateTime.UtcNow };
+    private EditContext? editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new(leaveRequest);
+    }
+    private async Task HandleSubmit()
+    {
+        if (editContext != null && editContext.Validate())
+        {
+            Logger.LogInformation("HandleSubmit called: Form is valid");
+
+            // Process the valid form
+            // await ...
+            await Task.CompletedTask;
+        }
+        else
+        {
+            Logger.LogInformation("HandleSubmit called: Form is INVALID");
+        }
+    }
+}
+
+
