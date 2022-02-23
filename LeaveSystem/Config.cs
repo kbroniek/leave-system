@@ -1,20 +1,18 @@
-﻿using GoldenEye.Marten.Registration;
+﻿using GoldenEye.Backend.Core.Marten.Registration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Tickets.Maintenance;
-using Tickets.Reservations;
+using System.Configuration;
+//using Tickets.Maintenance;
+//using Tickets.Reservations;
 
 namespace Tickets;
 
 public static class Config
 {
-    public static void AddTicketsModule(this IServiceCollection services, IConfiguration config)
+    public static void AddLeaveSystemModule(this IServiceCollection services, IConfiguration config)
     {
-        services.AddMarten(config, options =>
-        {
-            options.ConfigureReservations();
-        });
-        services.AddReservations();
-        services.AddMaintainance();
+        services.AddMarten(s => config.GetConnectionString("Marten"));
+        //services.AddReservations();
+        //services.AddMaintainance();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LeaveSystem.Web.Models;
+namespace LeaveSystem.Web.Pages.AddLeaveRequest;
 
 public class LeaveRequestModel
 {
