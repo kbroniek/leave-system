@@ -1,6 +1,7 @@
 ﻿@page "/addleaverequest"
 @using Microsoft.Extensions.Logging
 @using GoldenEye.Backend.Core.DDD.Commands
+@using LeaveSystem.LeaveRequests.CreatingLeaveRequest
 @inject ILogger<AddLeaveRequest> Logger
 @inject ICommandBus CommandBus
 
@@ -64,7 +65,8 @@
         if (editContext != null && editContext.Validate())
         {
             Logger.LogInformation("HandleSubmit called: Form is valid");
-            var command = LeaveSystem.LeaveRequests.AddingLeaveRequest.AddLeaveRequest.Create(
+            var command = CreateLeaveRequest.Create(
+                Guid.NewGuid(),
                 leaveRequest.DateFrom,
                 leaveRequest.DateTo,
                 leaveRequest.Hours,

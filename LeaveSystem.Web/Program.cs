@@ -2,6 +2,7 @@ using GoldenEye.Backend.Core.DDD.Registration;
 using LeaveSystem.Web;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Tickets;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -16,5 +17,6 @@ builder.Services.AddMsalAuthentication(options =>
 });
 builder.Services.AddDDD();
 builder.Services.AddAllDDDHandlers();
+builder.Services.AddLeaveSystemModule(builder.Configuration);
 
 await builder.Build().RunAsync();
