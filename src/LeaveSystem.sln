@@ -8,9 +8,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Web", "LeaveSystem.Web\LeaveSystem.Web.csproj", "{F1797FA0-2439-4B6A-8CA6-2B6688FE1993}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Web", "LeaveSystem.Web\LeaveSystem.Web\LeaveSystem.Web.csproj", "{F1797FA0-2439-4B6A-8CA6-2B6688FE1993}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem", "LeaveSystem\LeaveSystem.csproj", "{1A43849F-FC96-47E9-9617-D211667837F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem", "LeaveSystem\LeaveSystem\LeaveSystem.csproj", "{1A43849F-FC96-47E9-9617-D211667837F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

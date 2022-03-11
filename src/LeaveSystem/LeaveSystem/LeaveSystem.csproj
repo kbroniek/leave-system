@@ -8,9 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GoldenEye.Backend.Core" Version="9.0.0" />
-    <PackageReference Include="GoldenEye.Backend.Core.Marten" Version="10.0.0" />
-    <PackageReference Include="GoldenEye.Shared.Core" Version="8.0.0" />
+    <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
     <PackageReference Include="Marten" Version="4.3.1" />
   </ItemGroup>
 </Project>
