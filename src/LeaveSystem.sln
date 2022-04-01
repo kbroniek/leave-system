@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{83819FDA-9594-4E49-85E5-272FD5E46F16}"
 	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Web", "LeaveSystem.Web\LeaveSystem.Web\LeaveSystem.Web.csproj", "{F1797FA0-2439-4B6A-8CA6-2B6688FE1993}"
