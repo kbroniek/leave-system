@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="GoldenEye.Backend.Core.DDD" Version="11.0.0" />
 	  <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.15.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.0" PrivateAssets="all" />
@@ -17,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
     <ProjectReference Include="..\..\LeaveSystem\LeaveSystem\LeaveSystem.csproj" />
   </ItemGroup>
 

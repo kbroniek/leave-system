@@ -1,4 +1,4 @@
-﻿using GoldenEye.Backend.Core.DDD.Events;
+﻿using GoldenEye.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,4 @@
-using GoldenEye.Backend.Core.DDD.Registration;
+using GoldenEye.Registration;
 using LeaveSystem.Web;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;

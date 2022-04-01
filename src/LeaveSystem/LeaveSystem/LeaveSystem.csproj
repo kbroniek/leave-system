@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
     <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
     <PackageReference Include="Marten" Version="4.3.1" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-﻿using GoldenEye.Backend.Core.Marten.Registration;
+﻿using GoldenEye.Marten.Registration;
 using LeaveSystem.LeaveRequests;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

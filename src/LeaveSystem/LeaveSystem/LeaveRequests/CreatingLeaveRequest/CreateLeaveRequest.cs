@@ -1,5 +1,5 @@
-﻿using GoldenEye.Backend.Core.DDD.Commands;
-using GoldenEye.Backend.Core.Repositories;
+﻿using GoldenEye.Commands;
+using GoldenEye.Repositories;
 using MediatR;
 
 namespace LeaveSystem.LeaveRequests.CreatingLeaveRequest;
@@ -44,11 +44,11 @@ internal class HandleCreateLeaveRequest :
         this.repository = repository;
     }
 
-    public async Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
+    public Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
-        var leaveRequest = LeaveRequest.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, command.Hours, command.Type, command.Remarks);
-        await repository.AddAsync(leaveRequest, cancellationToken);
-        await repository.SaveChangesAsync(cancellationToken);
-        return Unit.Value;
+        //var leaveRequest = LeaveRequest.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, command.Hours, command.Type, command.Remarks);
+        //await repository.AddAsync(leaveRequest, cancellationToken);
+        //await repository.SaveChangesAsync(cancellationToken);
+        return Task.FromResult(Unit.Value);
     }
 }

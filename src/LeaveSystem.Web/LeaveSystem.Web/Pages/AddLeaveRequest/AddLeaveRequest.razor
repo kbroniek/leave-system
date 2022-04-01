@@ -1,6 +1,6 @@
 ﻿@page "/addleaverequest"
+@using GoldenEye.Commands
 @using Microsoft.Extensions.Logging
-@using GoldenEye.Backend.Core.DDD.Commands
 @using LeaveSystem.LeaveRequests.CreatingLeaveRequest
 @inject ILogger<AddLeaveRequest> Logger
 @inject ICommandBus CommandBus
@@ -73,7 +73,7 @@
                 leaveRequest.Type,
                 leaveRequest.Remarks
             );
-            return CommandBus.SendAsync(command);
+            return CommandBus.Send(command);
         }
         else
         {
