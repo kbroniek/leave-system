@@ -44,11 +44,11 @@ internal class HandleCreateLeaveRequest :
         this.repository = repository;
     }
 
-    public Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
-        //var leaveRequest = LeaveRequest.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, command.Hours, command.Type, command.Remarks);
-        //await repository.AddAsync(leaveRequest, cancellationToken);
-        //await repository.SaveChangesAsync(cancellationToken);
-        return Task.FromResult(Unit.Value);
+        var leaveRequest = LeaveRequest.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, command.Hours, command.Type, command.Remarks);
+        await repository.Add(leaveRequest, cancellationToken);
+        await repository.SaveChanges(cancellationToken);
+        return Unit.Value;
     }
 }

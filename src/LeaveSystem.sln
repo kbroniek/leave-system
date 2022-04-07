@@ -32,6 +32,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Tests", "GoldenEye\Cor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core.Tests.External", "GoldenEye\Core\Core.Tests.External\Core.Tests.External.csproj", "{6FC8793E-9FB1-4CCF-A740-EE563C4C7ACA}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem.Api", "LeaveSystem.Api", "{F16D4955-ECA7-49EB-ACF3-2DBA73CD9EF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Api", "LeaveSystem.Api\LeaveSystem.Api\LeaveSystem.Api.csproj", "{533FD533-7607-49F0-9D49-22A34EBE9EF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +70,10 @@ Global
 		{6FC8793E-9FB1-4CCF-A740-EE563C4C7ACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FC8793E-9FB1-4CCF-A740-EE563C4C7ACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FC8793E-9FB1-4CCF-A740-EE563C4C7ACA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{533FD533-7607-49F0-9D49-22A34EBE9EF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{533FD533-7607-49F0-9D49-22A34EBE9EF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{533FD533-7607-49F0-9D49-22A34EBE9EF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{533FD533-7607-49F0-9D49-22A34EBE9EF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,6 +88,7 @@ Global
 		{ED59F3B5-495F-4720-A087-CBC5345A7C8D} = {9F29AA2C-E395-4030-8B8B-7F6AFBCE50B7}
 		{9F7B0142-DA7C-4A9A-BA27-7EB1B7743509} = {6E3C660F-EA38-4960-A7F3-DF8417C9B8DF}
 		{6FC8793E-9FB1-4CCF-A740-EE563C4C7ACA} = {6E3C660F-EA38-4960-A7F3-DF8417C9B8DF}
+		{533FD533-7607-49F0-9D49-22A34EBE9EF4} = {F16D4955-ECA7-49EB-ACF3-2DBA73CD9EF6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E8762886-5B99-4DD1-B6A9-242FAC001B38}
