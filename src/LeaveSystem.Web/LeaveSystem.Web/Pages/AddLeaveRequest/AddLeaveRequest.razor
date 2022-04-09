@@ -1,9 +1,9 @@
 ﻿@page "/addleaverequest"
-@using GoldenEye.Commands
-@using Microsoft.Extensions.Logging
-@using LeaveSystem.LeaveRequests.CreatingLeaveRequest
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@inject HttpClient Http
 @inject ILogger<AddLeaveRequest> Logger
-@inject ICommandBus CommandBus
 
 <PageTitle>Add leave request</PageTitle>
 
@@ -60,25 +60,24 @@
     {
         editContext = new(leaveRequest);
     }
-    private Task HandleSubmit()
+    private async Task HandleSubmit()
     {
         if (editContext != null && editContext.Validate())
         {
             Logger.LogInformation("HandleSubmit called: Form is valid");
-            var command = CreateLeaveRequest.Create(
-                Guid.NewGuid(),
-                leaveRequest.DateFrom,
-                leaveRequest.DateTo,
-                leaveRequest.Hours,
-                leaveRequest.Type,
-                leaveRequest.Remarks
-            );
-            return CommandBus.Send(command);
+            try
+            {
+                await Http.PostAsJsonAsync("LeaveRequest", leaveRequest);
+            }
+            catch (AccessTokenNotAvailableException exception)
+            {
+                Logger.LogError(exception, "HandleSubmit called: Form is INVALID");
+                exception.Redirect();
+            }
         }
         else
         {
-            Logger.LogInformation("HandleSubmit called: Form is INVALID");
-            return Task.CompletedTask;
+            Logger.LogError("HandleSubmit called: Form is INVALID");
         }
     }
 }

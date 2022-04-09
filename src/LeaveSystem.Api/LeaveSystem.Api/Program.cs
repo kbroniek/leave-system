@@ -1,4 +1,5 @@
 using LeaveSystem.Shared;
+using LeaveSystem.Web.Pages.AddLeaveRequest;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
@@ -68,6 +69,13 @@ app.MapGet("/weatherforecast", (HttpContext httpContext) =>
     return forecast;
 })
 .WithName("GetWeatherForecast")
+.RequireAuthorization();
+
+app.MapPost("/leaverequest", (HttpContext httpContext, LeaveRequestModel model) =>
+{
+    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+})
+.WithName("AddLeaveRequest")
 .RequireAuthorization();
 
 app.Run();
