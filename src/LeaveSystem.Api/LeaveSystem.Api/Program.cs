@@ -10,7 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+      options.AddPolicy("Something",
+      policy => policy.RequireClaim("extension_Role", "Administrator")));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -69,7 +71,7 @@ app.MapGet("/weatherforecast", (HttpContext httpContext) =>
     return forecast;
 })
 .WithName("GetWeatherForecast")
-.RequireAuthorization();
+.RequireAuthorization("Something");
 
 app.MapPost("/leaverequest", (HttpContext httpContext, LeaveRequestModel model) =>
 {
