@@ -1,19 +1,27 @@
 ﻿using GoldenEye.Marten.Registration;
-using LeaveSystem.LeaveRequests;
+using LeaveSystem.Db;
+using LeaveSystem.Es;
+using LeaveSystem.Mappers;
+using LeaveSystem.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Configuration;
-//using Tickets.Maintenance;
-//using Tickets.Reservations;
 
-namespace Tickets;
+namespace LeaveSystem;
 
 public static class Config
 {
     public static void AddLeaveSystemModule(this IServiceCollection services, IConfiguration config)
     {
-        services.AddMarten(_ => config.GetConnectionString("Marten"));
-        services.AddLeaveRequests();
+        string connectionString = config.GetConnectionString("PostgreSQL");
+        services.AddDbContext<LeaveSystemDbContext>(options =>
+        {
+            options.UseNpgsql(connectionString);
+        });
+        services.AddMarten(_ => connectionString);
+        services.AddEventSourcing();
+        services.AddServices();
+        services.AddMappers();
         //services.AddMaintainance();
     }
 }

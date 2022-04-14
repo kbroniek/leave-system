@@ -2,7 +2,7 @@
 using GoldenEye.Repositories;
 using MediatR;
 
-namespace LeaveSystem.LeaveRequests.CreatingLeaveRequest;
+namespace LeaveSystem.Es.CreatingLeaveRequest;
 
 public class CreateLeaveRequest : ICommand
 {

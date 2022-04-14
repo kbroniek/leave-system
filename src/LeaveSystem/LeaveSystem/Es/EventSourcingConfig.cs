@@ -1,10 +1,10 @@
 ﻿using GoldenEye.Marten.Registration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LeaveSystem.LeaveRequests;
-internal static class LeaveRequestsConfig
+namespace LeaveSystem.Es;
+internal static class EventSourcingConfig
 {
-    internal static void AddLeaveRequests(this IServiceCollection services)
+    internal static void AddEventSourcing(this IServiceCollection services)
     {
         services.AddMartenEventSourcedRepository<LeaveRequest>();
     }

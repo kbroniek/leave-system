@@ -1,6 +1,8 @@
+using GoldenEye.Registration;
+using LeaveSystem;
+using LeaveSystem.Services.LeaveType;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.AddLeaveRequest;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
@@ -21,6 +23,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
+
+builder.Services.AddDDD();
+//builder.Services.AddAllDDDHandlers();
+builder.Services.AddLeaveSystemModule(builder.Configuration);
 
 var app = builder.Build();
 
@@ -79,5 +85,16 @@ app.MapPost("/leaverequest", (HttpContext httpContext, LeaveRequestModel model) 
 })
 .WithName("AddLeaveRequest")
 .RequireAuthorization();
+
+app.MapPost("/leavetype", async (HttpContext httpContext, CreateLeaveType model, LeaveTypeService leaveTypeService) =>
+{
+    //httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+
+    await leaveTypeService.Create(model);
+
+    return Results.NoContent();
+})
+.WithName("CreateLeaveType");
+//.RequireAuthorization();
 
 app.Run();
