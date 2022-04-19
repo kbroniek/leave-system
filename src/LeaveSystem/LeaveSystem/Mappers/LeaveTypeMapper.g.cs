@@ -12,8 +12,22 @@ namespace LeaveSystem.Mappers
             {
                 LeaveTypeId = p1.LeaveTypeId,
                 Description = p1.Description,
-                Abbreviation = p1.Abbreviation
+                Properties = p1.Properties
             };
+        }
+        public LeaveType MapToExisting(UpdateLeaveType p2, LeaveType p3)
+        {
+            if (p2 == null)
+            {
+                return null;
+            }
+            LeaveType result = p3 ?? new LeaveType();
+            
+            result.LeaveTypeId = p2.LeaveTypeId;
+            result.Description = p2.Description;
+            result.Properties = p2.Properties;
+            return result;
+            
         }
     }
 }

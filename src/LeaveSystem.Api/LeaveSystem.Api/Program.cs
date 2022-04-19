@@ -1,6 +1,6 @@
 using GoldenEye.Registration;
 using LeaveSystem;
-using LeaveSystem.Services.LeaveType;
+using LeaveSystem.Api;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.AddLeaveRequest;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -57,6 +57,9 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 var scopeRequiredByApi = app.Configuration["AzureAdB2C:Scopes"];
+
+app.MapLeaveTypeEndpoints(scopeRequiredByApi);
+
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -85,16 +88,5 @@ app.MapPost("/leaverequest", (HttpContext httpContext, LeaveRequestModel model) 
 })
 .WithName("AddLeaveRequest")
 .RequireAuthorization();
-
-app.MapPost("/leavetype", async (HttpContext httpContext, CreateLeaveType model, LeaveTypeService leaveTypeService) =>
-{
-    //httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
-
-    await leaveTypeService.Create(model);
-
-    return Results.NoContent();
-})
-.WithName("CreateLeaveType");
-//.RequireAuthorization();
 
 app.Run();

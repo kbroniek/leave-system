@@ -58,3 +58,50 @@ Run command
 ```
 msidentity-app-sync --unregister true
 ```
+
+## Update the Database schema
+
+Working with the database migrations. https://docs.microsoft.com/pl-pl/ef/core/get-started/overview/first-app?tabs=netcore-cli
+
+Run:
+
+```
+cd LeaveSystem\LeaveSystem
+dotnet ef --startup-project ..\..\LeaveSystem.Api\LeaveSystem.Api\ migrations add InitialCreate
+dotnet ef --startup-project ..\..\LeaveSystem.Api\LeaveSystem.Api\ database update
+```
+
+## Mapster tool
+
+To generate new mapping I use Mapster. 
+
+**Important: Mapster generate code from dll.**
+
+To regenerate mappers run:
+
+```
+dotnet msbuild -t:Mapster
+```
+
+To clear all generated files run:
+
+```
+dotnet msbuild -t:CleanGenerated
+```
+
+More info https://github.com/MapsterMapper/Mapster/wiki/Mapster.Tool.
+
+## Generate security token to the azure B2C
+
+1. Install Azure CLI.
+2. Login to the tenant, e.g.
+
+```
+az login -t leavesystem.onmicrosoft.com --allow-no-subscriptions
+```
+
+3. Get access token and replace guid your scope in your server app (https://www.schaeflein.net/use-a-cli-to-get-an-access-token-for-your-aad-protected-web-api/)
+
+```
+az account get-access-token --resource api://4f24b978-403f-47fe-9cae-52deea03661d
+```

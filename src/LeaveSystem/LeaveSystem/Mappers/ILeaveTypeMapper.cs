@@ -8,5 +8,6 @@ namespace LeaveSystem.Mappers
     public interface ILeaveTypeMapper
     {
         public LeaveType MapTo(CreateLeaveType contact);
+        public LeaveType MapToExisting(UpdateLeaveType contact, LeaveType leaveType);
     }
 }

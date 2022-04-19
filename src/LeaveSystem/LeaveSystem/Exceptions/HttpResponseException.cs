@@ -27,7 +27,12 @@ public class HttpResponseException : Exception
 
     internal static Exception InternalServerError(string? message)
     {
-        return new HttpResponseException(message, HttpStatusCode.BadRequest);
+        return new HttpResponseException(message, HttpStatusCode.InternalServerError);
+    }
+
+    internal static Exception NotFound(string? message)
+    {
+        return new HttpResponseException(message, HttpStatusCode.NotFound);
     }
 
     public static HttpResponseException BadRequest(string? message)

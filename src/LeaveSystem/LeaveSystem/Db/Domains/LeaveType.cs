@@ -10,8 +10,6 @@ public class LeaveType
     public Guid LeaveTypeId { get; set; }
     [Required]
     public string? Description { get; set; }
-    [Required]
-    public string? Abbreviation { get; set; }
     public string? Properties { get; set; }
 }
 
