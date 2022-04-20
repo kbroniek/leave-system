@@ -1,11 +1,16 @@
 using GoldenEye.Registration;
 using LeaveSystem;
 using LeaveSystem.Api;
+using LeaveSystem.Api.Domains;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.AddLeaveRequest;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +28,23 @@ builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
+builder.Services.AddControllers().AddOData(opt =>
+    opt.AddRouteComponents("odata", GetEdmModel())
+        .Select()
+        .Filter()
+        .Count()
+        .Expand()
+        .OrderBy());
+
+IEdmModel GetEdmModel()
+{
+    var builder = new ODataConventionModelBuilder();
+    builder.Namespace = "LeaveSystem";
+    builder.ContainerName = "LeaveSystemContainer";
+    builder.EntitySet<LeaveType>("LeaveTypes");
+
+    return builder.GetEdmModel();
+}
 
 builder.Services.AddDDD();
 //builder.Services.AddAllDDDHandlers();
@@ -40,6 +62,9 @@ if (app.Environment.IsDevelopment())
     // .AllowAnyOrigin()
     // .AllowAnyMethod()
     // .AllowAnyHeader());
+
+    // Send "~/$odata" to debug routing if enable the following middleware
+    app.UseODataRouteDebug();
 }
 
 app.UseHttpsRedirection();
@@ -52,41 +77,46 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-var scopeRequiredByApi = app.Configuration["AzureAdB2C:Scopes"];
+//var scopeRequiredByApi = app.Configuration["AzureAdB2C:Scopes"];
 
-app.MapLeaveTypeEndpoints(scopeRequiredByApi);
+//app.MapLeaveTypeEndpoints(scopeRequiredByApi);
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+//var summaries = new[]
+//{
+//    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+//};
 
-app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-{
-    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+//app.MapGet("/weatherforecast", (HttpContext httpContext) =>
+//{
+//    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
 
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-       new WeatherForecast
-       (
-           DateTime.Now.AddDays(index),
-           Random.Shared.Next(-20, 55),
-           summaries[Random.Shared.Next(summaries.Length)]
-       ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.RequireAuthorization("Something");
+//    var forecast = Enumerable.Range(1, 5).Select(index =>
+//       new WeatherForecast
+//       (
+//           DateTime.Now.AddDays(index),
+//           Random.Shared.Next(-20, 55),
+//           summaries[Random.Shared.Next(summaries.Length)]
+//       ))
+//        .ToArray();
+//    return forecast;
+//})
+//.WithName("GetWeatherForecast")
+//.RequireAuthorization("Something");
 
-app.MapPost("/leaverequest", (HttpContext httpContext, LeaveRequestModel model) =>
-{
-    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
-})
-.WithName("AddLeaveRequest")
-.RequireAuthorization();
+//app.MapPost("/leaverequest", (HttpContext httpContext, LeaveRequestModel model) =>
+//{
+//    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+//})
+//.WithName("AddLeaveRequest")
+//.RequireAuthorization();
 
 app.Run();
