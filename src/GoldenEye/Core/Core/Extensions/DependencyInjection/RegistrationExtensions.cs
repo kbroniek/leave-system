@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Scrutor;
 
@@ -277,8 +278,13 @@ public static class RegistrationExtensions
     }
 
     public static IImplementationTypeSelector FromAssemblies(this IAssemblySelector assemblySelector,
-        AssemblySelector assemblySelection = AssemblySelector.ApplicationDependencies)
+        AssemblySelector assemblySelection = AssemblySelector.ApplicationDependencies,
+        params Assembly[] assemblies)
     {
+        if (assemblySelection == AssemblySelector.FromAssembly && assemblies.Length == 0)
+        {
+            throw new InvalidOperationException($"Have to provide {nameof(assemblies)} argument when {nameof(assemblySelection)} = {nameof(AssemblySelector.FromAssembly)}");
+        }
         switch (assemblySelection)
         {
             case AssemblySelector.ApplicationDependencies:
@@ -286,6 +292,9 @@ public static class RegistrationExtensions
 
             case AssemblySelector.CallingAssembly:
                 return assemblySelector.FromCallingAssembly();
+
+            case AssemblySelector.FromAssembly:
+                return assemblySelector.FromAssemblies(assemblies);
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(assemblySelection), assemblySelection,

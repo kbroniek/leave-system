@@ -15,12 +15,12 @@ namespace LeaveSystem.Es.CreatingLeaveRequest
 
         public int? Hours { get; }
 
-        public string? Type { get; }
+        public Guid? Type { get; }
 
         public string? Remarks { get; }
 
         [JsonConstructor]
-        private LeaveRequestCreated(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, string? type, string? remarks)
+        private LeaveRequestCreated(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
         {
             LeaveRequestId = leaveRequestId;
             DateFrom = dateFrom;
@@ -29,7 +29,7 @@ namespace LeaveSystem.Es.CreatingLeaveRequest
             Type = type;
             Remarks = remarks;
         }
-        public static LeaveRequestCreated Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, string? type, string? remarks)
+        public static LeaveRequestCreated Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
         {
             return new LeaveRequestCreated(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
         }

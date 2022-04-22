@@ -1,7 +1,9 @@
+using GoldenEye.Commands;
 using GoldenEye.Registration;
 using LeaveSystem;
 using LeaveSystem.Api;
 using LeaveSystem.Api.Domains;
+using LeaveSystem.Es.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.AddLeaveRequest;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -47,7 +49,6 @@ IEdmModel GetEdmModel()
 }
 
 builder.Services.AddDDD();
-//builder.Services.AddAllDDDHandlers();
 builder.Services.AddLeaveSystemModule(builder.Configuration);
 
 var app = builder.Build();
@@ -58,10 +59,10 @@ if (app.Environment.IsDevelopment())
     app.UseWebAssemblyDebugging();
     app.UseSwagger();
     app.UseSwaggerUI();
-    //app.UseCors(builder => builder
-    // .AllowAnyOrigin()
-    // .AllowAnyMethod()
-    // .AllowAnyHeader());
+    app.UseCors(builder => builder
+     .AllowAnyOrigin()
+     .AllowAnyMethod()
+     .AllowAnyHeader());
 
     // Send "~/$odata" to debug routing if enable the following middleware
     app.UseODataRouteDebug();
@@ -86,7 +87,7 @@ app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-//var scopeRequiredByApi = app.Configuration["AzureAdB2C:Scopes"];
+var scopeRequiredByApi = app.Configuration["AzureAdB2C:Scopes"];
 
 //app.MapLeaveTypeEndpoints(scopeRequiredByApi);
 
@@ -112,11 +113,21 @@ app.MapFallbackToFile("index.html");
 //.WithName("GetWeatherForecast")
 //.RequireAuthorization("Something");
 
-//app.MapPost("/leaverequest", (HttpContext httpContext, LeaveRequestModel model) =>
-//{
-//    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
-//})
-//.WithName("AddLeaveRequest")
-//.RequireAuthorization();
+app.MapPost("/leaverequest", (HttpContext httpContext, ICommandBus commandBus, LeaveRequestModel leaveRequest) =>
+{
+    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+    var command = CreateLeaveRequest.Create(
+                Guid.NewGuid(),
+                leaveRequest.DateFrom,
+                leaveRequest.DateTo,
+                leaveRequest.Hours,
+                leaveRequest.Type,
+                leaveRequest.Remarks
+            );
+    return commandBus.Send(command);
+
+})
+.WithName("AddLeaveRequest")
+.RequireAuthorization();
 
 app.Run();

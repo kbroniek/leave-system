@@ -1,5 +1,6 @@
 ﻿using LeaveSystem.Api.Domains;
 using LeaveSystem.Db;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LeaveSystem.Api.Controllers
 {
     [Route("api/[controller]")]
+    //[Authorize]
     public class LeaveTypeController : ODataController
     {
         private readonly LeaveSystemDbContext dbContext;
@@ -33,25 +35,25 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(LeaveType leaveType)
+        public async Task<IActionResult> Post(LeaveType leaveType, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             GetLeaveTypes().Add(leaveType);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(cancellationToken);
             return Created(leaveType);
         }
 
         [HttpPatch]
-        public async Task<IActionResult> Patch([FromODataUri] Guid key, Delta<LeaveType> create)
+        public async Task<IActionResult> Patch([FromODataUri] Guid key, Delta<LeaveType> create, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var entity = await GetLeaveTypes().FindAsync(key);
+            var entity = await GetLeaveTypes().FindAsync(new object[] { key }, cancellationToken);
             if (entity == null)
             {
                 return NotFound();
@@ -59,11 +61,11 @@ namespace LeaveSystem.Api.Controllers
             create.Patch(entity);
             try
             {
-                await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductExists(key))
+                if (!await ProductExists(key, cancellationToken))
                 {
                     return NotFound();
                 }
@@ -76,7 +78,7 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Put([FromODataUri] Guid key, LeaveType update)
+        public async Task<IActionResult> Put([FromODataUri] Guid key, LeaveType update, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
@@ -89,11 +91,11 @@ namespace LeaveSystem.Api.Controllers
             dbContext.Entry(update).State = EntityState.Modified;
             try
             {
-                await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductExists(key))
+                if (!await ProductExists(key, cancellationToken))
                 {
                     return NotFound();
                 }
@@ -106,21 +108,21 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete([FromODataUri] int key)
+        public async Task<IActionResult> Delete([FromODataUri] Guid key, CancellationToken cancellationToken = default)
         {
-            var product = await GetLeaveTypes().FindAsync(key);
+            var product = await GetLeaveTypes().FindAsync(new object[] { key }, cancellationToken);
             if (product == null)
             {
                 return NotFound();
             }
             GetLeaveTypes().Remove(product);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(cancellationToken);
             return NoContent();
         }
 
-        private Task<bool> ProductExists(Guid key)
+        private Task<bool> ProductExists(Guid key, CancellationToken cancellationToken)
         {
-            return GetLeaveTypes().AnyAsync(l => l.LeaveTypeId == key);
+            return GetLeaveTypes().AnyAsync(l => l.LeaveTypeId == key, cancellationToken);
         }
 
         private DbSet<LeaveType> GetLeaveTypes()

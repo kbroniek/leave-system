@@ -1,11 +1,12 @@
-﻿using GoldenEye.Marten.Registration;
+﻿using GoldenEye.Extensions.DependencyInjection;
+using GoldenEye.Marten.Registration;
+using GoldenEye.Registration;
 using LeaveSystem.Db;
 using LeaveSystem.Es;
-using LeaveSystem.Mappers;
-using LeaveSystem.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace LeaveSystem;
 
@@ -13,6 +14,10 @@ public static class Config
 {
     public static void AddLeaveSystemModule(this IServiceCollection services, IConfiguration config)
     {
+        services.AddAllDDDHandlers(
+            ServiceLifetime.Transient,
+            AssemblySelector.FromAssembly,
+            Assembly.GetExecutingAssembly());
         string connectionString = config.GetConnectionString("PostgreSQL");
         services.AddDbContext<LeaveSystemDbContext>(options =>
         {
@@ -20,8 +25,6 @@ public static class Config
         });
         services.AddMarten(_ => connectionString);
         services.AddEventSourcing();
-        services.AddServices();
-        services.AddMappers();
         //services.AddMaintainance();
     }
 }

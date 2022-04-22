@@ -14,6 +14,7 @@ using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Reflection;
 
 namespace GoldenEye.Registration;
 
@@ -124,10 +125,11 @@ public static class Registration
     public static IServiceCollection AddAllCommandHandlers(
         this IServiceCollection services,
         ServiceLifetime withLifetime = ServiceLifetime.Transient,
-        AssemblySelector from = AssemblySelector.ApplicationDependencies)
+        AssemblySelector from = AssemblySelector.ApplicationDependencies,
+        params Assembly[] assemblies)
     {
         return services.Scan(scan => scan
-            .FromAssemblies(from)
+            .FromAssemblies(from, assemblies)
             .AddClasses(classes =>
                 classes.AssignableTo(typeof(ICommandHandler<>))
                     .Where(c => !c.IsAbstract && !c.IsGenericTypeDefinition))
@@ -139,10 +141,11 @@ public static class Registration
     public static IServiceCollection AddAllQueryHandlers(
         this IServiceCollection services,
         ServiceLifetime withLifetime = ServiceLifetime.Transient,
-        AssemblySelector from = AssemblySelector.ApplicationDependencies)
+        AssemblySelector from = AssemblySelector.ApplicationDependencies,
+        params Assembly[] assemblies)
     {
         return services.Scan(scan => scan
-            .FromAssemblies(from)
+            .FromAssemblies(from, assemblies)
             .AddClasses(classes =>
                 classes.AssignableTo(typeof(IQueryHandler<,>))
                     .Where(c => !c.IsAbstract && !c.IsGenericTypeDefinition))
@@ -154,10 +157,11 @@ public static class Registration
     public static IServiceCollection AddAllEventHandlers(
         this IServiceCollection services,
         ServiceLifetime withLifetime = ServiceLifetime.Transient,
-        AssemblySelector from = AssemblySelector.ApplicationDependencies)
+        AssemblySelector from = AssemblySelector.ApplicationDependencies,
+        params Assembly[] assemblies)
     {
         return services.Scan(scan => scan
-            .FromAssemblies(from)
+            .FromAssemblies(from, assemblies)
             .AddClasses(classes =>
                 classes.AssignableTo(typeof(IEventHandler<>))
                     .Where(c => !c.IsAbstract && !c.IsGenericTypeDefinition))
@@ -169,12 +173,13 @@ public static class Registration
     public static IServiceCollection AddAllDDDHandlers(
         this IServiceCollection services,
         ServiceLifetime withLifetime = ServiceLifetime.Transient,
-        AssemblySelector from = AssemblySelector.ApplicationDependencies)
+        AssemblySelector from = AssemblySelector.ApplicationDependencies,
+        params Assembly[] assemblies)
     {
         return services
-            .AddAllCommandHandlers(withLifetime, from)
-            .AddAllQueryHandlers(withLifetime, from)
-            .AddAllEventHandlers(withLifetime, from);
+            .AddAllCommandHandlers(withLifetime, from, assemblies)
+            .AddAllQueryHandlers(withLifetime, from, assemblies)
+            .AddAllEventHandlers(withLifetime, from, assemblies);
     }
 
     public static IServiceCollection AddExternalEventConsumerBackgroundWorker(this IServiceCollection services)

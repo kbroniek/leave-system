@@ -33,12 +33,13 @@
     </p>
     <p>
         <label>
-            Primary Classification:
-            <InputSelect @bind-Value="leaveRequest.Type">
-                <option value="">Select classification ...</option>
-                <option value="Exploration">Exploration</option>
-                <option value="Diplomacy">Diplomacy</option>
-                <option value="Defense">Defense</option>
+            Leave type:
+            <InputSelect @bind-Value="leaveRequest.Type" >
+                <option value="">Select leave type ...</option>
+                @foreach (var leaveType in leaveTypes)
+                {
+                    <option value="@leaveType.LeaveTypeId">@leaveType.Description</option>
+                }
             </InputSelect>
         </label>
     </p>
@@ -55,10 +56,15 @@
 @code {
     private LeaveRequestModel leaveRequest = new() { DateFrom = DateTime.UtcNow, DateTo = DateTime.UtcNow };
     private EditContext? editContext;
+    private IEnumerable<LeaveType> leaveTypes = Enumerable.Empty<LeaveType>();
 
     protected override void OnInitialized()
     {
         editContext = new(leaveRequest);
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        leaveTypes = await LoadLeaveTypes();
     }
     private async Task HandleSubmit()
     {
@@ -79,6 +85,24 @@
         {
             Logger.LogError("HandleSubmit called: Form is INVALID");
         }
+    }
+    private async ValueTask<IEnumerable<LeaveType>> LoadLeaveTypes()
+    {
+        Logger.LogInformation("Get all leave types");
+        var leaveRequests = await Http.GetFromJsonAsync<IEnumerable<LeaveType>>("api/LeaveType");
+
+        if (leaveRequests == null)
+        {
+            throw new InvalidOperationException("The collection leaveRequests is empty.");
+        }
+
+        return leaveRequests;
+    }
+
+    private class LeaveType
+    {
+        public Guid LeaveTypeId { get; set; }
+        public string? Description { get; set; }
     }
 }
 

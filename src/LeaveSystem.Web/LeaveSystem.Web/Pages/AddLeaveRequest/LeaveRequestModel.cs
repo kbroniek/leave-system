@@ -13,7 +13,7 @@ public class LeaveRequestModel
     public int? Hours { get; set; }
 
     [Required]
-    public string? Type { get; set; }
+    public Guid? Type { get; set; }
 
     public string? Remarks { get; set; }
 }

@@ -11,14 +11,14 @@ public class LeaveRequest : Aggregate
 
     public int? Hours { get; private set; }
 
-    public string? Type { get; private set; }
+    public Guid? Type { get; private set; }
 
     public string? Remarks { get; private set; }
 
     //For serialization
     public LeaveRequest() { }
 
-    private LeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, string? type, string? remarks)
+    private LeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
     {
         var @event = LeaveRequestCreated.Create(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
         Enqueue(@event);
@@ -36,7 +36,7 @@ public class LeaveRequest : Aggregate
         Version++;
     }
 
-    public static LeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, string? type, string? remarks)
+    public static LeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
     {
         return new LeaveRequest(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
     }

@@ -14,11 +14,11 @@ public class CreateLeaveRequest : ICommand
 
     public int? Hours { get; }
 
-    public string? Type { get; }
+    public Guid? Type { get; }
 
     public string? Remarks { get; }
 
-    private CreateLeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, string? type, string? remarks)
+    private CreateLeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
@@ -27,7 +27,7 @@ public class CreateLeaveRequest : ICommand
         Type = type;
         Remarks = remarks;
     }
-    public static CreateLeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, string? type, string? remarks)
+    public static CreateLeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
     {
         return new CreateLeaveRequest(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
     }

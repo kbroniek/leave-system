@@ -3,5 +3,6 @@
 public enum AssemblySelector
 {
     ApplicationDependencies = 1,
-    CallingAssembly = 2
+    CallingAssembly = 2,
+    FromAssembly = 3,
 }
