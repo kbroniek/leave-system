@@ -15,6 +15,10 @@ System to manage leaves.
 
 ![Update appsettings.json](./AzureAppRegistrationB2C-appsettings.png)
 
+### Custom policy
+
+https://docs.microsoft.com/en-us/azure/active-directory-b2c/custom-policy-overview#prepare-your-environment
+
 ## Start using the application B2B
 
 1. Clone the project
