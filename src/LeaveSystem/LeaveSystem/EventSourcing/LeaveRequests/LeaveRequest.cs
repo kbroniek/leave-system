@@ -1,7 +1,7 @@
 ﻿using GoldenEye.Aggregates;
-using LeaveSystem.Es.CreatingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
-namespace LeaveSystem.Es;
+namespace LeaveSystem.EventSourcing.LeaveRequests;
 
 public class LeaveRequest : Aggregate
 {

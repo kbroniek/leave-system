@@ -1,14 +1,11 @@
 using GoldenEye.Commands;
 using GoldenEye.Registration;
 using LeaveSystem;
-using LeaveSystem.Api;
 using LeaveSystem.Api.Domains;
-using LeaveSystem.Es.CreatingLeaveRequest;
-using LeaveSystem.Shared;
+using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.AddLeaveRequest;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.Resource;
 using Microsoft.OData.Edm;

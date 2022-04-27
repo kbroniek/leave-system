@@ -12,9 +12,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
-    <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
     <PackageReference Include="Marten" Version="4.2.0" />
 	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
+    <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
   </ItemGroup>
 </Project>

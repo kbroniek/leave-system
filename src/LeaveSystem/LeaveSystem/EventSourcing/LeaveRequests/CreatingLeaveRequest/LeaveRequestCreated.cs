@@ -1,7 +1,7 @@
 ﻿using GoldenEye.Events;
 using System.Text.Json.Serialization;
 
-namespace LeaveSystem.Es.CreatingLeaveRequest
+namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest
 {
     internal class LeaveRequestCreated : IEvent
     {

@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
-    <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Web\LeaveSystem.Web\LeaveSystem.Web.csproj" />
   </ItemGroup>
