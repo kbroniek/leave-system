@@ -11,10 +11,6 @@ public static class Config
 {
     public static void AddLeaveSystemModule(this IServiceCollection services, IConfiguration config)
     {
-        //services.AddAllDDDHandlers(
-        //    ServiceLifetime.Transient,
-        //    AssemblySelector.FromAssembly,
-        //    Assembly.GetExecutingAssembly());
         string connectionString = config.GetConnectionString("PostgreSQL");
         services.AddDbContext<LeaveSystemDbContext>(options =>
         {

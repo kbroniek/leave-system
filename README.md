@@ -15,6 +15,10 @@ System to manage leaves.
 
 ![Update appsettings.json](./AzureAppRegistrationB2C-appsettings.png)
 
+### Using AppRoles and Azure AD B2C for RBAC
+
+https://blog.redbaronofazure.com/?p=7751
+
 ### Custom policy
 
 https://docs.microsoft.com/en-us/azure/active-directory-b2c/custom-policy-overview#prepare-your-environment
@@ -96,6 +100,8 @@ dotnet msbuild -t:CleanGenerated
 More info https://github.com/MapsterMapper/Mapster/wiki/Mapster.Tool.
 
 ## Generate security token to the azure B2C
+
+`not working, I don't know why. It is for postman`
 
 1. Install Azure CLI.
 2. Login to the tenant, e.g.
