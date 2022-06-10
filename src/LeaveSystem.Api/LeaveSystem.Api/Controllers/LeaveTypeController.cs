@@ -1,5 +1,6 @@
 ﻿using LeaveSystem.Api.Domains;
 using LeaveSystem.Db;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LeaveSystem.Api.Controllers
