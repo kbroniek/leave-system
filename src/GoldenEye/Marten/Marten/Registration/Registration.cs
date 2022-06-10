@@ -101,7 +101,7 @@ public static class Registration
 
         options.UseDefaultSerialization(nonPublicMembersStorage: NonPublicMembersStorage.NonPublicSetters,
             enumStorage: EnumStorage.AsString);
-        options.Projections.AsyncMode = config.DaemonMode;
+        //options.Projections.AsyncMode = config.DaemonMode; //TODO: Fix
 
         configureOptions?.Invoke(options);
     }

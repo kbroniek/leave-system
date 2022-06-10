@@ -71,12 +71,27 @@ msidentity-app-sync --unregister true
 
 Working with the database migrations. https://docs.microsoft.com/pl-pl/ef/core/get-started/overview/first-app?tabs=netcore-cli
 
+Prerequisite:
+
+- Run docker and postgress image
+
 Run:
 
 ```
 cd LeaveSystem\LeaveSystem
-dotnet ef --startup-project ..\..\LeaveSystem.Api\LeaveSystem.Api\ migrations add InitialCreate
+dotnet ef -s LeaveSystem.Api\LeaveSystem.Api\ -p LeaveSystem\LeaveSystem\ migrations add InitialCreate
 dotnet ef --startup-project ..\..\LeaveSystem.Api\LeaveSystem.Api\ database update
+```
+
+If you have issues try to install:
+
+```
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational.Design" Version="1.1.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
 ```
 
 ## Mapster tool
