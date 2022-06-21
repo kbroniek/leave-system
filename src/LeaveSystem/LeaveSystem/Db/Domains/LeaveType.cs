@@ -1,7 +1,7 @@
 ﻿using GoldenEye.Objects.General;
 using System.Drawing;
 
-namespace LeaveSystem.Api.Domains;
+namespace LeaveSystem.Db.Domains;
 
 public class LeaveType : IHaveId<Guid>
 {
