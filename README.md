@@ -78,9 +78,8 @@ Prerequisite:
 Run:
 
 ```
-cd LeaveSystem\LeaveSystem
 dotnet ef -s LeaveSystem.Api\LeaveSystem.Api\ -p LeaveSystem\LeaveSystem\ migrations add InitialCreate
-dotnet ef --startup-project ..\..\LeaveSystem.Api\LeaveSystem.Api\ database update
+dotnet ef -s LeaveSystem.Api\LeaveSystem.Api\ -p LeaveSystem\LeaveSystem\ database update
 ```
 
 If you have issues try to install:

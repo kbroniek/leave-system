@@ -4,29 +4,33 @@ using Microsoft.EntityFrameworkCore;
 namespace LeaveSystem.Db;
 public class LeaveSystemDbContext : DbContext
 {
-    public LeaveSystemDbContext(DbContextOptions<LeaveSystemDbContext> options) : base(options) {}
+    public LeaveSystemDbContext(DbContextOptions<LeaveSystemDbContext> options) : base(options) { }
+
     public DbSet<LeaveType>? LeaveTypes { get; set; }
-    //public DbSet<Blog>? Blogs { get; set; }
-    //public DbSet<Post>? Posts { get; set; }
 
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //    => optionsBuilder.UseNpgsql(Configuration.GetConnectionString("WebApiDatabase"));
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        OnLeaveTypeCreating(modelBuilder);
+    }
+
+    private static void OnLeaveTypeCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<LeaveType>()
+             .HasKey(e => e.LeaveTypeId);
+        modelBuilder.Entity<LeaveType>()
+            .Property(b => b.Title)
+            .IsRequired();
+        modelBuilder.Entity<LeaveType>()
+            .Property(b => b.Properties)
+            .IsRequired(false)
+            .HasColumnType("jsonb");
+        modelBuilder.Entity<LeaveType>()
+            .HasOne(t => t.BaseLeaveType)
+            .WithMany(t => t.ConstraintedLeaveTypes)
+            .HasForeignKey(t => t.BaseLeaveTypeId)
+            .HasPrincipalKey(t => t.LeaveTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<LeaveType>()
+            .Ignore(t => t.Id);
+    }
 }
-
-//public class Blog
-//{
-//    public int BlogId { get; set; }
-//    public string? Url { get; set; }
-
-//    public List<Post>? Posts { get; set; }
-//}
-
-//public class Post
-//{
-//    public int PostId { get; set; }
-//    public string? Title { get; set; }
-//    public string? Content { get; set; }
-
-//    public int BlogId { get; set; }
-//    public Blog? Blog { get; set; }
-//}

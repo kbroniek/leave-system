@@ -20,4 +20,8 @@
     <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
     <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
 </Project>

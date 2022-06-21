@@ -1,19 +1,20 @@
 ﻿using GoldenEye.Objects.General;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Drawing;
 
 namespace LeaveSystem.Api.Domains;
 
 public class LeaveType : IHaveId<Guid>
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid LeaveTypeId { get; set; }
-    [Required]
-    public string? Description { get; set; }
-    public string? Properties { get; set; }
-
-    [NotMapped]
+    public Guid? BaseLeaveTypeId { get; set; }
+    public string Title { get; set; } = "";
+    public LeaveTypeProperties? Properties { get; set; }
+    public LeaveType? BaseLeaveType { get; set; }
+    public ICollection<LeaveType>? ConstraintedLeaveTypes { get; set; }
     public Guid Id => LeaveTypeId;
 }
 
+public class LeaveTypeProperties
+{
+    public string? Color { get; set; }
+}
