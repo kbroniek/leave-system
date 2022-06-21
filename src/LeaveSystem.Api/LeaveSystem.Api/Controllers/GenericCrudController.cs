@@ -32,7 +32,7 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(TEntity TEntity, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Post([FromBody] TEntity TEntity, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
@@ -44,7 +44,7 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPatch]
-        public async Task<IActionResult> Patch([FromODataUri] Guid key, Delta<TEntity> update, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Patch([FromODataUri] Guid key, [FromBody] Delta<TEntity> update, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
@@ -75,7 +75,7 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Put([FromODataUri] Guid key, TEntity update, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Put([FromODataUri] Guid key, [FromBody] TEntity update, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
