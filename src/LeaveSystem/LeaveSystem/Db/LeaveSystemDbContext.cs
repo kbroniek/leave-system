@@ -7,7 +7,7 @@ public class LeaveSystemDbContext : DbContext
     public LeaveSystemDbContext(DbContextOptions<LeaveSystemDbContext> options) : base(options) { }
 
     public DbSet<LeaveType>? LeaveTypes { get; set; }
-    public DbSet<Department>? Department { get; set; }
+    public DbSet<Department>? Departments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

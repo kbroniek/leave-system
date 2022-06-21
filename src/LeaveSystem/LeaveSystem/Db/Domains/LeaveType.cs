@@ -12,9 +12,10 @@ public class LeaveType : IHaveId<Guid>
     public LeaveType? BaseLeaveType { get; set; }
     public ICollection<LeaveType>? ConstraintedLeaveTypes { get; set; }
     public Guid Id => LeaveTypeId;
-}
-
-public class LeaveTypeProperties
-{
-    public string? Color { get; set; }
+    public class LeaveTypeProperties
+    {
+        public string? Color { get; set; }
+        public bool IncludeFreeDays { get; set; }
+        public int? DefaultLimit { get; set; }
+    }
 }

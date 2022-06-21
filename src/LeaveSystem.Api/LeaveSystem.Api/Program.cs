@@ -1,7 +1,7 @@
 using GoldenEye.Commands;
 using GoldenEye.Registration;
 using LeaveSystem;
-using LeaveSystem.Api.Domains;
+using LeaveSystem.Db.Domains;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.AddLeaveRequest;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,6 +41,8 @@ IEdmModel GetEdmModel()
     builder.Namespace = "LeaveSystem";
     builder.ContainerName = "LeaveSystemContainer";
     builder.EntitySet<LeaveType>("LeaveTypes");
+    builder.EntitySet<Department>("Departments");
+    builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
 
     return builder.GetEdmModel();
 }

@@ -5,12 +5,7 @@ public class Department : IHaveId<Guid>
 {
     public Guid DepartmentId { get; set; }
     public string? Title { get; set; }
-    public UserDepartment? Users { get; set; }
+    public FederatedUser[]? Users { get; set; }
 
     public Guid Id => DepartmentId;
-
-    public class UserDepartment
-    {
-        public string[]? UserIds { get; set; }
-    }
 }
