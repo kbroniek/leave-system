@@ -8,11 +8,45 @@ public class LeaveSystemDbContext : DbContext
 
     public DbSet<LeaveType>? LeaveTypes { get; set; }
     public DbSet<Department>? Departments { get; set; }
+    public DbSet<UserLeaveLimit>? UserLeaveLimits { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         OnLeaveTypeCreating(modelBuilder);
         OnDepartmentCreating(modelBuilder);
+        OnUserLeaveLimitCreating(modelBuilder);
+    }
+
+    private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<UserLeaveLimit>()
+             .HasKey(e => e.UserLeaveLimitId);
+        modelBuilder.Entity<UserLeaveLimit>()
+            .Property(b => b.User)
+            .IsRequired()
+            .HasColumnType("jsonb");
+        modelBuilder.Entity<UserLeaveLimit>()
+            .Property(b => b.Limit)
+            .IsRequired();
+        modelBuilder.Entity<UserLeaveLimit>()
+            .Property(b => b.ValidSince)
+            .IsRequired();
+        modelBuilder.Entity<UserLeaveLimit>()
+            .Property(b => b.ValidUntil)
+            .IsRequired();
+        modelBuilder.Entity<UserLeaveLimit>()
+            .Property(b => b.Property)
+            .IsRequired(false)
+            .HasColumnType("jsonb");
+        modelBuilder.Entity<UserLeaveLimit>()
+            .Ignore(t => t.Id);
+        modelBuilder.Entity<UserLeaveLimit>()
+            .HasOne(l => l.LeaveType)
+            .WithMany(t => t.UserLeaveLimits)
+            .HasForeignKey(l => l.LeaveTypeId)
+            .HasPrincipalKey(t => t.LeaveTypeId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 
     private void OnDepartmentCreating(ModelBuilder modelBuilder)
@@ -24,7 +58,7 @@ public class LeaveSystemDbContext : DbContext
             .IsRequired();
         modelBuilder.Entity<Department>()
             .Property(b => b.Users)
-            .IsRequired(false)
+            .IsRequired()
             .HasColumnType("jsonb");
         modelBuilder.Entity<Department>()
             .Ignore(t => t.Id);

@@ -9,10 +9,11 @@ namespace LeaveSystem.Db.Domains;
 public class UserLeaveLimit : IHaveId<Guid>
 {
     public Guid UserLeaveLimitId { get; set; }
-    public double Limit { get; set; }
-    public double OverdueLimit { get; set; }
+    public TimeSpan Limit { get; set; }
+    public TimeSpan? OverdueLimit { get; set; }
     public FederatedUser? User { get; set; }
     public LeaveType? LeaveType { get; set; }
+    public Guid? LeaveTypeId { get; set; }
     public DateTime ValidSince { get; set; }
     public DateTime ValidUntil { get; set; }
     public UserLeaveLimitProperties? Property { get; set; }
