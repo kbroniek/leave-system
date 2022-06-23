@@ -1,16 +1,16 @@
-﻿@page "/addleaverequest"
+﻿@page "/createleaverequest"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @attribute [Authorize]
 @inject HttpClient Http
-@inject ILogger<AddLeaveRequest> Logger
+@inject ILogger<CreateLeaveRequest> Logger
 
 <PageTitle>Add leave request</PageTitle>
 
 <h1>Add leave request</h1>
 
 <EditForm Model="@leaveRequest" OnValidSubmit="@HandleSubmit">
-    <DataAnnotationsValidator />
+    <FluentValidationValidator />
     <ValidationSummary />
 
     <p>
@@ -38,7 +38,7 @@
                 <option value="">Select leave type ...</option>
                 @foreach (var leaveType in leaveTypes)
                 {
-                    <option value="@leaveType.LeaveTypeId">@leaveType.Description</option>
+                    <option value="@leaveType.LeaveTypeId">@leaveType.Name</option>
                 }
             </InputSelect>
         </label>
@@ -54,7 +54,7 @@
 </EditForm>
 
 @code {
-    private LeaveRequestModel leaveRequest = new() { DateFrom = DateTime.UtcNow, DateTo = DateTime.UtcNow };
+    private CreateLeaveRequestDto leaveRequest = new() { DateFrom = DateTime.UtcNow, DateTo = DateTime.UtcNow };
     private EditContext? editContext;
     private IEnumerable<LeaveType> leaveTypes = Enumerable.Empty<LeaveType>();
 
@@ -70,20 +70,20 @@
     {
         if (editContext != null && editContext.Validate())
         {
-            Logger.LogInformation("HandleSubmit called: Form is valid");
+            Logger.LogInformation("[HandleSubmit]: Form is valid");
             try
             {
-                await Http.PostAsJsonAsync("LeaveRequest", leaveRequest);
+                await Http.PostAsJsonAsync("createLeaveRequest", leaveRequest);
             }
             catch (AccessTokenNotAvailableException exception)
             {
-                Logger.LogError(exception, "HandleSubmit called: Form is INVALID");
+                Logger.LogError(exception, "AccessTokenNotAvailableException");
                 exception.Redirect();
             }
         }
         else
         {
-            Logger.LogError("HandleSubmit called: Form is INVALID");
+            Logger.LogTrace("[HandleSubmit]: Form is INVALID");
         }
     }
     private async ValueTask<IEnumerable<LeaveType>> LoadLeaveTypes()
@@ -102,7 +102,7 @@
     private class LeaveType
     {
         public Guid LeaveTypeId { get; set; }
-        public string? Description { get; set; }
+        public string? Name { get; set; }
     }
 }
 
