@@ -15,6 +15,8 @@ public class LeaveRequest : Aggregate
 
     public string? Remarks { get; private set; }
 
+    public LeaveRequestStatus Status { get; set; }
+
     //For serialization
     public LeaveRequest() { }
 
@@ -33,6 +35,7 @@ public class LeaveRequest : Aggregate
         Hours = @event.Hours;
         Type = @event.Type;
         Remarks = @event.Remarks;
+        Status = LeaveRequestStatus.Pending;
         Version++;
     }
 
