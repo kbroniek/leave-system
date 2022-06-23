@@ -6,7 +6,7 @@ public class LeaveType : IHaveId<Guid>
 {
     public Guid LeaveTypeId { get; set; }
     public Guid? BaseLeaveTypeId { get; set; }
-    public string Title { get; set; } = "";
+    public string Name { get; set; } = "";
     public LeaveTypeProperties? Properties { get; set; }
     public LeaveType? BaseLeaveType { get; set; }
     public ICollection<LeaveType>? ConstraintedLeaveTypes { get; set; }

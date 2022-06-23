@@ -15,7 +15,7 @@ namespace LeaveSystem.Migrations
                 columns: table => new
                 {
                     DepartmentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
                     Users = table.Column<FederatedUser[]>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>

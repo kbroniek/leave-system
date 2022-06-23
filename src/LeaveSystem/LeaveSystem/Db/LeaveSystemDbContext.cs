@@ -54,7 +54,7 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<Department>()
              .HasKey(e => e.DepartmentId);
         modelBuilder.Entity<Department>()
-            .Property(b => b.Title)
+            .Property(b => b.Name)
             .IsRequired();
         modelBuilder.Entity<Department>()
             .Property(b => b.Users)
@@ -69,7 +69,7 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<LeaveType>()
              .HasKey(e => e.LeaveTypeId);
         modelBuilder.Entity<LeaveType>()
-            .Property(b => b.Title)
+            .Property(b => b.Name)
             .IsRequired();
         modelBuilder.Entity<LeaveType>()
             .Property(b => b.Properties)

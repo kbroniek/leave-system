@@ -29,7 +29,7 @@ namespace LeaveSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -54,7 +54,7 @@ namespace LeaveSystem.Migrations
                     b.Property<LeaveType.LeaveTypeProperties>("Properties")
                         .HasColumnType("jsonb");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
