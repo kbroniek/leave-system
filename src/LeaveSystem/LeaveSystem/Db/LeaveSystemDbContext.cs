@@ -1,4 +1,4 @@
-﻿using LeaveSystem.Db.Domains;
+﻿using LeaveSystem.Db.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeaveSystem.Db;

@@ -1,6 +1,6 @@
 ﻿using GoldenEye.Objects.General;
 
-namespace LeaveSystem.Db.Domains;
+namespace LeaveSystem.Db.Entities;
 public class Department : IHaveId<Guid>
 {
     public Guid DepartmentId { get; set; }

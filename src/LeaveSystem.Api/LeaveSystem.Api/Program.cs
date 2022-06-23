@@ -1,7 +1,7 @@
 using GoldenEye.Commands;
 using GoldenEye.Registration;
 using LeaveSystem;
-using LeaveSystem.Db.Domains;
+using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.AddLeaveRequest;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

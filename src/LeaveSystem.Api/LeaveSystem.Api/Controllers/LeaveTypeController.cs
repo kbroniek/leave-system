@@ -1,5 +1,5 @@
 ﻿using LeaveSystem.Db;
-using LeaveSystem.Db.Domains;
+using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

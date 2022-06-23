@@ -1,7 +1,6 @@
 ﻿using GoldenEye.Objects.General;
-using System.Drawing;
 
-namespace LeaveSystem.Db.Domains;
+namespace LeaveSystem.Db.Entities;
 
 public class LeaveType : IHaveId<Guid>
 {

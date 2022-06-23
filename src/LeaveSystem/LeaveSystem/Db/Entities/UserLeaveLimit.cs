@@ -1,11 +1,6 @@
 ﻿using GoldenEye.Objects.General;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace LeaveSystem.Db.Domains;
+namespace LeaveSystem.Db.Entities;
 public class UserLeaveLimit : IHaveId<Guid>
 {
     public Guid UserLeaveLimitId { get; set; }

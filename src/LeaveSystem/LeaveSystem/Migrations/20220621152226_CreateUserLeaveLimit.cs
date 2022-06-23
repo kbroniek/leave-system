@@ -1,6 +1,6 @@
 ﻿using System;
 using LeaveSystem.Db;
-using LeaveSystem.Db.Domains;
+using LeaveSystem.Db.Entities;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
