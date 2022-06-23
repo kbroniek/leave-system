@@ -7,7 +7,7 @@ namespace LeaveSystem.Api.Controllers
 {
     [Route("api/[controller]")]
     [Authorize]
-    public class UserLeaveLimitController : GenericCrudController<LeaveType>
+    public class UserLeaveLimitController : GenericCrudController<UserLeaveLimit>
     {
         public UserLeaveLimitController(LeaveSystemDbContext dbContext)
             : base(dbContext)

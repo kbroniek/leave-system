@@ -7,7 +7,7 @@ namespace LeaveSystem.Api.Controllers
 {
     [Route("api/[controller]")]
     [Authorize]
-    public class RoleController : GenericCrudController<LeaveType>
+    public class RoleController : GenericCrudController<Role>
     {
         public RoleController(LeaveSystemDbContext dbContext)
             : base(dbContext)
