@@ -15,7 +15,7 @@ namespace LeaveSystem.Migrations
                 {
                     LeaveTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     BaseLeaveTypeId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Title = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
                     Properties = table.Column<string>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>

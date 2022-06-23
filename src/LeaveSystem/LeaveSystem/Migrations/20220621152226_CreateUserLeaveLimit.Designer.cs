@@ -4,6 +4,7 @@ using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveSystem.Migrations
 {
     [DbContext(typeof(LeaveSystemDbContext))]
-    partial class LeaveSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220621152226_CreateUserLeaveLimit")]
+    partial class CreateUserLeaveLimit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,7 +25,7 @@ namespace LeaveSystem.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("LeaveSystem.Db.Entities.Department", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.Department", b =>
                 {
                     b.Property<Guid>("DepartmentId")
                         .ValueGeneratedOnAdd()
@@ -42,7 +44,7 @@ namespace LeaveSystem.Migrations
                     b.ToTable("Departments");
                 });
 
-            modelBuilder.Entity("LeaveSystem.Db.Entities.LeaveType", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.LeaveType", b =>
                 {
                     b.Property<Guid>("LeaveTypeId")
                         .ValueGeneratedOnAdd()
@@ -51,12 +53,12 @@ namespace LeaveSystem.Migrations
                     b.Property<Guid?>("BaseLeaveTypeId")
                         .HasColumnType("uuid");
 
+                    b.Property<LeaveType.LeaveTypeProperties>("Properties")
+                        .HasColumnType("jsonb");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<LeaveType.LeaveTypeProperties>("Properties")
-                        .HasColumnType("jsonb");
 
                     b.HasKey("LeaveTypeId");
 
@@ -65,26 +67,7 @@ namespace LeaveSystem.Migrations
                     b.ToTable("LeaveTypes");
                 });
 
-            modelBuilder.Entity("LeaveSystem.Db.Entities.Role", b =>
-                {
-                    b.Property<Guid>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<FederatedUser>("User")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.HasKey("RoleId");
-
-                    b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("LeaveSystem.Db.Entities.UserLeaveLimit", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.UserLeaveLimit", b =>
                 {
                     b.Property<Guid>("UserLeaveLimitId")
                         .ValueGeneratedOnAdd()
@@ -120,9 +103,9 @@ namespace LeaveSystem.Migrations
                     b.ToTable("UserLeaveLimits");
                 });
 
-            modelBuilder.Entity("LeaveSystem.Db.Entities.LeaveType", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.LeaveType", b =>
                 {
-                    b.HasOne("LeaveSystem.Db.Entities.LeaveType", "BaseLeaveType")
+                    b.HasOne("LeaveSystem.Db.Domains.LeaveType", "BaseLeaveType")
                         .WithMany("ConstraintedLeaveTypes")
                         .HasForeignKey("BaseLeaveTypeId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -130,9 +113,9 @@ namespace LeaveSystem.Migrations
                     b.Navigation("BaseLeaveType");
                 });
 
-            modelBuilder.Entity("LeaveSystem.Db.Entities.UserLeaveLimit", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.UserLeaveLimit", b =>
                 {
-                    b.HasOne("LeaveSystem.Db.Entities.LeaveType", "LeaveType")
+                    b.HasOne("LeaveSystem.Db.Domains.LeaveType", "LeaveType")
                         .WithMany("UserLeaveLimits")
                         .HasForeignKey("LeaveTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -141,7 +124,7 @@ namespace LeaveSystem.Migrations
                     b.Navigation("LeaveType");
                 });
 
-            modelBuilder.Entity("LeaveSystem.Db.Entities.LeaveType", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.LeaveType", b =>
                 {
                     b.Navigation("ConstraintedLeaveTypes");
 

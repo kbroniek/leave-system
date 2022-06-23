@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveSystem.Migrations
 {
     [DbContext(typeof(LeaveSystemDbContext))]
-    [Migration("20220621100229_CreateLeaveType")]
-    partial class CreateLeaveType
+    [Migration("20220621142849_CreateDepartment")]
+    partial class CreateDepartment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,7 +25,25 @@ namespace LeaveSystem.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("LeaveSystem.Api.Domains.LeaveType", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.Department", b =>
+                {
+                    b.Property<Guid>("DepartmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<FederatedUser[]>("Users")
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("DepartmentId");
+
+                    b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("LeaveSystem.Db.Domains.LeaveType", b =>
                 {
                     b.Property<Guid>("LeaveTypeId")
                         .ValueGeneratedOnAdd()
@@ -48,9 +66,9 @@ namespace LeaveSystem.Migrations
                     b.ToTable("LeaveTypes");
                 });
 
-            modelBuilder.Entity("LeaveSystem.Api.Domains.LeaveType", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.LeaveType", b =>
                 {
-                    b.HasOne("LeaveSystem.Api.Domains.LeaveType", "BaseLeaveType")
+                    b.HasOne("LeaveSystem.Db.Domains.LeaveType", "BaseLeaveType")
                         .WithMany("ConstraintedLeaveTypes")
                         .HasForeignKey("BaseLeaveTypeId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -58,7 +76,7 @@ namespace LeaveSystem.Migrations
                     b.Navigation("BaseLeaveType");
                 });
 
-            modelBuilder.Entity("LeaveSystem.Api.Domains.LeaveType", b =>
+            modelBuilder.Entity("LeaveSystem.Db.Domains.LeaveType", b =>
                 {
                     b.Navigation("ConstraintedLeaveTypes");
                 });
