@@ -43,7 +43,7 @@ IEdmModel GetEdmModel()
     builder.EntitySet<LeaveType>("LeaveTypes");
     builder.EntitySet<Department>("Departments");
     builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
-    builder.EntitySet<UserLeaveLimit>("Roles");
+    builder.EntitySet<Role>("Roles");
 
     return builder.GetEdmModel();
 }
@@ -88,30 +88,6 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 var scopeRequiredByApi = app.Configuration["AzureAdB2C:Scopes"];
-
-//app.MapLeaveTypeEndpoints(scopeRequiredByApi);
-
-//var summaries = new[]
-//{
-//    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-//};
-
-//app.MapGet("/weatherforecast", (HttpContext httpContext) =>
-//{
-//    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
-
-//    var forecast = Enumerable.Range(1, 5).Select(index =>
-//       new WeatherForecast
-//       (
-//           DateTime.Now.AddDays(index),
-//           Random.Shared.Next(-20, 55),
-//           summaries[Random.Shared.Next(summaries.Length)]
-//       ))
-//        .ToArray();
-//    return forecast;
-//})
-//.WithName("GetWeatherForecast")
-//.RequireAuthorization("Something");
 
 app.MapPost("/leaverequest", (HttpContext httpContext, ICommandBus commandBus, LeaveRequestModel leaveRequest) =>
 {
