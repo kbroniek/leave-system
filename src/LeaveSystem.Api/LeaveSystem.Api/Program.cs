@@ -43,6 +43,7 @@ IEdmModel GetEdmModel()
     builder.EntitySet<LeaveType>("LeaveTypes");
     builder.EntitySet<Department>("Departments");
     builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
+    builder.EntitySet<UserLeaveLimit>("Roles");
 
     return builder.GetEdmModel();
 }

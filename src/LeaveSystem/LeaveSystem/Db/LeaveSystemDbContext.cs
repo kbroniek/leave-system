@@ -9,12 +9,29 @@ public class LeaveSystemDbContext : DbContext
     public DbSet<LeaveType>? LeaveTypes { get; set; }
     public DbSet<Department>? Departments { get; set; }
     public DbSet<UserLeaveLimit>? UserLeaveLimits { get; set; }
+    public DbSet<Role>? Roles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         OnLeaveTypeCreating(modelBuilder);
         OnDepartmentCreating(modelBuilder);
         OnUserLeaveLimitCreating(modelBuilder);
+        OnRoleCreating(modelBuilder);
+    }
+
+    private void OnRoleCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Role>()
+             .HasKey(e => e.RoleId);
+        modelBuilder.Entity<Role>()
+            .Property(b => b.Name)
+            .IsRequired();
+        modelBuilder.Entity<Role>()
+            .Property(b => b.User)
+            .IsRequired()
+            .HasColumnType("jsonb");
+        modelBuilder.Entity<Role>()
+            .Ignore(t => t.Id);
     }
 
     private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)
