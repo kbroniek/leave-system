@@ -1,5 +1,6 @@
 ﻿using GoldenEye.Commands;
 using GoldenEye.Repositories;
+using LeaveSystem.Db;
 using MediatR;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -18,7 +19,9 @@ public class CreateLeaveRequest : ICommand
 
     public string? Remarks { get; }
 
-    private CreateLeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
+    public FederatedUser CreatedBy { get; }
+
+    private CreateLeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
@@ -26,11 +29,10 @@ public class CreateLeaveRequest : ICommand
         Hours = hours;
         Type = type;
         Remarks = remarks;
+        CreatedBy = createdBy;
     }
-    public static CreateLeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
-    {
-        return new CreateLeaveRequest(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
-    }
+    public static CreateLeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
+        => new(leaveRequestId, dateFrom, dateTo, hours, type, remarks, createdBy);
 }
 
 
@@ -46,7 +48,7 @@ internal class HandleCreateLeaveRequest :
 
     public async Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
-        var leaveRequest = LeaveRequest.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, command.Hours, command.Type, command.Remarks);
+        var leaveRequest = LeaveRequest.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, command.Hours, command.Type, command.Remarks, command.CreatedBy);
         await repository.Add(leaveRequest, cancellationToken);
         await repository.SaveChanges(cancellationToken);
         return Unit.Value;

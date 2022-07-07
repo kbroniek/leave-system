@@ -1,4 +1,5 @@
 ﻿using GoldenEye.Aggregates;
+using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
@@ -15,14 +16,16 @@ public class LeaveRequest : Aggregate
 
     public string? Remarks { get; private set; }
 
-    public LeaveRequestStatus Status { get; set; }
+    public LeaveRequestStatus Status { get; private set; }
+
+    public FederatedUser CreatedBy { get; private set; }
 
     //For serialization
     public LeaveRequest() { }
 
-    private LeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
+    private LeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
     {
-        var @event = LeaveRequestCreated.Create(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
+        var @event = LeaveRequestCreated.Create(leaveRequestId, dateFrom, dateTo, hours, type, remarks, createdBy);
         Enqueue(@event);
         Apply(@event);
     }
@@ -36,12 +39,11 @@ public class LeaveRequest : Aggregate
         Type = @event.Type;
         Remarks = @event.Remarks;
         Status = LeaveRequestStatus.Pending;
+        CreatedBy = @event.CreatedBy;
         Version++;
     }
 
-    public static LeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
-    {
-        return new LeaveRequest(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
-    }
+    public static LeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
+        => new(leaveRequestId, dateFrom, dateTo, hours, type, remarks, createdBy);
 }
 

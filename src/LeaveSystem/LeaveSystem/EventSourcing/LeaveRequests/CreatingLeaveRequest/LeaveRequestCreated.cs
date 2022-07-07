@@ -1,4 +1,5 @@
 ﻿using GoldenEye.Events;
+using LeaveSystem.Db;
 using System.Text.Json.Serialization;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest
@@ -19,8 +20,10 @@ namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest
 
         public string? Remarks { get; }
 
+        public FederatedUser CreatedBy { get; }
+
         [JsonConstructor]
-        private LeaveRequestCreated(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
+        private LeaveRequestCreated(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
         {
             LeaveRequestId = leaveRequestId;
             DateFrom = dateFrom;
@@ -28,10 +31,9 @@ namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest
             Hours = hours;
             Type = type;
             Remarks = remarks;
+            CreatedBy = createdBy;
         }
-        public static LeaveRequestCreated Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
-        {
-            return new LeaveRequestCreated(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
-        }
+        public static LeaveRequestCreated Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
+            => new(leaveRequestId, dateFrom, dateTo, hours, type, remarks, createdBy);
     }
 }
