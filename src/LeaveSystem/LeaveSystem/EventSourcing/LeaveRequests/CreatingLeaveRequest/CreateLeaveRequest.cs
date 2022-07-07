@@ -1,6 +1,8 @@
-﻿using GoldenEye.Commands;
+﻿using Ardalis.GuardClauses;
+using GoldenEye.Commands;
 using GoldenEye.Repositories;
 using LeaveSystem.Db;
+using LeaveSystem.Shared;
 using MediatR;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -15,13 +17,13 @@ public class CreateLeaveRequest : ICommand
 
     public int? Hours { get; }
 
-    public Guid? Type { get; }
+    public Guid Type { get; }
 
     public string? Remarks { get; }
 
     public FederatedUser CreatedBy { get; }
 
-    private CreateLeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
+    private CreateLeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid type, string? remarks, FederatedUser createdBy)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
@@ -31,10 +33,16 @@ public class CreateLeaveRequest : ICommand
         Remarks = remarks;
         CreatedBy = createdBy;
     }
-    public static CreateLeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
-        => new(leaveRequestId, dateFrom, dateTo, hours, type, remarks, createdBy);
+    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTime? dateFrom, DateTime? dateTo, int? hours, Guid? type, string? remarks, FederatedUser? createdBy)
+    {
+        leaveRequestId = Guard.Against.Nill(leaveRequestId);
+        dateFrom = Guard.Against.Nill(dateFrom);
+        dateTo = Guard.Against.Nill(dateTo);
+        type = Guard.Against.Nill(type);
+        createdBy = Guard.Against.Nill(createdBy);
+        return new(leaveRequestId.Value, dateFrom.Value, dateTo.Value, hours, type.Value, remarks, createdBy);
+    }
 }
-
 
 internal class HandleCreateLeaveRequest :
     ICommandHandler<CreateLeaveRequest>
