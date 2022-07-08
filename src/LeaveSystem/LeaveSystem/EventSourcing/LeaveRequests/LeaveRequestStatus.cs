@@ -4,5 +4,6 @@ public enum LeaveRequestStatus
     Pending,
     Accepted,
     Printed,
+    Canceled,
+    Rejected
 }
-

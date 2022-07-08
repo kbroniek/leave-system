@@ -10,9 +10,9 @@ public class LeaveRequest : Aggregate
 
     public DateTime DateTo { get; private set; }
 
-    public int? Hours { get; private set; }
+    public TimeSpan Duration { get; private set; }
 
-    public Guid? Type { get; private set; }
+    public Guid Type { get; private set; }
 
     public string? Remarks { get; private set; }
 
@@ -23,9 +23,9 @@ public class LeaveRequest : Aggregate
     //For serialization
     public LeaveRequest() { }
 
-    private LeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
+    private LeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
     {
-        var @event = LeaveRequestCreated.Create(leaveRequestId, dateFrom, dateTo, hours, type, remarks, createdBy);
+        var @event = LeaveRequestCreated.Create(leaveRequestId, dateFrom, dateTo, duration, type, remarks, createdBy);
         Enqueue(@event);
         Apply(@event);
     }
@@ -35,7 +35,7 @@ public class LeaveRequest : Aggregate
         Id = @event.LeaveRequestId;
         DateFrom = @event.DateFrom;
         DateTo = @event.DateTo;
-        Hours = @event.Hours;
+        Duration = @event.Duration;
         Type = @event.Type;
         Remarks = @event.Remarks;
         Status = LeaveRequestStatus.Pending;
@@ -43,7 +43,7 @@ public class LeaveRequest : Aggregate
         Version++;
     }
 
-    public static LeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks, FederatedUser createdBy)
-        => new(leaveRequestId, dateFrom, dateTo, hours, type, remarks, createdBy);
+    public static LeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
+        => new(leaveRequestId, dateFrom, dateTo, duration, type, remarks, createdBy);
 }
 
