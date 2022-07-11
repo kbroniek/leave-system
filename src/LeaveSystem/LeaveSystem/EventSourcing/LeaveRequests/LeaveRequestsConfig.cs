@@ -2,7 +2,6 @@
 using GoldenEye.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-using LeaveSystem.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeaveSystem.EventSourcing;

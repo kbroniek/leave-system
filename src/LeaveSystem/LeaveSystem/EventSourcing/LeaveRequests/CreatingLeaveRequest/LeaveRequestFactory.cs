@@ -25,7 +25,7 @@ public class LeaveRequestFactory
         var maxDuration = workingHoursService.CalculateDurationOfLeave(command.DateFrom, command.DateTo, workingHours, leaveType.Properties?.IncludeFreeDays);
         var minDuration = maxDuration - workingHours;
         var duration = command.Duration ?? maxDuration;
-        var leaveRequest = LeaveRequest.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, duration, command.Type, command.Remarks, command.CreatedBy);
+        var leaveRequest = LeaveRequest.Create(LeaveRequestCreated.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, duration, command.Type, command.Remarks, command.CreatedBy));
         await validator.Validate(leaveRequest, minDuration, maxDuration, leaveType.Properties?.IncludeFreeDays, workingHours);
         return leaveRequest;
     }

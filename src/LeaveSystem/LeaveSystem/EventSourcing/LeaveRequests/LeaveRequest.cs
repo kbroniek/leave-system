@@ -23,9 +23,8 @@ public class LeaveRequest : Aggregate
     //For serialization
     public LeaveRequest() { }
 
-    private LeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
+    private LeaveRequest(LeaveRequestCreated @event)
     {
-        var @event = LeaveRequestCreated.Create(leaveRequestId, dateFrom, dateTo, duration, type, remarks, createdBy);
         Enqueue(@event);
         Apply(@event);
     }
@@ -43,7 +42,6 @@ public class LeaveRequest : Aggregate
         Version++;
     }
 
-    public static LeaveRequest Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
-        => new(leaveRequestId, dateFrom, dateTo, duration, type, remarks, createdBy);
+    public static LeaveRequest Create(LeaveRequestCreated @event) => new(@event);
 }
 

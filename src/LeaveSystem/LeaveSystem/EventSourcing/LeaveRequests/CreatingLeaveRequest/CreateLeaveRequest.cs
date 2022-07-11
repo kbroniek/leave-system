@@ -50,17 +50,17 @@ internal class HandleCreateLeaveRequest :
     ICommandHandler<CreateLeaveRequest>
 {
     private readonly IRepository<LeaveRequest> repository;
-    private readonly LeaveRequestFactory leaveRequestCreator;
+    private readonly LeaveRequestFactory leaveRequestFactory;
 
     public HandleCreateLeaveRequest(IRepository<LeaveRequest> repository, LeaveRequestFactory leaveRequestFactory)
     {
         this.repository = repository;
-        this.leaveRequestCreator = leaveRequestFactory;
+        this.leaveRequestFactory = leaveRequestFactory;
     }
 
     public async Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
-        var leaveRequest = await leaveRequestCreator.Create(command);
+        var leaveRequest = await leaveRequestFactory.Create(command);
         await repository.Add(leaveRequest, cancellationToken);
         await repository.SaveChanges(cancellationToken);
         return Unit.Value;
