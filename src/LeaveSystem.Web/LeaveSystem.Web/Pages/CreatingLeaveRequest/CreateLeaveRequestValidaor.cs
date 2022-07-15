@@ -11,7 +11,7 @@ public class CreateLeaveRequestValidaor : AbstractValidator<CreateLeaveRequestDt
             .NotNull().WithMessage("You must enter the date to");
         RuleFor(p => new { p.DateFrom, p.DateTo }).Must(p => p.DateFrom <= p.DateTo)
             .WithMessage("Date to must be greater than date from");
-        RuleFor(p => p.Type)
+        RuleFor(p => p.LeaveTypeId)
             .NotNull().WithMessage("You must enter the type");
         RuleFor(p => p.Hours)
             .Must(p => p > 0 && p < 1000)

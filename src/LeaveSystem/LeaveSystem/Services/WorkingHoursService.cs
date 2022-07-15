@@ -18,7 +18,7 @@ public class WorkingHoursService
         return ValueTask.FromResult(TimeSpan.FromHours(8));
     }
 
-    public virtual TimeSpan CalculateDurationOfLeave(DateTime dateFrom, DateTime dateTo, TimeSpan workingHours, bool? includeFreeDays)
+    public virtual TimeSpan CalculateDurationOfLeave(DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan workingHours, bool? includeFreeDays)
     {
         var dateToPlusOne = dateTo.AddDays(1);
         if (includeFreeDays == true)
@@ -42,7 +42,7 @@ public class WorkingHoursService
         return daysBetween * workingHours;
     }
 
-    public virtual DayKind getDayKind(DateTime date)
+    public virtual DayKind getDayKind(DateTimeOffset date)
     {
         if (isPolishHoliday(date))
             return DayKind.HOLIDAY;
@@ -51,7 +51,7 @@ public class WorkingHoursService
         return DayKind.WORKING;
     }
 
-    private bool isPolishHoliday(DateTime date)
+    private bool isPolishHoliday(DateTimeOffset date)
     {
         switch (date.Month)
         {
@@ -116,7 +116,7 @@ public class WorkingHoursService
             var day = p + 1;
             var month = (int)Math.Floor((double)((h + l - 7 * m + 114) / 31));
 
-            DateTime wielkanoc = new DateTime(date.Year, month, day);
+            DateTimeOffset wielkanoc = new DateTimeOffset(new DateTime(date.Year, month, day));
 
             return date == wielkanoc ||
                 date == wielkanoc.AddDays(1) ||

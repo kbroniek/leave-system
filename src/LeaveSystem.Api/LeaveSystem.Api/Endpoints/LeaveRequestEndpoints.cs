@@ -15,7 +15,7 @@ public static class LeaveRequestEndpoints
                         leaveRequest.DateFrom,
                         leaveRequest.DateTo,
                         leaveRequest.Hours == null ? null : TimeSpan.FromHours(leaveRequest.Hours.Value),
-                        leaveRequest.Type,
+                        leaveRequest.LeaveTypeId,
                         leaveRequest.Remarks,
                         httpContext.User.CreateModel()
                     );

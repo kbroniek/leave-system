@@ -90,10 +90,10 @@ namespace LeaveSystem.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<DateTime>("ValidSince")
+                    b.Property<DateTimeOffset>("ValidSince")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("ValidUntil")
+                    b.Property<DateTimeOffset>("ValidUntil")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("UserLeaveLimitId");

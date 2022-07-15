@@ -30,8 +30,8 @@ namespace LeaveSystem.Migrations
                     OverdueLimit = table.Column<TimeSpan>(type: "interval", nullable: true),
                     User = table.Column<FederatedUser>(type: "jsonb", nullable: false),
                     LeaveTypeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ValidSince = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ValidUntil = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ValidSince = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ValidUntil = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Property = table.Column<UserLeaveLimit.UserLeaveLimitProperties>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>

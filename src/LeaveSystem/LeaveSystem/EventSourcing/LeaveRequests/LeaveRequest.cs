@@ -6,13 +6,13 @@ namespace LeaveSystem.EventSourcing.LeaveRequests;
 
 public class LeaveRequest : Aggregate
 {
-    public DateTime DateFrom { get; private set; }
+    public DateTimeOffset DateFrom { get; private set; }
 
-    public DateTime DateTo { get; private set; }
+    public DateTimeOffset DateTo { get; private set; }
 
     public TimeSpan Duration { get; private set; }
 
-    public Guid Type { get; private set; }
+    public Guid LeaveTypeId { get; private set; }
 
     public string? Remarks { get; private set; }
 
@@ -35,7 +35,7 @@ public class LeaveRequest : Aggregate
         DateFrom = @event.DateFrom;
         DateTo = @event.DateTo;
         Duration = @event.Duration;
-        Type = @event.Type;
+        LeaveTypeId = @event.LeaveTypeId;
         Remarks = @event.Remarks;
         Status = LeaveRequestStatus.Pending;
         CreatedBy = @event.CreatedBy;

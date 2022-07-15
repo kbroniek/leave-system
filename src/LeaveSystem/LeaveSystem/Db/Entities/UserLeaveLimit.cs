@@ -8,9 +8,9 @@ public class UserLeaveLimit : IHaveId<Guid>
     public TimeSpan? OverdueLimit { get; set; }
     public FederatedUser? User { get; set; }
     public LeaveType? LeaveType { get; set; }
-    public Guid? LeaveTypeId { get; set; }
-    public DateTime ValidSince { get; set; }
-    public DateTime ValidUntil { get; set; }
+    public Guid LeaveTypeId { get; set; }
+    public DateTimeOffset? ValidSince { get; set; }
+    public DateTimeOffset? ValidUntil { get; set; }
     public UserLeaveLimitProperties? Property { get; set; }
     public Guid Id => UserLeaveLimitId;
 

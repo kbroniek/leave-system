@@ -40,7 +40,7 @@ public class LeaveSystemDbContext : DbContext
              .HasKey(e => e.UserLeaveLimitId);
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.User)
-            .IsRequired()
+            .IsRequired(false)
             .HasColumnType("jsonb");
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.Limit)

@@ -13,36 +13,36 @@ public class CreateLeaveRequest : ICommand
 {
     public Guid LeaveRequestId { get; }
 
-    public DateTime DateFrom { get; }
+    public DateTimeOffset DateFrom { get; }
 
-    public DateTime DateTo { get; }
+    public DateTimeOffset DateTo { get; }
 
     public TimeSpan? Duration { get; }
 
-    public Guid Type { get; }
+    public Guid LeaveTypeId { get; }
 
     public string? Remarks { get; }
 
     public FederatedUser CreatedBy { get; }
 
-    private CreateLeaveRequest(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, TimeSpan? duration, Guid type, string? remarks, FederatedUser createdBy)
+    private CreateLeaveRequest(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
         DateTo = dateTo;
         Duration = duration;
-        Type = type;
+        LeaveTypeId = leaveTypeId;
         Remarks = remarks;
         CreatedBy = createdBy;
     }
-    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTime? dateFrom, DateTime? dateTo, TimeSpan? duration, Guid? type, string? remarks, FederatedUser? createdBy)
+    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy)
     {
         leaveRequestId = Guard.Against.Nill(leaveRequestId);
         dateFrom = Guard.Against.Nill(dateFrom);
         dateTo = Guard.Against.Nill(dateTo);
-        type = Guard.Against.Nill(type);
+        leaveTypeId = Guard.Against.Nill(leaveTypeId);
         createdBy = Guard.Against.Nill(createdBy);
-        return new(leaveRequestId.Value, dateFrom.Value, dateTo.Value, duration, type.Value, remarks, createdBy);
+        return new(leaveRequestId.Value, dateFrom.Value, dateTo.Value, duration, leaveTypeId.Value, remarks, createdBy);
     }
 }
 

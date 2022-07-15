@@ -20,13 +20,15 @@ public class LeaveRequestFactory
 
     public virtual async Task<LeaveRequest> Create(CreateLeaveRequest command)
     {
-        var leaveType = await GetLeaveType(command.Type);
+        var leaveType = await GetLeaveType(command.LeaveTypeId);
         var workingHours = await workingHoursService.GetUsersWorkingHours(command.CreatedBy);
         var maxDuration = workingHoursService.CalculateDurationOfLeave(command.DateFrom, command.DateTo, workingHours, leaveType.Properties?.IncludeFreeDays);
         var minDuration = maxDuration - workingHours;
         var duration = command.Duration ?? maxDuration;
-        var leaveRequest = LeaveRequest.Create(LeaveRequestCreated.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, duration, command.Type, command.Remarks, command.CreatedBy));
-        await validator.Validate(leaveRequest, minDuration, maxDuration, leaveType.Properties?.IncludeFreeDays, workingHours);
+        var leaveRequest = LeaveRequest.Create(LeaveRequestCreated.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, duration, command.LeaveTypeId, command.Remarks, command.CreatedBy));
+        validator.BasicValidate(leaveRequest, minDuration, maxDuration, leaveType.Properties?.IncludeFreeDays);
+        await validator.ImpositionValidator(leaveRequest);
+        await validator.LimitValidator(leaveRequest);
         return leaveRequest;
     }
 
