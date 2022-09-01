@@ -28,7 +28,8 @@
     <p>
         <label>
             Hours:
-            <InputNumber @bind-Value="leaveRequest.Hours" />
+            @*<InputText @bind-Value="leaveRequest.Hours" />*@
+            <InputText type="time" @bind-Value="TimeProxy" />
         </label>
     </p>
     <p>
@@ -52,14 +53,29 @@
 
     <button type="submit">Submit</button>
 </EditForm>
-
+@functions
+{
+    string TimeProxy
+    {
+        get => leaveRequest.Duration?.ToString() ?? "";
+        set
+        {
+            TimeSpan.TryParse(value,out var parsedValue);
+            leaveRequest.Duration = parsedValue;
+        }
+  }
+}
 @code {
-    private CreateLeaveRequestDto leaveRequest = new() { DateFrom = DateTime.UtcNow, DateTo = DateTime.UtcNow };
+    private CreateLeaveRequestDto leaveRequest = new();
     private EditContext? editContext;
     private IEnumerable<LeaveType> leaveTypes = Enumerable.Empty<LeaveType>();
 
     protected override void OnInitialized()
     {
+        var today = DateTime.Today;
+        leaveRequest.DateFrom = today;
+        leaveRequest.DateTo = today;
+        leaveRequest.Duration = TimeSpan.FromHours(8);
         editContext = new(leaveRequest);
     }
     protected override async Task OnInitializedAsync()

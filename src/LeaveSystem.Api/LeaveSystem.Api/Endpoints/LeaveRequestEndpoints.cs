@@ -14,7 +14,7 @@ public static class LeaveRequestEndpoints
                         Guid.NewGuid(),
                         leaveRequest.DateFrom,
                         leaveRequest.DateTo,
-                        leaveRequest.Hours == null ? null : TimeSpan.FromHours(leaveRequest.Hours.Value),
+                        leaveRequest.Duration,
                         leaveRequest.LeaveTypeId,
                         leaveRequest.Remarks,
                         httpContext.User.CreateModel()

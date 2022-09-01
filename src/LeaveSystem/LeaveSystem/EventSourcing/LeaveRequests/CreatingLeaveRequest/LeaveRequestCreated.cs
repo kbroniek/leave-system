@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using GoldenEye.Events;
 using LeaveSystem.Db;
+using LeaveSystem.Shared;
 using Newtonsoft.Json;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -41,17 +42,19 @@ public class LeaveRequestCreated : IEvent
         type = Guard.Against.Default(type);
         duration = Guard.Against.Default(duration);
 
+        var dateFromWithoutTime = dateFrom.GetDayWithoutTime();
+        var dateToWithoutTime = dateTo.GetDayWithoutTime();
         var now = DateTimeOffset.UtcNow;
         var firstDay = new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var lastDay = new DateTimeOffset(now.Year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero);
-        Guard.Against.OutOfRange(dateFrom, nameof(dateFrom), firstDay, lastDay);
-        Guard.Against.OutOfRange(dateTo, nameof(dateTo), firstDay, lastDay);
+        Guard.Against.OutOfRange(dateFromWithoutTime, nameof(dateFrom), firstDay, lastDay);
+        Guard.Against.OutOfRange(dateToWithoutTime, nameof(dateTo), firstDay, lastDay);
 
-        if (dateFrom > dateTo)
+        if (dateFromWithoutTime > dateToWithoutTime)
         {
             throw new ArgumentOutOfRangeException(nameof(dateFrom), "Date from has to be less than date to.");
         }
 
-        return new(leaveRequestId, dateFrom.UtcDateTime, dateTo.UtcDateTime, duration, type, remarks, createdBy);
+        return new(leaveRequestId, dateFromWithoutTime, dateToWithoutTime, duration, type, remarks, createdBy);
     }
 }
