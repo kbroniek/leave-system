@@ -1,10 +1,9 @@
 ﻿using GoldenEye.Marten.Registration;
 using GoldenEye.Registration;
-using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LeaveSystem.EventSourcing;
+namespace LeaveSystem.EventSourcing.LeaveRequests;
 internal static class LeaveRequestsConfig
 {
     internal static IServiceCollection AddLeaveRequests(this IServiceCollection services) =>

@@ -1,7 +1,7 @@
 ﻿using LeaveSystem.Db;
 using System.Security.Claims;
 
-namespace LeaveSystem;
+namespace LeaveSystem.Api;
 public static class ClaimsPrincipalExtensions
 {
     public static FederatedUser CreateModel(this ClaimsPrincipal claimsPrincipal)
