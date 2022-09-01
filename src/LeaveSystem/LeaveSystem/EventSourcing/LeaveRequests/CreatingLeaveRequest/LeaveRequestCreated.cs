@@ -41,6 +41,7 @@ public class LeaveRequestCreated : IEvent
         dateTo = Guard.Against.Default(dateTo);
         type = Guard.Against.Default(type);
         duration = Guard.Against.Default(duration);
+        Guard.Against.InvalidEmail(createdBy.Email, $"{nameof(createdBy)}.{nameof(createdBy.Email)}");
 
         var dateFromWithoutTime = dateFrom.GetDayWithoutTime();
         var dateToWithoutTime = dateTo.GetDayWithoutTime();
