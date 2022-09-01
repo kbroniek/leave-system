@@ -1,5 +1,4 @@
-﻿using Ardalis.GuardClauses;
-using LeaveSystem.Db;
+﻿using LeaveSystem.Db;
 using System.Globalization;
 
 namespace LeaveSystem.Services;
@@ -32,7 +31,7 @@ public class WorkingHoursService
             if (getDayKind(currentDate) == DayKind.WORKING)
             {
                 ++daysBetween;
-                if(daysBetween > MaxCalculatedDays)
+                if (daysBetween > MaxCalculatedDays)
                 {
                     throw new ArgumentOutOfRangeException($"Mar range reached calculating duration between dates from: {dateFrom.ToString("o", CultureInfo.InvariantCulture)} to: {dateTo.ToString("o", CultureInfo.InvariantCulture)}. The max duration is {MaxCalculatedDays} days.");
                 }

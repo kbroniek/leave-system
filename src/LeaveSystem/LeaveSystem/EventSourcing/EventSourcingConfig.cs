@@ -2,8 +2,6 @@
 using GoldenEye.Marten.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
-using System.Diagnostics;
 
 namespace LeaveSystem.EventSourcing;
 internal static class EventSourcingConfig

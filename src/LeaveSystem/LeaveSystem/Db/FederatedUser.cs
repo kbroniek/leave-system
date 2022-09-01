@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-
-namespace LeaveSystem.Db;
+﻿namespace LeaveSystem.Db;
 
 public class FederatedUser
 {
@@ -9,7 +7,7 @@ public class FederatedUser
 
     public static FederatedUser Create(string? email, string? name)
     {
-        if(string.IsNullOrWhiteSpace(email))
+        if (string.IsNullOrWhiteSpace(email))
         {
             throw new ArgumentNullException(nameof(email));
         }
