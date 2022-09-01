@@ -10,7 +10,6 @@ using EFExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExten
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 public class CreateLeaveRequestValidator
 {
-    private const string LeaveTypeName = "leave_request_created";
     private readonly LeaveSystemDbContext dbContext;
     private readonly WorkingHoursService workingHoursService;
     private readonly IDocumentSession documentSession;
@@ -42,20 +41,19 @@ public class CreateLeaveRequestValidator
 
     public virtual async Task ImpositionValidator(LeaveRequest creatingLeaveRequest)
     {
-        var leaveRequestCreatedEvents = await documentSession.Events.QueryAllRawEvents()
-            .Where(x => x.EventTypeName == LeaveTypeName &&
-                x.As<LeaveRequestCreated>().CreatedBy.Email == creatingLeaveRequest.CreatedBy.Email && (
-                    x.As<LeaveRequestCreated>().DateFrom >= creatingLeaveRequest.DateTo &&
-                    x.As<LeaveRequestCreated>().DateTo <= creatingLeaveRequest.DateTo
+        var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
+            .Where(x => x.CreatedBy.Email == creatingLeaveRequest.CreatedBy.Email && (
+                    x.DateFrom >= creatingLeaveRequest.DateTo &&
+                    x.DateTo <= creatingLeaveRequest.DateTo
                 ) || (
-                    x.As<LeaveRequestCreated>().DateFrom >= creatingLeaveRequest.DateFrom &&
-                    x.As<LeaveRequestCreated>().DateTo <= creatingLeaveRequest.DateFrom
+                    x.DateFrom >= creatingLeaveRequest.DateFrom &&
+                    x.DateTo <= creatingLeaveRequest.DateFrom
                 ) || (
-                    x.As<LeaveRequestCreated>().DateFrom >= creatingLeaveRequest.DateFrom &&
-                    x.As<LeaveRequestCreated>().DateTo <= creatingLeaveRequest.DateTo
+                    x.DateFrom >= creatingLeaveRequest.DateFrom &&
+                    x.DateTo <= creatingLeaveRequest.DateTo
                 ) || (
-                    x.As<LeaveRequestCreated>().DateFrom <= creatingLeaveRequest.DateFrom &&
-                    x.As<LeaveRequestCreated>().DateTo >= creatingLeaveRequest.DateTo
+                    x.DateFrom <= creatingLeaveRequest.DateFrom &&
+                    x.DateTo >= creatingLeaveRequest.DateTo
                 ))
             .ToListAsync();
 
@@ -138,24 +136,22 @@ public class CreateLeaveRequestValidator
     {
         var firstDay = new DateTimeOffset(year, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var lastDay = new DateTimeOffset(year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero);
-        var command = documentSession.Events.QueryAllRawEvents()
-            .Where(x => x.EventTypeName == LeaveTypeName &&
-                x.As<LeaveRequestCreated>().CreatedBy.Email == userEmail &&
-                x.As<LeaveRequestCreated>().DateFrom >= firstDay &&
-                x.As<LeaveRequestCreated>().DateTo <= lastDay &&
+        var command = documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
+            .Where(x => x.CreatedBy.Email == userEmail &&
+                x.DateFrom >= firstDay &&
+                x.DateTo <= lastDay &&
                 (
-                    x.As<LeaveRequestCreated>().LeaveTypeId == leaveTypeId ||
-                    (nestedLeaveTypeId != null && x.As<LeaveRequestCreated>().LeaveTypeId == nestedLeaveTypeId)
+                    x.LeaveTypeId == leaveTypeId ||
+                    (nestedLeaveTypeId != null && x.LeaveTypeId == nestedLeaveTypeId)
                 )
              ).ToCommand();
-        var leaveRequestCreatedEvents = await documentSession.Events.QueryAllRawEvents()
-            .Where(x => x.EventTypeName == LeaveTypeName &&
-                x.As<LeaveRequestCreated>().CreatedBy.Email == userEmail &&
-                x.As<LeaveRequestCreated>().DateFrom >= firstDay &&
-                x.As<LeaveRequestCreated>().DateTo <= lastDay &&
+        var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
+            .Where(x => x.CreatedBy.Email == userEmail &&
+                x.DateFrom >= firstDay &&
+                x.DateTo <= lastDay &&
                 (
-                    x.As<LeaveRequestCreated>().LeaveTypeId == leaveTypeId ||
-                    (nestedLeaveTypeId != null && x.As<LeaveRequestCreated>().LeaveTypeId == nestedLeaveTypeId)
+                    x.LeaveTypeId == leaveTypeId ||
+                    (nestedLeaveTypeId != null && x.LeaveTypeId == nestedLeaveTypeId)
                 )
              ).ToListAsync();
 
