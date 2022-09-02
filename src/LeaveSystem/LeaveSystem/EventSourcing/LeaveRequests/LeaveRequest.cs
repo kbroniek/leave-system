@@ -33,7 +33,7 @@ public class LeaveRequest : Aggregate
         Apply(@event);
     }
 
-    public static LeaveRequest Create(LeaveRequestCreated @event) => new(@event);
+    public static LeaveRequest CreatePendingLeaveRequest(LeaveRequestCreated @event) => new(@event);
 
     internal void Approve(string? remarks, FederatedUser approvedBy)
     {
@@ -68,7 +68,11 @@ public class LeaveRequest : Aggregate
         }
         if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Approved)
         {
-            throw new InvalidOperationException($"Canceling leave request in '{Status}' status is not allowed.");
+            throw new InvalidOperationException($"Canceling leave requests in '{Status}' status is not allowed.");
+        }
+        if (DateFrom < DateTimeOffset.Now)
+        {
+            throw new InvalidOperationException($"Canceling of past leave requests is not allowed.");
         }
 
         var @event = LeaveRequestRejected.Create(Id, remarks, canceledBy);
