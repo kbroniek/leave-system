@@ -38,7 +38,9 @@ public class LeaveRequest : Aggregate
     internal void Approve(string? remarks, FederatedUser approvedBy)
     {
         if (Status != LeaveRequestStatus.Pending)
+        {
             throw new InvalidOperationException($"Approving leave request in '{Status}' status is not allowed.");
+        }
 
         var @event = LeaveRequestApproved.Create(Id, remarks, approvedBy);
 
@@ -48,9 +50,28 @@ public class LeaveRequest : Aggregate
     internal void Reject(string? remarks, FederatedUser rejectedBy)
     {
         if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Approved)
+        {
             throw new InvalidOperationException($"Rejecting leave request in '{Status}' status is not allowed.");
+        }
 
         var @event = LeaveRequestRejected.Create(Id, remarks, rejectedBy);
+
+        Enqueue(@event);
+        Apply(@event);
+    }
+
+    internal void Cancel(string? remarks, FederatedUser canceledBy)
+    {
+        if (!string.Equals(CreatedBy.Email, canceledBy.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException($"Canceling a non-your leave request is not allowed.");
+        }
+        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Approved)
+        {
+            throw new InvalidOperationException($"Canceling leave request in '{Status}' status is not allowed.");
+        }
+
+        var @event = LeaveRequestRejected.Create(Id, remarks, canceledBy);
 
         Enqueue(@event);
         Apply(@event);

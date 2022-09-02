@@ -50,7 +50,21 @@ public static class LeaveRequestEndpoints
             );
             return commandBus.Send(command);
         })
-        .WithName("ApproveLeaveRequest")
+        .WithName("RejectLeaveRequest")
+        .RequireAuthorization();
+
+        endpoint.MapPost("api/cancelLeaveRequest", (HttpContext httpContext, ICommandBus commandBus, Web.Pages.CancellingLeaveRequest.CancelLeaveRequestDto cancelLeaveRequest) =>
+        {
+            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+
+            var command = EventSourcing.LeaveRequests.CancelingLeaveRequest.CancelLeaveRequest.Create(
+                cancelLeaveRequest.LeaveRequestId,
+                cancelLeaveRequest.Remarks,
+                httpContext.User.CreateModel()
+            );
+            return commandBus.Send(command);
+        })
+        .WithName("CancelLeaveRequest")
         .RequireAuthorization();
     }
 }

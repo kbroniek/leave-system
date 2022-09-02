@@ -1,6 +1,7 @@
 ﻿using GoldenEye.Marten.Registration;
 using GoldenEye.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests.ApprovingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,8 @@ internal static class LeaveRequestsConfig
         services
             .AddCommandHandler<CreateLeaveRequest, HandleCreateLeaveRequest>()
             .AddCommandHandler<ApproveLeaveRequest, HandleApproveLeaveRequest>()
-            .AddCommandHandler<RejectLeaveRequest, HandleRejectLeaveRequest>();
+            .AddCommandHandler<RejectLeaveRequest, HandleRejectLeaveRequest>()
+            .AddCommandHandler<CancelLeaveRequest, HandleCancelLeaveRequest>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services;
