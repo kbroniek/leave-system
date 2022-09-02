@@ -36,7 +36,7 @@ public static class Registration
         services.Add(sp =>
         {
             var store = sp.GetService<DocumentStore>();
-            return CreateDocumentSession(store);
+            return CreateDocumentSession(store, getConnectionString(sp));
         }, serviceLifetime);
 
         services.AddEventStore<MartenEventStore>(serviceLifetime);
@@ -163,9 +163,9 @@ public static class Registration
         return store;
     }
 
-    public static IDocumentSession CreateDocumentSession(DocumentStore store)
+    public static IDocumentSession CreateDocumentSession(DocumentStore store, string connectionString)
     {
-        var session = store.OpenSession(SessionOptions.ForCurrentTransaction());
+        var session = store.OpenSession(SessionOptions.ForConnectionString(connectionString));
         return session;
     }
 }

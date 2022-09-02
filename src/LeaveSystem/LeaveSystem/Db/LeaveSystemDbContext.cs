@@ -6,10 +6,10 @@ public class LeaveSystemDbContext : DbContext
 {
     public LeaveSystemDbContext(DbContextOptions<LeaveSystemDbContext> options) : base(options) { }
 
-    public DbSet<LeaveType>? LeaveTypes { get; set; }
-    public DbSet<Department>? Departments { get; set; }
-    public DbSet<UserLeaveLimit>? UserLeaveLimits { get; set; }
-    public DbSet<Role>? Roles { get; set; }
+    public DbSet<LeaveType> LeaveTypes { get; set; }
+    public DbSet<Department> Departments { get; set; }
+    public DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
+    public DbSet<Role> Roles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,7 +40,7 @@ public class LeaveSystemDbContext : DbContext
              .HasKey(e => e.UserLeaveLimitId);
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.User)
-            .IsRequired()
+            .IsRequired(false)
             .HasColumnType("jsonb");
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.Limit)

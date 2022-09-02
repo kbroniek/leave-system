@@ -52,7 +52,7 @@ namespace GoldenEye.Marten.Integration.Tests.Infrastructure
         {
             var documentStore = Registration.Registration.CreateDocumentStore(ConnectionString, storeOptions, SchemaName);
 
-            return Registration.Registration.CreateDocumentSession(documentStore);
+            return Registration.Registration.CreateDocumentSession(documentStore, ConnectionString);
         }
     }
 }

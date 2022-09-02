@@ -1,21 +1,20 @@
-using GoldenEye.Commands;
 using GoldenEye.Registration;
 using LeaveSystem;
+using LeaveSystem.Api.Endpoints;
 using LeaveSystem.Db.Entities;
-using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-using LeaveSystem.Web.Pages.AddLeaveRequest;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+
+const string azureConfigSection = "AzureAdB2C";
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddAuthorization(options =>
       options.AddPolicy("Something",
       policy => policy.RequireClaim("extension_Role", "Administrator")));
@@ -87,23 +86,8 @@ app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-var scopeRequiredByApi = app.Configuration["AzureAdB2C:Scopes"];
+var azureScpes = app.Configuration[$"{azureConfigSection}:Scopes"];
 
-app.MapPost("/leaverequest", (HttpContext httpContext, ICommandBus commandBus, LeaveRequestModel leaveRequest) =>
-{
-    httpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
-    var command = CreateLeaveRequest.Create(
-                Guid.NewGuid(),
-                leaveRequest.DateFrom,
-                leaveRequest.DateTo,
-                leaveRequest.Hours,
-                leaveRequest.Type,
-                leaveRequest.Remarks
-            );
-    return commandBus.Send(command);
-
-})
-.WithName("AddLeaveRequest")
-.RequireAuthorization();
+app.AddLeaveRequestEndpoints(azureScpes);
 
 app.Run();

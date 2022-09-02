@@ -1,37 +1,60 @@
-﻿using GoldenEye.Events;
-using System.Text.Json.Serialization;
+﻿using Ardalis.GuardClauses;
+using GoldenEye.Events;
+using LeaveSystem.Db;
+using LeaveSystem.Shared;
+using Newtonsoft.Json;
 
-namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest
+namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+public class LeaveRequestCreated : IEvent
 {
-    internal class LeaveRequestCreated : IEvent
+    public Guid StreamId => LeaveRequestId;
+
+    public Guid LeaveRequestId { get; }
+
+    public DateTimeOffset DateFrom { get; }
+
+    public DateTimeOffset DateTo { get; }
+
+    public TimeSpan Duration { get; }
+
+    public Guid LeaveTypeId { get; }
+
+    public string? Remarks { get; }
+
+    public FederatedUser CreatedBy { get; }
+
+    [JsonConstructor]
+    private LeaveRequestCreated(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
     {
-        public Guid StreamId => LeaveRequestId;
+        LeaveRequestId = leaveRequestId;
+        DateFrom = dateFrom;
+        DateTo = dateTo;
+        Duration = duration;
+        LeaveTypeId = type;
+        Remarks = remarks;
+        CreatedBy = createdBy;
+    }
+    public static LeaveRequestCreated Create(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
+    {
+        leaveRequestId = Guard.Against.Default(leaveRequestId);
+        dateFrom = Guard.Against.Default(dateFrom);
+        dateTo = Guard.Against.Default(dateTo);
+        type = Guard.Against.Default(type);
+        duration = Guard.Against.Default(duration);
 
-        public Guid LeaveRequestId { get; }
+        var dateFromWithoutTime = dateFrom.GetDayWithoutTime();
+        var dateToWithoutTime = dateTo.GetDayWithoutTime();
+        var now = DateTimeOffset.UtcNow;
+        var firstDay = new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        var lastDay = new DateTimeOffset(now.Year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero);
+        Guard.Against.OutOfRange(dateFromWithoutTime, nameof(dateFrom), firstDay, lastDay);
+        Guard.Against.OutOfRange(dateToWithoutTime, nameof(dateTo), firstDay, lastDay);
 
-        public DateTime DateFrom { get; }
-
-        public DateTime DateTo { get; }
-
-        public int? Hours { get; }
-
-        public Guid? Type { get; }
-
-        public string? Remarks { get; }
-
-        [JsonConstructor]
-        private LeaveRequestCreated(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
+        if (dateFromWithoutTime > dateToWithoutTime)
         {
-            LeaveRequestId = leaveRequestId;
-            DateFrom = dateFrom;
-            DateTo = dateTo;
-            Hours = hours;
-            Type = type;
-            Remarks = remarks;
+            throw new ArgumentOutOfRangeException(nameof(dateFrom), "Date from has to be less than date to.");
         }
-        public static LeaveRequestCreated Create(Guid leaveRequestId, DateTime dateFrom, DateTime dateTo, int? hours, Guid? type, string? remarks)
-        {
-            return new LeaveRequestCreated(leaveRequestId, dateFrom, dateTo, hours, type, remarks);
-        }
+
+        return new(leaveRequestId, dateFromWithoutTime, dateToWithoutTime, duration, type, remarks, createdBy);
     }
 }
