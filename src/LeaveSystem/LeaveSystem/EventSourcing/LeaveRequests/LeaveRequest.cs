@@ -1,6 +1,7 @@
 ﻿using GoldenEye.Aggregates;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.ApprovingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 
@@ -75,7 +76,7 @@ public class LeaveRequest : Aggregate
             throw new InvalidOperationException($"Canceling of past leave requests is not allowed.");
         }
 
-        var @event = LeaveRequestRejected.Create(Id, remarks, canceledBy);
+        var @event = LeaveRequestCancelled.Create(Id, remarks, canceledBy);
 
         Enqueue(@event);
         Apply(@event);
@@ -106,6 +107,13 @@ public class LeaveRequest : Aggregate
         Status = LeaveRequestStatus.Rejected;
         AddRemarks(@event.Remarks, @event.RejectedBy);
         LastModifiedBy = @event.RejectedBy;
+    }
+
+    private void Apply(LeaveRequestCancelled @event)
+    {
+        Status = LeaveRequestStatus.Canceled;
+        AddRemarks(@event.Remarks, @event.CancelledBy);
+        LastModifiedBy = @event.CancelledBy;
     }
 
     private void AddRemarks(string? remarks, FederatedUser createdBy)
