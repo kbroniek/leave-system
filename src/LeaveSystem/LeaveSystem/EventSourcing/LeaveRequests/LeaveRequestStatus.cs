@@ -5,8 +5,7 @@ public enum LeaveRequestStatus
 {
     Pending = 1 << 0,
     Approved = 1 << 1,
-    Printed = 1 << 2,
-    Canceled = 1 << 3,
-    Rejected = 1 << 4,
-    Valid = Pending | Approved | Printed,
+    Canceled = 1 << 2,
+    Rejected = 1 << 3,
+    Valid = Pending | Approved,
 }

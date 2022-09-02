@@ -2,6 +2,7 @@
 using GoldenEye.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests.ApprovingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
@@ -17,7 +18,8 @@ internal static class LeaveRequestsConfig
     private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
         services
             .AddCommandHandler<CreateLeaveRequest, HandleCreateLeaveRequest>()
-            .AddCommandHandler<ApproveLeaveRequest, HandleApproveLeaveRequest>();
+            .AddCommandHandler<ApproveLeaveRequest, HandleApproveLeaveRequest>()
+            .AddCommandHandler<RejectLeaveRequest, HandleRejectLeaveRequest>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services;

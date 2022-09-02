@@ -2,6 +2,7 @@
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.ApprovingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
 
@@ -44,6 +45,16 @@ public class LeaveRequest : Aggregate
         Enqueue(@event);
         Apply(@event);
     }
+    internal void Reject(string? remarks, FederatedUser rejectedBy)
+    {
+        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Approved)
+            throw new InvalidOperationException($"Rejecting leave request in '{Status}' status is not allowed.");
+
+        var @event = LeaveRequestRejected.Create(Id, remarks, rejectedBy);
+
+        Enqueue(@event);
+        Apply(@event);
+    }
 
     private void Apply(LeaveRequestCreated @event)
     {
@@ -63,6 +74,13 @@ public class LeaveRequest : Aggregate
         Status = LeaveRequestStatus.Approved;
         AddRemarks(@event.Remarks, @event.ApprovedBy);
         LastModifiedBy = @event.ApprovedBy;
+    }
+
+    private void Apply(LeaveRequestRejected @event)
+    {
+        Status = LeaveRequestStatus.Rejected;
+        AddRemarks(@event.Remarks, @event.RejectedBy);
+        LastModifiedBy = @event.RejectedBy;
     }
 
     private void AddRemarks(string? remarks, FederatedUser createdBy)
