@@ -89,7 +89,7 @@
             Logger.LogInformation("[HandleSubmit]: Form is valid");
             try
             {
-                await Http.PostAsJsonAsync("api/createLeaveRequest", leaveRequest);
+                await Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
             }
             catch (AccessTokenNotAvailableException exception)
             {

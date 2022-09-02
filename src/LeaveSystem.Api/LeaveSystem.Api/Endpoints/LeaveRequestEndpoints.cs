@@ -6,12 +6,13 @@ public static class LeaveRequestEndpoints
 {
     public static void AddLeaveRequestEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
-        endpoint.MapPost("api/createLeaveRequest", (HttpContext httpContext, ICommandBus commandBus, Web.Pages.CreatingLeaveRequest.CreateLeaveRequestDto createLeaveRequest) =>
+        endpoint.MapPost("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus, Web.Pages.CreatingLeaveRequest.CreateLeaveRequestDto createLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
+            var leaveRequestId = Guid.NewGuid();
             var command = EventSourcing.LeaveRequests.CreatingLeaveRequest.CreateLeaveRequest.Create(
-                Guid.NewGuid(),
+                leaveRequestId,
                 createLeaveRequest.DateFrom,
                 createLeaveRequest.DateTo,
                 createLeaveRequest.Duration,
@@ -19,50 +20,53 @@ public static class LeaveRequestEndpoints
                 createLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            return commandBus.Send(command);
-
+            await commandBus.Send(command);
+            return Results.Created("api/LeaveRequests", leaveRequestId);
         })
         .WithName("CreateLeaveRequest")
         .RequireAuthorization();
 
-        endpoint.MapPost("api/approveLeaveRequest", (HttpContext httpContext, ICommandBus commandBus, Web.Pages.ApprovingLeaveRequest.ApproveLeaveRequestDto approveLeaveRequest) =>
+        endpoint.MapPost("api/leaveRequests/{id}/approve", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.ApprovingLeaveRequest.ApproveLeaveRequestDto approveLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
             var command = EventSourcing.LeaveRequests.ApprovingLeaveRequest.ApproveLeaveRequest.Create(
-                approveLeaveRequest.LeaveRequestId,
+                id,
                 approveLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            return commandBus.Send(command);
+            await commandBus.Send(command);
+            return Results.NoContent();
         })
         .WithName("ApproveLeaveRequest")
         .RequireAuthorization();
 
-        endpoint.MapPost("api/rejectLeaveRequest", (HttpContext httpContext, ICommandBus commandBus, Web.Pages.RejectingLeaveRequest.RejectLeaveRequestDto rejectLeaveRequest) =>
+        endpoint.MapPost("api/leaveRequests/{id}/reject", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.RejectingLeaveRequest.RejectLeaveRequestDto rejectLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
             var command = EventSourcing.LeaveRequests.RejectingLeaveRequest.RejectLeaveRequest.Create(
-                rejectLeaveRequest.LeaveRequestId,
+                id,
                 rejectLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            return commandBus.Send(command);
+            await commandBus.Send(command);
+            return Results.NoContent();
         })
         .WithName("RejectLeaveRequest")
         .RequireAuthorization();
 
-        endpoint.MapPost("api/cancelLeaveRequest", (HttpContext httpContext, ICommandBus commandBus, Web.Pages.CancellingLeaveRequest.CancelLeaveRequestDto cancelLeaveRequest) =>
+        endpoint.MapPost("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.CancellingLeaveRequest.CancelLeaveRequestDto cancelLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
             var command = EventSourcing.LeaveRequests.CancelingLeaveRequest.CancelLeaveRequest.Create(
-                cancelLeaveRequest.LeaveRequestId,
+                id,
                 cancelLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            return commandBus.Send(command);
+            await commandBus.Send(command);
+            return Results.NoContent();
         })
         .WithName("CancelLeaveRequest")
         .RequireAuthorization();
