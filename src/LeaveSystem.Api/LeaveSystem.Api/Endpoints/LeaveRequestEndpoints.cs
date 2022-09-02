@@ -38,5 +38,19 @@ public static class LeaveRequestEndpoints
         })
         .WithName("ApproveLeaveRequest")
         .RequireAuthorization();
+
+        endpoint.MapPost("api/rejectLeaveRequest", (HttpContext httpContext, ICommandBus commandBus, Web.Pages.RejectingLeaveRequest.RejectLeaveRequestDto rejectLeaveRequest) =>
+        {
+            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+
+            var command = EventSourcing.LeaveRequests.RejectingLeaveRequest.RejectLeaveRequest.Create(
+                rejectLeaveRequest.LeaveRequestId,
+                rejectLeaveRequest.Remarks,
+                httpContext.User.CreateModel()
+            );
+            return commandBus.Send(command);
+        })
+        .WithName("ApproveLeaveRequest")
+        .RequireAuthorization();
     }
 }
