@@ -1,6 +1,6 @@
 ﻿using GoldenEye.Aggregates;
 using LeaveSystem.Db;
-using LeaveSystem.EventSourcing.LeaveRequests.ApprovingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
@@ -36,21 +36,21 @@ public class LeaveRequest : Aggregate
 
     public static LeaveRequest CreatePendingLeaveRequest(LeaveRequestCreated @event) => new(@event);
 
-    internal void Approve(string? remarks, FederatedUser approvedBy)
+    internal void Accept(string? remarks, FederatedUser acceptedBy)
     {
         if (Status != LeaveRequestStatus.Pending)
         {
-            throw new InvalidOperationException($"Approving leave request in '{Status}' status is not allowed.");
+            throw new InvalidOperationException($"Accepting leave request in '{Status}' status is not allowed.");
         }
 
-        var @event = LeaveRequestApproved.Create(Id, remarks, approvedBy);
+        var @event = LeaveRequestAccepted.Create(Id, remarks, acceptedBy);
 
         Enqueue(@event);
         Apply(@event);
     }
     internal void Reject(string? remarks, FederatedUser rejectedBy)
     {
-        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Approved)
+        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Accepted)
         {
             throw new InvalidOperationException($"Rejecting leave request in '{Status}' status is not allowed.");
         }
@@ -67,7 +67,7 @@ public class LeaveRequest : Aggregate
         {
             throw new InvalidOperationException($"Canceling a non-your leave request is not allowed.");
         }
-        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Approved)
+        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Accepted)
         {
             throw new InvalidOperationException($"Canceling leave requests in '{Status}' status is not allowed.");
         }
@@ -95,11 +95,11 @@ public class LeaveRequest : Aggregate
         Version++;
     }
 
-    private void Apply(LeaveRequestApproved @event)
+    private void Apply(LeaveRequestAccepted @event)
     {
-        Status = LeaveRequestStatus.Approved;
-        AddRemarks(@event.Remarks, @event.ApprovedBy);
-        LastModifiedBy = @event.ApprovedBy;
+        Status = LeaveRequestStatus.Accepted;
+        AddRemarks(@event.Remarks, @event.AcceptedBy);
+        LastModifiedBy = @event.AcceptedBy;
     }
 
     private void Apply(LeaveRequestRejected @event)

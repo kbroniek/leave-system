@@ -5,45 +5,45 @@ using LeaveSystem.Db;
 using LeaveSystem.Shared;
 using MediatR;
 
-namespace LeaveSystem.EventSourcing.LeaveRequests.ApprovingLeaveRequest;
+namespace LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 
-public class ApproveLeaveRequest : ICommand
+public class AcceptLeaveRequest : ICommand
 {
     public Guid LeaveRequestId { get; }
     public string? Remarks { get; }
-    public FederatedUser ApprovedBy { get; }
+    public FederatedUser AcceptedBy { get; }
 
-    private ApproveLeaveRequest(Guid leaveRequestId, string? remarks, FederatedUser approvedBy)
+    private AcceptLeaveRequest(Guid leaveRequestId, string? remarks, FederatedUser acceptedBy)
     {
-        ApprovedBy = approvedBy;
+        AcceptedBy = acceptedBy;
         Remarks = remarks;
         LeaveRequestId = leaveRequestId;
     }
 
-    public static ApproveLeaveRequest Create(Guid? leaveRequestId, string? remarks, FederatedUser? approvedBy)
+    public static AcceptLeaveRequest Create(Guid? leaveRequestId, string? remarks, FederatedUser? acceptedBy)
     {
         leaveRequestId = Guard.Against.Nill(leaveRequestId);
-        approvedBy = Guard.Against.Nill(approvedBy);
-        return new(leaveRequestId.Value, remarks, approvedBy);
+        acceptedBy = Guard.Against.Nill(acceptedBy);
+        return new(leaveRequestId.Value, remarks, acceptedBy);
     }
 }
 
-internal class HandleApproveLeaveRequest :
-    ICommandHandler<ApproveLeaveRequest>
+internal class HandleAcceptLeaveRequest :
+    ICommandHandler<AcceptLeaveRequest>
 {
     private readonly IRepository<LeaveRequest> repository;
 
-    public HandleApproveLeaveRequest(IRepository<LeaveRequest> repository)
+    public HandleAcceptLeaveRequest(IRepository<LeaveRequest> repository)
     {
         this.repository = repository;
     }
 
-    public async Task<Unit> Handle(ApproveLeaveRequest command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(AcceptLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
                              ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
-        leaveRequest.Approve(command.Remarks, command.ApprovedBy);
+        leaveRequest.Accept(command.Remarks, command.AcceptedBy);
 
         await repository.Update(leaveRequest, cancellationToken);
 

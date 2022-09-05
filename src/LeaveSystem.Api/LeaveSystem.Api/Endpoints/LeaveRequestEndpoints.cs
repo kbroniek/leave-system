@@ -26,19 +26,19 @@ public static class LeaveRequestEndpoints
         .WithName("CreateLeaveRequest")
         .RequireAuthorization();
 
-        endpoint.MapPost("api/leaveRequests/{id}/approve", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.ApprovingLeaveRequest.ApproveLeaveRequestDto approveLeaveRequest) =>
+        endpoint.MapPost("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.AcceptingLeaveRequest.AcceptLeaveRequestDto acceptLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
-            var command = EventSourcing.LeaveRequests.ApprovingLeaveRequest.ApproveLeaveRequest.Create(
+            var command = EventSourcing.LeaveRequests.AcceptingLeaveRequest.AcceptLeaveRequest.Create(
                 id,
-                approveLeaveRequest.Remarks,
+                acceptLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
             await commandBus.Send(command);
             return Results.NoContent();
         })
-        .WithName("ApproveLeaveRequest")
+        .WithName("AcceptLeaveRequest")
         .RequireAuthorization();
 
         endpoint.MapPost("api/leaveRequests/{id}/reject", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.RejectingLeaveRequest.RejectLeaveRequestDto rejectLeaveRequest) =>
