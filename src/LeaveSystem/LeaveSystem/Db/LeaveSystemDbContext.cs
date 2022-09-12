@@ -27,7 +27,7 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<Role>()
             .Property(b => b.RoleName)
             .IsRequired()
-            .HasConversion(new EnumToStringConverter<Roles>()); ;
+            .HasConversion(new EnumToStringConverter<RoleType>()); ;
         modelBuilder.Entity<Role>()
             .Property(b => b.Email)
             .IsRequired();
