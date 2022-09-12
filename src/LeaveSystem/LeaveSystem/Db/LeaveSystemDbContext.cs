@@ -1,5 +1,6 @@
 ﻿using LeaveSystem.Db.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LeaveSystem.Db;
 public class LeaveSystemDbContext : DbContext
@@ -24,12 +25,12 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<Role>()
              .HasKey(e => e.RoleId);
         modelBuilder.Entity<Role>()
-            .Property(b => b.Name)
-            .IsRequired();
-        modelBuilder.Entity<Role>()
-            .Property(b => b.User)
+            .Property(b => b.RoleName)
             .IsRequired()
-            .HasColumnType("jsonb");
+            .HasConversion(new EnumToStringConverter<Roles>()); ;
+        modelBuilder.Entity<Role>()
+            .Property(b => b.Email)
+            .IsRequired();
         modelBuilder.Entity<Role>()
             .Ignore(t => t.Id);
     }

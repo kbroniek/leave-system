@@ -10,13 +10,21 @@ namespace LeaveSystem.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<FederatedUser>(
+                name: "User",
+                table: "UserLeaveLimits",
+                type: "jsonb",
+                nullable: true,
+                oldClrType: typeof(FederatedUser),
+                oldType: "jsonb");
+
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
                     RoleId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    User = table.Column<FederatedUser>(type: "jsonb", nullable: false)
+                    RoleName = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,6 +36,15 @@ namespace LeaveSystem.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Roles");
+
+            migrationBuilder.AlterColumn<FederatedUser>(
+                name: "User",
+                table: "UserLeaveLimits",
+                type: "jsonb",
+                nullable: false,
+                oldClrType: typeof(FederatedUser),
+                oldType: "jsonb",
+                oldNullable: true);
         }
     }
 }

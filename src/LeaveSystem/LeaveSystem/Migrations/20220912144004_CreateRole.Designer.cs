@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveSystem.Migrations
 {
     [DbContext(typeof(LeaveSystemDbContext))]
-    [Migration("20220623105131_CreateRole")]
+    [Migration("20220912144004_CreateRole")]
     partial class CreateRole
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,13 +73,13 @@ namespace LeaveSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<FederatedUser>("User")
+                    b.Property<string>("RoleName")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("text");
 
                     b.HasKey("RoleId");
 
@@ -92,8 +92,7 @@ namespace LeaveSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("LeaveTypeId")
-                        .IsRequired()
+                    b.Property<Guid>("LeaveTypeId")
                         .HasColumnType("uuid");
 
                     b.Property<TimeSpan>("Limit")
@@ -106,13 +105,14 @@ namespace LeaveSystem.Migrations
                         .HasColumnType("jsonb");
 
                     b.Property<FederatedUser>("User")
-                        .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<DateTimeOffset>("ValidSince")
+                    b.Property<DateTimeOffset?>("ValidSince")
+                        .IsRequired()
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset>("ValidUntil")
+                    b.Property<DateTimeOffset?>("ValidUntil")
+                        .IsRequired()
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("UserLeaveLimitId");
