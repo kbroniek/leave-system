@@ -1,10 +1,9 @@
 using GoldenEye.Registration;
 using LeaveSystem;
+using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Endpoints;
 using LeaveSystem.Db.Entities;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
-using Microsoft.Identity.Web;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -13,11 +12,10 @@ const string azureConfigSection = "AzureAdB2C";
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(azureConfigSection));
-builder.Services.AddAuthorization(options =>
-      options.AddPolicy("Something",
-      policy => policy.RequireClaim("extension_Role", "Administrator")));
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(azureConfigSection));
+builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
+builder.Services.AddRoleBasedAuthorization();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
