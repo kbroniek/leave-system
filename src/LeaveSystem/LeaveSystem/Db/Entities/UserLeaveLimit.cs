@@ -4,10 +4,10 @@ namespace LeaveSystem.Db.Entities;
 public class UserLeaveLimit : IHaveId<Guid>
 {
     public Guid UserLeaveLimitId { get; set; }
-    public TimeSpan Limit { get; set; }
+    public TimeSpan? Limit { get; set; }
     public TimeSpan? OverdueLimit { get; set; }
-    public FederatedUser? User { get; set; }
-    public LeaveType? LeaveType { get; set; }
+    public string? AssignedToUserEmail { get; set; }
+    public LeaveType LeaveType { get; set; }
     public Guid LeaveTypeId { get; set; }
     public DateTimeOffset? ValidSince { get; set; }
     public DateTimeOffset? ValidUntil { get; set; }

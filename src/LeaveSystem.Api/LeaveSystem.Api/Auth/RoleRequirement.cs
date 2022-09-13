@@ -32,7 +32,7 @@ public class RoleRequirementHandler : AuthorizationHandler<RoleRequirement>
         var userModel = context.User.CreateModel();
         var allRoles = requirement.Roles.Union(new RoleType[] { RoleType.GlobalAdmin }).ToArray();
 
-        if (await dbContext.Roles.AnyAsync(r => r.Email == userModel.Email && allRoles.Contains(r.RoleName)))
+        if (await dbContext.Roles.AnyAsync(r => r.Email == userModel.Email && allRoles.Contains(r.RoleType)))
         {
             context.Succeed(requirement);
             return;

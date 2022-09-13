@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveSystem.Migrations
 {
     [DbContext(typeof(LeaveSystemDbContext))]
-    [Migration("20220912144004_CreateRole")]
-    partial class CreateRole
+    [Migration("20220913115348_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,25 +24,6 @@ namespace LeaveSystem.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("LeaveSystem.Db.Entities.Department", b =>
-                {
-                    b.Property<Guid>("DepartmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<FederatedUser[]>("Users")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.HasKey("DepartmentId");
-
-                    b.ToTable("Departments");
-                });
 
             modelBuilder.Entity("LeaveSystem.Db.Entities.LeaveType", b =>
                 {
@@ -64,6 +45,9 @@ namespace LeaveSystem.Migrations
 
                     b.HasIndex("BaseLeaveTypeId");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("LeaveTypes");
                 });
 
@@ -77,11 +61,14 @@ namespace LeaveSystem.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("RoleName")
+                    b.Property<string>("RoleType")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("RoleId");
+
+                    b.HasIndex("RoleType", "Email")
+                        .IsUnique();
 
                     b.ToTable("Roles");
                 });
@@ -92,10 +79,13 @@ namespace LeaveSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AssignedToUserEmail")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("LeaveTypeId")
                         .HasColumnType("uuid");
 
-                    b.Property<TimeSpan>("Limit")
+                    b.Property<TimeSpan?>("Limit")
                         .HasColumnType("interval");
 
                     b.Property<TimeSpan?>("OverdueLimit")
@@ -104,20 +94,19 @@ namespace LeaveSystem.Migrations
                     b.Property<UserLeaveLimit.UserLeaveLimitProperties>("Property")
                         .HasColumnType("jsonb");
 
-                    b.Property<FederatedUser>("User")
-                        .HasColumnType("jsonb");
-
                     b.Property<DateTimeOffset?>("ValidSince")
-                        .IsRequired()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("ValidUntil")
-                        .IsRequired()
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("UserLeaveLimitId");
 
-                    b.HasIndex("LeaveTypeId");
+                    b.HasIndex("LeaveTypeId", "AssignedToUserEmail", "ValidSince")
+                        .IsUnique();
+
+                    b.HasIndex("LeaveTypeId", "AssignedToUserEmail", "ValidUntil")
+                        .IsUnique();
 
                     b.ToTable("UserLeaveLimits");
                 });

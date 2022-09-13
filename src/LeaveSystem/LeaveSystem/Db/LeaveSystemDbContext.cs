@@ -8,14 +8,12 @@ public class LeaveSystemDbContext : DbContext
     public LeaveSystemDbContext(DbContextOptions<LeaveSystemDbContext> options) : base(options) { }
 
     public DbSet<LeaveType> LeaveTypes { get; set; }
-    public DbSet<Department> Departments { get; set; }
     public DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
     public DbSet<Role> Roles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         OnLeaveTypeCreating(modelBuilder);
-        OnDepartmentCreating(modelBuilder);
         OnUserLeaveLimitCreating(modelBuilder);
         OnRoleCreating(modelBuilder);
     }
@@ -25,12 +23,14 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<Role>()
              .HasKey(e => e.RoleId);
         modelBuilder.Entity<Role>()
-            .Property(b => b.RoleName)
+            .Property(b => b.RoleType)
             .IsRequired()
             .HasConversion(new EnumToStringConverter<RoleType>()); ;
         modelBuilder.Entity<Role>()
             .Property(b => b.Email)
             .IsRequired();
+        modelBuilder.Entity<Role>()
+            .HasIndex(p => new { p.RoleType, p.Email }).IsUnique();
         modelBuilder.Entity<Role>()
             .Ignore(t => t.Id);
     }
@@ -40,24 +40,24 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<UserLeaveLimit>()
              .HasKey(e => e.UserLeaveLimitId);
         modelBuilder.Entity<UserLeaveLimit>()
-            .Property(b => b.User)
-            .IsRequired(false)
-            .HasColumnType("jsonb");
+            .Property(b => b.AssignedToUserEmail)
+            .IsRequired(false);
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.Limit)
-            .IsRequired();
+            .IsRequired(false);
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.ValidSince)
-            .IsRequired();
+            .IsRequired(false);
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.ValidUntil)
-            .IsRequired();
+            .IsRequired(false);
+        modelBuilder.Entity<UserLeaveLimit>()
+            .Property(b => b.LeaveTypeId)
+            .IsRequired(true);
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.Property)
             .IsRequired(false)
             .HasColumnType("jsonb");
-        modelBuilder.Entity<UserLeaveLimit>()
-            .Ignore(t => t.Id);
         modelBuilder.Entity<UserLeaveLimit>()
             .HasOne(l => l.LeaveType)
             .WithMany(t => t.UserLeaveLimits)
@@ -65,20 +65,11 @@ public class LeaveSystemDbContext : DbContext
             .HasPrincipalKey(t => t.LeaveTypeId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
-    }
-
-    private void OnDepartmentCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<Department>()
-             .HasKey(e => e.DepartmentId);
-        modelBuilder.Entity<Department>()
-            .Property(b => b.Name)
-            .IsRequired();
-        modelBuilder.Entity<Department>()
-            .Property(b => b.Users)
-            .IsRequired()
-            .HasColumnType("jsonb");
-        modelBuilder.Entity<Department>()
+        modelBuilder.Entity<UserLeaveLimit>()
+            .HasIndex(p => new { p.LeaveTypeId, p.AssignedToUserEmail, p.ValidSince }).IsUnique();
+        modelBuilder.Entity<UserLeaveLimit>()
+            .HasIndex(p => new { p.LeaveTypeId, p.AssignedToUserEmail, p.ValidUntil }).IsUnique();
+        modelBuilder.Entity<UserLeaveLimit>()
             .Ignore(t => t.Id);
     }
 
@@ -99,6 +90,8 @@ public class LeaveSystemDbContext : DbContext
             .HasForeignKey(t => t.BaseLeaveTypeId)
             .HasPrincipalKey(t => t.LeaveTypeId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<LeaveType>()
+            .HasIndex(p => new { p.Name }).IsUnique();
         modelBuilder.Entity<LeaveType>()
             .Ignore(t => t.Id);
     }
