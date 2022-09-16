@@ -2,6 +2,7 @@
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Services;
+using LeaveSystem.Shared;
 using Marten;
 using System.ComponentModel.DataAnnotations;
 using EFExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions;
@@ -82,7 +83,7 @@ public class CreateLeaveRequestValidator
             await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
                 creatingLeaveRequest.DateTo,
                 baseLeaveTypeId,
-                creatingLeaveRequest.CreatedBy.Email,
+                creatingLeaveRequest.CreatedBy.Email!,
                 baseLeaveTypeId);
         }
     }
@@ -99,7 +100,7 @@ public class CreateLeaveRequestValidator
                dateTo,
                currentLeaveTypeId,
                userEmail);
-        var totalUsed = await GetUsedLeavesDuration(dateFrom.Year,
+        var totalUsed = await GetUsedLeavesDuration(dateFrom,
             userEmail,
             leaveTypeId,
             nestedLeaveTypeId);
@@ -128,22 +129,13 @@ public class CreateLeaveRequestValidator
     }
 
     private async Task<TimeSpan> GetUsedLeavesDuration(
-        int year,
+        DateTimeOffset dateFrom,
         string userEmail,
         Guid leaveTypeId,
         Guid? nestedLeaveTypeId)
     {
-        var firstDay = new DateTimeOffset(year, 1, 1, 0, 0, 0, TimeSpan.Zero);
-        var lastDay = new DateTimeOffset(year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero);
-        var command = documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
-            .Where(x => x.CreatedBy.Email == userEmail &&
-                x.DateFrom >= firstDay &&
-                x.DateTo <= lastDay &&
-                (
-                    x.LeaveTypeId == leaveTypeId ||
-                    (nestedLeaveTypeId != null && x.LeaveTypeId == nestedLeaveTypeId)
-                )
-             ).ToCommand();
+        var firstDay = dateFrom.GetFirstDayOfYear();
+        var lastDay = dateFrom.GetLastDayOfYear();
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
             .Where(x => x.CreatedBy.Email == userEmail &&
                 x.DateFrom >= firstDay &&

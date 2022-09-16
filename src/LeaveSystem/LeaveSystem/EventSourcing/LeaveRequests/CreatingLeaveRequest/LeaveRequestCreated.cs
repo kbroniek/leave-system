@@ -46,8 +46,8 @@ public class LeaveRequestCreated : IEvent
         var dateFromWithoutTime = dateFrom.GetDayWithoutTime();
         var dateToWithoutTime = dateTo.GetDayWithoutTime();
         var now = DateTimeOffset.UtcNow;
-        var firstDay = new DateTimeOffset(now.Year, 1, 1, 0, 0, 0, TimeSpan.Zero);
-        var lastDay = new DateTimeOffset(now.Year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero);
+        var firstDay = now.GetFirstDayOfYear();
+        var lastDay = now.GetLastDayOfYear();
         Guard.Against.OutOfRange(dateFromWithoutTime, nameof(dateFrom), firstDay, lastDay);
         Guard.Against.OutOfRange(dateToWithoutTime, nameof(dateTo), firstDay, lastDay);
 

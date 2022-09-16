@@ -1,5 +1,6 @@
 ﻿using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeaveSystem.Api.Db;
@@ -59,14 +60,14 @@ public static class DbContextExtenstions
 
     public static void FillInUserLeaveLimit(this LeaveSystemDbContext dbContext)
     {
-        var today = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
         dbContext.UserLeaveLimits.Add(new UserLeaveLimit
         {
             LeaveTypeId = holiday.LeaveTypeId,
             Limit = holiday.Properties?.DefaultLimit,
             AssignedToUserEmail = DefaultUserEmail,
-            ValidSince = new DateTimeOffset(today.Year, 1, 1, 0, 0, 0, TimeSpan.Zero),
-            ValidUntil = new DateTimeOffset(today.Year, 12, 31, 23, 59, 59, TimeSpan.Zero),
+            ValidSince = now.GetFirstDayOfYear(),
+            ValidUntil = now.GetLastDayOfYear(),
         });
     }
 
