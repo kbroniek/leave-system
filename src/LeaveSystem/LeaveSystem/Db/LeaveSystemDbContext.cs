@@ -21,7 +21,7 @@ public class LeaveSystemDbContext : DbContext
     private void OnRoleCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Role>()
-             .HasKey(e => e.RoleId);
+             .HasKey(e => e.Id);
         modelBuilder.Entity<Role>()
             .Property(b => b.RoleType)
             .IsRequired()
@@ -31,14 +31,12 @@ public class LeaveSystemDbContext : DbContext
             .IsRequired();
         modelBuilder.Entity<Role>()
             .HasIndex(p => new { p.RoleType, p.Email }).IsUnique();
-        modelBuilder.Entity<Role>()
-            .Ignore(t => t.Id);
     }
 
     private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserLeaveLimit>()
-             .HasKey(e => e.UserLeaveLimitId);
+             .HasKey(e => e.Id);
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.AssignedToUserEmail)
             .IsRequired(false);
@@ -62,21 +60,19 @@ public class LeaveSystemDbContext : DbContext
             .HasOne(l => l.LeaveType)
             .WithMany(t => t.UserLeaveLimits)
             .HasForeignKey(l => l.LeaveTypeId)
-            .HasPrincipalKey(t => t.LeaveTypeId)
+            .HasPrincipalKey(t => t.Id)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<UserLeaveLimit>()
             .HasIndex(p => new { p.LeaveTypeId, p.AssignedToUserEmail, p.ValidSince }).IsUnique();
         modelBuilder.Entity<UserLeaveLimit>()
             .HasIndex(p => new { p.LeaveTypeId, p.AssignedToUserEmail, p.ValidUntil }).IsUnique();
-        modelBuilder.Entity<UserLeaveLimit>()
-            .Ignore(t => t.Id);
     }
 
     private static void OnLeaveTypeCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<LeaveType>()
-             .HasKey(e => e.LeaveTypeId);
+             .HasKey(e => e.Id);
         modelBuilder.Entity<LeaveType>()
             .Property(b => b.Name)
             .IsRequired();
@@ -88,11 +84,9 @@ public class LeaveSystemDbContext : DbContext
             .HasOne(t => t.BaseLeaveType)
             .WithMany(t => t.ConstraintedLeaveTypes)
             .HasForeignKey(t => t.BaseLeaveTypeId)
-            .HasPrincipalKey(t => t.LeaveTypeId)
+            .HasPrincipalKey(t => t.Id)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<LeaveType>()
             .HasIndex(p => new { p.Name }).IsUnique();
-        modelBuilder.Entity<LeaveType>()
-            .Ignore(t => t.Id);
     }
 }

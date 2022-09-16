@@ -6,7 +6,6 @@ using LeaveSystem.Api.Endpoints;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.OData;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -14,9 +13,6 @@ const string azureConfigSection = "AzureAdB2C";
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddRoleBasedAuthorization();
 
@@ -38,8 +34,6 @@ builder.Services.AddControllers().AddOData(opt =>
 IEdmModel GetEdmModel()
 {
     var builder = new ODataConventionModelBuilder();
-    builder.Namespace = "LeaveSystem";
-    builder.ContainerName = "LeaveSystemContainer";
     builder.EntitySet<LeaveType>("LeaveTypes");
     builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
     builder.EntitySet<Role>("Roles");

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveSystem.Migrations
 {
     [DbContext(typeof(LeaveSystemDbContext))]
-    [Migration("20220913115348_Init")]
+    [Migration("20220916105131_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,7 +27,7 @@ namespace LeaveSystem.Migrations
 
             modelBuilder.Entity("LeaveSystem.Db.Entities.LeaveType", b =>
                 {
-                    b.Property<Guid>("LeaveTypeId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -41,7 +41,7 @@ namespace LeaveSystem.Migrations
                     b.Property<LeaveType.LeaveTypeProperties>("Properties")
                         .HasColumnType("jsonb");
 
-                    b.HasKey("LeaveTypeId");
+                    b.HasKey("Id");
 
                     b.HasIndex("BaseLeaveTypeId");
 
@@ -53,7 +53,7 @@ namespace LeaveSystem.Migrations
 
             modelBuilder.Entity("LeaveSystem.Db.Entities.Role", b =>
                 {
-                    b.Property<Guid>("RoleId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -65,7 +65,7 @@ namespace LeaveSystem.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("RoleId");
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleType", "Email")
                         .IsUnique();
@@ -75,7 +75,7 @@ namespace LeaveSystem.Migrations
 
             modelBuilder.Entity("LeaveSystem.Db.Entities.UserLeaveLimit", b =>
                 {
-                    b.Property<Guid>("UserLeaveLimitId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -100,7 +100,7 @@ namespace LeaveSystem.Migrations
                     b.Property<DateTimeOffset?>("ValidUntil")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("UserLeaveLimitId");
+                    b.HasKey("Id");
 
                     b.HasIndex("LeaveTypeId", "AssignedToUserEmail", "ValidSince")
                         .IsUnique();

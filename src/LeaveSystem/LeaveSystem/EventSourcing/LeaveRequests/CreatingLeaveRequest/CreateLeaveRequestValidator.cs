@@ -2,6 +2,7 @@
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Services;
+using LeaveSystem.Shared;
 using Marten;
 using System.ComponentModel.DataAnnotations;
 using EFExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions;
@@ -20,7 +21,7 @@ public class CreateLeaveRequestValidator
         this.documentSession = documentSession;
     }
 
-    public virtual void BasicValidate(LeaveRequest creatingLeaveRequest, TimeSpan minDuration, TimeSpan maxDuration, bool? includeFreeDays)
+    public virtual void BasicValidate(LeaveRequestCreated creatingLeaveRequest, TimeSpan minDuration, TimeSpan maxDuration, bool? includeFreeDays)
     {
         Guard.Against.OutOfRange(creatingLeaveRequest.Duration, nameof(creatingLeaveRequest.Duration), minDuration, maxDuration);
         if (includeFreeDays == false)
@@ -38,7 +39,7 @@ public class CreateLeaveRequestValidator
         }
     }
 
-    public virtual async Task ImpositionValidator(LeaveRequest creatingLeaveRequest)
+    public virtual async Task ImpositionValidator(LeaveRequestCreated creatingLeaveRequest)
     {
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
             .Where(x => x.CreatedBy.Email == creatingLeaveRequest.CreatedBy.Email && (
@@ -66,13 +67,13 @@ public class CreateLeaveRequestValidator
         }
     }
 
-    public virtual async Task LimitValidator(LeaveRequest creatingLeaveRequest)
+    public virtual async Task LimitValidator(LeaveRequestCreated creatingLeaveRequest)
     {
         var connectedLeaveTypeIds = await GetConnectedLeaveTypeIds(creatingLeaveRequest.LeaveTypeId);
         await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
             creatingLeaveRequest.DateTo,
             creatingLeaveRequest.LeaveTypeId,
-            creatingLeaveRequest.CreatedBy.Email,
+            creatingLeaveRequest.CreatedBy.Email!,
             creatingLeaveRequest.LeaveTypeId,
             connectedLeaveTypeIds.nestedLeaveTypeId);
 
@@ -82,7 +83,7 @@ public class CreateLeaveRequestValidator
             await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
                 creatingLeaveRequest.DateTo,
                 baseLeaveTypeId,
-                creatingLeaveRequest.CreatedBy.Email,
+                creatingLeaveRequest.CreatedBy.Email!,
                 baseLeaveTypeId);
         }
     }
@@ -99,7 +100,7 @@ public class CreateLeaveRequestValidator
                dateTo,
                currentLeaveTypeId,
                userEmail);
-        var totalUsed = await GetUsedLeavesDuration(dateFrom.Year,
+        var totalUsed = await GetUsedLeavesDuration(dateFrom,
             userEmail,
             leaveTypeId,
             nestedLeaveTypeId);
@@ -117,33 +118,24 @@ public class CreateLeaveRequestValidator
     private async Task<(Guid? baseLeaveTypeId, Guid? nestedLeaveTypeId)> GetConnectedLeaveTypeIds(Guid leaveTypeId)
     {
         var leaveTypes = await EFExtensions.ToListAsync(dbContext.LeaveTypes.Where(l =>
-            l.BaseLeaveTypeId == leaveTypeId || l.LeaveTypeId == leaveTypeId));
+            l.BaseLeaveTypeId == leaveTypeId || l.Id == leaveTypeId));
         if (leaveTypes.Count == 0)
         {
             return (null, null);
         }
         var nestedLeaveType = leaveTypes.FirstOrDefault(l => l.BaseLeaveTypeId == leaveTypeId);
-        var currentLeaveType = leaveTypes.FirstOrDefault(l => l.LeaveTypeId == leaveTypeId);
-        return (currentLeaveType?.BaseLeaveTypeId, nestedLeaveType?.LeaveTypeId);
+        var currentLeaveType = leaveTypes.FirstOrDefault(l => l.Id == leaveTypeId);
+        return (currentLeaveType?.BaseLeaveTypeId, nestedLeaveType?.Id);
     }
 
     private async Task<TimeSpan> GetUsedLeavesDuration(
-        int year,
+        DateTimeOffset dateFrom,
         string userEmail,
         Guid leaveTypeId,
         Guid? nestedLeaveTypeId)
     {
-        var firstDay = new DateTimeOffset(year, 1, 1, 0, 0, 0, TimeSpan.Zero);
-        var lastDay = new DateTimeOffset(year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero);
-        var command = documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
-            .Where(x => x.CreatedBy.Email == userEmail &&
-                x.DateFrom >= firstDay &&
-                x.DateTo <= lastDay &&
-                (
-                    x.LeaveTypeId == leaveTypeId ||
-                    (nestedLeaveTypeId != null && x.LeaveTypeId == nestedLeaveTypeId)
-                )
-             ).ToCommand();
+        var firstDay = dateFrom.GetFirstDayOfYear();
+        var lastDay = dateFrom.GetLastDayOfYear();
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
             .Where(x => x.CreatedBy.Email == userEmail &&
                 x.DateFrom >= firstDay &&
