@@ -14,19 +14,19 @@ namespace LeaveSystem.Migrations
                 name: "LeaveTypes",
                 columns: table => new
                 {
-                    LeaveTypeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     BaseLeaveTypeId = table.Column<Guid>(type: "uuid", nullable: true),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Properties = table.Column<LeaveType.LeaveTypeProperties>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LeaveTypes", x => x.LeaveTypeId);
+                    table.PrimaryKey("PK_LeaveTypes", x => x.Id);
                     table.ForeignKey(
                         name: "FK_LeaveTypes_LeaveTypes_BaseLeaveTypeId",
                         column: x => x.BaseLeaveTypeId,
                         principalTable: "LeaveTypes",
-                        principalColumn: "LeaveTypeId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -34,20 +34,20 @@ namespace LeaveSystem.Migrations
                 name: "Roles",
                 columns: table => new
                 {
-                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     RoleType = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roles", x => x.RoleId);
+                    table.PrimaryKey("PK_Roles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "UserLeaveLimits",
                 columns: table => new
                 {
-                    UserLeaveLimitId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Limit = table.Column<TimeSpan>(type: "interval", nullable: true),
                     OverdueLimit = table.Column<TimeSpan>(type: "interval", nullable: true),
                     AssignedToUserEmail = table.Column<string>(type: "text", nullable: true),
@@ -58,12 +58,12 @@ namespace LeaveSystem.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserLeaveLimits", x => x.UserLeaveLimitId);
+                    table.PrimaryKey("PK_UserLeaveLimits", x => x.Id);
                     table.ForeignKey(
                         name: "FK_UserLeaveLimits_LeaveTypes_LeaveTypeId",
                         column: x => x.LeaveTypeId,
                         principalTable: "LeaveTypes",
-                        principalColumn: "LeaveTypeId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 

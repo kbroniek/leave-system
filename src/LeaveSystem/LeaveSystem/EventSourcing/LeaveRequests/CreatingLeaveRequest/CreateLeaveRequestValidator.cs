@@ -118,14 +118,14 @@ public class CreateLeaveRequestValidator
     private async Task<(Guid? baseLeaveTypeId, Guid? nestedLeaveTypeId)> GetConnectedLeaveTypeIds(Guid leaveTypeId)
     {
         var leaveTypes = await EFExtensions.ToListAsync(dbContext.LeaveTypes.Where(l =>
-            l.BaseLeaveTypeId == leaveTypeId || l.LeaveTypeId == leaveTypeId));
+            l.BaseLeaveTypeId == leaveTypeId || l.Id == leaveTypeId));
         if (leaveTypes.Count == 0)
         {
             return (null, null);
         }
         var nestedLeaveType = leaveTypes.FirstOrDefault(l => l.BaseLeaveTypeId == leaveTypeId);
-        var currentLeaveType = leaveTypes.FirstOrDefault(l => l.LeaveTypeId == leaveTypeId);
-        return (currentLeaveType?.BaseLeaveTypeId, nestedLeaveType?.LeaveTypeId);
+        var currentLeaveType = leaveTypes.FirstOrDefault(l => l.Id == leaveTypeId);
+        return (currentLeaveType?.BaseLeaveTypeId, nestedLeaveType?.Id);
     }
 
     private async Task<TimeSpan> GetUsedLeavesDuration(

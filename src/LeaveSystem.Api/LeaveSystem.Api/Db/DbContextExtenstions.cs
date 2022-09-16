@@ -9,7 +9,7 @@ public static class DbContextExtenstions
     private const string DefaultUserEmail = "karolbr5@gmail.com";
     private static LeaveType holiday = new LeaveType
     {
-        LeaveTypeId = Guid.NewGuid(),
+        Id = Guid.NewGuid(),
         Name = "urlop wypoczynkowy",
         Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = TimeSpan.FromDays(26), IncludeFreeDays = false, Color = "blue" }
     };
@@ -63,7 +63,7 @@ public static class DbContextExtenstions
         var now = DateTimeOffset.UtcNow;
         dbContext.UserLeaveLimits.Add(new UserLeaveLimit
         {
-            LeaveTypeId = holiday.LeaveTypeId,
+            LeaveTypeId = holiday.Id,
             Limit = holiday.Properties?.DefaultLimit,
             AssignedToUserEmail = DefaultUserEmail,
             ValidSince = now.GetFirstDayOfYear(),
@@ -73,7 +73,7 @@ public static class DbContextExtenstions
 
     public static void FillInRoles(this LeaveSystemDbContext dbContext)
     {
-        dbContext.Roles.Add(new Role { Email = DefaultUserEmail, RoleId = Guid.NewGuid(), RoleType = RoleType.GlobalAdmin });
+        dbContext.Roles.Add(new Role { Email = DefaultUserEmail, Id = Guid.NewGuid(), RoleType = RoleType.GlobalAdmin });
     }
 
     private static void FillInLeaveTypes(this LeaveSystemDbContext dbContext)
@@ -81,92 +81,92 @@ public static class DbContextExtenstions
         dbContext.LeaveTypes.Add(holiday);
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop na żądanie",
             BaseLeaveTypeId = holiday.Id,
             Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = TimeSpan.FromDays(4), IncludeFreeDays = false, Color = "yellow" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "niezdolność do pracy z powodu choroby",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop okolicznościowy",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop wychowawczy",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop macierzyński",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop bezpłatny",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "opieka nad chorym dzieckiem lub innym członkiem rodziny",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "nieobecność usprawiedliwiona płatna",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "nieobecność nieusprawiedliwiona",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "opieka nad dzieckiem do 14 lat - art. 188 KP",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop ojcowski",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop tacierzyński",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop za sobotę",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop od firmy",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "red" }
         });
         dbContext.LeaveTypes.Add(new LeaveType
         {
-            LeaveTypeId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "urlop szkoleniowy",
             Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "red" }
         });

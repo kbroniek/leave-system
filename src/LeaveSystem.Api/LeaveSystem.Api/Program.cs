@@ -6,7 +6,6 @@ using LeaveSystem.Api.Endpoints;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.OData;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -38,11 +37,9 @@ builder.Services.AddControllers().AddOData(opt =>
 IEdmModel GetEdmModel()
 {
     var builder = new ODataConventionModelBuilder();
-    builder.Namespace = "LeaveSystem";
-    builder.ContainerName = "LeaveSystemContainer";
-    builder.EntitySet<LeaveType>("LeaveTypes");
-    builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
-    builder.EntitySet<Role>("Roles");
+    builder.EntitySet<LeaveType>("LeaveType");
+    builder.EntitySet<UserLeaveLimit>("UserLeaveLimit");
+    builder.EntitySet<Role>("Role");
 
     return builder.GetEdmModel();
 }
