@@ -13,9 +13,6 @@ const string azureConfigSection = "AzureAdB2C";
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddRoleBasedAuthorization();
 
@@ -37,9 +34,9 @@ builder.Services.AddControllers().AddOData(opt =>
 IEdmModel GetEdmModel()
 {
     var builder = new ODataConventionModelBuilder();
-    builder.EntitySet<LeaveType>("LeaveType");
-    builder.EntitySet<UserLeaveLimit>("UserLeaveLimit");
-    builder.EntitySet<Role>("Role");
+    builder.EntitySet<LeaveType>("LeaveTypes");
+    builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
+    builder.EntitySet<Role>("Roles");
 
     return builder.GetEdmModel();
 }

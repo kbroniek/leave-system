@@ -10,15 +10,6 @@ public static class LeaveRequestEndpoints
     public const string CancelLeaveRequestName = "CancelLeaveRequest";
     public static void AddLeaveRequestEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
-        endpoint.MapGet("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus) =>
-        {
-            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
-
-            return Results.Ok();
-        })
-        .WithName(CreateLeaveRequestName)
-        .RequireAuthorization(CreateLeaveRequestName);
-
         endpoint.MapPost("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus, Web.Pages.CreatingLeaveRequest.CreateLeaveRequestDto createLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
