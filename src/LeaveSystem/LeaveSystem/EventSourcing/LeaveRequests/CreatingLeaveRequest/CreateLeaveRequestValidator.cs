@@ -20,7 +20,7 @@ public class CreateLeaveRequestValidator
         this.documentSession = documentSession;
     }
 
-    public virtual void BasicValidate(LeaveRequest creatingLeaveRequest, TimeSpan minDuration, TimeSpan maxDuration, bool? includeFreeDays)
+    public virtual void BasicValidate(LeaveRequestCreated creatingLeaveRequest, TimeSpan minDuration, TimeSpan maxDuration, bool? includeFreeDays)
     {
         Guard.Against.OutOfRange(creatingLeaveRequest.Duration, nameof(creatingLeaveRequest.Duration), minDuration, maxDuration);
         if (includeFreeDays == false)
@@ -38,7 +38,7 @@ public class CreateLeaveRequestValidator
         }
     }
 
-    public virtual async Task ImpositionValidator(LeaveRequest creatingLeaveRequest)
+    public virtual async Task ImpositionValidator(LeaveRequestCreated creatingLeaveRequest)
     {
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
             .Where(x => x.CreatedBy.Email == creatingLeaveRequest.CreatedBy.Email && (
@@ -66,13 +66,13 @@ public class CreateLeaveRequestValidator
         }
     }
 
-    public virtual async Task LimitValidator(LeaveRequest creatingLeaveRequest)
+    public virtual async Task LimitValidator(LeaveRequestCreated creatingLeaveRequest)
     {
         var connectedLeaveTypeIds = await GetConnectedLeaveTypeIds(creatingLeaveRequest.LeaveTypeId);
         await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
             creatingLeaveRequest.DateTo,
             creatingLeaveRequest.LeaveTypeId,
-            creatingLeaveRequest.CreatedBy.Email,
+            creatingLeaveRequest.CreatedBy.Email!,
             creatingLeaveRequest.LeaveTypeId,
             connectedLeaveTypeIds.nestedLeaveTypeId);
 
