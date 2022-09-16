@@ -1,9 +1,12 @@
 using GoldenEye.Registration;
 using LeaveSystem;
 using LeaveSystem.Api.Auth;
+using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints;
+using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -38,7 +41,6 @@ IEdmModel GetEdmModel()
     builder.Namespace = "LeaveSystem";
     builder.ContainerName = "LeaveSystemContainer";
     builder.EntitySet<LeaveType>("LeaveTypes");
-    builder.EntitySet<Department>("Departments");
     builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
     builder.EntitySet<Role>("Roles");
 
@@ -87,5 +89,11 @@ app.MapFallbackToFile("index.html");
 var azureScpes = app.Configuration[$"{azureConfigSection}:Scopes"];
 
 app.AddLeaveRequestEndpoints(azureScpes);
+
+app.MigrateDb();
+if(app.Environment.IsDevelopment())
+{
+    app.FillInDatabase();
+}
 
 app.Run();

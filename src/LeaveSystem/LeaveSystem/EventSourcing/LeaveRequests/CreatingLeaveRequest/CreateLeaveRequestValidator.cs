@@ -103,7 +103,7 @@ public class CreateLeaveRequestValidator
             userEmail,
             leaveTypeId,
             nestedLeaveTypeId);
-        if (CalculateRemaningLimit(leaveLimit.Limit, leaveLimit.OverdueLimit, totalUsed) <= TimeSpan.Zero)
+        if (leaveLimit.Limit != null && CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed) <= TimeSpan.Zero)
         {
             throw new ValidationException("You don't have enough free days for this type of leave");
         }
@@ -173,7 +173,7 @@ public class CreateLeaveRequestValidator
         string userEmail)
     {
         var limits = await EFExtensions.ToListAsync(dbContext.UserLeaveLimits.Where(l =>
-                        (l.User == null || l.User.Email == userEmail) &&
+                        (l.AssignedToUserEmail == null || l.AssignedToUserEmail == userEmail) &&
                         (l.ValidSince == null || l.ValidSince <= dateFrom) &&
                         (l.ValidUntil == null || l.ValidUntil >= dateTo) &&
                         l.LeaveTypeId == leaveTypeId));
