@@ -24,7 +24,7 @@ public class RoleRequirementHandler : AuthorizationHandler<RoleRequirement>
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context, RoleRequirement requirement)
     {
-        if (!context.User.Identity.IsAuthenticated)
+        if (context.User.Identity?.IsAuthenticated != true)
         {
             context.Fail(new AuthorizationFailureReason(this, $"The user is not authenticated."));
             return;

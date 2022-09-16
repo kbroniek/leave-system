@@ -39,7 +39,7 @@
                 <option value="">Select leave type ...</option>
                 @foreach (var leaveType in leaveTypes)
                 {
-                    <option value="@leaveType.LeaveTypeId">@leaveType.Name</option>
+                    <option value="@leaveType.Id">@leaveType.Name</option>
                 }
             </InputSelect>
         </label>
@@ -68,7 +68,7 @@
 @code {
     private CreateLeaveRequestDto leaveRequest = new();
     private EditContext? editContext;
-    private IEnumerable<LeaveType> leaveTypes = Enumerable.Empty<LeaveType>();
+    private IEnumerable<GetLeaveTypeDto> leaveTypes = Enumerable.Empty<GetLeaveTypeDto>();
 
     protected override void OnInitialized()
     {
@@ -102,22 +102,22 @@
             Logger.LogTrace("[HandleSubmit]: Form is INVALID");
         }
     }
-    private async ValueTask<IEnumerable<LeaveType>> LoadLeaveTypes()
+    private async ValueTask<IEnumerable<GetLeaveTypeDto>> LoadLeaveTypes()
     {
         Logger.LogInformation("Get all leave types");
-        var leaveRequests = await Http.GetFromJsonAsync<IEnumerable<LeaveType>>("api/LeaveType");
+        var leaveRequests = await Http.GetFromJsonAsync<OdataResponse<IEnumerable<GetLeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name");
 
-        if (leaveRequests == null)
+        if (leaveRequests == null || leaveRequests.Data == null)
         {
-            throw new InvalidOperationException("The collection leaveRequests is empty.");
+            throw new InvalidOperationException("Leave types collection is empty.");
         }
 
-        return leaveRequests;
+        return leaveRequests.Data;
     }
 
-    private class LeaveType
+    private class GetLeaveTypeDto
     {
-        public Guid LeaveTypeId { get; set; }
+        public Guid Id { get; set; }
         public string? Name { get; set; }
     }
 }
