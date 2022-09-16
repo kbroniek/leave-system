@@ -1,4 +1,4 @@
-﻿namespace LeaveSystem.Web.Pages.CancellingLeaveRequest;
+﻿namespace LeaveSystem.Web.Pages.LeaveRequests.CancellingLeaveRequest;
 
 public class CancelLeaveRequestDto
 {

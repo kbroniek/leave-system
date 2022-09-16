@@ -1,4 +1,4 @@
-﻿namespace LeaveSystem.Web.Pages.CreatingLeaveRequest;
+﻿namespace LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 
 public class CreateLeaveRequestDto
 {
