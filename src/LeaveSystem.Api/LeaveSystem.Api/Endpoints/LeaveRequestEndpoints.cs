@@ -49,7 +49,7 @@ public static class LeaveRequestEndpoints
         .WithName(CreateLeaveRequestName)
         .RequireAuthorization(CreateLeaveRequestName);
 
-        endpoint.MapPost("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, AcceptLeaveRequestDto acceptLeaveRequest) =>
+        endpoint.MapPut("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, AcceptLeaveRequestDto acceptLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
@@ -64,7 +64,7 @@ public static class LeaveRequestEndpoints
         .WithName(AcceptLeaveRequestName)
         .RequireAuthorization(AcceptLeaveRequestName);
 
-        endpoint.MapPost("api/leaveRequests/{id}/reject", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, RejectLeaveRequestDto rejectLeaveRequest) =>
+        endpoint.MapPut("api/leaveRequests/{id}/reject", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, RejectLeaveRequestDto rejectLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
@@ -79,7 +79,7 @@ public static class LeaveRequestEndpoints
         .WithName(RejectLeaveRequestName)
         .RequireAuthorization(RejectLeaveRequestName);
 
-        endpoint.MapPost("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, CancelLeaveRequestDto cancelLeaveRequest) =>
+        endpoint.MapPut("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, CancelLeaveRequestDto cancelLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
