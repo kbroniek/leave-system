@@ -47,11 +47,11 @@ internal class HandleGetLeaveRequest :
     public async Task<IPagedList<LeaveRequestShortInfo>> Handle(GetLeaveRequests request,
         CancellationToken cancellationToken)
     {
-        var c = await querySession.Query<LeaveRequestShortInfo>().ToListAsync();
         return await querySession.Query<LeaveRequestShortInfo>()
-            .Where(x => (x.DateFrom >= request.DateFrom && x.DateFrom <= request.DateTo) ||
+            .Where(x => ((x.DateFrom >= request.DateFrom && x.DateFrom <= request.DateTo) ||
                 (x.DateTo >= request.DateFrom && x.DateTo <= request.DateTo) ||
-                (request.DateFrom >= x.DateFrom && request.DateFrom <= x.DateTo))
+                (request.DateFrom >= x.DateFrom && request.DateFrom <= x.DateTo)) &&
+                (x.Status == LeaveRequestStatus.Accepted || x.Status == LeaveRequestStatus.Pending))
             .ToPagedListAsync(request.PageNumber, request.PageSize, cancellationToken);
     }
 }

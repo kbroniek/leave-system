@@ -1,4 +1,5 @@
-﻿using LeaveSystem.Db;
+﻿using GoldenEye.Marten.Registration;
+using LeaveSystem.Db;
 using LeaveSystem.EventSourcing;
 using LeaveSystem.Services;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +12,10 @@ public static class Config
 {
     public static void AddLeaveSystemModule(this IServiceCollection services, IConfiguration config)
     {
-        string connectionString = config.GetConnectionString("PostgreSQL");
+        var martenConfig = config.GetSection("Marten").Get<MartenConfig>();
         services
-            .AddDbContext<LeaveSystemDbContext>(options => options.UseNpgsql(connectionString))
-            .AddEventSourcing(connectionString)
+            .AddDbContext<LeaveSystemDbContext>(options => options.UseNpgsql(martenConfig.ConnectionString))
+            .AddEventSourcing(config)
             .AddServices();
     }
 
