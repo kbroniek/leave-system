@@ -46,7 +46,7 @@ public class LeaveRequestShortInfo
 
     public void Apply(LeaveRequestCancelled _)
     {
-        Status = LeaveRequestStatus.Canceled;
+        Status = LeaveRequestStatus.Cancelled;
     }
 }
 

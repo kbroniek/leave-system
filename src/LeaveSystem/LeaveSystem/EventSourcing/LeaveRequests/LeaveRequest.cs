@@ -111,7 +111,7 @@ public class LeaveRequest : Aggregate
 
     private void Apply(LeaveRequestCancelled @event)
     {
-        Status = LeaveRequestStatus.Canceled;
+        Status = LeaveRequestStatus.Cancelled;
         AddRemarks(@event.Remarks, @event.CancelledBy);
         LastModifiedBy = @event.CancelledBy;
     }
