@@ -76,7 +76,7 @@ public class LeaveRequest : Aggregate
             throw new InvalidOperationException($"Canceling of past leave requests is not allowed.");
         }
 
-        var @event = LeaveRequestCancelled.Create(Id, remarks, canceledBy);
+        var @event = LeaveRequestCanceled.Create(Id, remarks, canceledBy);
 
         Enqueue(@event);
         Apply(@event);
@@ -109,11 +109,11 @@ public class LeaveRequest : Aggregate
         LastModifiedBy = @event.RejectedBy;
     }
 
-    private void Apply(LeaveRequestCancelled @event)
+    private void Apply(LeaveRequestCanceled @event)
     {
         Status = LeaveRequestStatus.Canceled;
-        AddRemarks(@event.Remarks, @event.CancelledBy);
-        LastModifiedBy = @event.CancelledBy;
+        AddRemarks(@event.Remarks, @event.CanceledBy);
+        LastModifiedBy = @event.CanceledBy;
     }
 
     private void AddRemarks(string? remarks, FederatedUser createdBy)
