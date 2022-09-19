@@ -1,4 +1,4 @@
-﻿namespace LeaveSystem.Web.Pages.LeaveRequests.ApprovingLeaveRequest;
+﻿namespace LeaveSystem.Web.Pages.LeaveRequests.AcceptingLeaveRequest;
 
 public class AcceptLeaveRequestDto
 {
