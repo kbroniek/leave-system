@@ -44,9 +44,9 @@ public class LeaveRequestShortInfo
         Status = LeaveRequestStatus.Rejected;
     }
 
-    public void Apply(LeaveRequestCancelled _)
+    public void Apply(LeaveRequestCanceled _)
     {
-        Status = LeaveRequestStatus.Cancelled;
+        Status = LeaveRequestStatus.Canceled;
     }
 }
 
@@ -60,7 +60,7 @@ public class LeaveRequestShortInfoProjection : SingleStreamAggregation<LeaveRequ
 
         ProjectEvent<LeaveRequestRejected>((item, @event) => item.Apply(@event));
 
-        ProjectEvent<LeaveRequestCancelled>((item, @event) => item.Apply(@event));
+        ProjectEvent<LeaveRequestCanceled>((item, @event) => item.Apply(@event));
     }
 }
 
