@@ -16,6 +16,9 @@ public static class Config
     public static void AddRoleBasedAuthorization(this IServiceCollection services)
     {
         services.AddAuthorization(options =>
+                  options.AddPolicy(LeaveRequestEndpoints.GetLeaveRequestsName,
+                  policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
+        services.AddAuthorization(options =>
                   options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestName,
                   policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
         services.AddAuthorization(options =>

@@ -22,7 +22,7 @@ public static class LeaveRequestEndpoints
     {
         endpoint.MapGet("api/leaveRequests", async (HttpContext httpContext, IQueryBus queryBus, int? pageNumber, int? pageSize, DateTimeOffset? dateFrom, DateTimeOffset? dateTo) =>
         {
-            var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequest>>(GetLeaveRequests.Create(pageNumber, pageSize, dateFrom, dateTo));
+            var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(pageNumber, pageSize, dateFrom, dateTo));
 
             return PagedListResponse.From(pagedList);
         })

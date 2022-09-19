@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 
-internal class LeaveRequestCancelled : IEvent
+public class LeaveRequestCancelled : IEvent
 {
     public Guid StreamId => LeaveRequestId;
 

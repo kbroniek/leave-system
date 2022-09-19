@@ -33,7 +33,7 @@ public class WorkingHoursService
                 ++daysBetween;
                 if (daysBetween > MaxCalculatedDays)
                 {
-                    throw new ArgumentOutOfRangeException($"Mar range reached calculating duration between dates from: {dateFrom.ToString("o", CultureInfo.InvariantCulture)} to: {dateTo.ToString("o", CultureInfo.InvariantCulture)}. The max duration is {MaxCalculatedDays} days.");
+                    throw new ArgumentOutOfRangeException($"Max range reached calculating duration between dates from: {dateFrom.ToString("o", CultureInfo.InvariantCulture)} to: {dateTo.ToString("o", CultureInfo.InvariantCulture)}. The max duration is {MaxCalculatedDays} days.");
                 }
             }
             currentDate = currentDate.AddDays(1);

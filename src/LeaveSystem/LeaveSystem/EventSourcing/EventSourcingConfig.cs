@@ -8,6 +8,8 @@ internal static class EventSourcingConfig
 {
     internal static IServiceCollection AddEventSourcing(this IServiceCollection services, string connectionString) =>
         services
-            .AddMarten(_ => connectionString, null, null, ServiceLifetime.Scoped)
+            .AddMarten(_ => connectionString, opt => {
+                opt.ConfigureLeaveRequests();
+            }, null, ServiceLifetime.Scoped)
             .AddLeaveRequests();
 }

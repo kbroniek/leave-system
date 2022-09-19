@@ -6,7 +6,7 @@ using Marten.Pagination;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 
-public class GetLeaveRequests : IQuery<IPagedList<LeaveRequest>>
+public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
 {
     public int PageNumber { get; }
     public int PageSize { get; }
@@ -35,7 +35,7 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequest>>
 }
 
 internal class HandleGetLeaveRequest :
-    IQueryHandler<GetLeaveRequests, IPagedList<LeaveRequest>>
+    IQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>
 {
     private readonly IDocumentSession querySession;
 
@@ -44,10 +44,11 @@ internal class HandleGetLeaveRequest :
         this.querySession = querySession;
     }
 
-    public async Task<IPagedList<LeaveRequest>> Handle(GetLeaveRequests request,
+    public async Task<IPagedList<LeaveRequestShortInfo>> Handle(GetLeaveRequests request,
         CancellationToken cancellationToken)
     {
-        return await querySession.Query<LeaveRequest>()
+        var c = await querySession.Query<LeaveRequestShortInfo>().ToListAsync();
+        return await querySession.Query<LeaveRequestShortInfo>()
             .Where(x => (x.DateFrom >= request.DateFrom && x.DateFrom <= request.DateTo) ||
                 (x.DateTo >= request.DateFrom && x.DateTo <= request.DateTo) ||
                 (request.DateFrom >= x.DateFrom && request.DateFrom <= x.DateTo))
