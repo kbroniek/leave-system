@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Marten" Version="5.5.2" />
+        <PackageReference Include="Marten" Version="5.10.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
     </ItemGroup>
 

@@ -1,16 +1,35 @@
 ﻿using GoldenEye.Commands;
+using GoldenEye.Queries;
+using LeaveSystem.Api.Responses;
+using LeaveSystem.EventSourcing.LeaveRequests;
+using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
+using LeaveSystem.Web.Pages.LeaveRequests.ApprovingLeaveRequest;
+using LeaveSystem.Web.Pages.LeaveRequests.CancellingLeaveRequest;
+using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.Web.Pages.LeaveRequests.RejectingLeaveRequest;
+using Marten.Pagination;
 using Microsoft.Identity.Web.Resource;
 
 namespace LeaveSystem.Api.Endpoints;
 public static class LeaveRequestEndpoints
 {
+    public const string GetLeaveRequestsName = "GetLeaveRequests";
     public const string CreateLeaveRequestName = "CreateLeaveRequest";
     public const string AcceptLeaveRequestName = "AcceptLeaveRequest";
     public const string RejectLeaveRequestName = "RejectLeaveRequest";
     public const string CancelLeaveRequestName = "CancelLeaveRequest";
     public static void AddLeaveRequestEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
-        endpoint.MapPost("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus, Web.Pages.CreatingLeaveRequest.CreateLeaveRequestDto createLeaveRequest) =>
+        endpoint.MapGet("api/leaveRequests", async (HttpContext httpContext, IQueryBus queryBus, int? pageNumber, int? pageSize, DateTimeOffset? dateFrom, DateTimeOffset? dateTo) =>
+        {
+            var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(pageNumber, pageSize, dateFrom, dateTo));
+
+            return PagedListResponse.From(pagedList);
+        })
+        .WithName(GetLeaveRequestsName)
+        .RequireAuthorization(GetLeaveRequestsName);
+
+        endpoint.MapPost("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus, CreateLeaveRequestDto createLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
@@ -30,7 +49,7 @@ public static class LeaveRequestEndpoints
         .WithName(CreateLeaveRequestName)
         .RequireAuthorization(CreateLeaveRequestName);
 
-        endpoint.MapPost("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.AcceptingLeaveRequest.AcceptLeaveRequestDto acceptLeaveRequest) =>
+        endpoint.MapPost("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, AcceptLeaveRequestDto acceptLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
@@ -45,7 +64,7 @@ public static class LeaveRequestEndpoints
         .WithName(AcceptLeaveRequestName)
         .RequireAuthorization(AcceptLeaveRequestName);
 
-        endpoint.MapPost("api/leaveRequests/{id}/reject", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.RejectingLeaveRequest.RejectLeaveRequestDto rejectLeaveRequest) =>
+        endpoint.MapPost("api/leaveRequests/{id}/reject", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, RejectLeaveRequestDto rejectLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
@@ -60,7 +79,7 @@ public static class LeaveRequestEndpoints
         .WithName(RejectLeaveRequestName)
         .RequireAuthorization(RejectLeaveRequestName);
 
-        endpoint.MapPost("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, Web.Pages.CancellingLeaveRequest.CancelLeaveRequestDto cancelLeaveRequest) =>
+        endpoint.MapPost("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, CancelLeaveRequestDto cancelLeaveRequest) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 

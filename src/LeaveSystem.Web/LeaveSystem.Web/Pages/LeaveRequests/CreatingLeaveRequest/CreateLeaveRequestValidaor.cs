@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace LeaveSystem.Web.Pages.CreatingLeaveRequest;
+namespace LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 public class CreateLeaveRequestValidaor : AbstractValidator<CreateLeaveRequestDto>
 {
     public CreateLeaveRequestValidaor()

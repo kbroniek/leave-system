@@ -1,13 +1,17 @@
 ﻿
 using GoldenEye.Marten.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeaveSystem.EventSourcing;
 internal static class EventSourcingConfig
 {
-    internal static IServiceCollection AddEventSourcing(this IServiceCollection services, string connectionString) =>
+    internal static IServiceCollection AddEventSourcing(this IServiceCollection services, IConfiguration config) =>
         services
-            .AddMarten(_ => connectionString, null, null, ServiceLifetime.Scoped)
+            .AddMarten(config, options =>
+            {
+                options.ConfigureLeaveRequests();
+            })
             .AddLeaveRequests();
 }
