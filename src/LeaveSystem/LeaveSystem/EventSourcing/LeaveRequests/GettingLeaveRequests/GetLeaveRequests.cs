@@ -7,7 +7,6 @@ using LeaveSystem.Shared;
 using Marten;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 
@@ -87,7 +86,7 @@ internal class HandleGetLeaveRequest :
                 request.DateTo,
                 request.LeaveTypeIds,
                 request.Statuses,
-                new[] { request.RequestedBy.Email ?? ""},
+                new[] { request.RequestedBy.Email ?? "" },
                 request.RequestedBy);
         }
         return request;
