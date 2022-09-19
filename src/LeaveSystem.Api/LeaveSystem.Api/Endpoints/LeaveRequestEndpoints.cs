@@ -3,7 +3,7 @@ using GoldenEye.Queries;
 using LeaveSystem.Api.Responses;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
-using LeaveSystem.Web.Pages.LeaveRequests.ApprovingLeaveRequest;
+using LeaveSystem.Web.Pages.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.CancellingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.RejectingLeaveRequest;
