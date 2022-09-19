@@ -133,8 +133,8 @@ public static class LeaveRequestEndpoints
                 createLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            await commandBus.Send(command);
-            return Results.Created("api/LeaveRequests", leaveRequestId, cancellationToken);
+            await commandBus.Send(command, cancellationToken);
+            return Results.Created("api/LeaveRequests", leaveRequestId);
         })
         .WithName(CreateLeaveRequestName)
         .RequireAuthorization(CreateLeaveRequestName);
