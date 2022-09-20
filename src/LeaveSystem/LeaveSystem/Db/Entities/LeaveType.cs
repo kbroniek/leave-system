@@ -11,6 +11,7 @@ public class LeaveType : IHaveId<Guid>
     public LeaveType? BaseLeaveType { get; set; }
     public ICollection<LeaveType>? ConstraintedLeaveTypes { get; set; }
     public ICollection<UserLeaveLimit>? UserLeaveLimits { get; set; }
+    public int Order { get; set; }
     public class LeaveTypeProperties
     {
         public string? Color { get; set; }
