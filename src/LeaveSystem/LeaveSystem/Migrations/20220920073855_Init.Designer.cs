@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveSystem.Migrations
 {
     [DbContext(typeof(LeaveSystemDbContext))]
-    [Migration("20220916105131_Init")]
+    [Migration("20220920073855_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,6 +37,9 @@ namespace LeaveSystem.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
 
                     b.Property<LeaveType.LeaveTypeProperties>("Properties")
                         .HasColumnType("jsonb");

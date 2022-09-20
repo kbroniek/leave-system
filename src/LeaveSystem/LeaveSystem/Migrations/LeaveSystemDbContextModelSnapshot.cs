@@ -36,6 +36,9 @@ namespace LeaveSystem.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
                     b.Property<LeaveType.LeaveTypeProperties>("Properties")
                         .HasColumnType("jsonb");
 
