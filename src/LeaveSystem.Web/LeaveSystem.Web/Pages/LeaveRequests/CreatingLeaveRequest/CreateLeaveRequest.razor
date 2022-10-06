@@ -104,15 +104,14 @@
     }
     private async ValueTask<IEnumerable<GetLeaveTypeDto>> LoadLeaveTypes()
     {
-        Logger.LogInformation("Get all leave types");
-        var leaveRequests = await Http.GetFromJsonAsync<ODataResponse<IEnumerable<GetLeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name&$orderby=Order asc");
+        var leaveTypes = await Http.GetFromJsonAsync<ODataResponse<IEnumerable<GetLeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name&$orderby=Order asc");
 
-        if (leaveRequests == null || leaveRequests.Data == null)
+        if (leaveTypes == null || leaveTypes.Data == null)
         {
             throw new InvalidOperationException("Leave types collection is empty.");
         }
 
-        return leaveRequests.Data;
+        return leaveTypes.Data;
     }
 
     private class GetLeaveTypeDto

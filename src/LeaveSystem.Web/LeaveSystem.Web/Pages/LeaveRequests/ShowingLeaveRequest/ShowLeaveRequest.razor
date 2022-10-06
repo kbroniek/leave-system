@@ -1,4 +1,5 @@
 ﻿@page "/showleaverequests"
+@using LeaveSystem.Db
 @using LeaveSystem.EventSourcing.LeaveRequests
 @using LeaveSystem.Web.Components
 @using Microsoft.AspNetCore.Authorization
@@ -62,13 +63,14 @@ else
 
 @code {
     private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
-    private FederatedUser[]? users;
+    private FederatedUser[]? users = null;
     //public object? container;
 
     protected override async Task OnInitializedAsync()
     {
         leaveRequests = await Http.GetFromJsonAsync<PagedListResponse<LeaveRequestShortInfo>>("api/leaveRequests", new JsonSerializerOptions(JsonSerializerDefaults.Web));
         users = leaveRequests?.Items?.Where(l => l.CreatedBy != null).Select(l => l.CreatedBy!.Value).Distinct().OrderBy(u => u.Email).ToArray();
+        Logger.LogInformation("OnInitializedAsync", leaveRequests);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -78,34 +80,58 @@ else
             await timeline.CreateAsync("timeline-visualization");
         }
     }
-
-
-    public class LeaveRequestShortInfo
+    private async ValueTask<IEnumerable<GetLeaveTypeDto>> LoadLeaveTypes()
     {
-        public Guid Id { get; }
+        var leaveTypes = await Http.GetFromJsonAsync<ODataResponse<IEnumerable<GetLeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name&$orderby=Order asc");
 
-        public DateTimeOffset DateFrom { get; }
-
-        public DateTimeOffset DateTo { get; }
-
-        public TimeSpan Duration { get; }
-
-        public Guid LeaveTypeId { get; }
-
-        public LeaveRequestStatus Status { get; }
-
-        public FederatedUser? CreatedBy { get; }
-
-        [JsonConstructor]
-        public LeaveRequestShortInfo(Guid id, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, LeaveRequestStatus status, FederatedUser? createdBy)
+        if (leaveTypes == null || leaveTypes.Data == null)
         {
-            Id = id;
-            DateFrom = dateFrom;
-            DateTo = dateTo;
-            Duration = duration;
-            LeaveTypeId = leaveTypeId;
-            Status = status;
-            CreatedBy = createdBy;
+            throw new InvalidOperationException("Leave types collection is empty.");
         }
+
+        return leaveTypes.Data;
     }
+
+    public record class LeaveRequestShortInfo(
+        Guid Id,
+        DateTimeOffset DateFrom,
+        DateTimeOffset DateTo,
+        TimeSpan Duration,
+        Guid LeaveTypeId,
+        LeaveRequestStatus Status,
+        FederatedUser? CreatedBy
+    );
+//    {
+//        public Guid Id { get; set; }
+
+//        public DateTimeOffset DateFrom { get; set; }
+
+//        public DateTimeOffset DateTo { get; set; }
+
+//        public TimeSpan Duration { get; set; }
+
+//        public Guid LeaveTypeId { get; set; }
+
+//        public LeaveRequestStatus Status { get; set; }
+
+//        public FederatedUser? CreatedBy { get; set; }
+
+//        //[JsonConstructor]
+//        //public LeaveRequestShortInfo()
+//        //{
+
+//        //}
+
+//        //[JsonConstructor]
+//        //public LeaveRequestShortInfo(Guid id, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, LeaveRequestStatus status, FederatedUser? createdBy)
+//        //{
+//        //    Id = id;
+//        //    DateFrom = dateFrom;
+//        //    DateTo = dateTo;
+//        //    Duration = duration;
+//        //    LeaveTypeId = leaveTypeId;
+//        //    Status = status;
+//        //    CreatedBy = createdBy;
+//        //}
+//    }
 }
