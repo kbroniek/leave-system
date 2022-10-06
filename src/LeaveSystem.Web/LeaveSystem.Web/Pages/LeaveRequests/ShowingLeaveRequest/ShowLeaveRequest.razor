@@ -76,14 +76,7 @@ else
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         users = leaveRequests?.Items?.Where(l => l.CreatedBy != null).Select(l => l.CreatedBy!.Value).Distinct().OrderBy(u => u.Email).ToArray();
-        Logger.LogInformation("OnInitializedAsync", leaveRequests);
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender) {
-            await Timeline.CreateAsync("timeline-visualization");
-        }
+        await Timeline.CreateAsync("timeline-visualization", users, leaveRequests?.Items);
     }
 
     public record class LeaveRequestShortInfo(

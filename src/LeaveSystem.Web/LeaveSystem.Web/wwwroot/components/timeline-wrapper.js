@@ -1,77 +1,91 @@
 ﻿window.TimelineWrapper = {
-    create: function (componentName) {
+    create: function (componentName, users, leaveRequests) {
         // DOM element where the Timeline will be attached
         var container = document.getElementById(componentName ? componentName : 'timeline-visualization');
-        console.log("----- container", container)
-        var groups = new vis.DataSet([
-            { id: 1, content: 'Phase&nbsp;1' },
-            { id: 2, content: 'Phase&nbsp;2' },
-            { id: 3, content: 'Phase&nbsp;3' },
-            { id: 4, content: 'Phase&nbsp;4' }
-        ]);
+        console.log("----- users", users)
+        console.log("----- leaveRequests", leaveRequests)
 
+        var groups = new vis.DataSet(users.map((u) => ({ id: u.email, content: u.name })));
         var items = new vis.DataSet();
-
-        var start = new Date('2015-09-16');
-        var end = new Date('2015-09-25');
-        items.add({
-            id: 1,
-            group: 1,
-            start: start,
-            end: end,
-            className: 'p1',
-            content: 'Project 1'
+        leaveRequests.forEach(lr => {
+            items.add({
+                id: lr.id,
+                group: lr.createdBy.email,
+                start: new Date(lr.dateFrom).setHours(0, 0, 0, 0),
+                end: new Date(lr.dateTo).setHours(23, 59, 59, 99),
+                content: lr.leaveTypeId
+            });
         });
 
-        start = new Date('2015-09-25');
-        end = new Date('2015-10-05');
-        items.add({
-            id: 2,
-            group: 2,
-            start: start,
-            end: end,
-            className: 'p1',
-            content: 'Project 1'
-        });
+        //var groups = new vis.DataSet([
+        //    { id: 1, content: 'Phase&nbsp;1' },
+        //    { id: 2, content: 'Phase&nbsp;2' },
+        //    { id: 3, content: 'Phase&nbsp;3' },
+        //    { id: 4, content: 'Phase&nbsp;4' }
+        //]);
 
-        start = new Date('2015-10-01');
-        end = new Date('2015-11-15');
-        items.add({
-            id: 3,
-            group: 3,
-            start: start,
-            end: end,
-            className: 'p1',
-            content: 'Project 1'
-        });
+        //var items = new vis.DataSet();
 
-        start = new Date('2015-11-15');
-        end = new Date('2015-12-25');
-        items.add({
-            id: 4,
-            group: 4,
-            start: start,
-            end: end,
-            className: 'p1',
-            content: 'Project 1'
-        });
+        //var start = new Date('2015-09-16');
+        //var end = new Date('2015-09-25');
+        //items.add({
+        //    id: 1,
+        //    group: 1,
+        //    start: start,
+        //    end: end,
+        //    className: 'p1',
+        //    content: 'Project 1'
+        //});
 
-        start = new Date('2015-09-25');
-        end = new Date('2015-10-25');
-        items.add({
-            id: 5,
-            group: 1,
-            start: start,
-            end: end,
-            className: 'p2',
-            content: 'Project 2'
+        //start = new Date('2015-09-25');
+        //end = new Date('2015-10-05');
+        //items.add({
+        //    id: 2,
+        //    group: 2,
+        //    start: start,
+        //    end: end,
+        //    className: 'p1',
+        //    content: 'Project 1'
+        //});
 
-        });
+        //start = new Date('2015-10-01');
+        //end = new Date('2015-11-15');
+        //items.add({
+        //    id: 3,
+        //    group: 3,
+        //    start: start,
+        //    end: end,
+        //    className: 'p1',
+        //    content: 'Project 1'
+        //});
+
+        //start = new Date('2015-11-15');
+        //end = new Date('2015-12-25');
+        //items.add({
+        //    id: 4,
+        //    group: 4,
+        //    start: start,
+        //    end: end,
+        //    className: 'p1',
+        //    content: 'Project 1'
+        //});
+
+        //start = new Date('2015-09-25');
+        //end = new Date('2015-10-25');
+        //items.add({
+        //    id: 5,
+        //    group: 1,
+        //    start: start,
+        //    end: end,
+        //    className: 'p2',
+        //    content: 'Project 2'
+
+        //});
 
         var options = {
             stack: false,
-            min: new Date('2015-01-01'),                // lower limit of visible range
-            max: new Date('2015-12-31'),                // upper limit of visible range
+            //min: new Date('2015-01-01'),                // lower limit of visible range
+            //max: new Date('2015-12-31'),                // upper limit of visible range
             //hiddenDates: [
             //    { start: '2013-10-26 00:00:00', end: '2013-10-28 00:00:00', repeat: 'weekly' } // hide weekends
             //],
