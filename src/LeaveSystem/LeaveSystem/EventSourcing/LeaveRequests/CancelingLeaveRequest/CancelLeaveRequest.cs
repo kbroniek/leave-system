@@ -24,7 +24,7 @@ public class CancelLeaveRequest : ICommand
     {
         leaveRequestId = Guard.Against.Nill(leaveRequestId);
         canceledBy = Guard.Against.Nill(canceledBy);
-        return new(leaveRequestId.Value, remarks, canceledBy);
+        return new(leaveRequestId.Value, remarks, canceledBy.Value);
     }
 }
 

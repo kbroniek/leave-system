@@ -1,21 +1,14 @@
-﻿namespace LeaveSystem.Db;
+﻿using Ardalis.GuardClauses;
+using LeaveSystem.Shared;
 
-public class FederatedUser
+namespace LeaveSystem.Db;
+
+public record struct FederatedUser(string Email, string? Name)
 {
-    public string? Name { get; set; }
-    public string? Email { get; set; }
-
     public static FederatedUser Create(string? email, string? name)
     {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new ArgumentNullException(nameof(email));
-        }
-        return new()
-        {
-            Email = email,
-            Name = name,
-        };
+        Guard.Against.Nill(email);
+        return new(email, name);
     }
 }
 

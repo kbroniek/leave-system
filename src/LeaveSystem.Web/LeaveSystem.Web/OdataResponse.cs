@@ -2,7 +2,7 @@
 
 namespace LeaveSystem.Web;
 
-public class OdataResponse<T>
+public class ODataResponse<T>
 {
     [JsonPropertyName(name: "@odata.context")]
     public string? ContextUrl { get; set; }

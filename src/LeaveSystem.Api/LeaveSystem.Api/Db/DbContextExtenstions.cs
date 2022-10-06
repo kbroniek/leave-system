@@ -23,7 +23,7 @@ public static class DbContextExtenstions
             var dbContext = services.GetRequiredService<LeaveSystemDbContext>();
             if (dbContext == null)
             {
-                throw new InvalidOperationException("Cannot find DB context. Please fix the bug.");
+                throw new InvalidOperationException("Cannot find DB context.");
             }
             try
             {

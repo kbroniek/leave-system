@@ -40,7 +40,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem.Shared", "Leave
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Shared", "LeaveSystem.Shared\LeaveSystem.Shared.csproj", "{9E0A9888-B83A-4DA9-B7AF-DA98C9F8FB1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.UnitTests", "LeaveSystem.UnitTests\LeaveSystem.UnitTests.csproj", "{7D0DE106-0E47-47B6-B10C-6B9C06DF341C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.UnitTests", "LeaveSystem.UnitTests\LeaveSystem.UnitTests.csproj", "{7D0DE106-0E47-47B6-B10C-6B9C06DF341C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

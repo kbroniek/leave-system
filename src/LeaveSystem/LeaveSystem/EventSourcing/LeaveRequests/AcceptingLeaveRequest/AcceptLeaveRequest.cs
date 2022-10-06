@@ -24,7 +24,7 @@ public class AcceptLeaveRequest : ICommand
     {
         leaveRequestId = Guard.Against.Nill(leaveRequestId);
         acceptedBy = Guard.Against.Nill(acceptedBy);
-        return new(leaveRequestId.Value, remarks, acceptedBy);
+        return new(leaveRequestId.Value, remarks, acceptedBy.Value);
     }
 }
 

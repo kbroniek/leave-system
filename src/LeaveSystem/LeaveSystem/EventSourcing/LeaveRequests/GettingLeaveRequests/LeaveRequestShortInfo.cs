@@ -9,7 +9,7 @@ namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 
 public class LeaveRequestShortInfo
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; private set; }
 
     public DateTimeOffset DateFrom { get; private set; }
 
