@@ -1,0 +1,111 @@
+﻿@page "/showleaverequests"
+@using LeaveSystem.EventSourcing.LeaveRequests
+@using LeaveSystem.Web.Components
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using System.Text.Json.Serialization
+@using System.Text.Json
+@attribute [Authorize]
+@inject HttpClient Http
+@inject ILogger<ShowLeaveRequest> Logger
+@inject TimelineComponent timeline
+
+<PageTitle>Show leave request</PageTitle>
+
+<h1>Show leave request</h1>
+
+@if (leaveRequests == null || users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="timeline-panel">
+        <div class="timeline-users">
+            @foreach (var user in users)
+            {
+                <div class="timeline-user">@user.Name</div>
+            }
+        </div>
+        <div class="timeline-body">
+            @foreach (var user in users)
+            {
+                // for each given day and user check the leave request and put it an item https://code.tutsplus.com/articles/best-free-open-source-javascript-timelines--cms-39673
+                <div class="timeline-item"></div>
+            }
+        </div>
+    </div>
+    @*<table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leaveRequest in leaveRequests)
+            {
+                <tr>
+                    <td>@leaveRequest.DateFrom</td>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>*@
+}
+<div id="timeline-visualization"></div>
+
+@code {
+    private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
+    private FederatedUser[]? users;
+    //public object? container;
+
+    protected override async Task OnInitializedAsync()
+    {
+        leaveRequests = await Http.GetFromJsonAsync<PagedListResponse<LeaveRequestShortInfo>>("api/leaveRequests", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        users = leaveRequests?.Items?.Where(l => l.CreatedBy != null).Select(l => l.CreatedBy!.Value).Distinct().OrderBy(u => u.Email).ToArray();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        //Logger.LogInformation($"Container {(container is null ? "null" : "object")}");
+        if (firstRender) {
+            await timeline.CreateAsync("timeline-visualization");
+        }
+    }
+
+
+    public class LeaveRequestShortInfo
+    {
+        public Guid Id { get; }
+
+        public DateTimeOffset DateFrom { get; }
+
+        public DateTimeOffset DateTo { get; }
+
+        public TimeSpan Duration { get; }
+
+        public Guid LeaveTypeId { get; }
+
+        public LeaveRequestStatus Status { get; }
+
+        public FederatedUser? CreatedBy { get; }
+
+        [JsonConstructor]
+        public LeaveRequestShortInfo(Guid id, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, LeaveRequestStatus status, FederatedUser? createdBy)
+        {
+            Id = id;
+            DateFrom = dateFrom;
+            DateTo = dateTo;
+            Duration = duration;
+            LeaveTypeId = leaveTypeId;
+            Status = status;
+            CreatedBy = createdBy;
+        }
+    }
+}

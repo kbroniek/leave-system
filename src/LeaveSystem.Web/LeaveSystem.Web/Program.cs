@@ -1,7 +1,9 @@
 using LeaveSystem.Web;
+using LeaveSystem.Web.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -26,8 +28,6 @@ builder.Services.AddMsalAuthentication(options =>
     builder.Configuration.Bind(AzureConfig, options.ProviderOptions.Authentication);
     options.ProviderOptions.DefaultAccessTokenScopes.Add(scopes);
 });
-//builder.Services.AddDDD();
-//builder.Services.AddAllDDDHandlers();
-//builder.Services.AddLeaveSystemModule(builder.Configuration);
+builder.Services.AddTransient(sp => new TimelineComponent(sp.GetService<IJSRuntime>()));
 
 await builder.Build().RunAsync();

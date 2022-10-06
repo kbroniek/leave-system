@@ -105,7 +105,7 @@
     private async ValueTask<IEnumerable<GetLeaveTypeDto>> LoadLeaveTypes()
     {
         Logger.LogInformation("Get all leave types");
-        var leaveRequests = await Http.GetFromJsonAsync<OdataResponse<IEnumerable<GetLeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name");
+        var leaveRequests = await Http.GetFromJsonAsync<ODataResponse<IEnumerable<GetLeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name&$orderby=Order asc");
 
         if (leaveRequests == null || leaveRequests.Data == null)
         {
