@@ -18,10 +18,6 @@ public class LeaveTypeService
     }
 
 
-    public class LeaveTypeDto
-    {
-        public Guid Id { get; set; }
-        public string? Name { get; set; }
-    }
+    public record class LeaveTypeDto(Guid Id, string Name);
 }
 
