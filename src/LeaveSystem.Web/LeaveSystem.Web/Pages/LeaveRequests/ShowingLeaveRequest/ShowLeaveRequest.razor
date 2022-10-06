@@ -21,46 +21,6 @@
 {
     <p><em>Loading...</em></p>
 }
-else
-{
-    <div class="timeline-panel">
-        <div class="timeline-users">
-            @foreach (var user in users)
-            {
-                <div class="timeline-user">@user.Name</div>
-            }
-        </div>
-        <div class="timeline-body">
-            @foreach (var user in users)
-            {
-                // for each given day and user check the leave request and put it an item https://code.tutsplus.com/articles/best-free-open-source-javascript-timelines--cms-39673
-                <div class="timeline-item"></div>
-            }
-        </div>
-    </div>
-    @*<table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var leaveRequest in leaveRequests)
-            {
-                <tr>
-                    <td>@leaveRequest.DateFrom</td>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>*@
-}
 <div id="timeline-visualization"></div>
 
 @code {
