@@ -40,7 +40,7 @@ public class CreateLeaveRequest : ICommand
         dateTo = Guard.Against.Nill(dateTo);
         leaveTypeId = Guard.Against.Nill(leaveTypeId);
         createdBy = Guard.Against.Nill(createdBy);
-        return new(leaveRequestId.Value, dateFrom.Value, dateTo.Value, duration, leaveTypeId.Value, remarks, createdBy);
+        return new(leaveRequestId.Value, dateFrom.Value, dateTo.Value, duration, leaveTypeId.Value, remarks, createdBy.Value);
     }
 }
 

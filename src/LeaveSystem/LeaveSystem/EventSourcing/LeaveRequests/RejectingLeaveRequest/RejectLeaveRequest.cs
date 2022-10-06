@@ -24,7 +24,7 @@ public class RejectLeaveRequest : ICommand
     {
         leaveRequestId = Guard.Against.Nill(leaveRequestId);
         rejectedBy = Guard.Against.Nill(rejectedBy);
-        return new(leaveRequestId.Value, remarks, rejectedBy);
+        return new(leaveRequestId.Value, remarks, rejectedBy.Value);
     }
 }
 
