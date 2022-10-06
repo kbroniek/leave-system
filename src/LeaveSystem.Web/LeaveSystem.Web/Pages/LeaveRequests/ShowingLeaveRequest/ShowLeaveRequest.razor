@@ -2,6 +2,7 @@
 @using LeaveSystem.Db
 @using LeaveSystem.EventSourcing.LeaveRequests
 @using LeaveSystem.Web.Components
+@using LeaveSystem.Web.Services
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Text.Json.Serialization
@@ -9,7 +10,8 @@
 @attribute [Authorize]
 @inject HttpClient Http
 @inject ILogger<ShowLeaveRequest> Logger
-@inject TimelineComponent timeline
+@inject TimelineComponent Timeline
+@inject LeaveTypeService LeaveTypeService
 
 <PageTitle>Show leave request</PageTitle>
 
@@ -64,32 +66,24 @@ else
 @code {
     private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
     private FederatedUser[]? users = null;
-    //public object? container;
+    private IEnumerable<LeaveTypeService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypeService.LeaveTypeDto>();
 
     protected override async Task OnInitializedAsync()
     {
-        leaveRequests = await Http.GetFromJsonAsync<PagedListResponse<LeaveRequestShortInfo>>("api/leaveRequests", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var getLeaveRequestsTask = Http.GetFromJsonAsync<PagedListResponse<LeaveRequestShortInfo>>("api/leaveRequests", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var getLeaveTypesTask = LeaveTypeService.GetLeaveTypes();
+        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask);
+        leaveRequests = getLeaveRequestsTask.Result;
+        leaveTypes = getLeaveTypesTask.Result;
         users = leaveRequests?.Items?.Where(l => l.CreatedBy != null).Select(l => l.CreatedBy!.Value).Distinct().OrderBy(u => u.Email).ToArray();
         Logger.LogInformation("OnInitializedAsync", leaveRequests);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        //Logger.LogInformation($"Container {(container is null ? "null" : "object")}");
         if (firstRender) {
-            await timeline.CreateAsync("timeline-visualization");
+            await Timeline.CreateAsync("timeline-visualization");
         }
-    }
-    private async ValueTask<IEnumerable<GetLeaveTypeDto>> LoadLeaveTypes()
-    {
-        var leaveTypes = await Http.GetFromJsonAsync<ODataResponse<IEnumerable<GetLeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name&$orderby=Order asc");
-
-        if (leaveTypes == null || leaveTypes.Data == null)
-        {
-            throw new InvalidOperationException("Leave types collection is empty.");
-        }
-
-        return leaveTypes.Data;
     }
 
     public record class LeaveRequestShortInfo(
@@ -101,37 +95,4 @@ else
         LeaveRequestStatus Status,
         FederatedUser? CreatedBy
     );
-//    {
-//        public Guid Id { get; set; }
-
-//        public DateTimeOffset DateFrom { get; set; }
-
-//        public DateTimeOffset DateTo { get; set; }
-
-//        public TimeSpan Duration { get; set; }
-
-//        public Guid LeaveTypeId { get; set; }
-
-//        public LeaveRequestStatus Status { get; set; }
-
-//        public FederatedUser? CreatedBy { get; set; }
-
-//        //[JsonConstructor]
-//        //public LeaveRequestShortInfo()
-//        //{
-
-//        //}
-
-//        //[JsonConstructor]
-//        //public LeaveRequestShortInfo(Guid id, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, LeaveRequestStatus status, FederatedUser? createdBy)
-//        //{
-//        //    Id = id;
-//        //    DateFrom = dateFrom;
-//        //    DateTo = dateTo;
-//        //    Duration = duration;
-//        //    LeaveTypeId = leaveTypeId;
-//        //    Status = status;
-//        //    CreatedBy = createdBy;
-//        //}
-//    }
 }

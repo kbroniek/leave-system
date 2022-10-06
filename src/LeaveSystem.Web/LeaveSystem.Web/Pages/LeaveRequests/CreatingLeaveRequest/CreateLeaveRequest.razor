@@ -1,8 +1,10 @@
 ﻿@page "/createleaverequest"
+@using LeaveSystem.Web.Services
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @attribute [Authorize]
 @inject HttpClient Http
+@inject LeaveTypeService LeaveTypeService
 @inject ILogger<CreateLeaveRequest> Logger
 
 <PageTitle>Add leave request</PageTitle>
@@ -68,7 +70,7 @@
 @code {
     private CreateLeaveRequestDto leaveRequest = new();
     private EditContext? editContext;
-    private IEnumerable<GetLeaveTypeDto> leaveTypes = Enumerable.Empty<GetLeaveTypeDto>();
+    private IEnumerable<LeaveTypeService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypeService.LeaveTypeDto>();
 
     protected override void OnInitialized()
     {
@@ -80,7 +82,7 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        leaveTypes = await LoadLeaveTypes();
+        leaveTypes = await LeaveTypeService.GetLeaveTypes();
     }
     private async Task HandleSubmit()
     {
@@ -101,23 +103,6 @@
         {
             Logger.LogTrace("[HandleSubmit]: Form is INVALID");
         }
-    }
-    private async ValueTask<IEnumerable<GetLeaveTypeDto>> LoadLeaveTypes()
-    {
-        var leaveTypes = await Http.GetFromJsonAsync<ODataResponse<IEnumerable<GetLeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name&$orderby=Order asc");
-
-        if (leaveTypes == null || leaveTypes.Data == null)
-        {
-            throw new InvalidOperationException("Leave types collection is empty.");
-        }
-
-        return leaveTypes.Data;
-    }
-
-    private class GetLeaveTypeDto
-    {
-        public Guid Id { get; set; }
-        public string? Name { get; set; }
     }
 }
 
