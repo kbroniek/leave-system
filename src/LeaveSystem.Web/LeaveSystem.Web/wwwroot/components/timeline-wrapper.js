@@ -1,5 +1,5 @@
 ﻿window.TimelineWrapper = {
-    create: function (componentName, users, leaveRequests) {
+    create: function (componentName, users, leaveRequests, minDate, maxDate) {
         // DOM element where the Timeline will be attached
         var container = document.getElementById(componentName ? componentName : 'timeline-visualization');
         console.log("----- users", users)
@@ -25,7 +25,9 @@
                 axis: 5   // minimal margin between items and the axis
             },
             orientation: 'top',
-            timeAxis: { scale: 'day' }
+            timeAxis: { scale: 'day' },
+            min: minDate,                // lower limit of visible range
+            max: maxDate,                // upper limit of visible range
 
         };
         timeline = new vis.Timeline(container, null, options);

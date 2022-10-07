@@ -87,7 +87,7 @@ app.AddLeaveRequestEndpoints(azureScpes);
 app.MigrateDb();
 if(app.Environment.IsDevelopment())
 {
-    app.FillInDatabase();
+    _ = app.FillInDatabase();
 }
 
-app.Run();
+await app.RunAsync();

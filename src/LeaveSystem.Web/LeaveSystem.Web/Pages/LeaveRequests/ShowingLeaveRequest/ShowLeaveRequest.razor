@@ -36,7 +36,8 @@
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         users = leaveRequests?.Items?.Where(l => l.CreatedBy != null).Select(l => l.CreatedBy!.Value).Distinct().OrderBy(u => u.Email).ToArray();
-        await Timeline.CreateAsync("timeline-visualization", users, leaveRequests?.Items);
+        var now = DateTimeOffset.UtcNow;
+        await Timeline.CreateAsync("timeline-visualization", users, leaveRequests?.Items, now.AddDays(-14), now.AddDays(14));
     }
 
     public record class LeaveRequestShortInfo(

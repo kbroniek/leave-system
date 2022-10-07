@@ -16,9 +16,13 @@ public class TimelineComponent
         this.jSRuntime = Guard.Against.Nill(jSRuntime);
     }
 
-    public async Task CreateAsync(string? container, IEnumerable<FederatedUser>? users, IEnumerable<LeaveRequestShortInfo>? leaveRequests)
+    public async Task CreateAsync(string? container,
+        IEnumerable<FederatedUser>? users,
+        IEnumerable<LeaveRequestShortInfo>? leaveRequests,
+        DateTimeOffset minDate,
+        DateTimeOffset maxDate)
     {
-        await jSRuntime.InvokeVoidAsync("TimelineWrapper.create", container, users, leaveRequests);
+        await jSRuntime.InvokeVoidAsync("TimelineWrapper.create", container, users, leaveRequests, minDate, maxDate);
     }
 }
 
