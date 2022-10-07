@@ -93,6 +93,15 @@ If you have issues try to install:
     </PackageReference>
 ```
 
+### Recreate database
+
+Run:
+
+```
+cd "C:\Program Files\pgAdmin 4\v5\runtime"
+echo '\x \\ DROP DATABASE "leave-system"; CREATE DATABASE "leave-system";' | .\psql.exe -U postgres
+```
+
 ## Mapster tool
 
 To generate new mapping I use Mapster. 
