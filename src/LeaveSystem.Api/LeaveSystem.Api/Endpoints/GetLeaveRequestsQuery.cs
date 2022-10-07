@@ -1,20 +1,23 @@
 ﻿using LeaveSystem.EventSourcing.LeaveRequests;
+using System;
 
 namespace LeaveSystem.Api.Endpoints;
 
 public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTimeOffset? DateFrom, DateTimeOffset? DateTo,
     Guid[]? LeaveTypeIds, LeaveRequestStatus[]? Statuses, string[]? CreatedByEmails)
 {
-    public static ValueTask<GetLeaveRequestsQuery?> BindAsync(HttpContext context)
-        => ValueTask.FromResult<GetLeaveRequestsQuery?>(new(
-            PageNumber: TryParseInt(context.Request.Query, nameof(PageNumber)),
-            PageSize: TryParseInt(context.Request.Query, nameof(PageSize)),
-            DateFrom: TryParseDateTimeOffset(context.Request.Query, nameof(DateFrom)),
-            DateTo: TryParseDateTimeOffset(context.Request.Query, nameof(DateTo)),
-            LeaveTypeIds: TryParseGuids(context.Request.Query, nameof(LeaveTypeIds)),
-            Statuses: TryParseLeaveRequestStatuses(context.Request.Query, nameof(Statuses)),
-            CreatedByEmails: TryParseStrings(context.Request.Query, nameof(CreatedByEmails))
-            ));
+    public static ValueTask<Web.Pages.LeaveRequests.ShowingLeaveRequest.GetLeaveRequestsQuery?> BindAsync(HttpContext context)
+    {
+        return ValueTask.FromResult<Web.Pages.LeaveRequests.ShowingLeaveRequest.GetLeaveRequestsQuery?>(new(
+                   PageNumber: TryParseInt(context.Request.Query, nameof(PageNumber)),
+                   PageSize: TryParseInt(context.Request.Query, nameof(PageSize)),
+                   DateFrom: TryParseDateTimeOffset(context.Request.Query, nameof(DateFrom)),
+                   DateTo: TryParseDateTimeOffset(context.Request.Query, nameof(DateTo)),
+                   LeaveTypeIds: TryParseGuids(context.Request.Query, nameof(LeaveTypeIds)),
+                   Statuses: TryParseLeaveRequestStatuses(context.Request.Query, nameof(Statuses)),
+                   CreatedByEmails: TryParseStrings(context.Request.Query, nameof(CreatedByEmails))
+                   ));
+    }
 
     private static string[]? TryParseStrings(IQueryCollection query, string paramName)
     {
@@ -75,7 +78,7 @@ public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTi
         {
             return !string.IsNullOrEmpty(paramValue) ? int.Parse(paramValue) : null;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw new FormatException($"Cannot parse the {paramName} query parameter to int.", ex);
         }
