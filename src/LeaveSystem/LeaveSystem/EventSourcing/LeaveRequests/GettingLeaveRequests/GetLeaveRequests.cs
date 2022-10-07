@@ -38,8 +38,8 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
         var now = DateTimeOffset.UtcNow;
         var pageNumberOrDefault = pageNumber ?? 1;
         var pageSizeOrDefault = pageSize ?? 20;
-        var dateFromOrDefault = dateFrom ?? now.Add(TimeSpan.FromDays(-7));
-        var dateToOrDefault = dateTo ?? now.Add(TimeSpan.FromDays(7));
+        var dateFromOrDefault = dateFrom ?? now.Add(TimeSpan.FromDays(-14));
+        var dateToOrDefault = dateTo ?? now.Add(TimeSpan.FromDays(14));
         Guard.Against.NegativeOrZero(pageNumberOrDefault, nameof(pageNumber));
         Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), 1, 100);
         return new(

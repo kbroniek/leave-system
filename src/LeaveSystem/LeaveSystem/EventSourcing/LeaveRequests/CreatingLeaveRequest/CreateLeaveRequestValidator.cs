@@ -42,7 +42,7 @@ public class CreateLeaveRequestValidator
     public virtual async Task ImpositionValidator(LeaveRequestCreated creatingLeaveRequest)
     {
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
-            .Where(x => x.CreatedBy.Email == creatingLeaveRequest.CreatedBy.Email && (
+            .Where(x => x.CreatedBy.Email == creatingLeaveRequest.CreatedBy.Email && ((
                     x.DateFrom >= creatingLeaveRequest.DateTo &&
                     x.DateTo <= creatingLeaveRequest.DateTo
                 ) || (
@@ -54,7 +54,7 @@ public class CreateLeaveRequestValidator
                 ) || (
                     x.DateFrom <= creatingLeaveRequest.DateFrom &&
                     x.DateTo >= creatingLeaveRequest.DateTo
-                ))
+                )))
             .ToListAsync();
 
         foreach (var @event in leaveRequestCreatedEvents)
@@ -171,7 +171,7 @@ public class CreateLeaveRequestValidator
                         l.LeaveTypeId == leaveTypeId));
         if (limits == null || limits.Count == 0)
         {
-            throw new ValidationException($"Cannot find limits for the leave type id: {leaveTypeId}. User {userEmail}.");
+            throw new ValidationException($"Cannot find limits for the leave type id: {leaveTypeId}. Add limits for the user {userEmail}.");
         }
         if (limits.Count > 1)
         {
