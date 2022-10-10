@@ -45,7 +45,7 @@ else
 <div id="timeline-visualization"></div>
 
 @code {
-    private GetLeaveRequestsQuery leaveRequestsQuery = new();
+    private GetLeaveRequestsQuery leaveRequestsQuery = GetLeaveRequestsQuery.GetDefault();
     private EditContext? editContext;
     private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
     private FederatedUser[]? users = null;
@@ -64,7 +64,7 @@ else
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         users = leaveRequests?.Items?.Where(l => l.CreatedBy != null).Select(l => l.CreatedBy!.Value).Distinct().OrderBy(u => u.Email).ToArray();
-        await Timeline.CreateAsync("timeline-visualization", users, leaveRequests?.Items, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
+        await Timeline.CreateAsync("timeline-visualization", users, leaveRequests?.Items, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo.AddDays(1));
     }
     private async Task HandleFilter()
     {

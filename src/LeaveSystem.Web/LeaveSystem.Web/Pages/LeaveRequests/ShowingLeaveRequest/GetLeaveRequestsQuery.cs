@@ -1,11 +1,10 @@
 ﻿using LeaveSystem.EventSourcing.LeaveRequests;
+using LeaveSystem.Shared;
 
 namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest;
 
 public class GetLeaveRequestsQuery
 {
-    public static readonly GetLeaveRequestsQuery Default = GetDefault();
-
     public GetLeaveRequestsQuery(DateTimeOffset dateFrom, DateTimeOffset dateTo, int pageNumber, int pageSize, LeaveRequestStatus[] statuses)
     {
         DateFrom = dateFrom;
@@ -22,9 +21,9 @@ public class GetLeaveRequestsQuery
     public int PageSize { get; set; }
     public LeaveRequestStatus[] Statuses { get; set; }
     public string[]? CreatedByEmails { get; set; }
-    private static GetLeaveRequestsQuery GetDefault()
+    public static GetLeaveRequestsQuery GetDefault()
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
         return new GetLeaveRequestsQuery
         (
             dateFrom: now.AddDays(-14),
