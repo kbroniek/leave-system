@@ -39,32 +39,6 @@ else
                 <InputDate @bind-Value="leaveRequestsQuery.DateTo" />
             </label>
         </p>
-        <p>
-            <label>
-                Hours:
-                @*<InputText @bind-Value="leaveRequest.Hours" />*@
-                <InputText type="time" @bind-Value="TimeProxy" />
-            </label>
-        </p>
-        <p>
-            <label>
-                Leave type:
-                <InputSelect @bind-Value="leaveRequest.LeaveTypeId" >
-                    <option value="">Select leave type ...</option>
-                    @foreach (var leaveType in leaveTypes)
-                    {
-                        <option value="@leaveType.Id">@leaveType.Name</option>
-                    }
-                </InputSelect>
-            </label>
-        </p>
-        <p>
-            <label>
-                Remarks (optional):
-                <InputTextArea @bind-Value="leaveRequest.Remarks" />
-            </label>
-        </p>
-
         <button type="submit">Submit</button>
     </EditForm>
 }

@@ -6,9 +6,9 @@ namespace LeaveSystem.Api.Endpoints;
 public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTimeOffset? DateFrom, DateTimeOffset? DateTo,
     Guid[]? LeaveTypeIds, LeaveRequestStatus[]? Statuses, string[]? CreatedByEmails)
 {
-    public static ValueTask<Web.Pages.LeaveRequests.ShowingLeaveRequest.GetLeaveRequestsQuery?> BindAsync(HttpContext context)
+    public static ValueTask<GetLeaveRequestsQuery?> BindAsync(HttpContext context)
     {
-        return ValueTask.FromResult<Web.Pages.LeaveRequests.ShowingLeaveRequest.GetLeaveRequestsQuery?>(new(
+        return ValueTask.FromResult<GetLeaveRequestsQuery?>(new(
                    PageNumber: TryParseInt(context.Request.Query, nameof(PageNumber)),
                    PageSize: TryParseInt(context.Request.Query, nameof(PageSize)),
                    DateFrom: TryParseDateTimeOffset(context.Request.Query, nameof(DateFrom)),
