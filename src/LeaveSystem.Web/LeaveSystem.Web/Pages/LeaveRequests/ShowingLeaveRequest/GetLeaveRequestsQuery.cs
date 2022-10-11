@@ -5,7 +5,7 @@ namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest;
 
 public class GetLeaveRequestsQuery
 {
-    public GetLeaveRequestsQuery(DateTimeOffset dateFrom, DateTimeOffset dateTo, int pageNumber, int pageSize, LeaveRequestStatus[] statuses)
+    public GetLeaveRequestsQuery(DateTimeOffset dateFrom, DateTimeOffset dateTo, int pageNumber, int pageSize, IEnumerable<LeaveRequestStatus> statuses)
     {
         DateFrom = dateFrom;
         DateTo = dateTo;
@@ -19,7 +19,7 @@ public class GetLeaveRequestsQuery
     public IEnumerable<Guid> LeaveTypeIds { get; set; } = Enumerable.Empty<Guid>();
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
-    public LeaveRequestStatus[] Statuses { get; set; }
+    public IEnumerable<LeaveRequestStatus> Statuses { get; set; }
     public string[]? CreatedByEmails { get; set; }
     public static GetLeaveRequestsQuery GetDefault()
     {

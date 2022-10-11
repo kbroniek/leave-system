@@ -27,29 +27,41 @@ else
         <FluentValidationValidator />
         <ValidationSummary />
 
-        <RadzenCard>
-            <p>
-                <label>
-                    Date from:
-                    <InputDate @bind-Value="leaveRequestsQuery.DateFrom" />
-                </label>
-            </p>
-            <p>
-                <label>
-                    Date from:
-                    <InputDate @bind-Value="leaveRequestsQuery.DateTo" />
-                </label>
-            </p>
-            <button type="submit">Submit</button>
-            <RadzenButton  type="submit" Text="Hi"></RadzenButton>
-            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Choose leave types</RadzenText>
-            <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+        <RadzenCard class="mb-3 row">
+            <div class="col-md-6">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Date from:</RadzenText>
+                <RadzenDatePicker @bind-Value=@leaveRequestsQuery.DateFrom DateFormat="d" Class="w-100" />
+            </div>
+            <div class="col-md-6">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Date to:</RadzenText>
+                <RadzenDatePicker @bind-Value=@leaveRequestsQuery.DateTo DateFormat="d" Class="w-100" />
+            </div>
+            <div class="col-md-12">
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" Class="mb-0">Advanced filtering</RadzenText>
+                <RadzenSwitch @bind-Value=@advancedFilteringEnabled Class="mb-3" />
+            </div>
+            @if (advancedFilteringEnabled)
+            {
+                <div class="col-md-6">
+                    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Choose leave types</RadzenText>
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                             @bind-Value=@leaveRequestsQuery.LeaveTypeIds Multiple="true" Placeholder="Select..." Data=@leaveTypes TextProperty="Name" ValueProperty="Id"
                             Class="w-100" />
+                </div>
+                <div class="col-md-6">
+                    <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Choose leave statuses</RadzenText>
+                    <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            @bind-Value=@leaveRequestsQuery.Statuses Multiple="true" Placeholder="Select..." Data=@leaveRequestStatuses
+                            TextProperty="Value" ValueProperty="Key" Class="w-100" />
+                </div>
+            }
+            <RadzenButton  type="submit" Text="Filter"></RadzenButton>
         </RadzenCard>
     </EditForm>
 }
+
 <div id="timeline-visualization"></div>
+
 
 @code {
     private GetLeaveRequestsQuery leaveRequestsQuery = GetLeaveRequestsQuery.GetDefault();
@@ -57,7 +69,9 @@ else
     private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
     private FederatedUser[]? users = null;
     private IEnumerable<LeaveTypeService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypeService.LeaveTypeDto>();
-    private IEnumerable<Guid> choosedLeaveTypeIds = Enumerable.Empty<Guid>();
+    private IEnumerable<KeyValuePair<LeaveRequestStatus, string>> leaveRequestStatuses = Enum.GetValues<LeaveRequestStatus>()
+        .Select(s => new KeyValuePair<LeaveRequestStatus, string>(s, s.ToString()));
+    private bool advancedFilteringEnabled;
 
     protected override async Task OnInitializedAsync()
     {
