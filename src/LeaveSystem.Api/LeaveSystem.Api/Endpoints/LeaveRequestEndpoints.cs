@@ -1,6 +1,5 @@
 ﻿using GoldenEye.Commands;
 using GoldenEye.Queries;
-using LeaveSystem.Api.Responses;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.CancellingLeaveRequest;

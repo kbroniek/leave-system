@@ -75,7 +75,7 @@ public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTi
         {
             return !string.IsNullOrEmpty(paramValue) ? int.Parse(paramValue) : null;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw new FormatException($"Cannot parse the {paramName} query parameter to int.", ex);
         }

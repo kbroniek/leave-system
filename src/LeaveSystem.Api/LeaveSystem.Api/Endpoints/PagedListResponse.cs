@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using Marten.Pagination;
 using Newtonsoft.Json;
 
-namespace LeaveSystem.Api.Responses;
+namespace LeaveSystem.Api.Endpoints;
 
 public class PagedListResponse<T>
 {

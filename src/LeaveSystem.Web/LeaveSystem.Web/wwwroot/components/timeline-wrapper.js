@@ -1,12 +1,14 @@
-﻿window.TimelineWrapper = {
+﻿let timeline;
+window.TimelineWrapper = {
     create: function (componentName, users, leaveRequests, minDate, maxDate) {
         // DOM element where the Timeline will be attached
-        var container = document.getElementById(componentName ? componentName : 'timeline-visualization');
-        console.log("----- users", users)
-        console.log("----- leaveRequests", leaveRequests)
+        if (timeline) {
+            timeline.destroy();
+        }
+        const container = document.getElementById(componentName ? componentName : 'timeline-visualization');
 
-        var groups = new vis.DataSet(users.map((u) => ({ id: u.email, content: u.name })));
-        var items = new vis.DataSet();
+        const groups = new vis.DataSet(users.map((u) => ({ id: u.email, content: u.name })));
+        const items = new vis.DataSet();
         leaveRequests.forEach(lr => {
             items.add({
                 id: lr.id,
@@ -17,7 +19,7 @@
             });
         });
 
-        var options = {
+        const options = {
             stack: false,
             editable: false,
             margin: {

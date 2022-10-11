@@ -60,7 +60,7 @@ public class CreateLeaveRequestValidator
         foreach (var @event in leaveRequestCreatedEvents)
         {
             var leaveRequestFromDb = await documentSession.Events.AggregateStreamAsync<LeaveRequest>(@event.StreamId);
-            if ((leaveRequestFromDb?.Status & LeaveRequestStatus.Valid) > 0)
+            if (leaveRequestFromDb?.Status.IsValid() == true)
             {
                 throw new ValidationException("Cannot create a new leave request in this time. The other leave is overlapping with this date.");
             }
@@ -150,7 +150,7 @@ public class CreateLeaveRequestValidator
         foreach (var @event in leaveRequestCreatedEvents)
         {
             var leaveRequestFromDb = await documentSession.Events.AggregateStreamAsync<LeaveRequest>(@event.StreamId);
-            if (leaveRequestFromDb != null && (leaveRequestFromDb.Status & LeaveRequestStatus.Valid) > 0)
+            if (leaveRequestFromDb?.Status.IsValid() == true)
             {
                 usedLimits += leaveRequestFromDb.Duration;
             }
