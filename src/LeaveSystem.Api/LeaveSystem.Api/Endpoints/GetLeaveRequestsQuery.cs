@@ -1,5 +1,4 @@
 ﻿using LeaveSystem.EventSourcing.LeaveRequests;
-using System;
 
 namespace LeaveSystem.Api.Endpoints;
 
@@ -7,17 +6,15 @@ public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTi
     Guid[]? LeaveTypeIds, LeaveRequestStatus[]? Statuses, string[]? CreatedByEmails)
 {
     public static ValueTask<GetLeaveRequestsQuery?> BindAsync(HttpContext context)
-    {
-        return ValueTask.FromResult<GetLeaveRequestsQuery?>(new(
-                   PageNumber: TryParseInt(context.Request.Query, nameof(PageNumber)),
-                   PageSize: TryParseInt(context.Request.Query, nameof(PageSize)),
-                   DateFrom: TryParseDateTimeOffset(context.Request.Query, nameof(DateFrom)),
-                   DateTo: TryParseDateTimeOffset(context.Request.Query, nameof(DateTo)),
-                   LeaveTypeIds: TryParseGuids(context.Request.Query, nameof(LeaveTypeIds)),
-                   Statuses: TryParseLeaveRequestStatuses(context.Request.Query, nameof(Statuses)),
-                   CreatedByEmails: TryParseStrings(context.Request.Query, nameof(CreatedByEmails))
-                   ));
-    }
+        => ValueTask.FromResult<GetLeaveRequestsQuery?>(new(
+            PageNumber: TryParseInt(context.Request.Query, nameof(PageNumber)),
+            PageSize: TryParseInt(context.Request.Query, nameof(PageSize)),
+            DateFrom: TryParseDateTimeOffset(context.Request.Query, nameof(DateFrom)),
+            DateTo: TryParseDateTimeOffset(context.Request.Query, nameof(DateTo)),
+            LeaveTypeIds: TryParseGuids(context.Request.Query, nameof(LeaveTypeIds)),
+            Statuses: TryParseLeaveRequestStatuses(context.Request.Query, nameof(Statuses)),
+            CreatedByEmails: TryParseStrings(context.Request.Query, nameof(CreatedByEmails))
+            ));
 
     private static string[]? TryParseStrings(IQueryCollection query, string paramName)
     {

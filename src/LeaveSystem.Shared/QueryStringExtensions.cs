@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
 using System.Collections;
 using System.Globalization;
-using System.Reflection;
 
 public static class QueryStringExtensions
 {
