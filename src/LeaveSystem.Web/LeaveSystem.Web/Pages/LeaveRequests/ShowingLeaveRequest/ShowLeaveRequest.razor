@@ -27,19 +27,26 @@ else
         <FluentValidationValidator />
         <ValidationSummary />
 
-        <p>
-            <label>
-                Date from:
-                <InputDate @bind-Value="leaveRequestsQuery.DateFrom" />
-            </label>
-        </p>
-        <p>
-            <label>
-                Date from:
-                <InputDate @bind-Value="leaveRequestsQuery.DateTo" />
-            </label>
-        </p>
-        <button type="submit">Submit</button>
+        <RadzenCard>
+            <p>
+                <label>
+                    Date from:
+                    <InputDate @bind-Value="leaveRequestsQuery.DateFrom" />
+                </label>
+            </p>
+            <p>
+                <label>
+                    Date from:
+                    <InputDate @bind-Value="leaveRequestsQuery.DateTo" />
+                </label>
+            </p>
+            <button type="submit">Submit</button>
+            <RadzenButton  type="submit" Text="Hi"></RadzenButton>
+            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Choose leave types</RadzenText>
+            <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            @bind-Value=@leaveRequestsQuery.LeaveTypeIds Multiple="true" Placeholder="Select..." Data=@leaveTypes TextProperty="Name" ValueProperty="Id"
+                            Class="w-100" />
+        </RadzenCard>
     </EditForm>
 }
 <div id="timeline-visualization"></div>
@@ -50,15 +57,17 @@ else
     private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
     private FederatedUser[]? users = null;
     private IEnumerable<LeaveTypeService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypeService.LeaveTypeDto>();
+    private IEnumerable<Guid> choosedLeaveTypeIds = Enumerable.Empty<Guid>();
 
     protected override async Task OnInitializedAsync()
     {
-        await GetLeaveRequests();
+        await GetData();
         editContext = new(leaveRequestsQuery);
     }
-    private async Task GetLeaveRequests()
+    private async Task GetData()
     {
-        var getLeaveRequestsTask = Http.GetFromJsonAsync<PagedListResponse<LeaveRequestShortInfo>>("api/leaveRequests", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var uri = leaveRequestsQuery.CreateQueryString("api/leaveRequests");
+        var getLeaveRequestsTask = Http.GetFromJsonAsync<PagedListResponse<LeaveRequestShortInfo>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         var getLeaveTypesTask = LeaveTypeService.GetLeaveTypes();
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask);
         leaveRequests = getLeaveRequestsTask.Result;
@@ -73,7 +82,7 @@ else
             Logger.LogInformation("[HandleSubmit]: Form is valid");
             try
             {
-                await GetLeaveRequests();
+                await GetData();
             }
             catch (AccessTokenNotAvailableException exception)
             {

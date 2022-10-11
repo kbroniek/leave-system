@@ -16,7 +16,7 @@ public class GetLeaveRequestsQuery
 
     public DateTimeOffset DateFrom { get; set; }
     public DateTimeOffset DateTo { get; set; }
-    public Guid[]? LeaveTypeIds { get; set; }
+    public IEnumerable<Guid> LeaveTypeIds { get; set; } = Enumerable.Empty<Guid>();
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
     public LeaveRequestStatus[] Statuses { get; set; }
@@ -28,7 +28,7 @@ public class GetLeaveRequestsQuery
         (
             dateFrom: now.AddDays(-14),
             dateTo: now.AddDays(14),
-            pageNumber: 0,
+            pageNumber: 1,
             pageSize: 100,
             statuses: new[] { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending }
         );
