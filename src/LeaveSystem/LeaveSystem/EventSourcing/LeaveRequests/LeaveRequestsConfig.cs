@@ -5,7 +5,6 @@ using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
-using LeaveSystem.EventSourcing.UserLeaveSummary.GettingUserLeaveSummary;
 using Marten;
 using Marten.Pagination;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,8 +28,7 @@ internal static class LeaveRequestsConfig
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
-            .AddQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>, HandleGetLeaveRequest>()
-            .AddQueryHandler<GetUserLeaveSummary, UserLeaveSummaryInfo, HandleGetUserLeaveSummary>();
+            .AddQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>, HandleGetLeaveRequest>();
 
     private static IServiceCollection AddValidators(this IServiceCollection services) =>
         services
