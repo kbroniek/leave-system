@@ -1,4 +1,4 @@
-﻿using LeaveSystem.Db;
+﻿using LeaveSystem.Shared;
 using System.Globalization;
 
 namespace LeaveSystem.Services;
@@ -44,9 +44,15 @@ public class WorkingHoursService
     public virtual DayKind getDayKind(DateTimeOffset date)
     {
         if (isPolishHoliday(date))
+        {
             return DayKind.HOLIDAY;
+        }
+
         if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+        {
             return DayKind.WEEKEND;
+        }
+
         return DayKind.WORKING;
     }
 

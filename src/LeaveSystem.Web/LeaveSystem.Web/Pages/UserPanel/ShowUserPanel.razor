@@ -1,0 +1,34 @@
+﻿@page "/user-panel"
+@using LeaveSystem.EventSourcing.LeaveRequests
+@using LeaveSystem.Shared
+@using LeaveSystem.Web.Pages.UserLeaveLimits
+@using Microsoft.AspNetCore.Authorization
+@using LeaveSystem.Web.Pages.LeaveTypes
+@using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize]
+@inject HttpClient Http
+@inject LeaveTypesService LeaveTypesService
+@inject GetLeaveRequestsService GetLeaveRequestsService
+@inject UserLeaveLimitsService UserLeaveLimitsService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>User panel</PageTitle>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User.CreateModel();
+        var now = DateTimeOffset.UtcNow;
+        var query = new GetLeaveRequestsQuery(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), 1, 100, Enum.GetValues<LeaveRequestStatus>())
+        {
+            CreatedByEmails = new[] { user.Email }
+        };
+        var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
+        var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
+        var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Email);
+        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
+    }
+}

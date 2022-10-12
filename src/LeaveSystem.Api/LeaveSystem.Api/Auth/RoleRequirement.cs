@@ -1,5 +1,6 @@
 ﻿using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 

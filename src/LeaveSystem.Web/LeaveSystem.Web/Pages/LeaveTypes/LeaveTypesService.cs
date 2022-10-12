@@ -1,12 +1,12 @@
 ﻿using System.Net.Http.Json;
 
-namespace LeaveSystem.Web.Services;
+namespace LeaveSystem.Web.Pages.LeaveTypes;
 
-public class LeaveTypeService
+public class LeaveTypesService
 {
     private readonly HttpClient httpClient;
 
-    public LeaveTypeService(HttpClient httpClient)
+    public LeaveTypesService(HttpClient httpClient)
     {
         this.httpClient = httpClient;
     }

@@ -1,6 +1,5 @@
 ﻿using Ardalis.GuardClauses;
 using GoldenEye.Events;
-using LeaveSystem.Db;
 using LeaveSystem.Shared;
 using Newtonsoft.Json;
 

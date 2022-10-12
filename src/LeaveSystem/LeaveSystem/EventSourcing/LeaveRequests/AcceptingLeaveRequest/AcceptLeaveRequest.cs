@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using GoldenEye.Commands;
 using GoldenEye.Repositories;
-using LeaveSystem.Db;
 using LeaveSystem.Shared;
 using MediatR;
 
