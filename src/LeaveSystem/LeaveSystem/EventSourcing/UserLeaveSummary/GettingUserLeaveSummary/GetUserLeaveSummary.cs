@@ -1,22 +1,30 @@
-﻿using GoldenEye.Queries;
+﻿using Ardalis.GuardClauses;
+using GoldenEye.Queries;
 using LeaveSystem.Db;
-using Marten;
+using LeaveSystem.EventSourcing.LeaveRequests;
+using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
+using LeaveSystem.Shared;
+using Marten.Pagination;
 
 namespace LeaveSystem.EventSourcing.UserLeaveSummary.GettingUserLeaveSummary;
 
 public class GetUserLeaveSummary : IQuery<UserLeaveSummaryInfo>
 {
     public FederatedUser RequestedBy { get; }
-    public int Year { get; }
-    private GetUserLeaveSummary(FederatedUser requestedBy, int year)
+    public DateTimeOffset DateFrom { get; }
+    public DateTimeOffset DateTo { get; }
+    private GetUserLeaveSummary(FederatedUser requestedBy, DateTimeOffset dateFrom, DateTimeOffset dateTo)
     {
         RequestedBy = requestedBy;
-        Year = year;
+        DateFrom = dateFrom;
+        DateTo = dateTo;
     }
 
-    public static GetUserLeaveSummary Create(FederatedUser requestedBy, int? year)
+    public static GetUserLeaveSummary Create(FederatedUser requestedBy, DateTimeOffset? dateFrom, DateTimeOffset? dateTo)
     {
-        return new GetUserLeaveSummary(requestedBy, year ?? DateTimeOffset.Now.Year);
+        var now = new Lazy<DateTimeOffset>(() => DateTimeOffset.Now);
+        Guard.Against.Nill(requestedBy.Email);
+        return new GetUserLeaveSummary(requestedBy, dateFrom ?? now.Value.GetFirstDayOfYear(), dateTo ?? now.Value.GetLastDayOfYear());
     }
 }
 
@@ -24,17 +32,26 @@ public class GetUserLeaveSummary : IQuery<UserLeaveSummaryInfo>
 internal class HandleGetUserLeaveSummary :
     IQueryHandler<GetUserLeaveSummary, UserLeaveSummaryInfo>
 {
-    private readonly IDocumentSession querySession;
+    private readonly IQueryBus queryBus;
     private readonly LeaveSystemDbContext dbContext;
 
-    public HandleGetUserLeaveSummary(IDocumentSession querySession, LeaveSystemDbContext dbContext)
+    public HandleGetUserLeaveSummary(IQueryBus queryBus, LeaveSystemDbContext dbContext)
     {
-        this.querySession = querySession;
+        this.queryBus = queryBus;
         this.dbContext = dbContext;
     }
 
-    public Task<UserLeaveSummaryInfo> Handle(GetUserLeaveSummary request, CancellationToken cancellationToken)
+    public async Task<UserLeaveSummaryInfo> Handle(GetUserLeaveSummary request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(
+            1,
+            1000,
+            request.DateFrom,
+            request.DateTo,
+            null,
+            Enum.GetValues<LeaveRequestStatus>(),
+            new[] { request.RequestedBy }
+            ), cancellationToken);
+
     }
 }

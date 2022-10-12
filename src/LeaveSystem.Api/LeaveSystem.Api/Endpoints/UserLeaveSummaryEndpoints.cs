@@ -9,14 +9,15 @@ public static class UserLeaveSummaryEndpoints
         public const string GetUserLeaveSummary = "GetUserLeaveSummary";
         public static void AddUserLeaveSummaryEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
         {
-            endpoint.MapGet("api/userLeaveSummary/{year}", async (HttpContext httpContext, IQueryBus queryBus, int? year, CancellationToken cancellationToken) =>
+            endpoint.MapGet("api/userLeaveSummary", async (HttpContext httpContext, IQueryBus queryBus, UserLeaveSummaryQuery query, CancellationToken cancellationToken) =>
             {
                 httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
                 var result = await queryBus.Send<GetUserLeaveSummary, UserLeaveSummaryInfo>(
                     EventSourcing.UserLeaveSummary.GettingUserLeaveSummary.GetUserLeaveSummary.Create(
                         requestedBy: httpContext.User.CreateModel(),
-                        year: year
+                        dateFrom: query.DateFrom,
+                        dateTo: query.DateTo
                     ), cancellationToken);
 
                 return Results.Ok(result);
