@@ -22,6 +22,8 @@ public static class LeaveRequestEndpoints
     {
         endpoint.MapGet("api/leaveRequests", async (HttpContext httpContext, IQueryBus queryBus, GetLeaveRequestsQuery query, CancellationToken cancellationToken) =>
         {
+            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+
             var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(
                 query.PageNumber,
                 query.PageSize,
@@ -87,7 +89,8 @@ public static class LeaveRequestEndpoints
         .WithName(RejectLeaveRequestName)
         .RequireAuthorization(RejectLeaveRequestName);
 
-        endpoint.MapDelete("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, [FromBody] CancelLeaveRequestDto cancelLeaveRequest, CancellationToken cancellationToken) =>        {
+        endpoint.MapDelete("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, [FromBody] CancelLeaveRequestDto cancelLeaveRequest, CancellationToken cancellationToken) =>
+        {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
             var command = EventSourcing.LeaveRequests.CancelingLeaveRequest.CancelLeaveRequest.Create(
