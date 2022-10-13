@@ -6,6 +6,7 @@
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest
 @using Microsoft.AspNetCore.Components.Authorization
+@using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService
 @attribute [Authorize]
 @inject HttpClient Http
 @inject LeaveTypesService LeaveTypesService
@@ -15,7 +16,67 @@
 
 <PageTitle>User panel</PageTitle>
 
+@if (userSummaryCollection == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="container">
+        <div class="row py-5">
+            <div class="col">
+                <RadzenCard>
+                    <RadzenDataList WrapItems="true" AllowPaging="true" Data="@userSummaryCollection" TItem="UserSummary" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
+                        <Template Context="summary">
+                            <RadzenCard Style="width: 100%; padding: 0; overflow: hidden;">
+                                <div class="container">
+                                    <div class="row" style="margin-left: calc(var(--bs-gutter-x) * -1); margin-right: calc(var(--bs-gutter-x) * -1)">
+                                        <div class="col-lg-3 p-3 product-title">
+                                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-color-secondary">@(summary.Name)</RadzenText>
+                                        </div>
+                                        <div class="col-lg-7 p-3">
+                                            <div class="row d-flex">
+                                                <div class="col-md-6 order-first order-lg-last col-lg-3 text-sm-start text-lg-end mb-3 mb-lg-0">
+                                                    <RadzenBadge BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" Class="price-badge" Text=@(summary.Value) />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-7 p-3">
+                                            <div class="row d-flex">
+                                                <div class="col-md-6 col-lg-2">
+                                                    <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.Description)</RadzenText>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </RadzenCard>
+                        </Template>
+                    </RadzenDataList>
+                </RadzenCard>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .product-title {
+        min-height: 72px;
+        background-color: var(--rz-secondary-lighter);
+    }
+    .price-badge {
+        font-size: 16px;
+        font-weight: bold;
+        line-height: 20px;
+        padding: 8px;
+    }
+    </style>
+}
+
 @code {
+    private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
+    private IEnumerable<LeaveTypesService.LeaveTypeDto>? leaveTypes;
+    private IEnumerable<UserLeaveLimitDto>? limits;
+    private IEnumerable<UserSummary>? userSummaryCollection;
 
     protected override async Task OnInitializedAsync()
     {
@@ -30,5 +91,11 @@
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
         var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Email);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
+        leaveRequests = getLeaveRequestsTask.Result;
+        leaveTypes = getLeaveTypesTask.Result;
+        limits = getLimitsTask.Result;
+        userSummaryCollection = leaveTypes.Select(lt => new UserSummary(lt.Name, "3d", "Wybrano"));
     }
+
+    private record class UserSummary(string Name, string Value, string? Description);
 }
