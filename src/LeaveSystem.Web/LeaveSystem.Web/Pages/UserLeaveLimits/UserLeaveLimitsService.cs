@@ -16,7 +16,7 @@ public class UserLeaveLimitsService
     public async Task<IEnumerable<UserLeaveLimitDto>> GetLimits(string userEmail)
     {
         // TODO: FIX. Returns only data for one user.
-        var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<UserLeaveLimitDto>>>($"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId&?$filter=AssignedToUserEmail eq '{userEmail}'", new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<UserLeaveLimitDto>>>($"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserEmail eq '{userEmail}'", new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
             Converters =
             {
@@ -27,7 +27,9 @@ public class UserLeaveLimitsService
     }
 
 
-    public record class UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId);
+    public record class UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property);
+
+    public record class UserLeaveLimitPropertyDto(string? Description);
 
     private class TimeSpanToStringConverter : JsonConverter<TimeSpan>
     {
