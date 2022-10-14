@@ -138,3 +138,12 @@ az login -t leavesystem.onmicrosoft.com --allow-no-subscriptions
 ```
 az account get-access-token --resource api://4f24b978-403f-47fe-9cae-52deea03661d
 ```
+
+## Hot reload BLAZOR
+
+If you want to hot reload blazor app you have to run LeaveSystem.App and then run the command:
+
+```
+cd LeaveSystem.Web/LeaveSystem.Web
+dotnet watch run
+```
