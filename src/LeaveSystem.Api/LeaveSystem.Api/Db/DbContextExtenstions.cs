@@ -13,7 +13,7 @@ public static class DbContextExtenstions
 {
     private class DbContextExtenstionsLogger { }
     private const string DefaultUserEmail = "karolbr5@gmail.com";
-    private static readonly FederatedUser defaultUser = new FederatedUser(DefaultUserEmail, "Karol Broniek");
+    private static readonly FederatedUser defaultUser = new FederatedUser(DefaultUserEmail, "Karol Volt");
     private static readonly FederatedUser[] testUsers = new[]
     {
         new FederatedUser("jkowalski@test.com", "Jan Kowalski"),
@@ -23,12 +23,12 @@ public static class DbContextExtenstions
         new FederatedUser("ourbanek@test.com", "Olgierd Urbanek"),
         defaultUser
     };
-    private static LeaveType holiday = new LeaveType
+    private static LeaveType holidayLeave = new LeaveType
     {
         Id = Guid.NewGuid(),
         Name = "urlop wypoczynkowy",
         Order = 1,
-        Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = TimeSpan.FromDays(26), IncludeFreeDays = false, Color = "blue" }
+        Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = TimeSpan.FromHours(8) * 26, IncludeFreeDays = false, Color = "blue" }
     };
     private static LeaveType sickLeave = new LeaveType
     {
@@ -36,6 +36,13 @@ public static class DbContextExtenstions
         Name = "niezdolność do pracy z powodu choroby",
         Order = 3,
         Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+    };
+    private static LeaveType saturdayLeave = new LeaveType
+    {
+        Id = Guid.NewGuid(),
+        Name = "urlop za sobotę",
+        Order = 14,
+        Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = TimeSpan.FromHours(8), IncludeFreeDays = false, Color = "red" }
     };
     public static void MigrateDb(this IApplicationBuilder app)
     {
@@ -103,6 +110,13 @@ public static class DbContextExtenstions
         await SetupUser2(commandBus, defaultUser, testUsers[2]);
         await SetupUser3(commandBus, defaultUser, testUsers[3]);
         await SetupUser4(commandBus, defaultUser, testUsers[4]);
+        await SetupUser0(commandBus, defaultUser, defaultUser);
+
+        var now = DateTimeOffset.UtcNow;
+        await AddSaturdayLeaveRequest(commandBus, testUsers[0], now, 6);
+        await AddSaturdayLeaveRequest(commandBus, testUsers[1], now, 12);
+        await AddSaturdayLeaveRequest(commandBus, defaultUser, now, 6);
+        await AddSaturdayLeaveRequest(commandBus, defaultUser, now, 12);
     }
 
     private static async Task SetupUser4(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
@@ -137,7 +151,7 @@ public static class DbContextExtenstions
         var start = GetFirstWorkingDay(now);
         var end = start;
 
-        var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
@@ -147,22 +161,22 @@ public static class DbContextExtenstions
         var start = GetFirstWorkingDay(now.AddDays(-5));
         var end = GetFirstWorkingDay(now.AddDays(2));
 
-        var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
         start = GetFirstWorkingDay(now.AddDays(8));
         end = start;
-        leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await RejectLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
         start = GetFirstWorkingDay(now.AddDays(10));
         end = start;
-        leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await CancelLeaveRequest(commandBus, leaveRequestId, testUser);
 
         start = GetFirstWorkingDay(now.AddDays(8));
         end = GetFirstWorkingDay(now.AddDays(10));
-        await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
 
         start = now.AddDays(14);
         end = now.AddDays(18);
@@ -176,26 +190,37 @@ public static class DbContextExtenstions
         var start = GetFirstWorkingDay(now);
         var end = GetFirstWorkingDay(now.AddDays(7));
 
-        var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
         start = GetFirstWorkingDay(now.AddDays(-14));
         end = start;
-        leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await RejectLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
         start = GetFirstWorkingDay(now.AddDays(14));
         end = start;
-        leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await CancelLeaveRequest(commandBus, leaveRequestId, testUser);
 
         start = GetFirstWorkingDay(now.AddDays(-15));
         end = GetFirstWorkingDay(now.AddDays(-10));
-        await CreateLeaveRequest(commandBus, start, end, holiday.Id, testUser);
+        await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
 
         start = now.AddDays(8);
         end = now.AddDays(30);
         await CreateLeaveRequest(commandBus, start, end, sickLeave.Id, testUser);
+
+        start = GetFirstWorkingDay(now.AddDays(-7));
+        end = start;
+        await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser, TimeSpan.FromHours(4));
+    }
+
+    private static async Task AddSaturdayLeaveRequest(ICommandBus commandBus, FederatedUser testUser, DateTimeOffset now, int month)
+    {
+        var startDay = GetFirstWorkingDay(new DateTimeOffset(now.Year, month, 10, 0, 0, 0, TimeSpan.Zero));
+        var endDay = startDay;
+        await CreateLeaveRequest(commandBus, startDay, endDay, saturdayLeave.Id, testUser);
     }
 
     private static async Task CancelLeaveRequest(ICommandBus commandBus, Guid leaveRequestId, FederatedUser canceledBy)
@@ -239,14 +264,15 @@ public static class DbContextExtenstions
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,
         Guid leaveTypeId,
-        FederatedUser createdBy)
+        FederatedUser createdBy,
+        TimeSpan? duration = null)
     {
         var leaveRequestId = Guid.NewGuid();
         var command = EventSourcing.LeaveRequests.CreatingLeaveRequest.CreateLeaveRequest.Create(
                     leaveRequestId,
                     dateFrom,
                     dateTo,
-                    null,
+                    duration,
                     leaveTypeId,
                     null,
                     createdBy
@@ -262,18 +288,40 @@ public static class DbContextExtenstions
             return;
         }
         var now = DateTimeOffset.UtcNow;
-        var limits = testUsers.Select(u => new UserLeaveLimit
+        var holidayLimits = testUsers.Select(u => new UserLeaveLimit
         {
-            LeaveTypeId = holiday.Id,
-            Limit = holiday.Properties?.DefaultLimit,
+            LeaveTypeId = holidayLeave.Id,
+            Limit = holidayLeave.Properties?.DefaultLimit,
             AssignedToUserEmail = u.Email,
             ValidSince = now.GetFirstDayOfYear(),
             ValidUntil = now.GetLastDayOfYear(),
         });
-        await dbContext.UserLeaveLimits.AddRangeAsync(limits);
+        await dbContext.UserLeaveLimits.AddRangeAsync(holidayLimits);
+        var saturdayJuneLimits = GetSaturdayLimits(now, 6);
+        await dbContext.UserLeaveLimits.AddRangeAsync(saturdayJuneLimits);
+        var saturdayDecemberLimits = GetSaturdayLimits(now, 12);
+        await dbContext.UserLeaveLimits.AddRangeAsync(saturdayDecemberLimits);
         await dbContext.UserLeaveLimits.AddAsync(new UserLeaveLimit
         {
             LeaveTypeId = sickLeave.Id,
+        });
+    }
+
+    private static IEnumerable<UserLeaveLimit> GetSaturdayLimits(DateTimeOffset now, int month)
+    {
+        var firstDayOfMonth = new DateTimeOffset(now.Year, month, 1, 0, 0, 0, TimeSpan.Zero);
+        var lastDayOfMonth = new DateTimeOffset(now.Year, month, 30, 23, 59, 59, TimeSpan.Zero);
+        return testUsers.Select(u => new UserLeaveLimit
+        {
+            LeaveTypeId = saturdayLeave.Id,
+            Limit = saturdayLeave.Properties?.DefaultLimit,
+            AssignedToUserEmail = u.Email,
+            ValidSince = firstDayOfMonth,
+            ValidUntil = lastDayOfMonth,
+            Property = new UserLeaveLimit.UserLeaveLimitProperties
+            {
+                Description = $"2022-{month}-10"
+            }
         });
     }
 
@@ -292,18 +340,19 @@ public static class DbContextExtenstions
     {
         if (await dbContext.LeaveTypes.AnyAsync())
         {
-            holiday = await dbContext.LeaveTypes.FirstOrDefaultAsync(l => l.Order == 1) ?? holiday;
+            holidayLeave = await dbContext.LeaveTypes.FirstOrDefaultAsync(l => l.Order == 1) ?? holidayLeave;
             sickLeave = await dbContext.LeaveTypes.FirstOrDefaultAsync(l => l.Order == 3) ?? sickLeave;
+            saturdayLeave = await dbContext.LeaveTypes.FirstOrDefaultAsync(l => l.Order == 14) ?? saturdayLeave;
             return;
         }
         var leaveTypes = new[]
         {
-            holiday,
+            holidayLeave,
             new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop na żądanie",
-                BaseLeaveTypeId = holiday.Id,
+                BaseLeaveTypeId = holidayLeave.Id,
                 Order = 2,
                 Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = TimeSpan.FromDays(4), IncludeFreeDays = false, Color = "yellow" }
             },
@@ -378,13 +427,7 @@ public static class DbContextExtenstions
                 Order = 13,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
             },
-                new LeaveType
-            {
-                Id = Guid.NewGuid(),
-                Name = "urlop za sobotę",
-                Order = 14,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "red" }
-            },
+                saturdayLeave,
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
