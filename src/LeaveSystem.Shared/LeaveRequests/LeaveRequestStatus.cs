@@ -1,4 +1,4 @@
-﻿namespace LeaveSystem.EventSourcing.LeaveRequests;
+﻿namespace LeaveSystem.Shared.LeaveRequests;
 
 public enum LeaveRequestStatus
 {

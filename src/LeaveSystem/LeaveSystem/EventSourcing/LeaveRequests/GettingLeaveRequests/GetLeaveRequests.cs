@@ -4,6 +4,7 @@ using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Linq;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;

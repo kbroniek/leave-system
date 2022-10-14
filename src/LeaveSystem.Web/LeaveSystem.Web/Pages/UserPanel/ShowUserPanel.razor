@@ -1,6 +1,6 @@
 ﻿@page "/user-panel"
-@using LeaveSystem.EventSourcing.LeaveRequests
 @using LeaveSystem.Shared
+@using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Web.Pages.UserLeaveLimits
 @using Microsoft.AspNetCore.Authorization
 @using LeaveSystem.Web.Pages.LeaveTypes
@@ -16,6 +16,8 @@
 
 <PageTitle>User panel</PageTitle>
 
+test
+
 @if (userSummaryCollection == null)
 {
     <p><em>Loading...</em></p>
@@ -26,30 +28,62 @@ else
         <div class="row py-5">
             <div class="col">
                 <RadzenCard>
-                    <RadzenDataList WrapItems="true" AllowPaging="true" Data="@userSummaryCollection" TItem="UserSummary" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true">
+                    <RadzenDataList WrapItems="true" Data="@userSummaryCollection" TItem="UserSummary">
                         <Template Context="summary">
                             <RadzenCard Style="width: 100%; padding: 0; overflow: hidden;">
                                 <div class="container">
                                     <div class="row" style="margin-left: calc(var(--bs-gutter-x) * -1); margin-right: calc(var(--bs-gutter-x) * -1)">
                                         <div class="col-lg-3 p-3 product-title">
-                                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-color-secondary">@(summary.Name)</RadzenText>
-                                        </div>
-                                        <div class="col-lg-7 p-3">
-                                            <div class="row d-flex">
-                                                <div class="col-md-6 order-first order-lg-last col-lg-3 text-sm-start text-lg-end mb-3 mb-lg-0">
-                                                    <RadzenBadge BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" Class="price-badge" Text=@(summary.Value) />
-                                                </div>
-                                            </div>
+                                                <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" Class="rz-color-secondary">@(summary.LeaveType)</RadzenText>
                                         </div>
                                         <div class="col-lg-7 p-3">
                                             <div class="row d-flex">
                                                 <div class="col-md-6 col-lg-2">
-                                                    <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.Description)</RadzenText>
+                                                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Used</RadzenText>
+                                                    <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.Used)</RadzenText>
+                                                </div>
+                                                <div class="col-md-6 col-lg-2">
+                                                    @if(summary.Limit != null)
+                                                    {
+                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Limit</RadzenText>
+                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.Limit)</RadzenText>
+                                                    }
+                                                </div>
+                                                <div class="col-md-6 col-lg-5">
+                                                    @if(summary.Left != null)
+                                                    {
+                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Left</RadzenText>
+                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.Left)</RadzenText>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                <RadzenAccordion>
+                                    <Items>
+                                        <RadzenAccordionItem Text="Leave requests list" Icon="account_balance_wallet">
+                                            <RadzenDataList WrapItems="true" Data="@summary.LeaveRequests" TItem="LeaveRequestShortInfoAndDescription">
+                                                <Template Context="leaveRequest">
+                                                    <RadzenCard Style="width: 100%; padding: 0; overflow: hidden;">
+                                                        <div class="container">
+                                                            <div class="row d-flex" style="margin-left: calc(var(--bs-gutter-x) * -1); margin-right: calc(var(--bs-gutter-x) * -1)">
+                                                                <div class="col-md-6 col-lg-2">
+                                                                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Date from</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(leaveRequest.LeaveRequest.DateFrom)</RadzenText>
+                                                                </div>
+                                                                <div class="col-md-6 col-lg-2">
+                                                                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Date to</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(leaveRequest.LeaveRequest.DateFrom)</RadzenText>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </RadzenCard>
+                                                </Template>
+                                            </RadzenDataList>
+                                        </RadzenAccordionItem>
+                                    </Items>
+                                </RadzenAccordion>
                             </RadzenCard>
                         </Template>
                     </RadzenDataList>
@@ -82,10 +116,11 @@ else
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User.CreateModel();
+        var email = user.Email.Substring(2, user.Email.Length - 4);
         var now = DateTimeOffset.UtcNow;
         var query = new GetLeaveRequestsQuery(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), 1, 100, Enum.GetValues<LeaveRequestStatus>())
         {
-            CreatedByEmails = new[] { user.Email }
+            CreatedByEmails = new[] { email }
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
@@ -94,8 +129,11 @@ else
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         limits = getLimitsTask.Result;
-        userSummaryCollection = leaveTypes.Select(lt => new UserSummary(lt.Name, "3d", "Wybrano"));
+        userSummaryCollection = leaveTypes.Select(lt =>
+            new UserSummary(lt.Name, "3d", "10d", "7d",
+                leaveRequests?.Items?.Where(lr => lr.LeaveTypeId == lt.Id).Select(lr => new LeaveRequestShortInfoAndDescription(lr, null)) ?? Enumerable.Empty<LeaveRequestShortInfoAndDescription>()));
     }
 
-    private record class UserSummary(string Name, string Value, string? Description);
+    private record class UserSummary(string LeaveType, string Used, string? Limit, string? Left, IEnumerable<LeaveRequestShortInfoAndDescription> LeaveRequests);
+    private record class LeaveRequestShortInfoAndDescription(LeaveRequestShortInfo LeaveRequest, string? Description);
 }

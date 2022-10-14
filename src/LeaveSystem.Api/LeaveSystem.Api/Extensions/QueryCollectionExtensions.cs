@@ -1,4 +1,4 @@
-﻿using LeaveSystem.EventSourcing.LeaveRequests;
+﻿using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.Api.Extensions;
 

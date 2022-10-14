@@ -1,5 +1,5 @@
 ﻿using LeaveSystem.Api.Extensions;
-using LeaveSystem.EventSourcing.LeaveRequests;
+using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.Api.Endpoints;
 
