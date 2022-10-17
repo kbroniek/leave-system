@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Web\LeaveSystem.Web\LeaveSystem.Web.csproj" />
+    <ProjectReference Include="..\..\LeaveSystem\LeaveSystem\LeaveSystem.csproj" />
   </ItemGroup>
 
   <ItemGroup>

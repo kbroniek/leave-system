@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
-using LeaveSystem.Shared;
 
-namespace LeaveSystem.Db;
+namespace LeaveSystem.Shared;
 
 public record struct FederatedUser(string Email, string? Name)
 {

@@ -28,7 +28,7 @@ internal static class LeaveRequestsConfig
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
-            .AddQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo> , HandleGetLeaveRequest>();
+            .AddQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>, HandleGetLeaveRequest>();
 
     private static IServiceCollection AddValidators(this IServiceCollection services) =>
         services

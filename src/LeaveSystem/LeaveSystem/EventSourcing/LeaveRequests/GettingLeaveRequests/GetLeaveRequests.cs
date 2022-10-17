@@ -4,6 +4,7 @@ using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Linq;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,7 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
         var dateToOrDefault = dateTo ?? now.Add(TimeSpan.FromDays(14));
         Guard.Against.NegativeOrZero(pageNumberOrDefault, nameof(pageNumber));
         Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), 1, 100);
+        Guard.Against.Nill(requestedBy.Email);
         return new(
             pageNumberOrDefault,
             pageSizeOrDefault,
@@ -70,14 +72,15 @@ internal class HandleGetLeaveRequest :
     public async Task<IPagedList<LeaveRequestShortInfo>> Handle(GetLeaveRequests request,
         CancellationToken cancellationToken)
     {
-        request = await NarrowDownQuery(request);
+        request = await NarrowDownQuery(request, cancellationToken);
         return await Query(request, cancellationToken);
     }
 
-    private async Task<GetLeaveRequests> NarrowDownQuery(GetLeaveRequests request)
+    private async Task<GetLeaveRequests> NarrowDownQuery(GetLeaveRequests request,
+        CancellationToken cancellationToken)
     {
         var privilegedRoles = new RoleType[] { RoleType.HumanResource, RoleType.LeaveLimitAdmin, RoleType.DecisionMaker, RoleType.GlobalAdmin };
-        if (!(await EntityFrameworkQueryableExtensions.AnyAsync(dbContext.Roles, r => r.Email == request.RequestedBy.Email && privilegedRoles.Contains(r.RoleType))))
+        if (!await EntityFrameworkQueryableExtensions.AnyAsync(dbContext.Roles, r => r.Email == request.RequestedBy.Email && privilegedRoles.Contains(r.RoleType), cancellationToken))
         {
             return GetLeaveRequests.Create(
                 request.PageNumber,

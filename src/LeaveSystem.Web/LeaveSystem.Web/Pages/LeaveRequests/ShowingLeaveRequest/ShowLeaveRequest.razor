@@ -1,8 +1,8 @@
-﻿@page "/showleaverequests"
-@using LeaveSystem.Db
-@using LeaveSystem.EventSourcing.LeaveRequests
+﻿@page "/leave-requests"
+@using LeaveSystem.Shared.LeaveRequests
+@using LeaveSystem.Shared
 @using LeaveSystem.Web.Components
-@using LeaveSystem.Web.Services
+@using LeaveSystem.Web.Pages.LeaveTypes
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Text.Json.Serialization
@@ -11,7 +11,8 @@
 @inject HttpClient Http
 @inject ILogger<ShowLeaveRequest> Logger
 @inject TimelineComponent Timeline
-@inject LeaveTypeService LeaveTypeService
+@inject LeaveTypesService LeaveTypeService
+@inject GetLeaveRequestsService GetLeaveRequestsService
 
 <PageTitle>Show leave request</PageTitle>
 
@@ -68,7 +69,7 @@ else
     private EditContext? editContext;
     private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
     private FederatedUser[]? users = null;
-    private IEnumerable<LeaveTypeService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypeService.LeaveTypeDto>();
+    private IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
     private IEnumerable<KeyValuePair<LeaveRequestStatus, string>> leaveRequestStatuses = Enum.GetValues<LeaveRequestStatus>()
         .Select(s => new KeyValuePair<LeaveRequestStatus, string>(s, s.ToString()));
     private bool advancedFilteringEnabled;
@@ -80,8 +81,7 @@ else
     }
     private async Task GetData()
     {
-        var uri = leaveRequestsQuery.CreateQueryString("api/leaveRequests");
-        var getLeaveRequestsTask = Http.GetFromJsonAsync<PagedListResponse<LeaveRequestShortInfo>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(leaveRequestsQuery);
         var getLeaveTypesTask = LeaveTypeService.GetLeaveTypes();
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask);
         leaveRequests = getLeaveRequestsTask.Result;

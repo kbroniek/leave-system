@@ -1,10 +1,10 @@
-﻿@page "/createleaverequest"
-@using LeaveSystem.Web.Services
+﻿@page "/create-leave-request"
+@using LeaveSystem.Web.Pages.LeaveTypes
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @attribute [Authorize]
 @inject HttpClient Http
-@inject LeaveTypeService LeaveTypeService
+@inject LeaveTypesService LeaveTypesService
 @inject ILogger<CreateLeaveRequest> Logger
 
 <PageTitle>Add leave request</PageTitle>
@@ -70,7 +70,7 @@
 @code {
     private CreateLeaveRequestDto leaveRequest = new();
     private EditContext? editContext;
-    private IEnumerable<LeaveTypeService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypeService.LeaveTypeDto>();
+    private IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
 
     protected override void OnInitialized()
     {
@@ -82,7 +82,7 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        leaveTypes = await LeaveTypeService.GetLeaveTypes();
+        leaveTypes = await LeaveTypesService.GetLeaveTypes();
     }
     private async Task HandleSubmit()
     {

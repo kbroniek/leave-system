@@ -3,6 +3,7 @@ using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using System.ComponentModel.DataAnnotations;
 using EFExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions;

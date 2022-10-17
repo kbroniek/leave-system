@@ -1,5 +1,5 @@
-﻿using LeaveSystem.Db;
-using LeaveSystem.EventSourcing.LeaveRequests;
+﻿using LeaveSystem.Shared;
+using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest;
 
