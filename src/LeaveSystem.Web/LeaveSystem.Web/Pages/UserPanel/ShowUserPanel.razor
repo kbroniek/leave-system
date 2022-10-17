@@ -4,12 +4,11 @@
 @using LeaveSystem.Web.Pages.UserLeaveLimits
 @using Microsoft.AspNetCore.Authorization
 @using LeaveSystem.Web.Pages.LeaveTypes
-@using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest
+@using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
 @using LeaveSystem.Web.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
 @using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService
 @attribute [Authorize]
-@inject HttpClient Http
 @inject LeaveTypesService LeaveTypesService
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject UserLeaveLimitsService UserLeaveLimitsService
@@ -83,6 +82,7 @@ else
                                                     <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateFrom" Title="Date from" FormatString="{0:d}"/>
                                                     <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateTo" Title="Date to" FormatString="{0:d}"/>
                                                     <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Duration" Title="Duration" />
+                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Status" Title="status" />
                                                     <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Description" Title="Description" />
                                                 </Columns>
                                             </RadzenDataGrid>
@@ -119,7 +119,7 @@ else
         var user = authState.User.CreateModel();
         var email = user.Email.Substring(2, user.Email.Length - 4); // because we get the email in weird format i.e. ['example@test.com']
         var now = DateTimeOffset.UtcNow;
-        var query = new GetLeaveRequestsQuery(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), 1, 100, Enum.GetValues<LeaveRequestStatus>())
+        var query = new GetLeaveRequestsQuery(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), 1, 1000, Enum.GetValues<LeaveRequestStatus>())
         {
             CreatedByEmails = new[] { email }
         };
@@ -129,8 +129,11 @@ else
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
         var leaveRequests = getLeaveRequestsTask.Result ?? new PagedListResponse<LeaveRequestShortInfo>(Enumerable.Empty<LeaveRequestShortInfo>(), 0, false);
         var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
-        var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitDto>();
-        userSummaryCollection = leaveTypes.Select(lt => UserSummary.Create(lt, leaveRequests.Items ?? Enumerable.Empty<LeaveRequestShortInfo>(), limits, workingHours));
+        var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
+        userSummaryCollection = leaveTypes.Select(lt =>
+            UserSummary.Create(lt, leaveRequests.Items ?? Enumerable.Empty<LeaveRequestShortInfo>(),
+            limits,
+            workingHours));
     }
 
     private record class UserSummary(string LeaveType, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestForView> LeaveRequests)
@@ -139,12 +142,14 @@ else
         {
             var leaveRequestsPerLeaveType = leaveRequests
                 .Where(lr => lr.LeaveTypeId == leaveType.Id);
+            var validLeaveRequestsPerLeaveType = leaveRequestsPerLeaveType
+                .Where(lr => lr.LeaveTypeId == leaveType.Id && lr.Status.IsValid());
             var limitsPerLeaveType = limits
                 .Where(l => l.LeaveTypeId == leaveType.Id);
 
             var leaveRequestsWithDescription = leaveRequestsPerLeaveType
                 .Select(lr => LeaveRequestForView.Create(lr, limitsPerLeaveType, workingHours));
-            var leaveRequestsUsed = TimeSpan.FromTicks(leaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
+            var leaveRequestsUsed = TimeSpan.FromTicks(validLeaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
             var limitsSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.Limit.Ticks));
             var overdueLimitSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.OverdueLimit.Ticks));
             var limitTotal = limitsSum + overdueLimitSum;
@@ -159,7 +164,7 @@ else
                 leaveRequestsWithDescription);
         }
     };
-    private record class LeaveRequestForView(DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description)
+    private record class LeaveRequestForView(DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description, LeaveRequestStatus Status)
     {
         public static LeaveRequestForView Create(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
         {
@@ -170,7 +175,9 @@ else
                 leaveRequest.DateFrom,
                 leaveRequest.DateTo,
                 leaveRequest.Duration.GetReadableTimeSpan(workingHours),
-                limit?.Property?.Description);
+                limit?.Property?.Description,
+                leaveRequest.Status
+            );
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest;
+namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 
 public class GetLeaveRequestsService
 {

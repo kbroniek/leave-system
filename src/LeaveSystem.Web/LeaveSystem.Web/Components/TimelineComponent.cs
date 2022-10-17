@@ -1,6 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Shared;
-using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest;
+using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using Microsoft.JSInterop;
 
 namespace LeaveSystem.Web.Components;

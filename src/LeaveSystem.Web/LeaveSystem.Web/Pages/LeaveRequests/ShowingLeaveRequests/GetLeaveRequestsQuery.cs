@@ -1,10 +1,19 @@
 ﻿using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 
-namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest;
+namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 
 public class GetLeaveRequestsQuery
 {
+    private static readonly LeaveRequestStatus[] validStatuses = new[] { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending };
+    public GetLeaveRequestsQuery(DateTimeOffset dateFrom, DateTimeOffset dateTo, int pageNumber, int pageSize)
+    {
+        DateFrom = dateFrom;
+        DateTo = dateTo;
+        PageNumber = pageNumber;
+        PageSize = pageSize;
+        Statuses = validStatuses;
+    }
     public GetLeaveRequestsQuery(DateTimeOffset dateFrom, DateTimeOffset dateTo, int pageNumber, int pageSize, IEnumerable<LeaveRequestStatus> statuses)
     {
         DateFrom = dateFrom;
@@ -30,7 +39,7 @@ public class GetLeaveRequestsQuery
             dateTo: now.AddDays(14),
             pageNumber: 1,
             pageSize: 100,
-            statuses: new[] { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending }
+            statuses: validStatuses
         );
     }
 }

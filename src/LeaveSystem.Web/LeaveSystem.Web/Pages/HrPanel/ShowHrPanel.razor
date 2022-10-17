@@ -1,0 +1,89 @@
+﻿@page "/hr-panel"
+@using LeaveSystem.Shared
+@using LeaveSystem.Web.Extensions
+@using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
+@using LeaveSystem.Web.Pages.LeaveTypes
+@using LeaveSystem.Web.Pages.UserLeaveLimits
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+@inject LeaveTypesService LeaveTypesService
+@inject GetLeaveRequestsService GetLeaveRequestsService
+@inject UserLeaveLimitsService UserLeaveLimitsService
+
+@code {
+    private IEnumerable<HrSummary>? hrSummary;
+    private TimeSpan workingHours = TimeSpan.FromHours(8);// TODO get workinghours from api
+
+    protected override async Task OnInitializedAsync()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var query = new GetLeaveRequestsQuery(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), 1, 1000);
+        var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
+        var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
+        var getLimitsTask = UserLeaveLimitsService.GetLimits();
+        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
+        var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
+        var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
+        var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.LeaveLimitDto>();
+        var users = CreateUserCollection(leaveRequests, limits);
+        hrSummary = users.Select(u => HrSummary.Create(u,
+            leaveTypes,
+            leaveRequests,
+            limits,
+            workingHours));
+    }
+
+    private static IEnumerable<FederatedUser> CreateUserCollection(IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits) =>
+        leaveRequests
+            .Select(lr => lr.CreatedBy)
+            .Union(limits.Select(l => new FederatedUser(l.AssignedToUserEmail, null)))
+            .GroupBy(u => u.Email)
+            .Select(g => g.First());
+
+    private record class HrSummary(
+        FederatedUser user,
+        string SumLimit,
+        string Limit,
+        string OverdueLimit,
+        string Left,
+        string Used,
+        bool usedDaysInRow,
+        string onDemand,
+        string saturdays,
+        IEnumerable<UsedPerLeaveType> usedPerLeaveType)
+    {
+        public static HrSummary Create(
+            FederatedUser user,
+            IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes,
+            IEnumerable<LeaveRequestShortInfo> leaveRequests,
+            IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits,
+            TimeSpan workingHours)
+        {
+            var usedPerLeaveTypes = leaveTypes.Select(lt => UsedPerLeaveType.Create(lt, leaveRequests, workingHours));
+            return new HrSummary(
+                user,
+                "",
+                "",
+                "",
+                "",
+                "",
+                false,
+                "",
+                "",
+                usedPerLeaveTypes
+            );
+        }
+    };
+
+    private record class UsedPerLeaveType(string LeaveType, string Used)
+    {
+        public static UsedPerLeaveType Create(LeaveTypesService.LeaveTypeDto leaveType, IEnumerable<LeaveRequestShortInfo> leaveRequests, TimeSpan workingHours)
+        {
+            var leaveRequestsPerLeaveType = leaveRequests
+                .Where(lr => lr.LeaveTypeId == leaveType.Id);
+            var leaveRequestsUsed = TimeSpan.FromTicks(leaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
+            return new UsedPerLeaveType(leaveType.Name, leaveRequestsUsed.GetReadableTimeSpan(workingHours));
+        }
+    };
+}
