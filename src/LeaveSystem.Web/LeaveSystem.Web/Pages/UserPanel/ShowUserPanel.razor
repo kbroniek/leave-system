@@ -72,44 +72,22 @@ else
                                         </div>
                                     </div>
                                 </div>
-                                @if (summary.LeaveRequests.Any())
-                                {
-                                    <RadzenAccordion>
-                                        <Items>
-                                            <RadzenAccordionItem Text="Leave requests list" Icon="list">
-                                                <RadzenDataList WrapItems="true" Data="@summary.LeaveRequests" TItem="LeaveRequestAndDescription">
-                                                    <Template Context="leaveRequest">
-                                                        <RadzenCard Style="width: 100%; padding: 0; overflow: hidden;">
-                                                            <div class="container">
-                                                                <div class="row d-flex" style="margin-left: calc(var(--bs-gutter-x) * -1); margin-right: calc(var(--bs-gutter-x) * -1)">
-                                                                    <div class="col-md-6 col-lg-2">
-                                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Date from</RadzenText>
-                                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(leaveRequest.LeaveRequest.DateFrom)</RadzenText>
-                                                                    </div>
-                                                                    <div class="col-md-6 col-lg-2">
-                                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Date to</RadzenText>
-                                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(leaveRequest.LeaveRequest.DateTo)</RadzenText>
-                                                                    </div>
-                                                                    <div class="col-md-6 col-lg-2">
-                                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Duration</RadzenText>
-                                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(leaveRequest.Duration)</RadzenText>
-                                                                    </div>
-                                                                    <div class="col-md-6 col-lg-2">
-                                                                        @if (leaveRequest.Description != null)
-                                                                        {
-                                                                            <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Description</RadzenText>
-                                                                            <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(leaveRequest.Description)</RadzenText>
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </RadzenCard>
-                                                    </Template>
-                                                </RadzenDataList>
-                                            </RadzenAccordionItem>
-                                        </Items>
-                                    </RadzenAccordion>
-                                }
+                                <RadzenAccordion>
+                                    <Items>
+                                        <RadzenAccordionItem Text="Leave requests list" Icon="list">
+                                            <RadzenDataGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                        AllowSorting="true" Data="@summary.LeaveRequests" TItem="LeaveRequestAndDescription" ColumnWidth="200px"
+                                                        SelectionMode="DataGridSelectionMode.Single">
+                                                <Columns>
+                                                    <RadzenDataGridColumn TItem="LeaveRequestAndDescription" Property="DateFrom" Title="Date from" FormatString="{0:d}"/>
+                                                    <RadzenDataGridColumn TItem="LeaveRequestAndDescription" Property="DateTo" Title="Date to" FormatString="{0:d}"/>
+                                                    <RadzenDataGridColumn TItem="LeaveRequestAndDescription" Property="Duration" Title="Duration" />
+                                                    <RadzenDataGridColumn TItem="LeaveRequestAndDescription" Property="Description" Title="Description" />
+                                                </Columns>
+                                            </RadzenDataGrid>
+                                        </RadzenAccordionItem>
+                                    </Items>
+                                </RadzenAccordion>
                             </RadzenCard>
                         </Template>
                     </RadzenDataList>
@@ -180,17 +158,18 @@ else
                 leaveRequestsWithDescription);
         }
     };
-    private record class LeaveRequestAndDescription(LeaveRequestShortInfo LeaveRequest, string Duration, string? Description)
+    private record class LeaveRequestAndDescription(DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description)
     {
-        public static LeaveRequestAndDescription Create(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours) =>
-            limits.Any() ? CreateWithDescription(leaveRequest, limits, workingHours) : new LeaveRequestAndDescription(leaveRequest, GetReadableTimeSpan(leaveRequest.Duration, workingHours), null);
-
-        private static LeaveRequestAndDescription CreateWithDescription(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
+        public static LeaveRequestAndDescription Create(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
         {
             var limit = limits.FirstOrDefault(l =>
                 (l.ValidSince == null || l.ValidSince <= leaveRequest.DateFrom) &&
                 (l.ValidUntil == null || l.ValidUntil >= leaveRequest.DateTo));
-            return new LeaveRequestAndDescription(leaveRequest, GetReadableTimeSpan(leaveRequest.Duration, workingHours), limit?.Property?.Description);
+            return new LeaveRequestAndDescription(
+                leaveRequest.DateFrom,
+                leaveRequest.DateTo,
+                GetReadableTimeSpan(leaveRequest.Duration, workingHours),
+                limit?.Property?.Description);
         }
     }
 
