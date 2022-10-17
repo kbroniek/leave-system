@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest
+@using LeaveSystem.Web.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
 @using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService
 @attribute [Authorize]
@@ -76,13 +77,13 @@ else
                                     <Items>
                                         <RadzenAccordionItem Text="Leave requests list" Icon="list">
                                             <RadzenDataGrid AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                        AllowSorting="true" Data="@summary.LeaveRequests" TItem="LeaveRequestAndDescription" ColumnWidth="200px"
+                                                        AllowSorting="true" Data="@summary.LeaveRequests" TItem="LeaveRequestForView" ColumnWidth="200px"
                                                         SelectionMode="DataGridSelectionMode.Single">
                                                 <Columns>
-                                                    <RadzenDataGridColumn TItem="LeaveRequestAndDescription" Property="DateFrom" Title="Date from" FormatString="{0:d}"/>
-                                                    <RadzenDataGridColumn TItem="LeaveRequestAndDescription" Property="DateTo" Title="Date to" FormatString="{0:d}"/>
-                                                    <RadzenDataGridColumn TItem="LeaveRequestAndDescription" Property="Duration" Title="Duration" />
-                                                    <RadzenDataGridColumn TItem="LeaveRequestAndDescription" Property="Description" Title="Description" />
+                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateFrom" Title="Date from" FormatString="{0:d}"/>
+                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateTo" Title="Date to" FormatString="{0:d}"/>
+                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Duration" Title="Duration" />
+                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Description" Title="Description" />
                                                 </Columns>
                                             </RadzenDataGrid>
                                         </RadzenAccordionItem>
@@ -132,7 +133,7 @@ else
         userSummaryCollection = leaveTypes.Select(lt => UserSummary.Create(lt, leaveRequests.Items ?? Enumerable.Empty<LeaveRequestShortInfo>(), limits, workingHours));
     }
 
-    private record class UserSummary(string LeaveType, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestAndDescription> LeaveRequests)
+    private record class UserSummary(string LeaveType, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestForView> LeaveRequests)
     {
         public static UserSummary Create(LeaveTypesService.LeaveTypeDto leaveType, IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
         {
@@ -142,7 +143,7 @@ else
                 .Where(l => l.LeaveTypeId == leaveType.Id);
 
             var leaveRequestsWithDescription = leaveRequestsPerLeaveType
-                .Select(lr => LeaveRequestAndDescription.Create(lr, limitsPerLeaveType, workingHours));
+                .Select(lr => LeaveRequestForView.Create(lr, limitsPerLeaveType, workingHours));
             var leaveRequestsUsed = TimeSpan.FromTicks(leaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
             var limitsSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.Limit.Ticks));
             var overdueLimitSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.OverdueLimit.Ticks));
@@ -150,52 +151,26 @@ else
             var left = limitTotal - leaveRequestsUsed;
             return new UserSummary(
                 leaveType.Name,
-                GetReadableTimeSpan(leaveRequestsUsed, workingHours),
-                limitsPerLeaveType.Any() ? GetReadableTimeSpan(limitsSum, workingHours) : null,
-                limitsPerLeaveType.Any() ? GetReadableTimeSpan(overdueLimitSum, workingHours) : null,
-                limitsPerLeaveType.Any() ? GetReadableTimeSpan(limitTotal, workingHours) : null,
-                limitsPerLeaveType.Any() ? GetReadableTimeSpan(left, workingHours) : null,
+                leaveRequestsUsed.GetReadableTimeSpan(workingHours),
+                limitsPerLeaveType.Any() ? limitsSum.GetReadableTimeSpan(workingHours) : null,
+                limitsPerLeaveType.Any() ? overdueLimitSum.GetReadableTimeSpan(workingHours) : null,
+                limitsPerLeaveType.Any() ? limitTotal.GetReadableTimeSpan(workingHours) : null,
+                limitsPerLeaveType.Any() ? left.GetReadableTimeSpan(workingHours) : null,
                 leaveRequestsWithDescription);
         }
     };
-    private record class LeaveRequestAndDescription(DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description)
+    private record class LeaveRequestForView(DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description)
     {
-        public static LeaveRequestAndDescription Create(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
+        public static LeaveRequestForView Create(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
         {
             var limit = limits.FirstOrDefault(l =>
                 (l.ValidSince == null || l.ValidSince <= leaveRequest.DateFrom) &&
                 (l.ValidUntil == null || l.ValidUntil >= leaveRequest.DateTo));
-            return new LeaveRequestAndDescription(
+            return new LeaveRequestForView(
                 leaveRequest.DateFrom,
                 leaveRequest.DateTo,
-                GetReadableTimeSpan(leaveRequest.Duration, workingHours),
+                leaveRequest.Duration.GetReadableTimeSpan(workingHours),
                 limit?.Property?.Description);
         }
     }
-
-    private static string GetReadableTimeSpan(TimeSpan duration, TimeSpan workingHours)
-    {
-        var days = duration.TotalHours / workingHours.TotalHours;
-		if (days == 0) {
-			return "0d";
-		}
-		var result = "";
-		var isNegative = days < 0;
-		if (isNegative) {
-			days = -days;
-		}
-		var hours = days * workingHours.TotalHours;
-		var modHours = hours % workingHours.TotalHours;
-		if (modHours > 0) {
-			result = Math.Round(modHours * 100) / 100 + "h ";
-		}
-		var modDays = (hours - modHours) / workingHours.TotalHours;
-		if (modDays > 0) {
-			result = Math.Round(modDays * 100) / 100 + "d " + result;
-		}
-		if (isNegative) {
-			result = "-" + result;
-		}
-		return result;
-	}
 }
