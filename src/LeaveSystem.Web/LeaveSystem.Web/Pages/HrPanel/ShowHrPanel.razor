@@ -11,8 +11,39 @@
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject UserLeaveLimitsService UserLeaveLimitsService
 
+@if (hrSummary == null || leaveTypes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="container">
+        <RadzenDataGrid AllowColumnResize="true" FilterMode="FilterMode.Simple" AllowSorting="true" Data="@hrSummary" TItem="HrSummary"
+            ColumnWidth="140px" LogicalFilterOperator="LogicalFilterOperator.Or">
+            <Columns>
+                <RadzenDataGridColumn TItem="HrSummary" Property="Employee" Title="Employee" Frozen="true" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="SumLimit" Title="Total limit"/>
+                <RadzenDataGridColumn TItem="HrSummary" Property="Limit" Title="Limit" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="OverdueLimit" Title="Overdue limit" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="Left" Title="Limit left" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="usedDaysInRow" Title="Used days in a row" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="OnDemand" Title="On demand" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="Saturdays" Title="Saturdays" />
+                @foreach(var leaveType in leaveTypes)
+                {
+                    <RadzenDataGridColumn TItem="HrSummary" Title="@(leaveType.Name)" Width="80px" TextAlign="TextAlign.Center" >
+                        <Template Context="data">
+                            @(data.UsedPerLeaveTypes[leaveType.Id])
+                        </Template>
+                    </RadzenDataGridColumn>
+                }
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+}
 @code {
     private IEnumerable<HrSummary>? hrSummary;
+    private IEnumerable<LeaveTypesService.LeaveTypeDto>? leaveTypes;
     private TimeSpan workingHours = TimeSpan.FromHours(8);// TODO get workinghours from api
 
     protected override async Task OnInitializedAsync()
@@ -24,7 +55,7 @@
         var getLimitsTask = UserLeaveLimitsService.GetLimits();
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
-        var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
+        leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
         var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.LeaveLimitDto>();
         var users = CreateUserCollection(leaveRequests, limits);
         hrSummary = users.Select(u => HrSummary.Create(u,
@@ -42,16 +73,15 @@
             .Select(g => g.First());
 
     private record class HrSummary(
-        FederatedUser user,
+        string Employee,
         string SumLimit,
         string Limit,
         string OverdueLimit,
         string Left,
-        string Used,
         bool usedDaysInRow,
-        string onDemand,
-        string saturdays,
-        IEnumerable<UsedPerLeaveType> usedPerLeaveType)
+        string OnDemand,
+        string Saturdays,
+        IDictionary<Guid, string> UsedPerLeaveTypes)
     {
         public static HrSummary Create(
             FederatedUser user,
@@ -60,10 +90,11 @@
             IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits,
             TimeSpan workingHours)
         {
-            var usedPerLeaveTypes = leaveTypes.Select(lt => UsedPerLeaveType.Create(lt, leaveRequests, workingHours));
+            var usedPerLeaveTypes = leaveTypes.ToDictionary(
+                lt => lt.Id,
+                lt => CalculateUsedLimit(user.Email, lt, leaveRequests, workingHours));
             return new HrSummary(
-                user,
-                "",
+                user.Name ?? user.Email,
                 "",
                 "",
                 "",
@@ -75,15 +106,11 @@
             );
         }
     };
-
-    private record class UsedPerLeaveType(string LeaveType, string Used)
+    private static string CalculateUsedLimit(string userEmail, LeaveTypesService.LeaveTypeDto leaveType, IEnumerable<LeaveRequestShortInfo> leaveRequests, TimeSpan workingHours)
     {
-        public static UsedPerLeaveType Create(LeaveTypesService.LeaveTypeDto leaveType, IEnumerable<LeaveRequestShortInfo> leaveRequests, TimeSpan workingHours)
-        {
-            var leaveRequestsPerLeaveType = leaveRequests
-                .Where(lr => lr.LeaveTypeId == leaveType.Id);
-            var leaveRequestsUsed = TimeSpan.FromTicks(leaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
-            return new UsedPerLeaveType(leaveType.Name, leaveRequestsUsed.GetReadableTimeSpan(workingHours));
-        }
-    };
+        var leaveRequestsPerLeaveType = leaveRequests
+            .Where(lr => lr.LeaveTypeId == leaveType.Id && string.Equals(lr.CreatedBy.Email, userEmail, StringComparison.CurrentCultureIgnoreCase));
+        var leaveRequestsUsed = TimeSpan.FromTicks(leaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
+        return leaveRequestsUsed.GetReadableTimeSpan(workingHours);
+    }
 }
