@@ -13,8 +13,8 @@ public class CreateLeaveRequestValidaor : AbstractValidator<CreateLeaveRequestDt
             .WithMessage("Date to must be greater than date from");
         RuleFor(p => p.LeaveTypeId)
             .NotNull().WithMessage("You must enter the type");
-        RuleFor(p => p.Duration)
-            .Must(p => p > TimeSpan.Zero && p < TimeSpan.FromDays(366))
-            .WithMessage("Hours should be at range (0-366 days).");
+        //RuleFor(p => p.Duration)
+        //    .Must(p => p > TimeSpan.Zero && p < TimeSpan.FromDays(366))
+        //    .WithMessage("Hours should be at range (0-366 days).");
     }
 }
