@@ -11,7 +11,7 @@ public static class DateCalculator
         WEEKEND,
         HOLIDAY
     }
-    public static TimeSpan CalculateDurationOfLeave(DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan workingHours, bool? includeFreeDays)
+    public static TimeSpan CalculateDuration(DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan workingHours, bool? includeFreeDays)
     {
         var dateToPlusOne = dateTo.AddDays(1);
         if (includeFreeDays == true)
@@ -31,8 +31,27 @@ public static class DateCalculator
                 }
             }
             currentDate = currentDate.AddDays(1);
-        } while (currentDate != dateToPlusOne);
+        } while (currentDate <= dateToPlusOne);
         return daysBetween * workingHours;
+    }
+
+    public static int CalculateDurationIncludeFreeDays(DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    {
+        var dateToPlusOne = dateTo.AddDays(1);
+        var daysBetween = (dateToPlusOne - dateFrom).Days;
+        var currentDate = dateToPlusOne;
+        while(GetDayKind(currentDate) != DayKind.WORKING)
+        {
+            ++daysBetween;
+            currentDate = currentDate.AddDays(1);
+        }
+        currentDate = dateFrom.AddDays(-1);
+        while (GetDayKind(currentDate) != DayKind.WORKING)
+        {
+            ++daysBetween;
+            currentDate = currentDate.AddDays(-1);
+        }
+        return daysBetween;
     }
 
     public static DayKind GetDayKind(DateTimeOffset date)

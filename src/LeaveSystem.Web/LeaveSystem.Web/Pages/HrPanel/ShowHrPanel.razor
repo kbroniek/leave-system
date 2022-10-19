@@ -135,7 +135,7 @@ else
     {
         return leaveRequests.Any(lr =>
             lr.LeaveTypeId == leaveTypeId &&
-            (lr.DateTo - lr.DateFrom).TotalDays >= daysInARow
+            DateCalculator.CalculateDurationIncludeFreeDays(lr.DateFrom.GetDayWithoutTime(), lr.DateTo.GetDayWithoutTime()) >= daysInARow
         );
     }
 
