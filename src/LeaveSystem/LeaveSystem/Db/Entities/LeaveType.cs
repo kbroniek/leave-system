@@ -17,5 +17,6 @@ public class LeaveType : IHaveId<Guid>
         public string? Color { get; set; }
         public bool? IncludeFreeDays { get; set; }
         public TimeSpan? DefaultLimit { get; set; }
+        public bool? IsDefault { get; set; }
     }
 }
