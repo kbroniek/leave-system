@@ -13,11 +13,12 @@ public class LeaveTypesService
 
     public async Task<IEnumerable<LeaveTypeDto>> GetLeaveTypes()
     {
-        var leaveTypes = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<LeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name&$orderby=Order asc");
+        var leaveTypes = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<LeaveTypeDto>>>("odata/LeaveTypes?$select=Id,Name,Properties&$orderby=Order asc");
         return leaveTypes?.Data ?? Enumerable.Empty<LeaveTypeDto>();
     }
 
 
-    public record class LeaveTypeDto(Guid Id, string Name);
+    public record class LeaveTypeDto(Guid Id, string Name, LeaveTypeProperties Properties);
+    public record class LeaveTypeProperties(string? Color, bool? IsDefault);
 }
 

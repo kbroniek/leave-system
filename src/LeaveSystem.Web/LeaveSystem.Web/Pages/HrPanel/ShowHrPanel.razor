@@ -10,6 +10,7 @@
 @inject LeaveTypesService LeaveTypesService
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject UserLeaveLimitsService UserLeaveLimitsService
+@inject ILogger<ShowHrPanel> Logger
 
 @if (hrSummary == null || leaveTypes == null)
 {
@@ -45,6 +46,7 @@ else
     private IEnumerable<HrSummary>? hrSummary;
     private IEnumerable<LeaveTypesService.LeaveTypeDto>? leaveTypes;
     private TimeSpan workingHours = TimeSpan.FromHours(8);// TODO get workinghours from api
+    private int daysInARow = 14;
 
     protected override async Task OnInitializedAsync()
     {
@@ -58,11 +60,14 @@ else
         leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
         var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.LeaveLimitDto>();
         var users = CreateUserCollection(leaveRequests, limits);
+        Logger.LogInformation($"Working hours: {daysInARow * workingHours}");
         hrSummary = users.Select(u => HrSummary.Create(u,
             leaveTypes,
             leaveRequests,
             limits,
-            workingHours));
+            workingHours,
+            daysInARow
+        ));
     }
 
     private static IEnumerable<FederatedUser> CreateUserCollection(IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits) =>
@@ -88,29 +93,73 @@ else
             IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes,
             IEnumerable<LeaveRequestShortInfo> leaveRequests,
             IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits,
-            TimeSpan workingHours)
+            TimeSpan workingHours,
+            int daysInARow)
         {
+            var leaveRequestsPerUser = leaveRequests.Where(lr => string.Equals(lr.CreatedBy.Email, user.Email, StringComparison.CurrentCultureIgnoreCase)).ToList();
             var usedPerLeaveTypes = leaveTypes.ToDictionary(
                 lt => lt.Id,
-                lt => CalculateUsedLimit(user.Email, lt, leaveRequests, workingHours));
+                lt => CalculateUsedLimit(lt, leaveRequestsPerUser));
+            var defaultLeaveType = GetDefaultLeaveType(leaveTypes);
+            var defaultLimit = GetDefaultLimit(user.Email, defaultLeaveType?.Id, limits);
+            var totalLimit = defaultLimit?.TotalLimit.GetReadableTimeSpan(workingHours) ?? "";
+            var limit = defaultLimit?.Limit.GetReadableTimeSpan(workingHours) ?? "";
+            var overdueLimit = defaultLimit?.OverdueLimit.GetReadableTimeSpan(workingHours) ?? "";
+            var defaultUsedLeaveType = defaultLimit == null ? "" :
+                (defaultLimit.TotalLimit - usedPerLeaveTypes[defaultLimit.LeaveTypeId]).GetReadableTimeSpan(workingHours);
+            var usedPerLeaveTypesReadable = usedPerLeaveTypes.ToDictionary(
+                lt => lt.Key,
+                lt => lt.Value.GetReadableTimeSpan(workingHours));
+            var usedDaysInARow = defaultLeaveType == null ? false : CalculateDaysInARow(
+                leaveRequestsPerUser,
+                defaultLeaveType.Id,
+                daysInARow);
             return new HrSummary(
                 user.Name ?? user.Email,
+                totalLimit,
+                limit,
+                overdueLimit,
+                defaultUsedLeaveType,
+                usedDaysInARow,
                 "",
                 "",
-                "",
-                "",
-                false,
-                "",
-                "",
-                usedPerLeaveTypes
+                usedPerLeaveTypesReadable
             );
         }
     };
-    private static string CalculateUsedLimit(string userEmail, LeaveTypesService.LeaveTypeDto leaveType, IEnumerable<LeaveRequestShortInfo> leaveRequests, TimeSpan workingHours)
+
+    private static bool CalculateDaysInARow(
+        IEnumerable<LeaveRequestShortInfo> leaveRequests,
+        Guid leaveTypeId,
+        int daysInARow)
+    {
+        return leaveRequests.Any(lr =>
+            lr.LeaveTypeId == leaveTypeId &&
+            (lr.DateTo - lr.DateFrom).TotalDays >= daysInARow
+        );
+    }
+
+    private static UserLeaveLimitsService.LeaveLimitDto? GetDefaultLimit(
+        string userEmail,
+        Guid? leaveTypeId,
+        IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits)
+    {
+        return leaveTypeId == null ? null :
+            limits.FirstOrDefault(l => string.Equals(l.AssignedToUserEmail, userEmail, StringComparison.CurrentCultureIgnoreCase) && l.LeaveTypeId == leaveTypeId.Value);
+    }
+
+    private static LeaveTypesService.LeaveTypeDto? GetDefaultLeaveType(
+        IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes)
+    {
+        return leaveTypes.FirstOrDefault(lt => lt.Properties.IsDefault == true);
+    }
+
+    private static TimeSpan CalculateUsedLimit(
+        LeaveTypesService.LeaveTypeDto leaveType,
+        IEnumerable<LeaveRequestShortInfo> leaveRequests)
     {
         var leaveRequestsPerLeaveType = leaveRequests
-            .Where(lr => lr.LeaveTypeId == leaveType.Id && string.Equals(lr.CreatedBy.Email, userEmail, StringComparison.CurrentCultureIgnoreCase));
-        var leaveRequestsUsed = TimeSpan.FromTicks(leaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
-        return leaveRequestsUsed.GetReadableTimeSpan(workingHours);
+            .Where(lr => lr.LeaveTypeId == leaveType.Id);
+        return TimeSpan.FromTicks(leaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
     }
 }
