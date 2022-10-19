@@ -28,7 +28,13 @@ public static class DbContextExtenstions
         Id = Guid.NewGuid(),
         Name = "urlop wypoczynkowy",
         Order = 1,
-        Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = TimeSpan.FromHours(8) * 26, IncludeFreeDays = false, Color = "blue" }
+        Properties = new LeaveType.LeaveTypeProperties
+        {
+            DefaultLimit = TimeSpan.FromHours(8) * 26,
+            IncludeFreeDays = false,
+            Color = "blue",
+            IsDefault = true,
+        }
     };
     private static LeaveType sickLeave = new LeaveType
     {
@@ -110,7 +116,7 @@ public static class DbContextExtenstions
         await SetupUser2(commandBus, defaultUser, testUsers[2]);
         await SetupUser3(commandBus, defaultUser, testUsers[3]);
         await SetupUser4(commandBus, defaultUser, testUsers[4]);
-        await SetupUser0(commandBus, defaultUser, defaultUser);
+        await SetupUser4(commandBus, defaultUser, defaultUser);
 
         var now = DateTimeOffset.UtcNow;
         await AddSaturdayLeaveRequest(commandBus, testUsers[0], now, 6);
@@ -255,8 +261,7 @@ public static class DbContextExtenstions
 
     private static DateTimeOffset GetFirstWorkingDay(DateTimeOffset now)
     {
-        var workingHoursService = new WorkingHoursService();
-        for (; workingHoursService.getDayKind(now) != WorkingHoursService.DayKind.WORKING; now = now.AddDays(2)) { }
+        for (; DateCalculator.GetDayKind(now) != DateCalculator.DayKind.WORKING; now = now.AddDays(2)) { }
         return now;
     }
 
