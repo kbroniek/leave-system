@@ -31,7 +31,7 @@ public static class DateCalculator
                 }
             }
             currentDate = currentDate.AddDays(1);
-        } while (currentDate <= dateToPlusOne);
+        } while (currentDate < dateToPlusOne);
         return daysBetween * workingHours;
     }
 
