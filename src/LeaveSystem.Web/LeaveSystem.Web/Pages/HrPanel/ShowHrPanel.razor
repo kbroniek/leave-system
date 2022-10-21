@@ -103,20 +103,21 @@ else
                 .ToList();
             var usedPerLeaveTypes = leaveTypes.ToDictionary(
                 lt => lt.Id,
-                lt => CalculateUsedLimit(lt, userLeaveRequests));
-            var holidayLeaveType = GetHolidayLeaveTypeOrDefault(leaveTypes);
-            var onDemandLeaveType = GetOnDemandLeaveTypeOrDefault(leaveTypes, holidayLeaveType?.Id);
+                lt => CalculateUsedLimit(lt.Id, userLeaveRequests));
+            var holidayLeaveType = GetLeaveTypeOrDefault(leaveTypes, LeaveTypeCatalog.Holiday);
+            var onDemandLeaveType = GetLeaveTypeOrDefault(leaveTypes, LeaveTypeCatalog.OnDemand);
             var holidayLimit = GetLimitOrDefault(holidayLeaveType?.Id, userLimits);
             var totalLimit = holidayLimit?.TotalLimit.GetReadableTimeSpan(workingHours) ?? "";
             var limit = holidayLimit?.Limit.GetReadableTimeSpan(workingHours) ?? "";
             var overdueLimit = holidayLimit?.OverdueLimit.GetReadableTimeSpan(workingHours) ?? "";
-            var holidayUsedLeaveType = CalculateLimitLeft(holidayLimit, onDemandLeaveType, usedPerLeaveTypes, workingHours);
+            var holidayUsedLeaveType = CalculateLimitLeft(holidayLimit, leaveTypes, usedPerLeaveTypes, workingHours);
             var usedDaysInARow = holidayLeaveType == null ? false : CalculateDaysInARow(
                 userLeaveRequests,
                 holidayLeaveType.Id,
                 daysInARow);
-            var onDemandDescription = onDemandLeaveType == null ? "" :
-                CalculateOnDemand(onDemandLeaveType.Id, userLeaveRequests, userLimits, workingHours);
+            var onDemandDescription = CalculateUsedAndTotalShortInfo(onDemandLeaveType?.Id, usedPerLeaveTypes, userLimits, workingHours);
+            var saturdayLeaveType = GetLeaveTypeOrDefault(leaveTypes, LeaveTypeCatalog.Saturday);
+            var saturdayDescription = CalculateUsedAndTotalShortInfo(saturdayLeaveType?.Id, usedPerLeaveTypes, userLimits, workingHours);
             var usedPerLeaveTypesReadable = usedPerLeaveTypes.ToDictionary(
                 lt => lt.Key,
                 lt => lt.Value.GetReadableTimeSpan(workingHours));
@@ -128,7 +129,7 @@ else
                 holidayUsedLeaveType,
                 usedDaysInARow,
                 onDemandDescription,
-                "",
+                saturdayDescription,
                 usedPerLeaveTypesReadable
             );
         }
@@ -136,7 +137,7 @@ else
 
     private static string CalculateLimitLeft(
         UserLeaveLimitsService.LeaveLimitDto? holidayLimit,
-        LeaveTypesService.LeaveTypeDto? onDemandLeaveType,
+        IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes,
         IDictionary<Guid, TimeSpan> usedPerLeaveTypes,
         TimeSpan workingHours)
     {
@@ -145,32 +146,40 @@ else
             return "";
         }
         usedPerLeaveTypes.TryGetValue(holidayLimit.LeaveTypeId, out TimeSpan usedHoliday);
-        usedPerLeaveTypes.TryGetValue(onDemandLeaveType?.Id ?? Guid.Empty, out TimeSpan usedOnDemand);
-        var left = holidayLimit.TotalLimit - usedHoliday - usedOnDemand;
+        TimeSpan usedConnected = TimeSpan.Zero;
+        foreach (var leaveType in leaveTypes.Where(lt => lt.BaseLeaveTypeId == holidayLimit.LeaveTypeId))
+        {
+            usedPerLeaveTypes.TryGetValue(leaveType?.Id ?? Guid.Empty, out TimeSpan temp);
+            usedConnected += temp;
+        }
+        var left = holidayLimit.TotalLimit - usedHoliday - usedConnected;
         return left.GetReadableTimeSpan(workingHours);
     }
 
-    private static LeaveTypesService.LeaveTypeDto? GetOnDemandLeaveTypeOrDefault(
-        IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypess,
-        Guid? defaultLeaveTypeId)
+    private static LeaveTypesService.LeaveTypeDto? GetLeaveTypeOrDefault(
+        IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes,
+        LeaveTypeCatalog leaveTypeCatalog)
     {
-        return defaultLeaveTypeId == null ? null : leaveTypess.FirstOrDefault(lt => lt.BaseLeaveTypeId == defaultLeaveTypeId);
+        return leaveTypes.FirstOrDefault(lt => lt.Properties.Catalog == leaveTypeCatalog);
     }
 
-    private static string CalculateOnDemand(
-        Guid onDemandLeaveTypeId,
-        IEnumerable<LeaveRequestShortInfo> leaveRequests,
+    private static string CalculateUsedAndTotalShortInfo(
+        Guid? leaveTypeId,
+        IDictionary<Guid, TimeSpan> usedPerLeaveTypes,
         IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits,
         TimeSpan workingHours)
     {
-        var onDemandLeaveRequestsDuration = TimeSpan.FromTicks(leaveRequests
-            .Where(lr => lr.LeaveTypeId == onDemandLeaveTypeId)
-            .Sum(lr => lr.Duration.Ticks));
-        var onDemandTotalLimit = limits
-            .FirstOrDefault(l => l.LeaveTypeId == onDemandLeaveTypeId)?.TotalLimit;
-        var onDemandLeaveRequestsDurationReadable = onDemandLeaveRequestsDuration == TimeSpan.Zero ? "0d" : onDemandLeaveRequestsDuration.GetReadableTimeSpan(workingHours);
-        var onDemandTotalLimitReadable = onDemandTotalLimit?.GetReadableTimeSpan(workingHours) ?? "0d";
-        return $"{onDemandLeaveRequestsDurationReadable} / {onDemandTotalLimitReadable}";
+        if(leaveTypeId == null)
+        {
+            return "";
+        }
+        usedPerLeaveTypes.TryGetValue(leaveTypeId.Value, out TimeSpan leaveRequestsDuration);
+        var totalLimit = TimeSpan.FromTicks(limits
+            .Where(l => l.LeaveTypeId == leaveTypeId)
+            .Sum(l => l.TotalLimit.Ticks));
+        var leaveRequestsDurationReadable = leaveRequestsDuration == TimeSpan.Zero ? "0d" : leaveRequestsDuration.GetReadableTimeSpan(workingHours);
+        var totalLimitReadable = totalLimit.GetReadableTimeSpan(workingHours);
+        return $"{leaveRequestsDurationReadable} / {totalLimitReadable}";
     }
 
     private static bool CalculateDaysInARow(
@@ -192,18 +201,12 @@ else
             limits.FirstOrDefault(l => l.LeaveTypeId == leaveTypeId.Value);
     }
 
-    private static LeaveTypesService.LeaveTypeDto? GetHolidayLeaveTypeOrDefault(
-        IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes)
-    {
-        return leaveTypes.FirstOrDefault(lt => lt.Properties.IsDefault == true);
-    }
-
     private static TimeSpan CalculateUsedLimit(
-        LeaveTypesService.LeaveTypeDto leaveType,
+        Guid leaveTypeId,
         IEnumerable<LeaveRequestShortInfo> leaveRequests)
     {
-        var leaveRequestsPerLeaveType = leaveRequests
-            .Where(lr => lr.LeaveTypeId == leaveType.Id);
-        return TimeSpan.FromTicks(leaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
+        return TimeSpan.FromTicks(leaveRequests
+            .Where(lr => lr.LeaveTypeId == leaveTypeId)
+            .Sum(lr => lr.Duration.Ticks));
     }
 }

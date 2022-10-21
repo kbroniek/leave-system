@@ -34,7 +34,7 @@ public static class DbContextExtenstions
             DefaultLimit = workingHours * 26,
             IncludeFreeDays = false,
             Color = "blue",
-            IsDefault = true,
+            Catalog = LeaveTypeCatalog.Holiday,
         }
     };
     private static LeaveType onDemandLeave = new LeaveType
@@ -43,21 +43,37 @@ public static class DbContextExtenstions
         Name = "urlop na żądanie",
         BaseLeaveTypeId = holidayLeave.Id,
         Order = 2,
-        Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = workingHours * 4, IncludeFreeDays = false, Color = "yellow" }
+        Properties = new LeaveType.LeaveTypeProperties
+        {
+            DefaultLimit = workingHours * 4,
+            IncludeFreeDays = false,
+            Color = "yellow",
+            Catalog = LeaveTypeCatalog.OnDemand,
+        }
     };
     private static LeaveType sickLeave = new LeaveType
     {
         Id = Guid.NewGuid(),
         Name = "niezdolność do pracy z powodu choroby",
         Order = 3,
-        Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+        Properties = new LeaveType.LeaveTypeProperties
+        {
+            IncludeFreeDays = true,
+            Color = "red",
+            Catalog = LeaveTypeCatalog.Sick,
+        }
     };
     private static LeaveType saturdayLeave = new LeaveType
     {
         Id = Guid.NewGuid(),
         Name = "urlop za sobotę",
         Order = 14,
-        Properties = new LeaveType.LeaveTypeProperties { DefaultLimit = workingHours, IncludeFreeDays = false, Color = "red" }
+        Properties = new LeaveType.LeaveTypeProperties
+        {
+            DefaultLimit = workingHours,
+            IncludeFreeDays = false, Color = "red",
+            Catalog = LeaveTypeCatalog.Saturday,
+        }
     };
     public static void MigrateDb(this IApplicationBuilder app)
     {

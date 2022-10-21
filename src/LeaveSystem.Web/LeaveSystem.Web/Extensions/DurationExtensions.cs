@@ -4,7 +4,9 @@ public static class DurationExtensions
 {
 	public static string GetReadableTimeSpan(this TimeSpan duration, TimeSpan workingHours)
 	{
-		var days = duration.TotalHours / workingHours.TotalHours;
+		var days = workingHours.TotalHours == 0 ?
+			duration.TotalHours :
+			duration.TotalHours / workingHours.TotalHours;
 		if (days == 0)
 		{
 			return "0d";
