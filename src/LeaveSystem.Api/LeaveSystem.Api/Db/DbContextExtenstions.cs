@@ -12,7 +12,7 @@ namespace LeaveSystem.Api.Db;
 public static class DbContextExtenstions
 {
     private class DbContextExtenstionsLogger { }
-    private static readonly TimeSpan workingHours = workingHours;
+    private static readonly TimeSpan workingHours = TimeSpan.FromHours(8);
     private const string DefaultUserEmail = "karolbr5@gmail.com";
     private static readonly FederatedUser defaultUser = new FederatedUser(DefaultUserEmail, "Karol Volt");
     private static readonly FederatedUser[] testUsers = new[]
@@ -138,6 +138,7 @@ public static class DbContextExtenstions
 
     private static async Task AddOnDemandLeaveRequest(ICommandBus commandBus, FederatedUser user, DateTimeOffset date)
     {
+        date = GetFirstWorkingDay(date);
         await CreateLeaveRequest(commandBus, date, date, onDemandLeave.Id, user);
     }
 
