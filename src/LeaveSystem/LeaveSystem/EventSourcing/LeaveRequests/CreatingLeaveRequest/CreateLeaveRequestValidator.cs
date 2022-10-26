@@ -27,13 +27,13 @@ public class CreateLeaveRequestValidator
         Guard.Against.OutOfRange(creatingLeaveRequest.Duration, nameof(creatingLeaveRequest.Duration), minDuration, maxDuration);
         if (includeFreeDays == false)
         {
-            var dateFromDayKind = workingHoursService.getDayKind(creatingLeaveRequest.DateFrom);
-            if (dateFromDayKind != WorkingHoursService.DayKind.WORKING)
+            var dateFromDayKind = DateCalculator.GetDayKind(creatingLeaveRequest.DateFrom);
+            if (dateFromDayKind != DateCalculator.DayKind.WORKING)
             {
                 throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateFrom), "The date is off work.");
             }
-            var dateToDayKind = workingHoursService.getDayKind(creatingLeaveRequest.DateTo);
-            if (dateToDayKind != WorkingHoursService.DayKind.WORKING)
+            var dateToDayKind = DateCalculator.GetDayKind(creatingLeaveRequest.DateTo);
+            if (dateToDayKind != DateCalculator.DayKind.WORKING)
             {
                 throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateTo), "The date is off work.");
             }

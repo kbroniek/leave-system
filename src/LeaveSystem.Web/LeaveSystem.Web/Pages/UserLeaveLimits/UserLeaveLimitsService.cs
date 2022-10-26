@@ -25,8 +25,23 @@ public class UserLeaveLimitsService
         });
         return limits?.Data ?? Enumerable.Empty<UserLeaveLimitDto>();
     }
+    public async Task<IEnumerable<LeaveLimitDto>> GetLimits()
+    {
+        // TODO: FIX. Returns only data for one user.
+        var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<LeaveLimitDto>>>("odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserEmail&$filter=not(AssignedToUserEmail eq null)", new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            Converters =
+            {
+                new TimeSpanToStringConverter()
+            }
+        });
+        return limits?.Data ?? Enumerable.Empty<LeaveLimitDto>();
+    }
 
-
+    public record class LeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, string AssignedToUserEmail)
+    {
+        public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
+    }
     public record class UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property);
 
     public record class UserLeaveLimitPropertyDto(string? Description);

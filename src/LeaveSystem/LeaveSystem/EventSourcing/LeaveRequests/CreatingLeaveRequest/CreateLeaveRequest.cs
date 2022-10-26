@@ -34,12 +34,14 @@ public class CreateLeaveRequest : ICommand
     }
     public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy)
     {
-        leaveRequestId = Guard.Against.Nill(leaveRequestId);
-        dateFrom = Guard.Against.Nill(dateFrom);
-        dateTo = Guard.Against.Nill(dateTo);
-        leaveTypeId = Guard.Against.Nill(leaveTypeId);
-        createdBy = Guard.Against.Nill(createdBy);
-        return new(leaveRequestId.Value, dateFrom.Value, dateTo.Value, duration, leaveTypeId.Value, remarks, createdBy.Value);
+        return new(
+            Guard.Against.Nill(leaveRequestId).Value,
+            Guard.Against.Nill(dateFrom).Value.GetDayWithoutTime(),
+            Guard.Against.Nill(dateTo).Value.GetDayWithoutTime(),
+            duration,
+            Guard.Against.Nill(leaveTypeId).Value,
+            remarks,
+            Guard.Against.Nill(createdBy).Value);
     }
 }
 

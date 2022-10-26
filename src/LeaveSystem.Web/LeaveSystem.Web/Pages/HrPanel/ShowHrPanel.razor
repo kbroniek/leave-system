@@ -1,0 +1,78 @@
+﻿@page "/hr-panel"
+@using LeaveSystem.Shared
+@using LeaveSystem.Web.Extensions
+@using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
+@using LeaveSystem.Web.Pages.LeaveTypes
+@using LeaveSystem.Web.Pages.UserLeaveLimits
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+@inject LeaveTypesService LeaveTypesService
+@inject GetLeaveRequestsService GetLeaveRequestsService
+@inject UserLeaveLimitsService UserLeaveLimitsService
+@inject ILogger<ShowHrPanel> Logger
+
+@if (hrSummary == null || leaveTypes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="container">
+        <RadzenDataGrid AllowColumnResize="true" FilterMode="FilterMode.Simple" AllowSorting="true" Data="@hrSummary" TItem="HrSummary"
+            ColumnWidth="140px" LogicalFilterOperator="LogicalFilterOperator.Or">
+            <Columns>
+                <RadzenDataGridColumn TItem="HrSummary" Property="Employee" Title="Employee" Frozen="true" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="SumLimit" Title="Total limit"/>
+                <RadzenDataGridColumn TItem="HrSummary" Property="Limit" Title="Limit" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="OverdueLimit" Title="Overdue limit" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="Left" Title="Limit left" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="usedDaysInRow" Title="Used days in a row" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="OnDemand" Title="On demand" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="Saturdays" Title="Saturdays" />
+                @foreach(var leaveType in leaveTypes)
+                {
+                    <RadzenDataGridColumn TItem="HrSummary" Title="@(leaveType.Name)" Width="80px" TextAlign="TextAlign.Center" >
+                        <Template Context="data">
+                            @(data.UsedPerLeaveTypes[leaveType.Id])
+                        </Template>
+                    </RadzenDataGridColumn>
+                }
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+}
+@code {
+    private IEnumerable<HrSummary>? hrSummary;
+    private IEnumerable<LeaveTypesService.LeaveTypeDto>? leaveTypes;
+    private TimeSpan workingHours = TimeSpan.FromHours(8);// TODO get workinghours from api
+    private int daysInARow = 14; // TODO get from config
+
+    protected override async Task OnInitializedAsync()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var query = new GetLeaveRequestsQuery(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), 1, 1000);
+        var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
+        var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
+        var getLimitsTask = UserLeaveLimitsService.GetLimits();
+        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
+        var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
+        leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
+        var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.LeaveLimitDto>();
+        var users = CreateUserCollection(leaveRequests, limits);
+        hrSummary = users.Select(u => HrSummary.Create(u,
+            leaveTypes,
+            leaveRequests,
+            limits,
+            workingHours,
+            daysInARow
+        ));
+    }
+
+    private static IEnumerable<FederatedUser> CreateUserCollection(IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits) =>
+        leaveRequests
+            .Select(lr => lr.CreatedBy)
+            .Union(limits.Select(l => new FederatedUser(l.AssignedToUserEmail, null)))
+            .GroupBy(u => u.Email)
+            .Select(g => g.First());
+}

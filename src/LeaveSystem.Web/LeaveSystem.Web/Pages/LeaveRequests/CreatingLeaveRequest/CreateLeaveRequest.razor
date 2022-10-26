@@ -77,7 +77,7 @@
         var today = DateTime.Today;
         leaveRequest.DateFrom = today;
         leaveRequest.DateTo = today;
-        leaveRequest.Duration = TimeSpan.FromHours(8);
+        //leaveRequest.Duration = TimeSpan.FromHours(8);
         editContext = new(leaveRequest);
     }
     protected override async Task OnInitializedAsync()

@@ -2,6 +2,7 @@
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Services;
+using LeaveSystem.Shared;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
@@ -22,7 +23,7 @@ public class LeaveRequestFactory
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
         var workingHours = await workingHoursService.GetUsersWorkingHours(command.CreatedBy);
-        var maxDuration = workingHoursService.CalculateDurationOfLeave(command.DateFrom, command.DateTo, workingHours, leaveType.Properties?.IncludeFreeDays);
+        var maxDuration = DateCalculator.CalculateDuration(command.DateFrom, command.DateTo, workingHours, leaveType.Properties?.IncludeFreeDays);
         var minDuration = maxDuration - workingHours;
         var duration = command.Duration ?? maxDuration;
         var leaveRequestCreated = LeaveRequestCreated.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, duration, command.LeaveTypeId, command.Remarks, command.CreatedBy);

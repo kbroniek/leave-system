@@ -42,7 +42,7 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
         var dateFromOrDefault = dateFrom ?? now.Add(TimeSpan.FromDays(-14));
         var dateToOrDefault = dateTo ?? now.Add(TimeSpan.FromDays(14));
         Guard.Against.NegativeOrZero(pageNumberOrDefault, nameof(pageNumber));
-        Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), 1, 100);
+        Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), 1, 1000);
         Guard.Against.Nill(requestedBy.Email);
         return new(
             pageNumberOrDefault,

@@ -1,5 +1,5 @@
 ﻿using LeaveSystem.Web.Components;
-using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequest;
+using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
