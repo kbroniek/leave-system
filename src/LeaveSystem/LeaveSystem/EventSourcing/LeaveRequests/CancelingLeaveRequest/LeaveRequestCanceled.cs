@@ -25,9 +25,6 @@ public class LeaveRequestCanceled : IEvent
 
     public static LeaveRequestCanceled Create(Guid leaveRequestId, string? remarks, FederatedUser canceledBy)
     {
-        leaveRequestId = Guard.Against.Default(leaveRequestId);
-        canceledBy = Guard.Against.Nill(canceledBy);
-        Guard.Against.InvalidEmail(canceledBy.Email, $"{nameof(canceledBy)}.{nameof(canceledBy.Email)}");
         return new(leaveRequestId, remarks, canceledBy);
     }
 }

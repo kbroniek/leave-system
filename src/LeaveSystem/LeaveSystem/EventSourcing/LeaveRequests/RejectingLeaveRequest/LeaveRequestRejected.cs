@@ -25,9 +25,6 @@ public class LeaveRequestRejected : IEvent
 
     public static LeaveRequestRejected Create(Guid leaveRequestId, string? remarks, FederatedUser rejectedBy)
     {
-        leaveRequestId = Guard.Against.Default(leaveRequestId);
-        rejectedBy = Guard.Against.Nill(rejectedBy);
-        Guard.Against.InvalidEmail(rejectedBy.Email, $"{nameof(rejectedBy)}.{nameof(rejectedBy.Email)}");
         return new(leaveRequestId, remarks, rejectedBy);
     }
 }

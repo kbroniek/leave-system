@@ -21,9 +21,9 @@ public class CancelLeaveRequest : ICommand
 
     public static CancelLeaveRequest Create(Guid? leaveRequestId, string? remarks, FederatedUser? canceledBy)
     {
-        leaveRequestId = Guard.Against.Nill(leaveRequestId);
-        canceledBy = Guard.Against.Nill(canceledBy);
-        return new(leaveRequestId.Value, remarks, canceledBy.Value);
+        var canceledByNotNull = Guard.Against.Nill(canceledBy);
+        Guard.Against.InvalidEmail(canceledByNotNull.Email, $"{nameof(canceledBy)}.{nameof(canceledByNotNull.Email)}");
+        return new(Guard.Against.NillAndDefault(leaveRequestId), remarks, canceledByNotNull);
     }
 }
 

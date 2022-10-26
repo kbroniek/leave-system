@@ -22,7 +22,9 @@ public class CreateLeaveRequest : ICommand
 
     public FederatedUser CreatedBy { get; }
 
-    private CreateLeaveRequest(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy)
+    public TimeSpan WorkingHours { get; }
+
+    private CreateLeaveRequest(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, TimeSpan workingHours)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
@@ -31,17 +33,19 @@ public class CreateLeaveRequest : ICommand
         LeaveTypeId = leaveTypeId;
         Remarks = remarks;
         CreatedBy = createdBy;
+        WorkingHours = workingHours;
     }
-    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy)
+    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy, TimeSpan? workingHours)
     {
         return new(
-            Guard.Against.Nill(leaveRequestId).Value,
-            Guard.Against.Nill(dateFrom).Value.GetDayWithoutTime(),
-            Guard.Against.Nill(dateTo).Value.GetDayWithoutTime(),
+            Guard.Against.NillAndDefault(leaveRequestId),
+            Guard.Against.NillAndDefault(dateFrom),
+            Guard.Against.NillAndDefault(dateTo),
             duration,
-            Guard.Against.Nill(leaveTypeId).Value,
+            Guard.Against.NillAndDefault(leaveTypeId),
             remarks,
-            Guard.Against.Nill(createdBy).Value);
+            Guard.Against.NillAndDefault(createdBy),
+            Guard.Against.NillAndDefault(workingHours));
     }
 }
 

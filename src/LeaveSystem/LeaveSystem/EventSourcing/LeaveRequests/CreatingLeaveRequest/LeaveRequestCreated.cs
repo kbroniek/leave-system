@@ -22,8 +22,10 @@ public class LeaveRequestCreated : IEvent
 
     public FederatedUser CreatedBy { get; }
 
+    public TimeSpan WorkingHours { get; }
+
     [JsonConstructor]
-    private LeaveRequestCreated(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
+    private LeaveRequestCreated(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy, TimeSpan workingHours)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
@@ -32,16 +34,11 @@ public class LeaveRequestCreated : IEvent
         LeaveTypeId = type;
         Remarks = remarks;
         CreatedBy = createdBy;
+        WorkingHours = workingHours;
     }
-    public static LeaveRequestCreated Create(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
+    public static LeaveRequestCreated Create(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy, TimeSpan workingHours)
     {
-        leaveRequestId = Guard.Against.Default(leaveRequestId);
-        dateFrom = Guard.Against.Default(dateFrom);
-        dateTo = Guard.Against.Default(dateTo);
-        type = Guard.Against.Default(type);
-        duration = Guard.Against.Default(duration);
         Guard.Against.InvalidEmail(createdBy.Email, $"{nameof(createdBy)}.{nameof(createdBy.Email)}");
-
         var dateFromWithoutTime = dateFrom.GetDayWithoutTime();
         var dateToWithoutTime = dateTo.GetDayWithoutTime();
         var now = DateTimeOffset.UtcNow;
@@ -55,6 +52,6 @@ public class LeaveRequestCreated : IEvent
             throw new ArgumentOutOfRangeException(nameof(dateFrom), "Date from has to be less than date to.");
         }
 
-        return new(leaveRequestId, dateFromWithoutTime, dateToWithoutTime, duration, type, remarks, createdBy);
+        return new(leaveRequestId, dateFromWithoutTime, dateToWithoutTime, duration, type, remarks, createdBy, workingHours);
     }
 }
