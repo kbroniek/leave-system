@@ -14,5 +14,5 @@ public class WorkingHoursService
         return workingHoursCollection.GetDuration(userEmail, dateFrom, dateTo);
     }
     private static IEnumerable<WorkingHoursModel> GetWorkingHours(string userEmail, DateTimeOffset dateFrom, DateTimeOffset dateTo) =>
-        new WorkingHoursModel[] { new WorkingHoursModel(userEmail, dateFrom, dateTo, TimeSpan.FromHours(8)) };
+        new WorkingHoursModel[] { new WorkingHoursModel(userEmail, dateFrom, dateTo, WorkingHoursCollection.DefaultWorkingHours) };
 }
