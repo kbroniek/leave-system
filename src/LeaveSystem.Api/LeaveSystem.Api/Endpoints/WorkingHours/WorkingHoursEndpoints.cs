@@ -3,7 +3,7 @@ using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using Microsoft.Identity.Web.Resource;
 
-namespace LeaveSystem.Api.Endpoints;
+namespace LeaveSystem.Api.Endpoints.WorkingHours;
 
 public static class WorkingHoursEndpoints
 {

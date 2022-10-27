@@ -10,7 +10,7 @@ using Marten.Pagination;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
-namespace LeaveSystem.Api.Endpoints;
+namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 
 public static class LeaveRequestEndpoints
 {

@@ -1,7 +1,7 @@
 ﻿using LeaveSystem.Api.Extensions;
 using LeaveSystem.Shared.LeaveRequests;
 
-namespace LeaveSystem.Api.Endpoints;
+namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 
 public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTimeOffset? DateFrom, DateTimeOffset? DateTo,
     Guid[]? LeaveTypeIds, LeaveRequestStatus[]? Statuses, string[]? CreatedByEmails)

@@ -1,4 +1,5 @@
-﻿using LeaveSystem.Api.Endpoints;
+﻿using LeaveSystem.Api.Endpoints.LeaveRequests;
+using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

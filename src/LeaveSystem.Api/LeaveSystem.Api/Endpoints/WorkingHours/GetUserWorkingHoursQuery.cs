@@ -1,6 +1,6 @@
 ﻿using LeaveSystem.Api.Extensions;
 
-namespace LeaveSystem.Api.Endpoints;
+namespace LeaveSystem.Api.Endpoints.WorkingHours;
 
 public record class GetUserWorkingHoursQuery(DateTimeOffset DateFrom, DateTimeOffset DateTo)
 {
