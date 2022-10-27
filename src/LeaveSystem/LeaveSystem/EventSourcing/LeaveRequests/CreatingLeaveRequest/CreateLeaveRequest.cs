@@ -59,7 +59,7 @@ internal class HandleCreateLeaveRequest :
 
     public async Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
-        var leaveRequest = await leaveRequestFactory.Create(command);
+        var leaveRequest = await leaveRequestFactory.Create(command, cancellationToken);
         await repository.Add(leaveRequest, cancellationToken);
         await repository.SaveChanges(cancellationToken);
         return Unit.Value;

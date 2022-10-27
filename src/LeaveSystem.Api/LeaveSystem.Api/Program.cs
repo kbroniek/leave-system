@@ -82,7 +82,9 @@ app.MapFallbackToFile("index.html");
 
 var azureScpes = app.Configuration[$"{azureConfigSection}:Scopes"];
 
-app.AddLeaveRequestEndpoints(azureScpes);
+app
+    .AddLeaveRequestEndpoints(azureScpes)
+    .AddWorkingHoursEndpoints(azureScpes);
 
 app.MigrateDb();
 if(app.Environment.IsDevelopment())
