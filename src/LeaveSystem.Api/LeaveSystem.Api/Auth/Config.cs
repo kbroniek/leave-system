@@ -15,22 +15,46 @@ public static class Config
     }
     public static void AddRoleBasedAuthorization(this IServiceCollection services)
     {
-        services.AddAuthorization(options =>
-                  options.AddPolicy(LeaveRequestEndpoints.GetLeaveRequestsPolicyName,
-                  policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
-        services.AddAuthorization(options =>
-                  options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestPolicyName,
-                  policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
-        services.AddAuthorization(options =>
-                  options.AddPolicy(LeaveRequestEndpoints.AcceptLeaveRequestPolicyName,
-                  policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))));
-        services.AddAuthorization(options =>
-                  options.AddPolicy(LeaveRequestEndpoints.RejectLeaveRequestPolicyName,
-                  policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))));
-        services.AddAuthorization(options =>
-                  options.AddPolicy(LeaveRequestEndpoints.CancelLeaveRequestPolicyName,
-                  policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
+        services
+            .AddLeaveRequestsAuthorization()
+            .AddWorkingHoursAuthorization();
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
+    }
+
+    private static IServiceCollection AddLeaveRequestsAuthorization(this IServiceCollection services)
+    {
+        services
+            .AddAuthorization(options =>
+                options.AddPolicy(LeaveRequestEndpoints.GetLeaveRequestsPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+            .AddAuthorization(options =>
+                options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+            .AddAuthorization(options =>
+                options.AddPolicy(LeaveRequestEndpoints.AcceptLeaveRequestPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
+            .AddAuthorization(options =>
+                options.AddPolicy(LeaveRequestEndpoints.RejectLeaveRequestPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
+            .AddAuthorization(options =>
+                options.AddPolicy(LeaveRequestEndpoints.CancelLeaveRequestPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
+        return services;
+    }
+
+    private static IServiceCollection AddWorkingHoursAuthorization(this IServiceCollection services)
+    {
+        services
+            .AddAuthorization(options =>
+                options.AddPolicy(WorkingHoursEndpoints.GetWorkingHoursEndpointsPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+            .AddAuthorization(options =>
+                options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursEndpointsPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+            .AddAuthorization(options =>
+                options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursDurationEndpointsPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
+        return services;
     }
 }
 
