@@ -2,7 +2,8 @@ using GoldenEye.Registration;
 using LeaveSystem;
 using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Db;
-using LeaveSystem.Api.Endpoints;
+using LeaveSystem.Api.Endpoints.LeaveRequests;
+using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.OData;
@@ -82,7 +83,9 @@ app.MapFallbackToFile("index.html");
 
 var azureScpes = app.Configuration[$"{azureConfigSection}:Scopes"];
 
-app.AddLeaveRequestEndpoints(azureScpes);
+app
+    .AddLeaveRequestEndpoints(azureScpes)
+    .AddWorkingHoursEndpoints(azureScpes);
 
 app.MigrateDb();
 if(app.Environment.IsDevelopment())

@@ -21,9 +21,9 @@ public class AcceptLeaveRequest : ICommand
 
     public static AcceptLeaveRequest Create(Guid? leaveRequestId, string? remarks, FederatedUser? acceptedBy)
     {
-        leaveRequestId = Guard.Against.Nill(leaveRequestId);
-        acceptedBy = Guard.Against.Nill(acceptedBy);
-        return new(leaveRequestId.Value, remarks, acceptedBy.Value);
+        var acceptedByNotNull = Guard.Against.Nill(acceptedBy);
+        Guard.Against.InvalidEmail(acceptedByNotNull.Email, $"{nameof(acceptedBy)}.{nameof(acceptedByNotNull.Email)}");
+        return new(Guard.Against.NillAndDefault(leaveRequestId), remarks, acceptedByNotNull);
     }
 }
 

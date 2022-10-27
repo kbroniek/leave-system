@@ -21,9 +21,9 @@ public class RejectLeaveRequest : ICommand
 
     public static RejectLeaveRequest Create(Guid? leaveRequestId, string? remarks, FederatedUser? rejectedBy)
     {
-        leaveRequestId = Guard.Against.Nill(leaveRequestId);
-        rejectedBy = Guard.Against.Nill(rejectedBy);
-        return new(leaveRequestId.Value, remarks, rejectedBy.Value);
+        var rejectedByNotNull = Guard.Against.Nill(rejectedBy);
+        Guard.Against.InvalidEmail(rejectedByNotNull.Email, $"{nameof(rejectedBy)}.{nameof(rejectedByNotNull.Email)}");
+        return new(Guard.Against.NillAndDefault(leaveRequestId), remarks, rejectedByNotNull);
     }
 }
 

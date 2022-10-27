@@ -10,7 +10,7 @@ using Marten.Pagination;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
-namespace LeaveSystem.Api.Endpoints;
+namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 
 public static class LeaveRequestEndpoints
 {
@@ -19,7 +19,7 @@ public static class LeaveRequestEndpoints
     public const string AcceptLeaveRequestPolicyName = "AcceptLeaveRequest";
     public const string RejectLeaveRequestPolicyName = "RejectLeaveRequest";
     public const string CancelLeaveRequestPolicyName = "CancelLeaveRequest";
-    public static void AddLeaveRequestEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
+    public static IEndpointRouteBuilder AddLeaveRequestEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
         endpoint.MapGet("api/leaveRequests", async (HttpContext httpContext, IQueryBus queryBus, GetLeaveRequestsQuery query, CancellationToken cancellationToken) =>
         {
@@ -104,5 +104,7 @@ public static class LeaveRequestEndpoints
         })
         .WithName(CancelLeaveRequestPolicyName)
         .RequireAuthorization(CancelLeaveRequestPolicyName);
+
+        return endpoint;
     }
 }

@@ -35,13 +35,13 @@ public class CreateLeaveRequest : ICommand
     public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy)
     {
         return new(
-            Guard.Against.Nill(leaveRequestId).Value,
-            Guard.Against.Nill(dateFrom).Value.GetDayWithoutTime(),
-            Guard.Against.Nill(dateTo).Value.GetDayWithoutTime(),
+            Guard.Against.NillAndDefault(leaveRequestId),
+            Guard.Against.NillAndDefault(dateFrom),
+            Guard.Against.NillAndDefault(dateTo),
             duration,
-            Guard.Against.Nill(leaveTypeId).Value,
+            Guard.Against.NillAndDefault(leaveTypeId),
             remarks,
-            Guard.Against.Nill(createdBy).Value);
+            Guard.Against.NillAndDefault(createdBy));
     }
 }
 
@@ -59,7 +59,7 @@ internal class HandleCreateLeaveRequest :
 
     public async Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
-        var leaveRequest = await leaveRequestFactory.Create(command);
+        var leaveRequest = await leaveRequestFactory.Create(command, cancellationToken);
         await repository.Add(leaveRequest, cancellationToken);
         await repository.SaveChanges(cancellationToken);
         return Unit.Value;

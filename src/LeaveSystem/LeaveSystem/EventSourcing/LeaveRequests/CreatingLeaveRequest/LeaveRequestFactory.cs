@@ -19,10 +19,10 @@ public class LeaveRequestFactory
         this.dbContext = dbContext;
     }
 
-    public virtual async Task<LeaveRequest> Create(CreateLeaveRequest command)
+    public virtual async Task<LeaveRequest> Create(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
-        var workingHours = await workingHoursService.GetUsersWorkingHours(command.CreatedBy);
+        var workingHours = await workingHoursService.GetUserSingleWorkingHoursDuration(command.CreatedBy.Email, command.DateFrom, command.DateTo, cancellationToken);
         var maxDuration = DateCalculator.CalculateDuration(command.DateFrom, command.DateTo, workingHours, leaveType.Properties?.IncludeFreeDays);
         var minDuration = maxDuration - workingHours;
         var duration = command.Duration ?? maxDuration;

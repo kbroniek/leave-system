@@ -35,13 +35,7 @@ public class LeaveRequestCreated : IEvent
     }
     public static LeaveRequestCreated Create(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
     {
-        leaveRequestId = Guard.Against.Default(leaveRequestId);
-        dateFrom = Guard.Against.Default(dateFrom);
-        dateTo = Guard.Against.Default(dateTo);
-        type = Guard.Against.Default(type);
-        duration = Guard.Against.Default(duration);
         Guard.Against.InvalidEmail(createdBy.Email, $"{nameof(createdBy)}.{nameof(createdBy.Email)}");
-
         var dateFromWithoutTime = dateFrom.GetDayWithoutTime();
         var dateToWithoutTime = dateTo.GetDayWithoutTime();
         var now = DateTimeOffset.UtcNow;

@@ -5,6 +5,7 @@ using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ namespace LeaveSystem.Api.Db;
 public static class DbContextExtenstions
 {
     private class DbContextExtenstionsLogger { }
-    private static readonly TimeSpan workingHours = TimeSpan.FromHours(8);
+    private static readonly TimeSpan workingHours = WorkingHoursCollection.DefaultWorkingHours;
     private const string DefaultUserEmail = "karolbr5@gmail.com";
     private static readonly FederatedUser defaultUser = new FederatedUser(DefaultUserEmail, "Karol Volt");
     private static readonly FederatedUser[] testUsers = new[]

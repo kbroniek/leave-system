@@ -2,6 +2,7 @@
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
+using LeaveSystem.Web.Pages.WorkingHours;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.JSInterop;
 
@@ -23,7 +24,8 @@ public static class Config
             .AddTransient(sp => new TimelineComponent(sp.GetService<IJSRuntime>()))
             .AddTransient<LeaveTypesService>()
             .AddTransient<GetLeaveRequestsService>()
-            .AddTransient<UserLeaveLimitsService>();
+            .AddTransient<UserLeaveLimitsService>()
+            .AddTransient<WorkingHoursService>();
     }
     private static IServiceCollection AddHttpClient(this IServiceCollection services, IConfiguration configuration, string scopes)
     {

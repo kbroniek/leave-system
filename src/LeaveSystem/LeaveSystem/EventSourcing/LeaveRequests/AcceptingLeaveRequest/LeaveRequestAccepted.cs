@@ -25,9 +25,6 @@ public class LeaveRequestAccepted : IEvent
 
     public static LeaveRequestAccepted Create(Guid leaveRequestId, string? remarks, FederatedUser acceptedBy)
     {
-        leaveRequestId = Guard.Against.Default(leaveRequestId);
-        acceptedBy = Guard.Against.Nill(acceptedBy);
-        Guard.Against.InvalidEmail(acceptedBy.Email, $"{nameof(acceptedBy)}.{nameof(acceptedBy.Email)}");
         return new(leaveRequestId, remarks, acceptedBy);
     }
 }
