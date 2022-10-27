@@ -21,10 +21,7 @@ public static class WorkingHoursEndpoints
                 query.DateFrom,
                 query.DateTo,
                 cancellationToken);
-            return new
-            {
-                WorkingHours = workingHours,
-            };
+            return new Web.Pages.WorkingHours.WorkingHoursCollectionDto(workingHours);
         })
         .WithName(GetWorkingHoursEndpointsPolicyName)
         .RequireAuthorization(GetWorkingHoursEndpointsPolicyName);
@@ -39,10 +36,7 @@ public static class WorkingHoursEndpoints
                 query.DateFrom,
                 query.DateTo,
                 cancellationToken);
-            return new
-            {
-                WorkingHours = workingHours,
-            };
+            return new Web.Pages.WorkingHours.WorkingHoursCollectionDto(workingHours);
         })
         .WithName(GetUserWorkingHoursEndpointsPolicyName)
         .RequireAuthorization(GetUserWorkingHoursEndpointsPolicyName);
@@ -57,10 +51,7 @@ public static class WorkingHoursEndpoints
                 query.DateFrom,
                 query.DateTo,
                 cancellationToken);
-            return new
-            {
-                Duration = duration,
-            };
+            return new Web.Pages.WorkingHours.WorkingHoursDurationDto(duration);
         })
         .WithName(GetUserWorkingHoursDurationEndpointsPolicyName)
         .RequireAuthorization(GetUserWorkingHoursDurationEndpointsPolicyName);

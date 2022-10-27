@@ -2,6 +2,7 @@
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Web.Pages.UserLeaveLimits
+@using LeaveSystem.Web.Pages.WorkingHours
 @using Microsoft.AspNetCore.Authorization
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
@@ -13,6 +14,7 @@
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject UserLeaveLimitsService UserLeaveLimitsService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject WorkingHoursService WorkingHoursService
 
 <PageTitle>User panel</PageTitle>
 
@@ -110,7 +112,6 @@ else
 
 @code {
     private IEnumerable<UserSummary>? userSummaryCollection;
-    private TimeSpan workingHours = TimeSpan.FromHours(8);// TODO get workinghours from api
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,21 +119,25 @@ else
         var user = authState.User.CreateModel();
         var email = user.Email.Substring(2, user.Email.Length - 4); // because we get the email in weird format i.e. ['example@test.com']
         var now = DateTimeOffset.UtcNow;
-        var query = new GetLeaveRequestsQuery(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), 1, 1000, Enum.GetValues<LeaveRequestStatus>())
+        var firstDay = now.GetFirstDayOfYear();
+        var lastDay = now.GetLastDayOfYear();
+        var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000, Enum.GetValues<LeaveRequestStatus>())
         {
             CreatedByEmails = new[] { email }
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
         var getLimitsTask = UserLeaveLimitsService.GetLimits(email);
-        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(email, firstDay, lastDay);
+        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result ?? new PagedListResponse<LeaveRequestShortInfo>(Enumerable.Empty<LeaveRequestShortInfo>(), 0, false);
         var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
         var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
+        var workingHours = getWorkingHoursTask.Result;
         userSummaryCollection = leaveTypes.Select(lt =>
             UserSummary.Create(lt, leaveRequests.Items ?? Enumerable.Empty<LeaveRequestShortInfo>(),
             limits,
-            workingHours));
+            workingHours.GetDuration()));
     }
 
     private record class UserSummary(string LeaveType, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestForView> LeaveRequests)
