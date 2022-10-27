@@ -7,13 +7,15 @@ namespace LeaveSystem.Shared;
 public static class GuardClauseExtensions
 {
     [return: NotNull]
-    public static T Nill<T>(this IGuardClause _, [NotNull][ValidatedNotNull] T input, [CallerArgumentExpression("input")] string? parameterName = null, string? message = null) where T : class
+    public static T Nill<T>(this IGuardClause _, [NotNull][ValidatedNotNull] T? input, [CallerArgumentExpression("input")] string? parameterName = null, string? message = null)
+        where T : class
     {
         return AgainstNill(input, parameterName, message);
     }
 
     [return: NotNull]
-    public static T Nill<T>(this IGuardClause _, [NotNull][ValidatedNotNull] T? input, [CallerArgumentExpression("input")] string? parameterName = null, string? message = null) where T : struct
+    public static T Nill<T>(this IGuardClause _, [NotNull][ValidatedNotNull] T? input, [CallerArgumentExpression("input")] string? parameterName = null, string? message = null)
+        where T : struct
     {
         return AgainstNill(input, parameterName, message).Value;
     }
@@ -32,7 +34,7 @@ public static class GuardClauseExtensions
     }
 
     [return: NotNull]
-    private static T AgainstNill<T>([NotNull][ValidatedNotNull] T input, string? parameterName, string? message)
+    private static T AgainstNill<T>([NotNull][ValidatedNotNull] T? input, string? parameterName, string? message)
     {
         if (input == null)
         {

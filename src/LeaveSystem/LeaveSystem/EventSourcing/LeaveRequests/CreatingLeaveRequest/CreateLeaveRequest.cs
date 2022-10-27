@@ -22,9 +22,7 @@ public class CreateLeaveRequest : ICommand
 
     public FederatedUser CreatedBy { get; }
 
-    public TimeSpan WorkingHours { get; }
-
-    private CreateLeaveRequest(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, TimeSpan workingHours)
+    private CreateLeaveRequest(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
@@ -33,9 +31,8 @@ public class CreateLeaveRequest : ICommand
         LeaveTypeId = leaveTypeId;
         Remarks = remarks;
         CreatedBy = createdBy;
-        WorkingHours = workingHours;
     }
-    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy, TimeSpan? workingHours)
+    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy)
     {
         return new(
             Guard.Against.NillAndDefault(leaveRequestId),
@@ -44,8 +41,7 @@ public class CreateLeaveRequest : ICommand
             duration,
             Guard.Against.NillAndDefault(leaveTypeId),
             remarks,
-            Guard.Against.NillAndDefault(createdBy),
-            Guard.Against.NillAndDefault(workingHours));
+            Guard.Against.NillAndDefault(createdBy));
     }
 }
 
