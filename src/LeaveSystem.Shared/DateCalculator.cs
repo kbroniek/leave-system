@@ -13,7 +13,8 @@ public static class DateCalculator
     }
     public static TimeSpan CalculateDuration(DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan workingHours, bool? includeFreeDays)
     {
-        var dateToPlusOne = dateTo.AddDays(1);
+        var dateToPlusOne = dateTo.AddDays(1).GetDayWithoutTime();
+        dateFrom = dateFrom.GetDayWithoutTime();
         if (includeFreeDays == true)
         {
             return (dateToPlusOne - dateFrom).Days * workingHours;
