@@ -152,7 +152,6 @@
     {
         if (editContext != null && editContext.Validate())
         {
-            Logger.LogInformation("Try to make a request");
             try
             {
                 var response = await Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
