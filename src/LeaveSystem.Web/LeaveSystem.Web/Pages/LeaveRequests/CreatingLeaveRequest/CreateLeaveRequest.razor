@@ -12,9 +12,12 @@
 @inject LeaveTypesService LeaveTypesService
 @inject WorkingHoursService WorkingHoursService;
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NotificationService NotificationService
 @inject ILogger<CreateLeaveRequest> Logger
 
 <PageTitle>Add leave request</PageTitle>
+
+<RadzenNotification />
 
 <div class="container-fluid">
     <h1>Add leave request</h1>
@@ -23,6 +26,7 @@
             <div class="col-xl-4">
             <RadzenCard>
                 <div class="row">
+                    @*TODO: Add behalf of another user*@
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date from:</RadzenText>
                         <RadzenDatePicker Name="DateFrom" @bind-Value=@leaveRequest.DateFrom DateFormat="d" Class="w-100" />
@@ -133,20 +137,59 @@
     {
         if (editContext != null && editContext.Validate())
         {
-            Logger.LogInformation("[HandleSubmit]: Form is valid");
+            Logger.LogInformation("Try to make a request");
             try
             {
-                await Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
+                var response = await Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
+                if((int)response.StatusCode < 400)
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Duration = 40000,
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Information",
+                        Detail = "The leave request has been added",
+                    });
+                }
+                else
+                {
+                    var resultContent = await response.Content.ReadAsStringAsync();
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Duration = 40000,
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = resultContent.Substring(59, 98),
+                    });
+                }
             }
             catch (AccessTokenNotAvailableException exception)
             {
                 Logger.LogError(exception, "AccessTokenNotAvailableException");
                 exception.Redirect();
+                return;
+            }
+            catch(Exception ex)
+            {
+                Logger.LogError(ex, "custome ex");
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Duration = 40000,
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Something went wrong",
+                    Detail = ex.Message
+                });
+                throw;
             }
         }
         else
         {
-            Logger.LogTrace("[HandleSubmit]: Form is INVALID");
+            NotificationService.Notify(new NotificationMessage
+            {
+                Duration = 40000,
+                Severity = NotificationSeverity.Warning,
+                Summary = "The edit form is invalid"
+            });
         }
     }
 
