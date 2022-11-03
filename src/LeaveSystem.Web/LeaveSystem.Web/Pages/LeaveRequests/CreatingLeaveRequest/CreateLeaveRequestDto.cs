@@ -2,8 +2,8 @@
 
 public class CreateLeaveRequestDto
 {
-    public DateTimeOffset? DateFrom { get; set; }
-    public DateTimeOffset? DateTo { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
     public TimeSpan? Duration { get; set; }
     public Guid? LeaveTypeId { get; set; }
     public string? Remarks { get; set; }

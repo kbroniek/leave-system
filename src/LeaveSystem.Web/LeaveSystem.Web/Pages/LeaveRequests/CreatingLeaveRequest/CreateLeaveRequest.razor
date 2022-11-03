@@ -2,59 +2,97 @@
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using LeaveSystem.Web.Pages.WorkingHours
+@using LeaveSystem.Web.Extensions
+@using LeaveSystem.Shared
+@using Microsoft.AspNetCore.Components.Authorization;
+@using LeaveSystem.Shared.WorkingHours
 @attribute [Authorize]
 @inject HttpClient Http
 @inject LeaveTypesService LeaveTypesService
+@inject WorkingHoursService WorkingHoursService;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NotificationService NotificationService
 @inject ILogger<CreateLeaveRequest> Logger
 
 <PageTitle>Add leave request</PageTitle>
 
-<h1>Add leave request</h1>
+<RadzenNotification />
 
-<EditForm Model="@leaveRequest" OnValidSubmit="@HandleSubmit">
-    <FluentValidationValidator />
-    <ValidationSummary />
+<div class="container-fluid">
+    <h1>Add leave request</h1>
+    <RadzenTemplateForm TItem="CreateLeaveRequestDto" Data=@leaveRequest Submit=@HandleSubmit>
+        <div class="row">
+            <div class="col-xl-4">
+            <RadzenCard>
+                <div class="row">
+                    @*TODO: Add behalf of another user*@
+                    <div>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date from:</RadzenText>
+                        <RadzenDatePicker Name="DateFrom" @bind-Value=@leaveRequest.DateFrom DateFormat="d" Class="w-100" />
+                        <RadzenRequiredValidator Component="DateFrom" Text="Put date from" Style="position: initial" Popup="true" />
+                    </div>
+                    <div>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date to:</RadzenText>
+                        <RadzenDatePicker Name="DateTo" @bind-Value=@leaveRequest.DateTo DateFormat="d" Class="w-100" Change=@(arg => DateChanged(arg)) />
+                        <RadzenRequiredValidator Component="DateTo" Text="Put date to" Style="position: initial" Popup="true" />
+                        <RadzenCompareValidator Value=@leaveRequest.DateFrom Component="DateTo" Style="position: initial" Popup="true" Operator="CompareOperator.GreaterThanEqual" Text="Date from must be less or equal date to" />
+                    </div>
+                    <div>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Leave type:</RadzenText>
+                        <RadzenDropDown @bind-Value="leaveRequest.LeaveTypeId" Data="@leaveTypes" TextProperty="Name" ValueProperty="Id" Name="LeaveType" Class="w-100">
+                        </RadzenDropDown>
+                        <RadzenRequiredValidator Component="LeaveType" Text="Choose leave type" Style="position: initial" Popup="true" />
+                    </div>
+@*                    <div>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-1">Hours:</RadzenText>
+                        <InputText type="time" @bind-Value="TimeProxy" />
+                    </div>*@
+                    <div>
+                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Remarks:</RadzenText>
+                        <RadzenTextArea Placeholder="Enter here..." @bind-Value="leaveRequest.Remarks" Class="w-100" />
+                    </div>
+                </div>
 
-    <p>
-        <label>
-            Date from:
-            <InputDate @bind-Value="leaveRequest.DateFrom" />
-        </label>
-    </p>
-    <p>
-        <label>
-            Date from:
-            <InputDate @bind-Value="leaveRequest.DateTo" />
-        </label>
-    </p>
-    <p>
-        <label>
-            Hours:
-            @*<InputText @bind-Value="leaveRequest.Hours" />*@
-            <InputText type="time" @bind-Value="TimeProxy" />
-        </label>
-    </p>
-    <p>
-        <label>
-            Leave type:
-            <InputSelect @bind-Value="leaveRequest.LeaveTypeId" >
-                <option value="">Select leave type ...</option>
-                @foreach (var leaveType in leaveTypes)
-                {
-                    <option value="@leaveType.Id">@leaveType.Name</option>
-                }
-            </InputSelect>
-        </label>
-    </p>
-    <p>
-        <label>
-            Remarks (optional):
-            <InputTextArea @bind-Value="leaveRequest.Remarks" />
-        </label>
-    </p>
+                <div class="row">
+                    <div class="col-4">
+                        <RadzenButton type="submit" Text="Create" class="mt-2"></RadzenButton>
+                    </div>
+                </div>
+            </RadzenCard>
+            </div>
+            <div class="col-xl-8">
+                <RadzenCard  style="min-height: 29rem">
+                    <RadzenText TextStyle="TextStyle.H6" class="mb-1">Leave details:</RadzenText>
+                    <hr class="mt-2 mb-3"/>
+                    @if(leaveSummary == null)
+                    {
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Loading...</RadzenText>
+                    }
+                    else
+                    {
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Days available: @leaveSummary.DaysAvailable</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Days available after submitting the request: @leaveSummary.DaysAvailableAfterSubmitting</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">All days in requests: @leaveSummary.AllDaysInRequests</RadzenText>
+                    }
+                    <RadzenText TextStyle="TextStyle.H6" class="mb-1 mt-4">Date range details:</RadzenText>
+                    <hr class="mt-2 mb-3"/>
+                    @if(dateSummary == null)
+                    {
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Loading...</RadzenText>
+                    }
+                    else
+                    {
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Calendar days: @dateSummary.Days</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Working days: @dateSummary.WorkingDays</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Free days: @dateSummary.FreeDays</RadzenText>
+                    }
+                </RadzenCard>
+            </div>
+        </div>
+    </RadzenTemplateForm>
+</div>
 
-    <button type="submit">Submit</button>
-</EditForm>
 @functions
 {
     string TimeProxy
@@ -71,39 +109,129 @@
     private CreateLeaveRequestDto leaveRequest = new();
     private EditContext? editContext;
     private IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
+    private LeaveSummary? leaveSummary;
+    private DateSummary? dateSummary;
+    private WorkingHoursCollection workingHours = new WorkingHoursCollection(Enumerable.Empty<WorkingHoursModel>());
 
     protected override void OnInitialized()
     {
-        var today = DateTime.Today;
-        leaveRequest.DateFrom = today;
-        leaveRequest.DateTo = today;
+        var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
+        leaveRequest.DateFrom = now.Date;
+        leaveRequest.DateTo = now.Date;
         //leaveRequest.Duration = TimeSpan.FromHours(8);
         editContext = new(leaveRequest);
     }
     protected override async Task OnInitializedAsync()
     {
-        leaveTypes = await LeaveTypesService.GetLeaveTypes();
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var email = authState.User.CreateModel().GetEmail();
+            var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
+            leaveTypes = await LeaveTypesService.GetLeaveTypes();
+            leaveRequest.LeaveTypeId = leaveTypes.FirstOrDefault(lt => lt.Properties.Catalog == LeaveSystem.Shared.LeaveTypeCatalog.Holiday)?.Id;
+            workingHours = await WorkingHoursService.GetUserWorkingHours(email, now.GetFirstDayOfYear(), now.GetLastDayOfYear());
+            var workingHoursDuration = workingHours.GetDuration();
+            dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
+            leaveSummary = new("", "", "");
+        }
+        catch(Exception ex)
+        {
+            Logger.LogError(ex, "OnInitializedAsync");
+            NotificationService.Notify(new NotificationMessage
+            {
+                Duration = 40000,
+                Severity = NotificationSeverity.Error,
+                Summary = "Something went wrong",
+                Detail = ex.Message
+            });
+            throw;
+        }
     }
     private async Task HandleSubmit()
     {
         if (editContext != null && editContext.Validate())
         {
-            Logger.LogInformation("[HandleSubmit]: Form is valid");
             try
             {
-                await Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
+                var response = await Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
+                if((int)response.StatusCode < 400)
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Duration = 40000,
+                        Severity = NotificationSeverity.Info,
+                        Summary = "Information",
+                        Detail = "The leave request has been added",
+                    });
+                }
+                else
+                {
+                    var resultContent = await response.Content.ReadAsStringAsync();
+                    Logger.LogError(resultContent);
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Duration = 40000,
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = resultContent.Substring(59, 98),
+                    });
+                }
             }
             catch (AccessTokenNotAvailableException exception)
             {
                 Logger.LogError(exception, "AccessTokenNotAvailableException");
                 exception.Redirect();
+                return;
+            }
+            catch(Exception ex)
+            {
+                Logger.LogError(ex, "HandleSubmit");
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Duration = 40000,
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Something went wrong",
+                    Detail = ex.Message
+                });
+                throw;
             }
         }
         else
         {
-            Logger.LogTrace("[HandleSubmit]: Form is INVALID");
+            NotificationService.Notify(new NotificationMessage
+            {
+                Duration = 40000,
+                Severity = NotificationSeverity.Warning,
+                Summary = "The edit form is invalid"
+            });
         }
     }
+
+    private void DateChanged(DateTime? _)
+    {
+        var workingHoursDuration = workingHours.GetDuration();
+        dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
+    }
+
+    private static DateSummary GetDateSummary(DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan workingHours)
+    {
+        if (dateFrom != null && dateTo != null)
+        {
+            var allDays = DateCalculator.CalculateDuration(dateFrom.Value, dateTo.Value, workingHours, true);
+            var workingDays = DateCalculator.CalculateDuration(dateFrom.Value, dateTo.Value, workingHours, false);
+            var freeDays = allDays - workingDays;
+
+            return new DateSummary(
+                allDays.GetReadableTimeSpan(workingHours),
+                workingDays.GetReadableTimeSpan(workingHours),
+                freeDays.GetReadableTimeSpan(workingHours));
+        }
+        return new DateSummary("","","");
+    }
+
+    private record class LeaveSummary(string DaysAvailable, string DaysAvailableAfterSubmitting, string AllDaysInRequests);
+    private record class DateSummary(string Days, string WorkingDays, string FreeDays);
 }
 
 

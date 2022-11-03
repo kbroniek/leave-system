@@ -28,7 +28,7 @@ public static class WorkingHoursEndpoints
 
         endpoint.MapGet("api/workingHours/{userEmail}", async (HttpContext httpContext, WorkingHoursService service, string? userEmail, GetUserWorkingHoursQuery query, CancellationToken cancellationToken) =>
         {
-            //httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
             Guard.Against.InvalidEmail(userEmail);
 
             var workingHours = await service.GetUserWorkingHours(
@@ -43,7 +43,7 @@ public static class WorkingHoursEndpoints
 
         endpoint.MapGet("api/workingHours/{userEmail}/duration", async (HttpContext httpContext, WorkingHoursService service, string? userEmail, GetUserWorkingHoursQuery query, CancellationToken cancellationToken) =>
         {
-            //httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
             Guard.Against.InvalidEmail(userEmail);
             var duration = await service.GetUserSingleWorkingHoursDuration(

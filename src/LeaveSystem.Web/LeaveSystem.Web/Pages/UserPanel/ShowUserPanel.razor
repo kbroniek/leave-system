@@ -117,7 +117,7 @@ else
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User.CreateModel();
-        var email = user.Email.Substring(2, user.Email.Length - 4); // because we get the email in weird format i.e. ['example@test.com']
+        var email = user.GetEmail();
         var now = DateTimeOffset.UtcNow;
         var firstDay = now.GetFirstDayOfYear();
         var lastDay = now.GetLastDayOfYear();

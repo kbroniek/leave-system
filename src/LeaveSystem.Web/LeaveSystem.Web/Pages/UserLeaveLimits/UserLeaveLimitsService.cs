@@ -13,6 +13,7 @@ public class UserLeaveLimitsService
     {
         this.httpClient = httpClient;
     }
+    //TODO: add time range
     public async Task<IEnumerable<UserLeaveLimitDto>> GetLimits(string userEmail)
     {
         // TODO: FIX. Returns only data for one user.
@@ -25,6 +26,7 @@ public class UserLeaveLimitsService
         });
         return limits?.Data ?? Enumerable.Empty<UserLeaveLimitDto>();
     }
+    //TODO: add time range
     public async Task<IEnumerable<LeaveLimitDto>> GetLimits()
     {
         // TODO: FIX. Returns only data for one user.
