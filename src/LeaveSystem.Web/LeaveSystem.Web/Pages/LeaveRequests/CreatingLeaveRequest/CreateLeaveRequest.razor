@@ -123,15 +123,30 @@
     }
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var email = authState.User.CreateModel().GetEmail();
-        var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
-        leaveTypes = await LeaveTypesService.GetLeaveTypes();
-        leaveRequest.LeaveTypeId = leaveTypes.FirstOrDefault(lt => lt.Properties.Catalog == LeaveSystem.Shared.LeaveTypeCatalog.Holiday)?.Id;
-        workingHours = await WorkingHoursService.GetUserWorkingHours(email, now.GetFirstDayOfYear(), now.GetLastDayOfYear());
-        var workingHoursDuration = workingHours.GetDuration();
-        dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
-        leaveSummary = new("", "", "");
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var email = authState.User.CreateModel().GetEmail();
+            var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
+            leaveTypes = await LeaveTypesService.GetLeaveTypes();
+            leaveRequest.LeaveTypeId = leaveTypes.FirstOrDefault(lt => lt.Properties.Catalog == LeaveSystem.Shared.LeaveTypeCatalog.Holiday)?.Id;
+            workingHours = await WorkingHoursService.GetUserWorkingHours(email, now.GetFirstDayOfYear(), now.GetLastDayOfYear());
+            var workingHoursDuration = workingHours.GetDuration();
+            dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
+            leaveSummary = new("", "", "");
+        }
+        catch(Exception ex)
+        {
+            Logger.LogError(ex, "OnInitializedAsync");
+            NotificationService.Notify(new NotificationMessage
+            {
+                Duration = 40000,
+                Severity = NotificationSeverity.Error,
+                Summary = "Something went wrong",
+                Detail = ex.Message
+            });
+            throw;
+        }
     }
     private async Task HandleSubmit()
     {
@@ -154,6 +169,7 @@
                 else
                 {
                     var resultContent = await response.Content.ReadAsStringAsync();
+                    Logger.LogError(resultContent);
                     NotificationService.Notify(new NotificationMessage
                     {
                         Duration = 40000,
@@ -171,6 +187,7 @@
             }
             catch(Exception ex)
             {
+                Logger.LogError(ex, "HandleSubmit");
                 NotificationService.Notify(new NotificationMessage
                 {
                     Duration = 40000,
