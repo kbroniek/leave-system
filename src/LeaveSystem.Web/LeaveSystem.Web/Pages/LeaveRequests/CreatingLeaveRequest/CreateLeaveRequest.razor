@@ -18,31 +18,32 @@
 
 <div class="container-fluid">
     <h1>Add leave request</h1>
-    <EditForm Model="@leaveRequest" OnValidSubmit="@HandleSubmit">
-        <FluentValidationValidator />
-        <ValidationSummary />
-
+    <RadzenTemplateForm TItem="CreateLeaveRequestDto" Data=@leaveRequest Submit=@HandleSubmit>
         <div class="row">
             <div class="col-xl-4">
             <RadzenCard>
                 <div class="row">
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date from:</RadzenText>
-                        <RadzenDatePicker @bind-Value=@leaveRequest.DateFrom DateFormat="d" Class="w-100" />
+                        <RadzenDatePicker Name="DateFrom" @bind-Value=@leaveRequest.DateFrom DateFormat="d" Class="w-100" />
+                        <RadzenRequiredValidator Component="DateFrom" Text="Put date from" Style="position: initial" Popup="true" />
                     </div>
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date to:</RadzenText>
-                        <RadzenDatePicker @bind-Value=@leaveRequest.DateTo DateFormat="d" Class="w-100" Change=@(arg => DateChanged(arg)) />
+                        <RadzenDatePicker Name="DateTo" @bind-Value=@leaveRequest.DateTo DateFormat="d" Class="w-100" Change=@(arg => DateChanged(arg)) />
+                        <RadzenRequiredValidator Component="DateTo" Text="Put date to" Style="position: initial" Popup="true" />
+                        <RadzenCompareValidator Value=@leaveRequest.DateFrom Component="DateTo" Style="position: initial" Popup="true" Operator="CompareOperator.GreaterThanEqual" Text="Date from must be less or equal date to" />
                     </div>
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Leave type:</RadzenText>
-                        <RadzenDropDown @bind-Value="leaveRequest.LeaveTypeId" Data="@leaveTypes" TextProperty="Name" ValueProperty="Id" Name="Leave type" Class="w-100">
+                        <RadzenDropDown @bind-Value="leaveRequest.LeaveTypeId" Data="@leaveTypes" TextProperty="Name" ValueProperty="Id" Name="LeaveType" Class="w-100">
                         </RadzenDropDown>
+                        <RadzenRequiredValidator Component="LeaveType" Text="Choose leave type" Style="position: initial" Popup="true" />
                     </div>
-                    <div>
+@*                    <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-1">Hours:</RadzenText>
                         <InputText type="time" @bind-Value="TimeProxy" />
-                    </div>
+                    </div>*@
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Remarks:</RadzenText>
                         <RadzenTextArea Placeholder="Enter here..." @bind-Value="leaveRequest.Remarks" Class="w-100" />
@@ -85,7 +86,7 @@
                 </RadzenCard>
             </div>
         </div>
-    </EditForm>
+    </RadzenTemplateForm>
 </div>
 
 @functions
@@ -111,8 +112,8 @@
     protected override void OnInitialized()
     {
         var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
-        leaveRequest.DateFrom = now;
-        leaveRequest.DateTo = now;
+        leaveRequest.DateFrom = now.Date;
+        leaveRequest.DateTo = now.Date;
         //leaveRequest.Duration = TimeSpan.FromHours(8);
         editContext = new(leaveRequest);
     }
