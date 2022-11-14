@@ -1,5 +1,7 @@
 ﻿@page "/create-leave-request"
+@using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
 @using LeaveSystem.Web.Pages.LeaveTypes
+@using LeaveSystem.Web.Pages.UserLeaveLimits
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using LeaveSystem.Web.Pages.WorkingHours
@@ -12,6 +14,8 @@
 @inject LeaveTypesService LeaveTypesService
 @inject WorkingHoursService WorkingHoursService;
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject GetLeaveRequestsService GetLeaveRequestsService
+@inject UserLeaveLimitsService UserLeaveLimitsService
 @inject NotificationService NotificationService
 @inject ILogger<CreateLeaveRequest> Logger
 
@@ -29,7 +33,7 @@
                     @*TODO: Add behalf of another user*@
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date from:</RadzenText>
-                        <RadzenDatePicker Name="DateFrom" @bind-Value=@leaveRequest.DateFrom DateFormat="d" Class="w-100" />
+                        <RadzenDatePicker Name="DateFrom" @bind-Value=@leaveRequest.DateFrom DateFormat="d" Class="w-100" Change=@(arg => DateChanged(arg)) />
                         <RadzenRequiredValidator Component="DateFrom" Text="Put date from" Style="position: initial" Popup="true" />
                     </div>
                     <div>
@@ -40,8 +44,7 @@
                     </div>
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Leave type:</RadzenText>
-                        <RadzenDropDown @bind-Value="leaveRequest.LeaveTypeId" Data="@leaveTypes" TextProperty="Name" ValueProperty="Id" Name="LeaveType" Class="w-100">
-                        </RadzenDropDown>
+                        <RadzenDropDown @bind-Value="leaveRequest.LeaveTypeId" Data="@leaveTypes" TextProperty="Name" ValueProperty="Id" Name="LeaveType" Class="w-100" Change=@(arg => LeaveTypeChanged(arg)) />
                         <RadzenRequiredValidator Component="LeaveType" Text="Choose leave type" Style="position: initial" Popup="true" />
                     </div>
 @*                    <div>
@@ -71,9 +74,9 @@
                     }
                     else
                     {
-                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Days available: @leaveSummary.DaysAvailable</RadzenText>
-                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Days available after submitting the request: @leaveSummary.DaysAvailableAfterSubmitting</RadzenText>
-                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">All days in requests: @leaveSummary.AllDaysInRequests</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Days available: <strong>@leaveSummary.DaysAvailable</strong></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Days available after submitting the request: <strong>@leaveSummary.DaysAvailableAfterSubmitting</strong></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">All days in requests: <strong>@leaveSummary.AllDaysInRequests</strong></RadzenText>
                     }
                     <RadzenText TextStyle="TextStyle.H6" class="mb-1 mt-4">Date range details:</RadzenText>
                     <hr class="mt-2 mb-3"/>
@@ -83,9 +86,9 @@
                     }
                     else
                     {
-                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Calendar days: @dateSummary.Days</RadzenText>
-                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Working days: @dateSummary.WorkingDays</RadzenText>
-                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Free days: @dateSummary.FreeDays</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Calendar days: <strong>@dateSummary.Days</strong></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Working days: <strong>@dateSummary.WorkingDays</strong></RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Free days: <strong>@dateSummary.FreeDays</strong></RadzenText>
                     }
                 </RadzenCard>
             </div>
@@ -111,6 +114,8 @@
     private IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
     private LeaveSummary? leaveSummary;
     private DateSummary? dateSummary;
+    private IEnumerable<LeaveRequestShortInfo> submittedLeaveRequests = Enumerable.Empty<LeaveRequestShortInfo>();
+    private IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
     private WorkingHoursCollection workingHours = new WorkingHoursCollection(Enumerable.Empty<WorkingHoursModel>());
 
     protected override void OnInitialized()
@@ -128,16 +133,27 @@
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var email = authState.User.CreateModel().GetEmail();
             var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
+            var firstDay = now.GetFirstDayOfYear();
+            var lastDay = now.GetLastDayOfYear();
             leaveTypes = await LeaveTypesService.GetLeaveTypes();
             leaveRequest.LeaveTypeId = leaveTypes.FirstOrDefault(lt => lt.Properties.Catalog == LeaveSystem.Shared.LeaveTypeCatalog.Holiday)?.Id;
-            workingHours = await WorkingHoursService.GetUserWorkingHours(email, now.GetFirstDayOfYear(), now.GetLastDayOfYear());
+            var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000)
+            {
+                CreatedByEmails = new string[] { email }
+            });
+            var getLimitsTask = UserLeaveLimitsService.GetLimits(email);
+            var getUserWorkingHours = WorkingHoursService.GetUserWorkingHours(email, firstDay, lastDay);
+            await Task.WhenAll(getLeaveRequestsTask, getLimitsTask, getUserWorkingHours);
+            submittedLeaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
+            workingHours = getUserWorkingHours.Result;
+            limits = getLimitsTask.Result;
             var workingHoursDuration = workingHours.GetDuration();
             dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
-            leaveSummary = new("", "", "");
+            leaveSummary = GetLeaveDetails();
         }
         catch(Exception ex)
         {
-            Logger.LogError(ex, "OnInitializedAsync");
+            Logger.LogError(ex, nameof(OnInitializedAsync));
             NotificationService.Notify(new NotificationMessage
             {
                 Duration = 40000,
@@ -212,6 +228,12 @@
     {
         var workingHoursDuration = workingHours.GetDuration();
         dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
+        leaveSummary = GetLeaveDetails();
+    }
+
+    private void LeaveTypeChanged(object _)
+    {
+        leaveSummary = GetLeaveDetails();
     }
 
     private static DateSummary GetDateSummary(DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan workingHours)
@@ -228,6 +250,26 @@
                 freeDays.GetReadableTimeSpan(workingHours));
         }
         return new DateSummary("","","");
+    }
+
+    private LeaveSummary GetLeaveDetails()
+    {
+        var submittedLeaveRequestsDuration = TimeSpan.FromTicks(submittedLeaveRequests
+            .Where(lr => lr.LeaveTypeId == leaveRequest.LeaveTypeId)
+            .Sum(lr => lr.Duration.Ticks));
+        var limit = limits.FirstOrDefault(l => l.LeaveTypeId == leaveRequest.LeaveTypeId &&
+            (l.ValidSince == null || l.ValidSince <= leaveRequest.DateFrom) &&
+            (l.ValidUntil == null || l.ValidUntil >= leaveRequest.DateFrom));
+        var workingHoursDuration = workingHours.GetDuration();
+        var workingDays = leaveRequest.DateFrom != null && leaveRequest.DateTo != null ?
+            DateCalculator.CalculateDuration((DateTimeOffset)leaveRequest.DateFrom, (DateTimeOffset)leaveRequest.DateTo, workingHoursDuration, false) :
+            TimeSpan.Zero;
+        var totalLimit = limit?.TotalLimit;
+        var daysAvailable = totalLimit - submittedLeaveRequestsDuration;
+        var daysAvailableAfterSubmitting = totalLimit - submittedLeaveRequestsDuration - workingDays;
+        return new(daysAvailable?.GetReadableTimeSpan(workingHoursDuration) ?? "",
+            daysAvailableAfterSubmitting?.GetReadableTimeSpan(workingHoursDuration) ?? "",
+            submittedLeaveRequestsDuration.GetReadableTimeSpan(workingHoursDuration));
     }
 
     private record class LeaveSummary(string DaysAvailable, string DaysAvailableAfterSubmitting, string AllDaysInRequests);

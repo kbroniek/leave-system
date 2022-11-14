@@ -44,7 +44,10 @@ public class UserLeaveLimitsService
     {
         public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
     }
-    public record class UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property);
+    public record class UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
+    {
+        public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
+    }
 
     public record class UserLeaveLimitPropertyDto(string? Description);
 
