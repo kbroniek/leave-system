@@ -60,8 +60,8 @@ else
         var getLimitsTask = UserLeaveLimitsService.GetLimits();
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
-        leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
-        var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.LeaveLimitDto>();
+        leaveTypes = getLeaveTypesTask.Result;
+        var limits = getLimitsTask.Result;
         var users = CreateUserCollection(leaveRequests, limits);
         var workingHours = await WorkingHoursService.GetWorkingHours(users.Select(u => u.Email), firstDay, lastDay);
         hrSummary = users.Select(u => HrSummary.Create(u,
