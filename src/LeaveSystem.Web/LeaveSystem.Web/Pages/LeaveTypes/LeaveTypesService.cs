@@ -27,7 +27,7 @@ public class LeaveTypesService
     }
 
     public record class LeaveTypeDto(Guid Id, Guid? BaseLeaveTypeId, string Name, LeaveTypeProperties Properties);
-    public record class LeaveTypeProperties(string? Color, LeaveTypeCatalog? Catalog);
+    public record class LeaveTypeProperties(string? Color, LeaveTypeCatalog? Catalog, bool? IncludeFreeDays);
 
     private class LeaveTypePropertiesConverter : JsonConverter<LeaveTypeProperties>
     {
@@ -37,14 +37,14 @@ public class LeaveTypesService
             {
                 var value = jsonDoc.RootElement.GetRawText();
                 return value == null ?
-                    new LeaveTypeProperties(null, null) :
+                    new LeaveTypeProperties(null, null, null) :
                     JsonSerializer.Deserialize<LeaveTypeProperties>(value, new JsonSerializerOptions(JsonSerializerDefaults.Web)
                     {
                         Converters =
                         {
                             new LeaveTypeCatalogConverter()
                         }
-                    }) ?? new LeaveTypeProperties(null, null);
+                    }) ?? new LeaveTypeProperties(null, null, null);
             }
         }
 

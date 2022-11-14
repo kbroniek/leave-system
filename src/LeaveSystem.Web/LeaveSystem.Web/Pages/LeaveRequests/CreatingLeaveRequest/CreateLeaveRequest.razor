@@ -17,11 +17,10 @@
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject UserLeaveLimitsService UserLeaveLimitsService
 @inject NotificationService NotificationService
+@inject NavigationManager NavManager
 @inject ILogger<CreateLeaveRequest> Logger
 
 <PageTitle>Add leave request</PageTitle>
-
-<RadzenNotification />
 
 <div class="container-fluid">
     <h1>Add leave request</h1>
@@ -47,10 +46,13 @@
                         <RadzenDropDown @bind-Value="leaveRequest.LeaveTypeId" Data="@leaveTypes" TextProperty="Name" ValueProperty="Id" Name="LeaveType" Class="w-100" Change=@(arg => LeaveTypeChanged(arg)) />
                         <RadzenRequiredValidator Component="LeaveType" Text="Choose leave type" Style="position: initial" Popup="true" />
                     </div>
-@*                    <div>
-                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-1">Hours:</RadzenText>
-                        <InputText type="time" @bind-Value="TimeProxy" />
-                    </div>*@
+                    @if (durationEnabled)
+                    {
+                        <div>
+                            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-1">Hours:</RadzenText>
+                            <InputText type="time" @bind-Value="TimeProxy" />
+                        </div>
+                    }
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Remarks:</RadzenText>
                         <RadzenTextArea Placeholder="Enter here..." @bind-Value="leaveRequest.Remarks" Class="w-100" />
@@ -117,13 +119,14 @@
     private IEnumerable<LeaveRequestShortInfo> submittedLeaveRequests = Enumerable.Empty<LeaveRequestShortInfo>();
     private IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
     private WorkingHoursCollection workingHours = new WorkingHoursCollection(Enumerable.Empty<WorkingHoursModel>());
+    private bool durationEnabled = true;
 
     protected override void OnInitialized()
     {
         var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
         leaveRequest.DateFrom = now.Date;
         leaveRequest.DateTo = now.Date;
-        //leaveRequest.Duration = TimeSpan.FromHours(8);
+        leaveRequest.Duration = TimeSpan.FromHours(8);
         editContext = new(leaveRequest);
     }
     protected override async Task OnInitializedAsync()
@@ -170,16 +173,21 @@
         {
             try
             {
+                if(durationEnabled)
+                {
+                    leaveRequest.Duration = null;
+                }
                 var response = await Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
                 if((int)response.StatusCode < 400)
                 {
                     NotificationService.Notify(new NotificationMessage
                     {
                         Duration = 40000,
-                        Severity = NotificationSeverity.Info,
+                        Severity = NotificationSeverity.Success,
                         Summary = "Information",
                         Detail = "The leave request has been added",
                     });
+                    NavManager.NavigateTo("leave-requests");
                 }
                 else
                 {
@@ -226,8 +234,11 @@
 
     private void DateChanged(DateTime? _)
     {
+        DateTimeOffset? dateFrom = leaveRequest.DateFrom;
+        DateTimeOffset? dateTo = leaveRequest.DateTo;
+        durationEnabled = dateFrom?.GetDayWithoutTime() == dateTo?.GetDayWithoutTime();
         var workingHoursDuration = workingHours.GetDuration();
-        dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
+        dateSummary = GetDateSummary(dateFrom, dateTo, workingHoursDuration);
         leaveSummary = GetLeaveDetails();
     }
 
@@ -261,8 +272,9 @@
             (l.ValidSince == null || l.ValidSince <= leaveRequest.DateFrom) &&
             (l.ValidUntil == null || l.ValidUntil >= leaveRequest.DateFrom));
         var workingHoursDuration = workingHours.GetDuration();
+        var leaveType = leaveTypes.FirstOrDefault(lt => lt.Id == leaveRequest.LeaveTypeId);
         var workingDays = leaveRequest.DateFrom != null && leaveRequest.DateTo != null ?
-            DateCalculator.CalculateDuration((DateTimeOffset)leaveRequest.DateFrom, (DateTimeOffset)leaveRequest.DateTo, workingHoursDuration, false) :
+            DateCalculator.CalculateDuration((DateTimeOffset)leaveRequest.DateFrom, (DateTimeOffset)leaveRequest.DateTo, workingHoursDuration, leaveType?.Properties.IncludeFreeDays) :
             TimeSpan.Zero;
         var totalLimit = limit?.TotalLimit;
         var daysAvailable = totalLimit - submittedLeaveRequestsDuration;
@@ -275,5 +287,3 @@
     private record class LeaveSummary(string DaysAvailable, string DaysAvailableAfterSubmitting, string AllDaysInRequests);
     private record class DateSummary(string Days, string WorkingDays, string FreeDays);
 }
-
-
