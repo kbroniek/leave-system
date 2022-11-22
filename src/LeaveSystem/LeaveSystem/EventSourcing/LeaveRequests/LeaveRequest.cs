@@ -1,5 +1,4 @@
 ﻿using GoldenEye.Aggregates;
-using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -19,13 +18,15 @@ public class LeaveRequest : Aggregate
 
     public Guid LeaveTypeId { get; private set; }
 
-    public List<RemarksModel> Remarks { get; private set; } = new ();
+    public List<RemarksModel> Remarks { get; } = new();
 
     public LeaveRequestStatus Status { get; private set; }
 
     public FederatedUser CreatedBy { get; private set; }
 
     public FederatedUser? LastModifiedBy { get; private set; }
+
+    public FederatedUser CreatedByBehalfOn { get; private set; }
 
     //For serialization
     public LeaveRequest() { }
@@ -84,6 +85,18 @@ public class LeaveRequest : Aggregate
         Apply(@event);
     }
 
+    internal void BehalfOn(FederatedUser createdByBehalfOn)
+    {
+        if (Status != LeaveRequestStatus.Pending)
+        {
+            throw new InvalidOperationException($"Creating on behalf leave request in {Status} status is not allowed. Only {LeaveRequestStatus.Pending} is allowed.");
+        }
+        var @event = LeaveRequestBehalfOnCreated.Create(Id, createdByBehalfOn);
+
+        Enqueue(@event);
+        Apply(@event);
+    }
+
     private void Apply(LeaveRequestCreated @event)
     {
         Id = @event.LeaveRequestId;
@@ -94,6 +107,7 @@ public class LeaveRequest : Aggregate
         AddRemarks(@event.Remarks, @event.CreatedBy);
         Status = LeaveRequestStatus.Pending;
         CreatedBy = @event.CreatedBy;
+        LastModifiedBy = @event.CreatedBy;
         Version++;
     }
 
@@ -102,6 +116,7 @@ public class LeaveRequest : Aggregate
         Status = LeaveRequestStatus.Accepted;
         AddRemarks(@event.Remarks, @event.AcceptedBy);
         LastModifiedBy = @event.AcceptedBy;
+        Version++;
     }
 
     private void Apply(LeaveRequestRejected @event)
@@ -109,6 +124,7 @@ public class LeaveRequest : Aggregate
         Status = LeaveRequestStatus.Rejected;
         AddRemarks(@event.Remarks, @event.RejectedBy);
         LastModifiedBy = @event.RejectedBy;
+        Version++;
     }
 
     private void Apply(LeaveRequestCanceled @event)
@@ -116,11 +132,19 @@ public class LeaveRequest : Aggregate
         Status = LeaveRequestStatus.Canceled;
         AddRemarks(@event.Remarks, @event.CanceledBy);
         LastModifiedBy = @event.CanceledBy;
+        Version++;
+    }
+
+    private void Apply(LeaveRequestBehalfOnCreated @event)
+    {
+        CreatedByBehalfOn = @event.CreatedByBehalfOn;
+        LastModifiedBy = @event.CreatedByBehalfOn;
+        Version++;
     }
 
     private void AddRemarks(string? remarks, FederatedUser createdBy)
     {
-        if(string.IsNullOrWhiteSpace(remarks))
+        if (string.IsNullOrWhiteSpace(remarks))
         {
             return;
         }

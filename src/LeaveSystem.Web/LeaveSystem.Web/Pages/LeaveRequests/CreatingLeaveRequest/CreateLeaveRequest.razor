@@ -204,13 +204,13 @@
             }
             catch (AccessTokenNotAvailableException exception)
             {
-                Logger.LogError(exception, "AccessTokenNotAvailableException");
+                Logger.LogError(exception, nameof(AccessTokenNotAvailableException));
                 exception.Redirect();
                 return;
             }
             catch(Exception ex)
             {
-                Logger.LogError(ex, "HandleSubmit");
+                Logger.LogError(ex, nameof(HandleSubmit));
                 NotificationService.Notify(new NotificationMessage
                 {
                     Duration = 40000,

@@ -60,6 +60,28 @@ public static class LeaveRequestEndpoints
         .WithName(CreateLeaveRequestPolicyName)
         .RequireAuthorization(CreateLeaveRequestPolicyName);
 
+
+        endpoint.MapPost("api/leaveRequests/onBehalf", async (HttpContext httpContext, ICommandBus commandBus, CreateLeaveRequestOnBehalfDto createLeaveRequest, CancellationToken cancellationToken) =>
+        {
+            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+
+            var leaveRequestId = Guid.NewGuid();
+            var command = EventSourcing.LeaveRequests.CreatingLeaveRequest.CreateLeaveRequestOnBehalf.Create(
+                leaveRequestId,
+                createLeaveRequest.DateFrom,
+                createLeaveRequest.DateTo,
+                createLeaveRequest.Duration,
+                createLeaveRequest.LeaveTypeId,
+                createLeaveRequest.Remarks,
+                createLeaveRequest.CreatedBy,
+                httpContext.User.CreateModel()
+            );
+            await commandBus.Send(command, cancellationToken);
+            return Results.Created("api/LeaveRequests", leaveRequestId);
+        })
+        .WithName(CreateLeaveRequestPolicyName)
+        .RequireAuthorization(CreateLeaveRequestPolicyName);
+
         endpoint.MapPut("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, AcceptLeaveRequestDto acceptLeaveRequest, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
