@@ -11,11 +11,13 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
 const string azureConfigSection = "AzureAdB2C";
+const string azureReadUsersSection = "AzureReadUsers";
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddRoleBasedAuthorization();
+builder.Services.AddAzureReadUsers(builder.Configuration.GetSection(azureReadUsersSection));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

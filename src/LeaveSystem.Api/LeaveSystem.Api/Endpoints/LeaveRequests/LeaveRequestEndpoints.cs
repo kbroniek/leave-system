@@ -16,6 +16,7 @@ public static class LeaveRequestEndpoints
 {
     public const string GetLeaveRequestsPolicyName = "GetLeaveRequests";
     public const string CreateLeaveRequestPolicyName = "CreateLeaveRequest";
+    public const string CreateLeaveRequestonBehalfPolicyName = "CreateLeaveRequestOnBehalf";
     public const string AcceptLeaveRequestPolicyName = "AcceptLeaveRequest";
     public const string RejectLeaveRequestPolicyName = "RejectLeaveRequest";
     public const string CancelLeaveRequestPolicyName = "CancelLeaveRequest";
@@ -79,8 +80,8 @@ public static class LeaveRequestEndpoints
             await commandBus.Send(command, cancellationToken);
             return Results.Created("api/LeaveRequests", leaveRequestId);
         })
-        .WithName(CreateLeaveRequestPolicyName)
-        .RequireAuthorization(CreateLeaveRequestPolicyName);
+        .WithName(CreateLeaveRequestonBehalfPolicyName)
+        .RequireAuthorization(CreateLeaveRequestonBehalfPolicyName);
 
         endpoint.MapPut("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, AcceptLeaveRequestDto acceptLeaveRequest, CancellationToken cancellationToken) =>
         {
