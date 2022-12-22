@@ -11,13 +11,15 @@ System to manage leaves.
 
 ![Create an application](./AzureAppRegistrationB2C.png)
 
-5. Update the `ClientId` and `Authority` in the [appsettings.json](./src/LeaveSystem.Web/wwwroot/appsettings.json)
+5. Update the `ClientId` and `Authority` in the [appsettings.json](./src/LeaveSystem.Web/LeaveSystem.Web/wwwroot/appsettings.json)
 
 ![Update appsettings.json](./AzureAppRegistrationB2C-appsettings.png)
 
-### Using AppRoles and Azure AD B2C for RBAC
+### Assign correct permissions to read users
 
-https://blog.redbaronofazure.com/?p=7751
+- Choose the server app e.g. `Blazor Server AAD B2C` or create a new one.
+- Go to the `API permissions` and add a `User.ReadBasic.All` application permission.
+- Go to the `Certificates & secrets` and generate new secret. Copy a secret in to the [appsettings.json](./src/LeaveSystem.Api/LeaveSystem.Api/appsettings.json), to the `AzureReadUsers` section.
 
 ### Custom policy
 

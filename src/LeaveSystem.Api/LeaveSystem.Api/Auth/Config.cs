@@ -1,4 +1,5 @@
-﻿using LeaveSystem.Api.Endpoints.LeaveRequests;
+﻿using LeaveSystem.Api.Endpoints.Employees;
+using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,7 +19,8 @@ public static class Config
     {
         services
             .AddLeaveRequestsAuthorization()
-            .AddWorkingHoursAuthorization();
+            .AddWorkingHoursAuthorization()
+            .AddEmployeeAuthorization();
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
 
@@ -31,6 +33,9 @@ public static class Config
             .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+            .AddAuthorization(options =>
+                options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestonBehalfPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
             .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestEndpoints.AcceptLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
@@ -55,6 +60,14 @@ public static class Config
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursDurationEndpointsPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
+        return services;
+    }
+    private static IServiceCollection AddEmployeeAuthorization(this IServiceCollection services)
+    {
+        services
+            .AddAuthorization(options =>
+                options.AddPolicy(EmployeesEndpoints.GetEmployeeEndpointsPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))));
         return services;
     }
 }
