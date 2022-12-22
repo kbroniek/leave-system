@@ -58,13 +58,13 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
 }
 
 
-internal class HandleGetLeaveRequest :
+internal class HandleGetLeaveRequests :
     IQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>
 {
     private readonly IDocumentSession querySession;
     private readonly LeaveSystemDbContext dbContext;
 
-    public HandleGetLeaveRequest(IDocumentSession querySession, LeaveSystemDbContext dbContext)
+    public HandleGetLeaveRequests(IDocumentSession querySession, LeaveSystemDbContext dbContext)
     {
         this.querySession = querySession;
         this.dbContext = dbContext;
