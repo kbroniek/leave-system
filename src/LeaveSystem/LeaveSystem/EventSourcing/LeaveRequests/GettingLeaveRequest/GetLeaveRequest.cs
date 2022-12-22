@@ -1,5 +1,7 @@
-﻿using GoldenEye.Queries;
+﻿using Ardalis.GuardClauses;
+using GoldenEye.Queries;
 using GoldenEye.Repositories;
+using LeaveSystem.Shared;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequest;
 
@@ -12,9 +14,9 @@ public class GetLeaveRequest : IQuery<LeaveRequest>
         LeaveRequestId = leaveRequestId;
     }
 
-    public static GetLeaveRequest Create(Guid leaveRequestId)
+    public static GetLeaveRequest Create(Guid? leaveRequestId)
     {
-        return new(leaveRequestId);
+        return new(Guard.Against.Nill(leaveRequestId));
     }
 }
 

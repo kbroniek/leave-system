@@ -1,5 +1,7 @@
 ﻿using GoldenEye.Commands;
 using GoldenEye.Queries;
+using LeaveSystem.EventSourcing.LeaveRequests;
+using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.LeaveRequests.AcceptingLeaveRequest;
@@ -12,9 +14,10 @@ using Microsoft.Identity.Web.Resource;
 
 namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 
-public static class LeaveRequestEndpoints
+public static class LeaveRequestsEndpoints
 {
     public const string GetLeaveRequestsPolicyName = "GetLeaveRequests";
+    public const string GetLeaveRequestPolicyName = "GetLeaveRequest";
     public const string CreateLeaveRequestPolicyName = "CreateLeaveRequest";
     public const string CreateLeaveRequestonBehalfPolicyName = "CreateLeaveRequestOnBehalf";
     public const string AcceptLeaveRequestPolicyName = "AcceptLeaveRequest";
@@ -40,6 +43,15 @@ public static class LeaveRequestEndpoints
         })
         .WithName(GetLeaveRequestsPolicyName)
         .RequireAuthorization(GetLeaveRequestsPolicyName);
+
+        endpoint.MapGet("api/leaveRequests/{id}", (HttpContext httpContext, IQueryBus queryBus, Guid? id, CancellationToken cancellationToken) =>
+        {
+            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+            //TODO: Protect, only authorized users have access to all leave requests.
+            return queryBus.Send<GetLeaveRequest, LeaveRequest>(GetLeaveRequest.Create(id), cancellationToken);
+        })
+        .WithName(GetLeaveRequestPolicyName)
+        .RequireAuthorization(GetLeaveRequestPolicyName);
 
         endpoint.MapPost("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus, CreateLeaveRequestDto createLeaveRequest, CancellationToken cancellationToken) =>
         {
