@@ -26,14 +26,14 @@
 
 <div class="container-fluid">
     <h1>Add leave request</h1>
-    <RadzenTemplateForm TItem="CreateLeaveRequestDto" Data=@leaveRequest Submit=@HandleSubmit>
+    <RadzenTemplateForm TItem="CreateLeaveRequestOnBehalfDto" Data=@leaveRequest Submit=@HandleSubmit>
         <div class="row">
             <div class="col-xl-4">
             <RadzenCard>
                 <div class="row">
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create behalf on:</RadzenText>
-                        <RadzenDropDown @bind-Value="leaveRequest.CreatedBy" Data="@employees" TextProperty="Name" ValueProperty="Email" Name="OnBehalf" Class="w-100" />
+                        <RadzenDropDown @bind-Value="onBehalfEmail" Data="@employees" TextProperty="Name" ValueProperty="Email" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." />
                     </div>
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date from:</RadzenText>
@@ -125,7 +125,8 @@
     private IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
     private WorkingHoursCollection workingHours = new WorkingHoursCollection(Enumerable.Empty<WorkingHoursModel>());
     private bool durationEnabled = true;
-    private IEnumerable<GetEmployeeDto> employees = Enumerable.Empty<GetEmployeeDto>();
+    private IEnumerable<GetEmployeeDto?> employees = Enumerable.Empty<GetEmployeeDto?>();
+    private string? onBehalfEmail = null;
 
     protected override void OnInitialized()
     {
@@ -186,7 +187,8 @@
                 {
                     leaveRequest.Duration = null;
                 }
-                var response = await Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
+                var onBehalf = onBehalfEmail is null ? null : employees.First(e => e?.Email == onBehalfEmail);
+                var response = onBehalf is null ? await CreateLeaveRequestApi() : await CreateLeaveRequestApi(onBehalf);
                 if((int)response.StatusCode < 400)
                 {
                     NotificationService.Notify(new NotificationMessage
@@ -239,6 +241,17 @@
                 Summary = "The edit form is invalid"
             });
         }
+    }
+
+    private Task<HttpResponseMessage> CreateLeaveRequestApi()
+    {
+        return Http.PostAsJsonAsync("api/leaveRequests", leaveRequest);
+    }
+
+    private Task<HttpResponseMessage> CreateLeaveRequestApi(GetEmployeeDto onBehalf)
+    {
+        var leaveRequestOnBehalf = leaveRequest with { CreatedByBehalfOn = new FederatedUser(onBehalf.Email, onBehalf.Name) };
+        return Http.PostAsJsonAsync("api/leaveRequests/onBehalf", leaveRequestOnBehalf);
     }
 
     private void DateChanged(DateTime? _)

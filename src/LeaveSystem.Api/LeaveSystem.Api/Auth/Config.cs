@@ -34,6 +34,9 @@ public static class Config
                 options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
             .AddAuthorization(options =>
+                options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestonBehalfPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
+            .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestEndpoints.AcceptLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
             .AddAuthorization(options =>

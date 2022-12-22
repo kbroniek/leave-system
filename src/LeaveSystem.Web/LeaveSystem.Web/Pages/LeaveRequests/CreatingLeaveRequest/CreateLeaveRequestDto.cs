@@ -1,6 +1,6 @@
 ﻿namespace LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 
-public class CreateLeaveRequestDto
+public record class CreateLeaveRequestDto
 {
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }

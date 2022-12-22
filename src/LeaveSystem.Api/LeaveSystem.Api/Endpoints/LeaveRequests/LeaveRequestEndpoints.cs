@@ -74,7 +74,7 @@ public static class LeaveRequestEndpoints
                 createLeaveRequest.Duration,
                 createLeaveRequest.LeaveTypeId,
                 createLeaveRequest.Remarks,
-                createLeaveRequest.CreatedBy,
+                createLeaveRequest.CreatedByBehalfOn,
                 httpContext.User.CreateModel()
             );
             await commandBus.Send(command, cancellationToken);
