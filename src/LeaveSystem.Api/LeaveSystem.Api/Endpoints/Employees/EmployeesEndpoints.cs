@@ -34,6 +34,6 @@ public static class EmployeesEndpoints
     private static GetEmployeeDto Map(string email, IEnumerable<GraphUser> graphUsers)
     {
         var graphUser = graphUsers.FirstOrDefault(gu => string.Equals(gu.Email, email, StringComparison.OrdinalIgnoreCase));
-        return new GetEmployeeDto(graphUser?.DisplayName, email);
+        return new GetEmployeeDto(graphUser?.Id, graphUser?.DisplayName, email);
     }
 }

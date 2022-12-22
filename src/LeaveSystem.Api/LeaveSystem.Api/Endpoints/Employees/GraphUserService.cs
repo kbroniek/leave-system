@@ -40,7 +40,10 @@ public class GraphUserService
 
         var graphClient = new GraphServiceClient(clientSecretCredential, scopes);
 
-        var users = await graphClient.Users.Request().GetAsync(cancellationToken);
+        var users = await graphClient.Users
+            .Request()
+            .Select(u => new {u.Id, u.Mail, u.DisplayName})
+            .GetAsync(cancellationToken);
 
         var graphUsers = Enumerable.Empty<GraphUser>();
         while (users is not null && users.Count != 0)
@@ -55,6 +58,5 @@ public class GraphUserService
         return graphUsers;
     }
 }
-
 
 public record class GraphUser(string Id, string Email, string DisplayName);
