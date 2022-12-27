@@ -18,7 +18,7 @@
 
 <h1>Show leave request</h1>
 
-@if (leaveRequests == null || users == null)
+@if (leaveRequests == null || employees == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -68,7 +68,7 @@ else
     private GetLeaveRequestsQuery leaveRequestsQuery = GetLeaveRequestsQuery.GetDefault();
     private EditContext? editContext;
     private PagedListResponse<LeaveRequestShortInfo>? leaveRequests;
-    private FederatedUser[]? users = null;
+    private FederatedUser[]? employees = null;
     private IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
     private IEnumerable<KeyValuePair<LeaveRequestStatus, string>> leaveRequestStatuses = Enum.GetValues<LeaveRequestStatus>()
         .Select(s => new KeyValuePair<LeaveRequestStatus, string>(s, s.ToString()));
@@ -86,11 +86,11 @@ else
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask);
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
-        users = leaveRequests?.Items?.Select(l => l.CreatedBy)
+        employees = leaveRequests?.Items?.Select(l => l.CreatedBy)
             .GroupBy(u => u.Email)
             .Select(u => u.First())
             .OrderBy(u => u.Email).ToArray();
-        await Timeline.CreateAsync("timeline-visualization", users, leaveRequests?.Items, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo.AddDays(1));
+        await Timeline.CreateAsync("timeline-visualization", employees, leaveRequests?.Items, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo.AddDays(1));
     }
     private async Task HandleFilter()
     {
