@@ -34,7 +34,8 @@ internal class HandleGetLeaveRequest :
     public async Task<LeaveRequest> Handle(GetLeaveRequest request,
         CancellationToken cancellationToken)
     {
-        return await repository.FindById(request.LeaveRequestId, cancellationToken)
+        LeaveRequest leaveRequest = await repository.FindById(request.LeaveRequestId, cancellationToken);
+        return leaveRequest
             ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(request.LeaveRequestId);
     }
 }

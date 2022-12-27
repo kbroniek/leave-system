@@ -24,9 +24,9 @@ public class LeaveRequest : Aggregate
 
     public FederatedUser CreatedBy { get; private set; }
 
-    public FederatedUser? LastModifiedBy { get; private set; }
+    public FederatedUser LastModifiedBy { get; private set; }
 
-    public FederatedUser CreatedByBehalfOn { get; private set; }
+    public FederatedUser? CreatedByBehalfOn { get; private set; }
 
     //For serialization
     public LeaveRequest() { }
@@ -151,5 +151,5 @@ public class LeaveRequest : Aggregate
         Remarks.Add(new RemarksModel(remarks, createdBy));
     }
 
-    public record RemarksModel(string remarks, FederatedUser createdBy);
+    public record RemarksModel(string Remarks, FederatedUser CreatedBy);
 }

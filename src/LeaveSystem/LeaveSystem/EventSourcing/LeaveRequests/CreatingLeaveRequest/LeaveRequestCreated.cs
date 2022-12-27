@@ -23,17 +23,17 @@ public class LeaveRequestCreated : IEvent
     public FederatedUser CreatedBy { get; }
 
     [JsonConstructor]
-    private LeaveRequestCreated(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
+    private LeaveRequestCreated(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
         DateTo = dateTo;
         Duration = duration;
-        LeaveTypeId = type;
+        LeaveTypeId = leaveTypeId;
         Remarks = remarks;
         CreatedBy = createdBy;
     }
-    public static LeaveRequestCreated Create(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid type, string? remarks, FederatedUser createdBy)
+    public static LeaveRequestCreated Create(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy)
     {
         Guard.Against.InvalidEmail(createdBy.Email, $"{nameof(createdBy)}.{nameof(createdBy.Email)}");
         var dateFromWithoutTime = dateFrom.GetDayWithoutTime();
@@ -49,6 +49,6 @@ public class LeaveRequestCreated : IEvent
             throw new ArgumentOutOfRangeException(nameof(dateFrom), "Date from has to be less than date to.");
         }
 
-        return new(leaveRequestId, dateFromWithoutTime, dateToWithoutTime, duration, type, remarks, createdBy);
+        return new(leaveRequestId, dateFromWithoutTime, dateToWithoutTime, duration, leaveTypeId, remarks, createdBy);
     }
 }
