@@ -3,6 +3,7 @@ using GoldenEye.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequestDetails;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using Marten;
@@ -29,7 +30,8 @@ internal static class LeaveRequestsConfig
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
-            .AddQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>, HandleGetLeaveRequest>();
+            .AddQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>, HandleGetLeaveRequests>()
+            .AddQueryHandler<GetLeaveRequestDetails, LeaveRequest, HandleGetLeaveRequestDetails>();
 
     private static IServiceCollection AddValidators(this IServiceCollection services) =>
         services

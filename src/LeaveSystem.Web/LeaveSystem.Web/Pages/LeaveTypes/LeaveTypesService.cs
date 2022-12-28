@@ -25,6 +25,16 @@ public class LeaveTypesService
         });
         return leaveTypes?.Data ?? Enumerable.Empty<LeaveTypeDto>();
     }
+    public Task<LeaveTypeDto?> GetLeaveType(Guid leaveTypeId)
+    {
+        return httpClient.GetFromJsonAsync<LeaveTypeDto>($"odata/LeaveTypes({leaveTypeId})?$select=Id,BaseLeaveTypeId,Name,Properties", new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            Converters =
+            {
+                new LeaveTypePropertiesConverter()
+            }
+        });
+    }
 
     public record class LeaveTypeDto(Guid Id, Guid? BaseLeaveTypeId, string Name, LeaveTypeProperties Properties);
     public record class LeaveTypeProperties(string? Color, LeaveTypeCatalog? Catalog, bool? IncludeFreeDays);

@@ -28,22 +28,25 @@ public static class Config
     {
         services
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestEndpoints.GetLeaveRequestsPolicyName,
+                options.AddPolicy(LeaveRequestsEndpoints.GetLeaveRequestsPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestPolicyName,
+                options.AddPolicy(LeaveRequestsEndpoints.LeaveRequestDetailsPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestEndpoints.CreateLeaveRequestonBehalfPolicyName,
+                options.AddPolicy(LeaveRequestsEndpoints.CreateLeaveRequestPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+            .AddAuthorization(options =>
+                options.AddPolicy(LeaveRequestsEndpoints.CreateLeaveRequestBehalfOnPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestEndpoints.AcceptLeaveRequestPolicyName,
+                options.AddPolicy(LeaveRequestsEndpoints.AcceptLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestEndpoints.RejectLeaveRequestPolicyName,
+                options.AddPolicy(LeaveRequestsEndpoints.RejectLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestEndpoints.CancelLeaveRequestPolicyName,
+                options.AddPolicy(LeaveRequestsEndpoints.CancelLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
         return services;
     }

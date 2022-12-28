@@ -35,5 +35,11 @@ window.TimelineWrapper = {
         timeline = new vis.Timeline(container, null, options);
         timeline.setGroups(groups);
         timeline.setItems(items);
+        container.onclick = function (event) {
+            var props = timeline.getEventProperties(event);
+            if (props.item) {
+                window.location.href = `/leave-requests/${props.item}`;
+            }
+        }
     }
 }

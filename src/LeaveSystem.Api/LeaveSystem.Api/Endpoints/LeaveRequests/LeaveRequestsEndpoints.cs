@@ -1,5 +1,7 @@
 ﻿using GoldenEye.Commands;
 using GoldenEye.Queries;
+using LeaveSystem.EventSourcing.LeaveRequests;
+using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequestDetails;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.LeaveRequests.AcceptingLeaveRequest;
@@ -12,11 +14,12 @@ using Microsoft.Identity.Web.Resource;
 
 namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 
-public static class LeaveRequestEndpoints
+public static class LeaveRequestsEndpoints
 {
     public const string GetLeaveRequestsPolicyName = "GetLeaveRequests";
+    public const string LeaveRequestDetailsPolicyName = "LeaveRequestDetails";
     public const string CreateLeaveRequestPolicyName = "CreateLeaveRequest";
-    public const string CreateLeaveRequestonBehalfPolicyName = "CreateLeaveRequestOnBehalf";
+    public const string CreateLeaveRequestBehalfOnPolicyName = "CreateLeaveRequestBehalfOn";
     public const string AcceptLeaveRequestPolicyName = "AcceptLeaveRequest";
     public const string RejectLeaveRequestPolicyName = "RejectLeaveRequest";
     public const string CancelLeaveRequestPolicyName = "CancelLeaveRequest";
@@ -40,6 +43,15 @@ public static class LeaveRequestEndpoints
         })
         .WithName(GetLeaveRequestsPolicyName)
         .RequireAuthorization(GetLeaveRequestsPolicyName);
+
+        endpoint.MapGet("api/leaveRequests/{id}", (HttpContext httpContext, IQueryBus queryBus, Guid? id, CancellationToken cancellationToken) =>
+        {
+            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+            //TODO: Protect, only authorized users have access to all leave requests.
+            return queryBus.Send<GetLeaveRequestDetails, LeaveRequest>(GetLeaveRequestDetails.Create(id), cancellationToken);
+        })
+        .WithName(LeaveRequestDetailsPolicyName)
+        .RequireAuthorization(LeaveRequestDetailsPolicyName);
 
         endpoint.MapPost("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus, CreateLeaveRequestDto createLeaveRequest, CancellationToken cancellationToken) =>
         {
@@ -80,8 +92,8 @@ public static class LeaveRequestEndpoints
             await commandBus.Send(command, cancellationToken);
             return Results.Created("api/LeaveRequests", leaveRequestId);
         })
-        .WithName(CreateLeaveRequestonBehalfPolicyName)
-        .RequireAuthorization(CreateLeaveRequestonBehalfPolicyName);
+        .WithName(CreateLeaveRequestBehalfOnPolicyName)
+        .RequireAuthorization(CreateLeaveRequestBehalfOnPolicyName);
 
         endpoint.MapPut("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, AcceptLeaveRequestDto acceptLeaveRequest, CancellationToken cancellationToken) =>
         {

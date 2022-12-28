@@ -1,0 +1,75 @@
+﻿@page "/leave-requests/{LeaveRequestId}"
+@using System.Text.Json.Serialization
+@using System.Text.Json
+@using LeaveSystem.Shared
+@using LeaveSystem.Shared.LeaveRequests
+@using LeaveSystem.Web.Extensions
+@using LeaveSystem.Web.Pages.LeaveTypes
+@using LeaveSystem.Web.Pages.WorkingHours
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject HttpClient HttpClient
+@inject ILogger<LeaveRequestDetails> Logger
+@inject LeaveTypesService LeaveTypesService
+@inject WorkingHoursService WorkingHoursService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Show leave request</PageTitle>
+
+<h1>Show leave request</h1>
+
+@if (leaveRequest == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <RadzenCard  style="min-height: 29rem">
+        <RadzenText TextStyle="TextStyle.H6" class="mb-1">Leave details:</RadzenText>
+        <hr class="mt-2 mb-3"/>
+
+        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Date from: <strong>@leaveRequest.DateFrom.ToString("d")</strong></RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Date to: <strong>@leaveRequest.DateTo.ToString("d")</strong></RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Leave type: <strong>@leaveType?.Name</strong></RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Duration: <strong>@leaveRequest.Duration.GetReadableTimeSpan(workingHours)</strong></RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Status: <strong>@leaveRequest.Status</strong></RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Created by: <strong>@leaveRequest.CreatedBy.Name</strong></RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Last modified by: <strong>@leaveRequest.LastModifiedBy?.Name</strong></RadzenText>
+        @if (leaveRequest.CreatedByBehalfOn is not null)
+        {
+            <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">On behalf: <strong>@leaveRequest.CreatedByBehalfOn?.Name</strong></RadzenText>
+        }
+        <hr class="mt-2 mb-3"/>
+    </RadzenCard>
+}
+
+
+@code {
+    [Parameter]
+    public string? LeaveRequestId { get; set; }
+    private LeaveRequest? leaveRequest;
+    private LeaveTypesService.LeaveTypeDto? leaveType;
+    private TimeSpan workingHours;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User.CreateModel();
+        var email = user.GetEmail();
+        var now = DateTimeOffset.UtcNow;
+        var firstDay = now.GetFirstDayOfYear();
+        var lastDay = now.GetLastDayOfYear();
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(email, firstDay, lastDay);
+        leaveRequest = await HttpClient.GetFromJsonAsync<LeaveRequest>($"api/leaveRequests/{LeaveRequestId}", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        if(leaveRequest is null)
+        {
+            throw new InvalidOperationException($"Cannot find the leave request id: {LeaveRequestId}");
+        }
+        leaveType = await LeaveTypesService.GetLeaveType(leaveRequest.LeaveTypeId);
+        var workingHours = await getWorkingHoursTask;
+        this.workingHours = workingHours.GetDuration();
+    }
+
+    public record LeaveRequest(DateTimeOffset DateFrom, DateTimeOffset DateTo, TimeSpan Duration, Guid LeaveTypeId, IEnumerable<RemarksModel> Remarks, LeaveRequestStatus Status, FederatedUser CreatedBy, FederatedUser? LastModifiedBy, FederatedUser? CreatedByBehalfOn);
+    public record RemarksModel(string Remarks, FederatedUser CreatedBy);
+}
