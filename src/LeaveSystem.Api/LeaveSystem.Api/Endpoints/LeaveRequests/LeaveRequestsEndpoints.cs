@@ -1,7 +1,7 @@
 ﻿using GoldenEye.Commands;
 using GoldenEye.Queries;
 using LeaveSystem.EventSourcing.LeaveRequests;
-using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequestDetails;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.LeaveRequests.AcceptingLeaveRequest;
@@ -48,7 +48,7 @@ public static class LeaveRequestsEndpoints
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
             //TODO: Protect, only authorized users have access to all leave requests.
-            return queryBus.Send<GetLeaveRequest, LeaveRequest>(GetLeaveRequest.Create(id), cancellationToken);
+            return queryBus.Send<GetLeaveRequestDetails, LeaveRequest>(GetLeaveRequestDetails.Create(id), cancellationToken);
         })
         .WithName(LeaveRequestDetailsPolicyName)
         .RequireAuthorization(LeaveRequestDetailsPolicyName);
