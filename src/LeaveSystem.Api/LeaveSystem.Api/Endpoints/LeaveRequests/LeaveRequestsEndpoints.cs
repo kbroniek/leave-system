@@ -17,9 +17,9 @@ namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 public static class LeaveRequestsEndpoints
 {
     public const string GetLeaveRequestsPolicyName = "GetLeaveRequests";
-    public const string GetLeaveRequestPolicyName = "GetLeaveRequest";
+    public const string LeaveRequestDetailsPolicyName = "LeaveRequestDetails";
     public const string CreateLeaveRequestPolicyName = "CreateLeaveRequest";
-    public const string CreateLeaveRequestonBehalfPolicyName = "CreateLeaveRequestOnBehalf";
+    public const string CreateLeaveRequestBehalfOnPolicyName = "CreateLeaveRequestBehalfOn";
     public const string AcceptLeaveRequestPolicyName = "AcceptLeaveRequest";
     public const string RejectLeaveRequestPolicyName = "RejectLeaveRequest";
     public const string CancelLeaveRequestPolicyName = "CancelLeaveRequest";
@@ -50,8 +50,8 @@ public static class LeaveRequestsEndpoints
             //TODO: Protect, only authorized users have access to all leave requests.
             return queryBus.Send<GetLeaveRequest, LeaveRequest>(GetLeaveRequest.Create(id), cancellationToken);
         })
-        .WithName(GetLeaveRequestPolicyName)
-        .RequireAuthorization(GetLeaveRequestPolicyName);
+        .WithName(LeaveRequestDetailsPolicyName)
+        .RequireAuthorization(LeaveRequestDetailsPolicyName);
 
         endpoint.MapPost("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus, CreateLeaveRequestDto createLeaveRequest, CancellationToken cancellationToken) =>
         {
@@ -92,8 +92,8 @@ public static class LeaveRequestsEndpoints
             await commandBus.Send(command, cancellationToken);
             return Results.Created("api/LeaveRequests", leaveRequestId);
         })
-        .WithName(CreateLeaveRequestonBehalfPolicyName)
-        .RequireAuthorization(CreateLeaveRequestonBehalfPolicyName);
+        .WithName(CreateLeaveRequestBehalfOnPolicyName)
+        .RequireAuthorization(CreateLeaveRequestBehalfOnPolicyName);
 
         endpoint.MapPut("api/leaveRequests/{id}/accept", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, AcceptLeaveRequestDto acceptLeaveRequest, CancellationToken cancellationToken) =>
         {

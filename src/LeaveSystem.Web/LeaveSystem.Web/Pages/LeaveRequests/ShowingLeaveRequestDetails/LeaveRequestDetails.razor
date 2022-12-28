@@ -34,6 +34,7 @@ else
         <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Duration: <strong>@leaveRequest.Duration.GetReadableTimeSpan(workingHours)</strong></RadzenText>
         <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Status: <strong>@leaveRequest.Status</strong></RadzenText>
         <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Created by: <strong>@leaveRequest.CreatedBy.Name</strong></RadzenText>
+        <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Last modified by: <strong>@leaveRequest.LastModifiedBy?.Name</strong></RadzenText>
         @if (leaveRequest.CreatedByBehalfOn is not null)
         {
             <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">On behalf: <strong>@leaveRequest.CreatedByBehalfOn?.Name</strong></RadzenText>

@@ -31,13 +31,13 @@ public static class Config
                 options.AddPolicy(LeaveRequestsEndpoints.GetLeaveRequestsPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestsEndpoints.GetLeaveRequestPolicyName,
+                options.AddPolicy(LeaveRequestsEndpoints.LeaveRequestDetailsPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
             .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestsEndpoints.CreateLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestsEndpoints.CreateLeaveRequestonBehalfPolicyName,
+                options.AddPolicy(LeaveRequestsEndpoints.CreateLeaveRequestBehalfOnPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))))
             .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestsEndpoints.AcceptLeaveRequestPolicyName,
