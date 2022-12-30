@@ -26,7 +26,7 @@ public class LeaveRequest : Aggregate
 
     public FederatedUser LastModifiedBy { get; private set; }
 
-    public FederatedUser? CreatedByBehalfOn { get; private set; }
+    public FederatedUser? CreatedByOnBehalf { get; private set; }
 
     //For serialization
     public LeaveRequest() { }
@@ -85,13 +85,13 @@ public class LeaveRequest : Aggregate
         Apply(@event);
     }
 
-    internal void BehalfOn(FederatedUser createdByBehalfOn)
+    internal void OnBehalf(FederatedUser createdByOnBehalf)
     {
         if (Status != LeaveRequestStatus.Pending)
         {
             throw new InvalidOperationException($"Creating on behalf leave request in {Status} status is not allowed. Only {LeaveRequestStatus.Pending} is allowed.");
         }
-        var @event = LeaveRequestBehalfOnCreated.Create(Id, createdByBehalfOn);
+        var @event = LeaveRequestOnBehalfCreated.Create(Id, createdByOnBehalf);
 
         Enqueue(@event);
         Apply(@event);
@@ -135,10 +135,10 @@ public class LeaveRequest : Aggregate
         Version++;
     }
 
-    private void Apply(LeaveRequestBehalfOnCreated @event)
+    private void Apply(LeaveRequestOnBehalfCreated @event)
     {
-        CreatedByBehalfOn = @event.CreatedByBehalfOn;
-        LastModifiedBy = @event.CreatedByBehalfOn;
+        CreatedByOnBehalf = @event.CreatedByOnBehalf;
+        LastModifiedBy = @event.CreatedByOnBehalf;
         Version++;
     }
 
