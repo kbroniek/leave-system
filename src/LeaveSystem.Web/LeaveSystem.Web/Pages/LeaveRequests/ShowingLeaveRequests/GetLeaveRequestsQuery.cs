@@ -30,6 +30,7 @@ public class GetLeaveRequestsQuery
     public int PageSize { get; set; }
     public IEnumerable<LeaveRequestStatus> Statuses { get; set; }
     public string[]? CreatedByEmails { get; set; }
+    public string[]? CreatedByUserIds { get; set; }
     public static GetLeaveRequestsQuery GetDefault()
     {
         var now = DateTimeOffset.UtcNow.GetDayWithoutTime();

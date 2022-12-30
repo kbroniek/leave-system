@@ -19,7 +19,7 @@ public static class DbContextExtenstions
     private const string DefaultUserEmail = "karolbr5@gmail.com";
     private static readonly FederatedUser defaultUserMock = new FederatedUser("1c353785-c700-4a5d-bec5-a0f6f668bf22", DefaultUserEmail, "Karol Volt");
     private static FederatedUser defaultUser;
-    private static FederatedUser[] testUsers;
+    private static FederatedUser[] testUsers = Array.Empty<FederatedUser>();
     private static readonly FederatedUser[] testUserMock = new[]
     {
         new FederatedUser("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski"),
@@ -149,8 +149,8 @@ public static class DbContextExtenstions
         var queryBus = services.GetRequiredService<IQueryBus>();
         var commandBus = services.GetRequiredService<ICommandBus>();
         var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(
-                   null, null, null, null, null, null,
-                   testUsers.Take(5).Select(u => u.Email ?? "").ToArray(),
+                   null, null, null, null, null, null, null,
+                   testUsers.Take(5).Select(u => u.Id).ToArray(),
                    defaultUser));
         if (pagedList.Any())
         {

@@ -21,9 +21,10 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
     public Guid[]? LeaveTypeIds { get; }
     public LeaveRequestStatus[] Statuses { get; }
     public string[]? CreatedByEmails { get; }
+    public string[]? CreatedByUserIds { get; }
     public FederatedUser RequestedBy { get; }
 
-    private GetLeaveRequests(int pageNumber, int pageSize, DateTimeOffset dateFrom, DateTimeOffset dateTo, Guid[]? leaveTypeIds, LeaveRequestStatus[] statuses, string[]? createdByEmails, FederatedUser requestedBy)
+    private GetLeaveRequests(int pageNumber, int pageSize, DateTimeOffset dateFrom, DateTimeOffset dateTo, Guid[]? leaveTypeIds, LeaveRequestStatus[] statuses, string[]? createdByEmails, string[]? createdByUserIds, FederatedUser requestedBy)
     {
         PageNumber = pageNumber;
         PageSize = pageSize;
@@ -32,10 +33,11 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
         LeaveTypeIds = leaveTypeIds;
         Statuses = statuses;
         CreatedByEmails = createdByEmails;
+        CreatedByUserIds = createdByUserIds;
         RequestedBy = requestedBy;
     }
 
-    public static GetLeaveRequests Create(int? pageNumber, int? pageSize, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, Guid[]? leaveTypeIds, LeaveRequestStatus[]? statuses, string[]? createdByEmails, FederatedUser requestedBy)
+    public static GetLeaveRequests Create(int? pageNumber, int? pageSize, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, Guid[]? leaveTypeIds, LeaveRequestStatus[]? statuses, string[]? createdByEmails, string[]? createdByUserIds, FederatedUser requestedBy)
     {
         var now = DateTimeOffset.UtcNow;
         var pageNumberOrDefault = pageNumber ?? 1;
@@ -52,6 +54,7 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
             leaveTypeIds,
             statuses ?? validStatuses,
             createdByEmails,
+            createdByUserIds,
             requestedBy);
     }
 }
@@ -82,7 +85,6 @@ internal class HandleGetLeaveRequests :
         var privilegedRoles = new RoleType[] { RoleType.HumanResource, RoleType.LeaveLimitAdmin, RoleType.DecisionMaker, RoleType.GlobalAdmin };
         if (!await EntityFrameworkQueryableExtensions.AnyAsync(dbContext.Roles, r => r.UserId == request.RequestedBy.Id && privilegedRoles.Contains(r.RoleType), cancellationToken))
         {
-            Guard.Against.InvalidEmail(request.RequestedBy.Email, $"{nameof(request.RequestedBy)}.{nameof(request.RequestedBy.Email)}");
             return GetLeaveRequests.Create(
                 request.PageNumber,
                 request.PageSize,
@@ -90,7 +92,8 @@ internal class HandleGetLeaveRequests :
                 request.DateTo,
                 request.LeaveTypeIds,
                 request.Statuses,
-                new[] { request.RequestedBy.Email ?? "" }, // TODO: search by userId
+                request.CreatedByEmails,
+                new[] { request.RequestedBy.Id },
                 request.RequestedBy);
         }
         return request;
@@ -127,6 +130,15 @@ internal class HandleGetLeaveRequests :
             foreach (var createdByEmail in request.CreatedByEmails)
             {
                 predicate = predicate.Or(x => x.CreatedBy.Email == createdByEmail);
+            }
+            query = query.Where(predicate);
+        }
+        if (request.CreatedByUserIds != null && request.CreatedByUserIds.Length > 0)
+        {
+            var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
+            foreach (var createdByUserId in request.CreatedByUserIds)
+            {
+                predicate = predicate.Or(x => x.CreatedBy.Id == createdByUserId);
             }
             query = query.Where(predicate);
         }
