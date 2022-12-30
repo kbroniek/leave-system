@@ -76,7 +76,7 @@ public class LeaveRequest : Aggregate
         }
         if (DateFrom < DateTimeOffset.UtcNow)
         {
-            //throw new InvalidOperationException($"Canceling of past leave requests is not allowed.");
+            throw new InvalidOperationException($"Canceling of past leave requests is not allowed.");
         }
 
         var @event = LeaveRequestCanceled.Create(Id, remarks, canceledBy);
