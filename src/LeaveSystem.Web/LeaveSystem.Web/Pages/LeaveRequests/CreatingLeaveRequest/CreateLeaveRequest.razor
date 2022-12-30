@@ -251,7 +251,7 @@
 
     private Task<HttpResponseMessage> CreateLeaveRequestApi(GetEmployeeDto onBehalf)
     {
-        var leaveRequestOnBehalf = leaveRequest with { CreatedByBehalfOn = new FederatedUser(onBehalf.Id, onBehalf.Email, onBehalf.Name) };
+        var leaveRequestOnBehalf = leaveRequest with { CreatedByOnBehalf = new FederatedUser(onBehalf.Id, onBehalf.Email, onBehalf.Name) };
         return Http.PostAsJsonAsync("api/leaveRequests/onBehalf", leaveRequestOnBehalf);
     }
 

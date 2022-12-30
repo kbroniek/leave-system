@@ -10,9 +10,9 @@ public class CreateLeaveRequestOnBehalf : ICommand
 {
     public CreateLeaveRequest CreateLeaveRequest { get; }
 
-    public FederatedUser CreatedByBehalfOn { get; }
+    public FederatedUser CreatedByOnBehalf { get; }
 
-    private CreateLeaveRequestOnBehalf(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, FederatedUser createdByBehalfOn)
+    private CreateLeaveRequestOnBehalf(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, FederatedUser createdByOnBehalf)
     {
         CreateLeaveRequest = CreateLeaveRequest.Create(
             leaveRequestId,
@@ -23,9 +23,9 @@ public class CreateLeaveRequestOnBehalf : ICommand
             remarks,
             createdBy
         );
-        CreatedByBehalfOn = createdByBehalfOn;
+        CreatedByOnBehalf = createdByOnBehalf;
     }
-    public static CreateLeaveRequestOnBehalf Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy, FederatedUser? createdByBehalfOn)
+    public static CreateLeaveRequestOnBehalf Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy, FederatedUser? createdByOnBehalf)
     {
         return new(
             Guard.Against.NillAndDefault(leaveRequestId),
@@ -35,7 +35,7 @@ public class CreateLeaveRequestOnBehalf : ICommand
             Guard.Against.NillAndDefault(leaveTypeId),
             remarks,
             Guard.Against.NillAndDefault(createdBy),
-            Guard.Against.NillAndDefault(createdByBehalfOn));
+            Guard.Against.NillAndDefault(createdByOnBehalf));
     }
 }
 
@@ -54,7 +54,7 @@ internal class HandleCreateLeaveRequestOnBehalf :
     public async Task<Unit> Handle(CreateLeaveRequestOnBehalf command, CancellationToken cancellationToken)
     {
         var leaveRequest = await leaveRequestFactory.Create(command.CreateLeaveRequest, cancellationToken);
-        leaveRequest.BehalfOn(command.CreatedByBehalfOn);
+        leaveRequest.OnBehalf(command.CreatedByOnBehalf);
         await repository.Add(leaveRequest, cancellationToken);
         await repository.SaveChanges(cancellationToken);
         return Unit.Value;

@@ -4,24 +4,24 @@ using LeaveSystem.Shared;
 using Newtonsoft.Json;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-public class LeaveRequestBehalfOnCreated : IEvent
+public class LeaveRequestOnBehalfCreated : IEvent
 {
     public Guid StreamId => LeaveRequestId;
 
     public Guid LeaveRequestId { get; }
 
-    public FederatedUser CreatedByBehalfOn { get; }
+    public FederatedUser CreatedByOnBehalf { get; }
 
     [JsonConstructor]
-    private LeaveRequestBehalfOnCreated(Guid leaveRequestId, FederatedUser createdByBehalfOn)
+    private LeaveRequestOnBehalfCreated(Guid leaveRequestId, FederatedUser createdByOnBehalf)
     {
         LeaveRequestId = leaveRequestId;
-        CreatedByBehalfOn = createdByBehalfOn;
+        CreatedByOnBehalf = createdByOnBehalf;
     }
 
-    public static LeaveRequestBehalfOnCreated Create(Guid leaveRequestId,  FederatedUser createdByBehalfOn)
+    public static LeaveRequestOnBehalfCreated Create(Guid leaveRequestId,  FederatedUser createdByOnBehalf)
     {
-        Guard.Against.InvalidEmail(createdByBehalfOn.Email, $"{nameof(createdByBehalfOn)}.{nameof(createdByBehalfOn.Email)}");
-        return new(leaveRequestId, createdByBehalfOn);
+        Guard.Against.InvalidEmail(createdByOnBehalf.Email, $"{nameof(createdByOnBehalf)}.{nameof(createdByOnBehalf.Email)}");
+        return new(leaveRequestId, createdByOnBehalf);
     }
 }

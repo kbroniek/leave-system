@@ -35,9 +35,9 @@ else
         <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Status: <strong>@leaveRequest.Status</strong></RadzenText>
         <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Created by: <strong>@leaveRequest.CreatedBy.Name</strong></RadzenText>
         <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">Last modified by: <strong>@leaveRequest.LastModifiedBy?.Name</strong></RadzenText>
-        @if (leaveRequest.CreatedByBehalfOn is not null)
+        @if (leaveRequest.CreatedByOnBehalf is not null)
         {
-            <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">On behalf: <strong>@leaveRequest.CreatedByBehalfOn?.Name</strong></RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">On behalf: <strong>@leaveRequest.CreatedByOnBehalf?.Name</strong></RadzenText>
         }
         <hr class="mt-2 mb-3"/>
     </RadzenCard>
@@ -70,6 +70,6 @@ else
         this.workingHours = workingHours.GetDuration();
     }
 
-    public record LeaveRequest(DateTimeOffset DateFrom, DateTimeOffset DateTo, TimeSpan Duration, Guid LeaveTypeId, IEnumerable<RemarksModel> Remarks, LeaveRequestStatus Status, FederatedUser CreatedBy, FederatedUser? LastModifiedBy, FederatedUser? CreatedByBehalfOn);
+    public record LeaveRequest(DateTimeOffset DateFrom, DateTimeOffset DateTo, TimeSpan Duration, Guid LeaveTypeId, IEnumerable<RemarksModel> Remarks, LeaveRequestStatus Status, FederatedUser CreatedBy, FederatedUser? LastModifiedBy, FederatedUser? CreatedByOnBehalf);
     public record RemarksModel(string Remarks, FederatedUser CreatedBy);
 }
