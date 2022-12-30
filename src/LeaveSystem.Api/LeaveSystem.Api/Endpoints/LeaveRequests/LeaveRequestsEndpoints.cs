@@ -37,6 +37,7 @@ public static class LeaveRequestsEndpoints
                 query.LeaveTypeIds,
                 query.Statuses,
                 query.CreatedByEmails,
+                query.CreatedByUserIds,
                 httpContext.User.CreateModel()), cancellationToken);
 
             return PagedListResponse.From(pagedList);

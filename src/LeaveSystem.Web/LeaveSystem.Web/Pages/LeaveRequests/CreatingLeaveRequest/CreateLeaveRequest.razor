@@ -32,6 +32,7 @@
             <RadzenCard>
                 <div class="row">
                     <div>
+                        @*TODO: When we change behalf on we have to update summary*@
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create behalf on:</RadzenText>
                         <RadzenDropDown @bind-Value="onBehalfId" Data="@employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." />
                     </div>
@@ -142,7 +143,6 @@
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User.CreateModel();
-            var email = user.GetEmail();
             var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
             var firstDay = now.GetFirstDayOfYear();
             var lastDay = now.GetLastDayOfYear();
@@ -150,7 +150,7 @@
             leaveRequest.LeaveTypeId = leaveTypes.FirstOrDefault(lt => lt.Properties.Catalog == LeaveSystem.Shared.LeaveTypeCatalog.Holiday)?.Id;
             var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000)
             {
-                CreatedByEmails = new string[] { email ?? "" }
+                CreatedByUserIds = new string[] { user.Id }
             });
             var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Id);
             var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(user.Id, firstDay, lastDay);

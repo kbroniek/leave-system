@@ -117,13 +117,12 @@ else
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User.CreateModel();
-        var email = user.GetEmail();
         var now = DateTimeOffset.UtcNow;
         var firstDay = now.GetFirstDayOfYear();
         var lastDay = now.GetLastDayOfYear();
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000, Enum.GetValues<LeaveRequestStatus>())
         {
-            CreatedByEmails = new[] { email ?? "" }
+            CreatedByUserIds = new string[] { user.Id }
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();

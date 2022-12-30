@@ -4,7 +4,7 @@ using LeaveSystem.Shared.LeaveRequests;
 namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 
 public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTimeOffset? DateFrom, DateTimeOffset? DateTo,
-    Guid[]? LeaveTypeIds, LeaveRequestStatus[]? Statuses, string[]? CreatedByEmails)
+    Guid[]? LeaveTypeIds, LeaveRequestStatus[]? Statuses, string[]? CreatedByEmails, string[]? CreatedByUserIds)
 {
     public static ValueTask<GetLeaveRequestsQuery?> BindAsync(HttpContext context)
         => ValueTask.FromResult<GetLeaveRequestsQuery?>(new(
@@ -14,6 +14,7 @@ public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTi
             DateTo: context.Request.Query.TryParseDateTimeOffset(nameof(DateTo)),
             LeaveTypeIds: context.Request.Query.TryParseGuids(nameof(LeaveTypeIds)),
             Statuses: context.Request.Query.TryParseLeaveRequestStatuses(nameof(Statuses)),
-            CreatedByEmails: context.Request.Query.TryParseStrings(nameof(CreatedByEmails))
+            CreatedByEmails: context.Request.Query.TryParseStrings(nameof(CreatedByEmails)),
+            CreatedByUserIds: context.Request.Query.TryParseStrings(nameof(CreatedByUserIds))
             ));
 }

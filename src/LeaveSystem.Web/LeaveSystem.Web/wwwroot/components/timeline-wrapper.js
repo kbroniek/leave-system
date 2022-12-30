@@ -7,12 +7,12 @@ window.TimelineWrapper = {
         }
         const container = document.getElementById(componentName ? componentName : 'timeline-visualization');
 
-        const groups = new vis.DataSet(users.map((u) => ({ id: u.email, content: u.name })));
+        const groups = new vis.DataSet(users.map((u) => ({ id: u.id, content: u.name })));
         const items = new vis.DataSet();
         leaveRequests.forEach(lr => {
             items.add({
                 id: lr.id,
-                group: lr.createdBy.email,
+                group: lr.createdBy.id,
                 start: new Date(lr.dateFrom).setHours(0, 0, 0, 0),
                 end: new Date(lr.dateTo).setHours(23, 59, 59, 99),
                 content: lr.leaveTypeId
