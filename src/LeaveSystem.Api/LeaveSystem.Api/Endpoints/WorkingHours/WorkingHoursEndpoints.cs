@@ -17,7 +17,7 @@ public static class WorkingHoursEndpoints
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
             var workingHours = await service.GetUserWorkingHours(
-                query.UserEmails,
+                query.UserIds,
                 query.DateFrom,
                 query.DateTo,
                 cancellationToken);
@@ -26,13 +26,13 @@ public static class WorkingHoursEndpoints
         .WithName(GetWorkingHoursEndpointsPolicyName)
         .RequireAuthorization(GetWorkingHoursEndpointsPolicyName);
 
-        endpoint.MapGet("api/workingHours/{userEmail}", async (HttpContext httpContext, WorkingHoursService service, string? userEmail, GetUserWorkingHoursQuery query, CancellationToken cancellationToken) =>
+        endpoint.MapGet("api/workingHours/{userId}", async (HttpContext httpContext, WorkingHoursService service, string? userId, GetUserWorkingHoursQuery query, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
-            Guard.Against.InvalidEmail(userEmail);
+            Guard.Against.Nill(userId);
 
             var workingHours = await service.GetUserWorkingHours(
-                new string[] { userEmail },
+                new string[] { userId },
                 query.DateFrom,
                 query.DateTo,
                 cancellationToken);
@@ -41,13 +41,13 @@ public static class WorkingHoursEndpoints
         .WithName(GetUserWorkingHoursEndpointsPolicyName)
         .RequireAuthorization(GetUserWorkingHoursEndpointsPolicyName);
 
-        endpoint.MapGet("api/workingHours/{userEmail}/duration", async (HttpContext httpContext, WorkingHoursService service, string? userEmail, GetUserWorkingHoursQuery query, CancellationToken cancellationToken) =>
+        endpoint.MapGet("api/workingHours/{userId}/duration", async (HttpContext httpContext, WorkingHoursService service, string? userId, GetUserWorkingHoursQuery query, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
-            Guard.Against.InvalidEmail(userEmail);
+            Guard.Against.Nill(userId);
             var duration = await service.GetUserSingleWorkingHoursDuration(
-                userEmail,
+                userId,
                 query.DateFrom,
                 query.DateTo,
                 cancellationToken);

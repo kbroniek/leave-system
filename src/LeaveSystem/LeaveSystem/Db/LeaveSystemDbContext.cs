@@ -27,10 +27,10 @@ public class LeaveSystemDbContext : DbContext
             .IsRequired()
             .HasConversion(new EnumToStringConverter<RoleType>()); ;
         modelBuilder.Entity<Role>()
-            .Property(b => b.Email)
+            .Property(b => b.UserId)
             .IsRequired();
         modelBuilder.Entity<Role>()
-            .HasIndex(p => new { p.RoleType, p.Email }).IsUnique();
+            .HasIndex(p => new { p.RoleType, p.UserId }).IsUnique();
     }
 
     private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)
@@ -38,7 +38,7 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<UserLeaveLimit>()
              .HasKey(e => e.Id);
         modelBuilder.Entity<UserLeaveLimit>()
-            .Property(b => b.AssignedToUserEmail)
+            .Property(b => b.AssignedToUserId)
             .IsRequired(false);
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.Limit)
@@ -64,9 +64,9 @@ public class LeaveSystemDbContext : DbContext
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<UserLeaveLimit>()
-            .HasIndex(p => new { p.LeaveTypeId, p.AssignedToUserEmail, p.ValidSince }).IsUnique();
+            .HasIndex(p => new { p.LeaveTypeId, p.AssignedToUserId, p.ValidSince }).IsUnique();
         modelBuilder.Entity<UserLeaveLimit>()
-            .HasIndex(p => new { p.LeaveTypeId, p.AssignedToUserEmail, p.ValidUntil }).IsUnique();
+            .HasIndex(p => new { p.LeaveTypeId, p.AssignedToUserId, p.ValidUntil }).IsUnique();
     }
 
     private static void OnLeaveTypeCreating(ModelBuilder modelBuilder)

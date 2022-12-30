@@ -55,11 +55,11 @@ else
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User.CreateModel();
-        var email = user.GetEmail();
+        var userId = user.Id;
         var now = DateTimeOffset.UtcNow;
         var firstDay = now.GetFirstDayOfYear();
         var lastDay = now.GetLastDayOfYear();
-        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(email, firstDay, lastDay);
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(userId, firstDay, lastDay);
         leaveRequest = await HttpClient.GetFromJsonAsync<LeaveRequest>($"api/leaveRequests/{LeaveRequestId}", new JsonSerializerOptions(JsonSerializerDefaults.Web));
         if(leaveRequest is null)
         {

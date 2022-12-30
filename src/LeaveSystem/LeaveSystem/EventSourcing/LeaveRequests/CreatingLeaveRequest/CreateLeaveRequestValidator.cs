@@ -43,7 +43,7 @@ public class CreateLeaveRequestValidator
     public virtual async Task ImpositionValidator(LeaveRequestCreated creatingLeaveRequest)
     {
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
-            .Where(x => x.CreatedBy.Email == creatingLeaveRequest.CreatedBy.Email && ((
+            .Where(x => x.CreatedBy.Id == creatingLeaveRequest.CreatedBy.Id && ((
                     x.DateFrom >= creatingLeaveRequest.DateTo &&
                     x.DateTo <= creatingLeaveRequest.DateTo
                 ) || (
@@ -74,7 +74,7 @@ public class CreateLeaveRequestValidator
         await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
             creatingLeaveRequest.DateTo,
             creatingLeaveRequest.LeaveTypeId,
-            creatingLeaveRequest.CreatedBy.Email!,
+            creatingLeaveRequest.CreatedBy.Id,
             creatingLeaveRequest.LeaveTypeId,
             connectedLeaveTypeIds.nestedLeaveTypeId);
 
@@ -84,7 +84,7 @@ public class CreateLeaveRequestValidator
             await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
                 creatingLeaveRequest.DateTo,
                 baseLeaveTypeId,
-                creatingLeaveRequest.CreatedBy.Email!,
+                creatingLeaveRequest.CreatedBy.Id,
                 baseLeaveTypeId);
         }
     }
@@ -93,16 +93,16 @@ public class CreateLeaveRequestValidator
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,
         Guid currentLeaveTypeId,
-        string userEmail,
+        string userId,
         Guid leaveTypeId,
         Guid? nestedLeaveTypeId = null)
     {
         UserLeaveLimit leaveLimit = await GetLimits(dateFrom,
                dateTo,
                currentLeaveTypeId,
-               userEmail);
+               userId);
         var totalUsed = await GetUsedLeavesDuration(dateFrom,
-            userEmail,
+            userId,
             leaveTypeId,
             nestedLeaveTypeId);
         if (leaveLimit.Limit != null && CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed) <= TimeSpan.Zero)
@@ -131,14 +131,14 @@ public class CreateLeaveRequestValidator
 
     private async Task<TimeSpan> GetUsedLeavesDuration(
         DateTimeOffset dateFrom,
-        string userEmail,
+        string userId,
         Guid leaveTypeId,
         Guid? nestedLeaveTypeId)
     {
         var firstDay = dateFrom.GetFirstDayOfYear();
         var lastDay = dateFrom.GetLastDayOfYear();
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
-            .Where(x => x.CreatedBy.Email == userEmail &&
+            .Where(x => x.CreatedBy.Id == userId &&
                 x.DateFrom >= firstDay &&
                 x.DateTo <= lastDay &&
                 (
@@ -163,20 +163,20 @@ public class CreateLeaveRequestValidator
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,
         Guid leaveTypeId,
-        string userEmail)
+        string userId)
     {
         var limits = await EFExtensions.ToListAsync(dbContext.UserLeaveLimits.Where(l =>
-                        (l.AssignedToUserEmail == null || l.AssignedToUserEmail == userEmail) &&
+                        (l.AssignedToUserId == null || l.AssignedToUserId == userId) &&
                         (l.ValidSince == null || l.ValidSince <= dateFrom) &&
                         (l.ValidUntil == null || l.ValidUntil >= dateTo) &&
                         l.LeaveTypeId == leaveTypeId));
         if (limits == null || limits.Count == 0)
         {
-            throw new ValidationException($"Cannot find limits for the leave type id: {leaveTypeId}. Add limits for the user {userEmail}.");
+            throw new ValidationException($"Cannot find limits for the leave type id: {leaveTypeId}. Add limits for the user {userId}.");
         }
         if (limits.Count > 1)
         {
-            throw new ValidationException($"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userEmail}.");
+            throw new ValidationException($"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userId}.");
         }
         return limits.First();
     }

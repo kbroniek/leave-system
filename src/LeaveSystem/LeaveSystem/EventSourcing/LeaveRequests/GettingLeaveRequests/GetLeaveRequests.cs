@@ -44,7 +44,6 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
         var dateToOrDefault = dateTo ?? now.Add(TimeSpan.FromDays(14));
         Guard.Against.NegativeOrZero(pageNumberOrDefault, nameof(pageNumber));
         Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), 1, 1000);
-        Guard.Against.Nill(requestedBy.Email);
         return new(
             pageNumberOrDefault,
             pageSizeOrDefault,
@@ -81,8 +80,9 @@ internal class HandleGetLeaveRequests :
         CancellationToken cancellationToken)
     {
         var privilegedRoles = new RoleType[] { RoleType.HumanResource, RoleType.LeaveLimitAdmin, RoleType.DecisionMaker, RoleType.GlobalAdmin };
-        if (!await EntityFrameworkQueryableExtensions.AnyAsync(dbContext.Roles, r => r.Email == request.RequestedBy.Email && privilegedRoles.Contains(r.RoleType), cancellationToken))
+        if (!await EntityFrameworkQueryableExtensions.AnyAsync(dbContext.Roles, r => r.UserId == request.RequestedBy.Id && privilegedRoles.Contains(r.RoleType), cancellationToken))
         {
+            Guard.Against.InvalidEmail(request.RequestedBy.Email, $"{nameof(request.RequestedBy)}.{nameof(request.RequestedBy.Email)}");
             return GetLeaveRequests.Create(
                 request.PageNumber,
                 request.PageSize,
@@ -90,7 +90,7 @@ internal class HandleGetLeaveRequests :
                 request.DateTo,
                 request.LeaveTypeIds,
                 request.Statuses,
-                new[] { request.RequestedBy.Email ?? "" },
+                new[] { request.RequestedBy.Email ?? "" }, // TODO: search by userId
                 request.RequestedBy);
         }
         return request;

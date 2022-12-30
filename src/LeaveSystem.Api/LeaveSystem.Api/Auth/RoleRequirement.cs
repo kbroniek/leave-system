@@ -33,11 +33,11 @@ public class RoleRequirementHandler : AuthorizationHandler<RoleRequirement>
         var userModel = context.User.CreateModel();
         var allRoles = requirement.Roles.Union(new RoleType[] { RoleType.GlobalAdmin }).ToArray();
 
-        if (await dbContext.Roles.AnyAsync(r => r.Email == userModel.Email && allRoles.Contains(r.RoleType)))
+        if (await dbContext.Roles.AnyAsync(r => r.UserId == userModel.Id && allRoles.Contains(r.RoleType)))
         {
             context.Succeed(requirement);
             return;
         }
-        context.Fail(new AuthorizationFailureReason(this, $"The user {userModel.Email} doesn't have access to the endpoint."));
+        context.Fail(new AuthorizationFailureReason(this, $"The user {userModel.Email} doesn't have access to the endpoint. UserId: {userModel.Id}"));
     }
 }

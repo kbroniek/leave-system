@@ -66,7 +66,7 @@ public class LeaveRequest : Aggregate
 
     internal void Cancel(string? remarks, FederatedUser canceledBy)
     {
-        if (!string.Equals(CreatedBy.Email, canceledBy.Email, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException($"Canceling a non-your leave request is not allowed.");
         }
@@ -74,7 +74,7 @@ public class LeaveRequest : Aggregate
         {
             throw new InvalidOperationException($"Canceling leave requests in '{Status}' status is not allowed.");
         }
-        if (DateFrom < DateTimeOffset.Now)
+        if (DateFrom < DateTimeOffset.UtcNow)
         {
             throw new InvalidOperationException($"Canceling of past leave requests is not allowed.");
         }

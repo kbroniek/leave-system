@@ -87,9 +87,10 @@ else
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         employees = leaveRequests?.Items?.Select(l => l.CreatedBy)
-            .GroupBy(u => u.Email)
+            .GroupBy(u => u.Id)
             .Select(u => u.First())
-            .OrderBy(u => u.Email).ToArray();
+            .OrderBy(u => u.Name)
+            .ToArray();
         await Timeline.CreateAsync("timeline-visualization", employees, leaveRequests?.Items, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo.AddDays(1));
     }
     private async Task HandleFilter()

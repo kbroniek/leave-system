@@ -26,10 +26,10 @@ public record class HrSummary(
         int daysInARow)
     {
         var userLeaveRequests = leaveRequests
-            .Where(lr => string.Equals(lr.CreatedBy.Email, user.Email, StringComparison.CurrentCultureIgnoreCase))
+            .Where(lr => string.Equals(lr.CreatedBy.Id, user.Id, StringComparison.CurrentCultureIgnoreCase))
             .ToList();
         var userLimits = limits
-            .Where(l => string.Equals(l.AssignedToUserEmail, user.Email, StringComparison.CurrentCultureIgnoreCase))
+            .Where(l => string.Equals(l.AssignedToUserId, user.Id, StringComparison.CurrentCultureIgnoreCase))
             .ToList();
         var usedPerLeaveTypes = leaveTypes.ToDictionary(
             lt => lt.Id,
@@ -52,7 +52,7 @@ public record class HrSummary(
             lt => lt.Key,
             lt => lt.Value.GetReadableTimeSpan(workingHours));
         return new HrSummary(
-            user.Name ?? user.Email,
+            user.Name ?? user.Email ?? user.Id,
             totalLimit,
             limit,
             overdueLimit,

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveSystem.Migrations
 {
     [DbContext(typeof(LeaveSystemDbContext))]
-    [Migration("20220920073855_Init")]
+    [Migration("20221230130046_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,17 +60,17 @@ namespace LeaveSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("RoleType")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("RoleType")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RoleType", "Email")
+                    b.HasIndex("RoleType", "UserId")
                         .IsUnique();
 
                     b.ToTable("Roles");
@@ -82,7 +82,7 @@ namespace LeaveSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("AssignedToUserEmail")
+                    b.Property<string>("AssignedToUserId")
                         .HasColumnType("text");
 
                     b.Property<Guid>("LeaveTypeId")
@@ -105,10 +105,10 @@ namespace LeaveSystem.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LeaveTypeId", "AssignedToUserEmail", "ValidSince")
+                    b.HasIndex("LeaveTypeId", "AssignedToUserId", "ValidSince")
                         .IsUnique();
 
-                    b.HasIndex("LeaveTypeId", "AssignedToUserEmail", "ValidUntil")
+                    b.HasIndex("LeaveTypeId", "AssignedToUserId", "ValidUntil")
                         .IsUnique();
 
                     b.ToTable("UserLeaveLimits");

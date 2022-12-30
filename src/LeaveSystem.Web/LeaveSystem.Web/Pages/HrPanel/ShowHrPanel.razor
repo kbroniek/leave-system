@@ -63,12 +63,12 @@ else
         leaveTypes = getLeaveTypesTask.Result;
         var limits = getLimitsTask.Result;
         var users = CreateUserCollection(leaveRequests, limits);
-        var workingHours = await WorkingHoursService.GetWorkingHours(users.Select(u => u.Email), firstDay, lastDay);
+        var workingHours = await WorkingHoursService.GetWorkingHours(users.Select(u => u.Id), firstDay, lastDay);
         hrSummary = users.Select(u => HrSummary.Create(u,
             leaveTypes,
             leaveRequests,
             limits,
-            workingHours.GetDuration(u.Email),
+            workingHours.GetDuration(u.Id),
             daysInARow
         ));
     }
@@ -76,7 +76,7 @@ else
     private static IEnumerable<FederatedUser> CreateUserCollection(IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits) =>
         leaveRequests
             .Select(lr => lr.CreatedBy)
-            .Union(limits.Select(l => new FederatedUser(l.AssignedToUserEmail, null)))
-            .GroupBy(u => u.Email)
+            .Union(limits.Select(l => new FederatedUser(l.AssignedToUserId, null, null)))
+            .GroupBy(u => u.Id)
             .Select(g => g.First());
 }

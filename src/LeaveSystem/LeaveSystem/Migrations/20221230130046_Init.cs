@@ -37,7 +37,7 @@ namespace LeaveSystem.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     RoleType = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false)
+                    UserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -51,7 +51,7 @@ namespace LeaveSystem.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Limit = table.Column<TimeSpan>(type: "interval", nullable: true),
                     OverdueLimit = table.Column<TimeSpan>(type: "interval", nullable: true),
-                    AssignedToUserEmail = table.Column<string>(type: "text", nullable: true),
+                    AssignedToUserId = table.Column<string>(type: "text", nullable: true),
                     LeaveTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     ValidSince = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     ValidUntil = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
@@ -80,21 +80,21 @@ namespace LeaveSystem.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roles_RoleType_Email",
+                name: "IX_Roles_RoleType_UserId",
                 table: "Roles",
-                columns: new[] { "RoleType", "Email" },
+                columns: new[] { "RoleType", "UserId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserLeaveLimits_LeaveTypeId_AssignedToUserEmail_ValidSince",
+                name: "IX_UserLeaveLimits_LeaveTypeId_AssignedToUserId_ValidSince",
                 table: "UserLeaveLimits",
-                columns: new[] { "LeaveTypeId", "AssignedToUserEmail", "ValidSince" },
+                columns: new[] { "LeaveTypeId", "AssignedToUserId", "ValidSince" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserLeaveLimits_LeaveTypeId_AssignedToUserEmail_ValidUntil",
+                name: "IX_UserLeaveLimits_LeaveTypeId_AssignedToUserId_ValidUntil",
                 table: "UserLeaveLimits",
-                columns: new[] { "LeaveTypeId", "AssignedToUserEmail", "ValidUntil" },
+                columns: new[] { "LeaveTypeId", "AssignedToUserId", "ValidUntil" },
                 unique: true);
         }
 
