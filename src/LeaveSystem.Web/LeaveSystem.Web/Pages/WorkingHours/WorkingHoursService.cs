@@ -13,11 +13,11 @@ public class WorkingHoursService
         this.httpClient = httpClient;
     }
 
-    public async Task<WorkingHoursCollection> GetWorkingHours(IEnumerable<string> userEmails, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public async Task<WorkingHoursCollection> GetWorkingHours(IEnumerable<string> userIds, DateTimeOffset dateFrom, DateTimeOffset dateTo)
     {
         var query = new
         {
-            UserEmails = userEmails,
+            UserIds = userIds,
             DateFrom = dateFrom,
             dateTo = dateTo,
         };
@@ -26,14 +26,14 @@ public class WorkingHoursService
         return new WorkingHoursCollection(workingHours?.WorkingHours ?? Enumerable.Empty<WorkingHoursModel>());
     }
 
-    public async Task<WorkingHoursCollection> GetUserWorkingHours(string userEmail, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public async Task<WorkingHoursCollection> GetUserWorkingHours(string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo)
     {
         var query = new
         {
             DateFrom = dateFrom,
             dateTo = dateTo,
         };
-        var uri = query.CreateQueryString($"api/workingHours/{userEmail}");
+        var uri = query.CreateQueryString($"api/workingHours/{userId}");
         var workingHours = await httpClient.GetFromJsonAsync<WorkingHoursCollectionDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         return new WorkingHoursCollection(workingHours?.WorkingHours ?? Enumerable.Empty<WorkingHoursModel>());
     }

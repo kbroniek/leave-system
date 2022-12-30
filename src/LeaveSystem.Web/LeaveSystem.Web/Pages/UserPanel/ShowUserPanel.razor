@@ -123,12 +123,12 @@ else
         var lastDay = now.GetLastDayOfYear();
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000, Enum.GetValues<LeaveRequestStatus>())
         {
-            CreatedByEmails = new[] { email }
+            CreatedByEmails = new[] { email ?? "" }
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
-        var getLimitsTask = UserLeaveLimitsService.GetLimits(email);
-        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(email, firstDay, lastDay);
+        var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Id);
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(user.Id, firstDay, lastDay);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result ?? new PagedListResponse<LeaveRequestShortInfo>(Enumerable.Empty<LeaveRequestShortInfo>(), 0, false);
         var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();

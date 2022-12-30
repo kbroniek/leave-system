@@ -5,7 +5,7 @@ public class Role : IHaveId<Guid>
 {
     public Guid Id { get; set; }
     public RoleType RoleType { get; set; }
-    public string Email { get; set; }
+    public string UserId { get; set; }
 }
 
 public enum RoleType

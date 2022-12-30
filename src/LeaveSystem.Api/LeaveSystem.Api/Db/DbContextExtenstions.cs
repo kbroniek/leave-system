@@ -1,5 +1,6 @@
 ﻿using GoldenEye.Commands;
 using GoldenEye.Queries;
+using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
@@ -8,6 +9,7 @@ using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 
 namespace LeaveSystem.Api.Db;
 public static class DbContextExtenstions
@@ -15,15 +17,16 @@ public static class DbContextExtenstions
     private class DbContextExtenstionsLogger { }
     private static readonly TimeSpan workingHours = WorkingHoursCollection.DefaultWorkingHours;
     private const string DefaultUserEmail = "karolbr5@gmail.com";
-    private static readonly FederatedUser defaultUser = new FederatedUser(DefaultUserEmail, "Karol Volt");
-    private static readonly FederatedUser[] testUsers = new[]
+    private static readonly FederatedUser defaultUserMock = new FederatedUser("1c353785-c700-4a5d-bec5-a0f6f668bf22", DefaultUserEmail, "Karol Volt");
+    private static FederatedUser defaultUser;
+    private static FederatedUser[] testUsers;
+    private static readonly FederatedUser[] testUserMock = new[]
     {
-        new FederatedUser("jkowalski@test.com", "Jan Kowalski"),
-        new FederatedUser("mnowak@test.com", "Maria Nowak"),
-        new FederatedUser("jszczepanek@test.com", "Jadwiga Szczepanek"),
-        new FederatedUser("aszewczyk@test.com", "Aleksandra Szewczyk"),
-        new FederatedUser("ourbanek@test.com", "Olgierd Urbanek"),
-        defaultUser
+        new FederatedUser("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski"),
+        new FederatedUser("88fa3c20-0c52-4da4-8389-868d9a487aa0", "mnowak@test.com", "Maria Nowak"),
+        new FederatedUser("1374e2d6-15f5-4543-b7bf-95118701f315", "jszczepanek@test.com", "Jadwiga Szczepanek"),
+        new FederatedUser("59ed14ff-edc4-421c-8f22-28973f4ccd76", "aszewczyk@test.com", "Aleksandra Szewczyk"),
+        new FederatedUser("d5ff6b57-a701-4ce8-82ef-593ef207fb76", "ourbanek@test.com", "Olgierd Urbanek")
     };
     private static LeaveType holidayLeave = new LeaveType
     {
@@ -100,12 +103,20 @@ public static class DbContextExtenstions
 
     public static async Task FillInDatabase(this IApplicationBuilder app)
     {
+        var cancellationToken = new CancellationToken();
         await using (var scope = app.ApplicationServices.CreateAsyncScope())
         {
             var services = scope.ServiceProvider;
             try
             {
                 var dbContext = services.GetRequiredService<LeaveSystemDbContext>();
+                var graphUserService = services.GetRequiredService<GraphUserService>();
+                var graphUsers = await graphUserService.Get(cancellationToken);
+                defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email, defaultUserMock.Name);
+                testUsers = testUserMock
+                    .Select(t => CreateFederatedUser(graphUsers, t.Id, t.Email, t.Name))
+                    .Union(new FederatedUser[] { defaultUser })
+                    .ToArray();
                 await FillInSimpleData(dbContext);
                 await FillInLeaveRequests(services);
             }
@@ -115,6 +126,14 @@ public static class DbContextExtenstions
                 logger.LogError(ex, "Something wrong happened when fill in database.");
             }
         }
+    }
+
+    private static FederatedUser CreateFederatedUser(IEnumerable<GraphUser> graphUsers, string id, string? email, string? name)
+    {
+        GraphUser? graphUser = graphUsers.FirstOrDefault(u =>
+            string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(u.DisplayName, name, StringComparison.OrdinalIgnoreCase));
+        return new FederatedUser(graphUser?.Id ?? id, email, name);
     }
 
     private static async Task FillInSimpleData(LeaveSystemDbContext dbContext)
@@ -131,7 +150,7 @@ public static class DbContextExtenstions
         var commandBus = services.GetRequiredService<ICommandBus>();
         var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(
                    null, null, null, null, null, null,
-                   testUsers.Take(5).Select(u => u.Email).ToArray(),
+                   testUsers.Take(5).Select(u => u.Email ?? "").ToArray(),
                    defaultUser));
         if (pagedList.Any())
         {
@@ -144,7 +163,7 @@ public static class DbContextExtenstions
         await SetupUser4(commandBus, defaultUser, testUsers[4]);
         await SetupUser4(commandBus, defaultUser, defaultUser);
 
-        var now = DateTimeOffset.UtcNow;
+        var now = GetNow();
         int firstMonth = now.Month > 6 ? 1 : 9;
         int secondMonth = now.Month > 6 ? 5 : 12;
         await AddSaturdayLeaveRequest(commandBus, testUsers[0], now, firstMonth);
@@ -161,7 +180,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser4(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = GetNow();
         var start = GetFirstWorkingDay(now.GetFirstDayOfYear());
         var end = start;
 
@@ -177,7 +196,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser3(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = GetNow();
         var start = GetFirstWorkingDay(now.GetFirstDayOfYear());
         var end = GetFirstWorkingDay(new DateTimeOffset(now.Year, 12, 20, 0, 0, 0, TimeSpan.Zero));
 
@@ -187,7 +206,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser2(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = GetNow();
         var start = GetFirstWorkingDay(now);
         var end = start;
 
@@ -197,7 +216,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser1(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = GetNow();
         var start = GetFirstWorkingDay(now.AddDays(-5));
         var end = GetFirstWorkingDay(now.AddDays(2));
 
@@ -226,7 +245,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser0(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = GetNow();
         var start = GetFirstWorkingDay(now);
         var end = GetFirstWorkingDay(now.AddDays(7));
 
@@ -326,12 +345,12 @@ public static class DbContextExtenstions
         {
             return;
         }
-        var now = DateTimeOffset.UtcNow;
+        var now = GetNow();
         var holidayLimits = testUsers.Select(u => new UserLeaveLimit
         {
             LeaveTypeId = holidayLeave.Id,
             Limit = holidayLeave.Properties?.DefaultLimit,
-            AssignedToUserEmail = u.Email,
+            AssignedToUserId = u.Id,
             ValidSince = now.GetFirstDayOfYear(),
             ValidUntil = now.GetLastDayOfYear(),
         });
@@ -340,7 +359,7 @@ public static class DbContextExtenstions
         {
             LeaveTypeId = onDemandLeave.Id,
             Limit = onDemandLeave.Properties?.DefaultLimit,
-            AssignedToUserEmail = u.Email,
+            AssignedToUserId = u.Id,
             ValidSince = now.GetFirstDayOfYear(),
             ValidUntil = now.GetLastDayOfYear(),
         });
@@ -365,7 +384,7 @@ public static class DbContextExtenstions
         {
             LeaveTypeId = saturdayLeave.Id,
             Limit = saturdayLeave.Properties?.DefaultLimit,
-            AssignedToUserEmail = u.Email,
+            AssignedToUserId = u.Id,
             ValidSince = firstDayOfMonth,
             ValidUntil = lastDayOfMonth,
             Property = new UserLeaveLimit.UserLeaveLimitProperties
@@ -381,8 +400,8 @@ public static class DbContextExtenstions
         {
             return;
         }
-        await dbContext.Roles.AddAsync(new Role { Email = DefaultUserEmail, Id = Guid.NewGuid(), RoleType = RoleType.GlobalAdmin });
-        var roles = testUsers.Select(u => new Role { Email = u.Email, Id = Guid.NewGuid(), RoleType = RoleType.Employee });
+        await dbContext.Roles.AddAsync(new Role { UserId = defaultUser.Id, Id = Guid.NewGuid(), RoleType = RoleType.GlobalAdmin });
+        var roles = testUsers.Select(u => new Role { UserId = u.Id, Id = Guid.NewGuid(), RoleType = RoleType.Employee });
         await dbContext.Roles.AddRangeAsync(roles);
     }
 
@@ -489,5 +508,11 @@ public static class DbContextExtenstions
             }
         };
         await dbContext.LeaveTypes.AddRangeAsync(leaveTypes);
+    }
+
+    private static DateTimeOffset GetNow()
+    {
+        return new DateTimeOffset(2022, 11, 1, 0, 0, 0, TimeSpan.Zero);
+        //return GetNow();
     }
 }

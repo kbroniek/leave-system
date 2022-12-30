@@ -27,8 +27,4 @@
     <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
 </Project>

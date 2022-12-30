@@ -11,16 +11,16 @@ public class WorkingHoursCollection
     }
 
     public TimeSpan GetDuration() => GetDuration(workingHoursCollection);
-    public TimeSpan GetDuration(string userEmail)
+    public TimeSpan GetDuration(string userId)
     {
         var workingHoursFound = workingHoursCollection.Where(w =>
-            string.Equals(w.UserEmail, userEmail, StringComparison.CurrentCultureIgnoreCase));
+            string.Equals(w.UserId, userId, StringComparison.CurrentCultureIgnoreCase));
         return GetDuration(workingHoursFound);
     }
-    public TimeSpan GetDuration(string userEmail, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public TimeSpan GetDuration(string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo)
     {
         var workingHoursFound = workingHoursCollection.Where(w =>
-            string.Equals(w.UserEmail, userEmail, StringComparison.CurrentCultureIgnoreCase) &&
+            string.Equals(w.UserId, userId, StringComparison.CurrentCultureIgnoreCase) &&
             w.DateFrom <= dateFrom && w.DateTo >= dateTo);
         return GetDuration(workingHoursFound);
     }
