@@ -15,11 +15,22 @@ System to manage leaves.
 
 ![Update appsettings.json](./AzureAppRegistrationB2C-appsettings.png)
 
-### Assign correct permissions to read users
+### Assign correct permissions to read and update users
 
-- Choose the server app e.g. `Blazor Server AAD B2C` or create a new one.
-- Go to the `API permissions` and add a `User.ReadBasic.All` application permission.
-- Go to the `Certificates & secrets` and generate new secret. Copy a secret in to the [appsettings.json](./src/LeaveSystem.Api/LeaveSystem.Api/appsettings.json), to the `AzureReadUsers` section.
+You can create a new application or use existing the `Blazor Server AAD B2C` app.
+
+1. Copy client id and tenant id and paste to the `ManageAzureUsers` in the [appsettings.json](./src/LeaveSystem.Api/LeaveSystem.Api/appsettings.json) config file.
+1. Generate `client secret`. Go to the app details and click `Certificates & secrets`. Click `New client secret`. Copy secret and paste to the `ManageAzureUsers/Secret` in the `appsettings.json` config file.
+1. Go to the `API permissions`, `Add a permission` and add `User.ReadWrite.All`.
+1. Click `Grant admin consent for ...`
+1. Find Application (client) ID in the App registrations pane in the Azure portal. The app registration is named 'b2c-extensions-app. Do not modify. Used by AADB2C for storing user data.'. Copy clientId and paste to the `B2cExtensionAppClientId`.
+
+Create new user attribute to expose custom attribute to token claims
+
+1. Open `User attributes` and add new custom attribute and name it `Role` and choose `String` as a data type. Put custom description.
+1. Go to the `User flows` and open your user flow e.g. `B2C_1_signupsignin`.
+1. Open `User attributes` and select `Role` attribute. 
+1. Do the same with `Application claims`.
 
 ### Custom policy
 
