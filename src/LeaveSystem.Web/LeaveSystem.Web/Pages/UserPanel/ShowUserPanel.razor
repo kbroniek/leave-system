@@ -146,7 +146,7 @@ else
             var leaveRequestsPerLeaveType = leaveRequests
                 .Where(lr => lr.LeaveTypeId == leaveType.Id);
             var validLeaveRequestsPerLeaveType = leaveRequestsPerLeaveType
-                .Where(lr => lr.LeaveTypeId == leaveType.Id && lr.Status.IsValid());
+                .Where(lr => lr.Status.IsValid());
             var limitsPerLeaveType = limits
                 .Where(l => l.LeaveTypeId == leaveType.Id);
 
