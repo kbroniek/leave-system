@@ -5,6 +5,7 @@ using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.WorkingHours;
+using LeaveSystem.Api.Factories;
 using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
@@ -17,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddRoleBasedAuthorization();
-builder.Services.AddAzureReadUsers(builder.Configuration.GetSection(azureReadUsersSection));
+builder.Services.AddGraphService(builder.Configuration.GetSection(azureReadUsersSection));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

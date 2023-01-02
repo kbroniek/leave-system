@@ -11,7 +11,7 @@ public static class EmployeesEndpoints
     public const string GetEmployeeEndpointsPolicyName = "GetEmployee";
     public static IEndpointRouteBuilder AddEmployeesEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
-        endpoint.MapGet("api/employee", async (HttpContext httpContext, LeaveSystemDbContext dbContext, GraphUserService graphUserService, CancellationToken cancellationToken) =>
+        endpoint.MapGet("api/employee", async (HttpContext httpContext, LeaveSystemDbContext dbContext, GetGraphUserService graphUserService, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 

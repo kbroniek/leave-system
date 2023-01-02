@@ -110,7 +110,7 @@ public static class DbContextExtenstions
             try
             {
                 var dbContext = services.GetRequiredService<LeaveSystemDbContext>();
-                var graphUserService = services.GetRequiredService<GraphUserService>();
+                var graphUserService = services.GetRequiredService<GetGraphUserService>();
                 var graphUsers = await graphUserService.Get(cancellationToken);
                 defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email, defaultUserMock.Name);
                 testUsers = testUserMock

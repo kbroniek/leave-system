@@ -1,4 +1,6 @@
-﻿namespace LeaveSystem.Api.Endpoints.Employees;
+﻿using LeaveSystem.Api.Endpoints.Employees;
+
+namespace LeaveSystem.Api.Factories;
 
 public static class Config
 {
@@ -10,14 +12,15 @@ public static class Config
         public string[]? Scopes { get; set; }
     }
 
-    public static void AddAzureReadUsers(this IServiceCollection services, IConfigurationSection configuration)
+    public static void AddGraphService(this IServiceCollection services, IConfigurationSection configuration)
     {
         var settings = configuration.Get<AppSettings>();
         services
-            .AddScoped(_ => GraphUserService.Create(settings.TenantId,
+            .AddScoped(_ => GraphClientFactory.Create(settings.TenantId,
                                             settings.ClientId,
                                             settings.Secret,
-                                            settings.Scopes));
+                                            settings.Scopes))
+            .AddScoped<GetGraphUserService>();
     }
 }
 
