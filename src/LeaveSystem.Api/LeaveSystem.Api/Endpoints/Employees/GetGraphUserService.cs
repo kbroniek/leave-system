@@ -1,33 +1,44 @@
-﻿using LeaveSystem.Api.Factories;
+﻿using Microsoft.Graph;
 
 namespace LeaveSystem.Api.Endpoints.Employees;
 
 public class GetGraphUserService
 {
-    private readonly GraphClientFactory graphClientFactory;
+    private readonly Factories.GraphClientFactory graphClientFactory;
 
-    public GetGraphUserService(GraphClientFactory graphClientFactory)
+    public GetGraphUserService(Factories.GraphClientFactory graphClientFactory)
         => this.graphClientFactory = graphClientFactory;
 
     public async Task<IEnumerable<GraphUser>> Get(CancellationToken cancellationToken)
     {
         var graphClient = graphClientFactory.Create();
 
+        // Get all users
         var users = await graphClient.Users
             .Request()
-            .Select(u => new { u.Id, u.Mail, u.DisplayName })
-            .GetAsync(cancellationToken);
-
-        var graphUsers = Enumerable.Empty<GraphUser>();
-        while (users is not null && users.Count != 0)
-        {
-            graphUsers = graphUsers.Union(users.Select(u => new GraphUser(u.Id, u.Mail, u.DisplayName)));
-            if (users.NextPageRequest is null)
+            .Select(e => new
             {
-                return graphUsers.ToList();
-            }
-            users = await users.NextPageRequest.GetAsync(cancellationToken);
-        }
+                e.Id,
+                e.Mail,
+                e.DisplayName,
+                e.Identities //TODO: Get emails from here
+            })
+            .GetAsync(cancellationToken);
+        var graphUsers = new List<GraphUser>();
+        // Iterate over all the users in the directory
+        var pageIterator = PageIterator<User>
+            .CreatePageIterator(
+                graphClient,
+                users,
+                (user) =>
+                {
+                    graphUsers.Add(new GraphUser(user.Id, user.Mail, user.DisplayName));
+                    return true;
+                }
+            );
+
+        await pageIterator.IterateAsync(cancellationToken);
+
         return graphUsers;
     }
 }

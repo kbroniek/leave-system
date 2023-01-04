@@ -143,6 +143,8 @@
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             currentUser = authState.User.CreateModel();
+            Logger.LogInformation(string.Join("\r\n", authState.User.Claims.Select(c => $"{c.Type} {c.Value}")));
+
             var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
             var firstDay = now.GetFirstDayOfYear();
             var lastDay = now.GetLastDayOfYear();
@@ -154,7 +156,7 @@
             });
             var getLimitsTask = UserLeaveLimitsService.GetLimits(currentUser.Id);
             var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(currentUser.Id, firstDay, lastDay);
-            var getEmployeesTask = HttpClient.GetFromJsonAsync<GetEmployeesDto>("api/employee", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            var getEmployeesTask = HttpClient.GetFromJsonAsync<GetEmployeesDto>("api/employees", new JsonSerializerOptions(JsonSerializerDefaults.Web));
             await Task.WhenAll(getLeaveRequestsTask, getLimitsTask, getUserWorkingHoursTask, getEmployeesTask);
 
             submittedLeaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();

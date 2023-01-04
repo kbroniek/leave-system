@@ -69,7 +69,7 @@ public static class Config
     {
         services
             .AddAuthorization(options =>
-                options.AddPolicy(EmployeesEndpoints.GetEmployeeEndpointsPolicyName,
+                options.AddPolicy(EmployeesEndpoints.GetEmployeesPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))));
         return services;
     }

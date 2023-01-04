@@ -8,10 +8,10 @@ namespace LeaveSystem.Api.Endpoints.Employees;
 
 public static class EmployeesEndpoints
 {
-    public const string GetEmployeeEndpointsPolicyName = "GetEmployee";
+    public const string GetEmployeesPolicyName = "GetEmployees";
     public static IEndpointRouteBuilder AddEmployeesEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
-        endpoint.MapGet("api/employee", async (HttpContext httpContext, LeaveSystemDbContext dbContext, GetGraphUserService graphUserService, CancellationToken cancellationToken) =>
+        endpoint.MapGet("api/employees", async (HttpContext httpContext, LeaveSystemDbContext dbContext, GetGraphUserService graphUserService, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
@@ -25,8 +25,8 @@ public static class EmployeesEndpoints
             var graphUsers = graphUserTask.Result;
             return new GetEmployeesDto(userIds.Select(userId => Map(userId, graphUsers)));
         })
-        .WithName(GetEmployeeEndpointsPolicyName)
-        .RequireAuthorization(GetEmployeeEndpointsPolicyName);
+        .WithName(GetEmployeesPolicyName)
+        .RequireAuthorization(GetEmployeesPolicyName);
 
         return endpoint;
     }

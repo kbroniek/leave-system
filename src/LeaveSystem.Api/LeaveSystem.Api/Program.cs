@@ -12,7 +12,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
 const string azureConfigSection = "AzureAdB2C";
-const string azureReadUsersSection = "AzureReadUsers";
+const string azureReadUsersSection = "ManageAzureUsers";
 
 var builder = WebApplication.CreateBuilder(args);
 
