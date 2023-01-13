@@ -74,9 +74,9 @@ public class UserRolesGraphService
 
     public record class GraphUserRole(string Id, IEnumerable<string> Roles)
     {
-        public static GraphUserRole Create(string id, IDictionary<string, object> additionalData, string roleAttributeName)
+        public static GraphUserRole Create(string id, IDictionary<string, object>? additionalData, string roleAttributeName)
         {
-            if (additionalData.TryGetValue(roleAttributeName, out object? rolesRaw) && rolesRaw is not null)
+            if (additionalData?.TryGetValue(roleAttributeName, out object? rolesRaw) == true && rolesRaw is not null)
             {
                 return new(id, ClaimsPrincipalExtensions.Create(rolesRaw.ToString()));
             }

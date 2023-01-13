@@ -7,7 +7,9 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddLeaveSystemModule(builder.Configuration);
+builder.Services.AddAuthentication(builder.Configuration);
+builder.Services.AddAuthorization();
+builder.Services.AddLeaveSystemModule();
 builder.Services.AddScoped<NotificationService>();
 
 await builder.Build().RunAsync();

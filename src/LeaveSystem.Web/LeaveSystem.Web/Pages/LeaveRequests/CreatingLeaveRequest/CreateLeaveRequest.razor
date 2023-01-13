@@ -31,11 +31,12 @@
             <div class="col-xl-4">
             <RadzenCard>
                 <div class="row">
-
+                    <AuthorizeView Policy="CreateOnBehalf" Context="another_name">
                         <div>
                             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create on behalf of:</RadzenText>
                             <RadzenDropDown @bind-Value="onBehalfId" Data="@employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg)) />
                         </div>
+                    </AuthorizeView>
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date from:</RadzenText>
                         <RadzenDatePicker Name="DateFrom" @bind-Value=@leaveRequest.DateFrom DateFormat="d" Class="w-100" Change=@(arg => DateChanged(arg)) />
@@ -144,7 +145,6 @@
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             currentUser = authState.User.CreateModel();
-            Logger.LogInformation(string.Join("\r\n", authState.User.Claims.Select(c => $"{c.Type} {c.Value}")));
 
             var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
             var firstDay = now.GetFirstDayOfYear();
@@ -323,6 +323,12 @@
         return new(daysAvailable?.GetReadableTimeSpan(workingHoursDuration) ?? "",
             daysAvailableAfterSubmitting?.GetReadableTimeSpan(workingHoursDuration) ?? "",
             submittedLeaveRequestsDuration.GetReadableTimeSpan(workingHoursDuration));
+    }
+
+    [JSInvokable]
+    private void ShowingCreateOnBehalf()
+    {
+        Logger.LogInformation("!!! ShowingCreateOnBehalf");
     }
 
     private record class LeaveSummary(string DaysAvailable, string DaysAvailableAfterSubmitting, string AllDaysInRequests);

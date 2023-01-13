@@ -5,20 +5,35 @@ using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.WorkingHours;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Authorization;
+using LeaveSystem.Shared.Auth;
+//using LeaveSystem.Shared.Auth;
 
 namespace LeaveSystem.Web;
 
 public static class Config
 {
-    public static void AddLeaveSystemModule(this IServiceCollection services, IConfiguration configuration)
+    public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         const string AzureConfig = "AzureAdB2C";
         var scopes = configuration.GetValue<string>($"{AzureConfig}:Scopes");
         services.AddAuthentication(configuration, AzureConfig, scopes)
-            .AddHttpClient(configuration, scopes)
-            .AddDependecies();
+            .AddHttpClient(configuration, scopes);
     }
-    private static IServiceCollection AddDependecies(this IServiceCollection services)
+    public static void AddAuthorization(this IServiceCollection services)
+    {
+        //services.AddApiAuthorization(options =>
+        //{
+        //    options.UserOptions.
+        //})
+        services.AddAuthorizationCore(options =>
+        {
+            options.AddPolicy("CreateOnBehalf", policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker)));
+        });
+        services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
+    }
+    public static IServiceCollection AddLeaveSystemModule(this IServiceCollection services)
     {
         return services
             .AddTransient(sp => new TimelineComponent(sp.GetService<IJSRuntime>()))
