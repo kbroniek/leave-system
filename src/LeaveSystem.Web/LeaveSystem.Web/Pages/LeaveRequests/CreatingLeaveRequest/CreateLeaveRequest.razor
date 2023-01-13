@@ -10,7 +10,7 @@
 @using Microsoft.AspNetCore.Components.Authorization;
 @using LeaveSystem.Shared.WorkingHours
 @using System.Text.Json
-@attribute [Authorize]
+@attribute [Authorize(Policy=@CreatePolicyName)]
 @inject HttpClient Http
 @inject LeaveTypesService LeaveTypesService
 @inject WorkingHoursService WorkingHoursService
@@ -31,10 +31,10 @@
             <div class="col-xl-4">
             <RadzenCard>
                 <div class="row">
-                    <AuthorizeView Policy="CreateOnBehalf" Context="another_name">
+                    <AuthorizeView Policy="@CreateOnBehalfPolicyName" Context="CreateOnBehalf">
                         <div>
                             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create on behalf of:</RadzenText>
-                            <RadzenDropDown @bind-Value="onBehalfId" Data="@employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg)) />
+                            <RadzenDropDown @bind-Value="onBehalfId" Data="@Employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg)) @onfocus ="@((FocusEventArgs args) =>  ShowingCreateOnBehalf(args))"/>
                         </div>
                     </AuthorizeView>
                     <div>
@@ -118,6 +118,8 @@
   }
 }
 @code {
+    public const string CreatePolicyName = "CreateLeaveRequest";
+    public const string CreateOnBehalfPolicyName = "CreateLeaveRequestOnBehalf";
     private CreateLeaveRequestOnBehalfDto leaveRequest = new();
     private EditContext? editContext;
     private IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
@@ -130,6 +132,19 @@
     private IEnumerable<GetEmployeeDto?> employees = Enumerable.Empty<GetEmployeeDto?>();
     private string? onBehalfId = null;
     private FederatedUser currentUser;
+
+    private IEnumerable<GetEmployeeDto?> Employees
+    {
+        get
+        {
+            _ = GetEmployees();
+            return employees;
+        }
+        set
+        {
+            employees = value;
+        }
+    }
 
     protected override void OnInitialized()
     {
@@ -157,8 +172,7 @@
             });
             var getLimitsTask = UserLeaveLimitsService.GetLimits(currentUser.Id);
             var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(currentUser.Id, firstDay, lastDay);
-            var getEmployeesTask = HttpClient.GetFromJsonAsync<GetEmployeesDto>("api/employees", new JsonSerializerOptions(JsonSerializerDefaults.Web));
-            await Task.WhenAll(getLeaveRequestsTask, getLimitsTask, getUserWorkingHoursTask, getEmployeesTask);
+            await Task.WhenAll(getLeaveRequestsTask, getLimitsTask, getUserWorkingHoursTask);
 
             submittedLeaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
             workingHours = getUserWorkingHoursTask.Result;
@@ -166,7 +180,6 @@
             var workingHoursDuration = workingHours.GetDuration();
             dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
             leaveSummary = GetLeaveDetails();
-            employees = getEmployeesTask.Result?.Items.Where(e => e.Id != currentUser.Id) ?? Enumerable.Empty<GetEmployeeDto>();
         }
         catch(Exception ex)
         {
@@ -180,6 +193,11 @@
             });
             throw;
         }
+    }
+    private async Task GetEmployees()
+    {
+        var employeesFromApi = await HttpClient.GetFromJsonAsync<GetEmployeesDto>("api/employees", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        Employees = employeesFromApi?.Items.Where(e => e.Id != currentUser.Id) ?? Enumerable.Empty<GetEmployeeDto>();
     }
     private async Task HandleSubmit()
     {
@@ -326,7 +344,7 @@
     }
 
     [JSInvokable]
-    private void ShowingCreateOnBehalf()
+    private void ShowingCreateOnBehalf(FocusEventArgs args)
     {
         Logger.LogInformation("!!! ShowingCreateOnBehalf");
     }

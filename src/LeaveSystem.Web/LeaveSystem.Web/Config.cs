@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Authorization;
 using LeaveSystem.Shared.Auth;
-//using LeaveSystem.Shared.Auth;
+using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 
 namespace LeaveSystem.Web;
 
@@ -22,14 +22,12 @@ public static class Config
     }
     public static void AddAuthorization(this IServiceCollection services)
     {
-        //services.AddApiAuthorization(options =>
-        //{
-        //    options.UserOptions.
-        //})
         services.AddAuthorizationCore(options =>
         {
-            options.AddPolicy("CreateOnBehalf", policy =>
+            options.AddPolicy(CreateLeaveRequest.CreateOnBehalfPolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker)));
+            options.AddPolicy(CreateLeaveRequest.CreatePolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.Employee)));
         });
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
