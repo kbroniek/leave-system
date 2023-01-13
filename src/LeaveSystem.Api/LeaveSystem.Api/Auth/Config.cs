@@ -2,7 +2,7 @@
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Roles;
 using LeaveSystem.Api.Endpoints.WorkingHours;
-using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;

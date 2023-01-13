@@ -32,19 +32,6 @@ namespace LeaveSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Roles",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoleType = table.Column<string>(type: "text", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Roles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserLeaveLimits",
                 columns: table => new
                 {
@@ -80,12 +67,6 @@ namespace LeaveSystem.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roles_RoleType_UserId",
-                table: "Roles",
-                columns: new[] { "RoleType", "UserId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserLeaveLimits_LeaveTypeId_AssignedToUserId_ValidSince",
                 table: "UserLeaveLimits",
                 columns: new[] { "LeaveTypeId", "AssignedToUserId", "ValidSince" },
@@ -100,9 +81,6 @@ namespace LeaveSystem.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Roles");
-
             migrationBuilder.DropTable(
                 name: "UserLeaveLimits");
 

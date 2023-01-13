@@ -1,15 +1,21 @@
-﻿using Microsoft.Graph;
+﻿using LeaveSystem.Api.Factories;
+using LeaveSystem.Shared;
+using Microsoft.Graph;
 
 namespace LeaveSystem.Api.Endpoints.Employees;
 
 public class GetGraphUserService
 {
     private readonly Factories.GraphClientFactory graphClientFactory;
+    private readonly string roleAttributeName;
 
-    public GetGraphUserService(Factories.GraphClientFactory graphClientFactory)
-        => this.graphClientFactory = graphClientFactory;
+    public GetGraphUserService(Factories.GraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
+    {
+        this.graphClientFactory = graphClientFactory;
+        roleAttributeName = roleAttributeNameResolver.RoleAttributeName;
+    }
 
-    public async Task<IEnumerable<GraphUser>> Get(CancellationToken cancellationToken)
+    public async Task<IEnumerable<FederatedUser>> Get(CancellationToken cancellationToken)
     {
         var graphClient = graphClientFactory.Create();
 
@@ -21,16 +27,17 @@ public class GetGraphUserService
                 e.Id,
                 e.Mail,
                 e.DisplayName,
-                e.Identities //TODO: Get emails from here
+                e.Identities, //TODO: Get emails from here
+                e.AdditionalData
             })
             .GetAsync(cancellationToken);
-        var graphUsers = new List<GraphUser>();
-        // Iterate over all the users in the directory
+        var graphUsers = new List<FederatedUser>();
         var pageIterator = PageIterator<User>
             .CreatePageIterator(graphClient, users,
                 (user) =>
                 {
-                    graphUsers.Add(new GraphUser(user.Id, user.Mail, user.DisplayName));
+                    graphUsers.Add(new FederatedUser(user.Id, user.Mail, user.DisplayName,
+                        RoleAttributeNameResolver.MapRoles(users.AdditionalData, roleAttributeName).Roles));
                     return true;
                 }
             );
@@ -40,5 +47,3 @@ public class GetGraphUserService
         return graphUsers;
     }
 }
-
-public record class GraphUser(string Id, string Email, string DisplayName);

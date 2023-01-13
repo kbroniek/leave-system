@@ -27,14 +27,14 @@ public static class Config
             options.AddPolicy(CreateLeaveRequest.CreateOnBehalfPolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker)));
             options.AddPolicy(CreateLeaveRequest.CreatePolicyName, policy =>
-                policy.Requirements.Add(new RoleRequirement(RoleType.Employee)));
+                policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker)));
         });
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
     public static IServiceCollection AddLeaveSystemModule(this IServiceCollection services)
     {
         return services
-            .AddTransient(sp => new TimelineComponent(sp.GetService<IJSRuntime>()))
+            .AddTransient<TimelineComponent>()
             .AddTransient<LeaveTypesService>()
             .AddTransient<GetLeaveRequestsService>()
             .AddTransient<UserLeaveLimitsService>()

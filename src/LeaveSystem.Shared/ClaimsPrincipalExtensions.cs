@@ -14,17 +14,6 @@ public static class ClaimsPrincipalExtensions
             $"{firstName.Value} {lastName.Value}";
         var email = claimsPrincipal.FindFirst("emails");
         var rolesClaim = claimsPrincipal.FindFirst("extension_Role");
-        var roles = Create(rolesClaim?.Value);
-        return FederatedUser.Create(id?.Value, email?.Value, fullName, roles);
-    }
-
-    public static IEnumerable<string> Create(string? rolesRaw)
-    {
-        if (string.IsNullOrWhiteSpace(rolesRaw))
-        {
-            return RolesAttribute.Empty.Roles;
-        }
-        var roleAttribute = JsonSerializer.Deserialize<RolesAttribute>(rolesRaw) ?? RolesAttribute.Empty;
-        return roleAttribute.Roles;
+        return FederatedUser.Create(id?.Value, email?.Value, fullName, rolesClaim?.Value);
     }
 }

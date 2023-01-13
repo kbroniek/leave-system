@@ -22,9 +22,9 @@ public static class Config
                                             settings.ClientId,
                                             settings.Secret,
                                             settings.Scopes))
+            .AddScoped(_ => RoleAttributeNameResolver.Create(settings.B2cExtensionAppClientId))
             .AddScoped<GetGraphUserService>()
-            .AddScoped(s => UserRolesGraphService.Create(s.GetRequiredService<GraphClientFactory>(),
-                                            settings.B2cExtensionAppClientId));
+            .AddScoped<UserRolesGraphService>();
     }
 }
 

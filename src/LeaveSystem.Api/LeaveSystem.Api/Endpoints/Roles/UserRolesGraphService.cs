@@ -1,4 +1,4 @@
-﻿using Ardalis.GuardClauses;
+﻿using LeaveSystem.Api.Factories;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
 using System.Text.Json;
@@ -7,24 +7,14 @@ namespace LeaveSystem.Api.Endpoints.Roles;
 
 public class UserRolesGraphService
 {
-    private const string RoleAttributeName = "Role";
     private readonly Factories.GraphClientFactory graphClientFactory;
     private readonly string roleAttributeName;
 
-    private UserRolesGraphService(Factories.GraphClientFactory graphClientFactory, string roleAttributeName)
+    public UserRolesGraphService(Factories.GraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
     {
         this.graphClientFactory = graphClientFactory;
-        this.roleAttributeName = roleAttributeName;
+        roleAttributeName = roleAttributeNameResolver.RoleAttributeName;
     }
-
-    public static UserRolesGraphService Create(Factories.GraphClientFactory? graphClientFactory, string? b2cExtensionAppClientId)
-    {
-        Guard.Against.Nill(graphClientFactory);
-        Guard.Against.NullOrEmpty(b2cExtensionAppClientId);
-        string roleAttributeName = GetCompleteAttributeName(b2cExtensionAppClientId, RoleAttributeName);
-        return new(graphClientFactory, roleAttributeName);
-    }
-
 
     public async Task<IEnumerable<GraphUserRole>> Get(CancellationToken cancellationToken)
     {
@@ -35,7 +25,6 @@ public class UserRolesGraphService
             .Select(e => new { e.Id, e.AdditionalData })
             .GetAsync(cancellationToken);
         var graphUsers = new List<GraphUserRole>();
-        // Iterate over all the users in the directory
         var pageIterator = PageIterator<User>
             .CreatePageIterator(graphClient, users,
                 (user) =>
@@ -64,23 +53,9 @@ public class UserRolesGraphService
             }, cancellationToken);
     }
 
-    private static string GetCompleteAttributeName(string? b2cExtensionAppClientId, string? attributeName)
-    {
-        Guard.Against.NullOrWhiteSpace(b2cExtensionAppClientId);
-        Guard.Against.NullOrWhiteSpace(attributeName);
-        b2cExtensionAppClientId = b2cExtensionAppClientId.Replace("-", "");
-        return $"extension_{b2cExtensionAppClientId}_{attributeName}";
-    }
-
     public record class GraphUserRole(string Id, IEnumerable<string> Roles)
     {
-        public static GraphUserRole Create(string id, IDictionary<string, object>? additionalData, string roleAttributeName)
-        {
-            if (additionalData?.TryGetValue(roleAttributeName, out object? rolesRaw) == true && rolesRaw is not null)
-            {
-                return new(id, ClaimsPrincipalExtensions.Create(rolesRaw.ToString()));
-            }
-            return new(id, RolesAttribute.Empty.Roles);
-        }
+        public static GraphUserRole Create(string id, IDictionary<string, object>? additionalData, string roleAttributeName) =>
+            new(id, RoleAttributeNameResolver.MapRoles(additionalData, roleAttributeName).Roles);
     }
 }

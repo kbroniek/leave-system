@@ -6,6 +6,7 @@ using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
@@ -131,12 +132,12 @@ public static class DbContextExtenstions
         }
     }
 
-    private static FederatedUser CreateFederatedUser(IEnumerable<GraphUser> graphUsers, string id, string? email, string? name)
+    private static FederatedUser CreateFederatedUser(IEnumerable<FederatedUser> graphUsers, string id, string? email, string? name)
     {
-        GraphUser? graphUser = graphUsers.FirstOrDefault(u =>
+        var graphUser = graphUsers.FirstOrDefault(u =>
             string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(u.DisplayName, name, StringComparison.OrdinalIgnoreCase));
-        return FederatedUser.Create(graphUser?.Id ?? id, email, name);
+            string.Equals(u.Name, name, StringComparison.OrdinalIgnoreCase));
+        return FederatedUser.Create(graphUser.Id ?? id, graphUser.Email ?? email, graphUser.Name ?? name);
     }
 
     private static async Task FillInGraphRoles(UserRolesGraphService userRolesGraphService, CancellationToken cancellationToken)
@@ -156,7 +157,6 @@ public static class DbContextExtenstions
     private static async Task FillInSimpleData(LeaveSystemDbContext dbContext)
     {
         await dbContext.FillInLeaveTypes();
-        await dbContext.FillInRoles();
         await dbContext.FillInUserLeaveLimit();
         await dbContext.SaveChangesAsync();
     }
@@ -409,17 +409,6 @@ public static class DbContextExtenstions
                 Description = $"2022-{month}-10"
             }
         });
-    }
-
-    private static async Task FillInRoles(this LeaveSystemDbContext dbContext)
-    {
-        if (await dbContext.Roles.AnyAsync())
-        {
-            return;
-        }
-        await dbContext.Roles.AddAsync(new Role { UserId = defaultUser.Id, Id = Guid.NewGuid(), RoleType = RoleType.GlobalAdmin });
-        var roles = testUsers.Select(u => new Role { UserId = u.Id, Id = Guid.NewGuid(), RoleType = RoleType.Employee });
-        await dbContext.Roles.AddRangeAsync(roles);
     }
 
     private static async Task FillInLeaveTypes(this LeaveSystemDbContext dbContext)

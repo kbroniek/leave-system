@@ -1,19 +1,20 @@
 ﻿using Ardalis.GuardClauses;
 using GoldenEye.Queries;
 using LeaveSystem.Db;
-using LeaveSystem.Db.Entities;
 using LeaveSystem.Linq;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 
 public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
 {
-    public readonly static LeaveRequestStatus[] validStatuses = new[] { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending };
+    public static readonly LeaveRequestStatus[] validStatuses = new[] { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending };
     public int PageNumber { get; }
     public int PageSize { get; }
     public DateTimeOffset DateFrom { get; }
@@ -75,15 +76,20 @@ internal class HandleGetLeaveRequests :
     public async Task<IPagedList<LeaveRequestShortInfo>> Handle(GetLeaveRequests request,
         CancellationToken cancellationToken)
     {
-        request = await NarrowDownQuery(request, cancellationToken);
+        request = NarrowDownQuery(request);
         return await Query(request, cancellationToken);
     }
 
-    private async Task<GetLeaveRequests> NarrowDownQuery(GetLeaveRequests request,
-        CancellationToken cancellationToken)
+    private GetLeaveRequests NarrowDownQuery(GetLeaveRequests request)
     {
-        var privilegedRoles = new RoleType[] { RoleType.HumanResource, RoleType.LeaveLimitAdmin, RoleType.DecisionMaker, RoleType.GlobalAdmin };
-        if (!await EntityFrameworkQueryableExtensions.AnyAsync(dbContext.Roles, r => r.UserId == request.RequestedBy.Id && privilegedRoles.Contains(r.RoleType), cancellationToken))
+        var privilegedRoles = new[]
+        {
+            RoleType.HumanResource.ToString(),
+            RoleType.LeaveLimitAdmin.ToString(),
+            RoleType.DecisionMaker.ToString(),
+            RoleType.GlobalAdmin.ToString()
+        };
+        if (!request.RequestedBy.Roles.Any(r => privilegedRoles.Contains(r)))
         {
             return GetLeaveRequests.Create(
                 request.PageNumber,
