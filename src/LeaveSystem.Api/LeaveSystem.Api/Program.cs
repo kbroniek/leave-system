@@ -18,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddRoleBasedAuthorization();
-builder.Services.AddGraphService(builder.Configuration.GetSection(azureReadUsersSection));
+builder.Services.AddGraphFactory(builder.Configuration.GetSection(azureReadUsersSection));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

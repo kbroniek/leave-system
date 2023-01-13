@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Text.Json;
 
 namespace LeaveSystem.Shared;
 public static class ClaimsPrincipalExtensions
@@ -12,6 +13,18 @@ public static class ClaimsPrincipalExtensions
             claimsPrincipal.FindFirst("name")?.Value :
             $"{firstName.Value} {lastName.Value}";
         var email = claimsPrincipal.FindFirst("emails");
-        return FederatedUser.Create(id?.Value, email?.Value, fullName);
+        var rolesClaim = claimsPrincipal.FindFirst("extension_Role");
+        var roles = Create(rolesClaim?.Value);
+        return FederatedUser.Create(id?.Value, email?.Value, fullName, roles);
+    }
+
+    public static IEnumerable<string> Create(string? rolesRaw)
+    {
+        if (string.IsNullOrWhiteSpace(rolesRaw))
+        {
+            return RolesAttribute.Empty.Roles;
+        }
+        var roleAttribute = JsonSerializer.Deserialize<RolesAttribute>(rolesRaw) ?? RolesAttribute.Empty;
+        return roleAttribute.Roles;
     }
 }

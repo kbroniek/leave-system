@@ -14,6 +14,7 @@ public enum RoleType
     LeaveLimitAdmin,
     DecisionMaker,
     HumanResource,
+    UserAdmin,
     GlobalAdmin
 }
 

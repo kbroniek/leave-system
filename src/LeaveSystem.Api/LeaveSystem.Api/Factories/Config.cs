@@ -14,7 +14,7 @@ public static class Config
         public string? B2cExtensionAppClientId { get; set; }
     }
 
-    public static void AddGraphService(this IServiceCollection services, IConfigurationSection configuration)
+    public static void AddGraphFactory(this IServiceCollection services, IConfigurationSection configuration)
     {
         var settings = configuration.Get<AppSettings>();
         services
@@ -23,7 +23,7 @@ public static class Config
                                             settings.Secret,
                                             settings.Scopes))
             .AddScoped<GetGraphUserService>()
-            .AddScoped(s => RoleGraphUserService.Create(s.GetRequiredService<GraphClientFactory>(),
+            .AddScoped(s => UserRolesGraphService.Create(s.GetRequiredService<GraphClientFactory>(),
                                             settings.B2cExtensionAppClientId));
     }
 }

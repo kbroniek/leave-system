@@ -31,10 +31,11 @@
             <div class="col-xl-4">
             <RadzenCard>
                 <div class="row">
-                    <div>
-                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create on behalf of:</RadzenText>
-                        <RadzenDropDown @bind-Value="onBehalfId" Data="@employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg)) />
-                    </div>
+
+                        <div>
+                            <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create on behalf of:</RadzenText>
+                            <RadzenDropDown @bind-Value="onBehalfId" Data="@employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg)) />
+                        </div>
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Date from:</RadzenText>
                         <RadzenDatePicker Name="DateFrom" @bind-Value=@leaveRequest.DateFrom DateFormat="d" Class="w-100" Change=@(arg => DateChanged(arg)) />
@@ -253,7 +254,7 @@
 
     private Task<HttpResponseMessage> CreateLeaveRequestApi(GetEmployeeDto onBehalf)
     {
-        var leaveRequestOnBehalf = leaveRequest with { CreatedByOnBehalf = new FederatedUser(onBehalf.Id, onBehalf.Email, onBehalf.Name) };
+        var leaveRequestOnBehalf = leaveRequest with { CreatedByOnBehalf = FederatedUser.Create(onBehalf.Id, onBehalf.Email, onBehalf.Name) };
         return Http.PostAsJsonAsync("api/leaveRequests/onBehalf", leaveRequestOnBehalf);
     }
 

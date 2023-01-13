@@ -27,9 +27,7 @@ public class GetGraphUserService
         var graphUsers = new List<GraphUser>();
         // Iterate over all the users in the directory
         var pageIterator = PageIterator<User>
-            .CreatePageIterator(
-                graphClient,
-                users,
+            .CreatePageIterator(graphClient, users,
                 (user) =>
                 {
                     graphUsers.Add(new GraphUser(user.Id, user.Mail, user.DisplayName));
