@@ -7,7 +7,7 @@
 @using LeaveSystem.Web.Pages.WorkingHours
 @using Microsoft.AspNetCore.Authorization
 
-@attribute [Authorize]
+@attribute [Authorize(Policy=@PolicyName)]
 @inject LeaveTypesService LeaveTypesService
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject UserLeaveLimitsService UserLeaveLimitsService
@@ -45,6 +45,7 @@ else
     </div>
 }
 @code {
+    public const string PolicyName = "ShowHrPanel";
     private IEnumerable<HrSummary>? hrSummary;
     private IEnumerable<LeaveTypesService.LeaveTypeDto>? leaveTypes;
     private int daysInARow = 14; // TODO get from config

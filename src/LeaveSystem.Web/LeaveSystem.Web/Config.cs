@@ -1,13 +1,15 @@
-﻿using LeaveSystem.Web.Components;
+﻿using LeaveSystem.Shared.Auth;
+using LeaveSystem.Web.Components;
+using LeaveSystem.Web.Pages.HrPanel;
+using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequestDetails;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
+using LeaveSystem.Web.Pages.UserPanel;
 using LeaveSystem.Web.Pages.WorkingHours;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Authorization;
-using LeaveSystem.Shared.Auth;
-using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 
 namespace LeaveSystem.Web;
 
@@ -17,7 +19,9 @@ public static class Config
     {
         const string AzureConfig = "AzureAdB2C";
         var scopes = configuration.GetValue<string>($"{AzureConfig}:Scopes");
-        services.AddAuthentication(configuration, AzureConfig, scopes)
+
+        services
+            .AddMsalAuthentication(configuration, AzureConfig, scopes)
             .AddHttpClient(configuration, scopes);
     }
     public static void AddAuthorization(this IServiceCollection services)
@@ -28,6 +32,12 @@ public static class Config
                 policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker)));
             options.AddPolicy(CreateLeaveRequest.CreatePolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker)));
+            options.AddPolicy(LeaveRequestDetails.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker)));
+            options.AddPolicy(ShowUserPanel.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.Employee)));
+            options.AddPolicy(ShowHrPanel.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource)));
         });
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
@@ -49,11 +59,10 @@ public static class Config
             .ConfigureHandler(
                 authorizedUrls: new[] { apiAddress },
                 scopes: new[] { scopes }));
-        // Supply HttpClient instances that include access tokens when making requests to the server project
         return services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(apiName));
     }
 
-    private static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration, string AzureConfig, string scopes)
+    private static IServiceCollection AddMsalAuthentication(this IServiceCollection services, IConfiguration configuration, string AzureConfig, string scopes)
     {
         services.AddMsalAuthentication(options =>
         {
