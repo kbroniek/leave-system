@@ -9,7 +9,7 @@
 @using LeaveSystem.Web.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
 @using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService
-@attribute [Authorize]
+@attribute [Authorize(Policy=@PolicyName)]
 @inject LeaveTypesService LeaveTypesService
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject UserLeaveLimitsService UserLeaveLimitsService
@@ -111,6 +111,7 @@ else
 }
 
 @code {
+    public const string PolicyName = "ShowUserPanel";
     private IEnumerable<UserSummary>? userSummaryCollection;
 
     protected override async Task OnInitializedAsync()
