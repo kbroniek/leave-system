@@ -31,10 +31,10 @@ public static class Config
         services
             .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestsEndpoints.GetLeaveRequestsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestsEndpoints.LeaveRequestDetailsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+                options.AddPolicy(LeaveRequestsEndpoints.GetLeaveRequestDetailsPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker))))
             .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestsEndpoints.CreateLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
@@ -58,13 +58,13 @@ public static class Config
         services
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetWorkingHoursEndpointsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker))))
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursEndpointsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker))))
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursDurationEndpointsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker))));
         return services;
     }
     private static IServiceCollection AddEmployeesAuthorization(this IServiceCollection services)

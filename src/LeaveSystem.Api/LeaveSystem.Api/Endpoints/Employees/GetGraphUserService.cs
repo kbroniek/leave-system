@@ -22,14 +22,7 @@ public class GetGraphUserService
         // Get all users
         var users = await graphClient.Users
             .Request()
-            .Select(e => new
-            {
-                e.Id,
-                e.Mail,
-                e.DisplayName,
-                e.Identities, //TODO: Get emails from here
-                e.AdditionalData
-            })
+            .Select($"id,mail,displayName,identities,{roleAttributeName}")
             .GetAsync(cancellationToken);
         var graphUsers = new List<FederatedUser>();
         var pageIterator = PageIterator<User>
@@ -37,7 +30,7 @@ public class GetGraphUserService
                 (user) =>
                 {
                     graphUsers.Add(new FederatedUser(user.Id, user.Mail, user.DisplayName,
-                        RoleAttributeNameResolver.MapRoles(users.AdditionalData, roleAttributeName).Roles));
+                        RoleAttributeNameResolver.MapRoles(user.AdditionalData, roleAttributeName).Roles));
                     return true;
                 }
             );

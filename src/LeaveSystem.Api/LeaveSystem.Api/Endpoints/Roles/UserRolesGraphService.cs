@@ -22,7 +22,7 @@ public class UserRolesGraphService
 
         var users = await graphClient.Users
             .Request()
-            .Select(e => new { e.Id, e.AdditionalData })
+            .Select($"id,{roleAttributeName}")
             .GetAsync(cancellationToken);
         var graphUsers = new List<GraphUserRole>();
         var pageIterator = PageIterator<User>
