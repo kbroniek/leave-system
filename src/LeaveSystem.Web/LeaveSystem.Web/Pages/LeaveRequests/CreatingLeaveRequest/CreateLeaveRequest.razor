@@ -34,7 +34,7 @@
                     <AuthorizeView Policy="@CreateOnBehalfPolicyName" Context="CreateOnBehalf">
                         <div>
                             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create on behalf of:</RadzenText>
-                            <RadzenDropDown @bind-Value="onBehalfId" Data="@Employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg)) @onfocus ="@((FocusEventArgs args) =>  ShowingCreateOnBehalf(args))"/>
+                            <RadzenDropDown @bind-Value="onBehalfId" Data="@Employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg))/>
                         </div>
                     </AuthorizeView>
                     <div>
@@ -129,15 +129,19 @@
     private IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
     private WorkingHoursCollection workingHours = new WorkingHoursCollection(Enumerable.Empty<WorkingHoursModel>());
     private bool durationEnabled = true;
-    private IEnumerable<GetEmployeeDto?> employees = Enumerable.Empty<GetEmployeeDto?>();
+    private IEnumerable<GetEmployeeDto> employees = Enumerable.Empty<GetEmployeeDto>();
+    public SemaphoreSlim employeesLock { get; set; } = new SemaphoreSlim(1);
     private string? onBehalfId = null;
     private FederatedUser currentUser;
 
-    private IEnumerable<GetEmployeeDto?> Employees
+    private IEnumerable<GetEmployeeDto> Employees
     {
         get
         {
-            _ = GetEmployees();
+            if (!employees.Any())
+            {
+                _ = GetEmployees();
+            }
             return employees;
         }
         set
@@ -196,8 +200,22 @@
     }
     private async Task GetEmployees()
     {
-        var employeesFromApi = await HttpClient.GetFromJsonAsync<GetEmployeesDto>("api/employees", new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        Employees = employeesFromApi?.Items.Where(e => e.Id != currentUser.Id) ?? Enumerable.Empty<GetEmployeeDto>();
+        await employeesLock.WaitAsync();
+        try
+        {
+            if (!employees.Any())
+            {
+                var employeesFromApi = await HttpClient.GetFromJsonAsync<GetEmployeesDto>("api/employees", new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                Employees = employeesFromApi?.Items.Where(e => e != null && e.Id != currentUser.Id) ?? Enumerable.Empty<GetEmployeeDto>();
+                Logger.LogInformation($"currentUser.Id {currentUser.Id}");
+                Logger.LogInformation(string.Join("\r\n", Employees.Select(c => $"{c.Id} {c.Name}")));
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        finally
+        {
+            employeesLock.Release();
+        }
     }
     private async Task HandleSubmit()
     {
@@ -341,12 +359,6 @@
         return new(daysAvailable?.GetReadableTimeSpan(workingHoursDuration) ?? "",
             daysAvailableAfterSubmitting?.GetReadableTimeSpan(workingHoursDuration) ?? "",
             submittedLeaveRequestsDuration.GetReadableTimeSpan(workingHoursDuration));
-    }
-
-    [JSInvokable]
-    private void ShowingCreateOnBehalf(FocusEventArgs args)
-    {
-        Logger.LogInformation("!!! ShowingCreateOnBehalf");
     }
 
     private record class LeaveSummary(string DaysAvailable, string DaysAvailableAfterSubmitting, string AllDaysInRequests);

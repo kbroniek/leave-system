@@ -1,4 +1,5 @@
 ﻿using LeaveSystem.Shared;
+using LeaveSystem.Shared.Auth;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using Microsoft.Identity.Web.Resource;
 
@@ -15,7 +16,7 @@ public static class EmployeesEndpoints
 
             var graphUsers = await graphUserService.Get(cancellationToken);
             return new GetEmployeesDto(graphUsers
-                .Where(graphUser => graphUser.Roles.Any())
+                .Where(graphUser => graphUser.Roles.Any(r => r == RoleType.Employee.ToString()))
                 .Select(graphUser => Map(graphUser)));
         })
         .WithName(GetEmployeesPolicyName)
