@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Text.Json;
 
 namespace LeaveSystem.Shared;
 public static class ClaimsPrincipalExtensions
@@ -12,6 +13,7 @@ public static class ClaimsPrincipalExtensions
             claimsPrincipal.FindFirst("name")?.Value :
             $"{firstName.Value} {lastName.Value}";
         var email = claimsPrincipal.FindFirst("emails");
-        return FederatedUser.Create(id?.Value, email?.Value, fullName);
+        var rolesClaim = claimsPrincipal.FindFirst("extension_Role");
+        return FederatedUser.Create(id?.Value, email?.Value, fullName, rolesClaim?.Value);
     }
 }

@@ -52,28 +52,6 @@ namespace LeaveSystem.Migrations
                     b.ToTable("LeaveTypes");
                 });
 
-            modelBuilder.Entity("LeaveSystem.Db.Entities.Role", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("RoleType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleType", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("Roles");
-                });
-
             modelBuilder.Entity("LeaveSystem.Db.Entities.UserLeaveLimit", b =>
                 {
                     b.Property<Guid>("Id")

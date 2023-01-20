@@ -17,7 +17,7 @@ namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 public static class LeaveRequestsEndpoints
 {
     public const string GetLeaveRequestsPolicyName = "GetLeaveRequests";
-    public const string LeaveRequestDetailsPolicyName = "LeaveRequestDetails";
+    public const string GetLeaveRequestDetailsPolicyName = "GetLeaveRequestDetails";
     public const string CreateLeaveRequestPolicyName = "CreateLeaveRequest";
     public const string CreateLeaveRequestOnBehalfPolicyName = "CreateLeaveRequestOnBehalf";
     public const string AcceptLeaveRequestPolicyName = "AcceptLeaveRequest";
@@ -51,8 +51,8 @@ public static class LeaveRequestsEndpoints
             //TODO: Protect, only authorized users have access to all leave requests.
             return queryBus.Send<GetLeaveRequestDetails, LeaveRequest>(GetLeaveRequestDetails.Create(id), cancellationToken);
         })
-        .WithName(LeaveRequestDetailsPolicyName)
-        .RequireAuthorization(LeaveRequestDetailsPolicyName);
+        .WithName(GetLeaveRequestDetailsPolicyName)
+        .RequireAuthorization(GetLeaveRequestDetailsPolicyName);
 
         endpoint.MapPost("api/leaveRequests", async (HttpContext httpContext, ICommandBus commandBus, CreateLeaveRequestDto createLeaveRequest, CancellationToken cancellationToken) =>
         {

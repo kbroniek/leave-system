@@ -5,19 +5,20 @@ using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.WorkingHours;
+using LeaveSystem.Api.Factories;
 using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
 const string azureConfigSection = "AzureAdB2C";
-const string azureReadUsersSection = "AzureReadUsers";
+const string azureReadUsersSection = "ManageAzureUsers";
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddRoleBasedAuthorization();
-builder.Services.AddAzureReadUsers(builder.Configuration.GetSection(azureReadUsersSection));
+builder.Services.AddGraphFactory(builder.Configuration.GetSection(azureReadUsersSection));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -39,7 +40,6 @@ IEdmModel GetEdmModel()
     var builder = new ODataConventionModelBuilder();
     builder.EntitySet<LeaveType>("LeaveTypes");
     builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
-    builder.EntitySet<Role>("Roles");
 
     return builder.GetEdmModel();
 }

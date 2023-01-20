@@ -7,7 +7,7 @@
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.WorkingHours
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
+@attribute [Authorize(Policy=@PolicyName)]
 @inject HttpClient HttpClient
 @inject ILogger<LeaveRequestDetails> Logger
 @inject LeaveTypesService LeaveTypesService
@@ -45,6 +45,7 @@ else
 
 
 @code {
+    public const string PolicyName = "LeaveRequestDetails";
     [Parameter]
     public string? LeaveRequestId { get; set; }
     private LeaveRequest? leaveRequest;

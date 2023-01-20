@@ -1,7 +1,8 @@
 ﻿using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
+using LeaveSystem.Api.Endpoints.Roles;
 using LeaveSystem.Api.Endpoints.WorkingHours;
-using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
@@ -20,7 +21,8 @@ public static class Config
         services
             .AddLeaveRequestsAuthorization()
             .AddWorkingHoursAuthorization()
-            .AddEmployeeAuthorization();
+            .AddEmployeesAuthorization()
+            .AddRolesAuthorization();
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
 
@@ -29,10 +31,10 @@ public static class Config
         services
             .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestsEndpoints.GetLeaveRequestsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker, RoleType.HumanResource))))
             .AddAuthorization(options =>
-                options.AddPolicy(LeaveRequestsEndpoints.LeaveRequestDetailsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+                options.AddPolicy(LeaveRequestsEndpoints.GetLeaveRequestDetailsPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker))))
             .AddAuthorization(options =>
                 options.AddPolicy(LeaveRequestsEndpoints.CreateLeaveRequestPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
@@ -56,21 +58,33 @@ public static class Config
         services
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetWorkingHoursEndpointsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+                policy => policy.Requirements.Add(RoleRequirement.AuhtorizeAll)))
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursEndpointsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))))
+                policy => policy.Requirements.Add(RoleRequirement.AuhtorizeAll)))
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursDurationEndpointsPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.Employee))));
+                policy => policy.Requirements.Add(RoleRequirement.AuhtorizeAll)));
         return services;
     }
-    private static IServiceCollection AddEmployeeAuthorization(this IServiceCollection services)
+    private static IServiceCollection AddEmployeesAuthorization(this IServiceCollection services)
     {
         services
             .AddAuthorization(options =>
-                options.AddPolicy(EmployeesEndpoints.GetEmployeeEndpointsPolicyName,
+                options.AddPolicy(EmployeesEndpoints.GetEmployeesPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))));
+        return services;
+    }
+    private static IServiceCollection AddRolesAuthorization(this IServiceCollection services)
+    {
+        services
+            .AddAuthorization(options =>
+                options.AddPolicy(RolesEndpoints.GetRolesPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin))));
+        services
+            .AddAuthorization(options =>
+                options.AddPolicy(RolesEndpoints.UpdateRolesPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin))));
         return services;
     }
 }

@@ -1,13 +1,10 @@
-﻿using LeaveSystem.Db;
-using LeaveSystem.Db.Entities;
-using LeaveSystem.Shared;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authorization;
 
-namespace LeaveSystem.Api.Auth;
+namespace LeaveSystem.Shared.Auth;
 
 public class RoleRequirement : IAuthorizationRequirement
 {
+    public static RoleRequirement AuhtorizeAll = new RoleRequirement(Enum.GetValues<RoleType>());
     public RoleRequirement(params RoleType[] roles) =>
         Roles = roles;
 
@@ -16,28 +13,36 @@ public class RoleRequirement : IAuthorizationRequirement
 
 public class RoleRequirementHandler : AuthorizationHandler<RoleRequirement>
 {
-    private readonly LeaveSystemDbContext dbContext;
-
-    public RoleRequirementHandler(LeaveSystemDbContext dbContext)
-    {
-        this.dbContext = dbContext;
-    }
-    protected override async Task HandleRequirementAsync(
+    protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context, RoleRequirement requirement)
     {
         if (context.User.Identity?.IsAuthenticated != true)
         {
             context.Fail(new AuthorizationFailureReason(this, $"The user is not authenticated."));
-            return;
+            return Task.CompletedTask;
         }
         var userModel = context.User.CreateModel();
-        var allRoles = requirement.Roles.Union(new RoleType[] { RoleType.GlobalAdmin }).ToArray();
+        var allRoles = requirement.Roles
+            .Union(new RoleType[] { RoleType.GlobalAdmin })
+            .Select(r => r.ToString())
+            .ToArray();
 
-        if (await dbContext.Roles.AnyAsync(r => r.UserId == userModel.Id && allRoles.Contains(r.RoleType)))
+        if (userModel.Roles.Any(r => allRoles.Contains(r)))
         {
             context.Succeed(requirement);
-            return;
+            return Task.CompletedTask;
         }
         context.Fail(new AuthorizationFailureReason(this, $"The user {userModel.Email} doesn't have access to the endpoint. UserId: {userModel.Id}"));
+        return Task.CompletedTask;
     }
+}
+
+public enum RoleType
+{
+    Employee,
+    LeaveLimitAdmin,
+    DecisionMaker,
+    HumanResource,
+    UserAdmin,
+    GlobalAdmin
 }

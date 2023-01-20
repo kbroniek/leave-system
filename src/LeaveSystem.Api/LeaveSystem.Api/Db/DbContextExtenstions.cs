@@ -1,15 +1,15 @@
 ﻿using GoldenEye.Commands;
 using GoldenEye.Queries;
 using LeaveSystem.Api.Endpoints.Employees;
+using LeaveSystem.Api.Endpoints.Roles;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Mail;
 
 namespace LeaveSystem.Api.Db;
 public static class DbContextExtenstions
@@ -17,16 +17,16 @@ public static class DbContextExtenstions
     private class DbContextExtenstionsLogger { }
     private static readonly TimeSpan workingHours = WorkingHoursCollection.DefaultWorkingHours;
     private const string DefaultUserEmail = "karolbr5@gmail.com";
-    private static readonly FederatedUser defaultUserMock = new FederatedUser("1c353785-c700-4a5d-bec5-a0f6f668bf22", DefaultUserEmail, "Karol Volt");
+    private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22", DefaultUserEmail, "Karol Volt");
     private static FederatedUser defaultUser;
     private static FederatedUser[] testUsers = Array.Empty<FederatedUser>();
     private static readonly FederatedUser[] testUserMock = new[]
     {
-        new FederatedUser("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski"),
-        new FederatedUser("88fa3c20-0c52-4da4-8389-868d9a487aa0", "mnowak@test.com", "Maria Nowak"),
-        new FederatedUser("1374e2d6-15f5-4543-b7bf-95118701f315", "jszczepanek@test.com", "Jadwiga Szczepanek"),
-        new FederatedUser("59ed14ff-edc4-421c-8f22-28973f4ccd76", "aszewczyk@test.com", "Aleksandra Szewczyk"),
-        new FederatedUser("d5ff6b57-a701-4ce8-82ef-593ef207fb76", "ourbanek@test.com", "Olgierd Urbanek")
+        FederatedUser.Create("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski"),
+        FederatedUser.Create("88fa3c20-0c52-4da4-8389-868d9a487aa0", "mnowak@test.com", "Maria Nowak"),
+        FederatedUser.Create("1374e2d6-15f5-4543-b7bf-95118701f315", "jszczepanek@test.com", "Jadwiga Szczepanek"),
+        FederatedUser.Create("59ed14ff-edc4-421c-8f22-28973f4ccd76", "aszewczyk@test.com", "Aleksandra Szewczyk"),
+        FederatedUser.Create("d5ff6b57-a701-4ce8-82ef-593ef207fb76", "ourbanek@test.com", "Olgierd Urbanek")
     };
     private static LeaveType holidayLeave = new LeaveType
     {
@@ -75,7 +75,8 @@ public static class DbContextExtenstions
         Properties = new LeaveType.LeaveTypeProperties
         {
             DefaultLimit = workingHours,
-            IncludeFreeDays = false, Color = "red",
+            IncludeFreeDays = false,
+            Color = "red",
             Catalog = LeaveTypeCatalog.Saturday,
         }
     };
@@ -110,13 +111,16 @@ public static class DbContextExtenstions
             try
             {
                 var dbContext = services.GetRequiredService<LeaveSystemDbContext>();
-                var graphUserService = services.GetRequiredService<GraphUserService>();
+                var graphUserService = services.GetRequiredService<GetGraphUserService>();
+                var roleGraphUserService = services.GetRequiredService<UserRolesGraphService>();
                 var graphUsers = await graphUserService.Get(cancellationToken);
                 defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email, defaultUserMock.Name);
                 testUsers = testUserMock
                     .Select(t => CreateFederatedUser(graphUsers, t.Id, t.Email, t.Name))
                     .Union(new FederatedUser[] { defaultUser })
                     .ToArray();
+                //TODO: Create user in graph if missing.
+                await FillInGraphRoles(roleGraphUserService, cancellationToken);
                 await FillInSimpleData(dbContext);
                 await FillInLeaveRequests(services);
             }
@@ -128,18 +132,31 @@ public static class DbContextExtenstions
         }
     }
 
-    private static FederatedUser CreateFederatedUser(IEnumerable<GraphUser> graphUsers, string id, string? email, string? name)
+    private static FederatedUser CreateFederatedUser(IEnumerable<FederatedUser> graphUsers, string id, string? email, string? name)
     {
-        GraphUser? graphUser = graphUsers.FirstOrDefault(u =>
+        var graphUser = graphUsers.FirstOrDefault(u =>
             string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(u.DisplayName, name, StringComparison.OrdinalIgnoreCase));
-        return new FederatedUser(graphUser?.Id ?? id, email, name);
+            string.Equals(u.Name, name, StringComparison.OrdinalIgnoreCase));
+        return FederatedUser.Create(graphUser.Id ?? id, graphUser.Email ?? email, graphUser.Name ?? name);
+    }
+
+    private static async Task FillInGraphRoles(UserRolesGraphService userRolesGraphService, CancellationToken cancellationToken)
+    {
+        var userRoles = await userRolesGraphService.Get(cancellationToken);
+        if (!userRoles.Where(u => testUsers.Any(t => t.Id == u.Id)).All(u => u.Roles.Count() > 0))
+        {
+            await userRolesGraphService.Update(defaultUser.Id, new[] { RoleType.GlobalAdmin.ToString() }, cancellationToken);
+            await userRolesGraphService.Update(testUsers[0].Id, new[] { RoleType.DecisionMaker.ToString() }, cancellationToken);
+            await userRolesGraphService.Update(testUsers[1].Id, new[] { RoleType.HumanResource.ToString() }, cancellationToken);
+            await userRolesGraphService.Update(testUsers[2].Id, new[] { RoleType.LeaveLimitAdmin.ToString() }, cancellationToken);
+            await userRolesGraphService.Update(testUsers[3].Id, new[] { RoleType.UserAdmin.ToString() }, cancellationToken);
+            await userRolesGraphService.Update(testUsers[4].Id, new[] { RoleType.Employee.ToString() }, cancellationToken);
+        }
     }
 
     private static async Task FillInSimpleData(LeaveSystemDbContext dbContext)
     {
         await dbContext.FillInLeaveTypes();
-        await dbContext.FillInRoles();
         await dbContext.FillInUserLeaveLimit();
         await dbContext.SaveChangesAsync();
     }
@@ -394,17 +411,6 @@ public static class DbContextExtenstions
         });
     }
 
-    private static async Task FillInRoles(this LeaveSystemDbContext dbContext)
-    {
-        if (await dbContext.Roles.AnyAsync())
-        {
-            return;
-        }
-        await dbContext.Roles.AddAsync(new Role { UserId = defaultUser.Id, Id = Guid.NewGuid(), RoleType = RoleType.GlobalAdmin });
-        var roles = testUsers.Select(u => new Role { UserId = u.Id, Id = Guid.NewGuid(), RoleType = RoleType.Employee });
-        await dbContext.Roles.AddRangeAsync(roles);
-    }
-
     private static async Task FillInLeaveTypes(this LeaveSystemDbContext dbContext)
     {
         if (await dbContext.LeaveTypes.AnyAsync())
@@ -512,7 +518,7 @@ public static class DbContextExtenstions
 
     private static DateTimeOffset GetNow()
     {
-        return new DateTimeOffset(2022, 11, 1, 0, 0, 0, TimeSpan.Zero);
+        return new DateTimeOffset(2023, 2, 1, 0, 0, 0, TimeSpan.Zero);
         //return GetNow();
     }
 }

@@ -1,27 +1,52 @@
-﻿using LeaveSystem.Web.Components;
+﻿using LeaveSystem.Shared.Auth;
+using LeaveSystem.Web.Components;
+using LeaveSystem.Web.Pages.HrPanel;
+using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequestDetails;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
+using LeaveSystem.Web.Pages.UserPanel;
 using LeaveSystem.Web.Pages.WorkingHours;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using Microsoft.JSInterop;
 
 namespace LeaveSystem.Web;
 
 public static class Config
 {
-    public static void AddLeaveSystemModule(this IServiceCollection services, IConfiguration configuration)
+    public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         const string AzureConfig = "AzureAdB2C";
         var scopes = configuration.GetValue<string>($"{AzureConfig}:Scopes");
-        services.AddAuthentication(configuration, AzureConfig, scopes)
-            .AddHttpClient(configuration, scopes)
-            .AddDependecies();
+
+        services
+            .AddMsalAuthentication(configuration, AzureConfig, scopes)
+            .AddHttpClient(configuration, scopes);
     }
-    private static IServiceCollection AddDependecies(this IServiceCollection services)
+    public static void AddAuthorization(this IServiceCollection services)
+    {
+        services.AddAuthorizationCore(options =>
+        {
+            options.AddPolicy(CreateLeaveRequest.OnBehalfPolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker)));
+            options.AddPolicy(CreateLeaveRequest.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker)));
+            options.AddPolicy(LeaveRequestDetails.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker)));
+            options.AddPolicy(ShowLeaveRequests.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker)));
+            options.AddPolicy(ShowUserPanel.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.Employee)));
+            options.AddPolicy(ShowHrPanel.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource)));
+        });
+        services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
+    }
+    public static IServiceCollection AddLeaveSystemModule(this IServiceCollection services)
     {
         return services
-            .AddTransient(sp => new TimelineComponent(sp.GetService<IJSRuntime>()))
+            .AddTransient<TimelineComponent>()
             .AddTransient<LeaveTypesService>()
             .AddTransient<GetLeaveRequestsService>()
             .AddTransient<UserLeaveLimitsService>()
@@ -36,11 +61,10 @@ public static class Config
             .ConfigureHandler(
                 authorizedUrls: new[] { apiAddress },
                 scopes: new[] { scopes }));
-        // Supply HttpClient instances that include access tokens when making requests to the server project
         return services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(apiName));
     }
 
-    private static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration, string AzureConfig, string scopes)
+    private static IServiceCollection AddMsalAuthentication(this IServiceCollection services, IConfiguration configuration, string AzureConfig, string scopes)
     {
         services.AddMsalAuthentication(options =>
         {
