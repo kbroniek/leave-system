@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using LeaveSystem.Web.Pages.HrPanel
+@using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest
+@using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
+@using LeaveSystem.Web.Pages.UserPanel
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">LeaveSystem</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -15,24 +19,33 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="create-leave-request">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Create leave request
-            </NavLink>
+
+            <AuthorizeView Policy="@CreateLeaveRequest.PolicyName" Context="CreateLeaveRequest">
+                <NavLink class="nav-link" href="create-leave-request">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Create leave request
+                </NavLink>
+            </AuthorizeView>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="leave-requests">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Leave request
-            </NavLink>
+            <AuthorizeView Policy="@ShowLeaveRequests.PolicyName" Context="ShowLeaveRequests">
+                <NavLink class="nav-link" href="leave-requests">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Leave request
+                </NavLink>
+            </AuthorizeView>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="user-panel">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> User panel
-            </NavLink>
+            <AuthorizeView Policy="@ShowUserPanel.PolicyName" Context="ShowUserPanel">
+                <NavLink class="nav-link" href="user-panel">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> User panel
+                </NavLink>
+            </AuthorizeView>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="hr-panel">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> HR panel
-            </NavLink>
+            <AuthorizeView Policy="@ShowHrPanel.PolicyName" Context="ShowHrPanel">
+                <NavLink class="nav-link" href="hr-panel">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> HR panel
+                </NavLink>
+            </AuthorizeView>
         </div>
     </nav>
 </div>

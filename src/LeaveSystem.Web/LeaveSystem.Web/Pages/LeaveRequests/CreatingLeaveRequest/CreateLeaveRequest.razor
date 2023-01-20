@@ -10,7 +10,7 @@
 @using Microsoft.AspNetCore.Components.Authorization;
 @using LeaveSystem.Shared.WorkingHours
 @using System.Text.Json
-@attribute [Authorize(Policy=@CreatePolicyName)]
+@attribute [Authorize(Policy=PolicyName)]
 @inject HttpClient Http
 @inject LeaveTypesService LeaveTypesService
 @inject WorkingHoursService WorkingHoursService
@@ -31,7 +31,7 @@
             <div class="col-xl-4">
             <RadzenCard>
                 <div class="row">
-                    <AuthorizeView Policy="@CreateOnBehalfPolicyName" Context="CreateOnBehalf">
+                    <AuthorizeView Policy="@OnBehalfPolicyName" Context="CreateOnBehalf">
                         <div>
                             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create on behalf of:</RadzenText>
                             <RadzenDropDown @bind-Value="onBehalfId" Data="@Employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg))/>
@@ -118,8 +118,8 @@
   }
 }
 @code {
-    public const string CreatePolicyName = "CreateLeaveRequest";
-    public const string CreateOnBehalfPolicyName = "CreateLeaveRequestOnBehalf";
+    public const string PolicyName = "CreateLeaveRequest";
+    public const string OnBehalfPolicyName = "CreateLeaveRequestOnBehalf";
     private CreateLeaveRequestOnBehalfDto leaveRequest = new();
     private EditContext? editContext;
     private IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
@@ -223,7 +223,7 @@
         {
             try
             {
-                if(durationEnabled)
+                if(!durationEnabled)
                 {
                     leaveRequest.Duration = null;
                 }

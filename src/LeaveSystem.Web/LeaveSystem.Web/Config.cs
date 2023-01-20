@@ -28,9 +28,9 @@ public static class Config
     {
         services.AddAuthorizationCore(options =>
         {
-            options.AddPolicy(CreateLeaveRequest.CreateOnBehalfPolicyName, policy =>
+            options.AddPolicy(CreateLeaveRequest.OnBehalfPolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker)));
-            options.AddPolicy(CreateLeaveRequest.CreatePolicyName, policy =>
+            options.AddPolicy(CreateLeaveRequest.PolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker)));
             options.AddPolicy(LeaveRequestDetails.PolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.Employee, RoleType.DecisionMaker)));
