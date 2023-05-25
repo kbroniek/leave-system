@@ -1,0 +1,17 @@
+# Use postgres/example user/password credentials
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: leave-system
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Password12!
+    ports:
+      - 5432:5432
+volumes:
+  db_data:
