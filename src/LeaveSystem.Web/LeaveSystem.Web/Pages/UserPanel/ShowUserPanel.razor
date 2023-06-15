@@ -1,4 +1,4 @@
-﻿@page "/user-panel/{year:int?}"
+﻿@page "/user-panel/{userId?}/{year:int?}"
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Web.Pages.UserLeaveLimits
@@ -16,8 +16,9 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject WorkingHoursService WorkingHoursService
 @inject NavigationManager NavManager
+@inject EmployeeService EmployeeService
 
-<PageTitle>User panel</PageTitle>
+<PageTitle>User panel @Year</PageTitle>
 
 <div class="container-flex">
     <RadzenNumeric TValue="int?" Value=@Year Change=@(args => YearChanged(args)) />
@@ -35,16 +36,29 @@
 
 @code {
     [Parameter]
+    public string? UserId { get; set; }
+    [Parameter]
     public int? Year { get; set; }
     public const string PolicyName = "ShowUserPanel";
     private IEnumerable<LeaveRequestPerType>? userSummaryCollection;
     private IEnumerable<LeaveRequestForView>? leaveRequestsForView;
+    private string? userName;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User.CreateModel();
-        if(Year is null)
+        if (UserId is null)
+        {
+            UserId = user.Id;
+            userName = user.Name;
+        }
+        else
+        {
+            var userFromApi = await EmployeeService.Get(UserId);
+            userName = userFromApi?.Name;
+        }
+        if (Year is null)
         {
             Year = DateTimeOffset.UtcNow.Year;
         }
@@ -52,7 +66,7 @@
         var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(Year.Value);
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000, Enum.GetValues<LeaveRequestStatus>())
         {
-            CreatedByUserIds = new string[] { user.Id }
+                CreatedByUserIds = new string[] { UserId }
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
@@ -76,7 +90,7 @@
     private async Task<int?> YearChanged(int? year)
     {
         Year = year;
-        NavManager.NavigateTo($"/user-panel/{year}");
+        NavManager.NavigateTo($"/user-panel/{UserId}/{year}");
         await OnInitializedAsync();
         return year;
     }

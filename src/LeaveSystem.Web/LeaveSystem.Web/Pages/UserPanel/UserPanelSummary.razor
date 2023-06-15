@@ -83,19 +83,10 @@ else
     public IEnumerable<LeaveRequestForView>? LeaveRequestsForView { get; set; }
     private IEnumerable<LeaveRequestPerType> userSummaryCollectionToRender = Enumerable.Empty<LeaveRequestPerType>();
     private LeaveRequestPerType? holiday;
-    //private LeaveRequestPerType? onDemand;
-    //private LeaveRequestPerType? saturday;
 
     protected override void OnParametersSet()
     {
         holiday = UserSummaryCollection?.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.Holiday);
-        //onDemand = UserSummaryCollection?.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.OnDemand);
-        //saturday = UserSummaryCollection?.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.Saturday);
         userSummaryCollectionToRender = UserSummaryCollection?.OrderBy(s => s.SumLimit is null) ?? Enumerable.Empty<LeaveRequestPerType>();
-    }
-
-    private void TableCellClick1(MouseEventArgs args)
-    {
-        Console.WriteLine($"TableCellClick1: {args}");
     }
 }
