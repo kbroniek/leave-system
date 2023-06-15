@@ -41,7 +41,7 @@ else
         <div class="col-lg-8">
             <RadzenText TextStyle="TextStyle.H5">My leave requests</RadzenText>
             <hr />
-            <RadzenDataGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true" Data="@LeaveRequestsForView" TItem="LeaveRequestForView">
+            <RadzenDataGrid ColumnWidth="150px" AllowFiltering="true" AllowSorting="true" Data="@LeaveRequestsForView" TItem="LeaveRequestForView">
                 <Columns>
                     <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateFrom" Title="Date from">
                         <Template Context="data">
