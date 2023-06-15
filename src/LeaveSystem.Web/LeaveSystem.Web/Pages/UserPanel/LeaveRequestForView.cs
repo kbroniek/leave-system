@@ -6,13 +6,14 @@ using static LeaveSystem.Web.Pages.LeaveTypes.LeaveTypesService;
 
 namespace LeaveSystem.Web.Pages.UserPanel;
 
-public record class LeaveRequestForView(DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, LeaveRequestStatus Status, string LeaveTypeName, LeaveTypeProperties LeaveTypeProperties)
+public record class LeaveRequestForView(Guid Id, DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, LeaveRequestStatus Status, string LeaveTypeName, LeaveTypeProperties LeaveTypeProperties)
 {
     private static readonly LeaveTypeProperties emptyLeaveTypeProperties = new LeaveTypeProperties(null, null, null);
     public static LeaveRequestForView Create(LeaveRequestShortInfo leaveRequest, IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes, TimeSpan workingHours)
     {
         var leaveTypeDto = leaveTypes.FirstOrDefault(lt => lt.Id == leaveRequest.LeaveTypeId);
         return new LeaveRequestForView(
+            leaveRequest.Id,
             leaveRequest.DateFrom,
             leaveRequest.DateTo,
             leaveRequest.Duration.GetReadableTimeSpan(workingHours),

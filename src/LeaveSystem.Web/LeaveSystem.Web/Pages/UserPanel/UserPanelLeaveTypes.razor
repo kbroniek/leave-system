@@ -68,11 +68,26 @@ else
                                 <RadzenDataGrid AllowSorting="true" Data="@summary.LeaveRequests" TItem="LeaveRequestPerType.ForView" ColumnWidth="200px"
                                             SelectionMode="DataGridSelectionMode.Single">
                                     <Columns>
-                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="DateFrom" Title="Date from" FormatString="{0:d}"/>
-                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="DateTo" Title="Date to" FormatString="{0:d}"/>
-                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="Duration" Title="Duration" />
-                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="Status" Title="Status" />
-                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="Description" Title="Description" />
+                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="DateFrom" Title="Date from">
+                                            <Template Context="data">
+                                                <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@String.Format("{0:d}", data.DateFrom)" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="DateTo" Title="Date to">
+                                            <Template Context="data">
+                                                <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@String.Format("{0:d}", data.DateTo)" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="Duration" Title="Duration">
+                                            <Template Context="data">
+                                                <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@data.Duration" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn TItem="LeaveRequestPerType.ForView" Property="Status" Title="Status">
+                                            <Template Context="data">
+                                                <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@data.Status.ToString()" />
+                                            </Template>
+                                        </RadzenDataGridColumn>
                                     </Columns>
                                 </RadzenDataGrid>
                             </RadzenAccordionItem>

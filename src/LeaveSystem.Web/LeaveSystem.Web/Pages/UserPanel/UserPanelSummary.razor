@@ -43,11 +43,31 @@ else
             <hr />
             <RadzenDataGrid ColumnWidth="150px" AllowFiltering="true" AllowPaging="true" PageSize="5" AllowSorting="true" Data="@LeaveRequestsForView" TItem="LeaveRequestForView">
                 <Columns>
-                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateFrom" Title="Date from" FormatString="{0:d}" />
-                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateTo" Title="Date to" FormatString="{0:d}" />
-                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Duration" Title="Duration" />
-                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="LeaveTypeName" Title="LeaveType" />
-                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Status" Title="Status" />
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateFrom" Title="Date from">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@String.Format("{0:d}", data.DateFrom)" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateTo" Title="Date to">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@String.Format("{0:d}", data.DateTo)" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Duration" Title="Duration">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@data.Duration" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="LeaveTypeName" Title="Leave type">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@data.LeaveTypeName" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Status" Title="Status">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@data.Status.ToString()" />
+                        </Template>
+                    </RadzenDataGridColumn>
                 </Columns>
             </RadzenDataGrid>
         </div>
@@ -72,5 +92,10 @@ else
         //onDemand = UserSummaryCollection?.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.OnDemand);
         //saturday = UserSummaryCollection?.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.Saturday);
         userSummaryCollectionToRender = UserSummaryCollection?.OrderBy(s => s.SumLimit is null) ?? Enumerable.Empty<LeaveRequestPerType>();
+    }
+
+    private void TableCellClick1(MouseEventArgs args)
+    {
+        Console.WriteLine($"TableCellClick1: {args}");
     }
 }

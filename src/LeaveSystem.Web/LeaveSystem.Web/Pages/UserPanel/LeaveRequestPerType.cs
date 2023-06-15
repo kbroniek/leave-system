@@ -33,7 +33,7 @@ public record class LeaveRequestPerType(string LeaveType, string Used, string? L
             leaveRequestsWithDescription,
             leaveType.Properties);
     }
-    public record class ForView(DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description, LeaveRequestStatus Status)
+    public record class ForView(Guid Id, DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description, LeaveRequestStatus Status)
     {
         public static ForView CreateForView(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
         {
@@ -41,6 +41,7 @@ public record class LeaveRequestPerType(string LeaveType, string Used, string? L
                 (l.ValidSince == null || l.ValidSince <= leaveRequest.DateFrom) &&
                 (l.ValidUntil == null || l.ValidUntil >= leaveRequest.DateTo));
             return new ForView(
+                leaveRequest.Id,
                 leaveRequest.DateFrom,
                 leaveRequest.DateTo,
                 leaveRequest.Duration.GetReadableTimeSpan(workingHours),
