@@ -73,6 +73,10 @@ public static class Config
             .AddAuthorization(options =>
                 options.AddPolicy(EmployeesEndpoints.GetEmployeesPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker))));
+        services
+            .AddAuthorization(options =>
+                options.AddPolicy(EmployeesEndpoints.GetEmployeePolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource))));
         return services;
     }
     private static IServiceCollection AddRolesAuthorization(this IServiceCollection services)

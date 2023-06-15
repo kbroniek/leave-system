@@ -39,4 +39,16 @@ public class GetGraphUserService
 
         return graphUsers;
     }
+    public async Task<FederatedUser> Get(string id, CancellationToken cancellationToken)
+    {
+        var graphClient = graphClientFactory.Create();
+
+        var user = await graphClient.Users[id]
+            .Request()
+            .Select($"id,mail,displayName,identities,{roleAttributeName}")
+            .GetAsync(cancellationToken);
+
+        return new FederatedUser(user.Id, user.Mail, user.DisplayName,
+                        RoleAttributeNameResolver.MapRoles(user.AdditionalData, roleAttributeName).Roles);
+    }
 }
