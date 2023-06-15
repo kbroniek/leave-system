@@ -7,15 +7,16 @@ using LeaveSystem.Web.Pages.UserLeaveLimits;
 namespace LeaveSystem.Web.Pages.HrPanel;
 
 public record class HrSummary(
-        string Employee,
-        string SumLimit,
-        string Limit,
-        string OverdueLimit,
-        string Left,
-        bool usedDaysInRow,
-        string OnDemand,
-        string Saturdays,
-        IDictionary<Guid, string> UsedPerLeaveTypes)
+    string EmployeeId,
+    string Employee,
+    string SumLimit,
+    string Limit,
+    string OverdueLimit,
+    string Left,
+    bool usedDaysInRow,
+    string OnDemand,
+    string Saturdays,
+    IDictionary<Guid, string> UsedPerLeaveTypes)
 {
     public static HrSummary Create(
         FederatedUser user,
@@ -52,6 +53,7 @@ public record class HrSummary(
             lt => lt.Key,
             lt => lt.Value.GetReadableTimeSpan(workingHours));
         return new HrSummary(
+            user.Id,
             user.Name ?? user.Email ?? user.Id,
             totalLimit,
             limit,

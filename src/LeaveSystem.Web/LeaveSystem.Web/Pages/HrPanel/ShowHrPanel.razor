@@ -24,7 +24,11 @@ else
         <RadzenDataGrid AllowColumnResize="true" FilterMode="FilterMode.Simple" AllowSorting="true" Data="@hrSummary" TItem="HrSummary"
             ColumnWidth="140px" LogicalFilterOperator="LogicalFilterOperator.Or">
             <Columns>
-                <RadzenDataGridColumn TItem="HrSummary" Property="Employee" Title="Employee" Frozen="true" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="Employee" Title="Employee" Frozen="true">
+                    <Template Context="data">
+                        <RadzenLink Path=@String.Format("user-panel/{0}", data.EmployeeId) Text=@data.Employee />
+                    </Template>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="HrSummary" Property="SumLimit" Title="Total limit"/>
                 <RadzenDataGridColumn TItem="HrSummary" Property="Limit" Title="Limit" />
                 <RadzenDataGridColumn TItem="HrSummary" Property="OverdueLimit" Title="Overdue limit" />

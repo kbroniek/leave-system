@@ -18,20 +18,29 @@
 @inject NavigationManager NavManager
 @inject EmployeeService EmployeeService
 
-<PageTitle>User panel @Year</PageTitle>
+<PageTitle>User panel @userName @Year</PageTitle>
 
 <div class="container-flex">
-    <RadzenNumeric TValue="int?" Value=@Year Change=@(args => YearChanged(args)) />
-    <RadzenTabs RenderMode="TabRenderMode.Client" >
-        <Tabs>
-            <RadzenTabsItem Text="Summary">
-                <UserPanelSummary UserSummaryCollection=@userSummaryCollection LeaveRequestsForView=@leaveRequestsForView Year=@Year />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="By leave types">
-                <UserPanelLeaveTypes UserSummaryCollection=@userSummaryCollection />
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
+    <div class="row">
+        <span>
+            <RadzenText TextStyle="TextStyle.H5">Employee <strong>@userName</strong></RadzenText>
+        </span>
+        <span>
+            <RadzenNumeric TValue="int?" Value=@Year Change=@(args => YearChanged(args)) />
+        </span>
+    </div>
+    <div class="row">
+        <RadzenTabs RenderMode="TabRenderMode.Client" >
+            <Tabs>
+                <RadzenTabsItem Text="Summary">
+                    <UserPanelSummary UserSummaryCollection=@userSummaryCollection LeaveRequestsForView=@leaveRequestsForView Year=@Year />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="By leave types">
+                    <UserPanelLeaveTypes UserSummaryCollection=@userSummaryCollection />
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </div>
 </div>
 
 @code {
