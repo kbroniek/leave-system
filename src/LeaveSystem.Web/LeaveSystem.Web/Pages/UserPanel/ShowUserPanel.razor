@@ -15,10 +15,12 @@
 @inject UserLeaveLimitsService UserLeaveLimitsService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject WorkingHoursService WorkingHoursService
+@inject NavigationManager NavManager
 
 <PageTitle>User panel</PageTitle>
 
 <div class="container-flex">
+    <RadzenNumeric TValue="int?" Value=@Year Change=@(args => YearChanged(args)) />
     <RadzenTabs RenderMode="TabRenderMode.Client" >
         <Tabs>
             <RadzenTabsItem Text="Summary">
@@ -183,5 +185,12 @@
         leaveRequestsForView = leaveRequests
             .OrderBy(lr => lr.DateFrom)
             .Select(lr => LeaveRequestForView.Create(lr, leaveTypes, workingHoursDuration));
+    }
+    private async Task<int?> YearChanged(int? year)
+    {
+        Year = year;
+        NavManager.NavigateTo($"/user-panel/{year}");
+        await OnInitializedAsync();
+        return year;
     }
 }
