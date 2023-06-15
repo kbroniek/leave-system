@@ -39,7 +39,7 @@ public class LeaveTypesService
     public record class LeaveTypeDto(Guid Id, Guid? BaseLeaveTypeId, string Name, LeaveTypeProperties Properties);
     public record class LeaveTypeProperties(string? Color, LeaveTypeCatalog? Catalog, bool? IncludeFreeDays);
 
-    private class LeaveTypePropertiesConverter : JsonConverter<LeaveTypeProperties>
+    private sealed class LeaveTypePropertiesConverter : JsonConverter<LeaveTypeProperties>
     {
         public override LeaveTypeProperties Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -63,7 +63,7 @@ public class LeaveTypesService
             writer.WriteStringValue(JsonSerializer.Serialize(value));
         }
     }
-    private class LeaveTypeCatalogConverter : JsonConverter<LeaveTypeCatalog?>
+    private sealed class LeaveTypeCatalogConverter : JsonConverter<LeaveTypeCatalog?>
     {
         public override LeaveTypeCatalog? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
