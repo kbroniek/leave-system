@@ -2,61 +2,27 @@
 @using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
 @using LeaveSystem.Web.Pages.UserPanel
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">LeaveSystem</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-
-            <AuthorizeView Policy="@CreateLeaveRequest.PolicyName" Context="CreateLeaveRequest">
-                <NavLink class="nav-link" href="create-leave-request">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Create leave request
-                </NavLink>
-            </AuthorizeView>
-        </div>
-        <div class="nav-item px-3">
-            <AuthorizeView Policy="@ShowLeaveRequests.PolicyName" Context="ShowLeaveRequests">
-                <NavLink class="nav-link" href="leave-requests">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Leave request
-                </NavLink>
-            </AuthorizeView>
-        </div>
-        <div class="nav-item px-3">
-            <AuthorizeView Policy="@ShowUserPanel.PolicyName" Context="ShowUserPanel">
-                <NavLink class="nav-link" href="user-panel">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> User panel
-                </NavLink>
-            </AuthorizeView>
-        </div>
-        <div class="nav-item px-3">
-            <AuthorizeView Policy="@ShowHrPanel.PolicyName" Context="ShowHrPanel">
-                <NavLink class="nav-link" href="hr-panel">
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> HR panel
-                </NavLink>
-            </AuthorizeView>
-        </div>
-    </nav>
-</div>
+<RadzenSidebar @bind-Expanded="@SidebarExpanded">
+    <RadzenPanelMenu>
+        <RadzenPanelMenuItem Text="Home" Icon="home" Path="" />
+        <AuthorizeView Policy="@CreateLeaveRequest.PolicyName" Context="CreateLeaveRequest">
+        <RadzenPanelMenuItem Text="Create leave request" Icon="account_box" Path="create-leave-request" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@ShowLeaveRequests.PolicyName" Context="ShowLeaveRequests">
+            <RadzenPanelMenuItem Text="Leave request" Icon="account_box" Path="leave-requests" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@ShowUserPanel.PolicyName" Context="ShowUserPanel">
+            <RadzenPanelMenuItem Text="User panel" Icon="account_box" Path="user-panel" />
+        </AuthorizeView>
+        <AuthorizeView Policy="@ShowHrPanel.PolicyName" Context="ShowHrPanel">
+            <RadzenPanelMenuItem Text="HR panel" Icon="account_box" Path="hr-panel" />
+        </AuthorizeView>
+    </RadzenPanelMenu>
+</RadzenSidebar>
 
 @code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
+    [Parameter]
+    public bool SidebarExpanded { get; set; } = true;
 }
+
