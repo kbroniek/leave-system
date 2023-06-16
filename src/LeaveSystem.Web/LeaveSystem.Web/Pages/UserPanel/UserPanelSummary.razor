@@ -1,0 +1,92 @@
+﻿@using LeaveSystem.Shared
+@using LeaveSystem.Shared.LeaveRequests
+@using LeaveSystem.Web.Pages.UserLeaveLimits
+@using LeaveSystem.Web.Pages.WorkingHours
+@using Microsoft.AspNetCore.Authorization
+@using LeaveSystem.Web.Pages.LeaveTypes
+@using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
+@using LeaveSystem.Web.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
+@using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService
+
+@if (UserSummaryCollection == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-4">
+            <RadzenText TextStyle="TextStyle.H5">Additional information</RadzenText>
+            <hr />
+            <div class="row">
+                <RadzenText class="col-sm-8"> The number of days for the year @Year: </RadzenText>
+                <RadzenText class="col-sm-4">@holiday?.Limit </RadzenText>
+            </div>
+            <hr />
+            <div class="row">
+                <RadzenText class="col-sm-8"> Number of days for previous years: </RadzenText>
+                <RadzenText class="col-sm-4">@holiday?.OverdueLimit </RadzenText>
+            </div>
+            <hr />
+            @foreach (var userSummary in userSummaryCollectionToRender)
+            {
+                <div class="row">
+                    <RadzenText class="col-sm-8"> @userSummary.LeaveType: </RadzenText>
+                    <RadzenText class="col-sm-4">@userSummary.Used @if (@userSummary?.SumLimit is not null) {@("/ "); @userSummary?.SumLimit; } </RadzenText>
+                    </div>
+                <hr />
+            }
+        </div>
+        <div class="col-lg-8">
+            <RadzenText TextStyle="TextStyle.H5">My leave requests</RadzenText>
+            <hr />
+            <RadzenDataGrid ColumnWidth="150px" AllowFiltering="true" AllowSorting="true" Data="@LeaveRequestsForView" TItem="LeaveRequestForView">
+                <Columns>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateFrom" Title="Date from">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@String.Format("{0:d}", data.DateFrom)" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateTo" Title="Date to">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@String.Format("{0:d}", data.DateTo)" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Duration" Title="Duration">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@data.Duration" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="LeaveTypeName" Title="Leave type">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@data.LeaveTypeName" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Status" Title="Status">
+                        <Template Context="data">
+                            <RadzenLink Path=@String.Format("leave-requests/{0}", data.Id) Text="@data.Status.ToString()" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int? Year { get; set; }
+    [Parameter]
+    public IEnumerable<LeaveRequestPerType>? UserSummaryCollection { get; set; }
+    [Parameter]
+    public IEnumerable<LeaveRequestForView>? LeaveRequestsForView { get; set; }
+    private IEnumerable<LeaveRequestPerType> userSummaryCollectionToRender = Enumerable.Empty<LeaveRequestPerType>();
+    private LeaveRequestPerType? holiday;
+
+    protected override void OnParametersSet()
+    {
+        holiday = UserSummaryCollection?.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.Holiday);
+        userSummaryCollectionToRender = UserSummaryCollection?.OrderBy(s => s.SumLimit is null) ?? Enumerable.Empty<LeaveRequestPerType>();
+    }
+}

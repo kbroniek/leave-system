@@ -50,6 +50,7 @@ public static class Config
             .AddTransient<LeaveTypesService>()
             .AddTransient<GetLeaveRequestsService>()
             .AddTransient<UserLeaveLimitsService>()
+            .AddTransient<EmployeeService>()
             .AddTransient<WorkingHoursService>();
     }
     private static IServiceCollection AddHttpClient(this IServiceCollection services, IConfiguration configuration, string scopes)

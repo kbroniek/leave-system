@@ -1,4 +1,4 @@
-﻿@page "/user-panel"
+﻿@page "/user-panel/{userId?}/{year:int?}"
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Web.Pages.UserLeaveLimits
@@ -15,173 +15,90 @@
 @inject UserLeaveLimitsService UserLeaveLimitsService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject WorkingHoursService WorkingHoursService
+@inject NavigationManager NavManager
+@inject EmployeeService EmployeeService
 
-<PageTitle>User panel</PageTitle>
+<PageTitle>User panel @userName @Year</PageTitle>
 
-@if (userSummaryCollection == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="container">
-        <div class="row py-5">
-            <div class="col">
-                <RadzenCard>
-                    <RadzenDataList WrapItems="true" Data="@userSummaryCollection" TItem="UserSummary">
-                        <Template Context="summary">
-                            <RadzenCard Style="width: 100%; padding: 0; overflow: hidden;">
-                                <div class="container">
-                                    <div class="row" style="margin-left: calc(var(--bs-gutter-x) * -1); margin-right: calc(var(--bs-gutter-x) * -1)">
-                                        <div class="col-lg-4 p-3 product-title center">
-                                                <RadzenText TextStyle="TextStyle.H5" TagName="TagName.H5">@(summary.LeaveType)</RadzenText>
-                                        </div>
-                                        <div class="col-lg-8 p-3">
-                                            <div class="row d-flex">
-                                                <div class="col-md-6 col-lg-2">
-                                                    <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Used</RadzenText>
-                                                    <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.Used)</RadzenText>
-                                                </div>
-                                                <div class="col-md-6 col-lg-2">
-                                                    @if(summary.Limit != null)
-                                                    {
-                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Limit</RadzenText>
-                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.Limit)</RadzenText>
-                                                    }
-                                                </div>
-                                                <div class="col-md-6 col-lg-2">
-                                                    @if(summary.OverdueLimit != null)
-                                                    {
-                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Overdue</RadzenText>
-                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.OverdueLimit)</RadzenText>
-                                                    }
-                                                </div>
-                                                <div class="col-md-6 col-lg-2">
-                                                    @if(summary.SumLimit != null)
-                                                    {
-                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Total</RadzenText>
-                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.SumLimit)</RadzenText>
-                                                    }
-                                                </div>
-                                                <div class="col-md-6 col-lg-2">
-                                                    @if(summary.Left != null)
-                                                    {
-                                                        <RadzenText TextStyle="TextStyle.H6" TagName="TagName.H5" class="mb-0">Left</RadzenText>
-                                                        <RadzenText TextStyle="TextStyle.Body2" class="mb-sm-2 mb-lg-0">@(summary.Left)</RadzenText>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <RadzenAccordion>
-                                    <Items>
-                                        <RadzenAccordionItem Text="Leave requests list" Icon="list">
-                                            <RadzenDataGrid AllowSorting="true" Data="@summary.LeaveRequests" TItem="LeaveRequestForView" ColumnWidth="200px"
-                                                        SelectionMode="DataGridSelectionMode.Single">
-                                                <Columns>
-                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateFrom" Title="Date from" FormatString="{0:d}"/>
-                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="DateTo" Title="Date to" FormatString="{0:d}"/>
-                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Duration" Title="Duration" />
-                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Status" Title="Status" />
-                                                    <RadzenDataGridColumn TItem="LeaveRequestForView" Property="Description" Title="Description" />
-                                                </Columns>
-                                            </RadzenDataGrid>
-                                        </RadzenAccordionItem>
-                                    </Items>
-                                </RadzenAccordion>
-                            </RadzenCard>
-                        </Template>
-                    </RadzenDataList>
-                </RadzenCard>
-            </div>
-        </div>
+<div class="container-flex">
+    <div class="row">
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="3rem" Class="rz-p-12">
+            <RadzenText TextStyle="TextStyle.H5">Employee <strong>@userName</strong></RadzenText>
+            <RadzenNumeric TValue="int?" Value=@Year Change=@(args => YearChanged(args)) />
+        </RadzenStack>
     </div>
-
-    <style>
-    .product-title {
-    }
-    .price-badge {
-        font-size: 16px;
-        font-weight: bold;
-        line-height: 20px;
-        padding: 8px;
-    }
-    </style>
-}
+    <div class="row">
+        <RadzenTabs RenderMode="TabRenderMode.Client" >
+            <Tabs>
+                <RadzenTabsItem Text="Summary">
+                    <UserPanelSummary UserSummaryCollection=@userSummaryCollection LeaveRequestsForView=@leaveRequestsForView Year=@Year />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="By leave types">
+                    <UserPanelLeaveTypes UserSummaryCollection=@userSummaryCollection />
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </div>
+</div>
 
 @code {
+    [Parameter]
+    public string? UserId { get; set; }
+    [Parameter]
+    public int? Year { get; set; }
     public const string PolicyName = "ShowUserPanel";
-    private IEnumerable<UserSummary>? userSummaryCollection;
+    private IEnumerable<LeaveRequestPerType>? userSummaryCollection;
+    private IEnumerable<LeaveRequestForView>? leaveRequestsForView;
+    private string? userName;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User.CreateModel();
-        var now = DateTimeOffset.UtcNow;
-        var firstDay = now.GetFirstDayOfYear();
-        var lastDay = now.GetLastDayOfYear();
+        if (UserId is null)
+        {
+            UserId = user.Id;
+            userName = user.Name;
+        }
+        else
+        {
+            var userFromApi = await EmployeeService.Get(UserId);
+            userName = userFromApi?.Name;
+        }
+        if (Year is null)
+        {
+            Year = DateTimeOffset.UtcNow.Year;
+        }
+        var firstDay = DateTimeOffsetExtensions.GetFirstDayOfYear(Year.Value);
+        var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(Year.Value);
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000, Enum.GetValues<LeaveRequestStatus>())
         {
-            CreatedByUserIds = new string[] { user.Id }
+                CreatedByUserIds = new string[] { UserId }
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
         var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Id);
         var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(user.Id, firstDay, lastDay);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
-        var leaveRequests = getLeaveRequestsTask.Result ?? new PagedListResponse<LeaveRequestShortInfo>(Enumerable.Empty<LeaveRequestShortInfo>(), 0, false);
+        var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
         var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
         var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
         var workingHours = getWorkingHoursTask.Result;
-        userSummaryCollection = leaveTypes.Select(lt =>
-            UserSummary.Create(lt, leaveRequests.Items ?? Enumerable.Empty<LeaveRequestShortInfo>(),
+        var workingHoursDuration = workingHours.GetDuration();
+        userSummaryCollection = leaveTypes.Select(lt => LeaveRequestPerType.Create(
+            lt,
+            leaveRequests,
             limits,
-            workingHours.GetDuration()));
+            workingHoursDuration));
+        leaveRequestsForView = leaveRequests
+            .OrderBy(lr => lr.DateFrom)
+            .Select(lr => LeaveRequestForView.Create(lr, leaveTypes, workingHoursDuration));
     }
-
-    private record class UserSummary(string LeaveType, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestForView> LeaveRequests)
+    private async Task<int?> YearChanged(int? year)
     {
-        public static UserSummary Create(LeaveTypesService.LeaveTypeDto leaveType, IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
-        {
-            var leaveRequestsPerLeaveType = leaveRequests
-                .Where(lr => lr.LeaveTypeId == leaveType.Id);
-            var validLeaveRequestsPerLeaveType = leaveRequestsPerLeaveType
-                .Where(lr => lr.Status.IsValid());
-            var limitsPerLeaveType = limits
-                .Where(l => l.LeaveTypeId == leaveType.Id);
-
-            var leaveRequestsWithDescription = leaveRequestsPerLeaveType
-                .Select(lr => LeaveRequestForView.Create(lr, limitsPerLeaveType, workingHours));
-            var leaveRequestsUsed = TimeSpan.FromTicks(validLeaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
-            var limitsSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.Limit.Ticks));
-            var overdueLimitSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.OverdueLimit.Ticks));
-            var limitTotal = limitsSum + overdueLimitSum;
-            var left = limitTotal - leaveRequestsUsed;
-            return new UserSummary(
-                leaveType.Name,
-                leaveRequestsUsed.GetReadableTimeSpan(workingHours),
-                limitsPerLeaveType.Any() ? limitsSum.GetReadableTimeSpan(workingHours) : null,
-                limitsPerLeaveType.Any() ? overdueLimitSum.GetReadableTimeSpan(workingHours) : null,
-                limitsPerLeaveType.Any() ? limitTotal.GetReadableTimeSpan(workingHours) : null,
-                limitsPerLeaveType.Any() ? left.GetReadableTimeSpan(workingHours) : null,
-                leaveRequestsWithDescription);
-        }
-    };
-    private record class LeaveRequestForView(DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description, LeaveRequestStatus Status)
-    {
-        public static LeaveRequestForView Create(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
-        {
-            var limit = limits.FirstOrDefault(l =>
-                (l.ValidSince == null || l.ValidSince <= leaveRequest.DateFrom) &&
-                (l.ValidUntil == null || l.ValidUntil >= leaveRequest.DateTo));
-            return new LeaveRequestForView(
-                leaveRequest.DateFrom,
-                leaveRequest.DateTo,
-                leaveRequest.Duration.GetReadableTimeSpan(workingHours),
-                limit?.Property?.Description,
-                leaveRequest.Status
-            );
-        }
+        Year = year;
+        NavManager.NavigateTo($"/user-panel/{UserId}/{year}");
+        await OnInitializedAsync();
+        return year;
     }
 }
