@@ -9,9 +9,6 @@
         <AuthorizeView Policy="@CreateLeaveRequest.PolicyName" Context="CreateLeaveRequest">
             <RadzenPanelMenuItem Text="Create leave request" Icon="note_add" Path="create-leave-request" />
         </AuthorizeView>
-        <AuthorizeView Policy="@ShowLeaveRequests.PolicyName" Context="ShowLeaveRequests">
-            <RadzenPanelMenuItem Text="Leave request" Icon="event" Path="leave-requests" />
-        </AuthorizeView>
         <AuthorizeView Policy="@ShowUserPanel.PolicyName" Context="ShowUserPanel">
             <RadzenPanelMenuItem Text="User panel" Icon="account_box" Path="user-panel" />
         </AuthorizeView>
