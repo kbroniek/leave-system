@@ -22,7 +22,7 @@ public record class LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, 
         var limitsSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.Limit.Ticks));
         var overdueLimitSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.OverdueLimit.Ticks));
         var limitTotal = limitsSum + overdueLimitSum;
-        var left = limitTotal - leaveRequestsUsed;
+        var left = limitTotal - leaveRequestsUsed; // TODO: Fix based on baseId
         return new LeaveRequestPerType(
             leaveType.Name,
             leaveType.Id,

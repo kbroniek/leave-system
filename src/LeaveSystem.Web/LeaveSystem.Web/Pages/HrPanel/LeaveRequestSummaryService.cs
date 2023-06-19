@@ -42,7 +42,10 @@ public class LeaveRequestSummaryService
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
         var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
         var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.LeaveLimitDto>();
-        var employees = getEmployeesTask.Result;
+        var employees = getEmployeesTask.Result
+            .Union(leaveRequests.Select(lr =>
+                GetEmployeeDto.Create(lr.CreatedBy)
+            ));
         var allUserIds = limits
             .Select(l => l.AssignedToUserId)
             .Union(leaveRequests.Select(lr => lr.CreatedBy.Id))
