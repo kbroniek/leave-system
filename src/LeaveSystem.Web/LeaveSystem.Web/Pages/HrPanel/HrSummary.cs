@@ -9,11 +9,11 @@ namespace LeaveSystem.Web.Pages.HrPanel;
 public record class HrSummary(
     string EmployeeId,
     string Employee,
-    string SumLimit,
+    string Holiday,
     string Limit,
     string OverdueLimit,
     string Left,
-    bool usedDaysInRow,
+    bool UsedDaysInRow,
     string OnDemand,
     string Saturdays,
     IDictionary<Guid, string> UsedPerLeaveTypes)
@@ -42,7 +42,7 @@ public record class HrSummary(
         var limit = holidayLimit?.Limit.GetReadableTimeSpan(workingHours) ?? "";
         var overdueLimit = holidayLimit?.OverdueLimit.GetReadableTimeSpan(workingHours) ?? "";
         var holidayUsedLeaveType = CalculateLimitLeft(holidayLimit, leaveTypes, usedPerLeaveTypes, workingHours);
-        var usedDaysInARow = holidayLeaveType == null ? false : CalculateDaysInARow(
+        var usedDaysInARow = (holidayLeaveType != null) && CalculateDaysInARow(
             userLeaveRequests,
             holidayLeaveType.Id,
             daysInARow);

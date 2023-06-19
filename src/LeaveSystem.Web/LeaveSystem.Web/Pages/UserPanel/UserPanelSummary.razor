@@ -32,7 +32,7 @@ else
             @foreach (var userSummary in userSummaryCollectionToRender)
             {
                 <div class="row">
-                    <RadzenText class="col-sm-8"> @userSummary.LeaveType: </RadzenText>
+                    <RadzenText class="col-sm-8"> @userSummary.LeaveTypeName: </RadzenText>
                     <RadzenText class="col-sm-4">@userSummary.Used @if (@userSummary?.SumLimit is not null) {@("/ "); @userSummary?.SumLimit; } </RadzenText>
                     </div>
                 <hr />

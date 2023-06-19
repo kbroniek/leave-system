@@ -5,7 +5,7 @@ using static LeaveSystem.Web.Pages.LeaveTypes.LeaveTypesService;
 using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService;
 
 namespace LeaveSystem.Web.Pages.UserPanel;
-public record class LeaveRequestPerType(string LeaveType, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestPerType.ForView> LeaveRequests, LeaveTypeProperties LeaveTypeProperties)
+public record class LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestPerType.ForView> LeaveRequests, LeaveTypeProperties LeaveTypeProperties)
 {
     public static LeaveRequestPerType Create(LeaveTypeDto leaveType, IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
     {
@@ -25,6 +25,7 @@ public record class LeaveRequestPerType(string LeaveType, string Used, string? L
         var left = limitTotal - leaveRequestsUsed;
         return new LeaveRequestPerType(
             leaveType.Name,
+            leaveType.Id,
             leaveRequestsUsed.GetReadableTimeSpan(workingHours),
             limitsPerLeaveType.Any() ? limitsSum.GetReadableTimeSpan(workingHours) : null,
             limitsPerLeaveType.Any() ? overdueLimitSum.GetReadableTimeSpan(workingHours) : null,

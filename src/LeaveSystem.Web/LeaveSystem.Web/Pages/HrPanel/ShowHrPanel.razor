@@ -1,11 +1,13 @@
-﻿@page "/hr-panel"
+﻿@page "/hr-panel/{year:int?}"
 @using LeaveSystem.Shared
 @using LeaveSystem.Web.Extensions
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.UserLeaveLimits
+@using LeaveSystem.Web.Pages.UserPanel;
 @using LeaveSystem.Web.Pages.WorkingHours
 @using Microsoft.AspNetCore.Authorization
+@using static LeaveSystem.Web.Pages.HrPanel.LeaveRequestSummaryService;
 
 @attribute [Authorize(Policy=@PolicyName)]
 @inject LeaveTypesService LeaveTypesService
@@ -13,34 +15,35 @@
 @inject UserLeaveLimitsService UserLeaveLimitsService
 @inject WorkingHoursService WorkingHoursService
 @inject ILogger<ShowHrPanel> Logger
+@inject LeaveRequestSummaryService LeaveRequestSummaryService
 
-@if (hrSummary == null || leaveTypes == null)
+@if (summary == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <div class="container">
-        <RadzenDataGrid AllowColumnResize="true" FilterMode="FilterMode.Simple" AllowSorting="true" Data="@hrSummary" TItem="HrSummary"
+    <div class="container-flex">
+        <RadzenDataGrid AllowColumnResize="true" FilterMode="FilterMode.Simple" AllowSorting="true" Data="@summary.Items" TItem="UserLeaveRequestSummary"
             ColumnWidth="140px" LogicalFilterOperator="LogicalFilterOperator.Or">
             <Columns>
-                <RadzenDataGridColumn TItem="HrSummary" Property="Employee" Title="Employee" Frozen="true">
+                <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Property="Employee" Title="Employee" Frozen="true">
                     <Template Context="data">
-                        <RadzenLink Path=@String.Format("user-panel/{0}", data.EmployeeId) Text=@data.Employee />
+                        <RadzenLink Path=@String.Format("user-panel/{0}", data.Employee.Id) Text=@data.Employee.Name />
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="HrSummary" Property="SumLimit" Title="Total limit"/>
-                <RadzenDataGridColumn TItem="HrSummary" Property="Limit" Title="Limit" />
+@*                <RadzenDataGridColumn TItem="HrSummary" Property="Limit" Title="Limit" />
                 <RadzenDataGridColumn TItem="HrSummary" Property="OverdueLimit" Title="Overdue limit" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="Holiday" Title="Total limit" />
                 <RadzenDataGridColumn TItem="HrSummary" Property="Left" Title="Limit left" />
-                <RadzenDataGridColumn TItem="HrSummary" Property="usedDaysInRow" Title="Used days in a row" />
+                <RadzenDataGridColumn TItem="HrSummary" Property="UsedDaysInRow" Title="Used days in a row" />
                 <RadzenDataGridColumn TItem="HrSummary" Property="OnDemand" Title="On demand" />
-                <RadzenDataGridColumn TItem="HrSummary" Property="Saturdays" Title="Saturdays" />
-                @foreach(var leaveType in leaveTypes)
+                <RadzenDataGridColumn TItem="HrSummary" Property="Saturdays" Title="Saturdays" />*@
+                @foreach (var leaveType in summary.LeaveTypes)
                 {
-                    <RadzenDataGridColumn TItem="HrSummary" Title="@(leaveType.Name)" Width="80px" TextAlign="TextAlign.Center" >
+                    <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Title="@(leaveType.Name)" Width="80px" TextAlign="TextAlign.Center">
                         <Template Context="data">
-                            @(data.UsedPerLeaveTypes[leaveType.Id])
+                            @(data.Summary.FirstOrDefault(s => s.LeaveTypeId == leaveType.Id)?.Used) / @(data.Summary.FirstOrDefault(s => s.LeaveTypeId == leaveType.Id)?.SumLimit)
                         </Template>
                     </RadzenDataGridColumn>
                 }
@@ -49,39 +52,44 @@ else
     </div>
 }
 @code {
+    [Parameter]
+    public int? Year { get; set; }
     public const string PolicyName = "ShowHrPanel";
-    private IEnumerable<HrSummary>? hrSummary;
-    private IEnumerable<LeaveTypesService.LeaveTypeDto>? leaveTypes;
-    private int daysInARow = 14; // TODO get from config
+    private LeaveRequestSummary? summary;
+    //private int daysInARow = 14; // TODO get from config
 
     protected override async Task OnInitializedAsync()
     {
-        var now = DateTimeOffset.UtcNow;
-        var firstDay = now.GetFirstDayOfYear();
-        var lastDay = now.GetLastDayOfYear();
-        var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
-        var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
-        var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
-        var getLimitsTask = UserLeaveLimitsService.GetLimits();
-        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
-        var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
-        leaveTypes = getLeaveTypesTask.Result;
-        var limits = getLimitsTask.Result;
-        var users = CreateUserCollection(leaveRequests, limits);
-        var workingHours = await WorkingHoursService.GetWorkingHours(users.Select(u => u.Id), firstDay, lastDay);
-        hrSummary = users.Select(u => HrSummary.Create(u,
-            leaveTypes,
-            leaveRequests,
-            limits,
-            workingHours.GetDuration(u.Id),
-            daysInARow
-        ));
+        if (Year is null)
+        {
+            Year = DateTimeOffset.UtcNow.Year;
+        }
+        summary = await LeaveRequestSummaryService.Summary(Year.Value);
+        //leaveRequestsPerEmployee = summary.Items.GroupBy(lr => lr.CreatedBy);
+        //var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
+        //var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
+        //var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
+        //var getLimitsTask = UserLeaveLimitsService.GetLimits();
+        //await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
+        //var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
+        //leaveTypes = getLeaveTypesTask.Result;
+        //var limits = getLimitsTask.Result;
+        //var users = CreateUserCollection(leaveRequests, limits);
+        //var workingHours = await WorkingHoursService.GetWorkingHours(users.Select(u => u.Id), firstDay, lastDay);
+        //hrSummary = users.Select(u => HrSummary.Create(u,
+        //    leaveTypes,
+        //    leaveRequests,
+        //    limits,
+        //    workingHours.GetDuration(u.Id),
+        //    daysInARow
+        //));
     }
 
-    private static IEnumerable<FederatedUser> CreateUserCollection(IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits) =>
-        leaveRequests
-            .Select(lr => lr.CreatedBy)
-            .Union(limits.Select(l => FederatedUser.Create(l.AssignedToUserId, null, null)))
-            .GroupBy(u => u.Id)
-            .Select(g => g.First());
+
+    //private static IEnumerable<FederatedUser> CreateUserCollection(IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits) =>
+    //    leaveRequests
+    //        .Select(lr => lr.CreatedBy)
+    //        .Union(limits.Select(l => FederatedUser.Create(l.AssignedToUserId, null, null)))
+    //        .GroupBy(u => u.Id)
+    //        .Select(g => g.First());
 }
