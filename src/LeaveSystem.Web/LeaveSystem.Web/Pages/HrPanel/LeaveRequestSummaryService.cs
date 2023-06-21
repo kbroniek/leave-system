@@ -57,6 +57,7 @@ public class LeaveRequestSummaryService
                 .Select(e => new UserLeaveRequestSummary(e,
                     leaveTypes.Select(lt => LeaveRequestPerType.Create(
                         lt,
+                        leaveTypes,
                         leaveRequests.Where(lr => lr.CreatedBy.Id == e.Id),
                         limits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
                         workingHours.GetDuration(e.Id))))),

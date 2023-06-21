@@ -87,6 +87,7 @@
         var workingHoursDuration = workingHours.GetDuration();
         userSummaryCollection = leaveTypes.Select(lt => LeaveRequestPerType.Create(
             lt,
+            leaveTypes,
             leaveRequests,
             limits,
             workingHoursDuration));

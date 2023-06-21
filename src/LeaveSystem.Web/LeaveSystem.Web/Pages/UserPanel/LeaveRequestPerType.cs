@@ -7,7 +7,7 @@ using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService;
 namespace LeaveSystem.Web.Pages.UserPanel;
 public record class LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestPerType.ForView> LeaveRequests, LeaveTypeProperties LeaveTypeProperties)
 {
-    public static LeaveRequestPerType Create(LeaveTypeDto leaveType, IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
+    public static LeaveRequestPerType Create(LeaveTypeDto leaveType, IEnumerable<LeaveTypeDto> allLeaveTypes, IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
     {
         var leaveRequestsPerLeaveType = leaveRequests
             .Where(lr => lr.LeaveTypeId == leaveType.Id);
@@ -18,21 +18,42 @@ public record class LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, 
 
         var leaveRequestsWithDescription = leaveRequestsPerLeaveType
             .Select(lr => ForView.CreateForView(lr, limitsPerLeaveType, workingHours));
-        var leaveRequestsUsed = TimeSpan.FromTicks(validLeaveRequestsPerLeaveType.Sum(lr => lr.Duration.Ticks));
+        TimeSpan leaveRequestsUsed = CalculateUsed(validLeaveRequestsPerLeaveType);
         var limitsSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.Limit.Ticks));
         var overdueLimitSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.OverdueLimit.Ticks));
-        var limitTotal = limitsSum + overdueLimitSum;
-        var left = limitTotal - leaveRequestsUsed; // TODO: Fix based on baseId
+        var totalLimit = limitsSum + overdueLimitSum;
+        var left = CalculateLeft(totalLimit, leaveRequestsUsed, allLeaveTypes, leaveType.Id,
+            leaveRequests.Where(lr => lr.Status.IsValid()).ToList());
         return new LeaveRequestPerType(
             leaveType.Name,
             leaveType.Id,
             leaveRequestsUsed.GetReadableTimeSpan(workingHours),
             limitsPerLeaveType.Any() ? limitsSum.GetReadableTimeSpan(workingHours) : null,
             limitsPerLeaveType.Any() ? overdueLimitSum.GetReadableTimeSpan(workingHours) : null,
-            limitsPerLeaveType.Any() ? limitTotal.GetReadableTimeSpan(workingHours) : null,
+            limitsPerLeaveType.Any() ? totalLimit.GetReadableTimeSpan(workingHours) : null,
             limitsPerLeaveType.Any() ? left.GetReadableTimeSpan(workingHours) : null,
             leaveRequestsWithDescription,
             leaveType.Properties);
+    }
+
+    private static TimeSpan CalculateUsed(IEnumerable<LeaveRequestShortInfo> leaveRequests) =>
+        TimeSpan.FromTicks(leaveRequests.Sum(lr => lr.Duration.Ticks));
+
+    private static TimeSpan CalculateLeft(
+        TimeSpan totalLimit,
+        TimeSpan leaveRequestsUsed,
+        IEnumerable<LeaveTypeDto> leaveTypes,
+        Guid leaveTypeId,
+        IEnumerable<LeaveRequestShortInfo> validLeaveRequests)
+    {
+        TimeSpan usedConnected = TimeSpan.Zero;
+        foreach (var leaveType in leaveTypes.Where(lt => lt.BaseLeaveTypeId == leaveTypeId))
+        {
+            var used = CalculateUsed(validLeaveRequests
+                .Where(lr => lr.LeaveTypeId == leaveType.Id));
+            usedConnected += used;
+        }
+        return totalLimit - leaveRequestsUsed - usedConnected;
     }
     public record class ForView(Guid Id, DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description, LeaveRequestStatus Status)
     {
@@ -51,4 +72,4 @@ public record class LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, 
             );
         }
     }
-};
+}
