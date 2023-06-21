@@ -56,7 +56,6 @@ else
                         <RadzenCheckBox ReadOnly=true Value="@(CalculateDaysInARow(data.Summary))" />
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="HrSummary" Property="UsedDaysInRow" Title="Used days in a row" />
                 @foreach (var leaveType in summary.LeaveTypes)
                 {
                     <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Title="@(leaveType.Name)" TextAlign="TextAlign.Center">
