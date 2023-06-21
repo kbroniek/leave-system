@@ -9,8 +9,9 @@ public record class LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, 
 {
     public static LeaveRequestPerType Create(LeaveTypeDto leaveType, IEnumerable<LeaveTypeDto> allLeaveTypes, IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
     {
+        var connectedLeaveType = allLeaveTypes.FirstOrDefault(lt => lt.BaseLeaveTypeId == leaveType.Id);
         var leaveRequestsPerLeaveType = leaveRequests
-            .Where(lr => lr.LeaveTypeId == leaveType.Id);
+            .Where(lr => lr.LeaveTypeId == leaveType.Id || (connectedLeaveType is not null && lr.LeaveTypeId == connectedLeaveType.Id));
         var validLeaveRequestsPerLeaveType = leaveRequestsPerLeaveType
             .Where(lr => lr.Status.IsValid());
         var limitsPerLeaveType = limits
@@ -22,8 +23,7 @@ public record class LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, 
         var limitsSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.Limit.Ticks));
         var overdueLimitSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.OverdueLimit.Ticks));
         var totalLimit = limitsSum + overdueLimitSum;
-        var left = CalculateLeft(totalLimit, leaveRequestsUsed, allLeaveTypes, leaveType.Id,
-            leaveRequests.Where(lr => lr.Status.IsValid()).ToList());
+        var left = totalLimit - leaveRequestsUsed;
         return new LeaveRequestPerType(
             leaveType.Name,
             leaveType.Id,
@@ -39,22 +39,6 @@ public record class LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, 
     private static TimeSpan CalculateUsed(IEnumerable<LeaveRequestShortInfo> leaveRequests) =>
         TimeSpan.FromTicks(leaveRequests.Sum(lr => lr.Duration.Ticks));
 
-    private static TimeSpan CalculateLeft(
-        TimeSpan totalLimit,
-        TimeSpan leaveRequestsUsed,
-        IEnumerable<LeaveTypeDto> leaveTypes,
-        Guid leaveTypeId,
-        IEnumerable<LeaveRequestShortInfo> validLeaveRequests)
-    {
-        TimeSpan usedConnected = TimeSpan.Zero;
-        foreach (var leaveType in leaveTypes.Where(lt => lt.BaseLeaveTypeId == leaveTypeId))
-        {
-            var used = CalculateUsed(validLeaveRequests
-                .Where(lr => lr.LeaveTypeId == leaveType.Id));
-            usedConnected += used;
-        }
-        return totalLimit - leaveRequestsUsed - usedConnected;
-    }
     public record class ForView(Guid Id, DateTimeOffset DateFrom, DateTimeOffset DateTo, string Duration, string? Description, LeaveRequestStatus Status)
     {
         public static ForView CreateForView(LeaveRequestShortInfo leaveRequest, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)

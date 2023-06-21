@@ -29,6 +29,11 @@ else
                 <RadzenText class="col-sm-4">@holiday?.OverdueLimit </RadzenText>
             </div>
             <hr />
+            <div class="row">
+                <RadzenText class="col-sm-8"> Number of days left: </RadzenText>
+                <RadzenText class="col-sm-4">@holiday?.Left </RadzenText>
+            </div>
+            <hr />
             @foreach (var userSummary in userSummaryCollectionToRender)
             {
                 <div class="row">
