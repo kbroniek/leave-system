@@ -51,7 +51,8 @@ public static class Config
             .AddTransient<GetLeaveRequestsService>()
             .AddTransient<UserLeaveLimitsService>()
             .AddTransient<EmployeeService>()
-            .AddTransient<WorkingHoursService>();
+            .AddTransient<WorkingHoursService>()
+            .AddTransient<LeaveRequestSummaryService>();
     }
     private static IServiceCollection AddHttpClient(this IServiceCollection services, IConfiguration configuration, string scopes)
     {

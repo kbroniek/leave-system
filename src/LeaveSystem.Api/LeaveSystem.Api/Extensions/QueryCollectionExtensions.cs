@@ -22,7 +22,7 @@ public static class QueryCollectionExtensions
         return result ?? throw new FormatException($"The {paramName} query parameter cannot be null.");
     }
 
-    public static string[]? TryParseStrings(this IQueryCollection query, string paramName)
+    public static string?[]? TryParseStrings(this IQueryCollection query, string paramName)
     {
         var paramValue = query[paramName];
         try
