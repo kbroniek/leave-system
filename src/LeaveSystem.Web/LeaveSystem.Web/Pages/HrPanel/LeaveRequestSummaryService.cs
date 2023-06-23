@@ -1,4 +1,5 @@
 ﻿using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
@@ -36,7 +37,7 @@ public class LeaveRequestSummaryService
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
         var getLeaveRequestsTask = getLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = leaveTypesService.GetLeaveTypes();
-        var getLimitsTask = userLeaveLimitsService.GetLimits();
+        var getLimitsTask = userLeaveLimitsService.GetLimits(firstDay, lastDay);
         var getEmployeesTask = employeeService.Get();
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getEmployeesTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
@@ -48,9 +49,10 @@ public class LeaveRequestSummaryService
             ));
         var allUserIds = limits
             .Select(l => l.AssignedToUserId)
-            .Union(leaveRequests.Select(lr => lr.CreatedBy.Id))
-            .Distinct();
-        var workingHours = await workingHoursService.GetWorkingHours(allUserIds, firstDay, lastDay);
+            .Union(employees.Select(e => e.Id))
+            .Distinct()
+            .ToArray();
+        var workingHours = allUserIds.Length == 0 ? WorkingHoursCollection.Empty : await workingHoursService.GetWorkingHours(allUserIds, firstDay, lastDay);
 
         return new LeaveRequestSummary(
             employees

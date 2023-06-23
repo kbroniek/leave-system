@@ -27,9 +27,9 @@ public class UserLeaveLimitsService
         return limits?.Data ?? Enumerable.Empty<UserLeaveLimitDto>();
     }
     //TODO: add time range
-    public async Task<IEnumerable<LeaveLimitDto>> GetLimits()
+    public async Task<IEnumerable<LeaveLimitDto>> GetLimits(DateTimeOffset since, DateTimeOffset until)
     {
-        var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<LeaveLimitDto>>>("odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null)", jsonSerializerOptions);
+        var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<LeaveLimitDto>>>($"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))", jsonSerializerOptions);
         return limits?.Data ?? Enumerable.Empty<LeaveLimitDto>();
     }
 
