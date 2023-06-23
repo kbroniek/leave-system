@@ -9,7 +9,7 @@ using LeaveSystem.Web.Pages.WorkingHours;
 
 namespace LeaveSystem.Web.Pages.HrPanel;
 
-public class LeaveRequestSummaryService
+public class HrSummaryService
 {
     private readonly GetLeaveRequestsService getLeaveRequestsService;
     private readonly LeaveTypesService leaveTypesService;
@@ -17,7 +17,7 @@ public class LeaveRequestSummaryService
     private readonly UserLeaveLimitsService userLeaveLimitsService;
     private readonly EmployeeService employeeService;
 
-    public LeaveRequestSummaryService(
+    public HrSummaryService(
         GetLeaveRequestsService getLeaveRequestsService,
         LeaveTypesService leaveTypesService,
         WorkingHoursService workingHoursService,

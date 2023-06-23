@@ -8,11 +8,11 @@
 @using LeaveSystem.Web.Pages.WorkingHours
 @using Microsoft.AspNetCore.Authorization
 @using static LeaveSystem.Web.Pages.LeaveTypes.LeaveTypesService;
-@using static LeaveSystem.Web.Pages.HrPanel.LeaveRequestSummaryService;
+@using static LeaveSystem.Web.Pages.HrPanel.HrSummaryService;
 
 @attribute [Authorize(Policy=@PolicyName)]
 @inject ILogger<ShowHrPanel> Logger
-@inject LeaveRequestSummaryService LeaveRequestSummaryService
+@inject HrSummaryService HrSummaryService
 @inject NavigationManager NavManager
 
 <PageTitle>HR panel @Year</PageTitle>
@@ -82,7 +82,7 @@ else
         {
             Year = DateTimeOffset.UtcNow.Year;
         }
-        summary = await LeaveRequestSummaryService.Summary(Year.Value);
+        summary = await HrSummaryService.Summary(Year.Value);
         holidayLeaveType = summary.LeaveTypes.FirstOrDefault(lt => lt.Properties.Catalog == LeaveTypeCatalog.Holiday);
     }
 
