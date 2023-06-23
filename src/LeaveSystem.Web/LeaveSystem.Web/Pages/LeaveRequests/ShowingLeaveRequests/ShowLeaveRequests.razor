@@ -1,7 +1,6 @@
 ﻿@page "/leave-requests"
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Shared
-@using LeaveSystem.Web.Components
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
@@ -13,6 +12,7 @@
 @inject TimelineComponent Timeline
 @inject LeaveTypesService LeaveTypeService
 @inject GetLeaveRequestsService GetLeaveRequestsService
+@inject StyleGenerator StyleGenerator
 
 <PageTitle>Show leave request</PageTitle>
 
@@ -92,7 +92,15 @@ else
             .Select(u => u.First())
             .OrderBy(u => u.Name)
             .ToArray();
-        await Timeline.CreateAsync("timeline-visualization", employees, leaveRequests?.Items, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo.AddDays(1));
+        var style = HolidayStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
+        await StyleGenerator.CreateAsync(style);
+
+        await Timeline.CreateAsync(
+            "timeline-visualization",
+            employees,
+            leaveRequests?.Items,
+            leaveRequestsQuery.DateFrom,
+            leaveRequestsQuery.DateTo.AddDays(1));
     }
     private async Task HandleFilter()
     {

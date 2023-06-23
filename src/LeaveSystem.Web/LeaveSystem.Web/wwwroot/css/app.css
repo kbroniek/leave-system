@@ -1,1 +1,4 @@
-﻿
+﻿.vis-time-axis .vis-grid.vis-saturday,
+.vis-time-axis .vis-grid.vis-sunday {
+    background-color: #d2c0b2
+}

@@ -1,9 +1,8 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Shared;
-using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using Microsoft.JSInterop;
 
-namespace LeaveSystem.Web.Components;
+namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 
 public class TimelineComponent
 {

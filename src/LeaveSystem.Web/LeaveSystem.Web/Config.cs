@@ -1,5 +1,4 @@
 ﻿using LeaveSystem.Shared.Auth;
-using LeaveSystem.Web.Components;
 using LeaveSystem.Web.Pages.HrPanel;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequestDetails;
@@ -47,6 +46,7 @@ public static class Config
     {
         return services
             .AddTransient<TimelineComponent>()
+            .AddTransient<StyleGenerator>()
             .AddTransient<LeaveTypesService>()
             .AddTransient<GetLeaveRequestsService>()
             .AddTransient<UserLeaveLimitsService>()
