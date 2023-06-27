@@ -15,7 +15,8 @@ window.TimelineWrapper = {
                 group: lr.createdBy.id,
                 start: new Date(lr.dateFrom).setHours(0, 0, 0, 0),
                 end: new Date(lr.dateTo).setHours(23, 59, 59, 99),
-                content: lr.duration
+                content: lr.duration,
+                title: lr.leaveTypeName
             });
         });
 
@@ -30,7 +31,11 @@ window.TimelineWrapper = {
             timeAxis: { scale: 'day' },
             min: minDate,                // lower limit of visible range
             max: maxDate,                // upper limit of visible range
-
+            tooltip: {
+                template: function (originalItemData, parsedItemData) {
+                    return `<span>${originalItemData.title}</span>`;
+                }
+            }
         };
         timeline = new vis.Timeline(container, null, options);
         timeline.setGroups(groups);
