@@ -15,7 +15,7 @@ window.TimelineWrapper = {
                 group: lr.createdBy.id,
                 start: new Date(lr.dateFrom).setHours(0, 0, 0, 0),
                 end: new Date(lr.dateTo).setHours(23, 59, 59, 99),
-                content: lr.leaveTypeId
+                content: lr.duration
             });
         });
 

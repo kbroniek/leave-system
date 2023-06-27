@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Shared;
 using Microsoft.JSInterop;
+using static LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests.ShowLeaveRequests;
 
 namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 
@@ -15,7 +16,7 @@ public class TimelineComponent
 
     public async Task CreateAsync(string? container,
         IEnumerable<FederatedUser>? users,
-        IEnumerable<LeaveRequestShortInfo>? leaveRequests,
+        IEnumerable<LeaveRequestSummary>? leaveRequests,
         DateTimeOffset minDate,
         DateTimeOffset maxDate)
     {

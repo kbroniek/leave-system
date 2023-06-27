@@ -1,9 +1,11 @@
 window.StyleGenerator = {
     create: function (style) {
-        let styleElement = document.createElement('style');
-        styleElement.type = 'text/css';
+        let styleElement = document.getElementById('holidayTimeslineStyle');
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.type = 'text/css';
+            document.getElementsByTagName('head')[0].appendChild(styleElement);
+        }
         styleElement.innerHTML = style;
-        document.getElementsByTagName('head')[0].appendChild(styleElement);
-        console.log(styleElement)
     }
 }
