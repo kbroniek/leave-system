@@ -6,27 +6,20 @@
 .vis-timeline .vis-item.pending {
     background-color: #CFFF98
 }
-.vis-timeline .vis-item.accepted {
-    --base-text-weight-medium: 500;
-    --label-r: 29;
-    --label-g: 118;
-    --label-b: 219;
-    --label-h: 211;
-    --label-s: 76;
-    --label-l: 48;
+
+.vis-timeline .vis-item.vis-range {
     --lightness-threshold: 0.6;
-    --background-alpha: 0.18;
-    --border-alpha: 0.3;
+    --background-alpha: 0.28;
+    --border-alpha: 0.7;
     --perceived-lightness: calc( ((var(--label-r) * 0.2126) + (var(--label-g) * 0.7152) + (var(--label-b) * 0.0722)) / 255 );
     --lightness-switch: max(0, min(calc((1/(var(--lightness-threshold) - var(--perceived-lightness)))), 1));
     --lighten-by: calc(((var(--lightness-threshold) - var(--perceived-lightness)) * 100) * var(--lightness-switch));
     color: hsl(var(--label-h), calc(var(--label-s) * 1%), calc((var(--label-l) + var(--lighten-by)) * 1%));
     background: rgba(var(--label-r), var(--label-g), var(--label-b), var(--background-alpha));
     border-color: hsla(var(--label-h), calc(var(--label-s) * 1%), calc((var(--label-l) + var(--lighten-by)) * 1%), var(--border-alpha));
+    box-shadow: inset 0px 0px 0px 3px hsla(var(--label-status-h), calc(var(--label-status-s) * 1%), calc((var(--label-status-l)) * 1%), var(--border-alpha));
     display: inline-block;
     padding: 0 7px;
-    font-size: 12px;
-    font-weight: var(--base-text-weight-medium, 500);
     line-height: 18px;
     white-space: nowrap;
     border: 1px solid;
@@ -34,38 +27,40 @@
     cursor: pointer;
 }
 
-    .vis-timeline .vis-item.accepted .vis-item-content {
-        display: inline-block;
-        max-width: 125px;
-        vertical-align: top;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 100% !important;
-        box-sizing: border-box;
-        --label-r: 29;
-        --label-g: 118;
-        --label-b: 219;
-        --label-h: 211;
-        --label-s: 76;
-        --label-l: 48;
-        --lightness-threshold: 0.6;
-        --background-alpha: 0.18;
-        --border-alpha: 0.3;
-        --perceived-lightness: calc( ((var(--label-r) * 0.2126) + (var(--label-g) * 0.7152) + (var(--label-b) * 0.0722)) / 255 );
-        --lightness-switch: max(0, min(calc((1/(var(--lightness-threshold) - var(--perceived-lightness)))), 1));
-        --lighten-by: calc(((var(--lightness-threshold) - var(--perceived-lightness)) * 100) * var(--lightness-switch));
-        color: hsl(var(--label-h), calc(var(--label-s) * 1%), calc((var(--label-l) + var(--lighten-by)) * 1%));
-        border-color: hsla(var(--label-h), calc(var(--label-s) * 1%), calc((var(--label-l) + var(--lighten-by)) * 1%), var(--border-alpha));
-        display: inline-block;
-        padding: 2px 0;
-        font-size: 12px;
-        font-weight: var(--base-text-weight-medium, 500);
-        line-height: 18px;
-        white-space: nowrap;
-        border: 1px solid transparent;
-        border-radius: 2em;
-    }
-.vis-timeline .vis-item.leave-type-2bbc87ed-2295-435a-8c04-2039bd12ce812 {
-    border-color: red
+.vis-timeline .vis-item .vis-item-content {
+    --lightness-threshold: 0.1;
+    --background-alpha: 0.18;
+    --border-alpha: 0.3;
+    --perceived-lightness: calc( ((var(--label-r) * 0.2126) + (var(--label-g) * 0.7152) + (var(--label-b) * 0.0722)) / 255 );
+    --lightness-switch: max(0, min(calc((1/(var(--lightness-threshold) - var(--perceived-lightness)))), 1));
+    --lighten-by: calc(((var(--lightness-threshold) - var(--perceived-lightness)) * 100) * var(--lightness-switch));
+    color: hsl(var(--label-h), calc(var(--label-s) * 1%), calc((var(--label-l) + var(--lighten-by)) * 1%));
+    display: inline-block;
+    padding: 2px 0;
+    font-size: 12px;
+    font-weight: var(--base-text-weight-medium, 500);
+    line-height: 18px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: 2em;
+    vertical-align: top;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+.vis-timeline .vis-item.leave-type-2bbc87ed-2295-435a-8c04-2039bd12ce81 {
+    --label-r: 29;
+    --label-g: 118;
+    --label-b: 219;
+    --label-h: 211;
+    --label-s: 76;
+    --label-l: 48;
+}
+
+.vis-timeline .vis-item.accepted {
+    --label-status-h: 11;
+    --label-status-s: 76;
+    --label-status-l: 48;
 }
