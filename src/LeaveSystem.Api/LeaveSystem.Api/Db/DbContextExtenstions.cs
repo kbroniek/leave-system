@@ -7,9 +7,12 @@ using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
+using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using static LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests.ShowLeaveRequests;
 
 namespace LeaveSystem.Api.Db;
 public static class DbContextExtenstions
@@ -27,6 +30,13 @@ public static class DbContextExtenstions
         FederatedUser.Create("1374e2d6-15f5-4543-b7bf-95118701f315", "jszczepanek@test.com", "Jadwiga Szczepanek"),
         FederatedUser.Create("59ed14ff-edc4-421c-8f22-28973f4ccd76", "aszewczyk@test.com", "Aleksandra Szewczyk"),
         FederatedUser.Create("d5ff6b57-a701-4ce8-82ef-593ef207fb76", "ourbanek@test.com", "Olgierd Urbanek")
+    };
+    private static Setting[] settings = new Setting[]
+    {
+        new Setting {Id = LeaveRequestStatus.Canceled.ToString(), Category = Setting.CategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"lightgrey\"}") },
+        new Setting {Id = LeaveRequestStatus.Rejected.ToString(), Category = Setting.CategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#663300\"}") },
+        new Setting {Id = LeaveRequestStatus.Pending.ToString(), Category = Setting.CategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#CFFF98\"}") },
+        new Setting {Id = LeaveRequestStatus.Accepted.ToString(), Category = Setting.CategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"transparent\"}") }
     };
     private static LeaveType holidayLeave = new LeaveType
     {
@@ -157,7 +167,8 @@ public static class DbContextExtenstions
     private static async Task FillInSimpleData(LeaveSystemDbContext dbContext)
     {
         await dbContext.FillInLeaveTypes();
-        await dbContext.FillInUserLeaveLimit();
+        await dbContext.FillInUserLeaveLimits();
+        await dbContext.FillInSettings();
         await dbContext.SaveChangesAsync();
     }
 
@@ -356,7 +367,7 @@ public static class DbContextExtenstions
         return leaveRequestId;
     }
 
-    private static async Task FillInUserLeaveLimit(this LeaveSystemDbContext dbContext)
+    private static async Task FillInUserLeaveLimits(this LeaveSystemDbContext dbContext)
     {
         if (await dbContext.UserLeaveLimits.AnyAsync())
         {
@@ -520,5 +531,14 @@ public static class DbContextExtenstions
     {
         //return new DateTimeOffset(2023, 2, 1, 0, 0, 0, TimeSpan.Zero);
         return DateTimeOffset.Now;
+    }
+
+    private static async Task FillInSettings(this LeaveSystemDbContext dbContext)
+    {
+        if (await dbContext.Settings.AnyAsync())
+        {
+            return;
+        }
+        await dbContext.Settings.AddRangeAsync(settings);
     }
 }
