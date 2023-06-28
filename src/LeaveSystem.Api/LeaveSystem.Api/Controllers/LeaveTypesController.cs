@@ -7,7 +7,7 @@ namespace LeaveSystem.Api.Controllers
 {
     [Route("api/[controller]")]
     [Authorize]
-    public class LeaveTypesController : GenericCrudController<LeaveType>
+    public class LeaveTypesController : GenericCrudController<LeaveType, Guid>
     {
         public LeaveTypesController(LeaveSystemDbContext dbContext)
             : base(dbContext)
