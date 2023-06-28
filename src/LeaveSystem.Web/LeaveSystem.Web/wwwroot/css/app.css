@@ -11,13 +11,14 @@
     --lightness-threshold: 0.3;
     --background-alpha: 0.28;
     --border-alpha: 0.7;
+    --border-status-alpha: 0.9;
     --perceived-lightness: calc( ((var(--label-r) * 0.2126) + (var(--label-g) * 0.7152) + (var(--label-b) * 0.0722)) / 255 );
     --lightness-switch: max(0, min(calc((1/(var(--lightness-threshold) - var(--perceived-lightness)))), 1));
     --lighten-by: calc(((var(--lightness-threshold) - var(--perceived-lightness)) * 100) * var(--lightness-switch));
     color: hsl(var(--label-h), calc(var(--label-s) * 1%), calc((var(--label-l) + var(--lighten-by)) * 1%));
     background: rgba(var(--label-r), var(--label-g), var(--label-b), var(--background-alpha));
     border-color: hsla(var(--label-h), calc(var(--label-s) * 1%), calc((var(--label-l) + var(--lighten-by)) * 1%), var(--border-alpha));
-    box-shadow: inset 0px 0px 0px 3px hsla(var(--label-status-h), calc(var(--label-status-s) * 1%), calc((var(--label-status-l)) * 1%), var(--border-alpha));
+    box-shadow: inset 0px 0px 0px 3px hsla(var(--label-status-h), calc(var(--label-status-s) * 1%), calc((var(--label-status-l)) * 1%), var(--border-status-alpha));
     display: inline-block;
     padding: 0 7px;
     line-height: 18px;
@@ -58,9 +59,3 @@
     --label-s: 76;
     --label-l: 48;
 }
-
-/*.vis-timeline .vis-item.accepted {
-    --label-status-h: 11;
-    --label-status-s: 76;
-    --label-status-l: 48;
-}*/

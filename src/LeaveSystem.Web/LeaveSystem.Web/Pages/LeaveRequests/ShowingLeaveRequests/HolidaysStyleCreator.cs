@@ -4,7 +4,7 @@ using System.Text;
 namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 
 
-public static class HolidayStyleCreator
+public static class HolidaysStyleCreator
 {
     public static string Create(DateTimeOffset dateFrom, DateTimeOffset dateTo)
     {

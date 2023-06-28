@@ -94,10 +94,19 @@ else
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         var employeesFromGraph = getEmployeesTask.Result;
-        var holidayStyle = HolidayStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
+        var holidayStyle = HolidaysStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
         await StyleGenerator.CreateAsync("holidayTimeslineStyle", holidayStyle);
         var leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
         await StyleGenerator.CreateAsync("leaveTypesStyle", leaveTypesStyle);
+        var statuses = new LeaveRequestStatusProperty[]
+        {
+            new LeaveRequestStatusProperty(LeaveRequestStatus.Canceled, "lightgrey"),
+            new LeaveRequestStatusProperty(LeaveRequestStatus.Rejected, "#663300"),
+            new LeaveRequestStatusProperty(LeaveRequestStatus.Pending, "#CFFF98"),
+            new LeaveRequestStatusProperty(LeaveRequestStatus.Accepted, "transparent"),
+        };
+        var leaveStatusesStyle = LeaveStatusesStyleCreator.Create(statuses);
+        await StyleGenerator.CreateAsync("leaveStatusStyle", leaveStatusesStyle);
         if (leaveRequests?.Items is not null)
         {
             employees = leaveRequests.Items.Select(l => l.CreatedBy)
@@ -179,9 +188,11 @@ else
                 duration.GetReadableTimeSpan(workingHours),
                 leaveTypeName,
                 $"leave-type-{leaveTypeId.ToString()}",
-                status.ToString().ToLower(),
+                $"leave-status-{status.ToString().ToLower()}",
                 createdBy);
         }
 
     }
+
+    public sealed record LeaveRequestStatusProperty(LeaveRequestStatus Status, string Color);
 }
