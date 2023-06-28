@@ -58,8 +58,9 @@ namespace LeaveSystem.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<int>("Category")
-                        .HasColumnType("integer");
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<JsonDocument>("Value")
                         .IsRequired()

@@ -1,5 +1,7 @@
 ﻿using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LeaveSystem.Db;
 public class LeaveSystemDbContext : DbContext
@@ -23,7 +25,8 @@ public class LeaveSystemDbContext : DbContext
              .HasKey(e => e.Id);
         modelBuilder.Entity<Setting>()
             .Property(b => b.Category)
-            .IsRequired(true);
+            .IsRequired(true)
+            .HasConversion(new EnumToStringConverter<SettingCategoryType>());
         modelBuilder.Entity<Setting>()
             .Property(b => b.Value)
             .IsRequired(true)

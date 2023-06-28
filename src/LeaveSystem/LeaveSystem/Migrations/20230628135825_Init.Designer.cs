@@ -14,7 +14,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LeaveSystem.Migrations
 {
     [DbContext(typeof(LeaveSystemDbContext))]
-    [Migration("20230628131253_Init")]
+    [Migration("20230628135825_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,8 +60,9 @@ namespace LeaveSystem.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<int>("Category")
-                        .HasColumnType("integer");
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<JsonDocument>("Value")
                         .IsRequired()

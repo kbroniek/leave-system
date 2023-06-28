@@ -37,7 +37,7 @@ namespace LeaveSystem.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Category = table.Column<int>(type: "integer", nullable: false),
+                    Category = table.Column<string>(type: "text", nullable: false),
                     Value = table.Column<JsonDocument>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
