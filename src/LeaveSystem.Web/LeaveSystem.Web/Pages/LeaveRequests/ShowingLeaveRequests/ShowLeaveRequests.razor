@@ -18,6 +18,7 @@
 @inject StyleGenerator StyleGenerator
 @inject EmployeeService EmployeeService
 @inject WorkingHoursService WorkingHoursService
+@inject GetLeaveStatusSettingsService GetLeaveStatusSettingsService
 
 <PageTitle>Show leave request</PageTitle>
 
@@ -90,24 +91,27 @@ else
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(leaveRequestsQuery);
         var getLeaveTypesTask = LeaveTypeService.GetLeaveTypes();
         var getEmployeesTask = EmployeeService.Get();
-        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getEmployeesTask);
+        var getLeaveStatusSettingsTask = GetLeaveStatusSettingsService.Get();
+        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getEmployeesTask, getLeaveStatusSettingsTask);
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         var employeesFromGraph = getEmployeesTask.Result;
+        var getLeaveStatusSettings = getLeaveStatusSettingsTask.Result;
         var holidayStyle = HolidaysStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
         await StyleGenerator.CreateAsync("holidayTimeslineStyle", holidayStyle);
         var leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
         await StyleGenerator.CreateAsync("leaveTypesStyle", leaveTypesStyle);
-        // TODO Save this in the setting DB table
-        var statuses = new LeaveRequestStatusProperty[]
+        Console.WriteLine("leaveStatusesStyle");
+        if (getLeaveStatusSettings?.Items is not null)
         {
-            new LeaveRequestStatusProperty(LeaveRequestStatus.Canceled, "lightgrey"),
-            new LeaveRequestStatusProperty(LeaveRequestStatus.Rejected, "#663300"),
-            new LeaveRequestStatusProperty(LeaveRequestStatus.Pending, "#CFFF98"),
-            new LeaveRequestStatusProperty(LeaveRequestStatus.Accepted, "transparent"),
-        };
-        var leaveStatusesStyle = LeaveStatusesStyleCreator.Create(statuses);
-        await StyleGenerator.CreateAsync("leaveStatusStyle", leaveStatusesStyle);
+            var leaveStatusesStyle = LeaveStatusesStyleCreator.Create(getLeaveStatusSettings.Items);
+            Console.WriteLine(leaveStatusesStyle);
+            await StyleGenerator.CreateAsync("leaveStatusStyle", leaveStatusesStyle);
+        }
+        else
+        {
+            Console.WriteLine("leaveStatusesStyle null");
+        }
         if (leaveRequests?.Items is not null)
         {
             employees = leaveRequests.Items.Select(l => l.CreatedBy)
@@ -194,6 +198,4 @@ else
         }
 
     }
-
-    public sealed record LeaveRequestStatusProperty(LeaveRequestStatus Status, string Color);
 }
