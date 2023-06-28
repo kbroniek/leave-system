@@ -24,7 +24,6 @@ public static class HolidayStyleCreator
 {{
     background-color: #ffe0c9
 }}" : "";
-        Console.WriteLine(result);
         return result;
     }
 }

@@ -8,7 +8,7 @@
 }
 
 .vis-timeline .vis-item.vis-range {
-    --lightness-threshold: 0.6;
+    --lightness-threshold: 0.3;
     --background-alpha: 0.28;
     --border-alpha: 0.7;
     --perceived-lightness: calc( ((var(--label-r) * 0.2126) + (var(--label-g) * 0.7152) + (var(--label-b) * 0.0722)) / 255 );
@@ -59,8 +59,8 @@
     --label-l: 48;
 }
 
-.vis-timeline .vis-item.accepted {
+/*.vis-timeline .vis-item.accepted {
     --label-status-h: 11;
     --label-status-s: 76;
     --label-status-l: 48;
-}
+}*/

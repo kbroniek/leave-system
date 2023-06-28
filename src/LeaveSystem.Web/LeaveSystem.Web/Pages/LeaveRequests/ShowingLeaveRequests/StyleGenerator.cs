@@ -13,8 +13,8 @@ public class StyleGenerator
         this.jSRuntime = Guard.Against.Nill(jSRuntime);
     }
 
-    public async Task CreateAsync(string style)
+    public async Task CreateAsync(string id, string style)
     {
-        await jSRuntime.InvokeVoidAsync("StyleGenerator.create", style);
+        await jSRuntime.InvokeVoidAsync("StyleGenerator.create", id, style);
     }
 }

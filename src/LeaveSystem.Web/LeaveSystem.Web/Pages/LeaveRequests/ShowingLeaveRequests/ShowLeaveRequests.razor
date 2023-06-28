@@ -94,8 +94,10 @@ else
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         var employeesFromGraph = getEmployeesTask.Result;
-        var style = HolidayStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
-        await StyleGenerator.CreateAsync(style);
+        var holidayStyle = HolidayStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
+        await StyleGenerator.CreateAsync("holidayTimeslineStyle", holidayStyle);
+        var leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
+        await StyleGenerator.CreateAsync("leaveTypesStyle", leaveTypesStyle);
         if (leaveRequests?.Items is not null)
         {
             employees = leaveRequests.Items.Select(l => l.CreatedBy)

@@ -1,6 +1,6 @@
 window.StyleGenerator = {
-    create: function (style) {
-        let styleElement = document.getElementById('holidayTimeslineStyle');
+    create: function (id, style) {
+        let styleElement = document.getElementById(id);
         if (!styleElement) {
             styleElement = document.createElement('style');
             styleElement.type = 'text/css';
