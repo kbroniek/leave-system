@@ -19,6 +19,7 @@ public static class HolidayStyleCreator
                 cssClasses.Add($".vis-time-axis .vis-grid.vis-day{currentDate.Day}.vis-{currentDate.ToString("MMMM").ToLower()}");
             }
         }
+        // TODO: Get color from setting
         var result = cssClasses.Count > 0 ? $@"{string.Join($",{Environment.NewLine}", cssClasses)}
 {{
     background-color: #ffe0c9

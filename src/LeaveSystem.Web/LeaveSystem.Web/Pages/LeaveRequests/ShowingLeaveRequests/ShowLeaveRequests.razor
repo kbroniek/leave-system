@@ -117,6 +117,7 @@ else
                     lr.Duration,
                     workingHours.GetDuration(lr.CreatedBy.Id),
                     leaveTypes.FirstOrDefault(lt => lt.Id == lr.LeaveTypeId)?.Name ?? lr.LeaveTypeId.ToString(),
+                    lr.LeaveTypeId,
                     lr.Status,
                     lr.CreatedBy)),
                 leaveRequestsQuery.DateFrom,
@@ -154,7 +155,8 @@ else
         DateTimeOffset DateTo,
         string Duration,
         string LeaveTypeName,
-        LeaveRequestStatus Status,
+        string LeaveTypeClassName,
+        string StatusClassName,
         FederatedUser CreatedBy
     )
     {
@@ -164,10 +166,19 @@ else
             TimeSpan duration,
             TimeSpan workingHours,
             string leaveTypeName,
+            Guid leaveTypeId,
             LeaveRequestStatus status,
             FederatedUser createdBy)
         {
-            return new LeaveRequestSummary(id, dateFrom, dateTo, duration.GetReadableTimeSpan(workingHours), leaveTypeName, status, createdBy);
+            return new LeaveRequestSummary(
+                id,
+                dateFrom,
+                dateTo,
+                duration.GetReadableTimeSpan(workingHours),
+                leaveTypeName,
+                $"leave-type-{leaveTypeId.ToString()}",
+                status.ToString().ToLower(),
+                createdBy);
         }
 
     }
