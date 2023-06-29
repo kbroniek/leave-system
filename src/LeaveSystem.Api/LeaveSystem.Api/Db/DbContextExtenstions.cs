@@ -47,7 +47,7 @@ public static class DbContextExtenstions
         {
             DefaultLimit = workingHours * 26,
             IncludeFreeDays = false,
-            Color = "blue",
+            Color = "#0137C9",
             Catalog = LeaveTypeCatalog.Holiday,
         }
     };
@@ -61,7 +61,7 @@ public static class DbContextExtenstions
         {
             DefaultLimit = workingHours * 4,
             IncludeFreeDays = false,
-            Color = "yellow",
+            Color = "#B88E1E",
             Catalog = LeaveTypeCatalog.OnDemand,
         }
     };
@@ -73,7 +73,7 @@ public static class DbContextExtenstions
         Properties = new LeaveType.LeaveTypeProperties
         {
             IncludeFreeDays = true,
-            Color = "red",
+            Color = "#FF3333",
             Catalog = LeaveTypeCatalog.Sick,
         }
     };
@@ -86,7 +86,7 @@ public static class DbContextExtenstions
         {
             DefaultLimit = workingHours,
             IncludeFreeDays = false,
-            Color = "red",
+            Color = "#FFFF33",
             Catalog = LeaveTypeCatalog.Saturday,
         }
     };
@@ -443,70 +443,70 @@ public static class DbContextExtenstions
                 Id = Guid.NewGuid(),
                 Name = "urlop okolicznościowy",
                 Order = 4,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#30D5C8" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop wychowawczy",
                 Order = 5,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#2EB82E" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop macierzyński",
                 Order = 6,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop bezpłatny",
                 Order = 7,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#0033CC" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "opieka nad chorym dzieckiem lub innym członkiem rodziny",
                 Order = 8,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF3333" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "nieobecność usprawiedliwiona płatna",
                 Order = 9,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#80AAFF" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "nieobecność nieusprawiedliwiona",
                 Order = 10,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#0066FF" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "opieka nad dzieckiem do 14 lat - art. 188 KP",
                 Order = 11,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF4DA6" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop ojcowski",
                 Order = 12,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop tacierzyński",
                 Order = 13,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
                 saturdayLeave,
                 new LeaveType
@@ -514,14 +514,14 @@ public static class DbContextExtenstions
                 Id = Guid.NewGuid(),
                 Name = "urlop od firmy",
                 Order = 15,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "#0137C9" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop szkoleniowy",
                 Order = 16,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "blue" }
             }
         };
         await dbContext.LeaveTypes.AddRangeAsync(leaveTypes);
