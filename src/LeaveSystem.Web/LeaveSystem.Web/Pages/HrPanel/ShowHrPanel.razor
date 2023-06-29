@@ -1,42 +1,66 @@
-﻿@page "/hr-panel"
+﻿@page "/hr-panel/{year:int?}"
 @using LeaveSystem.Shared
 @using LeaveSystem.Web.Extensions
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.UserLeaveLimits
+@using LeaveSystem.Web.Pages.UserPanel;
 @using LeaveSystem.Web.Pages.WorkingHours
 @using Microsoft.AspNetCore.Authorization
+@using static LeaveSystem.Web.Pages.LeaveTypes.LeaveTypesService;
+@using static LeaveSystem.Web.Pages.HrPanel.HrSummaryService;
 
 @attribute [Authorize(Policy=@PolicyName)]
-@inject LeaveTypesService LeaveTypesService
-@inject GetLeaveRequestsService GetLeaveRequestsService
-@inject UserLeaveLimitsService UserLeaveLimitsService
-@inject WorkingHoursService WorkingHoursService
 @inject ILogger<ShowHrPanel> Logger
+@inject HrSummaryService HrSummaryService
+@inject NavigationManager NavManager
 
-@if (hrSummary == null || leaveTypes == null)
+<PageTitle>HR panel @Year</PageTitle>
+
+@if (summary == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <div class="container">
-        <RadzenDataGrid AllowColumnResize="true" FilterMode="FilterMode.Simple" AllowSorting="true" Data="@hrSummary" TItem="HrSummary"
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="3rem" Class="rz-p-12">
+        <RadzenText TextStyle="TextStyle.H5">Data for year </RadzenText>
+        <RadzenNumeric TValue="int?" Value=@Year Change=@(args => YearChanged(args)) />
+    </RadzenStack>
+    <div class="container-flex">
+        <RadzenDataGrid AllowColumnResize="true" FilterMode="FilterMode.Simple" AllowSorting="true" Data="@summary.Items" TItem="UserLeaveRequestSummary"
             ColumnWidth="140px" LogicalFilterOperator="LogicalFilterOperator.Or">
             <Columns>
-                <RadzenDataGridColumn TItem="HrSummary" Property="Employee" Title="Employee" Frozen="true" />
-                <RadzenDataGridColumn TItem="HrSummary" Property="SumLimit" Title="Total limit"/>
-                <RadzenDataGridColumn TItem="HrSummary" Property="Limit" Title="Limit" />
-                <RadzenDataGridColumn TItem="HrSummary" Property="OverdueLimit" Title="Overdue limit" />
-                <RadzenDataGridColumn TItem="HrSummary" Property="Left" Title="Limit left" />
-                <RadzenDataGridColumn TItem="HrSummary" Property="usedDaysInRow" Title="Used days in a row" />
-                <RadzenDataGridColumn TItem="HrSummary" Property="OnDemand" Title="On demand" />
-                <RadzenDataGridColumn TItem="HrSummary" Property="Saturdays" Title="Saturdays" />
-                @foreach(var leaveType in leaveTypes)
+                <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Property="Employee" Title="Employee" Frozen="true">
+                    <Template Context="data">
+                        <RadzenLink Path=@String.Format("user-panel/{0}", data.Employee.Id) Text=@data.Employee.Name />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Title="Limit">
+                    <Template Context="data">
+                        @(data.Summary.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.Holiday)?.Limit)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Title="Overdue limit">
+                    <Template Context="data">
+                        @(data.Summary.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.Holiday)?.OverdueLimit)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Title="Limit left">
+                    <Template Context="data">
+                        @(data.Summary.FirstOrDefault(s => s.LeaveTypeProperties.Catalog == LeaveTypeCatalog.Holiday)?.Left)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Title="Used days in a row">
+                    <Template Context="data">
+                        <RadzenCheckBox ReadOnly=true Value="@(CalculateDaysInARow(data.Summary))" />
+                    </Template>
+                </RadzenDataGridColumn>
+                @foreach (var leaveType in summary.LeaveTypes)
                 {
-                    <RadzenDataGridColumn TItem="HrSummary" Title="@(leaveType.Name)" Width="80px" TextAlign="TextAlign.Center" >
+                    <RadzenDataGridColumn TItem="UserLeaveRequestSummary" Title="@(leaveType.Name)" TextAlign="TextAlign.Center">
                         <Template Context="data">
-                            @(data.UsedPerLeaveTypes[leaveType.Id])
+                            @(GetUsedLeft(data.Summary.FirstOrDefault(s => s.LeaveTypeId == leaveType.Id)))
                         </Template>
                     </RadzenDataGridColumn>
                 }
@@ -45,39 +69,44 @@ else
     </div>
 }
 @code {
+    [Parameter]
+    public int? Year { get; set; }
     public const string PolicyName = "ShowHrPanel";
-    private IEnumerable<HrSummary>? hrSummary;
-    private IEnumerable<LeaveTypesService.LeaveTypeDto>? leaveTypes;
+    private LeaveRequestSummary? summary;
     private int daysInARow = 14; // TODO get from config
+    private LeaveTypeDto? holidayLeaveType;
 
     protected override async Task OnInitializedAsync()
     {
-        var now = DateTimeOffset.UtcNow;
-        var firstDay = now.GetFirstDayOfYear();
-        var lastDay = now.GetLastDayOfYear();
-        var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
-        var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
-        var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
-        var getLimitsTask = UserLeaveLimitsService.GetLimits();
-        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask);
-        var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
-        leaveTypes = getLeaveTypesTask.Result;
-        var limits = getLimitsTask.Result;
-        var users = CreateUserCollection(leaveRequests, limits);
-        var workingHours = await WorkingHoursService.GetWorkingHours(users.Select(u => u.Id), firstDay, lastDay);
-        hrSummary = users.Select(u => HrSummary.Create(u,
-            leaveTypes,
-            leaveRequests,
-            limits,
-            workingHours.GetDuration(u.Id),
-            daysInARow
-        ));
+        if (Year is null)
+        {
+            Year = DateTimeOffset.UtcNow.Year;
+        }
+        summary = await HrSummaryService.Summary(Year.Value);
+        holidayLeaveType = summary.LeaveTypes.FirstOrDefault(lt => lt.Properties.Catalog == LeaveTypeCatalog.Holiday);
     }
 
-    private static IEnumerable<FederatedUser> CreateUserCollection(IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitsService.LeaveLimitDto> limits) =>
-        leaveRequests
-            .Select(lr => lr.CreatedBy)
-            .Union(limits.Select(l => FederatedUser.Create(l.AssignedToUserId, null, null)))
-            .GroupBy(u => u.Id)
-            .Select(g => g.First());
+    private static string? GetUsedLeft(LeaveRequestPerType? leaveRequestPerType) =>
+        leaveRequestPerType?.SumLimit is null ? leaveRequestPerType?.Used : $"{leaveRequestPerType.Used}/{leaveRequestPerType.SumLimit}";
+
+    private bool CalculateDaysInARow(
+        IEnumerable<LeaveRequestPerType> leaveRequestPerTypes)
+    {
+        if (holidayLeaveType is null)
+        {
+            return false;
+        }
+        return leaveRequestPerTypes.Any(lrt =>
+            lrt.LeaveTypeId == holidayLeaveType.Id &&
+            lrt.LeaveRequests.Any(lr => DateCalculator.CalculateDurationIncludeFreeDays(lr.DateFrom.GetDayWithoutTime(), lr.DateTo.GetDayWithoutTime()) >= daysInARow) // TODO: calculate when leave requests are next to each other and could be on demand as well.
+        );
+    }
+
+    private async Task<int?> YearChanged(int? year)
+    {
+        Year = year;
+        NavManager.NavigateTo($"/hr-panel/{year}");
+        await OnInitializedAsync();
+        return year;
+    }
 }

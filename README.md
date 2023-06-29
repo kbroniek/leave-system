@@ -2,6 +2,41 @@
 
 System to manage leaves. 
 
+## How to run a project
+
+### Manual
+
+Install PostgreSQL and set up a database `leave-system` and a user `postgres` with password `Password12!`.
+
+#### Recreate database
+
+Run:
+
+```
+cd "C:\Program Files\pgAdmin 4\v5\runtime"
+echo '\x \\ DROP DATABASE "leave-system"; CREATE DATABASE "leave-system";' | .\psql.exe -U postgres
+```
+
+### Docker
+
+1. Run: `docker-compose down --remove-orphans; docker-compose up -d`
+1. Or if you have clear db: `docker-compose down --volumes; docker-compose up -d`
+1. Or with profile: `docker-compose -f docker-compose.yml -f docker-compose.bomed.yml up -d`
+
+#### Helpfull scripts
+
+1. Logs: `docker-compose -f docker-compose.yml -f docker-compose.bomed.yml logs -f`
+1. Build docker image: `docker build -t leave .`
+1. Save docker image: `docker save --output leave.tar leave`
+1. Load docker image: `docker load --input leave.tar`
+1. Remove all stopped containers, all dangling images, and all unused networks: `docker system prune`
+1. Stop all containers `docker container stop $(docker container ls -aq)`
+
+#### Grab logs
+
+1. Run `docker ps` and take the image id.
+1. Run `docker logs {image-ID} -f --tail 100` to get last 100 lines of logs.
+
 ## Start using the application B2C
 
 1. Clone the project
@@ -104,15 +139,6 @@ If you have issues try to install:
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-```
-
-### Recreate database
-
-Run:
-
-```
-cd "C:\Program Files\pgAdmin 4\v5\runtime"
-echo '\x \\ DROP DATABASE "leave-system"; CREATE DATABASE "leave-system";' | .\psql.exe -U postgres
 ```
 
 ## Mapster tool

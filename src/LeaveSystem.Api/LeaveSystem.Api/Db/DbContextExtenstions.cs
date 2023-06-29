@@ -518,7 +518,7 @@ public static class DbContextExtenstions
 
     private static DateTimeOffset GetNow()
     {
-        // return new DateTimeOffset(2023, 2, 1, 0, 0, 0, TimeSpan.Zero);
-        return DateTimeOffset.UtcNow;
+        //return new DateTimeOffset(2023, 2, 1, 0, 0, 0, TimeSpan.Zero);
+        return DateTimeOffset.Now;
     }
 }
