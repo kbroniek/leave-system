@@ -17,7 +17,8 @@ window.TimelineWrapper = {
                 end: new Date(lr.dateTo).setHours(23, 59, 59, 99),
                 content: lr.duration,
                 title: lr.leaveTypeName,
-                className: lr.statusClassName + " " + lr.leaveTypeClassName
+                className: lr.statusClassName + " " + lr.leaveTypeClassName,
+                subgroup: lr.statusClassName
             });
         });
 
@@ -32,6 +33,7 @@ window.TimelineWrapper = {
             timeAxis: { scale: 'day' },
             min: minDate,                // lower limit of visible range
             max: maxDate,                // upper limit of visible range
+            stackSubgroups: true,
             tooltip: {
                 template: function (originalItemData, parsedItemData) {
                     return `<span>${originalItemData.title}</span>`;
