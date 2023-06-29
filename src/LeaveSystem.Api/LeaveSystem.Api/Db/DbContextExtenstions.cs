@@ -33,8 +33,8 @@ public static class DbContextExtenstions
     };
     private static Setting[] settings = new Setting[]
     {
-        new Setting {Id = LeaveRequestStatus.Canceled.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"lightgrey\"}") },
-        new Setting {Id = LeaveRequestStatus.Rejected.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#663300\"}") },
+        new Setting {Id = LeaveRequestStatus.Canceled.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#525252\"}") },
+        new Setting {Id = LeaveRequestStatus.Rejected.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#850000\"}") },
         new Setting {Id = LeaveRequestStatus.Pending.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#CFFF98\"}") },
         new Setting {Id = LeaveRequestStatus.Accepted.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"transparent\"}") }
     };
