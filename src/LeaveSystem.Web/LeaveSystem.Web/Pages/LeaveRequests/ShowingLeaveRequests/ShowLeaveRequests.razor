@@ -102,9 +102,9 @@ else
         var leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
         await StyleGenerator.CreateAsync("leaveTypesStyle", leaveTypesStyle);
         Console.WriteLine("leaveStatusesStyle");
-        if (getLeaveStatusSettings?.Items is not null)
+        if (getLeaveStatusSettings.Any())
         {
-            var leaveStatusesStyle = LeaveStatusesStyleCreator.Create(getLeaveStatusSettings.Items);
+            var leaveStatusesStyle = LeaveStatusesStyleCreator.Create(getLeaveStatusSettings);
             Console.WriteLine(leaveStatusesStyle);
             await StyleGenerator.CreateAsync("leaveStatusStyle", leaveStatusesStyle);
         }

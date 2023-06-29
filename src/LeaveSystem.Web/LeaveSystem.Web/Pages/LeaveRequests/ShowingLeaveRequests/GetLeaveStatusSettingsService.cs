@@ -12,10 +12,13 @@ public class GetLeaveStatusSettingsService
     {
         this.httpClient = httpClient;
     }
-    public async Task<PagedListResponse<Setting>?> Get()
+    public async Task<IEnumerable<Setting>> Get()
     {
-        var uri = $"odata/settings?$select=Id,Value&$filter=Category eq '{SettingCategoryType.LeaveStatus}'";
-        return await httpClient.GetFromJsonAsync<PagedListResponse<Setting>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        // TODO: change to odata when it will be fixed https://github.com/OData/AspNetCoreOData/issues/586, https://stackoverflow.com/questions/76303065/odata-always-returns-for-entity-jsondocument-property
+        // var uri = $"odata/settings?$select=Id,Value&$filter=Category eq '{SettingCategoryType.LeaveStatus}'";
+        var uri = $"api/settings?$filter=Category eq '{SettingCategoryType.LeaveStatus}'";
+        var result = await httpClient.GetFromJsonAsync<IEnumerable<Setting>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        return result ?? Enumerable.Empty<Setting>();
     }
 
     public record Setting(string Id, SettingValue Value);
