@@ -3,7 +3,7 @@ using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 
-public record class LeaveRequestShortInfo(
+public record LeaveRequestShortInfo(
     Guid Id,
     DateTimeOffset DateFrom,
     DateTimeOffset DateTo,
