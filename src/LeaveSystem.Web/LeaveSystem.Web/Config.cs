@@ -6,6 +6,7 @@ using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.UserPanel;
+using LeaveSystem.Web.Pages.UsersManagement;
 using LeaveSystem.Web.Pages.WorkingHours;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -53,7 +54,8 @@ public static class Config
             .AddTransient<EmployeeService>()
             .AddTransient<WorkingHoursService>()
             .AddTransient<HrSummaryService>()
-            .AddTransient<GetLeaveStatusSettingsService>();
+            .AddTransient<GetLeaveStatusSettingsService>()
+            .AddTransient<UsersService>();
     }
     private static IServiceCollection AddHttpClient(this IServiceCollection services, IConfiguration configuration, string scopes)
     {

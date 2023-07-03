@@ -22,6 +22,7 @@ public static class Config
             .AddLeaveRequestsAuthorization()
             .AddWorkingHoursAuthorization()
             .AddEmployeesAuthorization()
+            .AddUsersAuthorization()
             .AddRolesAuthorization();
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
@@ -77,6 +78,14 @@ public static class Config
             .AddAuthorization(options =>
                 options.AddPolicy(EmployeesEndpoints.GetEmployeePolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource))));
+        return services;
+    }
+    private static IServiceCollection AddUsersAuthorization(this IServiceCollection services)
+    {
+        services
+            .AddAuthorization(options =>
+                options.AddPolicy(UsersEndpoints.GetUsersPolicyName,
+                policy => policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin))));
         return services;
     }
     private static IServiceCollection AddRolesAuthorization(this IServiceCollection services)

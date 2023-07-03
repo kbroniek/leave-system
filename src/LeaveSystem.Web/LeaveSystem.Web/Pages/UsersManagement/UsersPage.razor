@@ -1,0 +1,39 @@
+﻿@page "/users"
+@using LeaveSystem.Shared.Auth;
+@using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
+@using LeaveSystem.Web.Pages.UserLeaveLimits;
+@inject UsersService UsersService
+
+
+@if (employees is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="20" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+                    Data="@employees" TItem="UserDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+        <Columns>
+            <RadzenDataGridColumn TItem="UserDto" Property="Name" Title="Name" Frozen="true" Width="160px" />
+            <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" Width="160px" />
+            <RadzenDataGridColumn TItem="UserDto" Title="Roles" Width="80px" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+                <Template Context="data">
+                    <RadzenDropDown @bind-Value=@data.Roles Data=allRoles
+                                    Multiple=true AllowClear=true Placeholder="Select roles" Chips=true Style="width: 100%; max-width: 400px;" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+
+@code {
+    string[] allRoles = Enum.GetNames<RoleType>();
+    IEnumerable<UserDto>? employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        employees = await UsersService.Get();
+    }
+}

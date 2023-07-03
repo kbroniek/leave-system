@@ -7,7 +7,7 @@ public static class RolesEndpoints
 {
     public const string GetRolesPolicyName = "GetRoles";
     public const string UpdateRolesPolicyName = "UpdateRoles";
-    public static IEndpointRouteBuilder AddEmployeesEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
+    public static IEndpointRouteBuilder AddRolesEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
         endpoint.MapGet("api/roles", async (HttpContext httpContext, UserRolesGraphService userRolesGraphService, CancellationToken cancellationToken) =>
         {
