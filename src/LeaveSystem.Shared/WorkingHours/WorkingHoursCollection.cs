@@ -5,6 +5,8 @@ public class WorkingHoursCollection
     public readonly static TimeSpan DefaultWorkingHours = TimeSpan.FromHours(8);
     private readonly IEnumerable<WorkingHoursModel> workingHoursCollection;
 
+    public static WorkingHoursCollection Empty { get; } = new WorkingHoursCollection(Enumerable.Empty<WorkingHoursModel>());
+
     public WorkingHoursCollection(IEnumerable<WorkingHoursModel> workingHoursCollection)
     {
         this.workingHoursCollection = workingHoursCollection;

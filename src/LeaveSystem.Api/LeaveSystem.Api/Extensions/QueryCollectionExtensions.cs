@@ -22,12 +22,14 @@ public static class QueryCollectionExtensions
         return result ?? throw new FormatException($"The {paramName} query parameter cannot be null.");
     }
 
-    public static string?[]? TryParseStrings(this IQueryCollection query, string paramName)
+    public static string[] TryParseStrings(this IQueryCollection query, string paramName)
     {
         var paramValue = query[paramName];
         try
         {
-            return !string.IsNullOrEmpty(paramValue) ? paramValue.ToArray() : null;
+            return !string.IsNullOrEmpty(paramValue) ?
+                paramValue.Where(p => p != null).OfType<string>().ToArray() :
+                Enumerable.Empty<string>().ToArray();
         }
         catch (Exception ex)
         {
@@ -38,7 +40,7 @@ public static class QueryCollectionExtensions
     public static string[] ParseStrings(this IQueryCollection query, string paramName)
     {
         var result = query.TryParseStrings(paramName);
-        return result ?? throw new FormatException($"The {paramName} query parameter cannot be null.");
+        return result.Length == 0 ? throw new FormatException($"The {paramName} query parameter cannot be null.") : result;
     }
 
     public static LeaveRequestStatus[]? TryParseLeaveRequestStatuses(this IQueryCollection query, string paramName)
