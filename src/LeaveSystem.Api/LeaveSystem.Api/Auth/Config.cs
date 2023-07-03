@@ -58,13 +58,13 @@ public static class Config
         services
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetWorkingHoursEndpointsPolicyName,
-                policy => policy.Requirements.Add(RoleRequirement.AuhtorizeAll)))
+                policy => policy.Requirements.Add(RoleRequirement.AuthorizeAll)))
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursEndpointsPolicyName,
-                policy => policy.Requirements.Add(RoleRequirement.AuhtorizeAll)))
+                policy => policy.Requirements.Add(RoleRequirement.AuthorizeAll)))
             .AddAuthorization(options =>
                 options.AddPolicy(WorkingHoursEndpoints.GetUserWorkingHoursDurationEndpointsPolicyName,
-                policy => policy.Requirements.Add(RoleRequirement.AuhtorizeAll)));
+                policy => policy.Requirements.Add(RoleRequirement.AuthorizeAll)));
         return services;
     }
     private static IServiceCollection AddEmployeesAuthorization(this IServiceCollection services)
