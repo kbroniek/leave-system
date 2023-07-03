@@ -40,6 +40,8 @@ public static class Config
                 policy.Requirements.Add(new RoleRequirement(RoleType.Employee)));
             options.AddPolicy(ShowHrPanel.PolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource)));
+            options.AddPolicy(UsersPage.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin)));
         });
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }

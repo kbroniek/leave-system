@@ -2,38 +2,165 @@
 @using LeaveSystem.Shared.Auth;
 @using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 @using LeaveSystem.Web.Pages.UserLeaveLimits;
+@using Microsoft.AspNetCore.Authorization;
+
+@attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
 
 
-@if (employees is null)
+@if (users is null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false" FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="20" AllowPaging="true" PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
-                    Data="@employees" TItem="UserDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New User" Click="@InsertRow" Disabled=@(userToInsert != null || userToUpdate != null) />
+    <RadzenDataGrid @ref="usersGrid" AllowFiltering="true" AllowColumnResize="true"
+        FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="20" AllowPaging="true"
+        PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
+        EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset"
+        Data="@users" TItem="UserDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or"
+    >
         <Columns>
-            <RadzenDataGridColumn TItem="UserDto" Property="Name" Title="Name" Frozen="true" Width="160px" />
-            <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email" Width="160px" />
-            <RadzenDataGridColumn TItem="UserDto" Title="Roles" Width="80px" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+            <RadzenDataGridColumn TItem="UserDto" Property="Name" Title="Name" Frozen="true">
+                <EditTemplate Context="data">
+                    <RadzenTextBox @bind-Value="data.Name" Style="width:100%; display: block" Name="Name" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="UserDto" Property="Email" Title="Email">
+                <EditTemplate Context="data">
+                    <RadzenTextBox @bind-Value="data.Email" Style="width:100%; display: block" Name="Email" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="UserDto" Title="Roles" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
                 <Template Context="data">
-                    <RadzenDropDown @bind-Value=@data.Roles Data=allRoles
-                                    Multiple=true AllowClear=true Placeholder="Select roles" Chips=true Style="width: 100%; max-width: 400px;" />
+                    @RolesToString(data.Roles)
                 </Template>
+                <EditTemplate Context="data">
+                    <RadzenDropDown @bind-Value=data.Roles Data=@allRoles
+                                    Multiple=true AllowClear=true Placeholder="Select roles" Chips=true Style="width:100%; display: block" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="UserDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+                <Template Context="data">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(data))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(data))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                </Template>
+                <EditTemplate Context="data">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(data))">
+                    </RadzenButton>
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(data))">
+                    </RadzenButton>
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(data))">
+                    </RadzenButton>
+                </EditTemplate>
             </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
 }
 
 @code {
+    public const string PolicyName = "ShowUserPage";
     string[] allRoles = Enum.GetNames<RoleType>();
-    IEnumerable<UserDto>? employees;
+    RadzenDataGrid<UserDto>? usersGrid;
+    IEnumerable<UserDto>? users;
+    UserDto? userToInsert;
+    UserDto? userToUpdate;
+
+
+    string RolesToString(IEnumerable<string>? roles)
+        => roles is null ? "" : string.Join(",", roles);
+    void Reset()
+    {
+        userToInsert = null;
+        userToUpdate = null;
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        employees = await UsersService.Get();
+        users = await UsersService.Get();
+    }
+
+    async Task EditRow(UserDto user)
+    {
+        userToUpdate = user;
+        if (usersGrid is null) return;
+        await usersGrid.EditRow(user);
+    }
+
+    async Task OnUpdateRow(UserDto user)
+    {
+        if (user == userToInsert)
+        {
+            userToInsert = null;
+        }
+
+        userToUpdate = null;
+
+        await UsersService.Edit(user);
+    }
+
+    async Task SaveRow(UserDto order)
+    {
+        if (usersGrid is null) return;
+        await usersGrid.UpdateRow(order);
+    }
+
+    void CancelEdit(UserDto user)
+    {
+        if (user == userToInsert)
+        {
+            userToInsert = null;
+        }
+
+        userToUpdate = null;
+
+        usersGrid?.CancelEditRow(user);
+    }
+
+    async Task DeleteRow(UserDto user)
+    {
+        if (user == userToInsert)
+        {
+            userToInsert = null;
+        }
+
+        if (user == userToUpdate)
+        {
+            userToUpdate = null;
+        }
+
+        if (users?.Contains(user) == true && user.Id is not null)
+        {
+            await UsersService.Delete(user.Id);
+
+            if (usersGrid is null) return;
+            await usersGrid.Reload();
+        }
+        else
+        {
+            // TODO: Log an error. Can't find user to delete.
+            if (usersGrid is null) return;
+            usersGrid.CancelEditRow(user);
+            await usersGrid.Reload();
+        }
+    }
+
+    async Task InsertRow()
+    {
+        userToInsert = UserDto.Create();
+        if (usersGrid is null) return;
+        await usersGrid.InsertRow(userToInsert);
+    }
+
+    async Task OnCreateRow(UserDto order)
+    {
+        await UsersService.Create(order);
+
+        userToInsert = null;
     }
 }
