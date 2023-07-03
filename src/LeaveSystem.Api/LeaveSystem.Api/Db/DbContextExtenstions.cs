@@ -12,7 +12,6 @@ using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using static LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests.ShowLeaveRequests;
 
 namespace LeaveSystem.Api.Db;
 public static class DbContextExtenstions
