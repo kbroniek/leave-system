@@ -65,10 +65,7 @@
             var userFromApi = await EmployeeService.Get(UserId);
             userName = userFromApi?.Name;
         }
-        if (Year is null)
-        {
-            Year = DateTimeOffset.UtcNow.Year;
-        }
+        Year ??= DateTimeOffset.UtcNow.Year;
         var firstDay = DateTimeOffsetExtensions.GetFirstDayOfYear(Year.Value);
         var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(Year.Value);
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000, Enum.GetValues<LeaveRequestStatus>())
