@@ -7,7 +7,7 @@ namespace LeaveSystem.UnitTests;
 
 public static class DbContextFactory
 {
-    public static async ValueTask<LeaveSystemDbContext> CreateDbContext()
+    public static async ValueTask<LeaveSystemDbContext> CreateDbContextAsync()
     {
         var builder = new DbContextOptionsBuilder<LeaveSystemDbContext>();
 
