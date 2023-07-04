@@ -15,11 +15,15 @@
 @inject TimelineComponent Timeline
 @inject LeaveTypesService LeaveTypeService
 @inject GetLeaveRequestsService GetLeaveRequestsService
-@inject StyleGenerator StyleGenerator
 @inject EmployeeService EmployeeService
 @inject WorkingHoursService WorkingHoursService
 
 <PageTitle>Show leave request</PageTitle>
+<style type="text/css">
+    @holidayStyle
+    @leaveTypesStyle
+    @leaveStatusesStyle
+</style>
 
 <h1>Show leave request</h1>
 
@@ -79,6 +83,9 @@ else
     private IEnumerable<KeyValuePair<LeaveRequestStatus, string>> leaveRequestStatuses = Enum.GetValues<LeaveRequestStatus>()
         .Select(s => new KeyValuePair<LeaveRequestStatus, string>(s, s.ToString()));
     private bool advancedFilteringEnabled;
+    private string? holidayStyle;
+    private string? leaveTypesStyle;
+    private string? leaveStatusesStyle;
 
     protected override async Task OnInitializedAsync()
     {
@@ -94,10 +101,8 @@ else
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         var employeesFromGraph = getEmployeesTask.Result;
-        var holidayStyle = HolidaysStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
-        await StyleGenerator.CreateAsync("holidayTimeslineStyle", holidayStyle);
-        var leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
-        await StyleGenerator.CreateAsync("leaveTypesStyle", leaveTypesStyle);
+        holidayStyle = HolidaysStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
+        leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
         // TODO Save this in the setting DB table
         var statuses = new LeaveRequestStatusProperty[]
         {
@@ -106,8 +111,7 @@ else
             new LeaveRequestStatusProperty(LeaveRequestStatus.Pending, "#CFFF98"),
             new LeaveRequestStatusProperty(LeaveRequestStatus.Accepted, "transparent"),
         };
-        var leaveStatusesStyle = LeaveStatusesStyleCreator.Create(statuses);
-        await StyleGenerator.CreateAsync("leaveStatusStyle", leaveStatusesStyle);
+        leaveStatusesStyle = LeaveStatusesStyleCreator.Create(statuses);
         if (leaveRequests?.Items is not null)
         {
             employees = leaveRequests.Items.Select(l => l.CreatedBy)

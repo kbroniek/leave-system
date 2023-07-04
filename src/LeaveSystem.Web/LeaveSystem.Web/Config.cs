@@ -46,7 +46,6 @@ public static class Config
     {
         return services
             .AddTransient<TimelineComponent>()
-            .AddTransient<StyleGenerator>()
             .AddTransient<LeaveTypesService>()
             .AddTransient<GetLeaveRequestsService>()
             .AddTransient<UserLeaveLimitsService>()
