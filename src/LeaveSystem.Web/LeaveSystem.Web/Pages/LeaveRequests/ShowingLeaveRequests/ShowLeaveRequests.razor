@@ -167,8 +167,8 @@ else
         DateTimeOffset DateTo,
         string Duration,
         string LeaveTypeName,
-        string LeaveTypeClassName,
-        string StatusClassName,
+        Guid LeaveTypeId,
+        string Status,
         FederatedUser CreatedBy
     )
     {
@@ -188,8 +188,10 @@ else
                 dateTo,
                 duration.GetReadableTimeSpan(workingHours),
                 leaveTypeName,
-                $"leave-type-{leaveTypeId.ToString()}",
-                $"leave-status-{status.ToString().ToLower()}",
+                leaveTypeId,
+                status.ToString(),
+                //$"leave-type-{leaveTypeId.ToString()}",
+                //$"leave-status-{status.ToString().ToLower()}",
                 createdBy);
         }
 
