@@ -40,6 +40,7 @@ IEdmModel GetEdmModel()
     var builder = new ODataConventionModelBuilder();
     builder.EntitySet<LeaveType>("LeaveTypes");
     builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
+    builder.EntitySet<Setting>("Settings");
 
     return builder.GetEdmModel();
 }

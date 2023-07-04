@@ -10,7 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeaveSystem.Api.Controllers
 {
-    public abstract class GenericCrudController<TEntity> : ODataController where TEntity : class, IHaveId<Guid>
+    public abstract class GenericCrudController<TEntity, TId> : ODataController
+        where TId : IComparable<TId>
+        where TEntity : class, IHaveId<TId>
     {
         private readonly LeaveSystemDbContext dbContext;
 
@@ -25,9 +27,9 @@ namespace LeaveSystem.Api.Controllers
 
         [HttpGet("{key}")]
         [EnableQuery]
-        public SingleResult<TEntity> Get([FromODataUri] Guid key)
+        public SingleResult<TEntity> Get([FromODataUri] TId key)
         {
-            IQueryable<TEntity> result = GetSet().Where(p => p.Id == key);
+            IQueryable<TEntity> result = GetSet().Where(p => p.Id.CompareTo(key) == 0);
             return SingleResult.Create(result);
         }
 
@@ -44,7 +46,7 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPatch]
-        public async Task<IActionResult> Patch([FromODataUri] Guid key, [FromBody] Delta<TEntity> update, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Patch([FromODataUri] TId key, [FromBody] Delta<TEntity> update, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
@@ -75,13 +77,13 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Put([FromODataUri] Guid key, [FromBody] TEntity update, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Put([FromODataUri] TId key, [FromBody] TEntity update, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            if (key != update.Id)
+            if (key.CompareTo(update.Id) != 0)
             {
                 return BadRequest();
             }
@@ -105,7 +107,7 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete([FromODataUri] Guid key, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Delete([FromODataUri] TId key, CancellationToken cancellationToken = default)
         {
             var product = await GetSet().FindAsync(new object[] { key }, cancellationToken);
             if (product == null)
@@ -117,9 +119,9 @@ namespace LeaveSystem.Api.Controllers
             return NoContent();
         }
 
-        private Task<bool> ProductExists(Guid key, CancellationToken cancellationToken)
+        private Task<bool> ProductExists(TId key, CancellationToken cancellationToken)
         {
-            return GetSet().AnyAsync(l => l.Id == key, cancellationToken);
+            return GetSet().AnyAsync(l => l.Id.CompareTo(key) == 0, cancellationToken);
         }
 
         private DbSet<TEntity> GetSet()

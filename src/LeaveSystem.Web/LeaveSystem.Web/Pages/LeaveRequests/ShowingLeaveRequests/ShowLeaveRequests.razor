@@ -17,6 +17,7 @@
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject EmployeeService EmployeeService
 @inject WorkingHoursService WorkingHoursService
+@inject GetLeaveStatusSettingsService GetLeaveStatusSettingsService
 
 <PageTitle>Show leave request</PageTitle>
 <style type="text/css">
@@ -97,21 +98,16 @@ else
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(leaveRequestsQuery);
         var getLeaveTypesTask = LeaveTypeService.GetLeaveTypes();
         var getEmployeesTask = EmployeeService.Get();
-        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getEmployeesTask);
+        var getLeaveStatusSettingsTask = GetLeaveStatusSettingsService.Get();
+        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getEmployeesTask, getLeaveStatusSettingsTask);
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
         var employeesFromGraph = getEmployeesTask.Result;
+        var getLeaveStatusSettings = getLeaveStatusSettingsTask.Result;
+
         holidayStyle = HolidaysStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
         leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
-        // TODO Save this in the setting DB table
-        var statuses = new LeaveRequestStatusProperty[]
-        {
-            new LeaveRequestStatusProperty(LeaveRequestStatus.Canceled, "lightgrey"),
-            new LeaveRequestStatusProperty(LeaveRequestStatus.Rejected, "#663300"),
-            new LeaveRequestStatusProperty(LeaveRequestStatus.Pending, "#CFFF98"),
-            new LeaveRequestStatusProperty(LeaveRequestStatus.Accepted, "transparent"),
-        };
-        leaveStatusesStyle = LeaveStatusesStyleCreator.Create(statuses);
+        leaveStatusesStyle = getLeaveStatusSettings.Any() ? LeaveStatusesStyleCreator.Create(getLeaveStatusSettings) : null;
         if (leaveRequests?.Items is not null)
         {
             employees = leaveRequests.Items.Select(l => l.CreatedBy)
@@ -164,7 +160,6 @@ else
             Logger.LogTrace("[HandleSubmit]: Form is INVALID");
         }
     }
-
     public sealed record class LeaveRequestSummary(
         Guid Id,
         DateTimeOffset DateFrom,
@@ -194,12 +189,9 @@ else
                 leaveTypeName,
                 leaveTypeId,
                 status.ToString(),
-                //$"leave-type-{leaveTypeId.ToString()}",
-                //$"leave-status-{status.ToString().ToLower()}",
                 createdBy);
         }
 
     }
-
     public sealed record LeaveRequestStatusProperty(LeaveRequestStatus Status, string Color);
 }
