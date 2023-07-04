@@ -15,12 +15,16 @@
 @inject TimelineComponent Timeline
 @inject LeaveTypesService LeaveTypeService
 @inject GetLeaveRequestsService GetLeaveRequestsService
-@inject StyleGenerator StyleGenerator
 @inject EmployeeService EmployeeService
 @inject WorkingHoursService WorkingHoursService
 @inject GetLeaveStatusSettingsService GetLeaveStatusSettingsService
 
 <PageTitle>Show leave request</PageTitle>
+<style type="text/css">
+    @holidayStyle
+    @leaveTypesStyle
+    @leaveStatusesStyle
+</style>
 
 <h1>Show leave request</h1>
 
@@ -80,6 +84,9 @@ else
     private IEnumerable<KeyValuePair<LeaveRequestStatus, string>> leaveRequestStatuses = Enum.GetValues<LeaveRequestStatus>()
         .Select(s => new KeyValuePair<LeaveRequestStatus, string>(s, s.ToString()));
     private bool advancedFilteringEnabled;
+    private string? holidayStyle;
+    private string? leaveTypesStyle;
+    private string? leaveStatusesStyle;
 
     protected override async Task OnInitializedAsync()
     {
@@ -97,21 +104,10 @@ else
         leaveTypes = getLeaveTypesTask.Result;
         var employeesFromGraph = getEmployeesTask.Result;
         var getLeaveStatusSettings = getLeaveStatusSettingsTask.Result;
-        var holidayStyle = HolidaysStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
-        await StyleGenerator.CreateAsync("holidayTimeslineStyle", holidayStyle);
-        var leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
-        await StyleGenerator.CreateAsync("leaveTypesStyle", leaveTypesStyle);
-        Console.WriteLine("leaveStatusesStyle");
-        if (getLeaveStatusSettings.Any())
-        {
-            var leaveStatusesStyle = LeaveStatusesStyleCreator.Create(getLeaveStatusSettings);
-            Console.WriteLine(leaveStatusesStyle);
-            await StyleGenerator.CreateAsync("leaveStatusStyle", leaveStatusesStyle);
-        }
-        else
-        {
-            Console.WriteLine("leaveStatusesStyle null");
-        }
+
+        holidayStyle = HolidaysStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
+        leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
+        leaveStatusesStyle = getLeaveStatusSettings.Any() ? LeaveStatusesStyleCreator.Create(getLeaveStatusSettings) : null;
         if (leaveRequests?.Items is not null)
         {
             employees = leaveRequests.Items.Select(l => l.CreatedBy)
@@ -164,15 +160,14 @@ else
             Logger.LogTrace("[HandleSubmit]: Form is INVALID");
         }
     }
-
     public sealed record class LeaveRequestSummary(
         Guid Id,
         DateTimeOffset DateFrom,
         DateTimeOffset DateTo,
         string Duration,
         string LeaveTypeName,
-        string LeaveTypeClassName,
-        string StatusClassName,
+        Guid LeaveTypeId,
+        string Status,
         FederatedUser CreatedBy
     )
     {
@@ -192,10 +187,11 @@ else
                 dateTo,
                 duration.GetReadableTimeSpan(workingHours),
                 leaveTypeName,
-                $"leave-type-{leaveTypeId.ToString()}",
-                $"leave-status-{status.ToString().ToLower()}",
+                leaveTypeId,
+                status.ToString(),
                 createdBy);
         }
 
     }
+    public sealed record LeaveRequestStatusProperty(LeaveRequestStatus Status, string Color);
 }

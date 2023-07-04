@@ -17,8 +17,8 @@ window.TimelineWrapper = {
                 end: new Date(lr.dateTo).setHours(23, 59, 59, 99),
                 content: lr.duration,
                 title: lr.leaveTypeName,
-                className: lr.statusClassName + " " + lr.leaveTypeClassName,
-                subgroup: lr.statusClassName
+                className: `leave-status-${lr.status.toLowerCase()} leave-type-${lr.leaveTypeId}`,
+                subgroup: lr.status === "Pending" ? "Accepted" : lr.status
             });
         });
 
@@ -33,16 +33,14 @@ window.TimelineWrapper = {
             timeAxis: { scale: 'day' },
             min: minDate,                // lower limit of visible range
             max: maxDate,                // upper limit of visible range
-            stackSubgroups: true,
             tooltip: {
                 template: function (originalItemData, parsedItemData) {
                     return `<span>${originalItemData.title}</span>`;
                 }
             }
         };
-        timeline = new vis.Timeline(container, null, options);
-        timeline.setGroups(groups);
-        timeline.setItems(items);
+        timeline = new vis.Timeline(container, items, groups, options);
+
         container.onclick = function (event) {
             var props = timeline.getEventProperties(event);
             if (props.item) {
