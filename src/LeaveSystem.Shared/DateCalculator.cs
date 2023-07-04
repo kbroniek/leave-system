@@ -139,7 +139,6 @@ public static class DateCalculator
 
             var dateWithoutTime = date.GetDayWithoutTime();
 
-            Console.WriteLine($"{dateWithoutTime} {wielkanoc.AddDays(60)}");
             return dateWithoutTime == wielkanoc ||
                 dateWithoutTime == wielkanoc.AddDays(1) ||
                 dateWithoutTime == wielkanoc.AddDays(49) ||
