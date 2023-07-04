@@ -1,8 +1,10 @@
 ﻿@page "/leave-requests"
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Shared
-@using LeaveSystem.Web.Components
+@using LeaveSystem.Web.Extensions;
 @using LeaveSystem.Web.Pages.LeaveTypes
+@using LeaveSystem.Web.Pages.UserLeaveLimits;
+@using LeaveSystem.Web.Pages.WorkingHours;
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Text.Json.Serialization
@@ -13,8 +15,15 @@
 @inject TimelineComponent Timeline
 @inject LeaveTypesService LeaveTypeService
 @inject GetLeaveRequestsService GetLeaveRequestsService
+@inject EmployeeService EmployeeService
+@inject WorkingHoursService WorkingHoursService
 
 <PageTitle>Show leave request</PageTitle>
+<style type="text/css">
+    @holidayStyle
+    @leaveTypesStyle
+    @leaveStatusesStyle
+</style>
 
 <h1>Show leave request</h1>
 
@@ -74,6 +83,9 @@ else
     private IEnumerable<KeyValuePair<LeaveRequestStatus, string>> leaveRequestStatuses = Enum.GetValues<LeaveRequestStatus>()
         .Select(s => new KeyValuePair<LeaveRequestStatus, string>(s, s.ToString()));
     private bool advancedFilteringEnabled;
+    private string? holidayStyle;
+    private string? leaveTypesStyle;
+    private string? leaveStatusesStyle;
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,15 +96,53 @@ else
     {
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(leaveRequestsQuery);
         var getLeaveTypesTask = LeaveTypeService.GetLeaveTypes();
-        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask);
+        var getEmployeesTask = EmployeeService.Get();
+        await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getEmployeesTask);
         leaveRequests = getLeaveRequestsTask.Result;
         leaveTypes = getLeaveTypesTask.Result;
-        employees = leaveRequests?.Items?.Select(l => l.CreatedBy)
-            .GroupBy(u => u.Id)
-            .Select(u => u.First())
-            .OrderBy(u => u.Name)
-            .ToArray();
-        await Timeline.CreateAsync("timeline-visualization", employees, leaveRequests?.Items, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo.AddDays(1));
+        var employeesFromGraph = getEmployeesTask.Result;
+        holidayStyle = HolidaysStyleCreator.Create(leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
+        leaveTypesStyle = LeaveTypeStyleCreator.Create(leaveTypes);
+        // TODO Save this in the setting DB table
+        var statuses = new LeaveRequestStatusProperty[]
+        {
+            new LeaveRequestStatusProperty(LeaveRequestStatus.Canceled, "lightgrey"),
+            new LeaveRequestStatusProperty(LeaveRequestStatus.Rejected, "#663300"),
+            new LeaveRequestStatusProperty(LeaveRequestStatus.Pending, "#CFFF98"),
+            new LeaveRequestStatusProperty(LeaveRequestStatus.Accepted, "transparent"),
+        };
+        leaveStatusesStyle = LeaveStatusesStyleCreator.Create(statuses);
+        if (leaveRequests?.Items is not null)
+        {
+            employees = leaveRequests.Items.Select(l => l.CreatedBy)
+                .Union(employeesFromGraph.Select(e => FederatedUser.Create(e.Id, e.Name, e.Email)))
+                .GroupBy(u => u.Id)
+                .Select(u => u.First())
+                .OrderBy(u => u.Name)
+                .ToArray();
+            var allUserIds = employees.Select(e => e.Id);
+            var workingHours = await WorkingHoursService.GetWorkingHours(allUserIds, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
+
+            await Timeline.CreateAsync(
+                "timeline-visualization",
+                employees,
+                leaveRequests?.Items?.Select(lr => LeaveRequestSummary.Create(
+                    lr.Id,
+                    lr.DateFrom,
+                    lr.DateTo,
+                    lr.Duration,
+                    workingHours.GetDuration(lr.CreatedBy.Id),
+                    leaveTypes.FirstOrDefault(lt => lt.Id == lr.LeaveTypeId)?.Name ?? lr.LeaveTypeId.ToString(),
+                    lr.LeaveTypeId,
+                    lr.Status,
+                    lr.CreatedBy)),
+                leaveRequestsQuery.DateFrom,
+                leaveRequestsQuery.DateTo.AddDays(1));
+        }
+        else
+        {
+            // TODO: Show message "nothing to show"
+        }
     }
     private async Task HandleFilter()
     {
@@ -114,4 +164,42 @@ else
             Logger.LogTrace("[HandleSubmit]: Form is INVALID");
         }
     }
+
+    public sealed record class LeaveRequestSummary(
+        Guid Id,
+        DateTimeOffset DateFrom,
+        DateTimeOffset DateTo,
+        string Duration,
+        string LeaveTypeName,
+        Guid LeaveTypeId,
+        string Status,
+        FederatedUser CreatedBy
+    )
+    {
+        public static LeaveRequestSummary Create(Guid id,
+            DateTimeOffset dateFrom,
+            DateTimeOffset dateTo,
+            TimeSpan duration,
+            TimeSpan workingHours,
+            string leaveTypeName,
+            Guid leaveTypeId,
+            LeaveRequestStatus status,
+            FederatedUser createdBy)
+        {
+            return new LeaveRequestSummary(
+                id,
+                dateFrom,
+                dateTo,
+                duration.GetReadableTimeSpan(workingHours),
+                leaveTypeName,
+                leaveTypeId,
+                status.ToString(),
+                //$"leave-type-{leaveTypeId.ToString()}",
+                //$"leave-status-{status.ToString().ToLower()}",
+                createdBy);
+        }
+
+    }
+
+    public sealed record LeaveRequestStatusProperty(LeaveRequestStatus Status, string Color);
 }

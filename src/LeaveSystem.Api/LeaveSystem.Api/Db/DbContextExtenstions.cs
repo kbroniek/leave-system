@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LeaveSystem.Api.Db;
 public static class DbContextExtenstions
 {
-    private class DbContextExtenstionsLogger { }
+    private sealed class DbContextExtenstionsLogger { }
     private static readonly TimeSpan workingHours = WorkingHoursCollection.DefaultWorkingHours;
     private const string DefaultUserEmail = "karolbr5@gmail.com";
     private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22", DefaultUserEmail, "Karol Volt");
