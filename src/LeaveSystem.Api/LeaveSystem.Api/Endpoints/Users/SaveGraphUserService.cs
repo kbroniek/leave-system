@@ -16,41 +16,78 @@ public class SaveGraphUserService
         roleAttributeName = roleAttributeNameResolver.RoleAttributeName;
     }
 
-    public async Task<FederatedUser> Add(string? email, string? name, IEnumerable<string> roles, CancellationToken cancellationToken)
+    public async Task<FederatedUser> Add(string email, string? name, IEnumerable<string> roles, CancellationToken cancellationToken)
     {
         var graphClient = graphClientFactory.Create();
         IDictionary<string, object> extensionInstance = new Dictionary<string, object>
         {
             { roleAttributeName, JsonSerializer.Serialize(new RolesAttribute(roles)) }
         };
-        var addedUser = await graphClient.Users.Request().AddAsync(new User
+        var issuer = "leavesystem.onmicrosoft.com";
+        try
         {
-            AdditionalData = extensionInstance,
-            Mail = email,
-            DisplayName = name,
-            AccountEnabled = true,
-            UserPrincipalName = email,
-        }, cancellationToken);
-        return new FederatedUser(addedUser.Id, addedUser.Mail, addedUser.DisplayName,
-                        RoleAttributeNameResolver.MapRoles(addedUser.AdditionalData, roleAttributeName).Roles);
+            var principalId = Guid.NewGuid();
+            var addedUser = await graphClient.Users.Request().AddAsync(new User
+            {
+                AdditionalData = extensionInstance,
+                Mail = email,
+                DisplayName = name,
+                AccountEnabled = true,
+                PasswordProfile = new PasswordProfile
+                {
+                    ForceChangePasswordNextSignIn = false,
+                    Password = "$illy-Wood?" // TODO: Get from config
+                },
+                MailNickname = email.Split('@').First(),
+                Identities = new ObjectIdentity[]
+                {
+                    new ObjectIdentity
+                    {
+                        Issuer = issuer,
+                        IssuerAssignedId = email,
+                        SignInType = "emailAddress"
+                    }
+                },
+                PasswordPolicies = "DisablePasswordExpiration, DisableStrongPassword",
+                UserPrincipalName = $"{principalId}@{issuer}",
+            }, cancellationToken);
+            return new FederatedUser(addedUser.Id, addedUser.Mail, addedUser.DisplayName,
+                            RoleAttributeNameResolver.MapRoles(addedUser.AdditionalData, roleAttributeName).Roles);
+        }
+        catch (ServiceException ex)
+        {
+            // TODO: handle HTML status codes
+            throw;
+
+        }
     }
 
-    public async Task<FederatedUser> Update(string userId, string? email, string? name, IEnumerable<string> roles, CancellationToken cancellationToken)
+    public async Task<FederatedUser> Update(string userId, string email, string? name, IEnumerable<string> roles, CancellationToken cancellationToken)
     {
         var graphClient = graphClientFactory.Create();
         IDictionary<string, object> extensionInstance = new Dictionary<string, object>
         {
             { roleAttributeName, JsonSerializer.Serialize(new RolesAttribute(roles)) }
         };
-        var updatedUser = await graphClient.Users[userId]
+        var issuer = "leavesystem.onmicrosoft.com";
+        await graphClient.Users[userId]
             .Request()
             .UpdateAsync(new User
             {
                 AdditionalData = extensionInstance,
                 Mail = email,
-                DisplayName = name
+                DisplayName = name,
+                MailNickname = email.Split('@').First(),
+                Identities = new ObjectIdentity[]
+                {
+                    new ObjectIdentity
+                    {
+                        Issuer = issuer,
+                        IssuerAssignedId = email,
+                        SignInType = "emailAddress"
+                    }
+                },
             }, cancellationToken);
-        return new FederatedUser(updatedUser.Id, updatedUser.Mail, updatedUser.DisplayName,
-                        RoleAttributeNameResolver.MapRoles(updatedUser.AdditionalData, roleAttributeName).Roles);
+        return new FederatedUser(userId, email, name, roles);
     }
 }

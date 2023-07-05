@@ -24,7 +24,7 @@ public class UsersService
     {
         var jsonString = JsonSerializer.Serialize(user);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-        var response = await httpClient.PutAsync("api/users", httpContent);
+        var response = await httpClient.PutAsync($"api/users/{user.Id}", httpContent);
         if (!response.IsSuccessStatusCode)
         {
             // TODO: Log an error

@@ -1,4 +1,5 @@
-﻿using GoldenEye.Commands;
+﻿using Ardalis.GuardClauses;
+using GoldenEye.Commands;
 using GoldenEye.Queries;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Users;
@@ -155,6 +156,7 @@ public static class DbContextExtenstions
             var usersToAdd = testUsers.Where(u => !graphUsers.Any(g => u.Id == g.Id));
             foreach (var userToAdd in usersToAdd)
             {
+                Guard.Against.Null(userToAdd.Email);
                 await saveGraphUserService.Add(userToAdd.Email, userToAdd.Name, userToAdd.Roles, cancellationToken);
             }
             var usersToUpdate = testUsers.Where(u => IsRoleNotEqual(graphUsers, u));
