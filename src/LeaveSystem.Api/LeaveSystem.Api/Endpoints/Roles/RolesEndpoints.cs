@@ -6,7 +6,6 @@ namespace LeaveSystem.Api.Endpoints.Roles;
 public static class RolesEndpoints
 {
     public const string GetRolesPolicyName = "GetRoles";
-    public const string UpdateRolesPolicyName = "UpdateRoles";
     public static IEndpointRouteBuilder AddRolesEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
         endpoint.MapGet("api/roles", async (HttpContext httpContext, UserRolesGraphService userRolesGraphService, CancellationToken cancellationToken) =>
@@ -18,16 +17,6 @@ public static class RolesEndpoints
         })
         .WithName(GetRolesPolicyName)
         .RequireAuthorization(GetRolesPolicyName);
-
-        endpoint.MapPost("api/roles/{id}", async (HttpContext httpContext, string id, UpdateUserRoleDto userRoles, UserRolesGraphService graphUserService, CancellationToken cancellationToken) =>
-        {
-            httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
-
-            await graphUserService.Update(id, userRoles.Roles, cancellationToken);
-            return Results.NoContent();
-        })
-        .WithName(UpdateRolesPolicyName)
-        .RequireAuthorization(UpdateRolesPolicyName);
 
         return endpoint;
     }

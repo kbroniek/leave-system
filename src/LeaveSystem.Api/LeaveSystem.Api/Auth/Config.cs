@@ -1,6 +1,7 @@
 ﻿using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Roles;
+using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Shared.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -83,20 +84,23 @@ public static class Config
     private static IServiceCollection AddUsersAuthorization(this IServiceCollection services)
     {
         services
-            .AddAuthorization(options =>
-                options.AddPolicy(UsersEndpoints.GetUsersPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin))));
+            .AddAuthorizationPolicy(UsersEndpoints.GetUsersPolicyName, RoleType.UserAdmin)
+            .AddAuthorizationPolicy(UsersEndpoints.AddUserPolicyName, RoleType.UserAdmin)
+            .AddAuthorizationPolicy(UsersEndpoints.UpdateUserPolicyName, RoleType.UserAdmin);
         return services;
     }
+
+    private static IServiceCollection AddAuthorizationPolicy(this IServiceCollection services, string policyName, RoleType role) =>
+        services
+            .AddAuthorization(options =>
+                options.AddPolicy(policyName,
+                policy => policy.Requirements.Add(new RoleRequirement(role))));
+
     private static IServiceCollection AddRolesAuthorization(this IServiceCollection services)
     {
         services
             .AddAuthorization(options =>
                 options.AddPolicy(RolesEndpoints.GetRolesPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin))));
-        services
-            .AddAuthorization(options =>
-                options.AddPolicy(RolesEndpoints.UpdateRolesPolicyName,
                 policy => policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin))));
         return services;
     }

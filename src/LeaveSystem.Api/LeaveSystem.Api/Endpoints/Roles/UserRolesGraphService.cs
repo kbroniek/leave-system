@@ -1,7 +1,5 @@
 ﻿using LeaveSystem.Api.Factories;
-using LeaveSystem.Shared;
 using Microsoft.Graph;
-using System.Text.Json;
 
 namespace LeaveSystem.Api.Endpoints.Roles;
 
@@ -37,20 +35,6 @@ public class UserRolesGraphService
         await pageIterator.IterateAsync(cancellationToken);
 
         return graphUsers;
-    }
-    public async Task Update(string userId, IEnumerable<string> roles, CancellationToken cancellationToken)
-    {
-        var graphClient = graphClientFactory.Create();
-        IDictionary<string, object> extensionInstance = new Dictionary<string, object>
-        {
-            { roleAttributeName, JsonSerializer.Serialize(new RolesAttribute(roles)) }
-        };
-        await graphClient.Users[userId]
-            .Request()
-            .UpdateAsync(new User
-            {
-                AdditionalData = extensionInstance
-            }, cancellationToken);
     }
 
     public record class GraphUserRole(string Id, IEnumerable<string> Roles)
