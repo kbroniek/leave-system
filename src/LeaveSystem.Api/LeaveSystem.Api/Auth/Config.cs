@@ -1,6 +1,5 @@
 ﻿using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
-using LeaveSystem.Api.Endpoints.Roles;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Shared.Auth;
@@ -23,8 +22,7 @@ public static class Config
             .AddLeaveRequestsAuthorization()
             .AddWorkingHoursAuthorization()
             .AddEmployeesAuthorization()
-            .AddUsersAuthorization()
-            .AddRolesAuthorization();
+            .AddUsersAuthorization();
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
 
@@ -52,12 +50,6 @@ public static class Config
             .AddAuthorizationPolicy(UsersEndpoints.GetUsersPolicyName, RoleType.UserAdmin)
             .AddAuthorizationPolicy(UsersEndpoints.AddUserPolicyName, RoleType.UserAdmin)
             .AddAuthorizationPolicy(UsersEndpoints.UpdateUserPolicyName, RoleType.UserAdmin);
-
-    private static IServiceCollection AddRolesAuthorization(this IServiceCollection services) =>
-        services
-            .AddAuthorization(options =>
-                options.AddPolicy(RolesEndpoints.GetRolesPolicyName,
-                policy => policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin))));
 
     private static IServiceCollection AddAuthorizationPolicy(this IServiceCollection services, string policyName, params RoleType[] roles) =>
         services
