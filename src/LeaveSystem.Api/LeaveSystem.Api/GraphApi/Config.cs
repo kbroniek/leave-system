@@ -1,5 +1,4 @@
 ﻿using LeaveSystem.Api.Endpoints.Employees;
-using LeaveSystem.Api.Endpoints.Roles;
 using LeaveSystem.Api.Endpoints.Users;
 
 namespace LeaveSystem.Api.Factories;
@@ -25,8 +24,7 @@ public static class Config
                                             settings.Scopes))
             .AddScoped(_ => RoleAttributeNameResolver.Create(settings.B2cExtensionAppClientId))
             .AddScoped<GetGraphUserService>()
-            .AddScoped<SaveGraphUserService>()
-            .AddScoped<UserRolesGraphService>();
+            .AddScoped<SaveGraphUserService>();
     }
 }
 

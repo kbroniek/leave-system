@@ -27,7 +27,9 @@ public class SaveGraphUserService
         {
             AdditionalData = extensionInstance,
             Mail = email,
-            DisplayName = name
+            DisplayName = name,
+            AccountEnabled = true,
+            UserPrincipalName = email,
         }, cancellationToken);
         return new FederatedUser(addedUser.Id, addedUser.Mail, addedUser.DisplayName,
                         RoleAttributeNameResolver.MapRoles(addedUser.AdditionalData, roleAttributeName).Roles);
