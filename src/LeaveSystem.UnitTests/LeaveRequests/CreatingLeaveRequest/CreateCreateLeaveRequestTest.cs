@@ -35,9 +35,9 @@ public class CreateCreateLeaveRequestTest
         {
             Guid.NewGuid(), DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Guid.NewGuid(), null
         };
-        yield return new object?[] { null, null, null, null, null};
+        yield return new object?[] { null, null, null, null, null };
     }
-    
+
     public static IEnumerable<object?[]> GetDefaultTestData()
     {
         yield return new object?[]
@@ -64,7 +64,8 @@ public class CreateCreateLeaveRequestTest
         {
             Guid.NewGuid(), DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, Guid.NewGuid(), default(FederatedUser)
         };
-        yield return new object?[] { Guid.Empty, default(DateTimeOffset), default(DateTimeOffset), Guid.Empty, default(FederatedUser)};
+        yield return new object?[]
+            { Guid.Empty, default(DateTimeOffset), default(DateTimeOffset), Guid.Empty, default(FederatedUser) };
     }
 
     [Theory]
@@ -95,7 +96,7 @@ public class CreateCreateLeaveRequestTest
         //Then
         act.Should().Throw<ArgumentNullException>();
     }
-    
+
     [Theory]
     [MemberData(nameof(GetDefaultTestData))]
     public void WhenOneOfCreateLeaveRequestPropertiesIsDefault_ThenThrowArgumentException(
@@ -123,5 +124,39 @@ public class CreateCreateLeaveRequestTest
         };
         //Then
         act.Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void WhenAllPropertiesAreNotNullOrDefault_CreateCreateLeaveRequest()
+    {
+        //Given
+        var leaveRequestId = Guid.NewGuid();
+        var dateFrom = DateTimeOffset.UtcNow;
+        var dateTo = DateTimeOffset.MaxValue;
+        var duration = TimeSpan.MaxValue;
+        var leaveTypeId = Guid.NewGuid();
+        const string remarks = "fake remarks";
+        var createdBy = FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav");
+        //When
+        var createLeaveRequest = CreateLeaveRequest.Create(
+            leaveRequestId,
+            dateFrom,
+            dateTo,
+            duration,
+            leaveTypeId,
+            remarks,
+            createdBy
+        );
+        //Then
+        createLeaveRequest.Should().BeEquivalentTo(new
+        {
+            LeaveRequestId = leaveRequestId,
+            DateFrom = dateFrom,
+            DateTo = dateTo,
+            Duration = duration,
+            LeaveTypeId = leaveTypeId,
+            Remarks = remarks,
+            CreatedBy = createdBy
+        }, o => o.ExcludingMissingMembers());
     }
 }
