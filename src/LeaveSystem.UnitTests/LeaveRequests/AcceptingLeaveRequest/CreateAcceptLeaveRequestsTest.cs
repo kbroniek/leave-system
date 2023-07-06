@@ -10,7 +10,7 @@ namespace LeaveSystem.UnitTests;
 public class CreateAcceptLeaveRequestsTest
 {
     [Fact]
-    public void WhenAcceptLeaveRequestPropertiesValid_ThenUserIsCreatedWithSameProperties()
+    public void WhenAcceptLeaveRequestPropertiesValid_ThenIsCreatedWithSameProperties()
     {
         //Given
         var leaveRequestId = Guid.NewGuid();
