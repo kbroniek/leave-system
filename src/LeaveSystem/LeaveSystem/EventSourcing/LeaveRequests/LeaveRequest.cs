@@ -31,12 +31,6 @@ public class LeaveRequest : Aggregate
     //For serialization
     public LeaveRequest() { }
 
-    public LeaveRequest(Guid id, LeaveRequestStatus status)
-    {
-        Id = id;
-        Status = status;
-    }
-
     private LeaveRequest(LeaveRequestCreated @event)
     {
         Enqueue(@event);

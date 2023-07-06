@@ -20,22 +20,17 @@ namespace LeaveSystem.UnitTests;
 
 public class AcceptLeaveRequestTest
 {
-    private IRepository<LeaveRequest>? repository;
-    private LeaveRequestFactory leaveRequestFactory;
+    private Mock<IRepository<LeaveRequest>> repositoryMock = new Mock<IRepository<LeaveRequest>>();
+    private AcceptLeaveRequest command = AcceptLeaveRequest.Create(Guid.NewGuid(), "testRemarks", FederatedUser.Create("1", "john@fake.com", "John"));
     [Fact]
     public async Task
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenThrowNotFoundException()
     {
         //Given
-        repository = new InMemoryRepository<LeaveRequest>();
-        var federatedUser = FederatedUser.Create("1","testEmail@test.com","John");
-        var command = AcceptLeaveRequest.Create(Guid.NewGuid(), "remarks", federatedUser);
-        var handleAcceptLeaveRequest = new HandleAcceptLeaveRequest(repository);
+        var handleAcceptLeaveRequest = new HandleAcceptLeaveRequest(repositoryMock.Object);
         //When
-        Func<Task> act = async () =>
-        {
-            await handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
-        };
+        var act = () =>
+            handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
         //Then
         await act.Should().ThrowAsync<GoldenEye.Exceptions.NotFoundException>();
     }
@@ -45,22 +40,34 @@ public class AcceptLeaveRequestTest
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenUpdate()
     {
         //Given
-        repository = new InMemoryRepository<LeaveRequest>();
-        
-        var leaveRequest = new LeaveRequest(Guid.NewGuid(), LeaveRequestStatus.Pending);
-        await repository.Add(leaveRequest);
-        var federatedUser = FederatedUser.Create("1","testEmail@test.com","John");
-        var command = AcceptLeaveRequest.Create(leaveRequest.Id, "remarks", federatedUser);
-        var handleAcceptLeaveRequest = new HandleAcceptLeaveRequest(repository);
+        var createdEvent = LeaveRequestCreated.Create(
+            command.LeaveRequestId,
+            new DateTimeOffset(638242288542961190, TimeSpan.Zero),
+            new DateTimeOffset(638242288542961190, TimeSpan.Zero),
+            TimeSpan.FromHours(8),
+            Guid.NewGuid(),
+            "fakeRemarks",
+            FederatedUser.Create("2", "filip@fake.com", "Filip")
+            );
+        var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createdEvent);
+        repositoryMock
+            .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(leaveRequest);
+        var handleAcceptLeaveRequest = new HandleAcceptLeaveRequest(repositoryMock.Object);
         //When
         await handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
-        var updatedLeaveRequest =  await repository.FindById(command.LeaveRequestId);
         //Then
-        updatedLeaveRequest.Should()
-            .Match<LeaveRequest>(x =>
-                x.Id == command.LeaveRequestId &&
-                x.LastModifiedBy == federatedUser &&
-                x.Remarks.Last().Remarks == command.Remarks
-            );
-        }
+        leaveRequest.Should().BeEquivalentTo(new {
+            Status = LeaveRequestStatus.Accepted,
+            LastModifiedBy = command.AcceptedBy,
+            Remarks = new LeaveRequest.RemarksModel[]
+            {
+                new LeaveRequest.RemarksModel(createdEvent.Remarks, createdEvent.CreatedBy),
+                new LeaveRequest.RemarksModel(command.Remarks, command.AcceptedBy)
+            },
+            Version = 2
+        }, o => o.ExcludingMissingMembers());
+        repositoryMock.Verify(x => x.Update(leaveRequest, null, It.IsAny<CancellationToken>()), Times.Once);
+        repositoryMock.Verify(x => x.SaveChanges(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
