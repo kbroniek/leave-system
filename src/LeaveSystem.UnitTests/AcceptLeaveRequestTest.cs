@@ -1,18 +1,13 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Ardalis.GuardClauses;
 using FluentAssertions;
 using GoldenEye.Repositories;
-using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
-using Marten.Internal.Sessions;
 using Moq;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using LeaveRequest = LeaveSystem.EventSourcing.LeaveRequests.LeaveRequest;
 
@@ -57,7 +52,8 @@ public class AcceptLeaveRequestTest
         //When
         await handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
         //Then
-        leaveRequest.Should().BeEquivalentTo(new {
+        leaveRequest.Should().BeEquivalentTo(new
+        {
             Status = LeaveRequestStatus.Accepted,
             LastModifiedBy = command.AcceptedBy,
             Remarks = new LeaveRequest.RemarksModel[]
