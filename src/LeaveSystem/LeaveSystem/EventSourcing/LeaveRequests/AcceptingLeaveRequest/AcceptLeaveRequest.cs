@@ -22,17 +22,9 @@ public class AcceptLeaveRequest : BasicLeaveRequestAction
     }
 }
 
-internal class HandleAcceptLeaveRequest : HandleLeaveRequestAction,
-    ICommandHandler<AcceptLeaveRequest>
+internal class HandleAcceptLeaveRequest : HandleLeaveRequestAction<AcceptLeaveRequest>
 {
     public HandleAcceptLeaveRequest(IRepository<LeaveRequest> repository) : base(repository)
     {
-    }
-
-    public async Task<Unit> Handle(AcceptLeaveRequest command, CancellationToken cancellationToken)
-    {
-        return await base.Handle(
-            new BasicLeaveRequestAction(command.LeaveRequestId, command.Remarks, command.AcceptedBy),
-            cancellationToken);
     }
 }

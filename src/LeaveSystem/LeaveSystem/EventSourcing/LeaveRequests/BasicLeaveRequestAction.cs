@@ -30,8 +30,8 @@ public class BasicLeaveRequestAction : ICommand
     protected record ValidatedProperties(Guid LeaveRequestId, FederatedUser DidBy);
 }
 
-internal class HandleLeaveRequestAction :
-    ICommandHandler<BasicLeaveRequestAction>
+internal class HandleLeaveRequestAction<T> :
+    ICommandHandler<T> where T : BasicLeaveRequestAction
 {
     private readonly IRepository<LeaveRequest> repository;
 
@@ -40,7 +40,7 @@ internal class HandleLeaveRequestAction :
         this.repository = repository;
     }
 
-    public async Task<Unit> Handle(BasicLeaveRequestAction command, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(T command, CancellationToken cancellationToken)
     {
         var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
                            ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);

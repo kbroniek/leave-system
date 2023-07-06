@@ -1,53 +1,28 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Commands;
+﻿using GoldenEye.Commands;
 using GoldenEye.Repositories;
 using LeaveSystem.Shared;
 using MediatR;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 
-public class CancelLeaveRequest : ICommand
+public class CancelLeaveRequest : BasicLeaveRequestAction
 {
-    public Guid LeaveRequestId { get; }
-    public string? Remarks { get; }
-    public FederatedUser CanceledBy { get; }
+    public FederatedUser CanceledBy => DidBy;
 
-    private CancelLeaveRequest(Guid leaveRequestId, string? remarks, FederatedUser canceledBy)
+    private CancelLeaveRequest(Guid leaveRequestId, string? remarks, FederatedUser canceledBy) : base(leaveRequestId, remarks, canceledBy)
     {
-        CanceledBy = canceledBy;
-        Remarks = remarks;
-        LeaveRequestId = leaveRequestId;
     }
 
     public static CancelLeaveRequest Create(Guid? leaveRequestId, string? remarks, FederatedUser? canceledBy)
     {
-        var canceledByNotNull = Guard.Against.Nill(canceledBy);
-        Guard.Against.InvalidEmail(canceledByNotNull.Email, $"{nameof(canceledBy)}.{nameof(canceledByNotNull.Email)}");
-        return new(Guard.Against.NillAndDefault(leaveRequestId), remarks, canceledByNotNull);
+        var validatedProperties = ValidateProperties(leaveRequestId, canceledBy);
+        return new CancelLeaveRequest(validatedProperties.LeaveRequestId, remarks, validatedProperties.DidBy);
     }
 }
 
-internal class HandleCancelLeaveRequest :
-    ICommandHandler<CancelLeaveRequest>
+internal class HandleCancelLeaveRequest : HandleLeaveRequestAction<CancelLeaveRequest>
 {
-    private readonly IRepository<LeaveRequest> repository;
-
-    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository)
+    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository): base(repository)
     {
-        this.repository = repository;
-    }
-
-    public async Task<Unit> Handle(CancelLeaveRequest command, CancellationToken cancellationToken)
-    {
-        var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
-                             ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
-
-        leaveRequest.Cancel(command.Remarks, command.CanceledBy);
-
-        await repository.Update(leaveRequest, cancellationToken);
-
-        await repository.SaveChanges(cancellationToken);
-
-        return Unit.Value;
     }
 }

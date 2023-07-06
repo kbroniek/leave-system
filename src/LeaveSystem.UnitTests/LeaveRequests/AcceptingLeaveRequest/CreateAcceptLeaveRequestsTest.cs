@@ -1,11 +1,10 @@
 using System;
-using System.Runtime.InteropServices;
 using FluentAssertions;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.Shared;
 using Xunit;
 
-namespace LeaveSystem.UnitTests;
+namespace LeaveSystem.UnitTests.LeaveRequests.AcceptingLeaveRequest;
 
 public class CreateAcceptLeaveRequestsTest
 {
