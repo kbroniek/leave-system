@@ -15,8 +15,8 @@ namespace LeaveSystem.UnitTests;
 
 public class AcceptLeaveRequestTest
 {
-    private Mock<IRepository<LeaveRequest>> repositoryMock = new Mock<IRepository<LeaveRequest>>();
-    private AcceptLeaveRequest command = AcceptLeaveRequest.Create(Guid.NewGuid(), "testRemarks", FederatedUser.Create("1", "john@fake.com", "John"));
+    private readonly Mock<IRepository<LeaveRequest>> repositoryMock = new();
+    private readonly AcceptLeaveRequest command = AcceptLeaveRequest.Create(Guid.NewGuid(), "testRemarks", FederatedUser.Create("1", "john@fake.com", "John"));
     [Fact]
     public async Task
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenThrowNotFoundException()
@@ -56,7 +56,7 @@ public class AcceptLeaveRequestTest
         {
             Status = LeaveRequestStatus.Accepted,
             LastModifiedBy = command.AcceptedBy,
-            Remarks = new LeaveRequest.RemarksModel[]
+            Remarks = new[]
             {
                 new LeaveRequest.RemarksModel(createdEvent.Remarks, createdEvent.CreatedBy),
                 new LeaveRequest.RemarksModel(command.Remarks, command.AcceptedBy)
