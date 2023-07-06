@@ -20,9 +20,9 @@ public class CancelLeaveRequest : BasicLeaveRequestAction
     }
 }
 
-internal class HandleCancelLeaveRequest : HandleLeaveRequestAction<CancelLeaveRequest>
+internal class HandleBasicCancelLeaveRequest : HandleBasicLeaveRequestAction<CancelLeaveRequest>
 {
-    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository): base(repository)
+    public HandleBasicCancelLeaveRequest(IRepository<LeaveRequest> repository): base(repository)
     {
     }
 }

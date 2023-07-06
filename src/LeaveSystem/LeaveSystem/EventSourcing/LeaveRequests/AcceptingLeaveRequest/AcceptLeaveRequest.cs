@@ -22,9 +22,9 @@ public class AcceptLeaveRequest : BasicLeaveRequestAction
     }
 }
 
-internal class HandleAcceptLeaveRequest : HandleLeaveRequestAction<AcceptLeaveRequest>
+internal class HandleBasicAcceptLeaveRequest : HandleBasicLeaveRequestAction<AcceptLeaveRequest>
 {
-    public HandleAcceptLeaveRequest(IRepository<LeaveRequest> repository) : base(repository)
+    public HandleBasicAcceptLeaveRequest(IRepository<LeaveRequest> repository) : base(repository)
     {
     }
 }

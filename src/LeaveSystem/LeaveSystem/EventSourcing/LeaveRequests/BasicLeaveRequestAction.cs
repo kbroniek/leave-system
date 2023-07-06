@@ -30,12 +30,12 @@ public class BasicLeaveRequestAction : ICommand
     protected record ValidatedProperties(Guid LeaveRequestId, FederatedUser DidBy);
 }
 
-internal class HandleLeaveRequestAction<T> :
+internal abstract class HandleBasicLeaveRequestAction<T> :
     ICommandHandler<T> where T : BasicLeaveRequestAction
 {
     private readonly IRepository<LeaveRequest> repository;
 
-    public HandleLeaveRequestAction(IRepository<LeaveRequest> repository)
+    public HandleBasicLeaveRequestAction(IRepository<LeaveRequest> repository)
     {
         this.repository = repository;
     }

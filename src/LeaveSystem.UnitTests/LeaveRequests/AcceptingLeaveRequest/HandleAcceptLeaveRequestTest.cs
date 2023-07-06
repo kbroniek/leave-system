@@ -6,23 +6,26 @@ using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using Xunit;
 using LeaveRequest = LeaveSystem.EventSourcing.LeaveRequests.LeaveRequest;
 
 namespace LeaveSystem.UnitTests;
 
-public class AcceptLeaveRequestTest
+public class HandleAcceptLeaveRequestTest
 {
     private readonly Mock<IRepository<LeaveRequest>> repositoryMock = new();
     private readonly AcceptLeaveRequest command = AcceptLeaveRequest.Create(Guid.NewGuid(), "testRemarks", FederatedUser.Create("1", "john@fake.com", "John"));
+    
     [Fact]
     public async Task
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenThrowNotFoundException()
     {
         //Given
-        var handleAcceptLeaveRequest = new HandleAcceptLeaveRequest(repositoryMock.Object);
+        var handleAcceptLeaveRequest = new HandleBasicAcceptLeaveRequest(repositoryMock.Object);
         //When
         var act = () =>
             handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
@@ -48,7 +51,7 @@ public class AcceptLeaveRequestTest
         repositoryMock
             .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest);
-        var handleAcceptLeaveRequest = new HandleAcceptLeaveRequest(repositoryMock.Object);
+        var handleAcceptLeaveRequest = new HandleBasicAcceptLeaveRequest(repositoryMock.Object);
         //When
         await handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
         //Then

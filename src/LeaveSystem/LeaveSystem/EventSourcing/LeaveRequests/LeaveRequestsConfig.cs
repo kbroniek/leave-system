@@ -24,9 +24,9 @@ internal static class LeaveRequestsConfig
         services
             .AddCommandHandler<CreateLeaveRequest, HandleCreateLeaveRequest>()
             .AddCommandHandler<CreateLeaveRequestOnBehalf, HandleCreateLeaveRequestOnBehalf>()
-            .AddCommandHandler<AcceptLeaveRequest, HandleAcceptLeaveRequest>()
+            .AddCommandHandler<AcceptLeaveRequest, HandleBasicAcceptLeaveRequest>()
             .AddCommandHandler<RejectLeaveRequest, HandleRejectLeaveRequest>()
-            .AddCommandHandler<CancelLeaveRequest, HandleCancelLeaveRequest>();
+            .AddCommandHandler<CancelLeaveRequest, HandleBasicCancelLeaveRequest>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
