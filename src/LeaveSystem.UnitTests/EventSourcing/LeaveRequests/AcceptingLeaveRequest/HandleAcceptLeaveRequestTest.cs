@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentAssertions;
 using GoldenEye.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
@@ -5,15 +8,10 @@ using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using Xunit;
 using LeaveRequest = LeaveSystem.EventSourcing.LeaveRequests.LeaveRequest;
 
-namespace LeaveSystem.UnitTests;
+namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 
 public class HandleAcceptLeaveRequestTest
 {
@@ -25,7 +23,7 @@ public class HandleAcceptLeaveRequestTest
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenThrowNotFoundException()
     {
         //Given
-        var handleAcceptLeaveRequest = new HandleBasicAcceptLeaveRequest(repositoryMock.Object);
+        var handleAcceptLeaveRequest = new HandleAcceptLeaveRequest(repositoryMock.Object);
         //When
         var act = () =>
             handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
@@ -51,7 +49,7 @@ public class HandleAcceptLeaveRequestTest
         repositoryMock
             .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest);
-        var handleAcceptLeaveRequest = new HandleBasicAcceptLeaveRequest(repositoryMock.Object);
+        var handleAcceptLeaveRequest = new HandleAcceptLeaveRequest(repositoryMock.Object);
         //When
         await handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
         //Then
