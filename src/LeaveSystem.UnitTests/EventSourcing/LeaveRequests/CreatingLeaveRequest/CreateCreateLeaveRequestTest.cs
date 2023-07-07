@@ -5,7 +5,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using Xunit;
 
-namespace LeaveSystem.UnitTests.LeaveRequests.CreatingLeaveRequest;
+namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
 public class CreateCreateLeaveRequestTest
 {
