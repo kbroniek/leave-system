@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.Db;
@@ -17,7 +18,33 @@ public class BasicValidateTest : IAsyncLifetime
     private LeaveSystemDbContext dbContext;
     private readonly Mock<WorkingHoursService> workingHoursServiceMock = new();
     private readonly Mock<IDocumentSession> documentSessionMock = new();
-
+    public static IEnumerable<object?[]> GetDateTestData()
+    {
+        yield return new object?[]
+        {
+            new DateTimeOffset(2023, 7, 9, 0, 0, 0, TimeSpan.FromHours(5)),     //Not working day
+            new DateTimeOffset(2023, 7, 10, 0, 0, 0, TimeSpan.FromHours(5)),     //Working day
+            TimeSpan.FromHours(8)
+        };
+        yield return new object?[]
+        {
+            new DateTimeOffset(2023, 7, 7, 0, 0, 0, TimeSpan.FromHours(5)),     //Working day
+            new DateTimeOffset(2023, 7, 8, 0, 0, 0, TimeSpan.FromHours(5)),      //Not working day
+            TimeSpan.FromHours(8)
+        };
+        yield return new object?[]
+        {
+            new DateTimeOffset(2023, 7, 8, 0, 0, 0, TimeSpan.FromHours(5)),     //Not working day
+            new DateTimeOffset(2023, 7, 9, 0, 0, 0, TimeSpan.FromHours(5)),      //Not working day
+            TimeSpan.FromHours(8)
+        };
+        yield return new object?[]
+        {
+            new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),     //Working day
+            new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),      //Working day
+            TimeSpan.FromDays(4)
+        };
+    }
     public async Task InitializeAsync()
     {
         dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -29,19 +56,22 @@ public class BasicValidateTest : IAsyncLifetime
         return Task.CompletedTask;
     }
 
-    [Fact]
-    public void WhenDurationOutOfRange_ThrowOutOfRangeException()
+    [Theory]
+    [MemberData(nameof(GetDateTestData))]
+    public void WhenDateFromDateToOrDurationIsWorkingDay_ThenThrowArgumentOutOfRangeException(
+        DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration
+    )
     {
         //Given
         var leaveRequestCreated = LeaveRequestCreated.Create(
             Guid.Empty, 
-            DateTimeOffset.UtcNow, 
-            DateTimeOffset.UtcNow, 
-            TimeSpan.FromHours(8),
+            dateFrom, 
+            dateTo, 
+            duration,
             Guid.NewGuid(),
             "fake remarks",
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
-            );
+        );
         //When
         var act = () =>
         {
@@ -53,5 +83,31 @@ public class BasicValidateTest : IAsyncLifetime
         };
         //Then
         act.Should().Throw<ArgumentOutOfRangeException>();
+    }
+    
+    [Fact]
+    public void WhenDataCorrect_NotArgumentOutOfRangeException()
+    {
+        //Given
+        var leaveRequestCreated = LeaveRequestCreated.Create(
+            Guid.Empty, 
+            new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
+            new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),   
+            TimeSpan.FromDays(6),
+            Guid.NewGuid(),
+            "fake remarks",
+            FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
+        );
+        //When
+        var act = () =>
+        {
+            requestValidator.BasicValidate(
+                leaveRequestCreated,
+                TimeSpan.FromDays(5),
+                TimeSpan.FromDays(10),
+                false);
+        };
+        //Then
+        act.Should().NotThrow<ArgumentOutOfRangeException>();
     }
 }
