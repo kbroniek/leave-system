@@ -1,5 +1,9 @@
-﻿using LeaveSystem.Db.Entities;
+﻿using System.Text.Json;
+using LeaveSystem.Converters;
+using LeaveSystem.Db.Entities;
+using Marten.Services.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LeaveSystem.Db;
@@ -18,6 +22,7 @@ public class LeaveSystemDbContext : DbContext
 
     private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)
     {
+        var userLeaveLimitProperties = new TypeToJsonConverter<UserLeaveLimit.UserLeaveLimitProperties>();
         modelBuilder.Entity<UserLeaveLimit>()
              .HasKey(e => e.Id);
         modelBuilder.Entity<UserLeaveLimit>()
@@ -38,7 +43,8 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<UserLeaveLimit>()
             .Property(b => b.Property)
             .IsRequired(false)
-            .HasColumnType("jsonb");
+            .HasColumnType("jsonb")
+            .HasConversion(userLeaveLimitProperties);
         modelBuilder.Entity<UserLeaveLimit>()
             .HasOne(l => l.LeaveType)
             .WithMany(t => t.UserLeaveLimits)
@@ -54,6 +60,7 @@ public class LeaveSystemDbContext : DbContext
 
     private static void OnLeaveTypeCreating(ModelBuilder modelBuilder)
     {
+        var leaveTypePropertiesToJsonConverter = new TypeToJsonConverter<LeaveType.LeaveTypeProperties>();
         modelBuilder.Entity<LeaveType>()
              .HasKey(e => e.Id);
         modelBuilder.Entity<LeaveType>()
@@ -62,7 +69,8 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<LeaveType>()
             .Property(b => b.Properties)
             .IsRequired(false)
-            .HasColumnType("jsonb");
+            .HasColumnType("jsonb")
+            .HasConversion(leaveTypePropertiesToJsonConverter);
         modelBuilder.Entity<LeaveType>()
             .HasOne(t => t.BaseLeaveType)
             .WithMany(t => t.ConstraintedLeaveTypes)
