@@ -30,16 +30,25 @@ internal class MartenQueryableStub<T> : List<T>, IMartenQueryable<T>
 
     public QueryStatistics Statistics => throw new NotImplementedException();
 
-    public Task<bool> AnyAsync(CancellationToken token) => Task.FromResult(this.Any());
+    public Task<bool> AnyAsync(CancellationToken token)
+    {
+        throw new NotImplementedException();
+    }
 
     public Task<double> AverageAsync(CancellationToken token)
     {
         throw new NotImplementedException();
     }
 
-    public Task<int> CountAsync(CancellationToken token) => Task.FromResult(Count);
+    public Task<int> CountAsync(CancellationToken token) 
+    {
+        throw new NotImplementedException();
+    }
 
-    public Task<long> CountLongAsync(CancellationToken token) => Task.FromResult((long)Count);
+    public Task<long> CountLongAsync(CancellationToken token) 
+    {
+        throw new NotImplementedException();
+    }
 
     public QueryPlan Explain(FetchType fetchType = FetchType.FetchMany, Action<IConfigureExplainExpressions>? configureExplain = null)
     {
