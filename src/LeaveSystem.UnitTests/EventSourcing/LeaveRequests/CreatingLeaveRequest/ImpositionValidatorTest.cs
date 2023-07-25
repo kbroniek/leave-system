@@ -20,67 +20,30 @@ using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
-public class ImpositionValidatorTest : IAsyncLifetime
+public class ImpositionValidatorTest : CreateLeaveRequestValidatorTest, IAsyncLifetime
 {
-    private const string FakeLeaveRequestId = "84e9635a-a241-42bb-b304-78d08138b24f";
-    private readonly Mock<WorkingHoursService> workingHoursServiceMock = new ();
-    private readonly Mock<IDocumentSession> documentSessionMock = new ();
-    private readonly Mock<IEventStore> eventStoreMock = new ();
-    private readonly FederatedUser fakeUser = FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav");
-    private readonly LeaveRequestCreated fakeLeaveRequestCreatedEvent;
-
-    private readonly LeaveRequest fakeLeaveRequestEntity;
-    private LeaveSystemDbContext dbContext;
-
-    public ImpositionValidatorTest()
-    {
-        fakeLeaveRequestCreatedEvent = LeaveRequestCreated.Create(
-            Guid.Parse(FakeLeaveRequestId),
-            new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
-            new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
-            TimeSpan.FromDays(6),
-            Guid.NewGuid(),
-            "fake remarks",
-            fakeUser
-        );
-        fakeLeaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeLeaveRequestCreatedEvent);
-        documentSessionMock.SetupGet(v => v.Events)
-            .Returns(eventStoreMock.Object);
-    }
-
-    public async Task InitializeAsync()
-    {
-        dbContext = await DbContextFactory.CreateDbContextAsync();
-    }
-
-    public Task DisposeAsync() => Task.CompletedTask;
-
     [Fact]
     public async Task WhenThereIsOtherValidLeveRequestWithSameId_ThenThrowValidationException()
     {
         //Given
         var events = new MartenQueryableStub<LeaveRequestCreated>() {
-            fakeLeaveRequestCreatedEvent,
+            FakeLeaveRequestCreatedEvent,
         };
-        SetupEventStoreMock(events, fakeLeaveRequestEntity);
+        SetupEventStoreMock(events, FakeLeaveRequestEntity);
 
 
-        var sut = GetSut(dbContext);
+        var sut = GetSut(DbContext);
         //When
-        var act = async () => { await sut.ImpositionValidator(fakeLeaveRequestCreatedEvent); };
+        var act = async () => { await sut.ImpositionValidator(FakeLeaveRequestCreatedEvent); };
         //Then
         await act.Should().ThrowAsync<ValidationException>();
     }
 
-    // System Under Test
-    private CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
-        new(dbContext, workingHoursServiceMock.Object, documentSessionMock.Object);
-    
     private void SetupEventStoreMock(IMartenQueryable<LeaveRequestCreated> eventsFromQueryRawEventDataOnly, LeaveRequest? leaveRequestFromAggregateStreamAsync)
     {
-        eventStoreMock.Setup(v => v.QueryRawEventDataOnly<LeaveRequestCreated>())
+        EventStoreMock.Setup(v => v.QueryRawEventDataOnly<LeaveRequestCreated>())
             .Returns(eventsFromQueryRawEventDataOnly);
-        eventStoreMock.Setup(v => v.AggregateStreamAsync(
+        EventStoreMock.Setup(v => v.AggregateStreamAsync(
                 Guid.Parse(FakeLeaveRequestId),
                 It.IsAny<long>(),
                 It.IsAny<DateTimeOffset?>(),
@@ -97,10 +60,10 @@ public class ImpositionValidatorTest : IAsyncLifetime
     {
         //Given
         var events = GetLeaveRequestCreatedEventsWithDifferentIds();
-        SetupEventStoreMock(events, fakeLeaveRequestEntity);
-        var sut = GetSut(dbContext);
+        SetupEventStoreMock(events, FakeLeaveRequestEntity);
+        var sut = GetSut(DbContext);
         //When
-        var act = async () => { await sut.ImpositionValidator(fakeLeaveRequestCreatedEvent); };
+        var act = async () => { await sut.ImpositionValidator(FakeLeaveRequestCreatedEvent); };
         //Then
         await act.Should().NotThrowAsync<ValidationException>();
     }
@@ -110,14 +73,14 @@ public class ImpositionValidatorTest : IAsyncLifetime
         WhenOtherLeaveRequestWithSameIdIsNotValid_ThenNotThrowValidationException()
     {
         //Given
-        var fakeCanceledLeaveRequestEntity = fakeLeaveRequestEntity;
-        fakeCanceledLeaveRequestEntity.Cancel("cancel fake remarks",fakeUser);
+        var fakeCanceledLeaveRequestEntity = FakeLeaveRequestEntity;
+        fakeCanceledLeaveRequestEntity.Cancel("cancel fake remarks",FakeUser);
         var events = GetLeaveRequestCreatedEventsWithDifferentIds();
-        events.Add(fakeLeaveRequestCreatedEvent);
-        SetupEventStoreMock(events, fakeLeaveRequestEntity);
-        var sut = GetSut(dbContext);
+        events.Add(FakeLeaveRequestCreatedEvent);
+        SetupEventStoreMock(events, FakeLeaveRequestEntity);
+        var sut = GetSut(DbContext);
         //When
-        var act = async () => { await sut.ImpositionValidator(fakeLeaveRequestCreatedEvent); };
+        var act = async () => { await sut.ImpositionValidator(FakeLeaveRequestCreatedEvent); };
         //Then
         await act.Should().NotThrowAsync<ValidationException>();
     }
