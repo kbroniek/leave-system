@@ -18,25 +18,6 @@ public class LimitValidatorTest : CreateLeaveRequestValidatorTest
     private const string FakeOnDemandLeaveGuid = "f17b1956-0dd5-4972-bde9-851ee112a4e8";
     private const string FakeSickLeaveGuid = "0d3d94ac-e137-4c90-8485-af3ab3042547";
 
-    public override async Task InitializeAsync()
-    {
-        await base.InitializeAsync();
-        await DbContext.LeaveTypes.AddRangeAsync(
-            LeaveTypesTestData()
-        );
-        var now = DateTimeOffset.Now;
-        var leaveLimit = new UserLeaveLimit
-        {
-            LeaveTypeId = Guid.Parse(FakeSickLeaveGuid),
-            Limit = FakeSickLeave.Properties?.DefaultLimit,
-            AssignedToUserId = FakeUser.Id,
-            ValidSince = now.GetFirstDayOfYear(),
-            ValidUntil = now.GetLastDayOfYear(),
-        };
-        await DbContext.UserLeaveLimits.AddAsync(leaveLimit);
-        await DbContext.SaveChangesAsync();
-    }
-
     private static readonly LeaveType FakeSickLeave = new()
     {
         Id = Guid.Parse(FakeSickLeaveGuid),
@@ -129,6 +110,7 @@ public class LimitValidatorTest : CreateLeaveRequestValidatorTest
         WhenCreatedLeaveTypeOrIsOutOfBaseLeaveTypeOrNestedLeaveType_ThenThrowValidationException(LeaveRequestCreated @event)
     {
         //Given
+        await RefillDbAsync();
         var sut = GetSut(DbContext);
         //When
         
@@ -136,11 +118,45 @@ public class LimitValidatorTest : CreateLeaveRequestValidatorTest
         //Then
         await act.Should().ThrowAsync<ValidationException>();
     }
+    private async Task RefillDbAsync()
+    {
+        await ReinitializeDbAsync();
+        await AddLeaveTypesToDbAsync();
+        await AddUserLeaveLimitsToDbAsync();
+        await DbContext.SaveChangesAsync();
+    }
+
+    private async Task ReinitializeDbAsync()
+    {
+        DbContext = await DbContextFactory.CreateDbContextAsync();
+    }
+    private async Task AddLeaveTypesToDbAsync()
+    {
+        await DbContext.LeaveTypes.AddRangeAsync(
+            LeaveTypesTestData()
+        );
+    }
+    
+    private async Task AddUserLeaveLimitsToDbAsync()
+    {
+        var now = DateTimeOffset.Now;
+        var leaveLimit = new UserLeaveLimit
+        {
+            LeaveTypeId = Guid.Parse(FakeSickLeaveGuid),
+            Limit = FakeSickLeave.Properties?.DefaultLimit,
+            AssignedToUserId = FakeUser.Id,
+            ValidSince = now.GetFirstDayOfYear(),
+            ValidUntil = now.GetLastDayOfYear(),
+        };
+        await DbContext.UserLeaveLimits.AddAsync(leaveLimit);
+    }
+
     [Fact]
     public async Task
         WhenCreatedLeaveTypeOrIsWithinTheLimit_ThenNotThrowValidationException()
     {
         //Given
+        await RefillDbAsync();
         var sut = GetSut(DbContext);
         var fakeLeaveRequestCreatedEvent = LeaveRequestCreated.Create(
             FakeLeaveRequestCreatedEvent.LeaveRequestId,
@@ -155,5 +171,58 @@ public class LimitValidatorTest : CreateLeaveRequestValidatorTest
         var act = async () => { await sut.LimitValidator(fakeLeaveRequestCreatedEvent); };
         //Then
         await act.Should().NotThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task
+        WhenNoLimitForLeaveRequestCreated_ThenThrowValidationException()
+    {
+        //Given
+        await ReinitializeDbAsync();
+        var sut = GetSut(DbContext);
+        var fakeLeaveRequestCreatedEvent = LeaveRequestCreated.Create(
+            FakeLeaveRequestCreatedEvent.LeaveRequestId,
+            FakeLeaveRequestCreatedEvent.DateFrom, 
+            FakeLeaveRequestCreatedEvent.DateTo,
+            WorkingHours * 3,
+            Guid.Parse(FakeSickLeaveGuid),
+            FakeLeaveRequestCreatedEvent.Remarks,
+            FakeUser
+        );
+        //When
+        var act = async () => { await sut.LimitValidator(fakeLeaveRequestCreatedEvent); };
+        await act.Should().ThrowAsync<ValidationException>().WithMessage("Cannot find limits for the leave type id*");
+    }
+    
+    [Fact]
+    public async Task
+        WhenMoreThanOneLimitForLeaveRequestCreated_ThenThrowValidationException()
+    {
+        //Given
+        await RefillDbAsync();
+        var now = DateTimeOffset.Now;
+        var secondLeaveLimitForSameUser = new UserLeaveLimit
+        {
+            LeaveTypeId = Guid.Parse(FakeSickLeaveGuid),
+            Limit = FakeSickLeave.Properties?.DefaultLimit,
+            AssignedToUserId = FakeUser.Id,
+            ValidSince = now.GetFirstDayOfYear(),
+            ValidUntil = now.GetLastDayOfYear(),
+        };
+        await DbContext.UserLeaveLimits.AddAsync(secondLeaveLimitForSameUser);
+        await DbContext.SaveChangesAsync();
+        var sut = GetSut(DbContext);
+        var fakeLeaveRequestCreatedEvent = LeaveRequestCreated.Create(
+            FakeLeaveRequestCreatedEvent.LeaveRequestId,
+            FakeLeaveRequestCreatedEvent.DateFrom, 
+            FakeLeaveRequestCreatedEvent.DateTo,
+            WorkingHours * 3,
+            Guid.Parse(FakeSickLeaveGuid),
+            FakeLeaveRequestCreatedEvent.Remarks,
+            FakeUser
+        );
+        //When
+        var act = async () => { await sut.LimitValidator(fakeLeaveRequestCreatedEvent); };
+        await act.Should().ThrowAsync<ValidationException>().WithMessage("Two or more limits found which are the same for the leave type id*");
     }
 }
