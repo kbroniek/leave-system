@@ -23,8 +23,8 @@ public abstract class CreateLeaveRequestValidatorTest : IAsyncLifetime
     protected const string FakeHolidayLeaveGuid = "d0db6559-43e8-4916-a93c-f87a3c75afe8";
 
     protected readonly LeaveRequest FakeLeaveRequestEntity;
-    protected  LeaveSystemDbContext DbContext;
-    
+    //protected  LeaveSystemDbContext DbContext;
+
     protected CreateLeaveRequestValidatorTest()
     {
         var currentDate = DateTimeOffset.UtcNow;
@@ -47,15 +47,15 @@ public abstract class CreateLeaveRequestValidatorTest : IAsyncLifetime
 
     public virtual async Task InitializeAsync()
     {
-        DbContext = await DbContextFactory.CreateDbContextAsync();
+        //DbContext = await DbContextFactory.CreateDbContextAsync();
     }
 
     public Task DisposeAsync()
     {
         return Task.CompletedTask;
     }
-    
-    
+
+
     // System Under Test
     protected CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
         new(dbContext, WorkingHoursServiceMock.Object, DocumentSessionMock.Object);
