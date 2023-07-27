@@ -16,7 +16,6 @@ using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestHelpers;
 using Marten;
 using Marten.Events;
-using Marten.Linq;
 using Moq;
 using Xunit;
 
@@ -60,7 +59,7 @@ public class LimitValidatorTest
         WhenCreatedLeaveTypeIsOutOfBaseLeaveTypeOrNestedLeaveType_ThenThrowValidationException(LeaveRequestCreated @event)
     {
         //Given
-        var events = GetIMartenQueryableStub();
+        var events = FakeLeaveRequestCreatedProvider.GetMartenQueryableStub();
         var leaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeLeaveRequestCreatedEvent);
         eventStoreMock.SetupLimitValidatorFunctions(events, leaveRequestEntity);
         await using var dbContext = await CreateAndFillDbAsync();
@@ -72,38 +71,9 @@ public class LimitValidatorTest
         VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
     }
 
-    private MartenQueryableStub<LeaveRequestCreated> GetIMartenQueryableStub()
-    {
-        return new MartenQueryableStub<LeaveRequestCreated>()
-        {
-            LeaveRequestCreated.Create(
-                fakeLeaveRequestCreatedEvent.LeaveRequestId,
-                fakeLeaveRequestCreatedEvent.DateFrom + (WorkingHours * 3),
-                fakeLeaveRequestCreatedEvent.DateTo - (WorkingHours * 2),
-                WorkingHours,
-                fakeLeaveRequestCreatedEvent.LeaveTypeId,
-                fakeLeaveRequestCreatedEvent.Remarks,
-                fakeLeaveRequestCreatedEvent.CreatedBy
-            ),
-            LeaveRequestCreated.Create(
-                fakeLeaveRequestCreatedEvent.LeaveRequestId,
-                fakeLeaveRequestCreatedEvent.DateFrom + (WorkingHours * 2),
-                fakeLeaveRequestCreatedEvent.DateTo - (WorkingHours * 3),
-                WorkingHours * 2,
-                fakeLeaveRequestCreatedEvent.LeaveTypeId,
-                fakeLeaveRequestCreatedEvent.Remarks,
-                fakeLeaveRequestCreatedEvent.CreatedBy
-            )
-        };
-    }
-
     private void VerifyDocumentSessionMockCalled(Guid leaveRequestId, Times queryRawEventDataOnlyTimes, Times aggregateStreamAsyncTimes)
     {
-        documentSessionMock.Verify(x => 
-            x.Events.QueryRawEventDataOnly<LeaveRequestCreated>(), queryRawEventDataOnlyTimes);
-        documentSessionMock.Verify(x => 
-            x.Events.AggregateStreamAsync(leaveRequestId, It.IsAny<long>(), It.IsAny<DateTimeOffset?>(), 
-                It.IsAny<LeaveRequest>(), It.IsAny<long>(), It.IsAny<CancellationToken>()), aggregateStreamAsyncTimes);
+        documentSessionMock.VerifyLeaveRequestValidatorFunctions(leaveRequestId, queryRawEventDataOnlyTimes, aggregateStreamAsyncTimes);
     }
 
     private async Task<LeaveSystemDbContext> CreateAndFillDbAsync()
@@ -141,11 +111,11 @@ public class LimitValidatorTest
         WhenCreatedLeaveTypeOrIsWithinTheLimit_ThenNotThrowValidationException()
     {
         //Given
-        var events = GetIMartenQueryableStub();
+        var events = FakeLeaveRequestCreatedProvider.GetMartenQueryableStub();
         var fakeEvent = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2, FakeLeaveTypeProvider.FakeSickLeaveId);
         var leaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock.SetupLimitValidatorFunctions(events, leaveRequestEntity);
-        await using var dbContext = await CreateAndFillDbAsync();
+        await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
         var sut = GetSut(dbContext);
         var @event = LeaveRequestCreated.Create(
             fakeLeaveRequestCreatedEvent.LeaveRequestId,

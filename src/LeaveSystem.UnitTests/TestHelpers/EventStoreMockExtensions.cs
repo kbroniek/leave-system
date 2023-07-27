@@ -17,7 +17,8 @@ internal static class EventStoreMockExtensions
         LeaveRequest? leaveRequestFromAggregateStreamAsync)
     {
         eventStoreMock.Setup(v => v.QueryRawEventDataOnly<LeaveRequestCreated>())
-            .Returns(eventsFromQueryRawEventDataOnly);
+            .Returns(eventsFromQueryRawEventDataOnly)
+            .Verifiable();
         eventStoreMock.Setup(v => v.AggregateStreamAsync(
                 FakeLeaveRequestCreatedProvider.FakeLeaveRequestId,
                 It.IsAny<long>(),
