@@ -1,127 +1,111 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore;
+using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.UnitTests.TestHelpers;
+using Marten;
+using Marten.Events;
+using Marten.Linq;
+using Moq;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
-public class LimitValidatorTest : CreateLeaveRequestValidatorTest
+public class LimitValidatorTest
 {
     private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
-    private const string FakeOnDemandLeaveId = "f17b1956-0dd5-4972-bde9-851ee112a4e8";
-    private const string FakeSickLeaveId = "0d3d94ac-e137-4c90-8485-af3ab3042547";
-    private const string FakeUserLeaveLimitId = "1d19cb47-9e68-4945-a28c-380a48c19d6e";
+    private readonly Mock<WorkingHoursService> workingHoursServiceMock = new ();
+    private readonly Mock<IDocumentSession> documentSessionMock = new ();
+    private readonly Mock<IEventStore> eventStoreMock = new ();
+    private readonly LeaveRequestCreated fakeLeaveRequestCreatedEvent =
+        FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
+    private readonly FederatedUser fakeUser = FakeUserProvider.GetUserWithNameFakeoslav();
 
-    private static LeaveType GetFakeSickLeave() => new()
+    public LimitValidatorTest()
     {
-        Id = Guid.Parse(FakeSickLeaveId),
-        Name = "niezdolność do pracy z powodu choroby",
-        Order = 3,
-        Properties = new LeaveType.LeaveTypeProperties
-        {
-            DefaultLimit = WorkingHours * 5,
-            IncludeFreeDays = true,
-            Color = "red",
-            Catalog = LeaveTypeCatalog.Sick,
-        }
-    };
-
-    private IEnumerable<LeaveType> LeaveTypesTestData() => new[]
-    {
-        new LeaveType
-        {
-            Id = Guid.Parse(FakeHolidayLeaveGuid),
-            Name = "urlop wypoczynkowy",
-            Order = 1,
-            BaseLeaveTypeId = Guid.Parse(FakeOnDemandLeaveId),
-            Properties = new LeaveType.LeaveTypeProperties
-            {
-                DefaultLimit = WorkingHours * 26,
-                IncludeFreeDays = false,
-                Color = "blue",
-                Catalog = LeaveTypeCatalog.Holiday,
-            }
-        },
-        new LeaveType
-        {
-            Id = Guid.Parse(FakeOnDemandLeaveId),
-            Name = "urlop na żądanie",
-            Order = 2,
-            Properties = new LeaveType.LeaveTypeProperties
-            {
-                DefaultLimit = WorkingHours * 4,
-                IncludeFreeDays = false,
-                Color = "yellow",
-                Catalog = LeaveTypeCatalog.OnDemand,
-            }
-        },
-        GetFakeSickLeave()
-    };
+        documentSessionMock.SetupGet(v => v.Events)
+            .Returns(eventStoreMock.Object);
+    }
 
     public static IEnumerable<object[]> GetFakeLeaveRequestCreatedTestData()
     {
         yield return new object[]
         {
-            LeaveRequestCreated.Create(
-                Guid.Parse(FakeLeaveRequestId),
-                new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
-                new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
-                WorkingHours * 30,
-                Guid.Parse(FakeHolidayLeaveGuid),
-                "fake remarks",
-                FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
-            )
+            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedWithSickLeave()
         };
         yield return new object[]
         {
-            LeaveRequestCreated.Create(
-                Guid.Parse(FakeLeaveRequestId),
-                new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
-                new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
-                WorkingHours * 30,
-                Guid.Parse(FakeOnDemandLeaveId),
-                "fake remarks",
-                FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
-            )
+            FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreated()
         };
         yield return new object[]
         {
-            LeaveRequestCreated.Create(
-                Guid.Parse(FakeLeaveRequestId),
-                new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
-                new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
-                WorkingHours * 10,
-                Guid.Parse(FakeSickLeaveId),
-                "fake remarks",
-                FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
-            )
+            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedWithOnDemandLeave()
         };
     }
 
     [Theory]
     [MemberData(nameof(GetFakeLeaveRequestCreatedTestData))]
     public async Task
-        WhenCreatedLeaveTypeOrIsOutOfBaseLeaveTypeOrNestedLeaveType_ThenThrowValidationException(LeaveRequestCreated @event)
+        WhenCreatedLeaveTypeIsOutOfBaseLeaveTypeOrNestedLeaveType_ThenThrowValidationException(LeaveRequestCreated @event)
     {
         //Given
-        using var dbContext = await CreateAndFillDbAsync();
+        var events = GetIMartenQueryableStub();
+        var leaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeLeaveRequestCreatedEvent);
+        eventStoreMock.SetupLimitValidatorFunctions(events, leaveRequestEntity);
+        await using var dbContext = await CreateAndFillDbAsync();
         var sut = GetSut(dbContext);
         //When
-
         var act = async () => { await sut.LimitValidator(@event); };
         //Then
-        await act.Should().ThrowAsync<ValidationException>();
+        await act.Should().ThrowAsync<ValidationException>().WithMessage("You don't have enough free days for this type of leave");
+        VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
     }
+
+    private MartenQueryableStub<LeaveRequestCreated> GetIMartenQueryableStub()
+    {
+        return new MartenQueryableStub<LeaveRequestCreated>()
+        {
+            LeaveRequestCreated.Create(
+                fakeLeaveRequestCreatedEvent.LeaveRequestId,
+                fakeLeaveRequestCreatedEvent.DateFrom + (WorkingHours * 3),
+                fakeLeaveRequestCreatedEvent.DateTo - (WorkingHours * 2),
+                WorkingHours,
+                fakeLeaveRequestCreatedEvent.LeaveTypeId,
+                fakeLeaveRequestCreatedEvent.Remarks,
+                fakeLeaveRequestCreatedEvent.CreatedBy
+            ),
+            LeaveRequestCreated.Create(
+                fakeLeaveRequestCreatedEvent.LeaveRequestId,
+                fakeLeaveRequestCreatedEvent.DateFrom + (WorkingHours * 2),
+                fakeLeaveRequestCreatedEvent.DateTo - (WorkingHours * 3),
+                WorkingHours * 2,
+                fakeLeaveRequestCreatedEvent.LeaveTypeId,
+                fakeLeaveRequestCreatedEvent.Remarks,
+                fakeLeaveRequestCreatedEvent.CreatedBy
+            )
+        };
+    }
+
+    private void VerifyDocumentSessionMockCalled(Guid leaveRequestId, Times queryRawEventDataOnlyTimes, Times aggregateStreamAsyncTimes)
+    {
+        documentSessionMock.Verify(x => 
+            x.Events.QueryRawEventDataOnly<LeaveRequestCreated>(), queryRawEventDataOnlyTimes);
+        documentSessionMock.Verify(x => 
+            x.Events.AggregateStreamAsync(leaveRequestId, It.IsAny<long>(), It.IsAny<DateTimeOffset?>(), 
+                It.IsAny<LeaveRequest>(), It.IsAny<long>(), It.IsAny<CancellationToken>()), aggregateStreamAsyncTimes);
+    }
+
     private async Task<LeaveSystemDbContext> CreateAndFillDbAsync()
     {
         var dbContext = await DbContextFactory.CreateDbContextAsync();
@@ -133,52 +117,50 @@ public class LimitValidatorTest : CreateLeaveRequestValidatorTest
         return dbContext;
     }
 
-    private void Local_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private void Local_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
     }
 
     private async Task AddLeaveTypesToDbAsync(LeaveSystemDbContext dbContext)
     {
         await dbContext.LeaveTypes.AddRangeAsync(
-            LeaveTypesTestData()
+            FakeLeaveTypeProvider.GetLeaveTypes()
         );
     }
 
     private async Task AddUserLeaveLimitsToDbAsync(LeaveSystemDbContext dbContext)
     {
-        var now = DateTimeOffset.Parse("2023-07-06T12:30:00");
-        var leaveLimit = new UserLeaveLimit
-        {
-            Id = Guid.Parse(FakeUserLeaveLimitId),
-            LeaveTypeId = Guid.Parse(FakeSickLeaveId),
-            Limit = GetFakeSickLeave().Properties?.DefaultLimit,
-            AssignedToUserId = FakeUser.Id,
-            ValidSince = now.GetFirstDayOfYear(),
-            ValidUntil = now.GetLastDayOfYear(),
-        };
-        await dbContext.UserLeaveLimits.AddAsync(leaveLimit);
+        await dbContext.UserLeaveLimits.AddRangeAsync(FakeUserLeaveLimitProvider.GetLimits());
     }
 
+    private CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
+        new(dbContext, workingHoursServiceMock.Object, documentSessionMock.Object);
+    
     [Fact]
     public async Task
         WhenCreatedLeaveTypeOrIsWithinTheLimit_ThenNotThrowValidationException()
     {
         //Given
-        using var dbContext = await CreateAndFillDbAsync();
+        var events = GetIMartenQueryableStub();
+        var fakeEvent = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2, FakeLeaveTypeProvider.FakeSickLeaveId);
+        var leaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
+        eventStoreMock.SetupLimitValidatorFunctions(events, leaveRequestEntity);
+        await using var dbContext = await CreateAndFillDbAsync();
         var sut = GetSut(dbContext);
-        var fakeLeaveRequestCreatedEvent = LeaveRequestCreated.Create(
-            FakeLeaveRequestCreatedEvent.LeaveRequestId,
-            FakeLeaveRequestCreatedEvent.DateFrom,
-            FakeLeaveRequestCreatedEvent.DateTo,
-            WorkingHours * 3,
-            Guid.Parse(FakeSickLeaveId),
-            FakeLeaveRequestCreatedEvent.Remarks,
-            FakeUser
+        var @event = LeaveRequestCreated.Create(
+            fakeLeaveRequestCreatedEvent.LeaveRequestId,
+            fakeLeaveRequestCreatedEvent.DateFrom,
+            fakeLeaveRequestCreatedEvent.DateTo,
+            WorkingHours,
+            FakeLeaveTypeProvider.FakeSickLeaveId,
+            fakeLeaveRequestCreatedEvent.Remarks,
+            FakeUserProvider.GetUserWithNameFakeoslav()
         );
         //When
-        var act = async () => { await sut.LimitValidator(fakeLeaveRequestCreatedEvent); };
+        var act = async () => { await sut.LimitValidator(@event); };
         //Then
         await act.Should().NotThrowAsync<ValidationException>();
+        VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
     }
 
     [Fact]
@@ -186,20 +168,12 @@ public class LimitValidatorTest : CreateLeaveRequestValidatorTest
         WhenNoLimitForLeaveRequestCreated_ThenThrowValidationException()
     {
         //Given
-        using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var sut = GetSut(dbContext);
-        var fakeLeaveRequestCreatedEvent = LeaveRequestCreated.Create(
-            FakeLeaveRequestCreatedEvent.LeaveRequestId,
-            FakeLeaveRequestCreatedEvent.DateFrom,
-            FakeLeaveRequestCreatedEvent.DateTo,
-            WorkingHours * 3,
-            Guid.Parse(FakeSickLeaveId),
-            FakeLeaveRequestCreatedEvent.Remarks,
-            FakeUser
-        );
         //When
         var act = async () => { await sut.LimitValidator(fakeLeaveRequestCreatedEvent); };
         await act.Should().ThrowAsync<ValidationException>().WithMessage("Cannot find limits for the leave type id*");
+        VerifyDocumentSessionMockCalled(It.IsAny<Guid>(), Times.Never(), Times.Never());
     }
 
     [Fact]
@@ -207,31 +181,32 @@ public class LimitValidatorTest : CreateLeaveRequestValidatorTest
         WhenMoreThanOneLimitForLeaveRequestCreated_ThenThrowValidationException()
     {
         //Given
-        using var dbContext = await CreateAndFillDbAsync();
+        await using var dbContext = await CreateAndFillDbAsync();
         var now = DateTimeOffset.Now;
         var secondLeaveLimitForSameUser = new UserLeaveLimit
         {
             Id = Guid.Parse("8e9709d4-c237-4043-bde3-bb58bca35c2e"),
-            LeaveTypeId = Guid.Parse(FakeSickLeaveId),
-            Limit = GetFakeSickLeave().Properties?.DefaultLimit,
-            AssignedToUserId = FakeUser.Id,
+            LeaveTypeId = FakeLeaveTypeProvider.FakeSickLeaveId,
+            Limit = FakeLeaveTypeProvider.GetFakeSickLeave().Properties?.DefaultLimit,
+            AssignedToUserId = FakeUserProvider.GetUserWithNameFakeoslav().Id,
             ValidSince = now.GetFirstDayOfYear(),
             ValidUntil = now.GetLastDayOfYear(),
         };
         await dbContext.UserLeaveLimits.AddAsync(secondLeaveLimitForSameUser);
         await dbContext.SaveChangesAsync();
         var sut = GetSut(dbContext);
-        var fakeLeaveRequestCreatedEvent = LeaveRequestCreated.Create(
-            FakeLeaveRequestCreatedEvent.LeaveRequestId,
-            FakeLeaveRequestCreatedEvent.DateFrom,
-            FakeLeaveRequestCreatedEvent.DateTo,
+        var @event = LeaveRequestCreated.Create(
+            fakeLeaveRequestCreatedEvent.LeaveRequestId,
+            fakeLeaveRequestCreatedEvent.DateFrom,
+            fakeLeaveRequestCreatedEvent.DateTo,
             WorkingHours * 3,
-            Guid.Parse(FakeSickLeaveId),
-            FakeLeaveRequestCreatedEvent.Remarks,
-            FakeUser
+            FakeLeaveTypeProvider.FakeSickLeaveId,
+            fakeLeaveRequestCreatedEvent.Remarks,
+            fakeUser
         );
         //When
-        var act = async () => { await sut.LimitValidator(fakeLeaveRequestCreatedEvent); };
+        var act = async () => { await sut.LimitValidator(@event); };
         await act.Should().ThrowAsync<ValidationException>().WithMessage("Two or more limits found which are the same for the leave type id*");
+        VerifyDocumentSessionMockCalled(It.IsAny<Guid>(), Times.Never(), Times.Never());
     }
 }

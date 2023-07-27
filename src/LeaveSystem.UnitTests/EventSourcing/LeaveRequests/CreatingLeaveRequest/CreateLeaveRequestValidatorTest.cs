@@ -12,7 +12,7 @@ using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
-public abstract class CreateLeaveRequestValidatorTest : IAsyncLifetime
+public abstract class CreateLeaveRequestValidatorTest
 {
     protected const string FakeLeaveRequestId = "84e9635a-a241-42bb-b304-78d08138b24f";
     protected readonly Mock<WorkingHoursService> WorkingHoursServiceMock = new ();
@@ -21,9 +21,7 @@ public abstract class CreateLeaveRequestValidatorTest : IAsyncLifetime
     protected readonly FederatedUser FakeUser = FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav");
     protected readonly LeaveRequestCreated FakeLeaveRequestCreatedEvent;
     protected const string FakeHolidayLeaveGuid = "d0db6559-43e8-4916-a93c-f87a3c75afe8";
-
     protected readonly LeaveRequest FakeLeaveRequestEntity;
-    //protected  LeaveSystemDbContext DbContext;
 
     protected CreateLeaveRequestValidatorTest()
     {
@@ -44,17 +42,6 @@ public abstract class CreateLeaveRequestValidatorTest : IAsyncLifetime
         DocumentSessionMock.SetupGet(v => v.Events)
             .Returns(EventStoreMock.Object);
     }
-
-    public virtual async Task InitializeAsync()
-    {
-        //DbContext = await DbContextFactory.CreateDbContextAsync();
-    }
-
-    public Task DisposeAsync()
-    {
-        return Task.CompletedTask;
-    }
-
 
     // System Under Test
     protected CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
