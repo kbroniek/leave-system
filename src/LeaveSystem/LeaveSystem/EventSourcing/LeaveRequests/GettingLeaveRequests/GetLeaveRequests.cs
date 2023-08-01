@@ -14,7 +14,7 @@ namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 
 public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
 {
-    public static readonly LeaveRequestStatus[] validStatuses = new[] { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending };
+    public static readonly LeaveRequestStatus[] ValidStatuses = { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending };
     public int PageNumber { get; }
     public int PageSize { get; }
     public DateTimeOffset DateFrom { get; }
@@ -53,7 +53,7 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
             dateFromOrDefault.GetDayWithoutTime(),
             dateToOrDefault.GetDayWithoutTime(),
             leaveTypeIds,
-            statuses ?? validStatuses,
+            statuses ?? ValidStatuses,
             createdByEmails,
             createdByUserIds,
             requestedBy);
