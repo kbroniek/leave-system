@@ -25,7 +25,7 @@ public class HandleCreateLeaveRequestOnBehalfTest
     );
     
     [Fact]
-    public async Task WhenCreateLeaveRequestHandled_Create()
+    public async Task WhenCreateLeaveRequestHandled_ThenCreate()
     {
         //Given
         var createdEvent = LeaveRequestCreated.Create(

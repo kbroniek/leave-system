@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
-using LeaveSystem.UnitTests.Providers;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
