@@ -121,7 +121,7 @@ internal class HandleGetLeaveRequests :
             }
             query = query.Where(predicate);
         }
-        if (request.LeaveTypeIds != null && request.LeaveTypeIds.Length > 0)
+        if (request.LeaveTypeIds is { Length: > 0 })
         {
             var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
             foreach (var leaveTypeId in request.LeaveTypeIds)
@@ -130,7 +130,7 @@ internal class HandleGetLeaveRequests :
             }
             query = query.Where(predicate);
         }
-        if (request.CreatedByEmails != null && request.CreatedByEmails.Length > 0)
+        if (request.CreatedByEmails is { Length: > 0 })
         {
             var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
             foreach (var createdByEmail in request.CreatedByEmails)
@@ -139,7 +139,7 @@ internal class HandleGetLeaveRequests :
             }
             query = query.Where(predicate);
         }
-        if (request.CreatedByUserIds != null && request.CreatedByUserIds.Length > 0)
+        if (request.CreatedByUserIds is { Length: > 0 })
         {
             var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
             foreach (var createdByUserId in request.CreatedByUserIds)

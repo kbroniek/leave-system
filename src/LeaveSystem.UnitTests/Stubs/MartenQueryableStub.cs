@@ -1,14 +1,14 @@
-﻿using FluentAssertions;
-using Marten.Linq;
-using Moq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
+using Marten.Linq;
+using Moq;
 
-namespace LeaveSystem.UnitTests.TestHelpers;
+namespace LeaveSystem.UnitTests.Stubs;
 
 internal class MartenQueryableStub<T> : List<T>, IMartenQueryable<T>
 {
@@ -104,7 +104,11 @@ internal class MartenQueryableStub<T> : List<T>, IMartenQueryable<T>
 
     public IMartenQueryable<T> Stats(out QueryStatistics stats)
     {
-        throw new NotImplementedException();
+        stats = new()
+        {
+            TotalResults = Count
+        };
+        return this;
     }
 
     public Task<TResult> SumAsync<TResult>(CancellationToken token)
