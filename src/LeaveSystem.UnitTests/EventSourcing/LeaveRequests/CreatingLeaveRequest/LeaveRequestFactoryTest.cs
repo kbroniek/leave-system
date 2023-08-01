@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestHelpers;
@@ -120,7 +123,7 @@ public class LeaveRequestFactoryTest
         var validatorMock = GetValidatorMock(workingHoursServiceMock.Object, dbContext);
         var sut = GetSut(dbContext, workingHoursServiceMock.Object, validatorMock.Object);
         //When
-        await sut.Create(fakeEvent, It.IsAny<CancellationToken>());
+        var leaveRequest = await sut.Create(fakeEvent, It.IsAny<CancellationToken>());
         //Then
         workingHoursServiceMock.Verify(x => x.GetUserSingleWorkingHoursDuration(
                 It.IsAny<string>(), It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(),
@@ -132,5 +135,18 @@ public class LeaveRequestFactoryTest
             ), Times.Once
         );
         validatorMock.Verify(x => x.LimitValidator(It.IsAny<LeaveRequestCreated>()), Times.Once);
+        leaveRequest.Should().BeEquivalentTo(new
+        {
+            Id = fakeEvent.LeaveRequestId,
+            DateFrom = fakeEvent.DateFrom,
+            DateTo = fakeEvent.DateTo,
+            Duration = fakeEvent.Duration,
+            LeaveTypeId = fakeEvent.LeaveTypeId,
+            Remarks = new List<LeaveRequest.RemarksModel>() {new (fakeEvent.Remarks!, fakeEvent.CreatedBy)},
+            Status = LeaveRequestStatus.Pending,
+            CreatedBy = fakeEvent.CreatedBy,
+            LastModifiedBy = fakeEvent.CreatedBy,
+            
+        },o => o.ExcludingMissingMembers());
     }
 }
