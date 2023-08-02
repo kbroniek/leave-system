@@ -81,7 +81,7 @@ public class HandleGetLeaveRequestsTest
         );
         var sut = await GetSut(documentSessionMock.Object);
         //When
-        var results = await sut.Handle(request, It.IsAny<CancellationToken>());
+        var results = await sut.Handle(request, CancellationToken.None);
         results.Should().BeEquivalentTo(new []
         {
             shortInfo1, shortInfo3
