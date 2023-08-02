@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
@@ -13,7 +14,7 @@ public static class FakeLeaveRequestCreatedProvider
     private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
     private static readonly LeaveRequestCreated FakeLeaveRequestCreatedEvent =
         FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
-    
+
     internal static LeaveRequestCreated GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate()
     {
         var currentDate = DateTimeOffset.Now;
@@ -30,7 +31,7 @@ public static class FakeLeaveRequestCreatedProvider
             FakeUserProvider.GetUserWithNameFakeoslav()
         );
     }
-    
+
     internal static LeaveRequestCreated GetLeaveRequestCreatedCalculatedFromCurrentDate(TimeSpan duration, Guid leaveType)
     {
         var currentDate = DateTimeOffset.Now;
@@ -73,7 +74,7 @@ public static class FakeLeaveRequestCreatedProvider
             FakeUserProvider.GetUserWithNameFakeoslav()
         );
     }
-    
+
     internal static LeaveRequestCreated GetLeaveRequestCreatedWithSickLeave()
     {
         return LeaveRequestCreated.Create(
@@ -86,10 +87,10 @@ public static class FakeLeaveRequestCreatedProvider
             FakeUserProvider.GetUserWithNameFakeoslav()
         );
     }
-    
-    internal static MartenQueryableStub<LeaveRequestCreated> GetMartenQueryableStub()
+
+    internal static IList<LeaveRequestCreated> GetMartenQueryableStub()
     {
-        return new MartenQueryableStub<LeaveRequestCreated>
+        return new List<LeaveRequestCreated>
         {
             LeaveRequestCreated.Create(
                 FakeLeaveRequestCreatedEvent.LeaveRequestId,
@@ -112,9 +113,9 @@ public static class FakeLeaveRequestCreatedProvider
         };
     }
 
-    internal static MartenQueryableStub<LeaveRequestCreated> GetLeaveRequestCreatedEventsWithDifferentIds()
+    internal static IList<LeaveRequestCreated> GetLeaveRequestCreatedEventsWithDifferentIds()
     {
-        return new MartenQueryableStub<LeaveRequestCreated>
+        return new List<LeaveRequestCreated>
         {
             LeaveRequestCreated.Create(
                 Guid.NewGuid(),

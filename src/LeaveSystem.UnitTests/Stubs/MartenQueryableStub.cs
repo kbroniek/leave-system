@@ -10,22 +10,14 @@ using Moq;
 
 namespace LeaveSystem.UnitTests.Stubs;
 
-internal class MartenQueryableStub<T> : List<T>, IMartenQueryable<T>
+internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>, IQueryProvider
 {
-    private readonly Mock<IQueryProvider> queryProviderMock = new();
-    public Type ElementType => typeof(T);
-
-    public Expression Expression => Expression.Constant(this);
-
-    public IQueryProvider Provider
+    public MartenQueryableStub(IEnumerable<T> enumerable) : base(enumerable)
     {
-        get
-        {
-            queryProviderMock
-                .Setup(x => x.CreateQuery<T>(It.IsAny<Expression>()))
-                .Returns(this);
-            return queryProviderMock.Object;
-        }
+    }
+
+    private MartenQueryableStub(Expression expression) : base(expression)
+    {
     }
 
     public QueryStatistics Statistics => throw new NotImplementedException();
@@ -40,14 +32,24 @@ internal class MartenQueryableStub<T> : List<T>, IMartenQueryable<T>
         throw new NotImplementedException();
     }
 
-    public Task<int> CountAsync(CancellationToken token) 
+    public Task<int> CountAsync(CancellationToken token)
     {
         throw new NotImplementedException();
     }
 
-    public Task<long> CountLongAsync(CancellationToken token) 
+    public Task<long> CountLongAsync(CancellationToken token)
     {
         throw new NotImplementedException();
+    }
+    IQueryable<TElement> IQueryProvider.CreateQuery<TElement>(Expression expression)
+    {
+        if (expression == null)
+            throw new ArgumentNullException(nameof(expression));
+        if (!typeof(IQueryable<TElement>).IsAssignableFrom(expression.Type))
+        {
+            throw new ArgumentException(nameof(expression));
+        }
+        return new MartenQueryableStub<TElement>(expression);
     }
 
     public QueryPlan Explain(FetchType fetchType = FetchType.FetchMany, Action<IConfigureExplainExpressions>? configureExplain = null)
@@ -106,7 +108,7 @@ internal class MartenQueryableStub<T> : List<T>, IMartenQueryable<T>
     {
         stats = new()
         {
-            TotalResults = Count
+            TotalResults = this.Count()
         };
         return this;
     }

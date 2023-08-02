@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
+using LeaveSystem.UnitTests.Stubs;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
@@ -45,7 +46,7 @@ public class ImpositionValidatorTest
                 FakeLeaveTypeProvider.FakeSickLeaveId);
         events.Add(fakeEvent);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
-        eventStoreMock.SetupLimitValidatorFunctions(events, entity);
+        eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);
         await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
         var sut = GetSut(dbContext);
         //When
@@ -68,7 +69,7 @@ public class ImpositionValidatorTest
             FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2,
                 FakeLeaveTypeProvider.FakeSickLeaveId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
-        eventStoreMock.SetupLimitValidatorFunctions(events, entity);
+        eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);
         await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
         var sut = GetSut(dbContext);
         //When
@@ -87,7 +88,7 @@ public class ImpositionValidatorTest
         entity.Cancel("cancel fake remarks", fakeUser);
         var events = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds();
         events.Add(fakeLeaveRequestCreatedEvent);
-        eventStoreMock.SetupLimitValidatorFunctions(events, entity);
+        eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);
         await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
         var sut = GetSut(dbContext);
         //When

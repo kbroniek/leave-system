@@ -13,6 +13,7 @@ using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.UnitTests.Stubs;
 using LeaveSystem.UnitTests.TestHelpers;
 using Marten;
 using Marten.Events;
@@ -61,7 +62,7 @@ public class LimitValidatorTest
         //Given
         var events = FakeLeaveRequestCreatedProvider.GetMartenQueryableStub();
         var leaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeLeaveRequestCreatedEvent);
-        eventStoreMock.SetupLimitValidatorFunctions(events, leaveRequestEntity);
+        eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), leaveRequestEntity);
         await using var dbContext = await CreateAndFillDbAsync();
         var sut = GetSut(dbContext);
         //When
@@ -105,7 +106,7 @@ public class LimitValidatorTest
 
     private CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
         new(dbContext, workingHoursServiceMock.Object, documentSessionMock.Object);
-    
+
     [Fact]
     public async Task
         WhenCreatedLeaveTypeOrIsWithinTheLimit_ThenNotThrowValidationException()
@@ -114,7 +115,7 @@ public class LimitValidatorTest
         var events = FakeLeaveRequestCreatedProvider.GetMartenQueryableStub();
         var fakeEvent = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2, FakeLeaveTypeProvider.FakeSickLeaveId);
         var leaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
-        eventStoreMock.SetupLimitValidatorFunctions(events, leaveRequestEntity);
+        eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), leaveRequestEntity);
         await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
         var sut = GetSut(dbContext);
         var @event = LeaveRequestCreated.Create(

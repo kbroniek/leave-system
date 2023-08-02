@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -56,14 +58,19 @@ public class HandleGetLeaveRequestsTest
             WorkingHours * 6,
             FakeLeaveTypeProvider.FakeSickLeaveId,
             FakeUserProvider.GetUserWithNameFakeoslav(), LeaveRequestStatus.Rejected);
-        documentSessionMock.Setup(x => x.Query<LeaveRequestShortInfo>())
-            .Returns(new MartenQueryableStub<LeaveRequestShortInfo>()
+        var test = new EnumerableQuery<LeaveRequestShortInfo>(new List<LeaveRequestShortInfo>
             {
                 shortInfo1, shortInfo2, shortInfo3
             });
+        var a = test.Where(x => x.Status == LeaveRequestStatus.Pending).ToList();
+        documentSessionMock.Setup(x => x.Query<LeaveRequestShortInfo>())
+            .Returns(new MartenQueryableStub<LeaveRequestShortInfo>(new List<LeaveRequestShortInfo>
+            {
+                shortInfo1, shortInfo2, shortInfo3
+            }));
         var request = GetLeaveRequests.Create(
-            5,
-            3,
+            null,
+            null,
             new DateTimeOffset(2023, 1, 2, 0, 0, 0, TimeSpan.Zero),
             new DateTimeOffset(2023, 1, 6, 0, 0, 0, TimeSpan.Zero),
             null,
