@@ -1,7 +1,5 @@
-﻿using GoldenEye.Commands;
-using GoldenEye.Repositories;
+﻿using GoldenEye.Repositories;
 using LeaveSystem.Shared;
-using MediatR;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 
@@ -20,9 +18,9 @@ public class CancelLeaveRequest : BasicLeaveRequestAction
     }
 }
 
-internal class HandleBasicCancelLeaveRequest : HandleBasicLeaveRequestAction<CancelLeaveRequest>
+internal class HandleCancelLeaveRequest : HandleBasicLeaveRequestAction<CancelLeaveRequest>
 {
-    public HandleBasicCancelLeaveRequest(IRepository<LeaveRequest> repository): base(repository)
+    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository): base(repository)
     {
     }
 }

@@ -113,7 +113,7 @@ public class LimitValidatorTest
     {
         //Given
         var events = FakeLeaveRequestCreatedProvider.GetMartenQueryableStub();
-        var fakeEvent = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2, FakeLeaveTypeProvider.FakeSickLeaveId);
+        var fakeEvent = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2, FakeLeaveTypeProvider.FakeHolidayLeaveGuid);
         var leaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), leaveRequestEntity);
         await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
@@ -123,7 +123,7 @@ public class LimitValidatorTest
             fakeLeaveRequestCreatedEvent.DateFrom,
             fakeLeaveRequestCreatedEvent.DateTo,
             WorkingHours,
-            FakeLeaveTypeProvider.FakeSickLeaveId,
+            FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
             fakeLeaveRequestCreatedEvent.Remarks,
             FakeUserProvider.GetUserWithNameFakeoslav()
         );
@@ -131,7 +131,7 @@ public class LimitValidatorTest
         var act = async () => { await sut.LimitValidator(@event); };
         //Then
         await act.Should().NotThrowAsync<ValidationException>();
-        VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
+        VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Exactly(2), Times.Exactly(2));
     }
 
     [Fact]

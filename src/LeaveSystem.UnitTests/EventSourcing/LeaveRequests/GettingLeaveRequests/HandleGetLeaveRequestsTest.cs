@@ -58,11 +58,6 @@ public class HandleGetLeaveRequestsTest
             WorkingHours * 6,
             FakeLeaveTypeProvider.FakeSickLeaveId,
             FakeUserProvider.GetUserWithNameFakeoslav(), LeaveRequestStatus.Rejected);
-        var test = new EnumerableQuery<LeaveRequestShortInfo>(new List<LeaveRequestShortInfo>
-            {
-                shortInfo1, shortInfo2, shortInfo3
-            });
-        var a = test.Where(x => x.Status == LeaveRequestStatus.Pending).ToList();
         documentSessionMock.Setup(x => x.Query<LeaveRequestShortInfo>())
             .Returns(new MartenQueryableStub<LeaveRequestShortInfo>(new List<LeaveRequestShortInfo>
             {
