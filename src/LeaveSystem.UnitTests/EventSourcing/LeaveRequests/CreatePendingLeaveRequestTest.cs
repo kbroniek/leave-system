@@ -42,7 +42,7 @@ public class CreatePendingLeaveRequestTest
     [InlineData("")]
     [InlineData("  ")]
     [InlineData(null)]
-    public void WhenCreatingWith_ThenCreateLeaveRequestWithThoseProperties(string remarks)
+    public void WhenCreatingWithNullOrWhitespaceRemarks_ThenCreateLeaveRequestWithoutRemarks(string remarks)
     {
         //Given
         var now = DateTimeOffset.Now;
