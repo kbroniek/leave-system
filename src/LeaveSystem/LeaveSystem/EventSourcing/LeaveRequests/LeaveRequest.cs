@@ -68,7 +68,7 @@ public class LeaveRequest : Aggregate
     {
         if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException($"Canceling a non-your leave request is not allowed.");
+            throw new InvalidOperationException("Canceling a non-your leave request is not allowed.");
         }
         if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Accepted)
         {
@@ -76,7 +76,7 @@ public class LeaveRequest : Aggregate
         }
         if (DateFrom < DateTimeOffset.UtcNow)
         {
-            throw new InvalidOperationException($"Canceling of past leave requests is not allowed.");
+            throw new InvalidOperationException("Canceling of past leave requests is not allowed.");
         }
 
         var @event = LeaveRequestCanceled.Create(Id, remarks, canceledBy);

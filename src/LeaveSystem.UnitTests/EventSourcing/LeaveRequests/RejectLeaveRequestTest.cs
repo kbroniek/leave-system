@@ -94,7 +94,7 @@ public class RejectLeaveRequestTest
             }, o => o.ExcludingMissingMembers()
         );
         var dequeuedEvents = leaveRequest.DequeueUncommittedEvents();
-        dequeuedEvents.Length.Should().Be(fakeRemarksCollection.Count());
+        dequeuedEvents.Length.Should().Be(fakeRemarksCollection.Count);
         dequeuedEvents.Last().Should().BeEquivalentTo(new
             {
                 LeaveRequestId = leaveRequest.Id,

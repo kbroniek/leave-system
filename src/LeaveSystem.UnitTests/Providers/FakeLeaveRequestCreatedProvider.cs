@@ -13,7 +13,7 @@ public static class FakeLeaveRequestCreatedProvider
     internal static Guid FakeLeaveRequestId = Guid.NewGuid();
     private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
     private static readonly LeaveRequestCreated FakeLeaveRequestCreatedEvent =
-        FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
+        GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
 
     internal static LeaveRequestCreated GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate()
     {
