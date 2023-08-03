@@ -1,5 +1,4 @@
 ﻿using LeaveSystem.Shared.Auth;
-using LeaveSystem.Web.Components;
 using LeaveSystem.Web.Pages.HrPanel;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequestDetails;
@@ -52,7 +51,8 @@ public static class Config
             .AddTransient<UserLeaveLimitsService>()
             .AddTransient<EmployeeService>()
             .AddTransient<WorkingHoursService>()
-            .AddTransient<HrSummaryService>();
+            .AddTransient<HrSummaryService>()
+            .AddTransient<GetLeaveStatusSettingsService>();
     }
     private static IServiceCollection AddHttpClient(this IServiceCollection services, IConfiguration configuration, string scopes)
     {
