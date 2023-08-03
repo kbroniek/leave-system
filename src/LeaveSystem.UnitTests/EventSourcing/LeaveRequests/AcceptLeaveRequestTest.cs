@@ -64,19 +64,45 @@ public class AcceptLeaveRequestTest
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {
-                Id = @event.LeaveRequestId,
-                DateFrom = @event.DateFrom,
-                DateTo = @event.DateTo,
-                Duration = @event.Duration,
-                LeaveTypeId = @event.LeaveTypeId,
                 Status = LeaveRequestStatus.Accepted,
-                CreatedBy = @event.CreatedBy,
                 LastModifiedBy = user,
                 Remarks = new[] {new LeaveRequest.RemarksModel(@event.Remarks, @event.CreatedBy)},
             }, o => o.ExcludingMissingMembers()
         );
         leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
             new IEvent[] {@event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, user)}
+        );
+    }
+
+    [Fact]
+    public void WhenStatusIsPendingAndRemarksIsNotNullOrWhitespace_ThenAddRemarksAndEnqueueEvent()
+    {
+        //Given
+        var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
+        var fakeRejectRemarks = "fake reject remarks";
+        var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
+        //When
+        leaveRequest.Reject(fakeRejectRemarks, user);
+        //Then
+        leaveRequest.Should().BeEquivalentTo(new
+            {
+                Status = LeaveRequestStatus.Rejected,
+                LastModifiedBy = user,
+                Remarks = new []
+                {
+                    new LeaveRequest.RemarksModel(@event.Remarks, @event.CreatedBy),
+                    new LeaveRequest.RemarksModel(fakeRejectRemarks, user)
+                }
+            }, o => o.ExcludingMissingMembers()
+        );
+        var dequeuedEvents = leaveRequest.DequeueUncommittedEvents();
+        dequeuedEvents.Length.Should().Be(2);
+        dequeuedEvents.Last().Should().BeEquivalentTo(new
+            {
+                LeaveRequestId = leaveRequest.Id,
+                Remarks = fakeRejectRemarks,
+                RejectedBy = user,
+            }, o => o.ExcludingMissingMembers()
         );
     }
 }
