@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.UnitTests.Providers;
@@ -8,7 +7,7 @@ using Marten.Events;
 using Marten.Linq;
 using Moq;
 
-namespace LeaveSystem.UnitTests.TestHelpers;
+namespace LeaveSystem.UnitTests.Extensions;
 
 internal static class EventStoreMockExtensions
 {

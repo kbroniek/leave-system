@@ -5,7 +5,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using Marten;
 using Moq;
 
-namespace LeaveSystem.UnitTests.TestHelpers;
+namespace LeaveSystem.UnitTests.Extensions;
 
 internal static class DocumentSessionMockExtensions
 {

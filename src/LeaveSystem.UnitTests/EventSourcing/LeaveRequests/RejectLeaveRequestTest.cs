@@ -9,13 +9,14 @@ using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.UnitTests.TestDataGenerators;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
 
 public class RejectLeaveRequestTest
 {
-    private static readonly FederatedUser user = FakeUserProvider.GetUserWithNameFakeoslav();
+    private static readonly FederatedUser User = FakeUserProvider.GetUserWithNameFakeoslav();
     
     [Theory]
     [MemberData(nameof(Get_WhenLeaveRequestStatusOtherThenPendingAndAccepted_ThenThrowInvalidOperationException_TestData))]
@@ -26,11 +27,11 @@ public class RejectLeaveRequestTest
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(
             createEvent
         );
-        actionBeforeReject(leaveRequest, "fake remarks", user);
+        actionBeforeReject(leaveRequest, "fake remarks", User);
         //When
         var act = () =>
         {
-            leaveRequest.Reject("fake remarks", user);
+            leaveRequest.Reject("fake remarks", User);
         };
         //Then
         act.Should().Throw<InvalidOperationException>();
@@ -56,17 +57,17 @@ public class RejectLeaveRequestTest
         var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //When
-        leaveRequest.Reject(remarks, user);
+        leaveRequest.Reject(remarks, User);
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {
                 Status = LeaveRequestStatus.Rejected,
-                LastModifiedBy = user,
+                LastModifiedBy = User,
                 Remarks = new[] {new LeaveRequest.RemarksModel(@event.Remarks, @event.CreatedBy)},
             }, o => o.ExcludingMissingMembers()
         );
         leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
-            new IEvent[] {@event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, user)}
+            new IEvent[] {@event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, User)}
         );
     }
 
@@ -82,14 +83,14 @@ public class RejectLeaveRequestTest
     {
         //Given
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
-        actionBeforeReject(leaveRequest, fakeRemarks, user);
+        actionBeforeReject(leaveRequest, fakeRemarks, User);
         //When
-        leaveRequest.Reject(fakeRejectRemarks, user);
+        leaveRequest.Reject(fakeRejectRemarks, User);
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {
                 Status = LeaveRequestStatus.Rejected,
-                LastModifiedBy = user,
+                LastModifiedBy = User,
                 Remarks = fakeRemarksCollection
             }, o => o.ExcludingMissingMembers()
         );
@@ -99,7 +100,7 @@ public class RejectLeaveRequestTest
             {
                 LeaveRequestId = leaveRequest.Id,
                 Remarks = fakeRejectRemarks,
-                RejectedBy = user,
+                RejectedBy = User,
             }, o => o.ExcludingMissingMembers()
         );
     }
@@ -107,35 +108,7 @@ public class RejectLeaveRequestTest
     public static IEnumerable<object[]>
         Get_WhenStatusIsPendingOrAcceptedAndRemarksIsNotNullOrWhitespace_ThenAddRemarksAndEnqueueEvent_TestData()
     {
-        var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
-        var fakeRemarks = "fake remarks";
-        var fakeRejectRemarks = "fake reject remarks";
-        void DoNoting(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) {}
-        void Accept(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) => leaveRequest.Accept(remarks, federatedUser);
-        yield return new object[]
-        {
-            DoNoting, 
-            new List<LeaveRequest.RemarksModel>
-            {
-                new(@event.Remarks, @event.CreatedBy),
-                new(fakeRejectRemarks, user)
-            },
-            fakeRemarks,
-            fakeRejectRemarks,
-            @event
-        };
-        yield return new object[]
-        {
-            Accept,
-            new List<LeaveRequest.RemarksModel>
-            {
-                new(@event.Remarks, @event.CreatedBy),
-                new(fakeRemarks, user),
-                new(fakeRejectRemarks, user)
-            },
-            fakeRemarks,
-            fakeRejectRemarks,
-            @event
-        };
+        return LeaveRequestTestDataGenerator
+            .GetDoNothingMethodWithTwoRemarksOrAcceptMethodWithThreeRemarksAndFakeRemarksAndEvent(User);
     }
 }

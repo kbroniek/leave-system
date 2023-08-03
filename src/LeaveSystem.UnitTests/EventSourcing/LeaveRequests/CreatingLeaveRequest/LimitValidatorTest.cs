@@ -12,6 +12,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.UnitTests.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
 using LeaveSystem.UnitTests.TestHelpers;

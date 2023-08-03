@@ -9,6 +9,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.UnitTests.TestDataGenerators;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
@@ -156,35 +157,7 @@ public class CancelLeaveRequestTest
     public static IEnumerable<object[]>
         Get_WhenStatusIsPendingOrAcceptedAndCreatedByIdIsSameAsCanceledByIdAndDateFromIsNotPastDate_ThenEnqueueEventAndAddRemarks_TestData()
     {
-        var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
-        const string fakeRemarks = "fake remarks";
-        const string fakeRejectRemarks = "fake reject remarks";
-        void DoNoting(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) {}
-        void Accept(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) => leaveRequest.Accept(remarks, federatedUser);
-        yield return new object[]
-        {
-            DoNoting, 
-            new List<LeaveRequest.RemarksModel>
-            {
-                new(@event.Remarks, @event.CreatedBy),
-                new(fakeRejectRemarks, User)
-            },
-            fakeRemarks,
-            fakeRejectRemarks,
-            @event
-        };
-        yield return new object[]
-        {
-            Accept,
-            new List<LeaveRequest.RemarksModel>
-            {
-                new(@event.Remarks, @event.CreatedBy),
-                new(fakeRemarks, User),
-                new(fakeRejectRemarks, User)
-            },
-            fakeRemarks,
-            fakeRejectRemarks,
-            @event
-        };
+        return LeaveRequestTestDataGenerator
+            .GetDoNothingMethodWithTwoRemarksOrAcceptMethodWithThreeRemarksAndFakeRemarksAndEvent(User);
     }
 }

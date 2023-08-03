@@ -11,6 +11,7 @@ using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.UnitTests.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestHelpers;
 using Marten;

@@ -1,10 +1,9 @@
 using System;
 using System.Threading;
-using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Services;
 using Moq;
 
-namespace LeaveSystem.UnitTests.TestHelpers;
+namespace LeaveSystem.UnitTests.Extensions;
 
 internal static class WorkingHoursServiceMockExtensions
 {

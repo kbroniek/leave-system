@@ -10,6 +10,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.UnitTests.TestDataGenerators;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
@@ -42,12 +43,7 @@ public class AcceptLeaveRequestTest
     public static IEnumerable<object[]>
         Get_WhenLeaveRequestStatusOtherThanPending_ThenThrowInvalidOperationException_TestData()
     {
-        void Cancel(LeaveRequest l, string r, FederatedUser u) => l.Cancel(r, u);
-        void Accept(LeaveRequest l, string r, FederatedUser u) => l.Accept(r, u);
-        void Reject(LeaveRequest l, string r, FederatedUser u) => l.Reject(r, u);
-        yield return new object[] { Cancel };
-        yield return new object[] { Accept };
-        yield return new object[] { Reject };
+        return LeaveRequestTestDataGenerator.GetCancelAcceptAndRejectMethods();
     }
     
     [Theory]

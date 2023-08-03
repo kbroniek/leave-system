@@ -12,6 +12,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.UnitTests.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
 using LeaveSystem.UnitTests.Stubs;
