@@ -9,11 +9,11 @@ namespace LeaveSystem.UnitTests.Providers;
 public static class FakeLeaveTypeProvider
 {
     private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
-    internal static Guid FakeOnDemandLeaveId = Guid.NewGuid();
-    internal static Guid FakeSickLeaveId = Guid.NewGuid();
-    internal static Guid FakeHolidayLeaveGuid = Guid.NewGuid();
+    public static Guid FakeOnDemandLeaveId = Guid.NewGuid();
+    public static Guid FakeSickLeaveId = Guid.NewGuid();
+    public static Guid FakeHolidayLeaveGuid = Guid.NewGuid();
     
-    internal static LeaveType GetFakeSickLeave() => new()
+    public static LeaveType GetFakeSickLeave() => new()
     {
         Id = FakeSickLeaveId,
         Name = "niezdolność do pracy z powodu choroby",
@@ -27,7 +27,7 @@ public static class FakeLeaveTypeProvider
         }
     };
 
-    internal static LeaveType GetFakeHolidayLeave() => new()
+    public  static LeaveType GetFakeHolidayLeave() => new()
     {
         Id = FakeHolidayLeaveGuid,
         Name = "urlop wypoczynkowy",
@@ -42,7 +42,7 @@ public static class FakeLeaveTypeProvider
         }
     };
 
-    internal static LeaveType GetFakeOnDemandLeave() => new()
+    public static LeaveType GetFakeOnDemandLeave() => new()
     {
         Id = FakeOnDemandLeaveId,
         Name = "urlop na żądanie",
@@ -55,8 +55,15 @@ public static class FakeLeaveTypeProvider
             Catalog = LeaveTypeCatalog.OnDemand,
         }
     };
+    
+    public static LeaveType GetFakeWrongLeave() => new()
+    {
+        Id = Guid.Empty,
+        Name = "niezdolność do pracy z powodu choroby",
+        Order = 3
+    };
 
-    internal static IEnumerable<LeaveType> GetLeaveTypes()
+    public static IEnumerable<LeaveType> GetLeaveTypes()
     {
         yield return GetFakeOnDemandLeave();
         yield return GetFakeHolidayLeave();
