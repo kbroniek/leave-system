@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using LeaveSystem.Converters;
 using LeaveSystem.Db.Entities;
 using Marten.Services.Json;
@@ -26,16 +26,18 @@ public class LeaveSystemDbContext : DbContext
 
     private void OnSettingsCreating(ModelBuilder modelBuilder)
     {
+        var userLeaveLimitProperties = new TypeToJsonConverter<JsonDocument>();
         modelBuilder.Entity<Setting>()
              .HasKey(e => e.Id);
         modelBuilder.Entity<Setting>()
             .Property(b => b.Category)
-            .IsRequired(true)
+            .IsRequired()
             .HasConversion(new EnumToStringConverter<SettingCategoryType>());
         modelBuilder.Entity<Setting>()
             .Property(b => b.Value)
-            .IsRequired(true)
-            .HasColumnType("jsonb");
+            .IsRequired()
+            .HasColumnType("jsonb")
+            .HasConversion(userLeaveLimitProperties);
     }
 
     private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)
