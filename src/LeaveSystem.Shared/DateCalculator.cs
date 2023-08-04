@@ -55,6 +55,16 @@ public static class DateCalculator
         return daysBetween;
     }
 
+    public static DateTimeOffset GetNextWorkingDay(DateTimeOffset date)
+    {
+        while(GetDayKind(date) != DayKind.WORKING)
+        {
+            date = date.AddDays(1);
+        }
+
+        return date;
+    }
+
     public static DayKind GetDayKind(DateTimeOffset date)
     {
         if (isPolishHoliday(date))
