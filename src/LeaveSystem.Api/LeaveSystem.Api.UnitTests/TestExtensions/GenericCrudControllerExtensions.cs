@@ -19,4 +19,14 @@ public static class GenericCrudControllerExtensions
         set.Should().BeEquivalentTo(dbContext.Set<LeaveType>());
     }
     
+    public static async Task CheckGetSingleResultMethodAsync<TEntity,TId>(this GenericCrudController<TEntity, TId> source, LeaveSystemDbContext dbContext)
+        where TId : IComparable<TId>
+        where TEntity : class, IHaveId<TId>
+    {
+        //When
+        var set = source.Get();
+        //Then
+        set.Should().BeEquivalentTo(dbContext.Set<LeaveType>());
+    }
+    
 }
