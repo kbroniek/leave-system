@@ -70,20 +70,19 @@ public class LeaveTypesControllerPutTest
         var fakeLeaveTypeToChange = fakeLeaveTypeFromDb.Clone()!;
         fakeLeaveTypeToChange.Name = "fake name";
         fakeLeaveTypeToChange.Order = 4;
-        var mockSet = FakeLeaveTypeProvider.GetLeaveTypes().AsQueryable().BuildMockDbSet(); 
-        mockSet.Setup(m => m.FindAsync(new object[] {holidayLeaveGuid}, default))
-            .ReturnsAsync(fakeLeaveTypeToChange);
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        await dbContext.AddAsync(fakeLeaveTypeFromDb);
+        await dbContext.SaveChangesAsync();
 
         var dbContextMock = new Mock<LeaveSystemDbContext>();
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<LeaveType>())
-            .Returns(mockSet.Object);
-        var internalEntityMock = new Mock<EntityEntry<LeaveType>>(null);
-        internalEntityMock.Setup(x => x.State).Returns(EntityState.Unchanged);
+            .Returns(dbContext.Set<LeaveType>());
+        dbContextMock.Setup(m => m.Entry(fakeLeaveTypeFromDb))
+            .Returns(dbContext.Entry(fakeLeaveTypeFromDb));
         dbContextMock.Setup(m => m.Entry(fakeLeaveTypeToChange))
-            .Returns(internalEntityMock.Object);
-
+            .Returns(dbContext.Entry(fakeLeaveTypeToChange));
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
         var act = async () =>
