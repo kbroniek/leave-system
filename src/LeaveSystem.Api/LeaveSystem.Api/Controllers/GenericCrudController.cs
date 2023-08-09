@@ -95,10 +95,7 @@ namespace LeaveSystem.Api.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
             return Updated(update);
         }

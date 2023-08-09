@@ -1,8 +1,5 @@
-using System.Data.Entity.Infrastructure;
-using System.Linq.Expressions;
 using FluentAssertions;
 using LeaveSystem.Api.Controllers;
-using LeaveSystem.Api.UnitTests.TestExtensions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.UnitTests;
@@ -10,7 +7,6 @@ using LeaveSystem.UnitTests.Providers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Results;
-using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
 using DbUpdateConcurrencyException = Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
@@ -59,7 +55,7 @@ public class LeaveTypesControllerPatchTest
     }
 
     [Fact]
-    public async Task WhenExceptionWasThrownDuringSavingChangesAndProductNotExists_ThenReturnNotFound()
+    public async Task WhenExceptionWasThrownDuringSavingChangesAndProductNotExists_ThenThrowDbUpdateConcurrencyException()
     {
         //Given
         var fakeLeave = FakeLeaveTypeProvider.GetFakeHolidayLeave();
