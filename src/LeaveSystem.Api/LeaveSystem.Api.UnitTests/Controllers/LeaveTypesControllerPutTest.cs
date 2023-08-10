@@ -6,12 +6,8 @@ using LeaveSystem.Db.Entities;
 using LeaveSystem.UnitTests;
 using LeaveSystem.UnitTests.Providers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-using MockQueryable.Moq;
 using Moq;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;

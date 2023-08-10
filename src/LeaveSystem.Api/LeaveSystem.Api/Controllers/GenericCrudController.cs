@@ -34,15 +34,15 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TEntity TEntity, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Post([FromBody] TEntity entity, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            GetSet().Add(TEntity);
+            GetSet().Add(entity);
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Created(TEntity);
+            return Created(entity);
         }
 
         [HttpPatch]
