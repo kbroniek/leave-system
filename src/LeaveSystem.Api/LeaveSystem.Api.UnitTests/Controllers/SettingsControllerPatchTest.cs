@@ -58,14 +58,14 @@ public class SettingsControllerPatchTest
     public async Task WhenExceptionWasThrownDuringSavingChangesAndSettingNotExists_ThenThrowDbUpdateConcurrencyException()
     {
         //Given
-        var fakeLeave = FakeSettingsProvider.GetAcceptedSetting();
+        var fakeSetting = FakeSettingsProvider.GetAcceptedSetting();
         var mockSet = new []
         {
             FakeSettingsProvider.GetCanceledSetting(),
             FakeSettingsProvider.GetRejectedSetting()
         }.AsQueryable().BuildMockDbSet(); 
-        mockSet.Setup(m => m.FindAsync(new object[] {fakeLeave.Id}, default))
-            .ReturnsAsync(fakeLeave);
+        mockSet.Setup(m => m.FindAsync(new object[] {fakeSetting.Id}, default))
+            .ReturnsAsync(fakeSetting);
 
         var dbContextMock = new Mock<LeaveSystemDbContext>();
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
@@ -86,10 +86,10 @@ public class SettingsControllerPatchTest
     public async Task WhenExceptionWasThrownDuringSavingChangesAndSettingExists_ThenThrowDbUpdateConcurrencyException()
     {
         //Given
-        var fakeLeave = FakeSettingsProvider.GetAcceptedSetting();
+        var fakeSetting = FakeSettingsProvider.GetAcceptedSetting();
         var mockSet = FakeSettingsProvider.GetSettings().AsQueryable().BuildMockDbSet(); 
-        mockSet.Setup(m => m.FindAsync(new object[] {fakeLeave.Id}, default))
-            .ReturnsAsync(fakeLeave);
+        mockSet.Setup(m => m.FindAsync(new object[] {fakeSetting.Id}, default))
+            .ReturnsAsync(fakeSetting);
 
         var dbContextMock = new Mock<LeaveSystemDbContext>();
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
@@ -119,12 +119,12 @@ public class SettingsControllerPatchTest
         var fakeDelta = new Delta<Setting>();
         var updatedSettingValue = JsonDocument.Parse("{\"color\": \"white\"}");
         fakeDelta.TrySetPropertyValue(nameof(Setting.Value), updatedSettingValue);
-        var updatedLeaveTypeId = FakeSettingsProvider.AcceptedSettingId;
+        var updatedSettingId = FakeSettingsProvider.AcceptedSettingId;
         //When
-        var result = await sut.Patch(updatedLeaveTypeId, fakeDelta);
+        var result = await sut.Patch(updatedSettingId, fakeDelta);
         //Then
         result.Should().BeOfType<UpdatedODataResult<Setting>>();
-        sut.Get(updatedLeaveTypeId).Queryable.First().Should().BeEquivalentTo(new
+        sut.Get(updatedSettingId).Queryable.First().Should().BeEquivalentTo(new
             {
                 Name = updatedSettingValue
             }, o => o.ExcludingMissingMembers()

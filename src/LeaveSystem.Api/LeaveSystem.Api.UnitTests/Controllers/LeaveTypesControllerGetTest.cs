@@ -1,8 +1,6 @@
-using FluentAssertions;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.UnitTests.TestExtensions;
 using LeaveSystem.Db;
-using LeaveSystem.Db.Entities;
 using LeaveSystem.UnitTests;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
