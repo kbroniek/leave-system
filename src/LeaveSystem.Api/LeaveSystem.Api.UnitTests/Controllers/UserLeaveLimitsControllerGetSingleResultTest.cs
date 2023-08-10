@@ -7,22 +7,22 @@ using LeaveSystem.UnitTests.Providers;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
 
-public class SettingsControllerGetSingleResultTest
+public class UserLeaveLimitsControllerGetSingleResultTest
 {
     [Fact]
-    public async Task WhenNoSettingWithProvidedId_ThenReturnEmptyResult()
+    public async Task WhenNoUserLeaveLimitWithProvidedId_ThenReturnEmptyResult()
     {
         //Given
-        var fakeLeaveTypes = FakeSettingsProvider.GetSettings();
+        var fakeLimits = FakeUserLeaveLimitProvider.GetLimits();
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        await dbContext.Settings.AddRangeAsync(fakeLeaveTypes);
-        var fakeId = Guid.NewGuid().ToString();
-        var sut = new SettingsController(dbContext);
+        await dbContext.UserLeaveLimits.AddRangeAsync(fakeLimits);
+        var fakeId = Guid.NewGuid();
+        var sut = new UserLeaveLimitsController(dbContext);
         //When
         var result = sut.Get(fakeId);
         //Then
         result.Queryable.Should().BeEquivalentTo(
-            Enumerable.Empty<LeaveType>()
+            Enumerable.Empty<UserLeaveLimit>()
         );
     }
     
@@ -30,18 +30,17 @@ public class SettingsControllerGetSingleResultTest
     public async Task WhenLeaveTypeWithThisIdExists_ThenReturnResult()
     {
         //Given
-        var fakeLeaveTypes = FakeSettingsProvider.GetSettings();
+        var fakeUserLeaveLimits = FakeUserLeaveLimitProvider.GetLimits();
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        await dbContext.Settings.AddRangeAsync(fakeLeaveTypes);
+        await dbContext.UserLeaveLimits.AddRangeAsync(fakeUserLeaveLimits);
         await dbContext.SaveChangesAsync();
-        var fakeId = FakeSettingsProvider.AcceptedSettingId;
-        var sut = new SettingsController(dbContext);
+        var fakeId = FakeUserLeaveLimitProvider.FakeLimitForHolidayLeaveId;
+        var sut = new UserLeaveLimitsController(dbContext);
         //When
         var result = sut.Get(fakeId);
         //Then
         result.Queryable.Should().BeEquivalentTo(
-            new [] {FakeSettingsProvider.GetAcceptedSetting()}
-            , o => o.ComparingByMembers<JsonElement>()
+            new [] {FakeUserLeaveLimitProvider.GetLimitForHolidayLeave()}
         );
     }
 }
