@@ -2,7 +2,7 @@
 using Azure.Identity;
 using Microsoft.Graph;
 
-namespace LeaveSystem.Api.Factories;
+namespace LeaveSystem.Api.GraphApi;
 
 public class GraphClientFactory
 {

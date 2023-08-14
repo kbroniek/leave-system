@@ -1,15 +1,16 @@
-﻿using LeaveSystem.Api.Factories;
+﻿using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
+using GraphClientFactory = LeaveSystem.Api.GraphApi.GraphClientFactory;
 
 namespace LeaveSystem.Api.Endpoints.Employees;
 
 public class GetGraphUserService
 {
-    private readonly Factories.GraphClientFactory graphClientFactory;
+    private readonly GraphClientFactory graphClientFactory;
     private readonly string roleAttributeName;
 
-    public GetGraphUserService(Factories.GraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
+    public GetGraphUserService(GraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
     {
         this.graphClientFactory = graphClientFactory;
         roleAttributeName = roleAttributeNameResolver.RoleAttributeName;

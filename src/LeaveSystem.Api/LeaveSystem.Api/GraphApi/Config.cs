@@ -1,7 +1,7 @@
 ﻿using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Roles;
 
-namespace LeaveSystem.Api.Factories;
+namespace LeaveSystem.Api.GraphApi;
 
 public static class Config
 {
