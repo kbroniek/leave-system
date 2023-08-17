@@ -8,10 +8,10 @@ namespace LeaveSystem.Api.Endpoints.Roles;
 
 public class UserRolesGraphService
 {
-    private readonly GraphClientFactory graphClientFactory;
+    private readonly IGraphClientFactory graphClientFactory;
     private readonly string roleAttributeName;
 
-    public UserRolesGraphService(GraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
+    public UserRolesGraphService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
     {
         this.graphClientFactory = graphClientFactory;
         roleAttributeName = roleAttributeNameResolver.RoleAttributeName;
@@ -54,7 +54,7 @@ public class UserRolesGraphService
             }, cancellationToken);
     }
 
-    public record class GraphUserRole(string Id, IEnumerable<string> Roles)
+    public record GraphUserRole(string Id, IEnumerable<string> Roles)
     {
         public static GraphUserRole Create(string id, IDictionary<string, object>? additionalData, string roleAttributeName) =>
             new(id, RoleAttributeNameResolver.MapRoles(additionalData, roleAttributeName).Roles);
