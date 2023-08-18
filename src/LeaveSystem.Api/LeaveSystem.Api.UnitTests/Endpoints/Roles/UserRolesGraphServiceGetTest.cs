@@ -1,16 +1,13 @@
 using System.Text.Json;
 using FluentAssertions;
-using LamarCodeGeneration.Frames;
 using LeaveSystem.Api.Endpoints.Roles;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Api.UnitTests.Stubs;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
 using Moq;
-using NSubstitute;
-using GraphClientFactory = LeaveSystem.Api.GraphApi.GraphClientFactory;
 
-namespace LeaveSystem.Api.UnitTests.Endoioints;
+namespace LeaveSystem.Api.UnitTests.Endpoints.Roles;
 
 public class UserRolesGraphServiceGetTest
 {
