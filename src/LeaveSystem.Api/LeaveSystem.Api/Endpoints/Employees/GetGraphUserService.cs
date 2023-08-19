@@ -7,10 +7,10 @@ namespace LeaveSystem.Api.Endpoints.Employees;
 
 public class GetGraphUserService
 {
-    private readonly GraphClientFactory graphClientFactory;
+    private readonly IGraphClientFactory graphClientFactory;
     private readonly string roleAttributeName;
 
-    public GetGraphUserService(GraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
+    public GetGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
     {
         this.graphClientFactory = graphClientFactory;
         roleAttributeName = roleAttributeNameResolver.RoleAttributeName;

@@ -56,9 +56,7 @@ public class UserRolesGraphServiceUpdateTest
             },
             o => o
                 .Using<Dictionary<string,object>>(CompareAdditionalData)
-                .When(i => i.Path.EndsWith(nameof(User.AdditionalData)
-                    )
-                )
+                .When(i => i.Path.EndsWith(nameof(User.AdditionalData)))
         );
     }
 
