@@ -12,7 +12,6 @@ namespace LeaveSystem.Db;
 public class LeaveSystemDbContext : DbContext
 {
     public LeaveSystemDbContext(DbContextOptions<LeaveSystemDbContext> options) : base(options) { }
-    public LeaveSystemDbContext() { }
     public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
     public DbSet<Setting> Settings { get; set; }
