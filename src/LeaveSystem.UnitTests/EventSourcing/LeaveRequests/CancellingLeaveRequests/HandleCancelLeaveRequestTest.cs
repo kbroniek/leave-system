@@ -37,14 +37,15 @@ public class HandleCancelLeaveRequestTest
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenUpdate()
     {
         //Given
+        var now = DateTimeOffset.Now;
         var createdEvent = LeaveRequestCreated.Create(
             command.LeaveRequestId,
-            new DateTimeOffset(638242288542961190, TimeSpan.Zero),
-            new DateTimeOffset(638242288542961190, TimeSpan.Zero),
+            now + TimeSpan.FromDays(1),
+            now + TimeSpan.FromDays(4),
             TimeSpan.FromHours(8),
             Guid.NewGuid(),
             "fakeRemarks",
-            FederatedUser.Create("2", "filip@fake.com", "Filip")
+            command.CanceledBy
             );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createdEvent);
         repositoryMock
@@ -56,7 +57,7 @@ public class HandleCancelLeaveRequestTest
         //Then
         leaveRequest.Should().BeEquivalentTo(new
         {
-            Status = LeaveRequestStatus.Accepted,
+            Status = LeaveRequestStatus.Canceled,
             LastModifiedBy = command.CanceledBy,
             Remarks = new[]
             {

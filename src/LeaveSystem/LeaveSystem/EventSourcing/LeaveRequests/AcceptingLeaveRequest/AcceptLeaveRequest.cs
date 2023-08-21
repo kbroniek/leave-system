@@ -27,4 +27,12 @@ internal class HandleAcceptLeaveRequest : HandleBasicLeaveRequestAction<AcceptLe
     public HandleAcceptLeaveRequest(IRepository<LeaveRequest> repository) : base(repository)
     {
     }
+
+    public override async Task<Unit> Handle(AcceptLeaveRequest command, CancellationToken cancellationToken)
+    {
+        var leaveRequest = await GetLeaveRequestAsync(command, cancellationToken);
+        leaveRequest.Accept(command.Remarks, command.AcceptedBy);
+        await UpdateAndSaveChangesAsync(leaveRequest, cancellationToken);
+        return Unit.Value;
+    }
 }

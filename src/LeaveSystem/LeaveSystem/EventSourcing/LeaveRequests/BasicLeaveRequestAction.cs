@@ -35,22 +35,23 @@ internal abstract class HandleBasicLeaveRequestAction<T> :
 {
     private readonly IRepository<LeaveRequest> repository;
 
-    public HandleBasicLeaveRequestAction(IRepository<LeaveRequest> repository)
+    protected HandleBasicLeaveRequestAction(IRepository<LeaveRequest> repository)
     {
         this.repository = repository;
     }
 
-    public async Task<Unit> Handle(T command, CancellationToken cancellationToken)
+    public abstract Task<Unit> Handle(T command, CancellationToken cancellationToken);
+
+    protected async Task<LeaveRequest> GetLeaveRequestAsync(T command, CancellationToken cancellationToken)
     {
-        var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
-                           ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
+        return await repository.FindById(command.LeaveRequestId, cancellationToken)
+               ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
+    }
 
-        leaveRequest.Accept(command.Remarks, command.DidBy);
-
+    protected async Task UpdateAndSaveChangesAsync(LeaveRequest leaveRequest, CancellationToken cancellationToken)
+    {
         await repository.Update(leaveRequest, cancellationToken);
 
         await repository.SaveChanges(cancellationToken);
-
-        return Unit.Value;
     }
 }
