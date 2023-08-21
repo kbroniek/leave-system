@@ -26,6 +26,7 @@ public class LeaveSystemDbContext : DbContext
 
     private void OnSettingsCreating(ModelBuilder modelBuilder)
     {
+        var settingValueConverter = new TypeToJsonConverter<JsonDocument>();
         modelBuilder.Entity<Setting>()
              .HasKey(e => e.Id);
         modelBuilder.Entity<Setting>()
@@ -35,7 +36,8 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<Setting>()
             .Property(b => b.Value)
             .IsRequired(true)
-            .HasColumnType("jsonb");
+            .HasColumnType("jsonb")
+            .HasConversion(settingValueConverter);
     }
 
     private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)

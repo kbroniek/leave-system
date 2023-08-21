@@ -1,5 +1,6 @@
 ﻿using GoldenEye.Repositories;
 using LeaveSystem.Shared;
+using MediatR;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 
@@ -22,5 +23,13 @@ internal class HandleCancelLeaveRequest : HandleBasicLeaveRequestAction<CancelLe
 {
     public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository): base(repository)
     {
+    }
+
+    public override async Task<Unit> Handle(CancelLeaveRequest command, CancellationToken cancellationToken)
+    {
+        var leaveRequest = await GetLeaveRequestAsync(command, cancellationToken);
+        leaveRequest.Cancel(command.Remarks, command.CanceledBy);
+        await UpdateAndSaveChangesAsync(leaveRequest, cancellationToken);
+        return Unit.Value;
     }
 }
