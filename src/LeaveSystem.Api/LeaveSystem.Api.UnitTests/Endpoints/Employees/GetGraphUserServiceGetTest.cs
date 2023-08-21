@@ -62,19 +62,22 @@ public class GetGraphUserServiceGetTest
             {
                 Id = users[0].Id,
                 Email = users[0].Mail,
-                Roles = Enumerable.Empty<string>()
+                Roles = Enumerable.Empty<string>(),
+                Name = users[0].DisplayName
             },
             new
             {
                 Id = users[1].Id,
                 Email = users[1].Mail,
-                Roles = fakeRolesAttribute.Roles
+                Roles = fakeRolesAttribute.Roles,
+                Name = users[1].DisplayName
             },
             new
             {
                 Id = users[2].Id,
                 Email = users[2].Mail,
-                Roles = fakeRolesAttribute.Roles
+                Roles = fakeRolesAttribute.Roles,
+                Name = users[2].DisplayName
             },
             
         }, o => o.ExcludingMissingMembers());

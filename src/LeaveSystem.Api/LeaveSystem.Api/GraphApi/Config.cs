@@ -18,7 +18,7 @@ public static class Config
     {
         var settings = configuration.Get<AppSettings>();
         services
-            .AddScoped(_ => GraphClientFactory.Create(settings.TenantId,
+            .AddScoped<IGraphClientFactory, GraphClientFactory>(_ => GraphClientFactory.Create(settings.TenantId,
                                             settings.ClientId,
                                             settings.Secret,
                                             settings.Scopes))

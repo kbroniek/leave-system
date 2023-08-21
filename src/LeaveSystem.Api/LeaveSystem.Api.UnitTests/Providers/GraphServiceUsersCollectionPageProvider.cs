@@ -16,7 +16,8 @@ public class GraphServiceUsersCollectionPageProvider
                 {
                     { "fakeKey", "fakeData" }
                 },
-                Mail = "fake@mail.com"
+                Mail = "fake@mail.com",
+                DisplayName = "fake.tom"
             },
             new()
             {
@@ -41,7 +42,8 @@ public class GraphServiceUsersCollectionPageProvider
                     },
                     { roleAttributeName, rolesJson }
                 },
-                Mail = "fake1@mail.com"
+                Mail = "fake1@mail.com",
+                DisplayName = "fake.jack"
             },
             new()
             {
@@ -50,7 +52,8 @@ public class GraphServiceUsersCollectionPageProvider
                 {
                     { roleAttributeName, rolesJson }
                 },
-                Mail = "fake3@mail.com"
+                Mail = "fake3@mail.com",
+                DisplayName = "fake.bruce"
             },
         };
     }
