@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using LeaveSystem.Db.Entities;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -29,6 +30,19 @@ namespace LeaveSystem.Migrations
                         principalTable: "LeaveTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Settings",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Category = table.Column<string>(type: "text", nullable: false),
+                    Value = table.Column<JsonDocument>(type: "jsonb", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Settings", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -81,6 +95,9 @@ namespace LeaveSystem.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Settings");
+
             migrationBuilder.DropTable(
                 name: "UserLeaveLimits");
 

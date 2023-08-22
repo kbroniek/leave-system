@@ -1,32 +1,42 @@
-﻿using GoldenEye.Commands;
+﻿using Ardalis.GuardClauses;
+using GoldenEye.Commands;
 using GoldenEye.Queries;
 using LeaveSystem.Api.Endpoints.Employees;
-using LeaveSystem.Api.Endpoints.Roles;
+using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
+using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace LeaveSystem.Api.Db;
 public static class DbContextExtenstions
 {
-    private class DbContextExtenstionsLogger { }
+    private sealed class DbContextExtenstionsLogger { }
     private static readonly TimeSpan workingHours = WorkingHoursCollection.DefaultWorkingHours;
     private const string DefaultUserEmail = "karolbr5@gmail.com";
-    private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22", DefaultUserEmail, "Karol Volt");
+    private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22", DefaultUserEmail, "Karol Volt", new[] { RoleType.GlobalAdmin.ToString() });
     private static FederatedUser defaultUser;
     private static FederatedUser[] testUsers = Array.Empty<FederatedUser>();
     private static readonly FederatedUser[] testUserMock = new[]
     {
-        FederatedUser.Create("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski"),
-        FederatedUser.Create("88fa3c20-0c52-4da4-8389-868d9a487aa0", "mnowak@test.com", "Maria Nowak"),
-        FederatedUser.Create("1374e2d6-15f5-4543-b7bf-95118701f315", "jszczepanek@test.com", "Jadwiga Szczepanek"),
-        FederatedUser.Create("59ed14ff-edc4-421c-8f22-28973f4ccd76", "aszewczyk@test.com", "Aleksandra Szewczyk"),
-        FederatedUser.Create("d5ff6b57-a701-4ce8-82ef-593ef207fb76", "ourbanek@test.com", "Olgierd Urbanek")
+        FederatedUser.Create("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski", new[] { RoleType.DecisionMaker.ToString() }),
+        FederatedUser.Create("88fa3c20-0c52-4da4-8389-868d9a487aa0", "mnowak@test.com", "Maria Nowak", new[] { RoleType.HumanResource.ToString() }),
+        FederatedUser.Create("1374e2d6-15f5-4543-b7bf-95118701f315", "jszczepanek@test.com", "Jadwiga Szczepanek", new[] { RoleType.LeaveLimitAdmin.ToString() }),
+        FederatedUser.Create("59ed14ff-edc4-421c-8f22-28973f4ccd76", "aszewczyk@test.com", "Aleksandra Szewczyk", new[] { RoleType.UserAdmin.ToString() }),
+        FederatedUser.Create("d5ff6b57-a701-4ce8-82ef-593ef207fb76", "ourbanek@test.com", "Olgierd Urbanek", new[] { RoleType.Employee.ToString() })
+    };
+    private static Setting[] settings = new Setting[]
+    {
+        new Setting {Id = LeaveRequestStatus.Canceled.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#525252\"}") },
+        new Setting {Id = LeaveRequestStatus.Rejected.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#850000\"}") },
+        new Setting {Id = LeaveRequestStatus.Pending.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#CFFF98\"}") },
+        new Setting {Id = LeaveRequestStatus.Accepted.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"transparent\"}") }
     };
     private static LeaveType holidayLeave = new LeaveType
     {
@@ -37,7 +47,7 @@ public static class DbContextExtenstions
         {
             DefaultLimit = workingHours * 26,
             IncludeFreeDays = false,
-            Color = "blue",
+            Color = "#0137C9",
             Catalog = LeaveTypeCatalog.Holiday,
         }
     };
@@ -51,7 +61,7 @@ public static class DbContextExtenstions
         {
             DefaultLimit = workingHours * 4,
             IncludeFreeDays = false,
-            Color = "yellow",
+            Color = "#B88E1E",
             Catalog = LeaveTypeCatalog.OnDemand,
         }
     };
@@ -63,7 +73,7 @@ public static class DbContextExtenstions
         Properties = new LeaveType.LeaveTypeProperties
         {
             IncludeFreeDays = true,
-            Color = "red",
+            Color = "#FF3333",
             Catalog = LeaveTypeCatalog.Sick,
         }
     };
@@ -76,7 +86,7 @@ public static class DbContextExtenstions
         {
             DefaultLimit = workingHours,
             IncludeFreeDays = false,
-            Color = "red",
+            Color = "#FFFF33",
             Catalog = LeaveTypeCatalog.Saturday,
         }
     };
@@ -108,56 +118,75 @@ public static class DbContextExtenstions
         await using (var scope = app.ApplicationServices.CreateAsyncScope())
         {
             var services = scope.ServiceProvider;
+            var logger = services.GetRequiredService<ILogger<DbContextExtenstionsLogger>>();
             try
             {
                 var dbContext = services.GetRequiredService<LeaveSystemDbContext>();
                 var graphUserService = services.GetRequiredService<GetGraphUserService>();
-                var roleGraphUserService = services.GetRequiredService<UserRolesGraphService>();
+                var saveGraphUserService = services.GetRequiredService<SaveGraphUserService>();
                 var graphUsers = await graphUserService.Get(cancellationToken);
-                defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email, defaultUserMock.Name);
+                defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email, defaultUserMock.Name, defaultUserMock.Roles);
                 testUsers = testUserMock
-                    .Select(t => CreateFederatedUser(graphUsers, t.Id, t.Email, t.Name))
+                    .Select(t => CreateFederatedUser(graphUsers, t.Id, t.Email, t.Name, t.Roles))
                     .Union(new FederatedUser[] { defaultUser })
                     .ToArray();
-                //TODO: Create user in graph if missing.
-                await FillInGraphRoles(roleGraphUserService, cancellationToken);
+                await FillInGraphUsers(graphUsers, saveGraphUserService, logger, cancellationToken);
                 await FillInSimpleData(dbContext);
                 await FillInLeaveRequests(services);
             }
             catch (Exception ex)
             {
-                var logger = services.GetRequiredService<ILogger<DbContextExtenstionsLogger>>();
-                logger.LogError(ex, "Something wrong happened when fill in database.");
+                logger.LogError(ex, "Something went wrong when fill in database.");
             }
         }
     }
 
-    private static FederatedUser CreateFederatedUser(IEnumerable<FederatedUser> graphUsers, string id, string? email, string? name)
+    private static FederatedUser CreateFederatedUser(IEnumerable<FederatedUser> graphUsers, string id, string? email, string? name, IEnumerable<string> roles)
     {
         var graphUser = graphUsers.FirstOrDefault(u =>
             string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase) ||
             string.Equals(u.Name, name, StringComparison.OrdinalIgnoreCase));
-        return FederatedUser.Create(graphUser.Id ?? id, graphUser.Email ?? email, graphUser.Name ?? name);
+        return FederatedUser.Create(graphUser.Id ?? id, graphUser.Email ?? email, graphUser.Name ?? name, roles);
     }
 
-    private static async Task FillInGraphRoles(UserRolesGraphService userRolesGraphService, CancellationToken cancellationToken)
+    private static async Task FillInGraphUsers(IEnumerable<FederatedUser> graphUsers, SaveGraphUserService saveGraphUserService, ILogger<DbContextExtenstionsLogger> logger, CancellationToken cancellationToken)
     {
-        var userRoles = await userRolesGraphService.Get(cancellationToken);
-        if (!userRoles.Where(u => testUsers.Any(t => t.Id == u.Id)).All(u => u.Roles.Count() > 0))
+        try
         {
-            await userRolesGraphService.Update(defaultUser.Id, new[] { RoleType.GlobalAdmin.ToString() }, cancellationToken);
-            await userRolesGraphService.Update(testUsers[0].Id, new[] { RoleType.DecisionMaker.ToString() }, cancellationToken);
-            await userRolesGraphService.Update(testUsers[1].Id, new[] { RoleType.HumanResource.ToString() }, cancellationToken);
-            await userRolesGraphService.Update(testUsers[2].Id, new[] { RoleType.LeaveLimitAdmin.ToString() }, cancellationToken);
-            await userRolesGraphService.Update(testUsers[3].Id, new[] { RoleType.UserAdmin.ToString() }, cancellationToken);
-            await userRolesGraphService.Update(testUsers[4].Id, new[] { RoleType.Employee.ToString() }, cancellationToken);
+            var usersToAdd = testUsers.Where(u => !graphUsers.Any(g => u.Id == g.Id));
+            foreach (var userToAdd in usersToAdd)
+            {
+                Guard.Against.Null(userToAdd.Email);
+                await saveGraphUserService.Add(userToAdd.Email, userToAdd.Name, userToAdd.Roles, cancellationToken);
+            }
+            var usersToUpdate = testUsers.Where(u => IsRoleNotEqual(graphUsers, u));
+            foreach (var userToUpdate in usersToUpdate)
+            {
+                await saveGraphUserService.Update(userToUpdate.Id, userToUpdate.Email, userToUpdate.Name, userToUpdate.Roles, cancellationToken);
+            }
         }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Something went wrong when fill in users in the Azure.");
+        }
+    }
+
+    private static bool IsRoleNotEqual(IEnumerable<FederatedUser> graphUsers, FederatedUser federatedUser)
+    {
+        var usersFound = graphUsers.Where(g => federatedUser.Id == g.Id);
+        if (!usersFound.Any())
+        {
+            return false;
+        }
+        var userFound = usersFound.First();
+        return !userFound.Roles.SequenceEqual(federatedUser.Roles);
     }
 
     private static async Task FillInSimpleData(LeaveSystemDbContext dbContext)
     {
         await dbContext.FillInLeaveTypes();
-        await dbContext.FillInUserLeaveLimit();
+        await dbContext.FillInUserLeaveLimits();
+        await dbContext.FillInSettings();
         await dbContext.SaveChangesAsync();
     }
 
@@ -356,7 +385,7 @@ public static class DbContextExtenstions
         return leaveRequestId;
     }
 
-    private static async Task FillInUserLeaveLimit(this LeaveSystemDbContext dbContext)
+    private static async Task FillInUserLeaveLimits(this LeaveSystemDbContext dbContext)
     {
         if (await dbContext.UserLeaveLimits.AnyAsync())
         {
@@ -432,70 +461,70 @@ public static class DbContextExtenstions
                 Id = Guid.NewGuid(),
                 Name = "urlop okolicznościowy",
                 Order = 4,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#30D5C8" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop wychowawczy",
                 Order = 5,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#2EB82E" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop macierzyński",
                 Order = 6,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop bezpłatny",
                 Order = 7,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#0033CC" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "opieka nad chorym dzieckiem lub innym członkiem rodziny",
                 Order = 8,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF3333" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "nieobecność usprawiedliwiona płatna",
                 Order = 9,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#80AAFF" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "nieobecność nieusprawiedliwiona",
                 Order = 10,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#0066FF" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "opieka nad dzieckiem do 14 lat - art. 188 KP",
                 Order = 11,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF4DA6" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop ojcowski",
                 Order = 12,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop tacierzyński",
                 Order = 13,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
                 saturdayLeave,
                 new LeaveType
@@ -503,14 +532,14 @@ public static class DbContextExtenstions
                 Id = Guid.NewGuid(),
                 Name = "urlop od firmy",
                 Order = 15,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "#0137C9" }
             },
                 new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop szkoleniowy",
                 Order = 16,
-                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "red" }
+                Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "blue" }
             }
         };
         await dbContext.LeaveTypes.AddRangeAsync(leaveTypes);
@@ -520,5 +549,14 @@ public static class DbContextExtenstions
     {
         //return new DateTimeOffset(2023, 2, 1, 0, 0, 0, TimeSpan.Zero);
         return DateTimeOffset.Now;
+    }
+
+    private static async Task FillInSettings(this LeaveSystemDbContext dbContext)
+    {
+        if (await dbContext.Settings.AnyAsync())
+        {
+            return;
+        }
+        await dbContext.Settings.AddRangeAsync(settings);
     }
 }

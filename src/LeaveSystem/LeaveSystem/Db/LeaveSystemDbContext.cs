@@ -1,4 +1,5 @@
 ﻿using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -9,11 +10,27 @@ public class LeaveSystemDbContext : DbContext
 
     public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
+    public DbSet<Setting> Settings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         OnLeaveTypeCreating(modelBuilder);
         OnUserLeaveLimitCreating(modelBuilder);
+        OnSettingsCreating(modelBuilder);
+    }
+
+    private void OnSettingsCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Setting>()
+             .HasKey(e => e.Id);
+        modelBuilder.Entity<Setting>()
+            .Property(b => b.Category)
+            .IsRequired(true)
+            .HasConversion(new EnumToStringConverter<SettingCategoryType>());
+        modelBuilder.Entity<Setting>()
+            .Property(b => b.Value)
+            .IsRequired(true)
+            .HasColumnType("jsonb");
     }
 
     private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)

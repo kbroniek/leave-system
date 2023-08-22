@@ -4,6 +4,7 @@ using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
+using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Api.Factories;
 using LeaveSystem.Db.Entities;
@@ -40,6 +41,7 @@ IEdmModel GetEdmModel()
     var builder = new ODataConventionModelBuilder();
     builder.EntitySet<LeaveType>("LeaveTypes");
     builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
+    builder.EntitySet<Setting>("Settings");
 
     return builder.GetEdmModel();
 }
@@ -88,7 +90,8 @@ var azureScpes = app.Configuration[$"{azureConfigSection}:Scopes"];
 app
     .AddLeaveRequestEndpoints(azureScpes)
     .AddWorkingHoursEndpoints(azureScpes)
-    .AddEmployeesEndpoints(azureScpes);
+    .AddEmployeesEndpoints(azureScpes)
+    .AddUsersEndpoints(azureScpes);
 
 app.MigrateDb();
 if (app.Environment.IsDevelopment())
