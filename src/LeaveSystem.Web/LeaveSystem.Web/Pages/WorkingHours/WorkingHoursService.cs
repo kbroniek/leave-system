@@ -14,7 +14,7 @@ public class WorkingHoursService
         this.httpClient = httpClient;
     }
 
-    public async Task<WorkingHoursCollection> GetWorkingHours(IEnumerable<string> userIds, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public virtual async Task<WorkingHoursCollection> GetWorkingHours(IEnumerable<string> userIds, DateTimeOffset dateFrom, DateTimeOffset dateTo)
     {
         var query = new
         {
@@ -27,7 +27,7 @@ public class WorkingHoursService
         return new WorkingHoursCollection(workingHours?.WorkingHours ?? Enumerable.Empty<WorkingHoursModel>());
     }
 
-    public async Task<WorkingHoursCollection> GetUserWorkingHours(string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public virtual async Task<WorkingHoursCollection> GetUserWorkingHours(string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo)
     {
         var query = new
         {

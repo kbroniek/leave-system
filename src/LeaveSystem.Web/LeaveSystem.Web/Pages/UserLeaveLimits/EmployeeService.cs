@@ -13,9 +13,9 @@ public class EmployeeService
         this.httpClient = httpClient;
     }
 
-    public Task<GetEmployeeDto?> Get(string id) =>
+    public virtual Task<GetEmployeeDto?> Get(string id) =>
         httpClient.GetFromJsonAsync<GetEmployeeDto>($"api/employees/{id}", new JsonSerializerOptions(JsonSerializerDefaults.Web));
-    public async Task<IEnumerable<GetEmployeeDto>> Get()
+    public virtual async Task<IEnumerable<GetEmployeeDto>> Get()
     {
         var employeesFromApi = await httpClient.GetFromJsonAsync<GetEmployeesDto>("api/employees", new JsonSerializerOptions(JsonSerializerDefaults.Web));
         return employeesFromApi?.Items.Where(e => e != null) ?? Enumerable.Empty<GetEmployeeDto>();

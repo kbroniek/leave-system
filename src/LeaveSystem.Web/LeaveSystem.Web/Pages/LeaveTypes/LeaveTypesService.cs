@@ -14,7 +14,7 @@ public class LeaveTypesService
         this.httpClient = httpClient;
     }
 
-    public async Task<IEnumerable<LeaveTypeDto>> GetLeaveTypes()
+    public virtual async Task<IEnumerable<LeaveTypeDto>> GetLeaveTypes()
     {
         var leaveTypes = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<LeaveTypeDto>>>("odata/LeaveTypes?$select=Id,BaseLeaveTypeId,Name,Properties&$orderby=Order asc", new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
@@ -25,7 +25,7 @@ public class LeaveTypesService
         });
         return leaveTypes?.Data ?? Enumerable.Empty<LeaveTypeDto>();
     }
-    public Task<LeaveTypeDto?> GetLeaveType(Guid leaveTypeId)
+    public virtual Task<LeaveTypeDto?> GetLeaveType(Guid leaveTypeId)
     {
         return httpClient.GetFromJsonAsync<LeaveTypeDto>($"odata/LeaveTypes({leaveTypeId})?$select=Id,BaseLeaveTypeId,Name,Properties", new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
