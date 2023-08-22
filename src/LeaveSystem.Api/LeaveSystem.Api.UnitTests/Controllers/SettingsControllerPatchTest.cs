@@ -67,7 +67,7 @@ public class SettingsControllerPatchTest
         mockSet.Setup(m => m.FindAsync(new object[] {fakeSetting.Id}, default))
             .ReturnsAsync(fakeSetting);
 
-        var dbContextMock = new Mock<LeaveSystemDbContext>();
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<Setting>())
@@ -91,7 +91,7 @@ public class SettingsControllerPatchTest
         mockSet.Setup(m => m.FindAsync(new object[] {fakeSetting.Id}, default))
             .ReturnsAsync(fakeSetting);
 
-        var dbContextMock = new Mock<LeaveSystemDbContext>();
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<Setting>())

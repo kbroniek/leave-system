@@ -7,6 +7,7 @@ using LeaveSystem.UnitTests.Providers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Results;
+using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
 using DbUpdateConcurrencyException = Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException;
@@ -67,7 +68,7 @@ public class LeaveTypesControllerPatchTest
         mockSet.Setup(m => m.FindAsync(new object[] {fakeLeave.Id}, default))
             .ReturnsAsync(fakeLeave);
 
-        var dbContextMock = new Mock<LeaveSystemDbContext>();
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<LeaveType>())
@@ -90,7 +91,7 @@ public class LeaveTypesControllerPatchTest
         mockSet.Setup(m => m.FindAsync(new object[] {fakeLeave.Id}, default))
             .ReturnsAsync(fakeLeave);
 
-        var dbContextMock = new Mock<LeaveSystemDbContext>();
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<LeaveType>())

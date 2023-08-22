@@ -71,7 +71,7 @@ public class SettingsControllerPutTest
         await dbContext.AddAsync(fakeSettingFromDb);
         await dbContext.SaveChangesAsync();
 
-        var dbContextMock = new Mock<LeaveSystemDbContext>();
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<Setting>())

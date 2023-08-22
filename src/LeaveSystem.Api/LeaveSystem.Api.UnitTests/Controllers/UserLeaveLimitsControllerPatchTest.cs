@@ -67,7 +67,7 @@ public class UserLeaveLimitsControllerPatchTest
         mockSet.Setup(m => m.FindAsync(new object[] {fakeLimit.Id}, default))
             .ReturnsAsync(fakeLimit);
 
-        var dbContextMock = new Mock<LeaveSystemDbContext>();
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<UserLeaveLimit>())
@@ -91,7 +91,7 @@ public class UserLeaveLimitsControllerPatchTest
         mockSet.Setup(m => m.FindAsync(new object[] {fakeLimit.Id}, default))
             .ReturnsAsync(fakeLimit);
 
-        var dbContextMock = new Mock<LeaveSystemDbContext>();
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<UserLeaveLimit>())
