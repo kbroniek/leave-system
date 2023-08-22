@@ -1,4 +1,5 @@
-﻿using GoldenEye.Marten.Registration;
+﻿using System.Runtime.CompilerServices;
+using GoldenEye.Marten.Registration;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing;
 using LeaveSystem.Services;

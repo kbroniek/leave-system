@@ -25,18 +25,16 @@ public class CreateLeaveRequestValidator
     public virtual void BasicValidate(LeaveRequestCreated creatingLeaveRequest, TimeSpan minDuration, TimeSpan maxDuration, bool? includeFreeDays)
     {
         Guard.Against.OutOfRange(creatingLeaveRequest.Duration, nameof(creatingLeaveRequest.Duration), minDuration, maxDuration);
-        if (includeFreeDays == false)
+        if (includeFreeDays != false) return;
+        var dateFromDayKind = DateCalculator.GetDayKind(creatingLeaveRequest.DateFrom);
+        if (dateFromDayKind != DateCalculator.DayKind.WORKING)
         {
-            var dateFromDayKind = DateCalculator.GetDayKind(creatingLeaveRequest.DateFrom);
-            if (dateFromDayKind != DateCalculator.DayKind.WORKING)
-            {
-                throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateFrom), "The date is off work.");
-            }
-            var dateToDayKind = DateCalculator.GetDayKind(creatingLeaveRequest.DateTo);
-            if (dateToDayKind != DateCalculator.DayKind.WORKING)
-            {
-                throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateTo), "The date is off work.");
-            }
+            throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateFrom), "The date is off work.");
+        }
+        var dateToDayKind = DateCalculator.GetDayKind(creatingLeaveRequest.DateTo);
+        if (dateToDayKind != DateCalculator.DayKind.WORKING)
+        {
+            throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateTo), "The date is off work.");
         }
     }
 

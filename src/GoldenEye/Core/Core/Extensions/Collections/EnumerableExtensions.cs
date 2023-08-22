@@ -181,7 +181,7 @@ public static class EnumerableExtensions
     public static T GetById<T>(this IEnumerable<T> source, object id)
         where T : IHaveId
     {
-        return source.SingleOrDefault(el => el.Id == id);
+        return source.SingleOrDefault(el => el.Id.Equals(id));
     }
 
     public static IEnumerable<TSource> DistinctBy<TSource, TProperty, TOrderProperty>(

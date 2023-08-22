@@ -2,9 +2,9 @@
 using Azure.Identity;
 using Microsoft.Graph;
 
-namespace LeaveSystem.Api.Factories;
+namespace LeaveSystem.Api.GraphApi;
 
-public class GraphClientFactory
+public class GraphClientFactory : IGraphClientFactory
 {
     private readonly string tenantId;
     private readonly string clientId;

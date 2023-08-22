@@ -21,7 +21,7 @@ public static class ListExtensions
     public static IList<T> Replace<T>(this IList<T> source, T item)
         where T : IHaveId
     {
-        var existingItemIndex = IndexOfId(source, item);
+        var existingItemIndex = IndexOfId(source, item.Id);
 
         source[existingItemIndex] = item;
 

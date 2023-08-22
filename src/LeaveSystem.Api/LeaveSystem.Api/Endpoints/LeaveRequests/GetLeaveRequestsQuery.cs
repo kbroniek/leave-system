@@ -3,7 +3,7 @@ using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.Api.Endpoints.LeaveRequests;
 
-public record class GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTimeOffset? DateFrom, DateTimeOffset? DateTo,
+public record GetLeaveRequestsQuery(int? PageNumber, int? PageSize, DateTimeOffset? DateFrom, DateTimeOffset? DateTo,
     Guid[]? LeaveTypeIds, LeaveRequestStatus[]? Statuses, string[]? CreatedByEmails, string[]? CreatedByUserIds)
 {
     public static ValueTask<GetLeaveRequestsQuery?> BindAsync(HttpContext context)

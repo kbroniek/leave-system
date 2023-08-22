@@ -2,5 +2,5 @@
 
 public record struct RolesAttribute(IEnumerable<string> Roles)
 {
-    public static RolesAttribute Empty => new RolesAttribute(Enumerable.Empty<string>());
+    public static RolesAttribute Empty => new(Enumerable.Empty<string>());
 }

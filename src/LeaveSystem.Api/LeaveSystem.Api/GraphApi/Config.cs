@@ -1,7 +1,7 @@
 ﻿using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Users;
 
-namespace LeaveSystem.Api.Factories;
+namespace LeaveSystem.Api.GraphApi;
 
 public static class Config
 {
@@ -18,7 +18,7 @@ public static class Config
     {
         var settings = configuration.Get<AppSettings>();
         services
-            .AddScoped(_ => GraphClientFactory.Create(settings.TenantId,
+            .AddScoped<IGraphClientFactory, GraphClientFactory>(_ => GraphClientFactory.Create(settings.TenantId,
                                             settings.ClientId,
                                             settings.Secret,
                                             settings.Scopes))
