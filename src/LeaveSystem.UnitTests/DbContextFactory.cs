@@ -41,10 +41,6 @@ public static class DbContextFactory
         return dbContext;
     }
 
-    private static void Local_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-    }
-
     private static async Task AddLeaveTypesToDbAsync(LeaveSystemDbContext dbContext)
     {
         await dbContext.LeaveTypes.AddRangeAsync(
