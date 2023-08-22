@@ -36,8 +36,8 @@ public class LeaveTypesService
         });
     }
 
-    public record class LeaveTypeDto(Guid Id, Guid? BaseLeaveTypeId, string Name, LeaveTypeProperties Properties);
-    public record class LeaveTypeProperties(string? Color, LeaveTypeCatalog? Catalog, bool? IncludeFreeDays);
+    public record LeaveTypeDto(Guid Id, Guid? BaseLeaveTypeId, string Name, LeaveTypeProperties Properties);
+    public record LeaveTypeProperties(string? Color, LeaveTypeCatalog? Catalog, bool? IncludeFreeDays);
 
     private sealed class LeaveTypePropertiesConverter : JsonConverter<LeaveTypeProperties>
     {

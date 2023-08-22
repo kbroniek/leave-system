@@ -45,6 +45,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.UnitTests", "Le
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Api.UnitTests", "LeaveSystem.Api\LeaveSystem.Api.UnitTests\LeaveSystem.Api.UnitTests.csproj", "{06849FD2-5B8D-4488-B3DE-075A06803319}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Web.UnitTests", "LeaveSystem.Web\LeaveSystem.Web.UnitTests\LeaveSystem.Web.UnitTests.csproj", "{359509CA-EA51-4FAE-B853-87BDD0BDB9DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,10 @@ Global
 		{06849FD2-5B8D-4488-B3DE-075A06803319}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06849FD2-5B8D-4488-B3DE-075A06803319}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06849FD2-5B8D-4488-B3DE-075A06803319}.Release|Any CPU.Build.0 = Release|Any CPU
+		{359509CA-EA51-4FAE-B853-87BDD0BDB9DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{359509CA-EA51-4FAE-B853-87BDD0BDB9DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{359509CA-EA51-4FAE-B853-87BDD0BDB9DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{359509CA-EA51-4FAE-B853-87BDD0BDB9DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -113,6 +119,7 @@ Global
 		{9E0A9888-B83A-4DA9-B7AF-DA98C9F8FB1D} = {A529F3D4-C7B6-412E-8EF1-6D77004B23A1}
 		{7D0DE106-0E47-47B6-B10C-6B9C06DF341C} = {EC97AF10-0CF8-4EBC-B52E-8152E6EF92FE}
 		{06849FD2-5B8D-4488-B3DE-075A06803319} = {F16D4955-ECA7-49EB-ACF3-2DBA73CD9EF6}
+		{359509CA-EA51-4FAE-B853-87BDD0BDB9DF} = {B8F915BD-44BE-4A4F-A641-427E6345DAE8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E8762886-5B99-4DD1-B6A9-242FAC001B38}

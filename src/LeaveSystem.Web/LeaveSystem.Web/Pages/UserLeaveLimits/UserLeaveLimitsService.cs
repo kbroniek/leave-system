@@ -33,7 +33,7 @@ public class UserLeaveLimitsService
         return limits?.Data ?? Enumerable.Empty<LeaveLimitDto>();
     }
 
-    public record class LeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property, string AssignedToUserId)
+    public record LeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property, string AssignedToUserId)
     {
         public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
     }
