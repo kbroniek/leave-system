@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
-using System.Collections;
+﻿using System.Collections;
 using System.Globalization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+
+namespace LeaveSystem.Shared;
 
 public static class QueryStringExtensions
 {
@@ -15,19 +17,15 @@ public static class QueryStringExtensions
 
     private static StringValues ToString(object? value)
     {
-        if (value == null)
+        return value switch
         {
-            return "";
-        }
-        if (value is DateTimeOffset date)
-        {
-            return date.ToString("o", CultureInfo.InvariantCulture);
-        }
-        if (value is IEnumerable collection)
-        {
-            return new StringValues(collection.Cast<object>().Where(x => x != null).Select(x => x.ToString()).ToArray());
-        }
-        return value.ToString();
+            null => "",
+            DateTimeOffset date => date.ToString("o", CultureInfo.InvariantCulture),
+            IEnumerable collection => new StringValues(collection.Cast<object>()
+                .Where(x => x != null)
+                .Select(x => x.ToString())
+                .ToArray()),
+            _ => value.ToString()
+        };
     }
 }
-

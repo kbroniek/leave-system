@@ -142,22 +142,20 @@ else
     }
     private async Task HandleFilter()
     {
-        if (editContext != null && editContext.Validate())
-        {
-            Logger.LogInformation("[HandleSubmit]: Form is valid");
-            try
-            {
-                await GetData();
-            }
-            catch (AccessTokenNotAvailableException exception)
-            {
-                Logger.LogError(exception, "AccessTokenNotAvailableException");
-                exception.Redirect();
-            }
-        }
-        else
+        if (editContext == null || !editContext.Validate())
         {
             Logger.LogTrace("[HandleSubmit]: Form is INVALID");
+            return;
+        }
+        Logger.LogInformation("[HandleSubmit]: Form is valid");
+        try
+        {
+            await GetData();
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            Logger.LogError(exception, "AccessTokenNotAvailableException");
+            exception.Redirect();
         }
     }
     public sealed record class LeaveRequestSummary(

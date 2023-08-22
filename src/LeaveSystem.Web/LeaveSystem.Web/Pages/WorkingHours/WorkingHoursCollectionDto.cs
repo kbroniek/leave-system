@@ -2,4 +2,4 @@
 
 namespace LeaveSystem.Web.Pages.WorkingHours;
 
-public record class WorkingHoursCollectionDto(IEnumerable<WorkingHoursModel>? WorkingHours);
+public record WorkingHoursCollectionDto(IEnumerable<WorkingHoursModel>? WorkingHours);
