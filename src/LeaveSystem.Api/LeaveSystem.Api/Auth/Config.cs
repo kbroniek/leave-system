@@ -38,9 +38,9 @@ public static class Config
 
     private static IServiceCollection AddWorkingHoursAuthorization(this IServiceCollection services) =>
         services
-            .AddAuthorizationPolicy(WorkingHoursEndpoints.GetWorkingHoursEndpointsPolicyName, RoleRequirement.AuhtorizeAll)
-            .AddAuthorizationPolicy(WorkingHoursEndpoints.GetUserWorkingHoursEndpointsPolicyName, RoleRequirement.AuhtorizeAll)
-            .AddAuthorizationPolicy(WorkingHoursEndpoints.GetUserWorkingHoursDurationEndpointsPolicyName, RoleRequirement.AuhtorizeAll);
+            .AddAuthorizationPolicy(WorkingHoursEndpoints.GetWorkingHoursEndpointsPolicyName, RoleRequirement.AuthorizeAll)
+            .AddAuthorizationPolicy(WorkingHoursEndpoints.GetUserWorkingHoursEndpointsPolicyName, RoleRequirement.AuthorizeAll)
+            .AddAuthorizationPolicy(WorkingHoursEndpoints.GetUserWorkingHoursDurationEndpointsPolicyName, RoleRequirement.AuthorizeAll);
     private static IServiceCollection AddEmployeesAuthorization(this IServiceCollection services) =>
         services
             .AddAuthorizationPolicy(EmployeesEndpoints.GetEmployeesPolicyName, RoleType.DecisionMaker)
