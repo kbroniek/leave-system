@@ -3,6 +3,7 @@
 public record class UsersDto(IEnumerable<UserDto> Items);
 public class UserDto
 {
+    public UserDto() { }
     public UserDto(string? id, string? name, string? email, IEnumerable<string>? roles)
     {
         Id = id;
@@ -16,5 +17,5 @@ public class UserDto
     public string? Email { get; set; }
     public IEnumerable<string>? Roles { get; set; }
     public static UserDto Create() =>
-        new(null, null, null, null);
+        new();
 }

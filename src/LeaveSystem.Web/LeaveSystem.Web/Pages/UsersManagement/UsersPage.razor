@@ -88,7 +88,7 @@ else
     async Task EditRow(UserDto user)
     {
         userToUpdate = user;
-        if (usersGrid is null) return;
+        if (usersGrid is null) { return; }
         await usersGrid.EditRow(user);
     }
 
@@ -106,7 +106,7 @@ else
 
     async Task SaveRow(UserDto order)
     {
-        if (usersGrid is null) return;
+        if (usersGrid is null) { return; }
         await usersGrid.UpdateRow(order);
     }
 
@@ -138,13 +138,13 @@ else
         {
             await UsersService.Delete(user.Id);
 
-            if (usersGrid is null) return;
+            if (usersGrid is null) { return; }
             await usersGrid.Reload();
         }
         else
         {
             // TODO: Log an error. Can't find user to delete.
-            if (usersGrid is null) return;
+            if (usersGrid is null) { return; }
             usersGrid.CancelEditRow(user);
             await usersGrid.Reload();
         }
@@ -153,7 +153,7 @@ else
     async Task InsertRow()
     {
         userToInsert = UserDto.Create();
-        if (usersGrid is null) return;
+        if (usersGrid is null) { return; }
         await usersGrid.InsertRow(userToInsert);
     }
 
