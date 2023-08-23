@@ -8,7 +8,7 @@ public static class FakeUserProvider
 {
     public static readonly string FakseoslavId = "1";
     public static readonly string BenId = "2";
-    public static string HabibId = "2";
+    public static string HabibId = "3";
     public static string PhilipId = "4";
     public static FederatedUser GetUserWithNameFakeoslav()
     {

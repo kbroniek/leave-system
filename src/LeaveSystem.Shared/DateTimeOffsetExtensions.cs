@@ -12,6 +12,6 @@ public static class DateTimeOffsetExtensions
     public static DateTimeOffset GetLastDayOfYear(int year) =>
         new DateTimeOffset(year, 12, 31, 23, 59, 59, 999, TimeSpan.Zero);
 
-    public static DateTimeOffset Create(int year, int month, int day) =>
+    public static DateTimeOffset CreateFromDate(int year, int month, int day) =>
         new(year, month, day, 0, 0, 0, TimeSpan.Zero);
 }

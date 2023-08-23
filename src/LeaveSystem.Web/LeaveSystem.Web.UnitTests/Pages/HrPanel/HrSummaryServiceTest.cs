@@ -1,14 +1,14 @@
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.HrPanel;
+using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
+using LeaveSystem.Web.Pages.UserPanel;
 using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
-using Moq;
-using NSubstitute;
 
 namespace LeaveSystem.Web.UnitTests.Pages.HrPanel;
 
@@ -32,19 +32,51 @@ public class HrSummaryServiceTest
         var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(year);
         var httpClientMock = Substitute.For<HttpClient>();
         var getLeaveRequestsServiceMock = Substitute.For<GetLeaveRequestsService>(httpClientMock);
-        getLeaveRequestsServiceMock.GetLeaveRequests(It.IsAny<GetLeaveRequestsQuery>())
-            .ReturnsAsync(FakeLeaveRequestShortInfoProvider.GetAll(new DateTimeOffset(year, 4, 5, 0,0,0,TimeSpan.Zero))
-                .ToPagedListResponse(1000));
+        var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
+        var fakeLeaveRequests =
+            FakeLeaveRequestShortInfoProvider.GetAll(DateTimeOffsetExtensions.CreateFromDate(year, 4, 5))
+                .ToPagedListResponse(1000);
+        getLeaveRequestsServiceMock.GetLeaveRequests(ArgExtensions.IsEquivalentTo<GetLeaveRequestsQuery>(query))
+            .Returns(fakeLeaveRequests);
         var leaveTypesServiceMock = Substitute.For<LeaveTypesService>(httpClientMock);
-        leaveTypesServiceMock.GetLeaveTypes().Returns(FakeLeaveTypeDtoProvider.GetAll());
-        var userLeaveLimitsService = Substitute.For<UserLeaveLimitsService>(httpClientMock);
-        userLeaveLimitsService.GetLimits(firstDay, lastDay).Returns(FakeUserLeaveLimitsDtoProvider.GetAll(year));
+        var fakeLeaveTypes = FakeLeaveTypeDtoProvider.GetAll();
+        leaveTypesServiceMock.GetLeaveTypes().Returns(fakeLeaveTypes);
+        var userLeaveLimitsServiceMock = Substitute.For<UserLeaveLimitsService>(httpClientMock);
+        var fakeLimits = FakeUserLeaveLimitsDtoProvider.GetAll(year);
+        userLeaveLimitsServiceMock.GetLimits(firstDay, lastDay).Returns(fakeLimits);
         var employeeServiceMock = Substitute.For<EmployeeService>(httpClientMock);
-        employeeServiceMock.Get().Returns(FakeGetEmployeesDtoProvider.GetAll());
+        var employees = FakeGetEmployeesDtoProvider.GetAll().ToArray();
+        employeeServiceMock.Get().Returns(employees);
         var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock);
-        workingHoursServiceMock.GetWorkingHours(FakeWorkingHoursProvider.GetUserIds(), firstDay, lastDay)
-            .Returns(FakeWorkingHoursProvider.GetAllAsWorkingHoursCollection());
-
+        var fakeUserIds = new[] { FakeUserProvider.BenId, FakeUserProvider.PhilipId, FakeUserProvider.HabibId, FakeUserProvider.FakseoslavId};
+        var fakeWorkingHours = FakeWorkingHoursProvider.GetAllAsWorkingHoursCollection();
+        workingHoursServiceMock.GetWorkingHours(ArgExtensions.IsCollectionEquivalentTo(fakeUserIds), firstDay, lastDay)
+            .Returns(fakeWorkingHours);
+        var sut = GetSut(getLeaveRequestsServiceMock, leaveTypesServiceMock, workingHoursServiceMock,
+            userLeaveLimitsServiceMock, employeeServiceMock);
+        //When
+        var result = await sut.Summary(year);
+        //Then
+        await getLeaveRequestsServiceMock.Received().GetLeaveRequests(ArgExtensions.IsEquivalentTo<GetLeaveRequestsQuery>(query));
+        await leaveTypesServiceMock.Received().GetLeaveTypes();
+        await userLeaveLimitsServiceMock.Received().GetLimits(firstDay, lastDay);
+        await employeeServiceMock.Received().Get();
+        await workingHoursServiceMock.Received().GetWorkingHours(ArgExtensions.IsCollectionEquivalentTo(fakeUserIds), firstDay, lastDay);
+        var items = employees.Union(fakeLeaveRequests.Items.Select(lr =>
+            GetEmployeeDto.Create(lr.CreatedBy)
+        )).Select(e => 
+            new HrSummaryService.UserLeaveRequestSummary(e, fakeLeaveTypes.Select(lt => LeaveRequestPerType.Create(
+                lt,
+                fakeLeaveTypes,
+                fakeLeaveRequests.Items.Where(lr => lr.CreatedBy.Id == e.Id),
+                fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
+                fakeWorkingHours.GetDuration(e.Id))))
+        );
+        result.Should().BeEquivalentTo(new
+        {
+            LeaveTypes = fakeLeaveTypes,
+            Items = items 
+        }, o => o.ExcludingMissingMembers());
     } 
     
 }

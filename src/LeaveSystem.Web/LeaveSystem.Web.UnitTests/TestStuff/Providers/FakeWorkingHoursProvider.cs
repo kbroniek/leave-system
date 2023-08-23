@@ -13,17 +13,17 @@ public class FakeWorkingHoursProvider
         return new[]
         {
             new WorkingHoursModel(
-                FakeUserProvider.PhilipId, DateTimeOffsetExtensions.Create(2020, 5,1),
-                DateTimeOffsetExtensions.Create(2025, 5, 1), TimeSpan.FromHours(8)),
+                FakeUserProvider.PhilipId, DateTimeOffsetExtensions.CreateFromDate(2020, 5,1),
+                DateTimeOffsetExtensions.CreateFromDate(2025, 5, 1), TimeSpan.FromHours(8)),
             new WorkingHoursModel(
-                FakeUserProvider.BenId, DateTimeOffsetExtensions.Create(2018, 5,1),
-                DateTimeOffsetExtensions.Create(2022, 5, 1), TimeSpan.FromHours(8)),
+                FakeUserProvider.BenId, DateTimeOffsetExtensions.CreateFromDate(2018, 5,1),
+                DateTimeOffsetExtensions.CreateFromDate(2022, 5, 1), TimeSpan.FromHours(8)),
             new WorkingHoursModel(
-                FakeUserProvider.HabibId, DateTimeOffsetExtensions.Create(2020, 2,2),
-                DateTimeOffsetExtensions.Create(2027, 5, 7), TimeSpan.FromHours(8)),
+                FakeUserProvider.HabibId, DateTimeOffsetExtensions.CreateFromDate(2020, 2,2),
+                DateTimeOffsetExtensions.CreateFromDate(2027, 5, 7), TimeSpan.FromHours(8)),
         };
     }
 
     public static WorkingHoursCollection GetAllAsWorkingHoursCollection() =>
-        new WorkingHoursCollection(GetAll());
+        new (GetAll());
 }

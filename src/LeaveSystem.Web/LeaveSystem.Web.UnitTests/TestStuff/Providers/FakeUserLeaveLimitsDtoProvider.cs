@@ -4,7 +4,7 @@ using LeaveSystem.Web.Pages.UserLeaveLimits;
 
 namespace LeaveSystem.Web.UnitTests.TestStuff.Providers;
 
-public class FakeUserLeaveLimitsDtoProvider
+public static class FakeUserLeaveLimitsDtoProvider
 {
     public static readonly Guid FakeLimitForSickLeaveId = Guid.NewGuid();
     public static readonly Guid FakeLimitForOnDemandLeaveId = Guid.NewGuid();
@@ -22,7 +22,7 @@ public class FakeUserLeaveLimitsDtoProvider
                 DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fakeDesc"), FakeUserProvider.BenId),
             new UserLeaveLimitsService.LeaveLimitDto(
                 TimeSpan.FromHours(16), TimeSpan.FromHours(24), FakeLeaveTypeDtoProvider.OnDemandLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
-                DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fakeDesc"), FakeUserProvider.FakseoslavId),
+                DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fakeDesc"), FakeUserProvider.PhilipId),
         };
     }
 }
