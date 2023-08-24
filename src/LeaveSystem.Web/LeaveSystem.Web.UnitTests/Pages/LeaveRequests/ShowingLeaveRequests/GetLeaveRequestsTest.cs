@@ -1,13 +1,10 @@
-using System.Net.Http.Json;
-using System.Text.Json;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using RichardSzalay.MockHttp;
-using MockHttpMessageHandlerExtensions = RichardSzalay.MockHttp.MockHttpMessageHandlerExtensions;
 
-namespace LeaveSystem.Web.UnitTests.Pages.ShowingLeaveRequests;
+namespace LeaveSystem.Web.UnitTests.Pages.LeaveRequests.ShowingLeaveRequests;
 
 
 //Todo: decide if remove this test

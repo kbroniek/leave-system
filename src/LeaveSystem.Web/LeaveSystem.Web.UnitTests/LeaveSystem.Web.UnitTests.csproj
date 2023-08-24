@@ -29,4 +29,8 @@
       <ProjectReference Include="..\LeaveSystem.Web\LeaveSystem.Web.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Pages\LeaveRequests" />
+    </ItemGroup>
+
 </Project>
