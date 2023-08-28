@@ -6,7 +6,7 @@ namespace LeaveSystem.Web.UnitTests.TestStuff.Factories;
 public static class HttpClientMockFactory
 {
     
-    public static HttpClient CreateWithJsonResponse<T>(string url, T response, string baseFakeUrl = "http://localhost:5047/")
+    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, string baseFakeUrl = "http://localhost:5047/")
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();
         mockHttpMessageHandler.When(baseFakeUrl + url).RespondWithJson(response);
