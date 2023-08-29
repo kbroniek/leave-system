@@ -10,11 +10,6 @@ public class GetLeaveTypesTest
 {
     private HttpClient httpClient;
     private ODataResponse<IEnumerable<LeaveTypesService.LeaveTypeDto>> data;
-    
-    public GetLeaveTypesTest()
-    {
-
-    }
 
     private LeaveTypesService GetSut() => new(httpClient);
     

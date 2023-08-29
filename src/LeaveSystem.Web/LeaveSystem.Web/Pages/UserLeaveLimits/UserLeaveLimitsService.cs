@@ -37,7 +37,7 @@ public class UserLeaveLimitsService
     {
         public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
     }
-    public record class UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
+    public record UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
     {
         public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
 
@@ -45,7 +45,7 @@ public class UserLeaveLimitsService
             new UserLeaveLimitDto(limit.Limit, limit.OverdueLimit, limit.LeaveTypeId, limit.ValidSince, limit.ValidUntil, limit.Property);
     }
 
-    public record class UserLeaveLimitPropertyDto(string? Description);
+    public record UserLeaveLimitPropertyDto(string? Description);
 
     private sealed class TimeSpanToStringConverter : JsonConverter<TimeSpan>
     {

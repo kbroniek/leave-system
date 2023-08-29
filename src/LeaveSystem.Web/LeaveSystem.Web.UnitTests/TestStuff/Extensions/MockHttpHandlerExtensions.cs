@@ -12,9 +12,12 @@ public static class MockHttpHandlerExtensions
         return source.When(BaseFakeUrl + restOfUrl);
     }
 
-    public static MockedRequest RespondWithJson<T>(this MockedRequest source, T objectToSerialize)
+    public static MockedRequest RespondWithJson<T>(this MockedRequest source, T objectToSerialize) =>
+        RespondWithJson(source, objectToSerialize, JsonSerializerOptions.Default);
+    
+    public static MockedRequest RespondWithJson<T>(this MockedRequest source, T objectToSerialize, JsonSerializerOptions jsonSerializerOptions)
     {
-        var jsonContent = JsonSerializer.Serialize(objectToSerialize);
+        var jsonContent = JsonSerializer.Serialize(objectToSerialize, jsonSerializerOptions);
         return source.Respond("application/json", jsonContent);
     } 
 }
