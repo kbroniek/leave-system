@@ -4,6 +4,7 @@ using System.Xml;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
+using LeaveSystem.Web.UnitTests.TestStuff.Converters;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
 
@@ -95,18 +96,5 @@ public class GetLimitsByUserIdTest
         yield return new object[] { new ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto>() };
     }
 
-    private class TimeSpanToStringConverter : JsonConverter<TimeSpan>
-    {
-        public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            var value = reader.GetString();
-            return value == null ? TimeSpan.Zero : XmlConvert.ToTimeSpan(value);
-        }
 
-        public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
-        {
-            var timeSpanValue = XmlConvert.ToString(value);
-            writer.WriteStringValue(timeSpanValue);
-        }
-    }
 }
