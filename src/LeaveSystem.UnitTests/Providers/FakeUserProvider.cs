@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
 
@@ -35,5 +36,10 @@ public static class FakeUserProvider
         yield return GetUserBen();
         yield return GetUserHabib();
         yield return GetUserPhilip();
+    }
+
+    public static IEnumerable<FederatedUser> GetAllUsers()
+    {
+        return GetEmployees().Append(GetUserWithNameFakeoslav());
     }
 }
