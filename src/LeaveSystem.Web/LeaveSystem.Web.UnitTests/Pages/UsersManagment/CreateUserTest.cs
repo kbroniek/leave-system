@@ -4,7 +4,7 @@ using LeaveSystem.Web.UnitTests.TestStuff.Factories;
 
 namespace LeaveSystem.Web.UnitTests.Pages.UsersManagment;
 
-public class EditUserTest
+public class CreateUserTest
 {
     private HttpClient httpClient;
 
@@ -15,12 +15,12 @@ public class EditUserTest
     {
         //Given
         var user = new UserDto("fakeId123", "George", "fake.george@gmail.com", new[] { "admin", "worker" });
-        httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users/{user.Id}", user, HttpStatusCode.NoContent);
+        httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users", user, HttpStatusCode.Created);
         var sut = GetSut();
         //When
         var act = async () =>
         {
-            await sut.Edit(user);
+            await sut.Create(user);
         };
         //Then
         await act.Should().NotThrowAsync<Exception>();
@@ -35,12 +35,12 @@ public class EditUserTest
     {
         //Given
         var user = new UserDto("fakeId123", "George", "fake.george@gmail.com", new[] { "admin", "worker" });
-        httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users/{user.Id}", user, statusCode);
+        httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users", user, statusCode);
         var sut = GetSut();
         //When
         var act = async () =>
         {
-            await sut.Edit(user);
+            await sut.Create(user);
         };
         //Then
         await act.Should().ThrowAsync<InvalidOperationException>();

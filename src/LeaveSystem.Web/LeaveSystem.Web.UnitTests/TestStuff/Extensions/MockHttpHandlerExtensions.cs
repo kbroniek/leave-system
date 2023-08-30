@@ -1,4 +1,5 @@
 using System.Text.Json;
+using LeaveSystem.Shared;
 using RichardSzalay.MockHttp;
 
 namespace LeaveSystem.Web.UnitTests.TestStuff.Extensions;
@@ -19,5 +20,11 @@ public static class MockHttpHandlerExtensions
     {
         var jsonContent = JsonSerializer.Serialize(objectToSerialize, jsonSerializerOptions);
         return source.Respond("application/json", jsonContent);
+    } 
+    
+    public static MockedRequest WithJsonContent(this MockedRequest source, object objectToSerialize)
+    {
+        var serializedObject = JsonSerializer.Serialize(objectToSerialize);
+        return source.WithContent(serializedObject);
     } 
 }
