@@ -28,4 +28,14 @@ public static class HttpClientMockFactory
         httpClient.BaseAddress = new Uri(baseFakeUrl);
         return httpClient;
     } 
+    
+    public static HttpClient Create(string url, HttpStatusCode httpStatusCode, 
+        string baseFakeUrl = "http://localhost:5047/")
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        mockHttpMessageHandler.When(baseFakeUrl + url).Respond(httpStatusCode);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(baseFakeUrl);
+        return httpClient;
+    } 
 }
