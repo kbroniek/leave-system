@@ -42,7 +42,7 @@ public class HrSummaryServiceTest
         var fakeLeaveTypes = FakeLeaveTypeDtoProvider.GetAll();
         leaveTypesServiceMock.GetLeaveTypes().Returns(fakeLeaveTypes);
         var userLeaveLimitsServiceMock = Substitute.For<UserLeaveLimitsService>(httpClientMock);
-        var fakeLimits = FakeUserLeaveLimitsDtoProvider.GetAll(year);
+        var fakeLimits = FakeLeaveLimitsDtoProvider.GetAll(year);
         userLeaveLimitsServiceMock.GetLimits(firstDay, lastDay).Returns(fakeLimits);
         var employeeServiceMock = Substitute.For<EmployeeService>(httpClientMock);
         var employees = FakeGetEmployeesDtoProvider.GetAll().ToArray();
