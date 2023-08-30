@@ -19,6 +19,16 @@ public static class HttpClientMockFactory
         return httpClient;
     }
 
+    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, JsonSerializerOptions options, out MockedHttpValues mockedHttpValues, string baseFakeUrl = "http://localhost:5047/")
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        var request = mockHttpMessageHandler.When(baseFakeUrl + url).RespondWithJson(response, options);
+        mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(baseFakeUrl);
+        return httpClient;
+    }
+    
     public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, 
         string baseFakeUrl = "http://localhost:5047/")
     {
@@ -37,5 +47,13 @@ public static class HttpClientMockFactory
         var httpClient = new HttpClient(mockHttpMessageHandler);
         httpClient.BaseAddress = new Uri(baseFakeUrl);
         return httpClient;
-    } 
+    }
+
+    public record MockedHttpValues(MockedRequest Request, MockHttpMessageHandler MockHttpMessageHandler)
+    {
+        public void ShouldMatchCount(int count = 1)
+        {
+            MockHttpMessageHandler.GetMatchCount(Request).Should().Be(count);
+        }
+    }
 }
