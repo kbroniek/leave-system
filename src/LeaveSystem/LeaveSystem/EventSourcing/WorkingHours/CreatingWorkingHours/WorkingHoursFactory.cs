@@ -11,7 +11,7 @@ public class WorkingHoursFactory
 
     public virtual WorkingHours Create(CreateWorkingHours command)
     {
-        var @event = WorkingHoursCreated.Create(command.UserId, command.DateFrom, command.DateTo, command.Duration);
+        var @event = WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom, command.DateTo, command.Duration);
         validator.ValidateWorkingHoursUnique(@event);
         return WorkingHours.CreateWorkingHours(@event);
     }

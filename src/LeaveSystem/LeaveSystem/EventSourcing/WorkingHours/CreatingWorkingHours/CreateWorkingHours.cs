@@ -9,21 +9,24 @@ namespace LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 
 public class CreateWorkingHours : ICommand
 {
+    public Guid WorkingHoursId { get; }
     public string UserId { get;}
     public DateTimeOffset DateFrom { get; }
     public DateTimeOffset DateTo { get; }
     public TimeSpan? Duration { get; }
 
-    private CreateWorkingHours(string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration)
+    private CreateWorkingHours(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration)
     {
         UserId = userId;
         DateFrom = dateFrom;
         DateTo = dateTo;
         Duration = duration;
+        WorkingHoursId = workingHoursId;
     }
 
-    public static CreateWorkingHours Create(string? userId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration) =>
+    public static CreateWorkingHours Create(Guid? workingHoursId, string? userId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration) =>
         new(
+            Guard.Against.NillAndDefault(workingHoursId),
             Guard.Against.NullOrWhiteSpace(userId),
             Guard.Against.NillAndDefault(dateFrom),
             Guard.Against.NillAndDefault(dateTo),

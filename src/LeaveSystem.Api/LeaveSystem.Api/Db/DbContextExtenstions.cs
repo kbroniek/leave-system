@@ -14,6 +14,8 @@ using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
+using WorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
 namespace LeaveSystem.Api.Db;
 
@@ -238,12 +240,17 @@ public static class DbContextExtenstions
     {
         var queryBus = services.GetRequiredService<IQueryBus>();
         var commandBus = services.GetRequiredService<ICommandBus>();
-        await commandBus.Send(
-            CreateWorkingHours.Create(
-                testUsers[0].Id,
-                DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-                DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
-                TimeSpan.FromHours(8)));
+        var workingHoursFromDb = await queryBus.Send<GetWorkingHoursByUserId, WorkingHours>(GetWorkingHoursByUserId.Create(testUsers[0].Id));
+        if (workingHoursFromDb == null)
+        {
+            await commandBus.Send(
+                CreateWorkingHours.Create(
+                    Guid.NewGuid(),
+                    testUsers[0].Id,
+                    DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
+                    DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
+                    TimeSpan.FromHours(8)));
+        }
         var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(
             GetLeaveRequests.Create(
                 null, null, null, null, null, null, null,

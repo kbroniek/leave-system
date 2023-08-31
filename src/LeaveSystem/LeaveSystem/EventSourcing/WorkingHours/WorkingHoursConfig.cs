@@ -2,6 +2,7 @@ using GoldenEye.Marten.Registration;
 using GoldenEye.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using Marten;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +12,7 @@ public static class WorkingHoursConfig
 {
         
     internal static IServiceCollection AddWorkingHours(this IServiceCollection services) =>
-        services.AddMartenEventSourcedRepository<EventSourcing.WorkingHours.WorkingHours>()
+        services.AddMartenEventSourcedRepository<WorkingHours>()
             .AddCommandHandlers()
             .AddQueryHandlers()
             .AddLeaveRequestValidators()
@@ -22,7 +23,8 @@ public static class WorkingHoursConfig
             .AddCommandHandler<CreateWorkingHours, HandleCreateWorkingHours>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
-        services;
+        services
+            .AddQueryHandler<GetWorkingHoursByUserId, WorkingHours, HandleGetWorkingHoursByUserId>();
     
     private static IServiceCollection AddLeaveRequestValidators(this IServiceCollection services) =>
         services
