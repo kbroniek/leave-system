@@ -1,5 +1,6 @@
 ﻿using GoldenEye.Marten.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests;
+using LeaveSystem.EventSourcing.WorkingHours;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,8 @@ internal static class EventSourcingConfig
             .AddMarten(config, options =>
             {
                 options.ConfigureLeaveRequests();
+                options.ConfigureWorkingHours();
             })
-            .AddLeaveRequests();
+            .AddLeaveRequests()
+            .AddWorkingHours();
 }
