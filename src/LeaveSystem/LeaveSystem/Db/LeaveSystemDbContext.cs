@@ -15,14 +15,12 @@ public class LeaveSystemDbContext : DbContext
     public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
     public DbSet<Setting> Settings { get; set; }
-    public DbSet<WorkingHours> WorkingHours { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         OnLeaveTypeCreating(modelBuilder);
         OnUserLeaveLimitCreating(modelBuilder);
         OnSettingsCreating(modelBuilder);
-        OnWorkingHoursCreating(modelBuilder);
     }
 
     private void OnSettingsCreating(ModelBuilder modelBuilder)
@@ -101,21 +99,4 @@ public class LeaveSystemDbContext : DbContext
         modelBuilder.Entity<LeaveType>()
             .HasIndex(p => new { p.Name }).IsUnique();
     }
-
-    private static void OnWorkingHoursCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<WorkingHours>()
-            .HasKey(w => w.Id);
-        modelBuilder.Entity<WorkingHours>()
-            .Property(w => w.UserId)
-            .IsRequired();
-        modelBuilder.Entity<WorkingHours>()
-            .Property(w => w.DateFrom)
-            .IsRequired();
-        modelBuilder.Entity<WorkingHours>()
-            .Property(w => w.DateTo)
-            .IsRequired();
-        modelBuilder.Entity<WorkingHours>()
-            .Property(w => w.Duration)
-            .IsRequired();}
 }

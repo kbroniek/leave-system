@@ -12,11 +12,6 @@ public class CreateWorkingHoursValidator
         this.documentSession = documentSession;
     }
 
-    public virtual void ValidateUserId()
-    {
-        //Todo: Implement checking if GraphUser with that Id Exists
-    }
-
     public virtual void ValidateWorkingHoursUnique(WorkingHoursCreated @event)
     {
         var userId = @event.UserId;

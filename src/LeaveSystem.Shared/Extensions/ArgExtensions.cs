@@ -1,4 +1,6 @@
-namespace LeaveSystem.Web.UnitTests.TestStuff.Extensions;
+using NSubstitute;
+
+namespace LeaveSystem.Shared.Extensions;
 
 public static class ArgExtensions
 {
