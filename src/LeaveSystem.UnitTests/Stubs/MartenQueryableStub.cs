@@ -64,7 +64,11 @@ internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>,
 
     public Task<TResult?> FirstOrDefaultAsync<TResult>(CancellationToken token)
     {
-        throw new NotImplementedException();
+        if (typeof(TResult) != typeof(T))
+        {
+            throw new Exception("TypesAreDifferent");
+        }
+        return Task.FromResult(this.Any() ? this.First().As<TResult>() : default);
     }
 
     public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback) where TInclude : notnull

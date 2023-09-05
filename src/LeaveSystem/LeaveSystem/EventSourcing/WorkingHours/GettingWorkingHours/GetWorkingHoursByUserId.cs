@@ -33,7 +33,7 @@ internal class HandleGetWorkingHoursByUserId : IQueryHandler<GetWorkingHoursByUs
 
     public async Task<WorkingHours> Handle(GetWorkingHoursByUserId request, CancellationToken cancellationToken)
     {
-        var workingHours = await querySession.Query<WorkingHours>().Where(wh => wh.UserId == request.UserId || wh.Status == WorkingHoursStatus.Current)
+        var workingHours = await querySession.Query<WorkingHours>().Where(wh => wh.UserId == request.UserId && wh.Status == WorkingHoursStatus.Current)
             .FirstOrDefaultAsync(cancellationToken);
         return workingHours
                ?? throw GoldenEye.Exceptions.NotFoundException.For<WorkingHours>(request.UserId);
