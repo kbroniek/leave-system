@@ -40,7 +40,7 @@ internal class HandleAcceptLeaveRequest :
     public async Task<Unit> Handle(AcceptLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
-                             ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
+                           ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
         leaveRequest.Accept(command.Remarks, command.AcceptedBy);
 

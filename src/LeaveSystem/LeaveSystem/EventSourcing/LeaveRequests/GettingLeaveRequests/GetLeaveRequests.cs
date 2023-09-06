@@ -14,7 +14,7 @@ namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 
 public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
 {
-    public static readonly LeaveRequestStatus[] validStatuses = new[] { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending };
+    public static readonly LeaveRequestStatus[] ValidStatuses = { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending };
     public int PageNumber { get; }
     public int PageSize { get; }
     public DateTimeOffset DateFrom { get; }
@@ -59,7 +59,7 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
             dateFromOrDefault.GetDayWithoutTime(),
             dateToOrDefault.GetDayWithoutTime(),
             leaveTypeIds,
-            statuses ?? validStatuses,
+            statuses ?? ValidStatuses,
             createdByEmails,
             createdByUserIds,
             requestedBy);
@@ -127,7 +127,7 @@ internal class HandleGetLeaveRequests :
             }
             query = query.Where(predicate);
         }
-        if (request.LeaveTypeIds != null && request.LeaveTypeIds.Length > 0)
+        if (request.LeaveTypeIds is { Length: > 0 })
         {
             var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
             foreach (var leaveTypeId in request.LeaveTypeIds)
@@ -136,7 +136,7 @@ internal class HandleGetLeaveRequests :
             }
             query = query.Where(predicate);
         }
-        if (request.CreatedByEmails != null && request.CreatedByEmails.Length > 0)
+        if (request.CreatedByEmails is { Length: > 0 })
         {
             var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
             foreach (var createdByEmail in request.CreatedByEmails)
@@ -145,7 +145,7 @@ internal class HandleGetLeaveRequests :
             }
             query = query.Where(predicate);
         }
-        if (request.CreatedByUserIds != null && request.CreatedByUserIds.Length > 0)
+        if (request.CreatedByUserIds is { Length: > 0 })
         {
             var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
             foreach (var createdByUserId in request.CreatedByUserIds)

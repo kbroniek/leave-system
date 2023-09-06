@@ -14,7 +14,7 @@ public class InMemoryReadonlyRepository<TEntity>: IReadonlyRepository<TEntity> w
 
     public virtual Task<TEntity> FindById(object id, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(Context.SingleOrDefault(r => r.Id == id));
+        return Task.FromResult(Context.SingleOrDefault(r => r.Id.Equals(id)));
     }
 
     public virtual IQueryable<TEntity> Query()
