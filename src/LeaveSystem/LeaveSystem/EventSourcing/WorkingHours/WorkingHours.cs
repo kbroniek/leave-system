@@ -26,7 +26,7 @@ public class WorkingHours : Aggregate
 
     private void Apply(WorkingHoursCreated @event)
     {
-        Id = @event.StreamId;
+        Id = @event.WorkingHoursId;
         UserId = @event.UserId;
         DateFrom = @event.DateFrom;
         DateTo = @event.DateTo;

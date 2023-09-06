@@ -21,23 +21,42 @@ public class HandleGetWorkingHoursByUserIdTest
     [Fact]
     public async Task WhenThereIsNoWorkingHoursForGivenUser_ThrowNotFoundException()
     {
-        //Given
+        //
+        var workingHours = FakeWorkingHoursCreatedProvider.GetAll(false)
+            .Select(LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours);
         var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
-            FakeWorkingHoursCreatedProvider.GetAll(false)
-                .Select(LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours)
-                //Todo: Add deprecated WorkingHours
-                );
+            workingHours
+            //Todo: Add deprecated WorkingHours
+        );
         querySessionMock = Substitute.For<IDocumentSession>();
         querySessionMock.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>()
             .Returns(martenQueryableStub);
         var request = GetWorkingHoursByUserId.Create(FakeUserProvider.BenId);
         var sut = GetSut();
         //When
-        var act = async () =>
-        {
-            await sut.Handle(request, CancellationToken.None);
-        };
+        var act = async () => { await sut.Handle(request, CancellationToken.None); };
         //Then
         await act.Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task WhenThereIsWorkingHoursForGivenUser_ThenReturnIt()
+    {
+        //Given
+        var fakeWorkingHours = FakeWorkingHoursCreatedProvider.GetAll()
+            .Select(LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours).ToArray();
+        var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
+            fakeWorkingHours
+            //Todo: Add deprecated WorkingHours
+        );
+        querySessionMock = Substitute.For<IDocumentSession>();
+        querySessionMock.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>()
+            .Returns(martenQueryableStub);
+        var request = GetWorkingHoursByUserId.Create(FakeUserProvider.BenId);
+        var sut = GetSut();
+        //When
+        var result = await sut.Handle(request, CancellationToken.None);
+        //Then
+        result.Should().BeEquivalentTo(fakeWorkingHours.First(w => w.UserId == FakeUserProvider.BenId));
     }
 }

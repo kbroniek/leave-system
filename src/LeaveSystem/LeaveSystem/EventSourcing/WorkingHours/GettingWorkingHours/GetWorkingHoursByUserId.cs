@@ -1,12 +1,8 @@
 using Ardalis.GuardClauses;
-using GoldenEye.Commands;
 using GoldenEye.Queries;
-using GoldenEye.Repositories;
-using LeaveSystem.EventSourcing.LeaveRequests;
-using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using Marten;
-using Marten.Linq;
+
 
 namespace LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 
