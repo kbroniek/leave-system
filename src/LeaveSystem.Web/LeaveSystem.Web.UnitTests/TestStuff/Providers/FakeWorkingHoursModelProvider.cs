@@ -4,7 +4,7 @@ using LeaveSystem.UnitTests.Providers;
 
 namespace LeaveSystem.Web.UnitTests.TestStuff.Providers;
 
-public class FakeWorkingHoursProvider
+public class FakeWorkingHoursModelProvider
 {
     public static IEnumerable<string> GetUserIds() => FakeUserProvider.GetEmployees().Select(e => e.Id);
 

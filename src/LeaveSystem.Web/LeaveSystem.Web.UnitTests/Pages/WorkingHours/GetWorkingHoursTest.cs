@@ -20,7 +20,7 @@ public class GetWorkingHoursTest
     public async Task WhenGetWorkingHours_ThenReturnExceptedDeserializedResult()
     {
         //Given
-        var dto = new WorkingHoursCollectionDto(FakeWorkingHoursProvider.GetAll());
+        var dto = new WorkingHoursCollectionDto(FakeWorkingHoursModelProvider.GetAll());
         var userIds = new[] { "1", "2", "3", "4", "5" };
         var dateFrom = DateTimeOffsetExtensions.CreateFromDate(2020, 1, 2);
         var dateTo = DateTimeOffsetExtensions.CreateFromDate(2027, 1, 2);
