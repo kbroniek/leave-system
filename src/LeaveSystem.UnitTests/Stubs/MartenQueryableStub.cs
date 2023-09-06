@@ -64,7 +64,7 @@ internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>,
         throw new NotImplementedException();
     }
 
-    public Task<TResult?> FirstOrDefaultAsync<TResult>(CancellationToken token) =>
+    public virtual Task<TResult?> FirstOrDefaultAsync<TResult>(CancellationToken token) =>
         Task.FromResult(this.FirstOrDefault().As<TResult?>());
     
     

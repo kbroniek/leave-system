@@ -1,7 +1,7 @@
 using GoldenEye.Events;
 using Newtonsoft.Json;
 
-namespace LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+namespace LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 
 public class WorkingHoursCreated : IEvent
 {

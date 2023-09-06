@@ -13,7 +13,7 @@ using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using WorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
@@ -244,7 +244,7 @@ public static class DbContextExtenstions
         if (workingHoursFromDb == null)
         {
             await commandBus.Send(
-                CreateWorkingHours.Create(
+                AddWorkingHours.Create(
                     Guid.NewGuid(),
                     testUsers[0].Id,
                     DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),

@@ -6,7 +6,6 @@ using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequestDetails;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
-using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using Marten;
 using Marten.Pagination;
 using Microsoft.Extensions.DependencyInjection;

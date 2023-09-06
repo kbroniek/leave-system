@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using LeaveSystem.EventSourcing.WorkingHours;
-using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 using LeaveSystem.Shared;
 
 namespace LeaveSystem.UnitTests.Providers;

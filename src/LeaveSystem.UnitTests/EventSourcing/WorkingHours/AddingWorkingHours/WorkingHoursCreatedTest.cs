@@ -1,11 +1,11 @@
 using System;
 using FluentAssertions;
-using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
 
-namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
+namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.AddingWorkingHours;
 
 public class WorkingHoursCreatedTest
 {

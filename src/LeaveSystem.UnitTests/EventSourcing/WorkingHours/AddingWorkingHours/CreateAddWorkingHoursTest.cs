@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 using LeaveSystem.Shared;
 using Xunit;
 
-namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
+namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.AddingWorkingHours;
 
-public class CreateWorkingHoursTest
+public class CreateAddWorkingHoursTest
 {
     [Theory]
     [MemberData(nameof(Get_WhenCreatingWithNullArguments_ThenThrowArgumentNullException_TestData))]
@@ -19,7 +19,7 @@ public class CreateWorkingHoursTest
         //When
         var act = () =>
         {
-            CreateWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration);
+            AddWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration);
         };
         //Then
         act.Should().Throw<ArgumentNullException>();
@@ -45,7 +45,7 @@ public class CreateWorkingHoursTest
         //When
         var act = () =>
         {
-            CreateWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration);
+            AddWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration);
         };
         //Then
         act.Should().Throw<ArgumentException>();
@@ -71,7 +71,7 @@ public class CreateWorkingHoursTest
         var dateTo = DateTimeOffsetExtensions.CreateFromDate(2023, 5, 6);
         var duration = TimeSpan.FromHours(4);
         //When
-        var result = CreateWorkingHours.Create(id, userId, dateFrom, dateTo, duration);
+        var result = AddWorkingHours.Create(id, userId, dateFrom, dateTo, duration);
         //Then
         result.Should().BeEquivalentTo(new
         {

@@ -1,5 +1,5 @@
 using GoldenEye.Aggregates;
-using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.EventSourcing.WorkingHours;
@@ -23,6 +23,22 @@ public class WorkingHours : Aggregate
     }
 
     public static WorkingHours CreateWorkingHours(WorkingHoursCreated @event) => new(@event);
+
+    internal void Deprecate()
+    {
+        if (Status == WorkingHoursStatus.Deprecated)
+        {
+            throw new InvalidOperationException("Deprecating deprecated working hours is not allowed");
+        }
+        var @event = WorkingHoursDeprecated.Create(Id);
+        Apply(@event);
+        Enqueue(@event);
+    }
+
+    private void Apply(WorkingHoursDeprecated _)
+    {
+        Status = WorkingHoursStatus.Deprecated;
+    }
 
     private void Apply(WorkingHoursCreated @event)
     {
