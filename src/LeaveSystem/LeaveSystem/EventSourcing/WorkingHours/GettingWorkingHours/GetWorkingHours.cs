@@ -50,7 +50,7 @@ public class GetWorkingHours : IQuery<IPagedList<WorkingHours>>
         const int maxPageSize = 1000;
         Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), minPageSize, maxPageSize);
         return new(
-            pageSizeOrDefault, pageNumberOrDefault, dateFromOrDefault, dateToOrDefault, userIds, requestedBy, statuses ?? ValidStatuses
+            pageSizeOrDefault, pageNumberOrDefault, dateFromOrDefault.GetDayWithoutTime(), dateToOrDefault.GetDayWithoutTime(), userIds, requestedBy, statuses ?? ValidStatuses
         );
     }
 }
