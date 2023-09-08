@@ -1,14 +1,20 @@
-using FluentAssertions;
 using LeaveSystem.Api.Controllers;
+using LeaveSystem.Api.UnitTests.Stubs;
 using LeaveSystem.Api.UnitTests.TestExtensions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared;
 using LeaveSystem.UnitTests;
 using LeaveSystem.UnitTests.Providers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.Graph.ExternalConnectors;
+using Microsoft.Graph;
 using Moq;
+using System.Runtime.Serialization;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
 
@@ -33,8 +39,8 @@ public class LeaveTypesControllerPutTest
     public async Task WhenProvidedIdIsDifferentThanEntityId_ThenReturnBadRequest()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new LeaveTypesController(dbContext);
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var sut = new LeaveTypesController(dbContextMock.Object);
         var fakeLeaveTypeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid;
         var fakeLeaveType = FakeLeaveTypeProvider.GetFakeOnDemandLeave();
         //When
@@ -47,8 +53,8 @@ public class LeaveTypesControllerPutTest
     public async Task WhenProvidedLeaveTypeNotExistsInDatabase_ThenReturnNotFound()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new LeaveTypesController(dbContext);
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var sut = new LeaveTypesController(dbContextMock.Object);
         var fakeLeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId;
         var fakeLeaveType = FakeLeaveTypeProvider.GetFakeOnDemandLeave();
         //When
@@ -66,19 +72,17 @@ public class LeaveTypesControllerPutTest
         var fakeLeaveTypeToChange = fakeLeaveTypeFromDb.Clone()!;
         fakeLeaveTypeToChange.Name = "fake name";
         fakeLeaveTypeToChange.Order = 4;
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        await dbContext.AddAsync(fakeLeaveTypeFromDb);
-        await dbContext.SaveChangesAsync();
-
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var leaveTypeDbSetMock = new Mock<DbSet<LeaveType>>();
+        leaveTypeDbSetMock.MockDbAsyncEnumerable(FakeLeaveTypeProvider.GetLeaveTypes());
+
+        var leaveTypeEntityEntryMock = new Mock<EntityEntry<LeaveType>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
-            .ThrowsAsync(new DbUpdateConcurrencyException());
+            .ThrowsAsync(new System.Data.Entity.Infrastructure.DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Set<LeaveType>())
-            .Returns(dbContext.Set<LeaveType>());
-        dbContextMock.Setup(m => m.Entry(fakeLeaveTypeFromDb))
-            .Returns(dbContext.Entry(fakeLeaveTypeFromDb));
+            .Returns(leaveTypeDbSetMock.Object);
         dbContextMock.Setup(m => m.Entry(fakeLeaveTypeToChange))
-            .Returns(dbContext.Entry(fakeLeaveTypeToChange));
+            .Returns(leaveTypeEntityEntryMock.Object);
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
         var act = async () =>
@@ -86,35 +90,35 @@ public class LeaveTypesControllerPutTest
             await sut.Put(holidayLeaveGuid, fakeLeaveTypeToChange);
         };
         //Then
-        await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
+        await act.Should().ThrowAsync<System.Data.Entity.Infrastructure.DbUpdateConcurrencyException>();
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));
+        leaveTypeEntityEntryMock.VerifySet(m => m.State = EntityState.Modified);
     }
-    
+
     [Fact]
     public async Task WhenModelIsValidAndSameProvidedIdAndLeaveRequestIdAndNoExceptionWasThrown_ThenReturnUpdated()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new LeaveTypesController(dbContext);
-        var fakeLeaveTypes = FakeLeaveTypeProvider.GetLeaveTypes();
-        foreach (var leaveType in fakeLeaveTypes)
-        {
-            await sut.Post(leaveType);
-        }
-        
-        var fakeLeaveTypeToChange = sut.Get(FakeLeaveTypeProvider.FakeOnDemandLeaveId).Queryable.First();
-        fakeLeaveTypeToChange.Name = "fake name";
-        fakeLeaveTypeToChange.Order = 4;
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+
+        var fakeLeaveTypeToChange = new LeaveType {
+            Id = FakeLeaveTypeProvider.FakeOnDemandLeaveId,
+            Name = "fake name",
+            Order = 4,
+        };
+        var leaveTypeEntityEntryMock = new Mock<EntityEntry<LeaveType>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
+        var leaveTypeDbSetMock = new Mock<DbSet<LeaveType>>();
+        var leaveTypes = FakeLeaveTypeProvider.GetLeaveTypes();
+        leaveTypeDbSetMock.MockDbAsyncEnumerable(leaveTypes);
+        dbContextMock.Setup(m => m.Entry(fakeLeaveTypeToChange))
+            .Returns(leaveTypeEntityEntryMock.Object);
         var updatedLeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId;
+        var sut = new LeaveTypesController(dbContextMock.Object);
         //When
         var result = await sut.Put(updatedLeaveTypeId, fakeLeaveTypeToChange);
         //Then
         result.Should().BeOfType<UpdatedODataResult<LeaveType>>();
-        sut.Get(updatedLeaveTypeId).Queryable.First().Should().BeEquivalentTo(new
-            {
-                Name = fakeLeaveTypeToChange.Name,
-                Order = fakeLeaveTypeToChange.Order
-            }, o => o.ExcludingMissingMembers()
-        );
+        dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));
+        leaveTypeEntityEntryMock.VerifySet(m => m.State = EntityState.Modified);
     }
 }

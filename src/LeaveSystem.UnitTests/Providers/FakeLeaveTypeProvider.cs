@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
@@ -12,7 +13,7 @@ public static class FakeLeaveTypeProvider
     public static Guid FakeOnDemandLeaveId = Guid.NewGuid();
     public static Guid FakeSickLeaveId = Guid.NewGuid();
     public static Guid FakeHolidayLeaveGuid = Guid.NewGuid();
-    
+
     public static LeaveType GetFakeSickLeave() => new()
     {
         Id = FakeSickLeaveId,
@@ -55,7 +56,7 @@ public static class FakeLeaveTypeProvider
             Catalog = LeaveTypeCatalog.OnDemand,
         }
     };
-    
+
     public static LeaveType GetFakeWrongLeave() => new()
     {
         Id = Guid.Empty,
@@ -63,10 +64,12 @@ public static class FakeLeaveTypeProvider
         Order = 3
     };
 
-    public static IEnumerable<LeaveType> GetLeaveTypes()
+    public static IQueryable<LeaveType> GetLeaveTypes()
     {
-        yield return GetFakeOnDemandLeave();
-        yield return GetFakeHolidayLeave();
-        yield return GetFakeSickLeave();
+        return new List<LeaveType> {
+            GetFakeOnDemandLeave(),
+            GetFakeHolidayLeave(),
+            GetFakeSickLeave()
+        }.AsQueryable();
     }
 }

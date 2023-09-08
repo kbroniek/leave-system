@@ -84,13 +84,6 @@ namespace LeaveSystem.Api.Controllers
             {
                 return BadRequest("Id in the path is not the same as in the body.");
             }
-            var local = GetSet()
-                .Local
-                .FirstOrDefault(entry => entry.Id.Equals(key));
-            if (local != null)
-            {
-                dbContext.Entry(local).State = EntityState.Detached;
-            }
             dbContext.Entry(update).State = EntityState.Modified;
             try
             {
