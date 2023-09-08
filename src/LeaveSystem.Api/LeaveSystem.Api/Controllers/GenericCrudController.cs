@@ -64,7 +64,7 @@ namespace LeaveSystem.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductExists(key, cancellationToken))
+                if (!await IsEntityExists(key, cancellationToken))
                 {
                     return NotFound();
                 }
@@ -98,7 +98,7 @@ namespace LeaveSystem.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductExists(key, cancellationToken))
+                if (!await IsEntityExists(key, cancellationToken))
                 {
                     return NotFound();
                 }
@@ -120,7 +120,7 @@ namespace LeaveSystem.Api.Controllers
             return NoContent();
         }
 
-        private Task<bool> ProductExists(TId key, CancellationToken cancellationToken)
+        private Task<bool> IsEntityExists(TId key, CancellationToken cancellationToken)
         {
             return GetSet().AnyAsync(l => l.Id.CompareTo(key) == 0, cancellationToken);
         }
