@@ -82,7 +82,7 @@ namespace LeaveSystem.Api.Controllers
             }
             if (key.CompareTo(update.Id) != 0)
             {
-                return BadRequest();
+                return BadRequest("Id in the path is not the same as in the body.");
             }
             var local = GetSet()
                 .Local
