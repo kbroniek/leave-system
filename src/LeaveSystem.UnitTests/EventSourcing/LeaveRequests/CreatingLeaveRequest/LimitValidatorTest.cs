@@ -81,16 +81,11 @@ public class LimitValidatorTest
     private async Task<LeaveSystemDbContext> CreateAndFillDbAsync()
     {
         var dbContext = await DbContextFactory.CreateDbContextAsync();
-        dbContext.UserLeaveLimits.Local.CollectionChanged += Local_CollectionChanged;
         await AddLeaveTypesToDbAsync(dbContext);
         await dbContext.SaveChangesAsync();
         await AddUserLeaveLimitsToDbAsync(dbContext);
         await dbContext.SaveChangesAsync();
         return dbContext;
-    }
-
-    private void Local_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
     }
 
     private async Task AddLeaveTypesToDbAsync(LeaveSystemDbContext dbContext)
