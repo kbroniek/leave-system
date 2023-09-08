@@ -172,7 +172,7 @@ public static class DbContextExtenstions
                     .ToArray();
                 await FillInGraphUsers(graphUsers, saveGraphUserService, logger, cancellationToken);
                 await FillInSimpleData(dbContext);
-                await FillInLeaveRequests(services);
+                await FillInEventSourcingData(services);
             }
             catch (Exception ex)
             {
@@ -236,10 +236,16 @@ public static class DbContextExtenstions
         await dbContext.SaveChangesAsync();
     }
 
-    private static async Task FillInLeaveRequests(IServiceProvider services)
+    private static async Task FillInEventSourcingData(IServiceProvider services)
     {
         var queryBus = services.GetRequiredService<IQueryBus>();
         var commandBus = services.GetRequiredService<ICommandBus>();
+        await FillInWorkingHours(queryBus, commandBus);
+        await FillInLeaveRequests(queryBus, commandBus);
+    }
+    
+    private static async Task FillInWorkingHours(IQueryBus queryBus, ICommandBus commandBus)
+    {
         var workingHoursFromDb = await queryBus.Send<GetWorkingHoursByUserId, WorkingHours>(GetWorkingHoursByUserId.Create(testUsers[0].Id));
         if (workingHoursFromDb == null)
         {
@@ -251,6 +257,10 @@ public static class DbContextExtenstions
                     DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
                     TimeSpan.FromHours(8)));
         }
+    }
+
+    private static async Task FillInLeaveRequests(IQueryBus queryBus, ICommandBus commandBus)
+    {
         var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(
             GetLeaveRequests.Create(
                 null, null, null, null, null, null, null,
