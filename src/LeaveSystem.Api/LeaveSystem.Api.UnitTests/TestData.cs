@@ -16,4 +16,17 @@ public static class TestData
             ]
           }
           """;
+    public const string FakeRolesJsonV2 = """
+          {
+            "Roles": [
+              "enim",
+              "ut",
+              "et",
+              "aliquip",
+              "enim",
+              "aute",
+              "et"
+            ]
+          }
+          """;
 }
