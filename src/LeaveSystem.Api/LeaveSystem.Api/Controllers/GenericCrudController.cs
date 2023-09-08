@@ -93,7 +93,7 @@ namespace LeaveSystem.Api.Controllers
             {
                 if (!await IsEntityExists(key, cancellationToken))
                 {
-                    return NotFound();
+                    return NotFound("Entity doesn't exist.");
                 }
                 throw;
             }
