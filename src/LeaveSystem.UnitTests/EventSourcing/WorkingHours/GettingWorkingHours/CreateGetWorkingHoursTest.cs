@@ -1,9 +1,7 @@
 using System;
 using FluentAssertions;
-using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
@@ -98,9 +96,7 @@ public class CreateGetWorkingHoursTest
         var pageSize = 3;
         var dateFrom = currentDate.GetDayWithoutTime();
         var dateTo = (currentDate + new TimeSpan(4, 0, 0, 0)).GetDayWithoutTime();
-        var leaveTypeIds = new[] { Guid.NewGuid() };
         var statuses = new[] { WorkingHoursStatus.Current, WorkingHoursStatus.Deprecated };
-        var createdByEmail = new[] { "fake@email.com" };
         var userIds = new[] { "1" };
         //When
         var getLeaveRequests = GetWorkingHours.Create(

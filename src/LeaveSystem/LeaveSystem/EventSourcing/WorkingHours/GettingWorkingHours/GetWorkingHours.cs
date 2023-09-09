@@ -1,5 +1,6 @@
 using Ardalis.GuardClauses;
 using GoldenEye.Queries;
+using LeaveSystem.Extensions;
 using LeaveSystem.Linq;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
@@ -11,7 +12,7 @@ namespace LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 
 public class GetWorkingHours : IQuery<IPagedList<WorkingHours>>
 {
-    public static readonly WorkingHoursStatus[] ValidStatuses = {WorkingHoursStatus.Current};
+    public static readonly WorkingHoursStatus[] ValidStatuses = { WorkingHoursStatus.Current };
     public int PageNumber { get; }
     public int PageSize { get; }
     public DateTimeOffset DateFrom { get; }
@@ -50,7 +51,8 @@ public class GetWorkingHours : IQuery<IPagedList<WorkingHours>>
         const int maxPageSize = 1000;
         Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), minPageSize, maxPageSize);
         return new(
-            pageSizeOrDefault, pageNumberOrDefault, dateFromOrDefault.GetDayWithoutTime(), dateToOrDefault.GetDayWithoutTime(), userIds, requestedBy, statuses ?? ValidStatuses
+            pageSizeOrDefault, pageNumberOrDefault, dateFromOrDefault.GetDayWithoutTime(),
+            dateToOrDefault.GetDayWithoutTime(), userIds, requestedBy, statuses ?? ValidStatuses
         );
     }
 }
@@ -100,18 +102,8 @@ internal class HandleGetWorkingHours : IQueryHandler<GetWorkingHours, IPagedList
             .Where(x => (x.DateFrom >= request.DateFrom && x.DateFrom <= request.DateTo) ||
                         (x.DateTo >= request.DateFrom && x.DateTo <= request.DateTo) ||
                         (request.DateFrom >= x.DateFrom && request.DateFrom <= x.DateTo));
-        if (request.UserIds is { Length: > 0 })
-        {
-            var predicate = PredicateBuilder.False<WorkingHours>();
-            predicate = request.UserIds.Aggregate(predicate, (current, userId) => current.Or(x => x.UserId == userId));
-            query = query.Where(predicate);
-        }
-        if (request.Statuses is { Length: > 0 })
-        {
-            var predicate = PredicateBuilder.False<WorkingHours>();
-            predicate = request.Statuses.Aggregate(predicate, (current, status) => current.Or(x => x.Status == status));
-            query = query.Where(predicate);
-        }
+        query = query.WhereMatchAny(w => w.UserId, request.UserIds);
+        query = query.WhereMatchAny(w => w.Status, request.Statuses);
         return await query.ToPagedListAsync(request.PageNumber, request.PageSize, cancellationToken);
     }
 }
