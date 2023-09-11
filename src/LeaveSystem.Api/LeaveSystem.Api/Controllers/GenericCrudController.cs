@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace LeaveSystem.Api.Controllers
 {
@@ -34,15 +35,15 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TEntity TEntity, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Post([FromBody] TEntity entity, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            GetSet().Add(TEntity);
+            GetSet().Add(entity);
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Created(TEntity);
+            return Created(entity);
         }
 
         [HttpPatch]
@@ -64,14 +65,11 @@ namespace LeaveSystem.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductExists(key, cancellationToken))
+                if (!await IsEntityExists(key, cancellationToken))
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
             return Updated(entity);
         }
@@ -85,7 +83,7 @@ namespace LeaveSystem.Api.Controllers
             }
             if (key.CompareTo(update.Id) != 0)
             {
-                return BadRequest();
+                return BadRequest("Id in the path is not the same as in the body.");
             }
             dbContext.Entry(update).State = EntityState.Modified;
             try
@@ -94,14 +92,11 @@ namespace LeaveSystem.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductExists(key, cancellationToken))
+                if (!await IsEntityExists(key, cancellationToken))
                 {
-                    return NotFound();
+                    return NotFound("Entity doesn't exist.");
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
             return Updated(update);
         }
@@ -119,7 +114,7 @@ namespace LeaveSystem.Api.Controllers
             return NoContent();
         }
 
-        private Task<bool> ProductExists(TId key, CancellationToken cancellationToken)
+        private Task<bool> IsEntityExists(TId key, CancellationToken cancellationToken)
         {
             return GetSet().AnyAsync(l => l.Id.CompareTo(key) == 0, cancellationToken);
         }

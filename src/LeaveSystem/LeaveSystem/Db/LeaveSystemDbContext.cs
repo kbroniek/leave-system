@@ -7,15 +7,15 @@ using LeaveSystem.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json;
 
 namespace LeaveSystem.Db;
 public class LeaveSystemDbContext : DbContext
 {
     public LeaveSystemDbContext(DbContextOptions<LeaveSystemDbContext> options) : base(options) { }
-
-    public DbSet<LeaveType> LeaveTypes { get; set; }
-    public DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
-    public DbSet<Setting> Settings { get; set; }
+    public virtual DbSet<LeaveType> LeaveTypes { get; set; }
+    public virtual DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
+    public virtual DbSet<Setting> Settings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,11 +31,11 @@ public class LeaveSystemDbContext : DbContext
              .HasKey(e => e.Id);
         modelBuilder.Entity<Setting>()
             .Property(b => b.Category)
-            .IsRequired(true)
+            .IsRequired()
             .HasConversion(new EnumToStringConverter<SettingCategoryType>());
         modelBuilder.Entity<Setting>()
             .Property(b => b.Value)
-            .IsRequired(true)
+            .IsRequired()
             .HasColumnType("jsonb")
             .HasConversion(settingValueConverter);
     }

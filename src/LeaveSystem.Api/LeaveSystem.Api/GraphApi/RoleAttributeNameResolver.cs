@@ -1,9 +1,9 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Shared;
 
-namespace LeaveSystem.Api.Factories;
+namespace LeaveSystem.Api.GraphApi;
 
-public record class RoleAttributeNameResolver(string RoleAttributeName)
+public record RoleAttributeNameResolver(string RoleAttributeName)
 {
     private const string ShortRoleAttributeName = "Role";
     public static RoleAttributeNameResolver Create(string? b2cExtensionAppClientId)

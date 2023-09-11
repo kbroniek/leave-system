@@ -70,7 +70,7 @@ public class LimitValidatorTest
         var act = async () => { await sut.LimitValidator(@event); };
         //Then
         await act.Should().ThrowAsync<ValidationException>().WithMessage("You don't have enough free days for this type of leave");
-        VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
+        documentSessionMock.VerifyLeaveRequestValidatorFunctions(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
     }
 
     private void VerifyDocumentSessionMockCalled(Guid leaveRequestId, Times queryRawEventDataOnlyTimes, Times aggregateStreamAsyncTimes)
@@ -132,7 +132,7 @@ public class LimitValidatorTest
         var act = async () => { await sut.LimitValidator(@event); };
         //Then
         await act.Should().NotThrowAsync<ValidationException>();
-        VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Exactly(2), Times.Exactly(2));
+        documentSessionMock.VerifyLeaveRequestValidatorFunctions(leaveRequestEntity.Id, Times.Exactly(2), Times.Exactly(2));
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class LimitValidatorTest
         //When
         var act = async () => { await sut.LimitValidator(fakeLeaveRequestCreatedEvent); };
         await act.Should().ThrowAsync<ValidationException>().WithMessage("Cannot find limits for the leave type id*");
-        VerifyDocumentSessionMockCalled(It.IsAny<Guid>(), Times.Never(), Times.Never());
+        documentSessionMock.VerifyLeaveRequestValidatorFunctions(It.IsAny<Guid>(), Times.Never(), Times.Never());
     }
 
     [Fact]
@@ -179,6 +179,6 @@ public class LimitValidatorTest
         //When
         var act = async () => { await sut.LimitValidator(@event); };
         await act.Should().ThrowAsync<ValidationException>().WithMessage("Two or more limits found which are the same for the leave type id*");
-        VerifyDocumentSessionMockCalled(It.IsAny<Guid>(), Times.Never(), Times.Never());
+        documentSessionMock.VerifyLeaveRequestValidatorFunctions(It.IsAny<Guid>(), Times.Never(), Times.Never());
     }
 }

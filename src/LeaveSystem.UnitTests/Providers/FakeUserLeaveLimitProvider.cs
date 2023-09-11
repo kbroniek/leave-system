@@ -7,11 +7,11 @@ namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeUserLeaveLimitProvider
 {
-    private static readonly Guid FakeLimitForSickLeaveId = Guid.NewGuid();
-    private static readonly Guid FakeLimitForOnDemandLeaveId = Guid.NewGuid();
-    private static readonly Guid FakeLimitForHolidayLeaveId = Guid.NewGuid();
-    
-    internal static UserLeaveLimit GetLimitForSickLeave()
+    public static readonly Guid FakeLimitForSickLeaveId = Guid.NewGuid();
+    public static readonly Guid FakeLimitForOnDemandLeaveId = Guid.NewGuid();
+    public static readonly Guid FakeLimitForHolidayLeaveId = Guid.NewGuid();
+
+    public static UserLeaveLimit GetLimitForSickLeave()
     {
         var now = DateTimeOffset.Now;
         return new UserLeaveLimit
@@ -24,8 +24,8 @@ public static class FakeUserLeaveLimitProvider
             ValidUntil = now.GetLastDayOfYear(),
         };
     }
-    
-    internal static UserLeaveLimit GetLimitForOnDemandLeave()
+
+    public static UserLeaveLimit GetLimitForOnDemandLeave()
     {
         var now = DateTimeOffset.Now;
         return new UserLeaveLimit
@@ -38,8 +38,8 @@ public static class FakeUserLeaveLimitProvider
             ValidUntil = now.GetLastDayOfYear(),
         };
     }
-    
-    internal static UserLeaveLimit GetLimitForHolidayLeave()
+
+    public static UserLeaveLimit GetLimitForHolidayLeave()
     {
         var now = DateTimeOffset.Now;
         return new UserLeaveLimit
@@ -53,7 +53,7 @@ public static class FakeUserLeaveLimitProvider
         };
     }
 
-    internal static IEnumerable<UserLeaveLimit> GetLimits()
+    public static IEnumerable<UserLeaveLimit> GetLimits()
     {
         yield return GetLimitForSickLeave();
         yield return GetLimitForHolidayLeave();
