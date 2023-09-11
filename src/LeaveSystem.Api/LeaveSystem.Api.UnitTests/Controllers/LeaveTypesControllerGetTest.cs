@@ -1,6 +1,8 @@
+using FluentAssertions;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.UnitTests.TestExtensions;
 using LeaveSystem.Db;
+using LeaveSystem.Db.Entities;
 using LeaveSystem.UnitTests;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
@@ -19,7 +21,8 @@ public class LeaveTypesControllerGetTest
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         var sut = GetSut(dbContext);
         //When
+        var set = sut.Get();
         //Then
-        await sut.CheckGetMethodAsync(dbContext);
+        set.Should().BeEquivalentTo(dbContext.Set<LeaveType>());
     }
 }

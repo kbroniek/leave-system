@@ -30,7 +30,7 @@ public static class DbContextFactory
 
         return dbContext;
     }
-    
+
     public static async Task<LeaveSystemDbContext> CreateAndFillDbAsync()
     {
         var dbContext = await CreateDbContextAsync();
@@ -42,8 +42,14 @@ public static class DbContextFactory
         return dbContext;
     }
 
-    private static void Local_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    public static async Task<LeaveSystemDbContext> CreateAndFillDbAsync()
     {
+        var dbContext = await CreateDbContextAsync();
+        await AddLeaveTypesToDbAsync(dbContext);
+        await dbContext.SaveChangesAsync();
+        await AddUserLeaveLimitsToDbAsync(dbContext);
+        await dbContext.SaveChangesAsync();
+        return dbContext;
     }
 
     private static async Task AddLeaveTypesToDbAsync(LeaveSystemDbContext dbContext)

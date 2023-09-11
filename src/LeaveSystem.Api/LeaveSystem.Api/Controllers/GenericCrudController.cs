@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace LeaveSystem.Api.Controllers
 {
@@ -64,7 +65,7 @@ namespace LeaveSystem.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductExists(key, cancellationToken))
+                if (!await IsEntityExists(key, cancellationToken))
                 {
                     return NotFound();
                 }
@@ -82,14 +83,7 @@ namespace LeaveSystem.Api.Controllers
             }
             if (key.CompareTo(update.Id) != 0)
             {
-                return BadRequest();
-            }
-            var local = GetSet()
-                .Local
-                .FirstOrDefault(entry => entry.Id.Equals(key));
-            if (local != null)
-            {
-                dbContext.Entry(local).State = EntityState.Detached;
+                return BadRequest("Id in the path is not the same as in the body.");
             }
             dbContext.Entry(update).State = EntityState.Modified;
             try
@@ -98,9 +92,9 @@ namespace LeaveSystem.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await ProductExists(key, cancellationToken))
+                if (!await IsEntityExists(key, cancellationToken))
                 {
-                    return NotFound();
+                    return NotFound("Entity doesn't exist.");
                 }
                 throw;
             }
@@ -120,7 +114,7 @@ namespace LeaveSystem.Api.Controllers
             return NoContent();
         }
 
-        private Task<bool> ProductExists(TId key, CancellationToken cancellationToken)
+        private Task<bool> IsEntityExists(TId key, CancellationToken cancellationToken)
         {
             return GetSet().AnyAsync(l => l.Id.CompareTo(key) == 0, cancellationToken);
         }

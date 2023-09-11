@@ -17,7 +17,7 @@ public class RoleAttributeNameResolverMapRolesTest
         //Given
         var roleAttributeName = "fakeAttrName";
         //When
-        var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, roleAttributeName);
+        var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(
             RolesAttribute.Empty,
             o => o.ComparingByMembers<RolesAttribute>());
@@ -42,62 +42,24 @@ public class RoleAttributeNameResolverMapRolesTest
     public void WhenThereIsSuchRolesRawInAdditionalData_ThenReturnRolesAttributeWithRolesFromRaw()
     {
         //Given
-        const string roleAttributeName = "fakeAttrName";
-        const string rolesJson = """
-            {
-              "Roles": [
-                "nulla",
-                "aliquip",
-                "amet",
-                "aliqua",
-                "magna",
-                "cillum",
-                "excepteur"
-              ]
-            }
-            """;
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(rolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
         var additionalData = new Dictionary<string, object>
         {
             {
                 "fakeKey",
-                """
-                {
-                  "Roles": [
-                    "enim",
-                    "ut",
-                    "et",
-                    "aliquip",
-                    "enim",
-                    "aute",
-                    "et"
-                  ]
-                }
-                """
+                TestData.FakeRolesJsonV2
             },
             {
-                roleAttributeName,
-                rolesJson
+                TestData.FakeRoleAttributeName,
+                TestData.FakeRolesJson
             },
             {
                 "fakeKey1",
-                """
-                {
-                  "Roles": [
-                    "enim",
-                    "ut",
-                    "et",
-                    "aliquip",
-                    "enim",
-                    "aute",
-                    "et"
-                  ]
-                }
-                """
+                TestData.FakeRolesJsonV2
             }
         };
         //When
-        var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, roleAttributeName);
+        var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(fakeRolesAttribute
         , o => o.ComparingByMembers<RolesAttribute>());
     }
@@ -114,43 +76,19 @@ public class RoleAttributeNameResolverMapRolesTest
         {
             {
                 "fakeKey",
-                """
-                {
-                  "Roles": [
-                    "enim",
-                    "ut",
-                    "et",
-                    "aliquip",
-                    "enim",
-                    "aute",
-                    "et"
-                  ]
-                }
-                """
+                TestData.FakeRolesJsonV2
             },
             {
-                roleAttributeName,
+                TestData.FakeRoleAttributeName,
                 rolesRaw
             },
             {
                 "fakeKey1",
-                """
-                {
-                  "Roles": [
-                    "enim",
-                    "ut",
-                    "et",
-                    "aliquip",
-                    "enim",
-                    "aute",
-                    "et"
-                  ]
-                }
-                """
+                TestData.FakeRolesJsonV2
             }
         };
         //When
-        var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, roleAttributeName);
+        var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(
             RolesAttribute.Empty
             , o => o.ComparingByMembers<RolesAttribute>());

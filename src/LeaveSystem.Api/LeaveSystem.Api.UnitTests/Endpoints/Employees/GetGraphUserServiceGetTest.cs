@@ -16,25 +16,11 @@ public class GetGraphUserServiceGetTest
     public async Task WhenGetting_ThenReturnUsers()
     {
         //Given
-        const string roleAttributeName = "fakeAttrName";
-        const string rolesJson = """
-            {
-              "Roles": [
-                "nulla",
-                "aliquip",
-                "amet",
-                "aliqua",
-                "magna",
-                "cillum",
-                "excepteur"
-              ]
-            }
-            """;
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(rolesJson);
-        var users = GraphServiceUsersCollectionPageProvider.Get(roleAttributeName, rolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
+        var users = GraphServiceUsersCollectionPageProvider.Get(TestData.FakeRoleAttributeName, TestData.FakeRolesJson);
         var graphClientFactoryMock = new Mock<IGraphClientFactory>();
         var graphServiceUsersCollectionRequestMock = new Mock<IGraphServiceUsersCollectionRequest>();
-        const string query = $"id,mail,displayName,identities,{roleAttributeName}";
+        const string query = $"id,mail,displayName,identities,{TestData.FakeRoleAttributeName}";
         graphServiceUsersCollectionRequestMock.Setup(m => m.Select(query))
             .Returns(graphServiceUsersCollectionRequestMock.Object);
         graphServiceUsersCollectionRequestMock.Setup(m => m.GetAsync(CancellationToken.None))
@@ -47,7 +33,7 @@ public class GetGraphUserServiceGetTest
             .Returns(graphServiceUsersCollectionRequestBuilderMock.Object);
         graphClientFactoryMock.Setup(x => x.Create())
             .Returns(graphClientMock.Object);
-        var rolesAttributeNameResolver = new RoleAttributeNameResolver(roleAttributeName);
+        var rolesAttributeNameResolver = new RoleAttributeNameResolver(TestData.FakeRoleAttributeName);
         var sut = new GetGraphUserService(graphClientFactoryMock.Object, rolesAttributeNameResolver);
         //When
         var federatedUsers = await sut.Get(CancellationToken.None);
@@ -79,7 +65,6 @@ public class GetGraphUserServiceGetTest
                 Roles = fakeRolesAttribute.Roles,
                 Name = users[2].DisplayName
             },
-            
         }, o => o.ExcludingMissingMembers());
     }
 }
