@@ -1,4 +1,3 @@
-using FluentAssertions;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;

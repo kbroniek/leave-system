@@ -16,20 +16,6 @@ public class GetGraphUserServiceGetSingleUserTest
     public async Task WhenUserFound_ThenReturnHimAsFederatedUser()
     {
         //Given
-        const string roleAttributeName = "fakeAttrName";
-        const string rolesJson = """
-            {
-              "Roles": [
-                "nulla",
-                "aliquip",
-                "amet",
-                "aliqua",
-                "magna",
-                "cillum",
-                "excepteur"
-              ]
-            }
-            """;
         var graphClientFactoryMock = Substitute.For<IGraphClientFactory>();
         var graphClientMock = Substitute.For<GraphServiceClient>(Substitute.For<IAuthenticationProvider>(), Substitute.For<IHttpProvider>());
         var userRequestBuilderMock = Substitute.For<IUserRequestBuilder>();
