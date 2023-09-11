@@ -1,9 +1,6 @@
-using System.Runtime.InteropServices;
-using System.Text.Json;
-using FluentAssertions;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
-using Microsoft.Graph;
+using System.Text.Json;
 
 namespace LeaveSystem.Api.UnitTests.GraphApi;
 
@@ -15,7 +12,6 @@ public class RoleAttributeNameResolverMapRolesTest
         Dictionary<string, object>? additionalData)
     {
         //Given
-        var roleAttributeName = "fakeAttrName";
         //When
         var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(
@@ -71,7 +67,6 @@ public class RoleAttributeNameResolverMapRolesTest
     public void WhenRolesRawIsNullOrWhiteSpace_ThenReturnEmptyRolesAttribute(string? rolesRaw)
     {
         //Given
-        const string roleAttributeName = "fakeAttrName";
         var additionalData = new Dictionary<string, object>
         {
             {

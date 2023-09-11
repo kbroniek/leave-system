@@ -1,9 +1,7 @@
-using FluentAssertions;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.UnitTests.TestExtensions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
-using LeaveSystem.UnitTests;
 using LeaveSystem.UnitTests.Providers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Results;
@@ -37,8 +35,6 @@ public class LeaveTypesControllerPutTest
     public async Task WhenProvidedIdIsDifferentThanEntityId_ThenReturnBadRequest()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new LeaveTypesController(dbContext);
         var fakeLeaveTypeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid;
         var fakeLeaveType = FakeLeaveTypeProvider.GetFakeOnDemandLeave();
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
@@ -56,8 +52,6 @@ public class LeaveTypesControllerPutTest
     public async Task WhenProvidedLeaveTypeNotExistsInDatabase_ThenReturnNotFound()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new LeaveTypesController(dbContext);
         var fakeLeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId;
         var fakeLeaveType = FakeLeaveTypeProvider.GetFakeOnDemandLeave();
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
@@ -85,9 +79,9 @@ public class LeaveTypesControllerPutTest
         var fakeLeaveTypeToChange = fakeLeaveTypeFromDb.Clone()!;
         fakeLeaveTypeToChange.Name = "fake name";
         fakeLeaveTypeToChange.Order = 4;
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         var leaveTypeEntityEntryMock = new Mock<EntityEntry<LeaveType>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
 
-        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Entry(fakeLeaveTypeToChange))

@@ -1,10 +1,9 @@
 ﻿using LeaveSystem.Db;
+using LeaveSystem.UnitTests.Providers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Specialized;
 using System.Threading.Tasks;
-using LeaveSystem.UnitTests.Providers;
 
 namespace LeaveSystem.UnitTests;
 
@@ -28,17 +27,6 @@ public static class DbContextFactory
 
         await dbContext.Database.EnsureCreatedAsync();
 
-        return dbContext;
-    }
-
-    public static async Task<LeaveSystemDbContext> CreateAndFillDbAsync()
-    {
-        var dbContext = await CreateDbContextAsync();
-        dbContext.UserLeaveLimits.Local.CollectionChanged += Local_CollectionChanged;
-        await AddLeaveTypesToDbAsync(dbContext);
-        await dbContext.SaveChangesAsync();
-        await AddUserLeaveLimitsToDbAsync(dbContext);
-        await dbContext.SaveChangesAsync();
         return dbContext;
     }
 

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using LeaveSystem.Api.GraphApi;
 
 namespace LeaveSystem.Api.UnitTests.GraphApi;
