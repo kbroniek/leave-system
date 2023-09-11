@@ -1,20 +1,17 @@
-﻿using System.Text.Json;
-using LeaveSystem.Converters;
-using LeaveSystem.Db.Entities;
-using Marten.Services.Json;
+﻿using LeaveSystem.Converters;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json;
 
 namespace LeaveSystem.Db;
 public class LeaveSystemDbContext : DbContext
 {
     public LeaveSystemDbContext(DbContextOptions<LeaveSystemDbContext> options) : base(options) { }
-    public DbSet<LeaveType> LeaveTypes { get; set; }
-    public DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
-    public DbSet<Setting> Settings { get; set; }
+    public virtual DbSet<LeaveType> LeaveTypes { get; set; }
+    public virtual DbSet<UserLeaveLimit> UserLeaveLimits { get; set; }
+    public virtual DbSet<Setting> Settings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

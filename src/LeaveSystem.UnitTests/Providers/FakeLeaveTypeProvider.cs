@@ -64,12 +64,10 @@ public static class FakeLeaveTypeProvider
         Order = 3
     };
 
-    public static IQueryable<LeaveType> GetLeaveTypes()
+    public static IEnumerable<LeaveType> GetLeaveTypes()
     {
-        return new List<LeaveType> {
-            GetFakeOnDemandLeave(),
-            GetFakeHolidayLeave(),
-            GetFakeSickLeave()
-        }.AsQueryable();
+        yield return GetFakeOnDemandLeave();
+        yield return GetFakeHolidayLeave();
+        yield return GetFakeSickLeave();
     }
 }
