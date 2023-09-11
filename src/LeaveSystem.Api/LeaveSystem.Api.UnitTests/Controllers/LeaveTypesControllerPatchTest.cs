@@ -1,4 +1,3 @@
-using FluentAssertions;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
@@ -48,7 +47,7 @@ public class LeaveTypesControllerPatchTest
         //Then
         result.Should().BeOfType<NotFoundResult>();
     }
-    
+
     public static IEnumerable<object[]> Get_LeveRequests_TestData()
     {
         yield return new object[] { Enumerable.Empty<LeaveType>() };
@@ -60,12 +59,12 @@ public class LeaveTypesControllerPatchTest
     {
         //Given
         var fakeLeave = FakeLeaveTypeProvider.GetFakeHolidayLeave();
-        var mockSet = new []
+        var mockSet = new[]
         {
             FakeLeaveTypeProvider.GetFakeSickLeave(),
             FakeLeaveTypeProvider.GetFakeOnDemandLeave()
-        }.AsQueryable().BuildMockDbSet(); 
-        mockSet.Setup(m => m.FindAsync(new object[] {fakeLeave.Id}, default))
+        }.AsQueryable().BuildMockDbSet();
+        mockSet.Setup(m => m.FindAsync(new object[] { fakeLeave.Id }, default))
             .ReturnsAsync(fakeLeave);
 
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
@@ -87,8 +86,8 @@ public class LeaveTypesControllerPatchTest
     {
         //Given
         var fakeLeave = FakeLeaveTypeProvider.GetFakeHolidayLeave();
-        var mockSet = FakeLeaveTypeProvider.GetLeaveTypes().AsQueryable().BuildMockDbSet(); 
-        mockSet.Setup(m => m.FindAsync(new object[] {fakeLeave.Id}, default))
+        var mockSet = FakeLeaveTypeProvider.GetLeaveTypes().AsQueryable().BuildMockDbSet();
+        mockSet.Setup(m => m.FindAsync(new object[] { fakeLeave.Id }, default))
             .ReturnsAsync(fakeLeave);
 
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
@@ -108,7 +107,7 @@ public class LeaveTypesControllerPatchTest
         await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));
     }
-    
+
     [Fact]
     public async Task WhenModelIsValidAndLeaveRequestExistsAndNoExceptionWasThrown_ThenUpdateEntitySuccessful()
     {
@@ -129,9 +128,9 @@ public class LeaveTypesControllerPatchTest
         //Then
         result.Should().BeOfType<UpdatedODataResult<LeaveType>>();
         sut.Get(updatedLeaveTypeId).Queryable.First().Should().BeEquivalentTo(new
-            {
-                Name = updatedLeaveTypeName
-            }, o => o.ExcludingMissingMembers()
+        {
+            Name = updatedLeaveTypeName
+        }, o => o.ExcludingMissingMembers()
         );
     }
 }
