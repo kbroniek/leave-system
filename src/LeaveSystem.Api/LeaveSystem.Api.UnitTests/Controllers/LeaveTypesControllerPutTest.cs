@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.OData.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using MockQueryable.Moq;
 using Moq;
-using Moq.EntityFrameworkCore;
 using System.Runtime.Serialization;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
@@ -61,7 +61,7 @@ public class LeaveTypesControllerPutTest
             .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Entry(fakeLeaveType))
             .Returns(leaveTypeEntityEntryMock.Object);
-        dbContextMock.Setup(x => x.Set<LeaveType>()).ReturnsDbSet(FakeLeaveTypeProvider.GetLeaveTypes().Skip(2));
+        dbContextMock.Setup(x => x.Set<LeaveType>()).Returns(FakeLeaveTypeProvider.GetLeaveTypes().Skip(2).BuildMockDbSet().Object);
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
         var result = await sut.Put(fakeLeaveTypeId, fakeLeaveType);
@@ -86,7 +86,7 @@ public class LeaveTypesControllerPutTest
             .ThrowsAsync(new Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException());
         dbContextMock.Setup(m => m.Entry(fakeLeaveTypeToChange))
             .Returns(leaveTypeEntityEntryMock.Object);
-        dbContextMock.Setup(x => x.Set<LeaveType>()).ReturnsDbSet(FakeLeaveTypeProvider.GetLeaveTypes());
+        dbContextMock.Setup(x => x.Set<LeaveType>()).Returns(FakeLeaveTypeProvider.GetLeaveTypes().BuildMockDbSet().Object);
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
         var act = async () =>
@@ -115,7 +115,7 @@ public class LeaveTypesControllerPutTest
         dbContextMock.Setup(m => m.Entry(fakeLeaveTypeToChange))
             .Returns(leaveTypeEntityEntryMock.Object);
         var updatedLeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId;
-        dbContextMock.Setup(x => x.Set<LeaveType>()).ReturnsDbSet(FakeLeaveTypeProvider.GetLeaveTypes());
+        dbContextMock.Setup(x => x.Set<LeaveType>()).Returns(FakeLeaveTypeProvider.GetLeaveTypes().BuildMockDbSet().Object);
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
         var result = await sut.Put(updatedLeaveTypeId, fakeLeaveTypeToChange);
