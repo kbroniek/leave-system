@@ -10,7 +10,7 @@ public static class FakeUserLeaveLimitProvider
     public static readonly Guid FakeLimitForSickLeaveId = Guid.NewGuid();
     public static readonly Guid FakeLimitForOnDemandLeaveId = Guid.NewGuid();
     public static readonly Guid FakeLimitForHolidayLeaveId = Guid.NewGuid();
-    
+
     public static UserLeaveLimit GetLimitForSickLeave()
     {
         var now = DateTimeOffset.Now;
@@ -24,7 +24,7 @@ public static class FakeUserLeaveLimitProvider
             ValidUntil = now.GetLastDayOfYear(),
         };
     }
-    
+
     public static UserLeaveLimit GetLimitForOnDemandLeave()
     {
         var now = DateTimeOffset.Now;
@@ -38,7 +38,7 @@ public static class FakeUserLeaveLimitProvider
             ValidUntil = now.GetLastDayOfYear(),
         };
     }
-    
+
     public static UserLeaveLimit GetLimitForHolidayLeave()
     {
         var now = DateTimeOffset.Now;

@@ -145,14 +145,17 @@ public static class DateCalculator
             var day = p + 1;
             var month = (int)Math.Floor((double)((h + l - 7 * m + 114) / 31));
 
-            DateTimeOffset wielkanoc = new DateTimeOffset(new DateTime(date.Year, month, day), TimeSpan.Zero);
+            DateTimeOffset easter = new DateTimeOffset(new DateTime(date.Year, month, day), TimeSpan.Zero);
 
             var dateWithoutTime = date.GetDayWithoutTime();
 
-            return dateWithoutTime == wielkanoc ||
-                dateWithoutTime == wielkanoc.AddDays(1) ||
-                dateWithoutTime == wielkanoc.AddDays(49) ||
-                dateWithoutTime == wielkanoc.AddDays(60);
+            const int easterMonday = 1;
+            const int pentecost = 49;
+            const int corpusChristi = 60;
+            return dateWithoutTime == easter ||
+                dateWithoutTime == easter.AddDays(easterMonday) ||
+                dateWithoutTime == easter.AddDays(pentecost) ||
+                dateWithoutTime == easter.AddDays(corpusChristi);
         }
         return false;
     }

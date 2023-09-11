@@ -1,7 +1,11 @@
-﻿using LeaveSystem.Converters;
+using System.Text.Json;
+using LeaveSystem.Converters;
+using LeaveSystem.Db.Entities;
+using Marten.Services.Json;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Text.Json;
 
@@ -22,7 +26,7 @@ public class LeaveSystemDbContext : DbContext
 
     private void OnSettingsCreating(ModelBuilder modelBuilder)
     {
-        var userLeaveLimitProperties = new TypeToJsonConverter<JsonDocument>();
+        var settingValueConverter = new TypeToJsonConverter<JsonDocument>();
         modelBuilder.Entity<Setting>()
              .HasKey(e => e.Id);
         modelBuilder.Entity<Setting>()
@@ -33,7 +37,7 @@ public class LeaveSystemDbContext : DbContext
             .Property(b => b.Value)
             .IsRequired()
             .HasColumnType("jsonb")
-            .HasConversion(userLeaveLimitProperties);
+            .HasConversion(settingValueConverter);
     }
 
     private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)

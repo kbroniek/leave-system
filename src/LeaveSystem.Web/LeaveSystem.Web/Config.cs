@@ -6,6 +6,7 @@ using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.UserPanel;
+using LeaveSystem.Web.Pages.UsersManagement;
 using LeaveSystem.Web.Pages.WorkingHours;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -39,6 +40,8 @@ public static class Config
                 policy.Requirements.Add(new RoleRequirement(RoleType.Employee)));
             options.AddPolicy(ShowHrPanel.PolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource)));
+            options.AddPolicy(UsersPage.PolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin)));
         });
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
@@ -52,7 +55,8 @@ public static class Config
             .AddTransient<EmployeeService>()
             .AddTransient<WorkingHoursService>()
             .AddTransient<HrSummaryService>()
-            .AddTransient<GetLeaveStatusSettingsService>();
+            .AddTransient<GetLeaveStatusSettingsService>()
+            .AddTransient<UsersService>();
     }
     private static IServiceCollection AddHttpClient(this IServiceCollection services, IConfiguration configuration, string scopes)
     {

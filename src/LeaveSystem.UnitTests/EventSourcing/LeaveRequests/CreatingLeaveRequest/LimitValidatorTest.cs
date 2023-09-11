@@ -71,17 +71,26 @@ public class LimitValidatorTest
         //Then
         await act.Should().ThrowAsync<ValidationException>().WithMessage("You don't have enough free days for this type of leave");
         documentSessionMock.VerifyLeaveRequestValidatorFunctions(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
-        
+    }
+
+    private void VerifyDocumentSessionMockCalled(Guid leaveRequestId, Times queryRawEventDataOnlyTimes, Times aggregateStreamAsyncTimes)
+    {
+        documentSessionMock.VerifyLeaveRequestValidatorFunctions(leaveRequestId, queryRawEventDataOnlyTimes, aggregateStreamAsyncTimes);
     }
 
     private async Task<LeaveSystemDbContext> CreateAndFillDbAsync()
     {
         var dbContext = await DbContextFactory.CreateDbContextAsync();
+        dbContext.UserLeaveLimits.Local.CollectionChanged += Local_CollectionChanged;
         await AddLeaveTypesToDbAsync(dbContext);
         await dbContext.SaveChangesAsync();
         await AddUserLeaveLimitsToDbAsync(dbContext);
         await dbContext.SaveChangesAsync();
         return dbContext;
+    }
+
+    private void Local_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
     }
 
     private async Task AddLeaveTypesToDbAsync(LeaveSystemDbContext dbContext)

@@ -41,12 +41,18 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
     public static GetLeaveRequests Create(int? pageNumber, int? pageSize, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, Guid[]? leaveTypeIds, LeaveRequestStatus[]? statuses, string[]? createdByEmails, string[]? createdByUserIds, FederatedUser requestedBy)
     {
         var now = DateTimeOffset.UtcNow;
-        var pageNumberOrDefault = pageNumber ?? 1;
-        var pageSizeOrDefault = pageSize ?? 20;
-        var dateFromOrDefault = dateFrom ?? now.Add(TimeSpan.FromDays(-14));
-        var dateToOrDefault = dateTo ?? now.Add(TimeSpan.FromDays(14));
+        const int defaultPageNumber = 1;
+        var pageNumberOrDefault = pageNumber ?? defaultPageNumber;
+        const int defaultPageSize = 20;
+        var pageSizeOrDefault = pageSize ?? defaultPageSize;
+        const int defaultDaysFrom = -14;
+        var dateFromOrDefault = dateFrom ?? now.Add(TimeSpan.FromDays(defaultDaysFrom));
+        const int defaultDaysTo = 14;
+        var dateToOrDefault = dateTo ?? now.Add(TimeSpan.FromDays(defaultDaysTo));
         Guard.Against.NegativeOrZero(pageNumberOrDefault, nameof(pageNumber));
-        Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), 1, 1000);
+        const int minPageSize = 1;
+        const int maxPageSize = 1000;
+        Guard.Against.OutOfRange(pageSizeOrDefault, nameof(pageSize), minPageSize, maxPageSize);
         return new(
             pageNumberOrDefault,
             pageSizeOrDefault,

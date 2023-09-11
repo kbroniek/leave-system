@@ -13,7 +13,7 @@ public static class FakeLeaveTypeProvider
     public static Guid FakeOnDemandLeaveId = Guid.NewGuid();
     public static Guid FakeSickLeaveId = Guid.NewGuid();
     public static Guid FakeHolidayLeaveGuid = Guid.NewGuid();
-
+    
     public static LeaveType GetFakeSickLeave() => new()
     {
         Id = FakeSickLeaveId,
