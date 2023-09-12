@@ -57,18 +57,14 @@ else
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User.CreateModel();
         var userId = user.Id;
-        var now = DateTimeOffset.UtcNow;
-        var firstDay = now.GetFirstDayOfYear();
-        var lastDay = now.GetLastDayOfYear();
-        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(userId, firstDay, lastDay);
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(userId);
         leaveRequest = await HttpClient.GetFromJsonAsync<LeaveRequest>($"api/leaveRequests/{LeaveRequestId}", new JsonSerializerOptions(JsonSerializerDefaults.Web));
         if(leaveRequest is null)
         {
             throw new InvalidOperationException($"Cannot find the leave request id: {LeaveRequestId}");
         }
         leaveType = await LeaveTypesService.GetLeaveType(leaveRequest.LeaveTypeId);
-        var workingHours = await getWorkingHoursTask;
-        this.workingHours = workingHours.GetDuration();
+        workingHours = (await getWorkingHoursTask).DurationOrDefault();
     }
 
     public record LeaveRequest(DateTimeOffset DateFrom, DateTimeOffset DateTo, TimeSpan Duration, Guid LeaveTypeId, IEnumerable<RemarksModel> Remarks, LeaveRequestStatus Status, FederatedUser CreatedBy, FederatedUser? LastModifiedBy, FederatedUser? CreatedByOnBehalf);

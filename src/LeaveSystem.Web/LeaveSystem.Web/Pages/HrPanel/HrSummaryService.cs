@@ -1,11 +1,13 @@
 ﻿using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.UserPanel;
 using LeaveSystem.Web.Pages.WorkingHours;
+using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 
 namespace LeaveSystem.Web.Pages.HrPanel;
 
@@ -52,7 +54,10 @@ public class HrSummaryService
             .Union(employees.Select(e => e.Id))
             .Distinct()
             .ToArray();
-        var workingHours = allUserIds.Length == 0 ? WorkingHoursCollection.Empty : await workingHoursService.GetWorkingHours(allUserIds, firstDay, lastDay);
+        var getWorkingHoursQuery = GetWorkingHoursQuery.GetDefaultForUsers(allUserIds);
+        var workingHours = allUserIds.Length == 0 ?
+            Enumerable.Empty<EventSourcing.WorkingHours.WorkingHours>() : 
+            (await workingHoursService.GetWorkingHours(getWorkingHoursQuery))?.Items;
 
         return new LeaveRequestSummary(
             employees
@@ -62,7 +67,7 @@ public class HrSummaryService
                         leaveTypes,
                         leaveRequests.Where(lr => lr.CreatedBy.Id == e.Id),
                         limits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
-                        workingHours.GetDuration(e.Id))))),
+                        workingHours.DurationOrDefault(e.Id))))),
         leaveTypes);
     }
 

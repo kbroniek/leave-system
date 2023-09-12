@@ -1,28 +1,30 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
+using Marten;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
 public class LeaveRequestFactory
 {
     private readonly CreateLeaveRequestValidator validator;
-    private readonly WorkingHoursService workingHoursService;
     private readonly LeaveSystemDbContext dbContext;
+    private readonly IQuerySession querySession;
 
-    public LeaveRequestFactory(CreateLeaveRequestValidator validator, WorkingHoursService workingHoursService, LeaveSystemDbContext dbContext)
+    public LeaveRequestFactory(CreateLeaveRequestValidator validator, LeaveSystemDbContext dbContext, IQuerySession querySession)
     {
         this.validator = validator;
-        this.workingHoursService = workingHoursService;
         this.dbContext = dbContext;
+        this.querySession = querySession;
     }
 
     public virtual async Task<LeaveRequest> Create(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
-        var workingHours = await workingHoursService.GetUserSingleWorkingHoursDuration(command.CreatedBy.Id, command.DateFrom, command.DateTo, cancellationToken);
+        var workingHoursModel = await querySession.Query<WorkingHours.WorkingHours>().Where(wh => wh.UserId == command.CreatedBy.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        var workingHours = workingHoursModel?.Duration ?? TimeSpan.Zero;
         var maxDuration = DateCalculator.CalculateDuration(command.DateFrom, command.DateTo, workingHours, leaveType.Properties?.IncludeFreeDays);
         var minDuration = maxDuration - workingHours;
         var duration = command.Duration ?? maxDuration;

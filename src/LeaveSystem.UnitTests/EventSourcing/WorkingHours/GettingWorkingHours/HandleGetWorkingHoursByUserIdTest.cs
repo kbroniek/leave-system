@@ -31,7 +31,7 @@ public class HandleGetWorkingHoursByUserIdTest
         querySessionMock = Substitute.For<IDocumentSession>();
         querySessionMock.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>()
             .Returns(martenQueryableStub);
-        var request = GetWorkingHoursByUserId.Create(FakeUserProvider.BenId);
+        var request = GetCurrentWorkingHoursByUserId.Create(FakeUserProvider.BenId);
         var sut = GetSut();
         //When
         var act = async () => { await sut.Handle(request, CancellationToken.None); };
@@ -52,7 +52,7 @@ public class HandleGetWorkingHoursByUserIdTest
         querySessionMock = Substitute.For<IDocumentSession>();
         querySessionMock.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>()
             .Returns(martenQueryableStub);
-        var request = GetWorkingHoursByUserId.Create(FakeUserProvider.BenId);
+        var request = GetCurrentWorkingHoursByUserId.Create(FakeUserProvider.BenId);
         var sut = GetSut();
         //When
         var result = await sut.Handle(request, CancellationToken.None);

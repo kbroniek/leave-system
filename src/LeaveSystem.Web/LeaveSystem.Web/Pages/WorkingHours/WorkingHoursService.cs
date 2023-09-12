@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using LeaveSystem.Shared;
+using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 
 namespace LeaveSystem.Web.Pages.WorkingHours;
 
@@ -14,29 +15,16 @@ public class WorkingHoursService
         this.httpClient = httpClient;
     }
 
-    public virtual async Task<WorkingHoursCollection> GetWorkingHours(IEnumerable<string> userIds, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public virtual async Task<PagedListResponse<EventSourcing.WorkingHours.WorkingHours>?> GetWorkingHours(GetWorkingHoursQuery query)
     {
-        var query = new
-        {
-            UserIds = userIds,
-            DateFrom = dateFrom,
-            dateTo = dateTo,
-        };
         var uri = query.CreateQueryString($"api/workingHours");
-        var workingHours = await httpClient.GetFromJsonAsync<WorkingHoursCollectionDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        return new WorkingHoursCollection(workingHours?.WorkingHours ?? Enumerable.Empty<WorkingHoursModel>());
+        return await httpClient.GetFromJsonAsync<PagedListResponse<EventSourcing.WorkingHours.WorkingHours>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
     }
 
-    public virtual async Task<WorkingHoursCollection> GetUserWorkingHours(string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public virtual async Task<EventSourcing.WorkingHours.WorkingHours?> GetUserWorkingHours(string userId)
     {
-        var query = new
-        {
-            DateFrom = dateFrom,
-            dateTo = dateTo,
-        };
-        var uri = query.CreateQueryString($"api/workingHours/{userId}");
-        var workingHours = await httpClient.GetFromJsonAsync<WorkingHoursCollectionDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        return new WorkingHoursCollection(workingHours?.WorkingHours ?? Enumerable.Empty<WorkingHoursModel>());
+        var uri = $"api/workingHours/{userId}";
+        return await httpClient.GetFromJsonAsync<EventSourcing.WorkingHours.WorkingHours>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
     }
 }
 

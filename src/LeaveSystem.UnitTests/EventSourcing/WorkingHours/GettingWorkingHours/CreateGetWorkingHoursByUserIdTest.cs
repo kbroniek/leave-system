@@ -13,7 +13,7 @@ public class CreateGetWorkingHoursByUserIdTest
         //Given
         var userId = (string?)null;
         //When
-        var act = () => { GetWorkingHoursByUserId.Create(userId); };
+        var act = () => { GetCurrentWorkingHoursByUserId.Create(userId); };
         //Then
         act.Should().Throw<ArgumentNullException>();
     }
@@ -25,7 +25,7 @@ public class CreateGetWorkingHoursByUserIdTest
     {
         //Given
         //When
-        var act = () => { GetWorkingHoursByUserId.Create(userId); };
+        var act = () => { GetCurrentWorkingHoursByUserId.Create(userId); };
         //Then
         act.Should().Throw<ArgumentException>();
     }
@@ -36,7 +36,7 @@ public class CreateGetWorkingHoursByUserIdTest
         //Given
         var userId = "1234";
         //When
-        var result = GetWorkingHoursByUserId.Create(userId);
+        var result = GetCurrentWorkingHoursByUserId.Create(userId);
         //Then
         result.Should().BeEquivalentTo(new
         {

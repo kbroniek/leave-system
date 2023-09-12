@@ -25,7 +25,7 @@ public static class WorkingHoursConfig
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
-            .AddQueryHandler<GetWorkingHoursByUserId, WorkingHours, HandleGetWorkingHoursByUserId>()
+            .AddQueryHandler<GetCurrentWorkingHoursByUserId, WorkingHours, HandleGetWorkingHoursByUserId>()
             .AddQueryHandler<GetWorkingHours, IPagedList<WorkingHours>, HandleGetWorkingHours>();
 
     private static IServiceCollection AddLeaveRequestValidators(this IServiceCollection services) =>

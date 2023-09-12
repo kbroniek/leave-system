@@ -10,6 +10,7 @@
 @using Microsoft.AspNetCore.Components.Authorization;
 @using LeaveSystem.Shared.WorkingHours
 @using System.Text.Json
+@using LeaveSystem.EventSourcing.WorkingHours
 @attribute [Authorize(Policy=PolicyName)]
 @inject HttpClient Http
 @inject LeaveTypesService LeaveTypesService
@@ -34,7 +35,7 @@
                     <AuthorizeView Policy="@OnBehalfPolicyName" Context="CreateOnBehalf">
                         <div>
                             <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="mb-1 mt-2">Create on behalf of:</RadzenText>
-                            <RadzenDropDown @bind-Value="onBehalfId" Data="@Employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg))/>
+                            <RadzenDropDown @bind-Value="onBehalfId" Data="@Employees" TextProperty="Name" ValueProperty="Id" Name="OnBehalf" Class="w-100" AllowClear="true" NullText="Select user ..." Change=@(arg => OnBehalfChanged(arg)) />
                         </div>
                     </AuthorizeView>
                     <div>
@@ -127,7 +128,7 @@
     private DateSummary? dateSummary;
     private IEnumerable<LeaveRequestShortInfo> submittedLeaveRequests = Enumerable.Empty<LeaveRequestShortInfo>();
     private IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
-    private WorkingHoursCollection workingHours = new WorkingHoursCollection(Enumerable.Empty<WorkingHoursModel>());
+    private WorkingHours workingHours = new();
     private bool durationEnabled = true;
     private IEnumerable<GetEmployeeDto> employees = Enumerable.Empty<GetEmployeeDto>();
     public SemaphoreSlim employeesLock { get; set; } = new SemaphoreSlim(1);
@@ -175,13 +176,13 @@
                 CreatedByUserIds = new string[] { currentUser.Id }
             });
             var getLimitsTask = UserLeaveLimitsService.GetLimits(currentUser.Id, firstDay, lastDay);
-            var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(currentUser.Id, firstDay, lastDay);
+            var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(currentUser.Id);
             await Task.WhenAll(getLeaveRequestsTask, getLimitsTask, getUserWorkingHoursTask);
 
             submittedLeaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
-            workingHours = getUserWorkingHoursTask.Result;
+            workingHours = getUserWorkingHoursTask.Result ?? new ();
             limits = getLimitsTask.Result;
-            var workingHoursDuration = workingHours.GetDuration();
+            var workingHoursDuration = workingHours.DurationOrDefault();
             dateSummary = GetDateSummary(leaveRequest.DateFrom, leaveRequest.DateTo, workingHoursDuration);
             leaveSummary = GetLeaveDetails();
         }
@@ -314,7 +315,7 @@
         DateTimeOffset? dateFrom = leaveRequest.DateFrom;
         DateTimeOffset? dateTo = leaveRequest.DateTo;
         durationEnabled = dateFrom?.GetDayWithoutTime() == dateTo?.GetDayWithoutTime();
-        var workingHoursDuration = workingHours.GetDuration();
+        var workingHoursDuration = workingHours.DurationOrDefault();
         dateSummary = GetDateSummary(dateFrom, dateTo, workingHoursDuration);
         leaveSummary = GetLeaveDetails();
     }
@@ -348,7 +349,7 @@
         var limit = limits.FirstOrDefault(l => l.LeaveTypeId == leaveRequest.LeaveTypeId &&
             (l.ValidSince == null || l.ValidSince <= leaveRequest.DateFrom) &&
             (l.ValidUntil == null || l.ValidUntil >= leaveRequest.DateFrom));
-        var workingHoursDuration = workingHours.GetDuration();
+        var workingHoursDuration = workingHours.DurationOrDefault();
         var leaveType = leaveTypes.FirstOrDefault(lt => lt.Id == leaveRequest.LeaveTypeId);
         var workingDays = leaveRequest.DateFrom != null && leaveRequest.DateTo != null ?
             DateCalculator.CalculateDuration((DateTimeOffset)leaveRequest.DateFrom, (DateTimeOffset)leaveRequest.DateTo, workingHoursDuration, leaveType?.Properties.IncludeFreeDays) :
@@ -361,6 +362,6 @@
             submittedLeaveRequestsDuration.GetReadableTimeSpan(workingHoursDuration));
     }
 
-    private record class LeaveSummary(string DaysAvailable, string DaysAvailableAfterSubmitting, string AllDaysInRequests);
-    private record class DateSummary(string Days, string WorkingDays, string FreeDays);
+    private record LeaveSummary(string DaysAvailable, string DaysAvailableAfterSubmitting, string AllDaysInRequests);
+    private record DateSummary(string Days, string WorkingDays, string FreeDays);
 }

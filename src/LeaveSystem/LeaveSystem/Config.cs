@@ -1,8 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using GoldenEye.Marten.Registration;
+﻿using GoldenEye.Marten.Registration;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing;
-using LeaveSystem.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,11 +14,6 @@ public static class Config
         var martenConfig = config.GetSection("Marten").Get<MartenConfig>();
         services
             .AddDbContext<LeaveSystemDbContext>(options => options.UseNpgsql(martenConfig.ConnectionString))
-            .AddEventSourcing(config)
-            .AddServices();
+            .AddEventSourcing(config);
     }
-
-    private static IServiceCollection AddServices(this IServiceCollection services) =>
-        services
-            .AddScoped<WorkingHoursService>();
 }

@@ -6,19 +6,19 @@ using Marten;
 
 namespace LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 
-public class GetWorkingHoursByUserId : IQuery<WorkingHours>
+public class GetCurrentWorkingHoursByUserId : IQuery<WorkingHours>
 {
     public string UserId { get; }
-    private GetWorkingHoursByUserId(string userId)
+    private GetCurrentWorkingHoursByUserId(string userId)
     {
         UserId = userId;
     }
 
-    public static GetWorkingHoursByUserId Create(string? userId) =>
+    public static GetCurrentWorkingHoursByUserId Create(string? userId) =>
         new(Guard.Against.NullOrWhiteSpace(userId));
 }
 
-internal class HandleGetWorkingHoursByUserId : IQueryHandler<GetWorkingHoursByUserId, WorkingHours>
+internal class HandleGetWorkingHoursByUserId : IQueryHandler<GetCurrentWorkingHoursByUserId, WorkingHours>
 {
     private readonly IDocumentSession querySession;
 
@@ -27,7 +27,7 @@ internal class HandleGetWorkingHoursByUserId : IQueryHandler<GetWorkingHoursByUs
         this.querySession = querySession;
     }
 
-    public async Task<WorkingHours> Handle(GetWorkingHoursByUserId request, CancellationToken cancellationToken)
+    public async Task<WorkingHours> Handle(GetCurrentWorkingHoursByUserId request, CancellationToken cancellationToken)
     {
         var workingHours = await querySession.Query<WorkingHours>().Where(wh => wh.UserId == request.UserId && wh.Status == WorkingHoursStatus.Current)
             .FirstOrDefaultAsync(cancellationToken);

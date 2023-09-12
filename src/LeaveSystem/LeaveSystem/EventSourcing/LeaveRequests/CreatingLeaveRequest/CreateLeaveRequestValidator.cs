@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using Marten;
@@ -12,13 +11,11 @@ namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 public class CreateLeaveRequestValidator
 {
     private readonly LeaveSystemDbContext dbContext;
-    private readonly WorkingHoursService workingHoursService;
     private readonly IDocumentSession documentSession;
 
-    public CreateLeaveRequestValidator(LeaveSystemDbContext dbContext, WorkingHoursService workingHoursService, IDocumentSession documentSession)
+    public CreateLeaveRequestValidator(LeaveSystemDbContext dbContext, IDocumentSession documentSession)
     {
         this.dbContext = dbContext;
-        this.workingHoursService = workingHoursService;
         this.documentSession = documentSession;
     }
 
