@@ -38,6 +38,7 @@ public class WorkingHours : Aggregate
     private void Apply(WorkingHoursDeprecated _)
     {
         Status = WorkingHoursStatus.Deprecated;
+        Version++;
     }
 
     private void Apply(WorkingHoursCreated @event)

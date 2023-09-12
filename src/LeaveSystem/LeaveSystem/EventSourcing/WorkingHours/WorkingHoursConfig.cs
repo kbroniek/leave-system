@@ -4,6 +4,7 @@ using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using Marten;
+using Marten.Pagination;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeaveSystem.EventSourcing.WorkingHours;
@@ -24,7 +25,8 @@ public static class WorkingHoursConfig
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services
-            .AddQueryHandler<GetWorkingHoursByUserId, WorkingHours, HandleGetWorkingHoursByUserId>();
+            .AddQueryHandler<GetWorkingHoursByUserId, WorkingHours, HandleGetWorkingHoursByUserId>()
+            .AddQueryHandler<GetWorkingHours, IPagedList<WorkingHours>, HandleGetWorkingHours>();
 
     private static IServiceCollection AddLeaveRequestValidators(this IServiceCollection services) =>
         services;

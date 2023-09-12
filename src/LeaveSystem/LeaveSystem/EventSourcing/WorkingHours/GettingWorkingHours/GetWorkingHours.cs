@@ -1,7 +1,6 @@
 using Ardalis.GuardClauses;
 using GoldenEye.Queries;
 using LeaveSystem.Extensions;
-using LeaveSystem.Linq;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.WorkingHours;

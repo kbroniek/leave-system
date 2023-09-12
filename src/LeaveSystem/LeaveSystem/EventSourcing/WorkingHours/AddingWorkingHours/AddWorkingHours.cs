@@ -56,7 +56,12 @@ internal class HandleAddWorkingHours : ICommandHandler<AddWorkingHours>
         var currentWorkingHoursForUser = await querySession.Query<WorkingHours>()
             .Where(x => x.UserId == request.UserId && x.Status == WorkingHoursStatus.Current)
             .FirstOrDefaultAsync(cancellationToken);
-        currentWorkingHoursForUser?.Deprecate();
+        if (currentWorkingHoursForUser is not null)
+        {
+            currentWorkingHoursForUser.Deprecate();
+            await repository.Update(currentWorkingHoursForUser, cancellationToken);
+            await repository.SaveChanges(cancellationToken);
+        }
         var createdWorkingHours = factory.Create(request);
         await repository.Add(createdWorkingHours, cancellationToken);
         await repository.SaveChanges(cancellationToken);

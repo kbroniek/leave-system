@@ -243,20 +243,61 @@ public static class DbContextExtenstions
         await FillInWorkingHours(queryBus, commandBus);
         await FillInLeaveRequests(queryBus, commandBus);
     }
-    
+
     private static async Task FillInWorkingHours(IQueryBus queryBus, ICommandBus commandBus)
     {
-        var workingHoursFromDb = await queryBus.Send<GetWorkingHoursByUserId, WorkingHours>(GetWorkingHoursByUserId.Create(testUsers[0].Id));
-        if (workingHoursFromDb == null)
+        var workingHoursFromDb = await queryBus.Send<GetWorkingHours, IPagedList<WorkingHours>>(GetWorkingHours.Create(
+            null, null, null, null,
+            testUsers.Take(5).Select(u => u.Id).ToArray(), defaultUser,
+            null));
+        if (workingHoursFromDb.Any())
         {
-            await commandBus.Send(
-                AddWorkingHours.Create(
-                    Guid.NewGuid(),
-                    testUsers[0].Id,
-                    DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-                    DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
-                    TimeSpan.FromHours(8)));
+            return;
         }
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[0].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
+            TimeSpan.FromHours(8));
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[1].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2018, 3, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2025, 3, 1),
+            TimeSpan.FromHours(8));
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[2].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2021, 12, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2023, 7, 10),
+            TimeSpan.FromHours(4));
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[3].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
+            TimeSpan.FromHours(8));
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[4].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2023, 6, 9),
+            DateTimeOffsetExtensions.CreateFromDate(2028, 1, 1),
+            TimeSpan.FromHours(8));
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[4].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
+            TimeSpan.FromHours(4));
+    }
+
+    private static Task CreateWorkingHours(ICommandBus commandBus, string? userId, DateTimeOffset? dateFrom,
+        DateTimeOffset? dateTo, TimeSpan? duration)
+    {
+        var workingHoursId = Guid.NewGuid();
+        var command = AddWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration);
+        return commandBus.Send(command);
     }
 
     private static async Task FillInLeaveRequests(IQueryBus queryBus, ICommandBus commandBus)
