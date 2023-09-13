@@ -6,13 +6,12 @@ using RichardSzalay.MockHttp;
 
 namespace LeaveSystem.Web.UnitTests.Pages.LeaveRequests.ShowingLeaveRequests;
 
-
 //Todo: decide if remove this test
 public class GetLeaveRequestsTest
 {
     private HttpClient httpClientMock;
     private PagedListResponse<LeaveRequestShortInfo> data;
-    private GetLeaveRequestsQuery query; 
+    private GetLeaveRequestsQuery query;
 
     public GetLeaveRequestsTest()
     {
