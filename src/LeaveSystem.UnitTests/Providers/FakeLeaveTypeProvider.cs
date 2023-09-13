@@ -8,7 +8,7 @@ namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeLeaveTypeProvider
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     public static Guid FakeOnDemandLeaveId = Guid.NewGuid();
     public static Guid FakeSickLeaveId = Guid.NewGuid();
     public static Guid FakeHolidayLeaveGuid = Guid.NewGuid();

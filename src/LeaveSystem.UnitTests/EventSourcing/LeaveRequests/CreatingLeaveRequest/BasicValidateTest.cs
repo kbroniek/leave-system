@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using Marten;
 using Moq;
@@ -16,7 +15,6 @@ public class BasicValidateTest : IAsyncLifetime
 {
     private CreateLeaveRequestValidator requestValidator;
     private LeaveSystemDbContext dbContext;
-    private readonly Mock<WorkingHoursService> workingHoursServiceMock = new();
     private readonly Mock<IDocumentSession> documentSessionMock = new();
     public static IEnumerable<object?[]> GetDateTestData()
     {
@@ -48,7 +46,7 @@ public class BasicValidateTest : IAsyncLifetime
     public async Task InitializeAsync()
     {
         dbContext = await DbContextFactory.CreateDbContextAsync();
-        requestValidator = new CreateLeaveRequestValidator(dbContext, workingHoursServiceMock.Object, documentSessionMock.Object);
+        requestValidator = new CreateLeaveRequestValidator(dbContext, documentSessionMock.Object);
     }
     
     public Task DisposeAsync()

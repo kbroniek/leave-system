@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -12,10 +10,8 @@ using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
-using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
-using LeaveSystem.UnitTests.TestHelpers;
 using Marten;
 using Moq;
 using Xunit;
@@ -24,7 +20,7 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.GettingLeaveRequests
 
 public class HandleGetLeaveRequestsTest
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
 
     private async Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession)
     {

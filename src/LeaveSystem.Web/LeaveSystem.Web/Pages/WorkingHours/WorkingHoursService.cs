@@ -17,7 +17,7 @@ public class WorkingHoursService
 
     public virtual async Task<PagedListResponse<EventSourcing.WorkingHours.WorkingHours>?> GetWorkingHours(GetWorkingHoursQuery query)
     {
-        var uri = query.CreateQueryString($"api/workingHours");
+        var uri = query.CreateQueryString("api/workingHours");
         return await httpClient.GetFromJsonAsync<PagedListResponse<EventSourcing.WorkingHours.WorkingHours>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
     }
 

@@ -1,32 +1,36 @@
+using FluentAssertions;
+using FluentAssertions.Equivalency;
+using FluentAssertions.Execution;
 using NSubstitute;
 
 namespace LeaveSystem.Shared.Extensions;
 
 public static class ArgExtensions
 {
-    public static T IsEquivalentTo<T>(object source) where T : class =>
-        Arg.Is<T>(x => x.IsEquivalentTo(source));
-
-    private static bool IsEquivalentTo<T>(this T source, object target) where T : class
+    public static T IsEquivalentTo<T>(object target) where T : class
     {
-        var properties = source.GetType().GetProperties();
-        foreach (var property in properties)
-        {
-            var propertyName = property.Name;
-            var targetProperty = target.GetType().GetProperty(propertyName);
-            if (targetProperty is null)
-            {
-                return false;
-            }
-            var valuesAreEquals = targetProperty.GetValue(target)?.Equals(targetProperty.GetValue(source));
-            if (valuesAreEquals == false)
-            {
-                return false;
-            }
-        }
-        return true;
+        return Arg.Is<T>(x => x.IsEquivalentTo(target));
     }
     
+    private static bool IsEquivalentTo<T>(this T source, object target) where T : class
+    {
+        using var scope = new AssertionScope();
+        source.Should().BeEquivalentTo(target);
+        return !scope.HasFailures();
+    }
+    
+    public static TSource IsEquivalentTo<TSource, TTarget>(TTarget target, Func<EquivalencyAssertionOptions<TTarget>, EquivalencyAssertionOptions<TTarget>>  config) where TSource : class where TTarget : class
+    {
+        return Arg.Is<TSource>(x => x.IsEquivalentTo(target, config));
+    }
+    
+    private static bool IsEquivalentTo<TSource, TTarget>(this TSource source, TTarget target, Func<EquivalencyAssertionOptions<TTarget>, EquivalencyAssertionOptions<TTarget>> config) where TSource : class where TTarget : class
+    {
+        using var scope = new AssertionScope();
+        source.Should().BeEquivalentTo(target, config);
+        return scope.Discard().Any();
+    }
+
     public static IEnumerable<T> IsCollectionEquivalentTo<T>(IEnumerable<T> source) =>
         Arg.Is<IEnumerable<T>>(x => x.SequenceEqual(source)); 
 }

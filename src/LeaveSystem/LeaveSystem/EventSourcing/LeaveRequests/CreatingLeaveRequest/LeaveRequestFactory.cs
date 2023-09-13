@@ -2,6 +2,7 @@
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 using Marten;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -22,7 +23,7 @@ public class LeaveRequestFactory
     public virtual async Task<LeaveRequest> Create(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
-        var workingHoursModel = await querySession.Query<WorkingHours.WorkingHours>().Where(wh => wh.UserId == command.CreatedBy.Id)
+        var workingHoursModel = await querySession.Query<WorkingHours.WorkingHours>().Where(wh => wh.UserId == command.CreatedBy.Id && wh.Status == WorkingHoursStatus.Current)
             .FirstOrDefaultAsync(cancellationToken);
         var workingHours = workingHoursModel?.Duration ?? TimeSpan.Zero;
         var maxDuration = DateCalculator.CalculateDuration(command.DateFrom, command.DateTo, workingHours, leaveType.Properties?.IncludeFreeDays);

@@ -10,7 +10,7 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest
 
 public class CreateLeaveRequestCreatedTest
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
 
     [Fact]
     public void WhenEmailIsInvalid_ThenThrowArgumentException()

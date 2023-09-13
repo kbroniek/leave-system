@@ -11,7 +11,7 @@ namespace LeaveSystem.UnitTests.Providers;
 public static class FakeLeaveRequestCreatedProvider
 {
     internal static Guid FakeLeaveRequestId = Guid.NewGuid();
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private static readonly LeaveRequestCreated FakeLeaveRequestCreatedEvent =
         GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
 

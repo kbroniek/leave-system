@@ -1,8 +1,6 @@
 ﻿using Ardalis.GuardClauses;
-using GoldenEye.Commands;
 using GoldenEye.Queries;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using Marten.Pagination;
 using Microsoft.Identity.Web.Resource;

@@ -2,20 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
-using LeaveSystem.UnitTests.TestHelpers;
 using Marten;
 using Marten.Events;
 using Moq;
@@ -25,8 +21,7 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest
 
 public class LimitValidatorTest
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
-    private readonly Mock<WorkingHoursService> workingHoursServiceMock = new ();
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private readonly Mock<IDocumentSession> documentSessionMock = new ();
     private readonly Mock<IEventStore> eventStoreMock = new ();
     private readonly LeaveRequestCreated fakeLeaveRequestCreatedEvent =
@@ -106,7 +101,7 @@ public class LimitValidatorTest
     }
 
     private CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
-        new(dbContext, workingHoursServiceMock.Object, documentSessionMock.Object);
+        new(dbContext, documentSessionMock.Object);
 
     [Fact]
     public async Task

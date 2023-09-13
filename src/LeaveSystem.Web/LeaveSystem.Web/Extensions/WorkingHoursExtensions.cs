@@ -2,7 +2,7 @@ using LeaveSystem.EventSourcing.WorkingHours;
 
 namespace LeaveSystem.Web.Extensions;
 
-internal static class WorkingHoursExtensions
+public static class WorkingHoursExtensions
 {
     public static TimeSpan DurationOrDefault(this WorkingHours? source) =>
         source?.Duration ?? TimeSpan.Zero;
