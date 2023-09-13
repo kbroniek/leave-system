@@ -68,7 +68,6 @@ public class SaveGraphUserService
         {
             { roleAttributeName, JsonSerializer.Serialize(new RolesAttribute(roles)) }
         };
-        var issuer = "leavesystem.onmicrosoft.com";
         await graphClient.Users[userId]
             .Request()
             .UpdateAsync(new User
@@ -81,7 +80,7 @@ public class SaveGraphUserService
                 {
                     new ObjectIdentity
                     {
-                        Issuer = issuer,
+                        Issuer = GraphApi.Config.Issuer,
                         IssuerAssignedId = email,
                         SignInType = "emailAddress"
                     }
