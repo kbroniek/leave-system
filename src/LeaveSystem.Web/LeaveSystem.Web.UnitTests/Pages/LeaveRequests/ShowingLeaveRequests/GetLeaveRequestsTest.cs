@@ -13,8 +13,15 @@ public class GetLeaveRequestsTest
     private PagedListResponse<LeaveRequestShortInfo> data;
     private GetLeaveRequestsQuery query;
 
-    public GetLeaveRequestsTest()
+    private GetLeaveRequestsService GetSut()
     {
+        return new GetLeaveRequestsService(httpClientMock);
+    }
+
+    [Fact]
+    public async Task WhenGetLeaveRequests_ThenReturnDesiredLeaveRequests()
+    {
+        //Given
         const int year = 2021;
         data = FakeLeaveRequestShortInfoProvider.GetAll(DateTimeOffsetExtensions.CreateFromDate(year, 4, 5))
             .ToPagedListResponse(1000);
@@ -26,17 +33,6 @@ public class GetLeaveRequestsTest
             .RespondWithJson(data);
         httpClientMock = Substitute.For<HttpClient>(mockHttp);
         httpClientMock.BaseAddress = new Uri(MockHttpHandlerExtensions.BaseFakeUrl);
-    }
-
-    private GetLeaveRequestsService GetSut()
-    {
-        return new GetLeaveRequestsService(httpClientMock);
-    }
-
-    [Fact]
-    public async Task WhenGetLeaveRequests_ThenReturnDesiredLeaveRequests()
-    {
-        //Given
         var sut = GetSut();
         //When
         var result = await sut.GetLeaveRequests(query);
