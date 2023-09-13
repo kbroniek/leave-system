@@ -23,7 +23,6 @@ public class SaveGraphUserService
         {
             { roleAttributeName, JsonSerializer.Serialize(new RolesAttribute(roles)) }
         };
-        var issuer = "leavesystem.onmicrosoft.com";
         try
         {
             var principalId = Guid.NewGuid();
@@ -43,13 +42,13 @@ public class SaveGraphUserService
                 {
                     new ObjectIdentity
                     {
-                        Issuer = issuer,
+                        Issuer = GraphApi.Config.Issuer,
                         IssuerAssignedId = email,
                         SignInType = "emailAddress"
                     }
                 },
                 PasswordPolicies = "DisablePasswordExpiration, DisableStrongPassword",
-                UserPrincipalName = $"{principalId}@{issuer}",
+                UserPrincipalName = $"{principalId}@{GraphApi.Config.Issuer}",
             }, cancellationToken);
             return new FederatedUser(addedUser.Id, addedUser.Mail, addedUser.DisplayName,
                             RoleAttributeNameResolver.MapRoles(addedUser.AdditionalData, roleAttributeName).Roles);

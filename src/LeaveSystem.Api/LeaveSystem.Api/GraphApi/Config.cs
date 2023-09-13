@@ -5,6 +5,7 @@ namespace LeaveSystem.Api.GraphApi;
 
 public static class Config
 {
+    public const string Issuer = "leavesystem.onmicrosoft.com";
     public class AppSettings
     {
         public string? TenantId { get; set; }
