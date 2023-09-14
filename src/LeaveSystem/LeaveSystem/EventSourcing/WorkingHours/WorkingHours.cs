@@ -12,14 +12,13 @@ public class WorkingHours : Aggregate
     public TimeSpan? Duration { get; private set; }
     public WorkingHoursStatus Status { get; private set; }
 
+    //For serialization
+    public WorkingHours() { }
+
     private WorkingHours(WorkingHoursCreated @event)
     {
         Enqueue(@event);
         Apply(@event);
-    }
-
-    public WorkingHours()
-    {
     }
 
     public static WorkingHours CreateWorkingHours(WorkingHoursCreated @event) => new(@event);

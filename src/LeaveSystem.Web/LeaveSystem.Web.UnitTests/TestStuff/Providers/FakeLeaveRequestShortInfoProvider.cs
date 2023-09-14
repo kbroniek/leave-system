@@ -11,7 +11,7 @@ public class FakeLeaveRequestShortInfoProvider
         return new[]
         {
             new LeaveRequestShortInfo(
-                Guid.NewGuid(), 
+                Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(3),
                 baseDate + TimeSpan.FromDays(6),
                 TimeSpan.FromHours(16),
@@ -19,7 +19,7 @@ public class FakeLeaveRequestShortInfoProvider
                 LeaveRequestStatus.Accepted,
                 FakeUserProvider.GetUserWithNameFakeoslav()),
             new LeaveRequestShortInfo(
-                Guid.NewGuid(), 
+                Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(7),
                 baseDate + TimeSpan.FromDays(8),
                 TimeSpan.FromHours(8),
@@ -27,7 +27,7 @@ public class FakeLeaveRequestShortInfoProvider
                 LeaveRequestStatus.Accepted,
                 FakeUserProvider.GetUserWithNameFakeoslav()),
             new LeaveRequestShortInfo(
-                Guid.NewGuid(), 
+                Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(1),
                 baseDate + TimeSpan.FromDays(5),
                 TimeSpan.FromHours(16),
@@ -36,13 +36,13 @@ public class FakeLeaveRequestShortInfoProvider
                 FakeUserProvider.GetUserBen()),
         };
     }
-    
+
     public static IEnumerable<LeaveRequestShortInfo> GetAllV2(DateTimeOffset baseDate)
     {
         return new[]
         {
             new LeaveRequestShortInfo(
-                Guid.NewGuid(), 
+                Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(3),
                 baseDate + TimeSpan.FromDays(6),
                 TimeSpan.FromHours(16),
@@ -50,7 +50,7 @@ public class FakeLeaveRequestShortInfoProvider
                 LeaveRequestStatus.Pending,
                 FakeUserProvider.GetUserWithNameFakeoslav()),
             new LeaveRequestShortInfo(
-                Guid.NewGuid(), 
+                Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(7),
                 baseDate + TimeSpan.FromDays(8),
                 TimeSpan.FromHours(8),
@@ -58,7 +58,7 @@ public class FakeLeaveRequestShortInfoProvider
                 LeaveRequestStatus.Canceled,
                 FakeUserProvider.GetUserWithNameFakeoslav()),
             new LeaveRequestShortInfo(
-                Guid.NewGuid(), 
+                Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(1),
                 baseDate + TimeSpan.FromDays(5),
                 TimeSpan.FromHours(4),

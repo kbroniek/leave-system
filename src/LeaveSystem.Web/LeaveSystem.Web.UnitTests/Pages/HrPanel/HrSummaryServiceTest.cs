@@ -38,7 +38,7 @@ public class HrSummaryServiceTest
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
         var fakeLeaveRequests =
             FakeLeaveRequestShortInfoProvider.GetAll(DateTimeOffsetExtensions.CreateFromDate(year, 4, 5))
-                .ToPagedListResponse(1000);
+                .ToPagedListResponse();
         getLeaveRequestsServiceMock.GetLeaveRequests(ArgExtensions.IsEquivalentTo<GetLeaveRequestsQuery>(query))
             .Returns(fakeLeaveRequests);
         var leaveTypesServiceMock = Substitute.For<LeaveTypesService>(httpClientMock);
@@ -52,7 +52,7 @@ public class HrSummaryServiceTest
         employeeServiceMock.Get().Returns(employees);
         var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock);
         var fakeUserIds = new[] { FakeUserProvider.BenId, FakeUserProvider.PhilipId, FakeUserProvider.HabibId, FakeUserProvider.FakseoslavId};
-        var fakeWorkingHours = FakeWorkingHoursProvider.GetAll().ToPagedListResponse(100);
+        var fakeWorkingHours = FakeWorkingHoursProvider.GetAll().ToDto().ToPagedListResponse();
         var getWorkingHoursQuery = GetWorkingHoursQuery.GetDefaultForUsers(fakeUserIds);
         workingHoursServiceMock.GetWorkingHours(ArgExtensions.IsEquivalentTo<GetWorkingHoursQuery>(getWorkingHoursQuery))
             .Returns(fakeWorkingHours);
@@ -68,7 +68,7 @@ public class HrSummaryServiceTest
         await workingHoursServiceMock.Received().GetWorkingHours(ArgExtensions.IsEquivalentTo<GetWorkingHoursQuery>(getWorkingHoursQuery));
         var items = employees.Union(fakeLeaveRequests.Items.Select(lr =>
             GetEmployeeDto.Create(lr.CreatedBy)
-        )).Select(e => 
+        )).Select(e =>
             new HrSummaryService.UserLeaveRequestSummary(e, fakeLeaveTypes.Select(lt => LeaveRequestPerType.Create(
                 lt,
                 fakeLeaveTypes,
@@ -79,8 +79,8 @@ public class HrSummaryServiceTest
         result.Should().BeEquivalentTo(new
         {
             LeaveTypes = fakeLeaveTypes,
-            Items = items 
+            Items = items
         }, o => o.ExcludingMissingMembers());
-    } 
-    
+    }
+
 }

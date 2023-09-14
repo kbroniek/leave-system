@@ -14,14 +14,14 @@ public class GetLeaveRequestsTest
 {
     private HttpClient httpClientMock;
     private PagedListResponse<LeaveRequestShortInfo> data;
-    private GetLeaveRequestsQuery query; 
+    private GetLeaveRequestsQuery query;
 
     public GetLeaveRequestsTest()
     {
         const int year = 2021;
         data = FakeLeaveRequestShortInfoProvider.GetAll(DateTimeOffsetExtensions.CreateFromDate(year, 4, 5))
-            .ToPagedListResponse(1000);
- 
+            .ToPagedListResponse();
+
         var firstDay = DateTimeOffsetExtensions.GetFirstDayOfYear(year);
         var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(year);
         query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);

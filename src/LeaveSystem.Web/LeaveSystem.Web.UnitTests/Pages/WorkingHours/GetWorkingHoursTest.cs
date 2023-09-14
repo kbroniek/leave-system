@@ -22,10 +22,10 @@ public class GetWorkingHoursTest
     public async Task WhenGetWorkingHours_ThenReturnExceptedDeserializedResult()
     {
         //Given
-        var expectedResponse = FakeWorkingHoursProvider.GetAll().ToArray().ToPagedListResponse(100); 
+        var expectedResponse = FakeWorkingHoursProvider.GetAll().ToDto().ToPagedListResponse();
         var query = GetWorkingHoursQuery.GetDefault();
-        var url = query.CreateQueryString("api/workingHours"); 
-        httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, expectedResponse, JsonSerializerOptions.Default, out var mockedHttpValues);
+        var url = query.CreateQueryString("api/workingHours");
+        httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, expectedResponse, new JsonSerializerOptions(JsonSerializerDefaults.Web), out var mockedHttpValues);
         var sut = GetSut();
         //When
         var result = await sut.GetWorkingHours(query);

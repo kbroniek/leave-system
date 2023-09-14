@@ -56,7 +56,7 @@ public class HrSummaryService
             .ToArray();
         var getWorkingHoursQuery = GetWorkingHoursQuery.GetDefaultForUsers(allUserIds);
         var workingHours = allUserIds.Length == 0 ?
-            Enumerable.Empty<EventSourcing.WorkingHours.WorkingHours>() : 
+            Enumerable.Empty<WorkingHoursDto>() :
             (await workingHoursService.GetWorkingHours(getWorkingHoursQuery))?.Items;
 
         return new LeaveRequestSummary(

@@ -1,8 +1,8 @@
-﻿using LeaveSystem.Shared.WorkingHours;
+﻿using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 using System.Net.Http.Json;
 using System.Text.Json;
-using LeaveSystem.Shared;
-using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 
 namespace LeaveSystem.Web.Pages.WorkingHours;
 
@@ -15,16 +15,18 @@ public class WorkingHoursService
         this.httpClient = httpClient;
     }
 
-    public virtual async Task<PagedListResponse<EventSourcing.WorkingHours.WorkingHours>?> GetWorkingHours(GetWorkingHoursQuery query)
+    public virtual async Task<PagedListResponse<WorkingHoursDto>?> GetWorkingHours(GetWorkingHoursQuery query)
     {
         var uri = query.CreateQueryString("api/workingHours");
-        return await httpClient.GetFromJsonAsync<PagedListResponse<EventSourcing.WorkingHours.WorkingHours>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        return await httpClient.GetFromJsonAsync<PagedListResponse<WorkingHoursDto>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
     }
 
-    public virtual async Task<EventSourcing.WorkingHours.WorkingHours?> GetUserWorkingHours(string userId)
+    public virtual async Task<WorkingHoursDto?> GetUserWorkingHours(string userId)
     {
         var uri = $"api/workingHours/{userId}";
-        return await httpClient.GetFromJsonAsync<EventSourcing.WorkingHours.WorkingHours>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        return await httpClient.GetFromJsonAsync<WorkingHoursDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
     }
 }
+
+public record WorkingHoursDto(string UserId, DateTimeOffset DateFrom, DateTimeOffset DateTo, TimeSpan? Duration, WorkingHoursStatus Status);
 
