@@ -13,11 +13,11 @@ public class AddWorkingHours : ICommand
     public Guid WorkingHoursId { get; }
     public string UserId { get; }
     public DateTimeOffset DateFrom { get; }
-    public DateTimeOffset DateTo { get; }
-    public TimeSpan? Duration { get; }
+    public DateTimeOffset? DateTo { get; }
+    public TimeSpan Duration { get; }
 
-    private AddWorkingHours(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo,
-        TimeSpan? duration)
+    private AddWorkingHours(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo,
+        TimeSpan duration)
     {
         UserId = userId;
         DateFrom = dateFrom;
@@ -32,8 +32,8 @@ public class AddWorkingHours : ICommand
             Guard.Against.NillAndDefault(workingHoursId),
             Guard.Against.NullOrWhiteSpace(userId),
             Guard.Against.NillAndDefault(dateFrom),
-            Guard.Against.NillAndDefault(dateTo),
-            duration
+            dateTo,
+            Guard.Against.NillAndDefault(duration)
         );
 }
 

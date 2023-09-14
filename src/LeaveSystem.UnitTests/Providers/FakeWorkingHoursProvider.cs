@@ -76,7 +76,7 @@ public static class FakeWorkingHoursProvider
 
     public static IEnumerable<WorkingHours> GetAll() =>
         GetCurrent().Union(GetDeprecated());
-    private static WorkingHours Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration) => 
+    private static WorkingHours Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration) => 
         WorkingHours.CreateWorkingHours(WorkingHoursCreated.Create(
             workingHoursId, userId, dateFrom, dateTo, duration)
         );

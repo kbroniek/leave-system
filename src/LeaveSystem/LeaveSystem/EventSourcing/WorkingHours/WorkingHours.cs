@@ -8,8 +8,8 @@ public class WorkingHours : Aggregate
 {
     public string UserId { get; private set; }
     public DateTimeOffset DateFrom { get; private set; }
-    public DateTimeOffset DateTo { get; private set; }
-    public TimeSpan? Duration { get; private set; }
+    public DateTimeOffset? DateTo { get; private set; }
+    public TimeSpan Duration { get; private set; }
     public WorkingHoursStatus Status { get; private set; }
 
     //For serialization

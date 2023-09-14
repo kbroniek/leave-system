@@ -9,11 +9,11 @@ public class WorkingHoursCreated : IEvent
     public Guid WorkingHoursId { get; }
     public string UserId { get; }
     public DateTimeOffset DateFrom { get; }
-    public DateTimeOffset DateTo { get; }
-    public TimeSpan? Duration { get; }
+    public DateTimeOffset? DateTo { get; }
+    public TimeSpan Duration { get; }
     
     [JsonConstructor]
-    private WorkingHoursCreated(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration)
+    private WorkingHoursCreated(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration)
     {
         WorkingHoursId = workingHoursId;
         UserId = userId;
@@ -22,7 +22,7 @@ public class WorkingHoursCreated : IEvent
         Duration = duration;
     }
     
-    public static WorkingHoursCreated Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan? duration)
+    public static WorkingHoursCreated Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration)
     {
         if (dateFrom > dateTo)
         {
