@@ -1,8 +1,8 @@
-using LeaveSystem.Web.Pages.WorkingHours;
+using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.Web.Extensions;
 
-public static class WorkingHoursExtensions
+public static class WorkingHoursDtoExtensions
 {
     public static TimeSpan DurationOrDefault(this WorkingHoursDto? source) =>
         source?.Duration ?? TimeSpan.Zero;

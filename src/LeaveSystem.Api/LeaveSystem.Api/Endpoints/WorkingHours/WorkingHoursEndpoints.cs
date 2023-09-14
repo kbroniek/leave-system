@@ -1,9 +1,11 @@
 ﻿using Ardalis.GuardClauses;
 using GoldenEye.Queries;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
+using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
 using Marten.Pagination;
 using Microsoft.Identity.Web.Resource;
+using NotFoundException = GoldenEye.Exceptions.NotFoundException;
 
 namespace LeaveSystem.Api.Endpoints.WorkingHours;
 
@@ -42,9 +44,18 @@ public static class WorkingHoursEndpoints
                 httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
                 Guard.Against.Nill(userId);
 
-                return await queryBus.Send<GetCurrentWorkingHoursByUserId, EventSourcing.WorkingHours.WorkingHours>(
-                    GetCurrentWorkingHoursByUserId.Create(userId), cancellationToken
-                );
+                try
+                {
+                    var workingHours =
+                        await queryBus.Send<GetCurrentWorkingHoursByUserId, EventSourcing.WorkingHours.WorkingHours>(
+                            GetCurrentWorkingHoursByUserId.Create(userId), cancellationToken
+                        );
+                    return Results.Json(workingHours.ToDto());
+                }
+                catch (NotFoundException)
+                {
+                    return Results.NotFound();
+                }
             })
             .WithName(GetUserWorkingHoursEndpointsPolicyName)
             .RequireAuthorization(GetUserWorkingHoursEndpointsPolicyName);

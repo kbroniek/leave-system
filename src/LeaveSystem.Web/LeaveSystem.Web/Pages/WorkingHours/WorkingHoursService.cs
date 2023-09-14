@@ -27,6 +27,3 @@ public class WorkingHoursService
         return await httpClient.GetFromJsonAsync<WorkingHoursDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
     }
 }
-
-public record WorkingHoursDto(string UserId, DateTimeOffset DateFrom, DateTimeOffset? DateTo, TimeSpan Duration, WorkingHoursStatus Status);
-
