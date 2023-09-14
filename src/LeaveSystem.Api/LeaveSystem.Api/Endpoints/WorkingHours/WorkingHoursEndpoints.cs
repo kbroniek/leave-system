@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using GoldenEye.Queries;
+using LeaveSystem.Api.Extensions;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.Extensions;
 using LeaveSystem.Shared;

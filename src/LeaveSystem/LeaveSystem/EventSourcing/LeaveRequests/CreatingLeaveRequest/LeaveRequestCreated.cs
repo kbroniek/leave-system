@@ -21,9 +21,11 @@ public class LeaveRequestCreated : IEvent
     public string? Remarks { get; }
 
     public FederatedUser CreatedBy { get; }
+    
+    public TimeSpan WorkingHours { get; }
 
     [JsonConstructor]
-    private LeaveRequestCreated(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy)
+    private LeaveRequestCreated(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, TimeSpan workingHours)
     {
         LeaveRequestId = leaveRequestId;
         DateFrom = dateFrom;
@@ -32,8 +34,9 @@ public class LeaveRequestCreated : IEvent
         LeaveTypeId = leaveTypeId;
         Remarks = remarks;
         CreatedBy = createdBy;
+        WorkingHours = workingHours;
     }
-    public static LeaveRequestCreated Create(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy)
+    public static LeaveRequestCreated Create(Guid leaveRequestId, DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, TimeSpan workingHours)
     {
         Guard.Against.InvalidEmail(createdBy.Email, $"{nameof(createdBy)}.{nameof(createdBy.Email)}");
         var dateFromWithoutTime = dateFrom.GetDayWithoutTime();
@@ -43,12 +46,15 @@ public class LeaveRequestCreated : IEvent
         var lastDay = now.GetLastDayOfYear();
         Guard.Against.OutOfRange(dateFromWithoutTime, nameof(dateFrom), firstDay, lastDay);
         Guard.Against.OutOfRange(dateToWithoutTime, nameof(dateTo), firstDay, lastDay);
+        const int hoursInDayCount = 24;
+        const int minHoursInDayCount = 1;
+        Guard.Against.OutOfRange(workingHours, nameof(workingHours), TimeSpan.FromHours(minHoursInDayCount), TimeSpan.FromHours(hoursInDayCount));
 
         if (dateFromWithoutTime > dateToWithoutTime)
         {
             throw new ArgumentOutOfRangeException(nameof(dateFrom), "Date from has to be less than date to.");
         }
 
-        return new(leaveRequestId, dateFromWithoutTime, dateToWithoutTime, duration, leaveTypeId, remarks, createdBy);
+        return new(leaveRequestId, dateFromWithoutTime, dateToWithoutTime, duration, leaveTypeId, remarks, createdBy, workingHours);
     }
 }

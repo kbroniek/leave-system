@@ -1,7 +1,7 @@
 using LeaveSystem.EventSourcing.WorkingHours;
 using LeaveSystem.Shared.WorkingHours;
 
-namespace LeaveSystem.Extensions;
+namespace LeaveSystem.Api.Extensions;
 
 public static class WorkingHoursExtensions
 {

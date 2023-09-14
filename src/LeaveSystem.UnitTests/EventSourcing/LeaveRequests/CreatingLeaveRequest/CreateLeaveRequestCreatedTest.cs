@@ -27,7 +27,9 @@ public class CreateLeaveRequestCreatedTest
                 WorkingHours * 3,
                 Guid.NewGuid(),
                 "fake remarks",
-                fakeUser
+                fakeUser,
+                WorkingHoursUtils.DefaultWorkingHours
+
             );
         };
         //Then
@@ -49,7 +51,8 @@ public class CreateLeaveRequestCreatedTest
                 WorkingHours * 3,
                 Guid.NewGuid(),
                 "fake remarks",
-                fakeUser
+                fakeUser,
+                WorkingHoursUtils.DefaultWorkingHours
             );
         };
         //Then
@@ -71,7 +74,8 @@ public class CreateLeaveRequestCreatedTest
                 WorkingHours * 3,
                 Guid.NewGuid(),
                 "fake remarks",
-                fakeUser
+                fakeUser,
+                WorkingHoursUtils.DefaultWorkingHours
             );
         };
         //Then
@@ -111,7 +115,8 @@ public class CreateLeaveRequestCreatedTest
                 WorkingHours * 3,
                 Guid.NewGuid(),
                 "fake remarks",
-                fakeUser
+                fakeUser,
+                WorkingHoursUtils.DefaultWorkingHours
             );
         };
         //Then

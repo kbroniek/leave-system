@@ -9,6 +9,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.WorkingHours;
 using Moq;
 using Xunit;
 
@@ -45,8 +46,9 @@ public class HandleCancelLeaveRequestTest
             TimeSpan.FromHours(8),
             Guid.NewGuid(),
             "fakeRemarks",
-            command.CanceledBy
-            );
+            command.CanceledBy,
+            WorkingHoursUtils.DefaultWorkingHours
+        );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createdEvent);
         repositoryMock
             .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))

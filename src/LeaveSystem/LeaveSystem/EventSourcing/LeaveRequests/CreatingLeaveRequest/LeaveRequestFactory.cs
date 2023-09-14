@@ -1,6 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using Marten;
@@ -13,7 +14,8 @@ public class LeaveRequestFactory
     private readonly LeaveSystemDbContext dbContext;
     private readonly IQuerySession querySession;
 
-    public LeaveRequestFactory(CreateLeaveRequestValidator validator, LeaveSystemDbContext dbContext, IQuerySession querySession)
+    public LeaveRequestFactory(CreateLeaveRequestValidator validator, LeaveSystemDbContext dbContext,
+        IQuerySession querySession)
     {
         this.validator = validator;
         this.dbContext = dbContext;
@@ -23,13 +25,17 @@ public class LeaveRequestFactory
     public virtual async Task<LeaveRequest> Create(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
-        var workingHoursModel = await querySession.Query<WorkingHours.WorkingHours>().Where(wh => wh.UserId == command.CreatedBy.Id && wh.Status == WorkingHoursStatus.Current)
-            .FirstOrDefaultAsync(cancellationToken);
-        var workingHours = workingHoursModel?.Duration ?? TimeSpan.Zero;
-        var maxDuration = DateCalculator.CalculateDuration(command.DateFrom, command.DateTo, workingHours, leaveType.Properties?.IncludeFreeDays);
+        var workingHoursModel =
+            await querySession.GetCurrentWorkingHoursForUser(command.CreatedBy.Id, cancellationToken)
+            ?? throw GoldenEye.Exceptions.NotFoundException.For<WorkingHours.WorkingHours>(
+                "You cant create leave request for user that not have current working hours");
+        var workingHours = workingHoursModel.Duration;
+        var maxDuration = DateCalculator.CalculateDuration(command.DateFrom, command.DateTo, workingHours,
+            leaveType.Properties?.IncludeFreeDays);
         var minDuration = maxDuration - workingHours;
         var duration = command.Duration ?? maxDuration;
-        var leaveRequestCreated = LeaveRequestCreated.Create(command.LeaveRequestId, command.DateFrom, command.DateTo, duration, command.LeaveTypeId, command.Remarks, command.CreatedBy);
+        var leaveRequestCreated = LeaveRequestCreated.Create(command.LeaveRequestId, command.DateFrom, command.DateTo,
+            duration, command.LeaveTypeId, command.Remarks, command.CreatedBy, workingHours);
         validator.BasicValidate(leaveRequestCreated, minDuration, maxDuration, leaveType.Properties?.IncludeFreeDays);
         await validator.ImpositionValidator(leaveRequestCreated);
         await validator.LimitValidator(leaveRequestCreated);
@@ -47,4 +53,3 @@ public class LeaveRequestFactory
         return leaveType;
     }
 }
-

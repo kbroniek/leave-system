@@ -5,6 +5,7 @@ using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 using Marten;
 using Moq;
 using Xunit;
@@ -68,7 +69,8 @@ public class BasicValidateTest : IAsyncLifetime
             duration,
             Guid.NewGuid(),
             "fake remarks",
-            FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
+            FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
+            WorkingHoursUtils.DefaultWorkingHours
         );
         //When
         var act = () =>
@@ -95,6 +97,7 @@ public class BasicValidateTest : IAsyncLifetime
             Guid.NewGuid(),
             "fake remarks",
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
+            ,WorkingHoursUtils.DefaultWorkingHours
         );
         //When
         var act = () =>

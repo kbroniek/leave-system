@@ -8,6 +8,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestDataGenerators;
 using Xunit;
@@ -75,7 +76,8 @@ public class CancelLeaveRequestTest
             TimeSpan.FromHours(16),
             Guid.NewGuid(), 
             "fake created remarks",
-            User
+            User,
+            WorkingHoursUtils.DefaultWorkingHours
         );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //When

@@ -28,6 +28,8 @@ public class LeaveRequest : Aggregate
 
     public FederatedUser? CreatedByOnBehalf { get; private set; }
 
+    public TimeSpan WorkingHours { get; private set; }
+
     //For serialization
     public LeaveRequest() { }
 

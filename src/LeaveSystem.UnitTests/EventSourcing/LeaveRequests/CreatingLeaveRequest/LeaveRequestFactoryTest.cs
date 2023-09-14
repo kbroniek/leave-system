@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using GoldenEye.Exceptions;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -143,5 +145,40 @@ public class LeaveRequestFactoryTest
             LastModifiedBy = fakeEvent.CreatedBy,
             
         },o => o.ExcludingMissingMembers());
+    }
+
+    [Fact]
+    public async Task WhenNoWorkingHoursForCreator_ThenThrowNotFoundException()
+    {
+                var fakeEvent = CreateLeaveRequest.Create(
+            Guid.NewGuid(),
+            new DateTimeOffset(2023, 7, 27, 0, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2023, 8, 5, 0, 0, 0, TimeSpan.Zero),
+            WorkingHours * 3,
+            FakeLeaveTypeProvider.FakeOnDemandLeaveId,
+            "fake remarks",
+            FakeUserProvider.GetUserWithNameFakeoslav()
+        );
+        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
+        await dbContext.LeaveTypes.AddAsync(FakeLeaveTypeProvider.GetFakeOnDemandLeave());
+        var querySessionMock = new Mock<IQuerySession>();
+        var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
+            new [] {FakeWorkingHoursProvider.GetCurrentForBen()}
+        );
+        querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
+            .Returns(martenQueryableStub);
+        var validatorMock = GetValidatorMock(dbContext);
+        var sut = GetSut(dbContext, querySessionMock.Object, validatorMock.Object);
+        //When
+        var act = async () => { await sut.Create(fakeEvent, It.IsAny<CancellationToken>()); };
+        //Then
+        await act.Should().ThrowAsync<NotFoundException>();
+        querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>());
+        validatorMock.Verify(x => x.BasicValidate(
+                It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
+            ), Times.Never
+        );
+        validatorMock.Verify(x => x.LimitValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
+        validatorMock.Verify(x => x.ImpositionValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
     }
 }

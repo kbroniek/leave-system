@@ -9,6 +9,7 @@ using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
@@ -121,7 +122,8 @@ public class LimitValidatorTest
             WorkingHours,
             FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
             fakeLeaveRequestCreatedEvent.Remarks,
-            FakeUserProvider.GetUserWithNameFakeoslav()
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            WorkingHoursUtils.DefaultWorkingHours
         );
         //When
         var act = async () => { await sut.LimitValidator(@event); };
@@ -169,7 +171,8 @@ public class LimitValidatorTest
             WorkingHours * 3,
             FakeLeaveTypeProvider.FakeSickLeaveId,
             fakeLeaveRequestCreatedEvent.Remarks,
-            fakeUser
+            fakeUser,
+            WorkingHoursUtils.DefaultWorkingHours
         );
         //When
         var act = async () => { await sut.LimitValidator(@event); };

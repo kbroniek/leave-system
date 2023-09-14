@@ -36,6 +36,9 @@
     <ProjectReference Include="..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
     <ProjectReference Include="..\LeaveSystem\LeaveSystem\LeaveSystem.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TestHelpers" />
+  </ItemGroup>
   <PropertyGroup>
     <SsdtUnitTestVersion>3.1</SsdtUnitTestVersion>
   </PropertyGroup>
