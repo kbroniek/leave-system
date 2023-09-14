@@ -24,6 +24,13 @@ public class WorkingHoursService
     public virtual async Task<WorkingHoursDto?> GetUserWorkingHours(string userId)
     {
         var uri = $"api/workingHours/{userId}";
-        return await httpClient.GetFromJsonAsync<WorkingHoursDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        try
+        {
+            return await httpClient.GetFromJsonAsync<WorkingHoursDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
     }
 }

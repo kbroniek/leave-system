@@ -1,9 +1,12 @@
 ﻿using Ardalis.GuardClauses;
+using GoldenEye.Commands;
 using GoldenEye.Queries;
 using LeaveSystem.Api.Extensions;
+using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.Identity.Web.Resource;
 using NotFoundException = GoldenEye.Exceptions.NotFoundException;
@@ -15,6 +18,7 @@ public static class WorkingHoursEndpoints
     public const string GetWorkingHoursEndpointsPolicyName = "GetWorkingHours";
     public const string GetUserWorkingHoursEndpointsPolicyName = "GetUserWorkingHours";
     public const string GetUserWorkingHoursDurationEndpointsPolicyName = "GetUserWorkingHoursDuration";
+    public const string AddUserWorkingHoursPolicyName = "AddWorkingHours";
 
     public static IEndpointRouteBuilder AddWorkingHoursEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
@@ -40,7 +44,8 @@ public static class WorkingHoursEndpoints
             .WithName(GetWorkingHoursEndpointsPolicyName)
             .RequireAuthorization(GetWorkingHoursEndpointsPolicyName);
 
-        endpoint.MapGet("api/workingHours/{userId}", async (HttpContext httpContext, IQueryBus queryBus, string? userId, CancellationToken cancellationToken) =>
+        endpoint.MapGet("api/workingHours/{userId}", async (HttpContext httpContext, IQueryBus queryBus, string? userId,
+                CancellationToken cancellationToken) =>
             {
                 httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
                 Guard.Against.Nill(userId);
@@ -60,6 +65,26 @@ public static class WorkingHoursEndpoints
             })
             .WithName(GetUserWorkingHoursEndpointsPolicyName)
             .RequireAuthorization(GetUserWorkingHoursEndpointsPolicyName);
+
+        endpoint.MapPost("api/workingHours",
+                async (HttpContext httpContext, ICommandBus commandBus, AddWorkingHoursDto addWorkingHoursDto,
+                    CancellationToken cancellationToken) =>
+                {
+                    httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+                    var workingHoursId = Guid.NewGuid();
+                    var command = AddWorkingHours.Create(
+                        workingHoursId,
+                        addWorkingHoursDto.UserId,
+                        addWorkingHoursDto.DateFrom,
+                        addWorkingHoursDto.DateTo,
+                        addWorkingHoursDto.Duration,
+                        addWorkingHoursDto.AddedBy
+                    );
+                    await commandBus.Send(command, cancellationToken);
+                    return Results.Created("api/workingHours", workingHoursId);
+                })
+            .WithName(AddUserWorkingHoursPolicyName)
+            .RequireAuthorization(AddUserWorkingHoursPolicyName);
 
         return endpoint;
     }
