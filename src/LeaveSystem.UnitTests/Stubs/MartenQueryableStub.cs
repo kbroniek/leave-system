@@ -12,7 +12,7 @@ using Moq;
 
 namespace LeaveSystem.UnitTests.Stubs;
 
-internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>, IQueryProvider
+internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>, IQueryProvider 
 {
     public MartenQueryableStub(IEnumerable<T> enumerable) : base(enumerable)
     {
@@ -36,7 +36,7 @@ internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>,
 
     public Task<int> CountAsync(CancellationToken token)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(this.Count());
     }
 
     public Task<long> CountLongAsync(CancellationToken token)

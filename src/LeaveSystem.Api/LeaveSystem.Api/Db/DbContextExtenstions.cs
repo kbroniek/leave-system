@@ -259,44 +259,50 @@ public static class DbContextExtenstions
             testUsers[0].Id,
             DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
             DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
-            TimeSpan.FromHours(8));
+            TimeSpan.FromHours(8),
+            defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[1].Id,
             DateTimeOffsetExtensions.CreateFromDate(2018, 3, 1),
             DateTimeOffsetExtensions.CreateFromDate(2025, 3, 1),
-            TimeSpan.FromHours(8));
+            TimeSpan.FromHours(8),
+            defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[2].Id,
             DateTimeOffsetExtensions.CreateFromDate(2021, 12, 1),
             DateTimeOffsetExtensions.CreateFromDate(2023, 7, 10),
-            TimeSpan.FromHours(4));
+            TimeSpan.FromHours(4),
+            defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[3].Id,
             DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
             DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
-            TimeSpan.FromHours(8));
+            TimeSpan.FromHours(8),
+            defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[4].Id,
             DateTimeOffsetExtensions.CreateFromDate(2023, 6, 9),
             DateTimeOffsetExtensions.CreateFromDate(2028, 1, 1),
-            TimeSpan.FromHours(8));
+            TimeSpan.FromHours(8),
+            defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[4].Id,
             DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
             DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
-            TimeSpan.FromHours(4));
+            TimeSpan.FromHours(4),
+            defaultUser);
     }
 
     private static Task CreateWorkingHours(ICommandBus commandBus, string? userId, DateTimeOffset? dateFrom,
-        DateTimeOffset? dateTo, TimeSpan? duration)
+        DateTimeOffset? dateTo, TimeSpan? duration, FederatedUser? createdBy)
     {
         var workingHoursId = Guid.NewGuid();
-        var command = AddWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration);
+        var command = AddWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, createdBy);
         return commandBus.Send(command);
     }
 

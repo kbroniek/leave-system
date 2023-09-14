@@ -46,3 +46,18 @@ public enum RoleType
     UserAdmin,
     GlobalAdmin
 }
+
+public static class RolePrivileges
+{
+    public static readonly RoleType[] RolesRequiredForManagingWorkingHours =
+    {
+        RoleType.GlobalAdmin,
+        RoleType.DecisionMaker,
+        RoleType.HumanResource,
+        RoleType.UserAdmin
+    };
+
+    public static bool CanManageWorkingHours(this FederatedUser user) => 
+        user.Roles.Any(r => RolesRequiredForManagingWorkingHours.Any(pr => r == pr.ToString()));
+    
+}
