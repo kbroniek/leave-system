@@ -44,7 +44,8 @@ public enum RoleType
     DecisionMaker,
     HumanResource,
     UserAdmin,
-    GlobalAdmin
+    GlobalAdmin,
+    WorkingHoursAdmin
 }
 
 public static class RolePrivileges

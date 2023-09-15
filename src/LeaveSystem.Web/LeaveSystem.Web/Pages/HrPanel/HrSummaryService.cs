@@ -67,7 +67,7 @@ public class HrSummaryService
                         leaveTypes,
                         leaveRequests.Where(lr => lr.CreatedBy.Id == e.Id),
                         limits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
-                        workingHours.DurationOrDefault(e.Id))))),
+                        workingHours.DurationOrZero(e.Id))))),
         leaveTypes);
     }
 

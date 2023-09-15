@@ -296,13 +296,13 @@ public static class DbContextExtenstions
             DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
             TimeSpan.FromHours(4),
             defaultUser);
-        await CreateWorkingHours(
-            commandBus,
-            defaultUser.Id,
-            DateTimeOffsetExtensions.CreateFromDate(2020, 2, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2026, 7, 1),
-            TimeSpan.FromHours(8),
-            defaultUser);
+        // await CreateWorkingHours(
+        //     commandBus,
+        //     defaultUser.Id,
+        //     DateTimeOffsetExtensions.CreateFromDate(2020, 2, 1),
+        //     DateTimeOffsetExtensions.CreateFromDate(2026, 7, 1),
+        //     TimeSpan.FromHours(8),
+        //     defaultUser);
     }
 
     private static Task CreateWorkingHours(ICommandBus commandBus, string? userId, DateTimeOffset? dateFrom,

@@ -1,5 +1,6 @@
 using GoldenEye.Aggregates;
 using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.EventSourcing.WorkingHours;
@@ -11,6 +12,7 @@ public class WorkingHours : Aggregate
     public DateTimeOffset? DateTo { get; private set; }
     public TimeSpan Duration { get; private set; }
     public WorkingHoursStatus Status { get; private set; }
+    public FederatedUser ModifiedBy { get; private set; }
 
     //For serialization
     public WorkingHours() { }

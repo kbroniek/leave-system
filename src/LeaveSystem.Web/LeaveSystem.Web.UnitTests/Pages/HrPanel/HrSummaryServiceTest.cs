@@ -74,7 +74,7 @@ public class HrSummaryServiceTest
                 fakeLeaveTypes,
                 fakeLeaveRequests.Items.Where(lr => lr.CreatedBy.Id == e.Id),
                 fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
-                fakeWorkingHours.Items.DurationOrDefault(e.Id))))
+                fakeWorkingHours.Items.DurationOrZero(e.Id))))
         );
         result.Should().BeEquivalentTo(new
         {

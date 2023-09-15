@@ -64,7 +64,7 @@ else
             throw new InvalidOperationException($"Cannot find the leave request id: {LeaveRequestId}");
         }
         leaveType = await LeaveTypesService.GetLeaveType(leaveRequest.LeaveTypeId);
-        workingHours = (await getWorkingHoursTask).DurationOrDefault();
+        workingHours = (await getWorkingHoursTask).DurationOrZero();
     }
 
     public record LeaveRequest(DateTimeOffset DateFrom, DateTimeOffset DateTo, TimeSpan Duration, Guid LeaveTypeId, IEnumerable<RemarksModel> Remarks, LeaveRequestStatus Status, FederatedUser CreatedBy, FederatedUser? LastModifiedBy, FederatedUser? CreatedByOnBehalf);
