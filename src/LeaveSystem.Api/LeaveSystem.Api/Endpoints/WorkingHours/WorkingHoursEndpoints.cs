@@ -4,6 +4,7 @@ using GoldenEye.Queries;
 using LeaveSystem.Api.Extensions;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;
 using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
@@ -17,8 +18,8 @@ public static class WorkingHoursEndpoints
 {
     public const string GetWorkingHoursEndpointsPolicyName = "GetWorkingHours";
     public const string GetUserWorkingHoursEndpointsPolicyName = "GetUserWorkingHours";
-    public const string GetUserWorkingHoursDurationEndpointsPolicyName = "GetUserWorkingHoursDuration";
-    public const string AddUserWorkingHoursPolicyName = "AddWorkingHours";
+    public const string CreateWorkingHoursPolicyName = "AddWorkingHours";
+    public const string ModifyUserWorkingHoursPolicyName = "ModifyUserWorkingHours";
 
     public static IEndpointRouteBuilder AddWorkingHoursEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
@@ -83,8 +84,34 @@ public static class WorkingHoursEndpoints
                     await commandBus.Send(command, cancellationToken);
                     return Results.Created("api/workingHours", workingHoursId);
                 })
-            .WithName(AddUserWorkingHoursPolicyName)
-            .RequireAuthorization(AddUserWorkingHoursPolicyName);
+            .WithName(CreateWorkingHoursPolicyName)
+            .RequireAuthorization(CreateWorkingHoursPolicyName);
+        
+        endpoint.MapPut("api/workingHours/{id}/modify",
+                async (HttpContext httpContext, ICommandBus commandBus, ModifyWorkingHoursDto addWorkingHoursDto,
+                    CancellationToken cancellationToken, Guid? id) =>
+                {
+                    httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+                    var command = ModifyWorkingHours.Create(
+                        id,
+                        addWorkingHoursDto.UsedId,
+                        addWorkingHoursDto.DateFrom,
+                        addWorkingHoursDto.DateTo,
+                        addWorkingHoursDto.Duration,
+                        addWorkingHoursDto.AddedBy
+                    );
+                    try
+                    {
+                        await commandBus.Send(command, cancellationToken);
+                        return Results.NoContent();
+                    }
+                    catch (NotFoundException)
+                    {
+                        return Results.NotFound();
+                    }
+                })
+            .WithName(ModifyUserWorkingHoursPolicyName)
+            .RequireAuthorization(ModifyUserWorkingHoursPolicyName);
 
         return endpoint;
     }
