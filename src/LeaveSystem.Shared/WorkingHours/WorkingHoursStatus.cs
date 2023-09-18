@@ -2,6 +2,7 @@ namespace LeaveSystem.Shared.WorkingHours;
 
 public enum WorkingHoursStatus
 {
-    Current = 0,
-    Deprecated = 1
+    Deprecated = 0,
+    Current = 1,
+    Future = 2
 }

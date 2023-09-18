@@ -1,11 +1,11 @@
 using System;
 using FluentAssertions;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
 
-namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.AddingWorkingHours;
+namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
 
 public class WorkingHoursCreatedTest
 {
@@ -18,7 +18,7 @@ public class WorkingHoursCreatedTest
         {
             WorkingHoursCreated.Create(
                 Guid.NewGuid(), FakeUserProvider.BenId, DateTimeOffsetExtensions.CreateFromDate(2024, 1, 2),
-                DateTimeOffsetExtensions.CreateFromDate(2020, 1, 2), TimeSpan.FromHours(8));
+                DateTimeOffsetExtensions.CreateFromDate(2020, 1, 2), TimeSpan.FromHours(8), FakeUserProvider.GetUserWithNameFakeoslav());
         };
         //Then
         act.Should().Throw<ArgumentOutOfRangeException>();
@@ -32,9 +32,10 @@ public class WorkingHoursCreatedTest
         var dateFrom = DateTimeOffsetExtensions.CreateFromDate(2020, 1, 2);
         var dateTo = DateTimeOffsetExtensions.CreateFromDate(2024, 1, 2);
         var duration = TimeSpan.FromHours(8);
+        var fakeAdmin = FakeUserProvider.GetUserWithNameFakeoslav();
         //When
         var result =
-            WorkingHoursCreated.Create(fakeId, FakeUserProvider.BenId, dateFrom, dateTo, duration);
+            WorkingHoursCreated.Create(fakeId, FakeUserProvider.BenId, dateFrom, dateTo, duration, fakeAdmin);
 
         //Then
         result.Should().BeEquivalentTo(new
@@ -44,7 +45,8 @@ public class WorkingHoursCreatedTest
             UserId = FakeUserProvider.BenId,
             DateFrom = dateFrom, 
             DateTo = dateTo,
-            Duration = duration
+            Duration = duration,
+            CreatedBy = fakeAdmin
         });
     }
 }

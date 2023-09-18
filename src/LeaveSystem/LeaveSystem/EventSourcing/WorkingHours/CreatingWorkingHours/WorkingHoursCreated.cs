@@ -1,7 +1,8 @@
 using GoldenEye.Events;
+using LeaveSystem.Shared;
 using Newtonsoft.Json;
 
-namespace LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+namespace LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 
 public class WorkingHoursCreated : IEvent
 {
@@ -11,18 +12,20 @@ public class WorkingHoursCreated : IEvent
     public DateTimeOffset DateFrom { get; }
     public DateTimeOffset? DateTo { get; }
     public TimeSpan Duration { get; }
+    public FederatedUser CreatedBy { get; }
     
     [JsonConstructor]
-    private WorkingHoursCreated(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration)
+    private WorkingHoursCreated(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration, FederatedUser createdBy)
     {
         WorkingHoursId = workingHoursId;
         UserId = userId;
         DateFrom = dateFrom;
         DateTo = dateTo;
         Duration = duration;
+        CreatedBy = createdBy;
     }
     
-    public static WorkingHoursCreated Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration)
+    public static WorkingHoursCreated Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration, FederatedUser createdBy)
     {
         if (dateFrom > dateTo)
         {
@@ -33,7 +36,8 @@ public class WorkingHoursCreated : IEvent
             userId,
             dateFrom,
             dateTo,
-            duration
+            duration,
+            createdBy
         );
     }
 }

@@ -6,8 +6,9 @@ namespace LeaveSystem.Extensions;
 
 public static class QuerySessionExtensions
 {
-    public static Task<WorkingHours?> GetCurrentWorkingHoursForUser(this IQuerySession querySession, string userId, CancellationToken cancellationToken) => 
+    public static Task<WorkingHours?> GetCurrentWorkingHoursForUser(
+        this IQuerySession querySession, string userId, DateTimeOffset currentDate, CancellationToken cancellationToken) => 
         querySession.Query<WorkingHours>()
-            .Where(x => x.UserId == userId && x.Status == WorkingHoursStatus.Current)
+            .Where(x => x.UserId == userId && x.GetStatus(currentDate) == WorkingHoursStatus.Current)
             .FirstOrDefaultAsync(cancellationToken);
 }

@@ -13,7 +13,6 @@ using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using WorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
@@ -309,7 +308,7 @@ public static class DbContextExtenstions
         DateTimeOffset? dateTo, TimeSpan? duration, FederatedUser? createdBy)
     {
         var workingHoursId = Guid.NewGuid();
-        var command = AddWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, createdBy);
+        var command = EventSourcing.WorkingHours.CreatingWorkingHours.CreateWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, createdBy);
         return commandBus.Send(command);
     }
 

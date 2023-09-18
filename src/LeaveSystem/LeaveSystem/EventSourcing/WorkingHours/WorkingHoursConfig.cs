@@ -1,7 +1,7 @@
 using GoldenEye.Marten.Registration;
 using GoldenEye.Registration;
 using LeaveSystem.EventSourcing.LeaveRequests;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using Marten;
 using Marten.Pagination;
@@ -21,7 +21,7 @@ public static class WorkingHoursConfig
 
     private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
         services
-            .AddCommandHandler<AddWorkingHours, HandleAddWorkingHours>();
+            .AddCommandHandler<CreateWorkingHours, HandleCreateWorkingHours>();
 
     private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
         services

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
 
-namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.AddingWorkingHours;
+namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
 
 public class CreateAddWorkingHoursTest
 {
@@ -20,7 +20,7 @@ public class CreateAddWorkingHoursTest
         //When
         var act = () =>
         {
-            AddWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, createdBy);
+            CreateWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, createdBy);
         };
         //Then
         act.Should().Throw<ArgumentNullException>();
@@ -48,7 +48,7 @@ public class CreateAddWorkingHoursTest
         //When
         var act = () =>
         {
-            AddWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, addedBy);
+            CreateWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, addedBy);
         };
         //Then
         act.Should().Throw<ArgumentException>();
@@ -77,7 +77,7 @@ public class CreateAddWorkingHoursTest
         var duration = TimeSpan.FromHours(4);
         var addedBy = FakeUserProvider.GetUserWithNameFakeoslav();
         //When
-        var result = AddWorkingHours.Create(id, userId, dateFrom, dateTo, duration, addedBy);
+        var result = CreateWorkingHours.Create(id, userId, dateFrom, dateTo, duration, addedBy);
         //Then
         result.Should().BeEquivalentTo(new
         {

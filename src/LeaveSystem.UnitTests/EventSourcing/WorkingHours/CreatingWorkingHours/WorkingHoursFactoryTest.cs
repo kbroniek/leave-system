@@ -1,10 +1,10 @@
 using FluentAssertions;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
 
-namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.AddingWorkingHours;
+namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
 
 public class WorkingHoursFactoryTest
 {
@@ -26,13 +26,12 @@ public class WorkingHoursFactoryTest
                 UserId = command.UserId,
                 DateFrom = command.DateFrom,
                 DateTo = command.DateTo,
-                Duration = command.Duration,
-                Status = WorkingHoursStatus.Current
+                Duration = command.Duration
             }
         );
         result.DequeueUncommittedEvents().Should().BeEquivalentTo(new[]
         {
-            WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom, command.DateTo, command.Duration)
+            WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom, command.DateTo, command.Duration, command.CreatedBy)
         });
     }
 }

@@ -1,18 +1,18 @@
 using GoldenEye.Aggregates;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;
+using LeaveSystem.Periods;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.EventSourcing.WorkingHours;
 
-public class WorkingHours : Aggregate
+public class WorkingHours : Aggregate, IDateToNullablePeriod
 {
     public string UserId { get; private set; }
     public DateTimeOffset DateFrom { get; private set; }
     public DateTimeOffset? DateTo { get; private set; }
     public TimeSpan Duration { get; private set; }
-    public WorkingHoursStatus Status { get; private set; }
-    public FederatedUser ModifiedBy { get; private set; }
+    public FederatedUser LastModifiedBy { get; private set; }
 
     //For serialization
     public WorkingHours() { }
@@ -25,20 +25,20 @@ public class WorkingHours : Aggregate
 
     public static WorkingHours CreateWorkingHours(WorkingHoursCreated @event) => new(@event);
 
-    internal void Deprecate()
+    internal void Modify(ModifyWorkingHours command)
     {
-        if (Status == WorkingHoursStatus.Deprecated)
-        {
-            throw new InvalidOperationException("Deprecating deprecated working hours is not allowed");
-        }
-        var @event = WorkingHoursDeprecated.Create(Id);
-        Apply(@event);
+        var @event = WorkingHoursModified.Create(
+            command.WorkingHoursId, command.DateFrom, command.DateTo, command.Duration, command.ModifiedBy);
         Enqueue(@event);
+        Apply(@event);
     }
 
-    private void Apply(WorkingHoursDeprecated _)
+    private void Apply(WorkingHoursModified @event)
     {
-        Status = WorkingHoursStatus.Deprecated;
+        DateFrom = @event.DateFrom;
+        DateTo = @event.DateTo;
+        Duration = @event.Duration;
+        LastModifiedBy = @event.ModifiedBy;
         Version++;
     }
 
@@ -49,6 +49,6 @@ public class WorkingHours : Aggregate
         DateFrom = @event.DateFrom;
         DateTo = @event.DateTo;
         Duration = @event.Duration;
-        Status = WorkingHoursStatus.Current;
+        LastModifiedBy = @event.CreatedBy;
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ public class HandleGetWorkingHoursTest
     private HandleGetWorkingHours GetSut() => new(querySession);
 
     private static readonly LeaveSystem.EventSourcing.WorkingHours.WorkingHours[] Data = FakeWorkingHoursProvider
-        .GetAll()
+        .GetAll(DateTimeOffset.Now)
         .ToArray();
 
 
@@ -58,7 +59,7 @@ public class HandleGetWorkingHoursTest
                 DateTimeOffsetExtensions.CreateFromDate(2030, 1, 1),
                 null,
                 user,
-                new[] { WorkingHoursStatus.Deprecated, WorkingHoursStatus.Current }
+                new[] { WorkingHoursStatus.Deprecated, WorkingHoursStatus.Current, WorkingHoursStatus.Future }
             ),
             new[]
             {

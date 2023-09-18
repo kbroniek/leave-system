@@ -25,8 +25,9 @@ public class LeaveRequestFactory
     public virtual async Task<LeaveRequest> Create(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
+        var now = DateTimeOffset.Now.GetDayWithoutTime();
         var workingHoursModel =
-            await querySession.GetCurrentWorkingHoursForUser(command.CreatedBy.Id, cancellationToken)
+            await querySession.GetCurrentWorkingHoursForUser(command.CreatedBy.Id, now, cancellationToken)
             ?? throw GoldenEye.Exceptions.NotFoundException.For<WorkingHours.WorkingHours>(
                 "You cant create leave request for user that not have current working hours");
         var workingHours = workingHoursModel.Duration;

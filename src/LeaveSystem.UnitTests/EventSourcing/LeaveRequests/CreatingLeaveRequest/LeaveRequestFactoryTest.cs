@@ -27,6 +27,8 @@ public class LeaveRequestFactoryTest
         return new LeaveRequestFactory(validator, dbContext, querySession);
     }
 
+    private static readonly DateTimeOffset Now = DateTimeOffset.Now;
+
     [Fact]
     public async Task WhenLeaveTypeNotFound_ThenThrowNotFoundException()
     {
@@ -44,7 +46,7 @@ public class LeaveRequestFactoryTest
         await dbContext.LeaveTypes.AddAsync(FakeLeaveTypeProvider.GetFakeOnDemandLeave());
         var querySessionMock = new Mock<IQuerySession>();
         var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
-            FakeWorkingHoursProvider.GetAll()
+            FakeWorkingHoursProvider.GetAll(Now)
             );
         querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
             .Returns(martenQueryableStub);
@@ -83,7 +85,7 @@ public class LeaveRequestFactoryTest
         await dbContext.LeaveTypes.AddAsync(FakeLeaveTypeProvider.GetFakeOnDemandLeave());
         var querySessionMock = new Mock<IQuerySession>();
         var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
-            FakeWorkingHoursProvider.GetAll()
+            FakeWorkingHoursProvider.GetAll(Now)
         );
         querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
             .Returns(martenQueryableStub);
@@ -117,7 +119,7 @@ public class LeaveRequestFactoryTest
         await dbContext.LeaveTypes.AddAsync(FakeLeaveTypeProvider.GetFakeOnDemandLeave());
         var querySessionMock = new Mock<IQuerySession>();
         var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
-            FakeWorkingHoursProvider.GetAll()
+            FakeWorkingHoursProvider.GetAll(Now)
         );
         querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
             .Returns(martenQueryableStub);
@@ -163,7 +165,7 @@ public class LeaveRequestFactoryTest
         await dbContext.LeaveTypes.AddAsync(FakeLeaveTypeProvider.GetFakeOnDemandLeave());
         var querySessionMock = new Mock<IQuerySession>();
         var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
-            new [] {FakeWorkingHoursProvider.GetCurrentForBen()}
+            new [] {FakeWorkingHoursProvider.GetCurrentForBen(DateTimeOffset.Now)}
         );
         querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
             .Returns(martenQueryableStub);

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LeaveSystem.EventSourcing.WorkingHours;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Shared;
 using NSubstitute.Core;
 
@@ -10,20 +10,21 @@ namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeWorkingHoursProvider
 {
-    public static IEnumerable<WorkingHours> GetCurrent() =>
-        FakeWorkingHoursCreatedProvider.GetAll().Select(WorkingHours.CreateWorkingHours);
+    private static readonly FederatedUser FakeAdmin = FakeUserProvider.GetUserWithNameFakeoslav();
+    public static IEnumerable<WorkingHours> GetCurrent(DateTimeOffset baseDate) =>
+        new [] { GetCurrentForBen(baseDate), GetCurrentForPhilip(baseDate), GetCurrentForFakeoslav(baseDate)};
 
-    public static WorkingHours GetCurrentForBen() => WorkingHours.CreateWorkingHours(
-        FakeWorkingHoursCreatedProvider.GetForBen()
-    );
+    public static WorkingHours GetCurrentForBen(DateTimeOffset baseDate) =>
+        Create(Guid.NewGuid(), FakeUserProvider.BenId, DateTimeOffsetExtensions.CreateFromDate(2018, 3, 21),
+            baseDate.AddYears(1), TimeSpan.FromHours(8));
 
-    public static WorkingHours GetCurrentForPhilip() => WorkingHours.CreateWorkingHours(
-        FakeWorkingHoursCreatedProvider.GetForPhilip()
-    );
+    public static WorkingHours GetCurrentForPhilip(DateTimeOffset baseDate) =>
+        Create(Guid.NewGuid(), FakeUserProvider.PhilipId, DateTimeOffsetExtensions.CreateFromDate(2018, 6, 18),
+            baseDate.AddYears(2), TimeSpan.FromHours(4));
 
-    public static WorkingHours GetCurrentForFakeoslav() => WorkingHours.CreateWorkingHours(
-        FakeWorkingHoursCreatedProvider.GetForFakeoslav()
-    );
+    public static WorkingHours GetCurrentForFakeoslav(DateTimeOffset baseDate) =>
+        Create(Guid.NewGuid(), FakeUserProvider.FakseoslavId, DateTimeOffsetExtensions.CreateFromDate(2020, 5, 21),
+            baseDate.AddYears(4), TimeSpan.FromHours(8));
 
     public static IEnumerable<WorkingHours> GetDeprecatedForBen()
     {
@@ -34,10 +35,6 @@ public static class FakeWorkingHoursProvider
             Create(Guid.NewGuid(), FakeUserProvider.BenId, DateTimeOffsetExtensions.CreateFromDate(2017, 1, 5),
                 DateTimeOffsetExtensions.CreateFromDate(2018, 3, 20), TimeSpan.FromHours(8)),
         };
-        foreach (var workingHours in workingHoursToDeprecate)
-        {
-            workingHours.Deprecate();
-        }
         return workingHoursToDeprecate;
     }
     
@@ -45,13 +42,9 @@ public static class FakeWorkingHoursProvider
     {
         var workingHoursToDeprecate = new[]
         {
-            Create(Guid.NewGuid(), FakeUserProvider.PhilipId, DateTimeOffsetExtensions.CreateFromDate(2018, 8, 30),
-                DateTimeOffsetExtensions.CreateFromDate(2023, 6, 17), TimeSpan.FromHours(4)),
+            Create(Guid.NewGuid(), FakeUserProvider.PhilipId, DateTimeOffsetExtensions.CreateFromDate(2015, 8, 30),
+                DateTimeOffsetExtensions.CreateFromDate(2018, 6, 17), TimeSpan.FromHours(4))
         };
-        foreach (var workingHours in workingHoursToDeprecate)
-        {
-            workingHours.Deprecate();
-        }
         return workingHoursToDeprecate;
     }
 
@@ -64,20 +57,16 @@ public static class FakeWorkingHoursProvider
             Create(Guid.NewGuid(), FakeUserProvider.FakseoslavId, DateTimeOffsetExtensions.CreateFromDate(2016, 1, 11),
                 DateTimeOffsetExtensions.CreateFromDate(2020, 5, 20), TimeSpan.FromHours(8)),
         };
-        foreach (var workingHours in workingHoursToDeprecate)
-        {
-            workingHours.Deprecate();
-        }
         return workingHoursToDeprecate;
     }
 
     public static IEnumerable<WorkingHours> GetDeprecated() =>
         GetDeprecatedForPhilip().Union(GetDeprecatedForBen().Union(GetDeprecatedForFakeoslav()));
 
-    public static IEnumerable<WorkingHours> GetAll() =>
-        GetCurrent().Union(GetDeprecated());
+    public static IEnumerable<WorkingHours> GetAll(DateTimeOffset baseDate) =>
+        GetCurrent(baseDate).Union(GetDeprecated());
     private static WorkingHours Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration) => 
         WorkingHours.CreateWorkingHours(WorkingHoursCreated.Create(
-            workingHoursId, userId, dateFrom, dateTo, duration)
+            workingHoursId, userId, dateFrom, dateTo, duration, FakeAdmin)
         );
 }

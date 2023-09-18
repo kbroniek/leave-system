@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using GoldenEye.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
+using LeaveSystem.Extensions;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.Extensions;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
@@ -14,22 +16,18 @@ using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
 using Marten;
 using MediatR;
-using Moq;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
-using NSubstitute.ReceivedExtensions;
 using Xunit;
 
-namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.AddingWorkingHours;
+namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
 
-public class HandleAddWorkingHoursTest
+public class HandleCreateWorkingHoursTest
 {
     private IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours> workingHoursRepositoryMock;
     private WorkingHoursFactory factoryMock;
     private IDocumentSession documentSessionMock;
-    private IRepository<LeaveRequest> leaveRequestRepositoryMock;
 
-    private HandleAddWorkingHours GetSut() => new(workingHoursRepositoryMock, factoryMock, documentSessionMock, leaveRequestRepositoryMock);
+    private HandleCreateWorkingHours GetSut() => new(workingHoursRepositoryMock, factoryMock, documentSessionMock);
 
     [Theory]
     [MemberData(nameof(Get_WhenHandlingSuccessful_PassAllCreateWorkingHoursAndReturnUnitValue_TestData))]
@@ -40,7 +38,7 @@ public class HandleAddWorkingHoursTest
         factoryMock = Substitute.For<WorkingHoursFactory>();
         var fakeWorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours(
             WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom,
-                command.DateTo, command.Duration));
+                command.DateTo, command.Duration, command.CreatedBy));
         factoryMock.Create(command).Returns(
             fakeWorkingHours
         );
@@ -51,31 +49,15 @@ public class HandleAddWorkingHoursTest
         );
         documentSessionMock.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>()
             .Returns(workingHoursMartenQueryable);
-        leaveRequestRepositoryMock = Substitute.For<IRepository<LeaveRequest>>();
-        var leaveRequestsMartenQueryable = new MartenQueryableStub<LeaveRequest>(
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds().Select(
-                LeaveRequest.CreatePendingLeaveRequest).ToList()
-        );
-        leaveRequestsMartenQueryable.ElementAt(2).Accept("",command.AddedBy);
-        documentSessionMock.Query<LeaveRequest>()
-            .Returns(leaveRequestsMartenQueryable);
-        var sut = GetSut();
-        var userValidLeaveRequestCount = await leaveRequestsMartenQueryable.CountAsync(x => x.CreatedBy.Id == command.AddedBy.Id && x.Status.IsValid());
+        var sut = GetSut(); 
         //When
         var result = await sut.Handle(command, CancellationToken.None);
         //Then
         documentSessionMock.Received(1).Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>();
-        documentSessionMock.Received(1).Query<LeaveRequest>();
-        factoryMock.Received(1).Create(ArgExtensions.IsEquivalentTo<AddWorkingHours>(command));
-        await workingHoursRepositoryMock.Received(1).Update(Arg.Any<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Arg.Any<CancellationToken>());
+        factoryMock.Received(1).Create(ArgExtensions.IsEquivalentTo<CreateWorkingHours>(command));
         await workingHoursRepositoryMock.Received(1).Add(fakeWorkingHours, Arg.Any<CancellationToken>());
-        await workingHoursRepositoryMock.Received(2).SaveChanges();
-        await leaveRequestRepositoryMock.Received(userValidLeaveRequestCount).Update(Arg.Any<LeaveRequest>(), Arg.Any<CancellationToken>());
-        await leaveRequestRepositoryMock.Received(userValidLeaveRequestCount).SaveChanges();
+        await workingHoursRepositoryMock.Received(1).SaveChanges();
         result.Should().BeEquivalentTo(Unit.Value);
-        workingHoursMartenQueryable.Any(x => x.UserId == command.UserId && x.Status == WorkingHoursStatus.Current)
-            .Should().BeFalse();
-        leaveRequestsMartenQueryable.Any(x => x.Status.IsValid()).Should().BeFalse();
     }
     
     [Fact]
@@ -86,7 +68,7 @@ public class HandleAddWorkingHoursTest
         factoryMock = Substitute.For<WorkingHoursFactory>();
         var fakeWorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours(
             WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom,
-                command.DateTo, command.Duration));
+                command.DateTo, command.Duration, command.CreatedBy));
         factoryMock.Create(command).Returns(
             fakeWorkingHours
         );
@@ -103,18 +85,20 @@ public class HandleAddWorkingHoursTest
         var result = await sut.Handle(command, CancellationToken.None);
         //Then
         documentSessionMock.Received(1).Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>();
-        factoryMock.Received(1).Create(ArgExtensions.IsEquivalentTo<AddWorkingHours>(command));
+        factoryMock.Received(1).Create(ArgExtensions.IsEquivalentTo<CreateWorkingHours>(command));
         await workingHoursRepositoryMock.DidNotReceiveWithAnyArgs().Update(Arg.Any<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Arg.Any<CancellationToken>());
         await workingHoursRepositoryMock.Received(1).Add(fakeWorkingHours, Arg.Any<CancellationToken>());
         await workingHoursRepositoryMock.Received(1).SaveChanges();
         result.Should().BeEquivalentTo(Unit.Value);
-        martenQueryable.Any(x => x.UserId == command.UserId && x.Status == WorkingHoursStatus.Current)
+        var now = DateTimeOffset.Now.GetDayWithoutTime();
+        martenQueryable.Any(x => x.UserId == command.UserId && x.GetStatus(now) == WorkingHoursStatus.Current)
             .Should().BeFalse();
     }
 
     public static IEnumerable<object[]> Get_WhenHandlingSuccessful_PassAllCreateWorkingHoursAndReturnUnitValue_TestData()
     {
-        yield return new object[] { FakeWorkingHoursProvider.GetAll() };
-        yield return new object[] { FakeWorkingHoursProvider.GetCurrent() };
+        var now = DateTimeOffset.Now;
+        yield return new object[] { new [] { FakeWorkingHoursProvider.GetCurrentForBen(now), FakeWorkingHoursProvider.GetCurrentForPhilip(now)}.Union(FakeWorkingHoursProvider.GetDeprecated()) };
+        yield return new object[] { new [] { FakeWorkingHoursProvider.GetCurrentForBen(now), FakeWorkingHoursProvider.GetCurrentForPhilip(now)} };
     }
 }

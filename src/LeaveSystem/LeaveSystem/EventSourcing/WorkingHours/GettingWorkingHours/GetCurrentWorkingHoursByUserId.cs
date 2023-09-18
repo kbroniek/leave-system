@@ -1,5 +1,7 @@
 using Ardalis.GuardClauses;
 using GoldenEye.Queries;
+using LeaveSystem.Extensions;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using Marten;
 
@@ -29,8 +31,8 @@ internal class HandleGetWorkingHoursByUserId : IQueryHandler<GetCurrentWorkingHo
 
     public async Task<WorkingHours> Handle(GetCurrentWorkingHoursByUserId request, CancellationToken cancellationToken)
     {
-        var workingHours = await querySession.Query<WorkingHours>().Where(wh => wh.UserId == request.UserId && wh.Status == WorkingHoursStatus.Current)
-            .FirstOrDefaultAsync(cancellationToken);
+        var now = DateTimeOffset.Now.GetDayWithoutTime();
+        var workingHours = await querySession.GetCurrentWorkingHoursForUser(request.UserId, now, cancellationToken);
         return workingHours
                ?? throw GoldenEye.Exceptions.NotFoundException.For<WorkingHours>(request.UserId);
     }

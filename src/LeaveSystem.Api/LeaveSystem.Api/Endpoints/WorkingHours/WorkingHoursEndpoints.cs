@@ -2,7 +2,7 @@
 using GoldenEye.Commands;
 using GoldenEye.Queries;
 using LeaveSystem.Api.Extensions;
-using LeaveSystem.EventSourcing.WorkingHours.AddingWorkingHours;
+using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
@@ -72,7 +72,7 @@ public static class WorkingHoursEndpoints
                 {
                     httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
                     var workingHoursId = Guid.NewGuid();
-                    var command = AddWorkingHours.Create(
+                    var command = CreateWorkingHours.Create(
                         workingHoursId,
                         addWorkingHoursDto.UserId,
                         addWorkingHoursDto.DateFrom,
