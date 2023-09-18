@@ -58,7 +58,7 @@ internal class HandleCreateWorkingHours : ICommandHandler<CreateWorkingHours>
     public async Task<Unit> Handle(CreateWorkingHours request, CancellationToken cancellationToken)
     {
         var workingHoursInThisPeriodExists = querySession.Query<WorkingHours>()
-            .Any(x => x.UserId == request.UserId && request.PeriodsOverlaps(x));
+            .Any(x => x.UserId == request.UserId && request.PeriodsOverlap(x));
         if (workingHoursInThisPeriodExists)
         {
             throw new InvalidOperationException("You cant add working hours in this period, because other");

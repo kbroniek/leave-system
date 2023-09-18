@@ -4,12 +4,13 @@ using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.DeprecatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
+using LeaveSystem.Periods;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
 
-public class LeaveRequest : Aggregate
+public class LeaveRequest : Aggregate, INotNullablePeriod
 {
     public DateTimeOffset DateFrom { get; private set; }
 
