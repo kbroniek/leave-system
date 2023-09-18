@@ -2,6 +2,7 @@
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.DeprecatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
@@ -99,6 +100,17 @@ public class LeaveRequest : Aggregate
         Apply(@event);
     }
 
+    internal void Deprecate(string? remarks, FederatedUser deprecatedBy)
+    {
+        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Accepted)
+        {
+            throw new InvalidOperationException($"Deprecating leave request in '{Status}' status is not allowed.");
+        }
+        var @event = LeaveRequestDeprecated.Create(Id, remarks, deprecatedBy);
+        Enqueue(@event);
+        Apply(@event);
+    }
+
     private void Apply(LeaveRequestCreated @event)
     {
         Id = @event.LeaveRequestId;
@@ -141,6 +153,14 @@ public class LeaveRequest : Aggregate
     {
         CreatedByOnBehalf = @event.CreatedByOnBehalf;
         LastModifiedBy = @event.CreatedByOnBehalf;
+        Version++;
+    }
+
+    private void Apply(LeaveRequestDeprecated @event)
+    {
+        LastModifiedBy = @event.DeprecatedBy;
+        Status = LeaveRequestStatus.Deprecated;
+        AddRemarks(@event.Remarks, @event.DeprecatedBy);
         Version++;
     }
 

@@ -1,6 +1,7 @@
 using Ardalis.GuardClauses;
 using GoldenEye.Commands;
 using GoldenEye.Repositories;
+using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Extensions;
 using LeaveSystem.Periods;
@@ -47,13 +48,15 @@ internal class HandleModifyWorkingHours : ICommandHandler<ModifyWorkingHours>
     private readonly IRepository<WorkingHours> workingHoursRepository;
     private readonly WorkingHoursFactory factory;
     private readonly IDocumentSession querySession;
+    private readonly IRepository<LeaveRequest> leaveRequestRepository;
 
     public HandleModifyWorkingHours(IRepository<WorkingHours> workingHoursRepository, WorkingHoursFactory factory,
-        IDocumentSession querySession)
+        IDocumentSession querySession, IRepository<LeaveRequest> leaveRequestRepository)
     {
         this.workingHoursRepository = workingHoursRepository;
         this.factory = factory;
         this.querySession = querySession;
+        this.leaveRequestRepository = leaveRequestRepository;
     }
 
     //Todo: Add deprecating leave requests
@@ -70,5 +73,10 @@ internal class HandleModifyWorkingHours : ICommandHandler<ModifyWorkingHours>
         await workingHoursRepository.Update(workingHours, cancellationToken);
         await workingHoursRepository.SaveChanges(cancellationToken);
         return Unit.Value;
+    }
+
+    private async Task DeprecateLeaveRequests()
+    {
+        
     }
 }

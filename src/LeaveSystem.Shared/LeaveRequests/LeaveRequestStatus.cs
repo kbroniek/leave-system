@@ -5,7 +5,8 @@ public enum LeaveRequestStatus
     Pending = 1,
     Accepted = 2,
     Canceled = 3,
-    Rejected = 4
+    Rejected = 4,
+    Deprecated = 5
 }
 
 public static class LeaveRequestStatusExtensions
