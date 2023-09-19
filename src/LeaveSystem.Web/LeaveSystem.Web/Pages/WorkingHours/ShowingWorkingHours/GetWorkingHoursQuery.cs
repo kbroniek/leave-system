@@ -51,4 +51,16 @@ public class GetWorkingHoursQuery
             userIds: userIds,
             statuses: ValidStatuses);
     }
+
+    public static GetWorkingHoursQuery GetAllForUsers(string[] userIds)
+    {
+        var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
+        return new(
+            pageNumber: 1,
+            pageSize: 100,
+            dateFrom: now.AddYears(-100),
+            dateTo: now.AddYears(100),
+            userIds: userIds,
+            statuses: new []{ WorkingHoursStatus.Current, WorkingHoursStatus.Deprecated, WorkingHoursStatus.Future});
+    }
 }
