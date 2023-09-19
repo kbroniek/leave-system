@@ -52,7 +52,7 @@ public class HrSummaryServiceTest
         employeeServiceMock.Get().Returns(employees);
         var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock);
         var fakeUserIds = new[] { FakeUserProvider.BenId, FakeUserProvider.PhilipId, FakeUserProvider.HabibId, FakeUserProvider.FakseoslavId};
-        var fakeWorkingHours = FakeWorkingHoursProvider.GetAll().ToDto().ToPagedListResponse();
+        var fakeWorkingHours = FakeWorkingHoursProvider.GetAll(DateTimeOffset.Now).ToDto().ToPagedListResponse();
         var getWorkingHoursQuery = GetWorkingHoursQuery.GetDefaultForUsers(fakeUserIds);
         workingHoursServiceMock.GetWorkingHours(ArgExtensions.IsEquivalentTo<GetWorkingHoursQuery>(getWorkingHoursQuery))
             .Returns(fakeWorkingHours);
