@@ -26,10 +26,9 @@ public class LeaveRequestFactory
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
         var now = DateTimeOffset.Now.GetDayWithoutTime();
-        var workingHoursModel =
+         var workingHoursModel =
             await querySession.GetCurrentWorkingHoursForUser(command.CreatedBy.Id, now, cancellationToken)
-            ?? throw GoldenEye.Exceptions.NotFoundException.For<WorkingHours.WorkingHours>(
-                "You cant create leave request for user that not have current working hours");
+            ?? throw GoldenEye.Exceptions.NotFoundException.For<WorkingHours.WorkingHours>(command.CreatedBy.Id);
         var workingHours = workingHoursModel.Duration;
         var maxDuration = DateCalculator.CalculateDuration(command.DateFrom, command.DateTo, workingHours,
             leaveType.Properties?.IncludeFreeDays);

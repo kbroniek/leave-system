@@ -103,7 +103,8 @@ internal class HandleGetWorkingHours : IQueryHandler<GetWorkingHours, IPagedList
                         (x.DateTo >= request.DateFrom && x.DateTo <= request.DateTo) ||
                         (request.DateFrom >= x.DateFrom && request.DateFrom <= x.DateTo));
         query = query.WhereMatchAny(w => w.UserId, request.UserIds);
-        query = query.WhereMatchAny(w => w.GetStatus(now), request.Statuses);
-        return await query.ToPagedListAsync(request.PageNumber, request.PageSize, cancellationToken);
+        query = query.WhereMatchAnyStatus(request.Statuses, DateTimeOffset.Now);
+        return await query
+            .ToPagedListAsync(request.PageNumber, request.PageSize, cancellationToken);
     }
 }

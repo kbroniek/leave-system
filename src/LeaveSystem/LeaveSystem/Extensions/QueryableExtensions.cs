@@ -1,5 +1,9 @@
 using System.Linq.Expressions;
+using LamarCodeGeneration.Util;
+using LeaveSystem.EventSourcing.WorkingHours;
 using LeaveSystem.Linq;
+using LeaveSystem.Periods;
+using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.Extensions;
 
@@ -21,4 +25,20 @@ public static class QueryableExtensions
         });
         return source.Where(predicate);
     }
+    
+    public static IQueryable<WorkingHours> WhereMatchAnyStatus(this IQueryable<WorkingHours> source, WorkingHoursStatus[]? statuses, DateTimeOffset currentDate) 
+    {
+        if (statuses is null or {Length: < 1})
+        {
+            return source;
+        }
+        var predicate = PredicateBuilder.False<WorkingHours>();
+        predicate = statuses.Aggregate(predicate, (current, status) =>
+        {
+            var expressionForStatus = WorkingHoursStatusExpression.GetExpressionForStatus(status, currentDate);
+            return current.Or(expressionForStatus);
+        });
+        return source.Where(predicate);
+    }
+
 }

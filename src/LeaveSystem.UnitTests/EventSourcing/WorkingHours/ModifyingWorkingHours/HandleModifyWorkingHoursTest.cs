@@ -9,6 +9,8 @@ using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;
 using LeaveSystem.Extensions;
+using LeaveSystem.Linq;
+using LeaveSystem.Periods;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Extensions;
 using LeaveSystem.Shared.LeaveRequests;
@@ -61,8 +63,9 @@ public class HandleModifyWorkingHoursTest
         );
         documentSessionMock.Query<LeaveRequest>()
             .Returns(leaveRequestsMartenQueryable);
+        var overlapPeriodExp = PeriodExpressions.GetPeriodOverlapExp<LeaveRequest, ModifyWorkingHours>(command);
         var overlappingLeaveRequestsCount = await 
-            leaveRequestsMartenQueryable.CountAsync(x => x.PeriodsOverlap(command) && x.CreatedBy.Id == command.UserId);
+            leaveRequestsMartenQueryable.CountAsync(overlapPeriodExp.And(x => x.CreatedBy.Id == command.UserId));
         leaveRequestRepositoryMock = Substitute.For<IRepository<LeaveRequest>>();
         var sut = GetSut();
         //When
@@ -75,7 +78,7 @@ public class HandleModifyWorkingHoursTest
         await leaveRequestRepositoryMock.Received(overlappingLeaveRequestsCount).SaveChanges();
         fakeWorkingHours.DequeueUncommittedEvents().Last().Should().BeOfType<WorkingHoursModified>();
         result.Should().BeEquivalentTo(Unit.Value);
-        leaveRequestsMartenQueryable.Any(x => x.PeriodsOverlap(command) && x.CreatedBy.Id == command.UserId && x.Status.IsValid())
+        leaveRequestsMartenQueryable.Any(overlapPeriodExp.And(x => x.CreatedBy.Id == command.UserId && x.Status.IsValid()))
             .Should().BeFalse();
     }
 

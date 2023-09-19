@@ -2,6 +2,7 @@ using Ardalis.GuardClauses;
 using GoldenEye.Commands;
 using GoldenEye.Repositories;
 using LeaveSystem.Extensions;
+using LeaveSystem.Linq;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
 using Marten;
@@ -57,8 +58,9 @@ internal class HandleCreateWorkingHours : ICommandHandler<CreateWorkingHours>
 
     public async Task<Unit> Handle(CreateWorkingHours request, CancellationToken cancellationToken)
     {
+        var periodOverlapExp = PeriodExpressions.GetPeriodOverlapExp<WorkingHours>(request);
         var workingHoursInThisPeriodExists = querySession.Query<WorkingHours>()
-            .Any(x => x.UserId == request.UserId && request.PeriodsOverlap(x));
+            .Any(periodOverlapExp.And(x => x.UserId == request.UserId));
         if (workingHoursInThisPeriodExists)
         {
             throw new InvalidOperationException("You cant add working hours in this period, because other");

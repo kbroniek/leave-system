@@ -28,4 +28,20 @@ public static class PredicateBuilder
         return Expression.Lambda<Func<T, bool>>
               (Expression.AndAlso(expr1.Body, invokedExpr), expr1.Parameters);
     }
+    
+    public static Expression<Func<T, bool>> MatchAny<T, TValue>(this Expression<Func<T,TValue>> expression, TValue[]? values) where T : class where TValue : IComparable
+    {
+        if (values is null or {Length: < 1})
+        {
+            return True<T>();
+        }
+        var predicate = False<T>();
+        var param = Expression.Parameter(typeof(T));
+        return values.Aggregate(predicate, (current, value) =>
+        {
+            var constValue = Expression.Constant(value);
+            var equal = Expression.Equal(Expression.Invoke(expression, param), constValue);
+            return current.Or(Expression.Lambda<Func<T, bool>>(equal, param));
+        });
+    }
 }

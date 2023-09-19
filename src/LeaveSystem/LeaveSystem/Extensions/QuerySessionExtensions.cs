@@ -1,4 +1,5 @@
 using LeaveSystem.EventSourcing.WorkingHours;
+using LeaveSystem.Linq;
 using LeaveSystem.Shared.WorkingHours;
 using Marten;
 
@@ -9,6 +10,6 @@ public static class QuerySessionExtensions
     public static Task<WorkingHours?> GetCurrentWorkingHoursForUser(
         this IQuerySession querySession, string userId, DateTimeOffset currentDate, CancellationToken cancellationToken) => 
         querySession.Query<WorkingHours>()
-            .Where(x => x.UserId == userId && x.GetStatus(currentDate) == WorkingHoursStatus.Current)
+            .Where(WorkingHoursStatusExpression.GetExpressionForStatus(WorkingHoursStatus.Current, currentDate).And(x => x.UserId == userId))
             .FirstOrDefaultAsync(cancellationToken);
 }
