@@ -35,7 +35,7 @@ public static class QueryableExtensions
         var predicate = PredicateBuilder.False<WorkingHours>();
         predicate = statuses.Aggregate(predicate, (current, status) =>
         {
-            var expressionForStatus = WorkingHoursStatusExpression.GetExpressionForStatus(status, currentDate);
+            var expressionForStatus = WorkingHoursExpression.GetExpressionForStatus(status, currentDate);
             return current.Or(expressionForStatus);
         });
         return source.Where(predicate);

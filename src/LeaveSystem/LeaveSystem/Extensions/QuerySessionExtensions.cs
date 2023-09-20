@@ -10,6 +10,6 @@ public static class QuerySessionExtensions
     public static Task<WorkingHours?> GetCurrentWorkingHoursForUser(
         this IQuerySession querySession, string userId, DateTimeOffset currentDate, CancellationToken cancellationToken) => 
         querySession.Query<WorkingHours>()
-            .Where(WorkingHoursStatusExpression.GetExpressionForStatus(WorkingHoursStatus.Current, currentDate).And(x => x.UserId == userId))
+            .Where(WorkingHoursExpression.GetExpressionForStatus(WorkingHoursStatus.Current, currentDate).And(x => x.UserId == userId))
             .FirstOrDefaultAsync(cancellationToken);
 }

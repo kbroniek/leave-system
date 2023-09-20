@@ -3,21 +3,8 @@ using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.EventSourcing.WorkingHours;
 
-public static class WorkingHoursStatusExpression
+public static class WorkingHoursExpression
 {
-    private static WorkingHoursStatus GetStatus(this WorkingHours source, DateTimeOffset currentDate)
-    {
-        if (currentDate > source.DateTo)
-        {
-            return WorkingHoursStatus.Deprecated;
-        }
-        if (currentDate < source.DateFrom)
-        {
-            return WorkingHoursStatus.Future;
-        }
-        return WorkingHoursStatus.Current;
-    }
-
     public static Expression<Func<WorkingHours, bool>> GetExpressionForStatus(WorkingHoursStatus status, DateTimeOffset currentDate) =>
         status switch
         {

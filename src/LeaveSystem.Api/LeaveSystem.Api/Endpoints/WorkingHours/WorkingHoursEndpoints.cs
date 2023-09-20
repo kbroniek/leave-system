@@ -92,13 +92,14 @@ public static class WorkingHoursEndpoints
                     CancellationToken cancellationToken, Guid? id) =>
                 {
                     httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+                    var user = httpContext.User.CreateModel();
                     var command = ModifyWorkingHours.Create(
                         id,
-                        addWorkingHoursDto.UsedId,
+                        addWorkingHoursDto.UserId,
                         addWorkingHoursDto.DateFrom,
                         addWorkingHoursDto.DateTo,
                         addWorkingHoursDto.Duration,
-                        addWorkingHoursDto.AddedBy
+                        user
                     );
                     try
                     {

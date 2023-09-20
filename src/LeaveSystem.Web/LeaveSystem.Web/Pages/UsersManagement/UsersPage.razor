@@ -5,6 +5,7 @@
 @using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
 @using Microsoft.AspNetCore.Authorization;
 @using LeaveSystem.Shared
+@using LeaveSystem.Shared.Extensions
 
 @attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
@@ -88,7 +89,7 @@ else
     UserWithWorkingHoursDto? userWithWorkingHoursToInsert;
     UserDto? userToUpdate;
     IEnumerable<WorkingHoursDto>? workingHoursToUpdate;
-    DateTimeOffset Now = DateTimeOffset.Now.GetDayWithoutTime();
+    readonly DateTimeOffset now = DateTimeOffset.Now.GetDayWithoutTime();
 
 
     string RolesToString(IEnumerable<string>? roles)
@@ -121,16 +122,21 @@ else
         await usersGrid.EditRow(userWithWorkingHours);
     }
 
-    async Task OnUpdateRow(UserDto user)
+    async Task OnUpdateRow(UserWithWorkingHoursDto userWithWorkingHours)
     {
-        if (user == userWithWorkingHoursToInsert)
+        if (userWithWorkingHours == userWithWorkingHoursToInsert)
         {
             userWithWorkingHoursToInsert = null;
         }
 
         userToUpdate = null;
+        workingHoursToUpdate = null;
 
-        await UsersService.Edit(user);
+        await UsersService.Edit(userWithWorkingHours.GetUser());
+        foreach (var workingHours in userWithWorkingHours.WorkingHours.OrEmptyIfNull())
+        {
+            await WorkingHoursService.Edit(workingHours);
+        }
     }
 
     async Task SaveRow(UserWithWorkingHoursDto userWithWorkingHours)
@@ -150,6 +156,7 @@ else
         }
 
         userToUpdate = null;
+        workingHoursToUpdate = null;
 
         usersGrid?.CancelEditRow(userWithWorkingHours);
     }
@@ -208,23 +215,13 @@ else
 
     string WorkingHoursToString(IEnumerable<WorkingHoursDto>? workingHours)
     {
-        var currentWorkingHours = workingHours?.FirstOrDefault(x => x.DateFrom <= Now && x.DateTo >= Now)?.Duration ?? TimeSpan.Zero;
+        var currentWorkingHours = workingHours?.FirstOrDefault(x => x.DateFrom <= now && x.DateTo >= now)?.Duration ?? TimeSpan.Zero;
         return $"{currentWorkingHours.Hours}h";
-    }
-
-    TimeSpan DateTimeToTimeSpan(DateTime? input, TimeSpan defaultValue = default)
-    {
-        if (!input.HasValue)
-        {
-            return defaultValue;
-        }
-        var notNullInput = input.Value;
-        return new TimeSpan(notNullInput.Hour, notNullInput.Minute, notNullInput.Second);
     }
 
     async Task ShowWorkingHoursDialog(IEnumerable<WorkingHoursDto>? workingHours)
     {
-        if (workingHours is null || workingHoursToUpdate is null)
+        if (workingHours is null)
         {
             return;
         }
