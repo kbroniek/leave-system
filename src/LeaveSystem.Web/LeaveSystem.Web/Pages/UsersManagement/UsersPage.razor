@@ -9,6 +9,7 @@
 @attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
 @inject WorkingHoursService WorkingHoursService
+@inject DialogService DialogService
 
 
 @if (users is null)
@@ -47,8 +48,16 @@ else
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Title="WorkingHours" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
                 <Template Context="data">
-                    @WorkingHoursToString(data?.WorkingHours)
+                    @WorkingHoursToString(data.WorkingHours)
                 </Template>
+                <EditTemplate Context="data">
+                    <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.WorkingHours))>
+                        <span class="rz-button-text">
+                            <i class="fa-solid fa-clock"> </i>
+                            <i class="fa-solid fa-pen"></i>
+                        </span>
+                    </RadzenButton>
+                </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
                 <Template Context="data">
@@ -78,6 +87,7 @@ else
     IEnumerable<UserWithWorkingHoursDto>? usersWithWorkingHours;
     UserWithWorkingHoursDto? userWithWorkingHoursToInsert;
     UserDto? userToUpdate;
+    IEnumerable<WorkingHoursDto>? workingHoursToUpdate;
     DateTimeOffset Now = DateTimeOffset.Now.GetDayWithoutTime();
 
 
@@ -88,6 +98,7 @@ else
     {
         userWithWorkingHoursToInsert = null;
         userToUpdate = null;
+        workingHoursToUpdate = null;
     }
 
     protected override async Task OnInitializedAsync()
@@ -200,4 +211,38 @@ else
         var currentWorkingHours = workingHours?.FirstOrDefault(x => x.DateFrom <= Now && x.DateTo >= Now)?.Duration ?? TimeSpan.Zero;
         return $"{currentWorkingHours.Hours}h";
     }
+
+    TimeSpan DateTimeToTimeSpan(DateTime? input, TimeSpan defaultValue = default)
+    {
+        if (!input.HasValue)
+        {
+            return defaultValue;
+        }
+        var notNullInput = input.Value;
+        return new TimeSpan(notNullInput.Hour, notNullInput.Minute, notNullInput.Second);
+    }
+
+    async Task ShowWorkingHoursDialog(IEnumerable<WorkingHoursDto>? workingHours)
+    {
+        if (workingHours is null || workingHoursToUpdate is null)
+        {
+            return;
+        }
+        workingHoursToUpdate = workingHours.ToList();
+        await DialogService.OpenAsync("Edit workingHours", ds =>
+            @<RadzenStack Gap="1.5rem">
+                @foreach (var singleWorkingHours in workingHoursToUpdate)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
+                        <RadzenDatePicker @bind-Value="singleWorkingHours.DateTo" DateFormat="d" Style="width: 150px"/>
+                        <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
+                    </RadzenStack>
+                }
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenButton Text="Close" Click="() => ds.Close()" Style="width: 80px;"/>
+                </RadzenStack>
+            </RadzenStack>);
+    }
+
 }

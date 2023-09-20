@@ -257,7 +257,7 @@ public static class DbContextExtenstions
             commandBus,
             testUsers[0].Id,
             DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2025, 1, 1),
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
@@ -271,37 +271,37 @@ public static class DbContextExtenstions
             commandBus,
             testUsers[2].Id,
             DateTimeOffsetExtensions.CreateFromDate(2021, 12, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2023, 7, 10),
+            DateTimeOffsetExtensions.CreateFromDate(2027, 7, 10),
             TimeSpan.FromHours(4),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[3].Id,
             DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
-            TimeSpan.FromHours(8),
-            defaultUser);
-        await CreateWorkingHours(
-            commandBus,
-            testUsers[4].Id,
-            DateTimeOffsetExtensions.CreateFromDate(2023, 6, 9),
             DateTimeOffsetExtensions.CreateFromDate(2028, 1, 1),
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[4].Id,
-            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2015, 6, 9),
+            DateTimeOffsetExtensions.CreateFromDate(2020, 1, 1),
+            TimeSpan.FromHours(8),
+            defaultUser);
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[4].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2020, 1, 2),
+            DateTimeOffsetExtensions.CreateFromDate(2024, 5, 6),
             TimeSpan.FromHours(4),
             defaultUser);
-        // await CreateWorkingHours(
-        //     commandBus,
-        //     defaultUser.Id,
-        //     DateTimeOffsetExtensions.CreateFromDate(2020, 2, 1),
-        //     DateTimeOffsetExtensions.CreateFromDate(2026, 7, 1),
-        //     TimeSpan.FromHours(8),
-        //     defaultUser);
+        await CreateWorkingHours(
+            commandBus,
+            defaultUser.Id,
+            DateTimeOffsetExtensions.CreateFromDate(2020, 2, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2026, 7, 1),
+            TimeSpan.FromHours(8),
+            defaultUser);
     }
 
     private static Task CreateWorkingHours(ICommandBus commandBus, string? userId, DateTimeOffset? dateFrom,
