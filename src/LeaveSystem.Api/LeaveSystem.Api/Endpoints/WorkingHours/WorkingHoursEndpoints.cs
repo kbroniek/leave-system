@@ -110,6 +110,10 @@ public static class WorkingHoursEndpoints
                     {
                         return Results.NotFound();
                     }
+                    catch (InvalidOperationException)
+                    {
+                        return Results.BadRequest();
+                    }
                 })
             .WithName(ModifyUserWorkingHoursPolicyName)
             .RequireAuthorization(ModifyUserWorkingHoursPolicyName);
