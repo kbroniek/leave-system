@@ -1,8 +1,11 @@
 @using LeaveSystem.Shared.WorkingHours
-@inject DialogService dialogService
+@using FluentAssertions
+@using LeaveSystem.Shared
+@inject DialogService DialogService
+@inject IToastService ToastService
 
 <RadzenStack Gap="1.5rem">
-    @foreach (var singleWorkingHours in WorkingHoursToUpdate)
+    @foreach (var singleWorkingHours in WorkingHoursToUpdate!)
     {
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
@@ -10,7 +13,7 @@
             <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
         </RadzenStack>
     }
-    @foreach (var singleWorkingHours in WorkingHoursToAdd)
+    @foreach (var singleWorkingHours in WorkingHoursToAdd!)
     {
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
@@ -24,8 +27,9 @@
         </RadzenStack>
     }
     <RadzenStack Orientation="Orientation.Horizontal">
-        <RadzenButton Text="Close" Click="dialogService.Close" Style="width: 80px;"/>
+        <RadzenButton Text="Close" Click="Close" Style="width: 80px;"/>
         <RadzenButton Text="Add" Click="() => WorkingHoursToAdd.Add(new(UserId))"></RadzenButton>
+        <RadzenButton Text="Reset" Click="Reset" ButtonStyle="ButtonStyle.Secondary"></RadzenButton>
     </RadzenStack>
 </RadzenStack>
 
@@ -35,9 +39,35 @@
     public string UserId { get; set; } = string.Empty;
 
     [Parameter]
-    public IEnumerable<WorkingHoursDto> WorkingHoursToUpdate { get; set; } = Enumerable.Empty<WorkingHoursDto>();
+    public IEnumerable<WorkingHoursDto>? WorkingHoursToUpdate { get; set; }
 
     [Parameter]
-    public List<AddWorkingHoursDto> WorkingHoursToAdd { get; set; } = new();
+    public List<AddWorkingHoursDto>? WorkingHoursToAdd { get; set; }
+
+    IEnumerable<WorkingHoursDto> workingHoursToUpdateToReset = Enumerable.Empty<WorkingHoursDto>();
+    List<AddWorkingHoursDto> workingHoursToAddToReset = new ();
+
+    protected override void OnInitialized()
+    {
+        if (WorkingHoursToUpdate is null || WorkingHoursToAdd is null)
+        {
+            ToastService.ShowError("Error while initializing dialog");
+            DialogService.Close();
+            return;
+        }   
+        workingHoursToUpdateToReset = ObjectCopier.Copy(WorkingHoursToUpdate);
+        workingHoursToAddToReset = WorkingHoursToAdd.ToList();
+    }
+
+    void Reset()
+    {
+        WorkingHoursToUpdate = ObjectCopier.Copy(workingHoursToUpdateToReset);
+        WorkingHoursToAdd = workingHoursToAddToReset.ToList();
+    }
+
+    void Close()
+    {
+        DialogService.Close();
+    }
 
 }

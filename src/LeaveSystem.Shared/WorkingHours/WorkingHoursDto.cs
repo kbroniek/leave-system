@@ -2,12 +2,12 @@ namespace LeaveSystem.Shared.WorkingHours;
 
 public class WorkingHoursDto
 {
-    public WorkingHoursDto(string UserId, DateTimeOffset DateFrom, DateTimeOffset? DateTo, TimeSpan Duration, Guid id)
+    public WorkingHoursDto(string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration, Guid id)
     {
-        this.UserId = UserId;
-        this.DateFrom = DateFrom;
-        this.DateTo = DateTo;
-        this.Duration = Duration;
+        this.UserId = userId;
+        this.DateFrom = dateFrom;
+        this.DateTo = dateTo;
+        this.Duration = duration;
         Id = id;
     }
     
