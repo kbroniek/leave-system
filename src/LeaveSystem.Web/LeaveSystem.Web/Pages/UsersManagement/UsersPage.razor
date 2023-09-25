@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Authorization;
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.Extensions
+@using System.Collections
 
 @attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
@@ -52,7 +53,7 @@ else
                     @WorkingHoursToString(data.WorkingHours)
                 </Template>
                 <EditTemplate Context="data">
-                    <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.WorkingHours))>
+                    <RadzenButton Click=@(ShowWorkingHoursDialog)>
                         <span class="rz-button-text">
                             <i class="fa-solid fa-clock"> </i>
                             <i class="fa-solid fa-pen"></i>
@@ -89,6 +90,7 @@ else
     UserWithWorkingHoursDto? userWithWorkingHoursToInsert;
     UserDto? userToUpdate;
     IEnumerable<WorkingHoursDto>? workingHoursToUpdate;
+    List<AddWorkingHoursDto>? workingHoursToAdd = new();
     readonly DateTimeOffset now = DateTimeOffset.Now.GetDayWithoutTime();
 
 
@@ -109,12 +111,14 @@ else
         users = (await UsersService.Get()).ToArray();
         var query = GetWorkingHoursQuery.GetAllForUsers(users.Select(x => x.Id ?? "").ToArray());
         var workingHours = await WorkingHoursService.GetWorkingHours(query);
-        usersWithWorkingHours = users.Select(x => new UserWithWorkingHoursDto(x.Id, x.Name, x.Email, x.Roles, workingHours?.Items?.Where(wh => wh.UserId == x.Id) ?? Enumerable.Empty<WorkingHoursDto>()));
+        usersWithWorkingHours = users.Select(x => new UserWithWorkingHoursDto(x.Id, x.Name, x.Email, x.Roles, workingHours?.Items?.Where(wh => wh.UserId == x.Id).OrderBy(wh => wh.DateFrom) ?? Enumerable.Empty<WorkingHoursDto>()));
     }
 
     async Task EditRow(UserWithWorkingHoursDto userWithWorkingHours)
     {
         userToUpdate = userWithWorkingHours.GetUser();
+        workingHoursToUpdate = userWithWorkingHours.WorkingHours;
+        workingHoursToAdd = new();
         if (usersGrid is null)
         {
             return;
@@ -134,6 +138,8 @@ else
 
         await UsersService.Edit(userWithWorkingHours.GetUser());
         await WorkingHoursService.Edit(userWithWorkingHours.WorkingHours.OrEmptyIfNull());
+        await WorkingHoursService.Add(workingHoursToAdd.OrEmptyIfNull());
+        workingHoursToAdd = null;
     }
 
     async Task SaveRow(UserWithWorkingHoursDto userWithWorkingHours)
@@ -154,6 +160,7 @@ else
 
         userToUpdate = null;
         workingHoursToUpdate = null;
+        workingHoursToAdd = null;
 
         usersGrid?.CancelEditRow(userWithWorkingHours);
     }
@@ -216,27 +223,20 @@ else
         return $"{currentWorkingHours.Hours}h";
     }
 
-    async Task ShowWorkingHoursDialog(IEnumerable<WorkingHoursDto>? workingHours)
+    async Task ShowWorkingHoursDialog()
     {
-        if (workingHours is null)
+        if (workingHoursToUpdate is null || userToUpdate?.Id is null)
         {
             return;
         }
-        workingHoursToUpdate = workingHours.ToList();
-        await DialogService.OpenAsync("Edit workingHours", ds =>
-            @<RadzenStack Gap="1.5rem">
-                @foreach (var singleWorkingHours in workingHoursToUpdate)
-                {
-                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
-                        <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
-                        <RadzenDatePicker @bind-Value="singleWorkingHours.DateTo" DateFormat="d" Style="width: 150px"/>
-                        <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
-                    </RadzenStack>
-                }
-                <RadzenStack Orientation="Orientation.Horizontal">
-                    <RadzenButton Text="Close" Click="() => ds.Close()" Style="width: 80px;"/>
-                </RadzenStack>
-            </RadzenStack>);
+        workingHoursToAdd ??= new();
+        var userId = userToUpdate.Id;
+        await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours", 
+            new Dictionary<string, object>
+            {
+                {"UserId", userToUpdate.Id},
+                {"WorkingHoursToUpdate", workingHoursToUpdate},
+                {"WorkingHoursToAdd", workingHoursToAdd}
+            });
     }
-
 }

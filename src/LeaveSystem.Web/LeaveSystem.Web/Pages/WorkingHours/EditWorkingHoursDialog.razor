@@ -1,0 +1,43 @@
+@using LeaveSystem.Shared.WorkingHours
+@inject DialogService dialogService
+
+<RadzenStack Gap="1.5rem">
+    @foreach (var singleWorkingHours in WorkingHoursToUpdate)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
+            <RadzenDatePicker @bind-Value="singleWorkingHours.DateTo" DateFormat="d" Style="width: 150px"/>
+            <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
+        </RadzenStack>
+    }
+    @foreach (var singleWorkingHours in WorkingHoursToAdd)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
+            <RadzenDatePicker @bind-Value="singleWorkingHours.DateTo" DateFormat="d" Style="width: 150px"/>
+            <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
+            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="-" Click="() => WorkingHoursToAdd.Remove(singleWorkingHours)">
+                <span class="rz-button-text">
+                    <i class="fa-solid fa-minus"></i>
+                </span>
+            </RadzenButton>
+        </RadzenStack>
+    }
+    <RadzenStack Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Close" Click="dialogService.Close" Style="width: 80px;"/>
+        <RadzenButton Text="Add" Click="() => WorkingHoursToAdd.Add(new(UserId))"></RadzenButton>
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+
+    [Parameter]
+    public string UserId { get; set; } = string.Empty;
+
+    [Parameter]
+    public IEnumerable<WorkingHoursDto> WorkingHoursToUpdate { get; set; } = Enumerable.Empty<WorkingHoursDto>();
+
+    [Parameter]
+    public List<AddWorkingHoursDto> WorkingHoursToAdd { get; set; } = new();
+
+}

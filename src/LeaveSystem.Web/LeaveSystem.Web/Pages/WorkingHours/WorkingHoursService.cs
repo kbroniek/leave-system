@@ -55,4 +55,21 @@ public class WorkingHoursService
         toastService.ShowSuccess("Working hours updated successfully");
         return true;
     }
+    
+    public virtual async Task<bool> Add(IEnumerable<AddWorkingHoursDto> workingHoursDtos)
+    {
+        foreach (var workingHoursDto in workingHoursDtos)
+        {
+            var jsonString = JsonSerializer.Serialize(workingHoursDto);
+            var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync($"api/workingHours", httpContent);
+            if (response.IsSuccessStatusCode) continue;
+            // TODO: Log an error
+            var responseMessage = await response.Content.ReadFromJsonAsync<string>() ?? string.Empty;
+            toastService.ShowError(responseMessage);
+            return false;
+        }
+        toastService.ShowSuccess("Working hours added successfully");
+        return true;
+    }
 }

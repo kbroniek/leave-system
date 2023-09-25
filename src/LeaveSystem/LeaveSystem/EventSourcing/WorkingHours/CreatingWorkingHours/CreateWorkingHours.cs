@@ -35,8 +35,8 @@ public class CreateWorkingHours : ICommand, IDateToNullablePeriod
         new(
             Guard.Against.NillAndDefault(workingHoursId),
             Guard.Against.NullOrWhiteSpace(userId),
-            Guard.Against.NillAndDefault(dateFrom),
-            dateTo,
+            Guard.Against.NillAndDefault(dateFrom).GetDayWithoutTime(),
+            dateTo?.GetDayWithoutTime(),
             Guard.Against.NillAndDefault(duration),
             Guard.Against.NillAndDefault(createdBy)
         );

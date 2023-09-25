@@ -72,17 +72,33 @@ public static class WorkingHoursEndpoints
                     CancellationToken cancellationToken) =>
                 {
                     httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
+                    var user = httpContext.User.CreateModel();
                     var workingHoursId = Guid.NewGuid();
-                    var command = CreateWorkingHours.Create(
-                        workingHoursId,
-                        addWorkingHoursDto.UserId,
-                        addWorkingHoursDto.DateFrom,
-                        addWorkingHoursDto.DateTo,
-                        addWorkingHoursDto.Duration,
-                        addWorkingHoursDto.AddedBy
-                    );
-                    await commandBus.Send(command, cancellationToken);
-                    return Results.Created("api/workingHours", workingHoursId);
+                    try
+                    {
+                        var command = CreateWorkingHours.Create(
+                            workingHoursId,
+                            addWorkingHoursDto.UserId,
+                            addWorkingHoursDto.DateFrom,
+                            addWorkingHoursDto.DateTo,
+                            addWorkingHoursDto.Duration,
+                            user
+                        );
+                        await commandBus.Send(command, cancellationToken);
+                        return Results.Created("api/workingHours", workingHoursId);
+                    }
+                    catch (NotFoundException exception)
+                    {
+                        return Results.NotFound(exception.Message);
+                    }
+                    catch (Exception ex) 
+                    {
+                        if (ex is InvalidOperationException or ArgumentOutOfRangeException or ArgumentNullException or ArgumentOutOfRangeException)
+                        {
+                            return Results.BadRequest(ex.Message);
+                        }
+                        throw;
+                    }
                 })
             .WithName(CreateWorkingHoursPolicyName)
             .RequireAuthorization(CreateWorkingHoursPolicyName);
@@ -93,16 +109,16 @@ public static class WorkingHoursEndpoints
                 {
                     httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
                     var user = httpContext.User.CreateModel();
-                    var command = ModifyWorkingHours.Create(
-                        id,
-                        addWorkingHoursDto.UserId,
-                        addWorkingHoursDto.DateFrom,
-                        addWorkingHoursDto.DateTo,
-                        addWorkingHoursDto.Duration,
-                        user
-                    );
                     try
                     {
+                        var command = ModifyWorkingHours.Create(
+                            id,
+                            addWorkingHoursDto.UserId,
+                            addWorkingHoursDto.DateFrom,
+                            addWorkingHoursDto.DateTo,
+                            addWorkingHoursDto.Duration,
+                            user
+                        );
                         await commandBus.Send(command, cancellationToken);
                         return Results.NoContent();
                     }
@@ -110,9 +126,13 @@ public static class WorkingHoursEndpoints
                     {
                         return Results.NotFound(exception.Message);
                     }
-                    catch (InvalidOperationException exception)
+                    catch (Exception ex) 
                     {
-                        return Results.BadRequest(exception.Message);
+                        if (ex is InvalidOperationException or ArgumentOutOfRangeException or ArgumentNullException or ArgumentOutOfRangeException)
+                        {
+                            return Results.BadRequest(ex.Message);
+                        }
+                        throw;
                     }
                 })
             .WithName(ModifyUserWorkingHoursPolicyName)
