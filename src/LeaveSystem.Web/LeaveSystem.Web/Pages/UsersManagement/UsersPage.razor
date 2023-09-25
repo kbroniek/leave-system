@@ -133,10 +133,7 @@ else
         workingHoursToUpdate = null;
 
         await UsersService.Edit(userWithWorkingHours.GetUser());
-        foreach (var workingHours in userWithWorkingHours.WorkingHours.OrEmptyIfNull())
-        {
-            await WorkingHoursService.Edit(workingHours);
-        }
+        await WorkingHoursService.Edit(userWithWorkingHours.WorkingHours.OrEmptyIfNull());
     }
 
     async Task SaveRow(UserWithWorkingHoursDto userWithWorkingHours)

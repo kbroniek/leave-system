@@ -1,20 +1,23 @@
-﻿using LeaveSystem.Shared;
+﻿using System.Net;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using Microsoft.CodeAnalysis.Differencing;
+using Blazored.Toast.Services;
 
 namespace LeaveSystem.Web.Pages.WorkingHours;
 
 public class WorkingHoursService
 {
     private readonly HttpClient httpClient;
+    private readonly IToastService toastService;
 
-    public WorkingHoursService(HttpClient httpClient)
+    public WorkingHoursService(HttpClient httpClient, IToastService toastService)
     {
         this.httpClient = httpClient;
+        this.toastService = toastService;
     }
 
     public virtual async Task<PagedListResponse<WorkingHoursDto>?> GetWorkingHours(GetWorkingHoursQuery query)
@@ -36,15 +39,20 @@ public class WorkingHoursService
         }
     }
 
-    public virtual async Task Edit(WorkingHoursDto workingHoursDto)
+    public virtual async Task<bool> Edit(IEnumerable<WorkingHoursDto> workingHoursDtos)
     {
-        var jsonString = JsonSerializer.Serialize(workingHoursDto);
-        var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-        var response = await httpClient.PutAsync($"api/workingHours/{workingHoursDto.Id}/modify", httpContent);
-        if (!response.IsSuccessStatusCode)
+        foreach (var workingHoursDto in workingHoursDtos)
         {
+            var jsonString = JsonSerializer.Serialize(workingHoursDto);
+            var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var response = await httpClient.PutAsync($"api/workingHours/{workingHoursDto.Id}/modify", httpContent);
+            if (response.IsSuccessStatusCode) continue;
             // TODO: Log an error
-            throw new InvalidOperationException("Can't update working hours");
+            var responseMessage = await response.Content.ReadFromJsonAsync<string>() ?? string.Empty;
+            toastService.ShowError(responseMessage);
+            return false;
         }
+        toastService.ShowSuccess("Working hours updated successfully");
+        return true;
     }
 }

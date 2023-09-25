@@ -106,13 +106,13 @@ public static class WorkingHoursEndpoints
                         await commandBus.Send(command, cancellationToken);
                         return Results.NoContent();
                     }
-                    catch (NotFoundException)
+                    catch (NotFoundException exception)
                     {
-                        return Results.NotFound();
+                        return Results.NotFound(exception.Message);
                     }
-                    catch (InvalidOperationException)
+                    catch (InvalidOperationException exception)
                     {
-                        return Results.BadRequest();
+                        return Results.BadRequest(exception.Message);
                     }
                 })
             .WithName(ModifyUserWorkingHoursPolicyName)
