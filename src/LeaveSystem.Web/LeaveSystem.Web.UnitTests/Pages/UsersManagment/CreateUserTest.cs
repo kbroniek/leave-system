@@ -20,12 +20,14 @@ public class CreateUserTest
         httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users", user, HttpStatusCode.Created, content);
         var sut = GetSut();
         //When
+        var id = string.Empty;
         var act = async () =>
         {
-            await sut.Create(user);
+            id = await sut.Create(user);
         };
         //Then
         await act.Should().NotThrowAsync<Exception>();
+        id.Should().Be(user.Id);
     }
     
     [Theory]
