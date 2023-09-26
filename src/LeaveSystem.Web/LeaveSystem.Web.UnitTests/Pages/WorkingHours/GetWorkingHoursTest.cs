@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using Blazored.Toast.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
@@ -15,8 +16,9 @@ namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
 public class GetWorkingHoursTest
 {
     private HttpClient httpClient;
+    private IToastService toastService;
 
-    private WorkingHoursService GetSut() => new(httpClient);
+    private WorkingHoursService GetSut() => new(httpClient, toastService);
 
     [Fact]
     public async Task WhenGetWorkingHours_ThenReturnExceptedDeserializedResult()
@@ -26,6 +28,7 @@ public class GetWorkingHoursTest
         var query = GetWorkingHoursQuery.GetDefault();
         var url = query.CreateQueryString("api/workingHours");
         httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, expectedResponse, new JsonSerializerOptions(JsonSerializerDefaults.Web), out var mockedHttpValues);
+        toastService = Substitute.For<IToastService>();
         var sut = GetSut();
         //When
         var result = await sut.GetWorkingHours(query);

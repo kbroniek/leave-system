@@ -1,3 +1,4 @@
+using Blazored.Toast.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Extensions;
 using LeaveSystem.UnitTests.Providers;
@@ -50,7 +51,7 @@ public class HrSummaryServiceTest
         var employeeServiceMock = Substitute.For<EmployeeService>(httpClientMock);
         var employees = FakeGetEmployeesDtoProvider.GetAll().ToArray();
         employeeServiceMock.Get().Returns(employees);
-        var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock);
+        var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock, Substitute.For<IToastService>());
         var fakeUserIds = new[] { FakeUserProvider.BenId, FakeUserProvider.PhilipId, FakeUserProvider.HabibId, FakeUserProvider.FakseoslavId};
         var fakeWorkingHours = FakeWorkingHoursProvider.GetAll(DateTimeOffset.Now).ToDto().ToPagedListResponse();
         var getWorkingHoursQuery = GetWorkingHoursQuery.GetDefaultForUsers(fakeUserIds);

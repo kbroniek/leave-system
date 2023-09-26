@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using LeaveSystem.Web.Pages.UsersManagement;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
 
@@ -15,7 +16,8 @@ public class CreateUserTest
     {
         //Given
         var user = new UserDto("fakeId123", "George", "fake.george@gmail.com", new[] { "admin", "worker" });
-        httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users", user, HttpStatusCode.Created);
+        var content = new StringContent(user.Id ?? string.Empty);
+        httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users", user, HttpStatusCode.Created, content);
         var sut = GetSut();
         //When
         var act = async () =>

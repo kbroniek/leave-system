@@ -150,7 +150,7 @@ public class LeaveRequestFactoryTest
     }
 
     [Fact]
-    public async Task WhenNoWorkingHoursForCreator_ThenThrowNotFoundException()
+    public async Task WhenNoWorkingHoursForCreator_ThenThrowInvalidOperationException()
     {
                 var fakeEvent = CreateLeaveRequest.Create(
             Guid.NewGuid(),
@@ -174,7 +174,7 @@ public class LeaveRequestFactoryTest
         //When
         var act = async () => { await sut.Create(fakeEvent, It.IsAny<CancellationToken>()); };
         //Then
-        await act.Should().ThrowAsync<NotFoundException>();
+        await act.Should().ThrowAsync<InvalidOperationException>();
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>());
         validatorMock.Verify(x => x.BasicValidate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()

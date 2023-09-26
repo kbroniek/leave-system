@@ -41,7 +41,7 @@ public class UsersService
             // TODO: Log an error
             throw new InvalidOperationException("Can't update users");
         }
-        return await response.Content.ReadFromJsonAsync<string>();
+        return await response.Content.ReadAsStringAsync();
     }
     public async Task Delete(string userId)
     {
