@@ -138,7 +138,11 @@ else
 
         await UsersService.Edit(userWithWorkingHours.GetUser());
         await WorkingHoursService.Edit(userWithWorkingHours.WorkingHours.OrEmptyIfNull());
-        await WorkingHoursService.Add(workingHoursToAdd.OrEmptyIfNull());
+        var createdWorkingHours = await WorkingHoursService.AddAndReturnDtos(workingHoursToAdd.OrEmptyIfNull());
+        if (createdWorkingHours is not null)
+        {
+            userWithWorkingHours.WorkingHours?.AddRange(createdWorkingHours);
+        }
         workingHoursToAdd = null;
     }
 
@@ -230,7 +234,6 @@ else
             return;
         }
         workingHoursToAdd ??= new();
-        var userId = userToUpdate.Id;
         await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours", 
             new Dictionary<string, object>
             {

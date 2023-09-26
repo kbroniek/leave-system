@@ -63,7 +63,7 @@ internal class HandleCreateWorkingHours : ICommandHandler<CreateWorkingHours>
             .Any(periodOverlapExp.And(x => x.UserId == request.UserId));
         if (workingHoursInThisPeriodExists)
         {
-            throw new InvalidOperationException("You cant add working hours in this period, because other");
+            throw new InvalidOperationException("You cant add working hours in this period, because other overlap it");
         }
         var workingHours = factory.Create(request);
         await workingHoursRepository.Add(workingHours, cancellationToken);

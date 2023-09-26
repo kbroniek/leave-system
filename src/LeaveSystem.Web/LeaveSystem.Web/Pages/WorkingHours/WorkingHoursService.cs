@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Blazored.Toast.Services;
+using LeaveSystem.Shared.Extensions;
 
 namespace LeaveSystem.Web.Pages.WorkingHours;
 
@@ -56,20 +57,26 @@ public class WorkingHoursService
         return true;
     }
     
-    public virtual async Task<bool> Add(IEnumerable<AddWorkingHoursDto> workingHoursDtos)
+    public virtual async Task<IEnumerable<WorkingHoursDto>?> AddAndReturnDtos(IEnumerable<AddWorkingHoursDto> addWorkingHoursDtos)
     {
-        foreach (var workingHoursDto in workingHoursDtos)
+        var resultWorkingHours = new List<WorkingHoursDto>();
+        foreach (var addWorkingHoursDto in addWorkingHoursDtos)
         {
-            var jsonString = JsonSerializer.Serialize(workingHoursDto);
+            var jsonString = JsonSerializer.Serialize(addWorkingHoursDto);
             var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
             var response = await httpClient.PostAsync($"api/workingHours", httpContent);
-            if (response.IsSuccessStatusCode) continue;
+            if (response.IsSuccessStatusCode)
+            {
+                var workingHoursId = await response.Content.ReadFromJsonAsync<Guid>();
+                resultWorkingHours.Add(addWorkingHoursDto.ToWorkingHoursDto(workingHoursId));
+                continue;
+            }
             // TODO: Log an error
             var responseMessage = await response.Content.ReadFromJsonAsync<string>() ?? string.Empty;
             toastService.ShowError(responseMessage);
-            return false;
+            return null;
         }
         toastService.ShowSuccess("Working hours added successfully");
-        return true;
+        return resultWorkingHours;
     }
 }
