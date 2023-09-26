@@ -53,7 +53,7 @@ else
                     @WorkingHoursToString(data.WorkingHours)
                 </Template>
                 <EditTemplate Context="data">
-                    <RadzenButton Click=@(ShowWorkingHoursDialog)>
+                    <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.Id))>
                         <span class="rz-button-text">
                             <i class="fa-solid fa-clock"> </i>
                             <i class="fa-solid fa-pen"></i>
@@ -214,10 +214,20 @@ else
         await usersGrid.InsertRow(userWithWorkingHoursToInsert);
     }
 
-    async Task OnCreateRow(UserDto order)
+    async Task OnCreateRow(UserWithWorkingHoursDto userWithWorkingHoursDto)
     {
-        await UsersService.Create(order);
-
+        var userId = await UsersService.Create(userWithWorkingHoursDto);
+        userWithWorkingHoursDto.Id = userId;
+        foreach (var addWorkingHoursDto in workingHoursToAdd.OrEmptyIfNull())
+        {
+            addWorkingHoursDto.UserId = userId;
+        }
+        var createdWorkingHours = await WorkingHoursService.AddAndReturnDtos(workingHoursToAdd.OrEmptyIfNull());
+        if (createdWorkingHours is not null)
+        {
+            userWithWorkingHoursDto.WorkingHours = createdWorkingHours;
+        }
+        workingHoursToAdd = null;
         userWithWorkingHoursToInsert = null;
     }
 
@@ -227,18 +237,14 @@ else
         return $"{currentWorkingHours.Hours}h";
     }
 
-    async Task ShowWorkingHoursDialog()
+    async Task ShowWorkingHoursDialog(string? userId)
     {
-        if (workingHoursToUpdate is null || userToUpdate?.Id is null)
-        {
-            return;
-        }
         workingHoursToAdd ??= new();
         await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours", 
             new Dictionary<string, object>
             {
-                {"UserId", userToUpdate.Id},
-                {"WorkingHoursToUpdate", workingHoursToUpdate},
+                {"UserId", userId ?? string.Empty},
+                {"WorkingHoursToUpdate", workingHoursToUpdate.OrEmptyIfNull()},
                 {"WorkingHoursToAdd", workingHoursToAdd}
             });
     }

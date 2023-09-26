@@ -57,7 +57,7 @@ public class WorkingHoursService
         return true;
     }
     
-    public virtual async Task<IEnumerable<WorkingHoursDto>?> AddAndReturnDtos(IEnumerable<AddWorkingHoursDto> addWorkingHoursDtos)
+    public virtual async Task<List<WorkingHoursDto>?> AddAndReturnDtos(IEnumerable<AddWorkingHoursDto> addWorkingHoursDtos)
     {
         var resultWorkingHours = new List<WorkingHoursDto>();
         foreach (var addWorkingHoursDto in addWorkingHoursDtos)

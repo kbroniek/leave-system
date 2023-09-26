@@ -1,11 +1,12 @@
 @using LeaveSystem.Shared.WorkingHours
 @using FluentAssertions
 @using LeaveSystem.Shared
+@using LeaveSystem.Shared.Extensions
 @inject DialogService DialogService
 @inject IToastService ToastService
 
 <RadzenStack Gap="1.5rem">
-    @foreach (var singleWorkingHours in WorkingHoursToUpdate!)
+    @foreach (var singleWorkingHours in WorkingHoursToUpdate.OrEmptyIfNull())
     {
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
@@ -13,13 +14,13 @@
             <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
         </RadzenStack>
     }
-    @foreach (var singleWorkingHours in WorkingHoursToAdd!)
+    @foreach (var singleWorkingHours in WorkingHoursToAdd.OrEmptyIfNull())
     {
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
             <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
             <RadzenDatePicker @bind-Value="singleWorkingHours.DateTo" DateFormat="d" Style="width: 150px"/>
             <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
-            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="-" Click="() => WorkingHoursToAdd.Remove(singleWorkingHours)">
+            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="-" Click="() => WorkingHoursToAdd?.Remove(singleWorkingHours)">
                 <span class="rz-button-text">
                     <i class="fa-solid fa-minus"></i>
                 </span>
@@ -28,7 +29,7 @@
     }
     <RadzenStack Orientation="Orientation.Horizontal">
         <RadzenButton Text="Close" Click="Close" Style="width: 80px;"/>
-        <RadzenButton Text="Add" Click="() => WorkingHoursToAdd.Add(new(UserId))"></RadzenButton>
+        <RadzenButton Text="Add" Click="() => WorkingHoursToAdd?.Add(new(UserId))"></RadzenButton>
         <RadzenButton Text="Reset" Click="Reset" ButtonStyle="ButtonStyle.Secondary"></RadzenButton>
     </RadzenStack>
 </RadzenStack>
