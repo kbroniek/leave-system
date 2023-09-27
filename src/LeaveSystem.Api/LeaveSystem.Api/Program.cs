@@ -3,6 +3,7 @@ using LeaveSystem;
 using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
+using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
@@ -11,6 +12,7 @@ using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using Microsoft.Extensions.DependencyInjection;
 
 const string azureConfigSection = "AzureAdB2C";
 const string azureReadUsersSection = "ManageAzureUsers";
@@ -65,6 +67,8 @@ if (app.Environment.IsDevelopment())
     // Send "~/$odata" to debug routing if enable the following middleware
     app.UseODataRouteDebug();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
