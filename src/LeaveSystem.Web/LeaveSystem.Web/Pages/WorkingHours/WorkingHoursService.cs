@@ -49,7 +49,7 @@ public class WorkingHoursService
             var response = await httpClient.PutAsync($"api/workingHours/{workingHoursDto.Id}/modify", httpContent);
             if (response.IsSuccessStatusCode) continue;
             // TODO: Log an error
-            var responseMessage = await response.Content.ReadFromJsonAsync<string>() ?? string.Empty;
+            var responseMessage = await response.Content.ReadAsStringAsync();
             toastService.ShowError(responseMessage);
             return false;
         }
