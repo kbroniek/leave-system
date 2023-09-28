@@ -49,8 +49,9 @@ public class WorkingHoursService
             var response = await httpClient.PutAsync($"api/workingHours/{workingHoursDto.Id}/modify", httpContent);
             if (response.IsSuccessStatusCode) continue;
             // TODO: Log an error
-            var responseMessage = await response.Content.ReadAsStringAsync();
-            toastService.ShowError(responseMessage);
+            var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
+            var message = problemDto?.Title ?? "Something went wrong";
+            toastService.ShowError(message);
             return false;
         }
         toastService.ShowSuccess("Working hours updated successfully");
@@ -72,8 +73,9 @@ public class WorkingHoursService
                 continue;
             }
             // TODO: Log an error
-            var responseMessage = await response.Content.ReadFromJsonAsync<string>() ?? string.Empty;
-            toastService.ShowError(responseMessage);
+            var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
+            var message = problemDto?.Title ?? "Something went wrong";
+            toastService.ShowError(message);
             return null;
         }
         toastService.ShowSuccess("Working hours added successfully");
