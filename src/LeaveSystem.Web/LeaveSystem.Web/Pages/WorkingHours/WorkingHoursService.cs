@@ -68,7 +68,8 @@ public class WorkingHoursService
             var response = await httpClient.PostAsync($"api/workingHours", httpContent);
             if (response.IsSuccessStatusCode)
             {
-                var workingHoursId = await response.Content.ReadFromJsonAsync<Guid>();
+                var workingHoursIdReading = await response.Content.ReadAsStringAsync();
+                var workingHoursId = Guid.Parse(workingHoursIdReading);
                 resultWorkingHours.Add(addWorkingHoursDto.ToWorkingHoursDto(workingHoursId));
                 continue;
             }
