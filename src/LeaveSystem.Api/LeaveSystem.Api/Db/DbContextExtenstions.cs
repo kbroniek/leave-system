@@ -127,7 +127,7 @@ public static class DbContextExtenstions
         }
     };
 
-    public static void MigrateDb(this IApplicationBuilder app)
+    public static async Task MigrateDb(this IApplicationBuilder app)
     {
         using (var scope = app.ApplicationServices.CreateScope())
         {
@@ -141,7 +141,7 @@ public static class DbContextExtenstions
 
             try
             {
-                dbContext.Database.Migrate();
+                await dbContext.Database.MigrateAsync();
             }
             catch (Exception ex)
             {

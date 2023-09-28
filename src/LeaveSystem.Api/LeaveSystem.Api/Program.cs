@@ -12,7 +12,7 @@ using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
-using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 
 const string azureConfigSection = "AzureAdB2C";
 const string azureReadUsersSection = "ManageAzureUsers";
@@ -53,6 +53,7 @@ builder.Services.AddLeaveSystemModule(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseMiddleware<ErrorHandlerMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -97,10 +98,49 @@ app
     .AddEmployeesEndpoints(azureScpes)
     .AddUsersEndpoints(azureScpes);
 
-app.MigrateDb();
+await app.MigrateDb();
 if (app.Environment.IsDevelopment())
 {
     _ = app.FillInDatabase();
 }
 
 await app.RunAsync();
+
+
+
+public class ErrorHandlerMiddleware
+{
+    private readonly RequestDelegate _next;
+
+    public ErrorHandlerMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task Invoke(HttpContext context)
+    {
+        try
+        {
+            await _next(context);
+        }
+        catch (Exception error)
+        {
+            var statusCode = HttpStatusCode.InternalServerError;
+            switch (error)
+            {
+                case KeyNotFoundException e:
+                    statusCode = HttpStatusCode.NotFound;
+                    break;
+                case ArgumentException e:
+                    statusCode = HttpStatusCode.BadRequest;
+                    break;
+            }
+            await Results.Problem(error.ToString(), nameof(ErrorHandlerMiddleware), (int)statusCode, error.Message, error.GetType().ToString(), new Dictionary<string, object?>()
+            {
+                { "test key", "test value" },
+                { "test key 2", new { message = "test value2" } },
+                { "test key 3", null },
+            }).ExecuteAsync(context);
+        }
+    }
+}

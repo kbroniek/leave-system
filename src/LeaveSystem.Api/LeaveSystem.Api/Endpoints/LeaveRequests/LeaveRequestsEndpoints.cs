@@ -25,6 +25,11 @@ public static class LeaveRequestsEndpoints
     public const string CancelLeaveRequestPolicyName = "CancelLeaveRequest";
     public static IEndpointRouteBuilder AddLeaveRequestEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
+        endpoint.MapGet("api/exception", () =>
+        {
+            throw new ArgumentException("Test exception");
+        });
+
         endpoint.MapGet("api/leaveRequests", async (HttpContext httpContext, IQueryBus queryBus, GetLeaveRequestsQuery query, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
