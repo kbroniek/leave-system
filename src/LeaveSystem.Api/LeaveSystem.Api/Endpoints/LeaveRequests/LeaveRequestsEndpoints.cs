@@ -27,7 +27,7 @@ public static class LeaveRequestsEndpoints
     {
         endpoint.MapGet("api/exception", () =>
         {
-            throw new ArgumentException("Test exception");
+            throw new BadHttpRequestException("Throtting", StatusCodes.Status429TooManyRequests);
         });
 
         endpoint.MapGet("api/leaveRequests", async (HttpContext httpContext, IQueryBus queryBus, GetLeaveRequestsQuery query, CancellationToken cancellationToken) =>
