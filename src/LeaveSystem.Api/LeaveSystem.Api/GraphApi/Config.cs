@@ -5,7 +5,6 @@ namespace LeaveSystem.Api.GraphApi;
 
 public static class Config
 {
-    public const string Issuer = "leavesystem.onmicrosoft.com";
     public class AppSettings
     {
         public string? TenantId { get; set; }
@@ -13,6 +12,8 @@ public static class Config
         public string? Secret { get; set; }
         public string[]? Scopes { get; set; }
         public string? B2cExtensionAppClientId { get; set; }
+        public string? DefaultPassword { get; set; }
+        public string? Issuer { get; set; }
     }
 
     public static void AddGraphFactory(this IServiceCollection services, IConfigurationSection configuration)
@@ -25,7 +26,11 @@ public static class Config
                                             settings.Scopes))
             .AddScoped(_ => RoleAttributeNameResolver.Create(settings.B2cExtensionAppClientId))
             .AddScoped<GetGraphUserService>()
-            .AddScoped<SaveGraphUserService>();
+            .AddScoped<SaveGraphUserService>(sp => SaveGraphUserService.Create(
+                sp.GetService<IGraphClientFactory>(),
+                sp.GetService<RoleAttributeNameResolver>(),
+                settings.DefaultPassword,
+                settings.Issuer));
     }
 }
 
