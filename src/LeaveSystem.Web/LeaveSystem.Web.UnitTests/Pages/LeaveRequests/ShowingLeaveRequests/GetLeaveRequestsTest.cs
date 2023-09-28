@@ -6,7 +6,6 @@ using RichardSzalay.MockHttp;
 
 namespace LeaveSystem.Web.UnitTests.Pages.LeaveRequests.ShowingLeaveRequests;
 
-//Todo: decide if remove this test
 public class GetLeaveRequestsTest
 {
     private HttpClient httpClientMock;
