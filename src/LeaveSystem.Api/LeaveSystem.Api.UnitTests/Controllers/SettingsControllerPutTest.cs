@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using System.Text.Json;
 using FluentAssertions;
 using LeaveSystem.Api.Controllers;
@@ -9,6 +10,8 @@ using LeaveSystem.UnitTests.Providers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Moq;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
@@ -19,8 +22,8 @@ public class SettingsControllerPutTest
     public async Task WhenModelStateIsNotValid_ThenReturnBadRequest()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new SettingsController(dbContext);
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var sut = new SettingsController(dbContextMock.Object);
         sut.ModelState.AddModelError("fakeKey", "fake error message");
         var fakeSettingId = FakeSettingsProvider.AcceptedSettingId;
         var fakeSetting = FakeSettingsProvider.GetAcceptedSetting();
@@ -34,10 +37,12 @@ public class SettingsControllerPutTest
     public async Task WhenProvidedIdIsDifferentThanEntityId_ThenReturnBadRequest()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new SettingsController(dbContext);
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var sut = new SettingsController(dbContextMock.Object);
         var fakeSettingId = FakeSettingsProvider.AcceptedSettingId;
         var fakeSetting = FakeSettingsProvider.GetCanceledSetting();
+        var settingEntityEntryMock = new Mock<EntityEntry<LeaveType>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
+        
         //When
         var result = await sut.Put(fakeSettingId, fakeSetting);
         //Then

@@ -45,7 +45,7 @@ public class LeaveTypesControllerPutTest
         //When
         var result = await sut.Put(fakeLeaveTypeId, fakeLeaveType);
         //Then
-        result.Should().BeOfType<BadRequestObjectResult>();
+        result.Should().BeOfType<BadRequestResult>();
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class LeaveTypesControllerPutTest
         //When
         var result = await sut.Put(fakeLeaveTypeId, fakeLeaveType);
         //Then
-        result.Should().BeOfType<NotFoundObjectResult>();
+        result.Should().BeOfType<NotFoundResult>();
         leaveTypeEntityEntryMock.VerifySet(m => m.State = EntityState.Modified);
     }
 
