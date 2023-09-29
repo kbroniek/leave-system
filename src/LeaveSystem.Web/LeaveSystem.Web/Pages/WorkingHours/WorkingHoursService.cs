@@ -1,42 +1,85 @@
-﻿using LeaveSystem.Shared.WorkingHours;
-using System.Net.Http.Json;
-using System.Text.Json;
+﻿using System.Net;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using Blazored.Toast.Services;
+using LeaveSystem.Shared.Extensions;
 
 namespace LeaveSystem.Web.Pages.WorkingHours;
 
 public class WorkingHoursService
 {
     private readonly HttpClient httpClient;
+    private readonly IToastService toastService;
 
-    public WorkingHoursService(HttpClient httpClient)
+    public WorkingHoursService(HttpClient httpClient, IToastService toastService)
     {
         this.httpClient = httpClient;
+        this.toastService = toastService;
     }
 
-    public async Task<WorkingHoursCollection> GetWorkingHours(IEnumerable<string> userIds, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public virtual async Task<PagedListResponse<WorkingHoursDto>?> GetWorkingHours(GetWorkingHoursQuery query)
     {
-        var query = new
-        {
-            UserIds = userIds,
-            DateFrom = dateFrom,
-            dateTo = dateTo,
-        };
-        var uri = query.CreateQueryString($"api/workingHours");
-        var workingHours = await httpClient.GetFromJsonAsync<WorkingHoursCollectionDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        return new WorkingHoursCollection(workingHours?.WorkingHours ?? Enumerable.Empty<WorkingHoursModel>());
+        var uri = query.CreateQueryString("api/workingHours");
+        return await httpClient.GetFromJsonAsync<PagedListResponse<WorkingHoursDto>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
     }
 
-    public async Task<WorkingHoursCollection> GetUserWorkingHours(string userId, DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public virtual async Task<WorkingHoursDto?> GetUserWorkingHours(string userId)
     {
-        var query = new
+        var uri = $"api/workingHours/{userId}";
+        try
         {
-            DateFrom = dateFrom,
-            dateTo = dateTo,
-        };
-        var uri = query.CreateQueryString($"api/workingHours/{userId}");
-        var workingHours = await httpClient.GetFromJsonAsync<WorkingHoursCollectionDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        return new WorkingHoursCollection(workingHours?.WorkingHours ?? Enumerable.Empty<WorkingHoursModel>());
+            return await httpClient.GetFromJsonAsync<WorkingHoursDto>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
+    }
+
+    public virtual async Task<bool> Edit(IEnumerable<WorkingHoursDto> workingHoursDtos)
+    {
+        foreach (var workingHoursDto in workingHoursDtos)
+        {
+            var jsonString = JsonSerializer.Serialize(workingHoursDto);
+            var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var response = await httpClient.PutAsync($"api/workingHours/{workingHoursDto.Id}/modify", httpContent);
+            if (response.IsSuccessStatusCode) continue;
+            // TODO: Log an error
+            var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
+            var message = problemDto?.Title ?? "Something went wrong";
+            toastService.ShowError(message);
+            return false;
+        }
+        toastService.ShowSuccess("Working hours updated successfully");
+        return true;
+    }
+    
+    public virtual async Task<List<WorkingHoursDto>?> AddAndReturnDtos(IEnumerable<AddWorkingHoursDto> addWorkingHoursDtos)
+    {
+        var resultWorkingHours = new List<WorkingHoursDto>();
+        foreach (var addWorkingHoursDto in addWorkingHoursDtos)
+        {
+            var jsonString = JsonSerializer.Serialize(addWorkingHoursDto);
+            var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync($"api/workingHours", httpContent);
+            if (response.IsSuccessStatusCode)
+            {
+                var workingHoursIdReading = await response.Content.ReadAsStringAsync();
+                var workingHoursId = Guid.Parse(workingHoursIdReading);
+                resultWorkingHours.Add(addWorkingHoursDto.ToWorkingHoursDto(workingHoursId));
+                continue;
+            }
+            // TODO: Log an error
+            var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
+            var message = problemDto?.Title ?? "Something went wrong";
+            toastService.ShowError(message);
+            return null;
+        }
+        toastService.ShowSuccess("Working hours added successfully");
+        return resultWorkingHours;
     }
 }
-

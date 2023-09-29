@@ -12,7 +12,7 @@ public class GetLeaveRequestsService
     {
         this.httpClient = httpClient;
     }
-    public async Task<PagedListResponse<LeaveRequestShortInfo>?> GetLeaveRequests(GetLeaveRequestsQuery leaveRequestsQuery)
+    public virtual async Task<PagedListResponse<LeaveRequestShortInfo>?> GetLeaveRequests(GetLeaveRequestsQuery leaveRequestsQuery)
     {
         var uri = leaveRequestsQuery.CreateQueryString("api/leaveRequests");
         return await httpClient.GetFromJsonAsync<PagedListResponse<LeaveRequestShortInfo>>(uri, new JsonSerializerOptions(JsonSerializerDefaults.Web));

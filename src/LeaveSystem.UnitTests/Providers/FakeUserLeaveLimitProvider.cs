@@ -24,7 +24,6 @@ public static class FakeUserLeaveLimitProvider
             ValidUntil = now.GetLastDayOfYear(),
         };
     }
-
     public static UserLeaveLimit GetLimitForOnDemandLeave()
     {
         var now = DateTimeOffset.Now;
@@ -38,7 +37,6 @@ public static class FakeUserLeaveLimitProvider
             ValidUntil = now.GetLastDayOfYear(),
         };
     }
-
     public static UserLeaveLimit GetLimitForHolidayLeave()
     {
         var now = DateTimeOffset.Now;

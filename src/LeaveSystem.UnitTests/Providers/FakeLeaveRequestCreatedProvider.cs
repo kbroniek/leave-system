@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
-using LeaveSystem.UnitTests.Stubs;
-using LeaveSystem.UnitTests.TestHelpers;
 
 namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeLeaveRequestCreatedProvider
 {
     internal static Guid FakeLeaveRequestId = Guid.NewGuid();
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private static readonly LeaveRequestCreated FakeLeaveRequestCreatedEvent =
         GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
 
@@ -28,7 +26,8 @@ public static class FakeLeaveRequestCreatedProvider
             TimeSpan.FromDays(6),
             FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
             "fake remarks",
-            FakeUserProvider.GetUserWithNameFakeoslav()
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            WorkingHoursUtils.DefaultWorkingHours
         );
     }
 
@@ -45,7 +44,8 @@ public static class FakeLeaveRequestCreatedProvider
             duration,
             leaveType,
             "fake remarks",
-            FakeUserProvider.GetUserWithNameFakeoslav()
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            WorkingHoursUtils.DefaultWorkingHours
         );
     }
 
@@ -58,7 +58,8 @@ public static class FakeLeaveRequestCreatedProvider
             WorkingHours * 30,
             FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
             "fake remarks",
-            FakeUserProvider.GetUserWithNameFakeoslav()
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            TimeSpan.FromHours(4)
         );
     }
 
@@ -71,7 +72,8 @@ public static class FakeLeaveRequestCreatedProvider
             WorkingHours * 30,
             FakeLeaveTypeProvider.FakeOnDemandLeaveId,
             "fake remarks",
-            FakeUserProvider.GetUserWithNameFakeoslav()
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            WorkingHoursUtils.DefaultWorkingHours
         );
     }
 
@@ -84,7 +86,8 @@ public static class FakeLeaveRequestCreatedProvider
             WorkingHours * 30,
             FakeLeaveTypeProvider.FakeOnDemandLeaveId,
             "fake remarks",
-            FakeUserProvider.GetUserWithNameFakeoslav()
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            WorkingHoursUtils.DefaultWorkingHours
         );
     }
 
@@ -99,7 +102,8 @@ public static class FakeLeaveRequestCreatedProvider
                 WorkingHours,
                 FakeLeaveRequestCreatedEvent.LeaveTypeId,
                 FakeLeaveRequestCreatedEvent.Remarks,
-                FakeLeaveRequestCreatedEvent.CreatedBy
+                FakeLeaveRequestCreatedEvent.CreatedBy,
+                WorkingHoursUtils.DefaultWorkingHours
             ),
             LeaveRequestCreated.Create(
                 FakeLeaveRequestCreatedEvent.LeaveRequestId,
@@ -108,7 +112,8 @@ public static class FakeLeaveRequestCreatedProvider
                 WorkingHours * 2,
                 FakeLeaveRequestCreatedEvent.LeaveTypeId,
                 FakeLeaveRequestCreatedEvent.Remarks,
-                FakeLeaveRequestCreatedEvent.CreatedBy
+                FakeLeaveRequestCreatedEvent.CreatedBy,
+                WorkingHoursUtils.DefaultWorkingHours
             )
         };
     }
@@ -124,7 +129,8 @@ public static class FakeLeaveRequestCreatedProvider
                 TimeSpan.FromDays(6),
                 Guid.NewGuid(),
                 "fake remarks",
-                FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
+                FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
+                WorkingHoursUtils.DefaultWorkingHours
             ),
             LeaveRequestCreated.Create(
                 Guid.NewGuid(),
@@ -133,7 +139,8 @@ public static class FakeLeaveRequestCreatedProvider
                 TimeSpan.FromDays(6),
                 Guid.NewGuid(),
                 "fake remarks",
-                FakeLeaveRequestCreatedEvent.CreatedBy
+                FakeLeaveRequestCreatedEvent.CreatedBy,
+                WorkingHoursUtils.DefaultWorkingHours
             ),
             LeaveRequestCreated.Create(
                 Guid.NewGuid(),
@@ -142,7 +149,7 @@ public static class FakeLeaveRequestCreatedProvider
                 TimeSpan.FromDays(6),
                 Guid.NewGuid(),
                 "fake remarks",
-                FakeLeaveRequestCreatedEvent.CreatedBy
+                FakeLeaveRequestCreatedEvent.CreatedBy,WorkingHoursUtils.DefaultWorkingHours
             ),
             LeaveRequestCreated.Create(
                 Guid.NewGuid(),
@@ -151,7 +158,8 @@ public static class FakeLeaveRequestCreatedProvider
                 TimeSpan.FromDays(6),
                 Guid.NewGuid(),
                 "fake remarks",
-                FakeLeaveRequestCreatedEvent.CreatedBy
+                FakeLeaveRequestCreatedEvent.CreatedBy,
+                WorkingHoursUtils.DefaultWorkingHours
             )
         };
     }

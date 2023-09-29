@@ -33,7 +33,6 @@ public class UserRolesGraphServiceGetTest
             .Returns(graphServiceUsersCollectionRequestBuilderMock.Object);
         graphClientFactoryMock.Setup(x => x.Create())
             .Returns(graphClientMock.Object);
-
         var rolesAttributeNameResolver = new RoleAttributeNameResolver(TestData.FakeRoleAttributeName);
         var sut = new UserRolesGraphService(graphClientFactoryMock.Object, rolesAttributeNameResolver);
         //When

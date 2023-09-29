@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 using Marten;
 using Moq;
 using Xunit;
@@ -16,7 +16,6 @@ public class BasicValidateTest : IAsyncLifetime
 {
     private CreateLeaveRequestValidator requestValidator;
     private LeaveSystemDbContext dbContext;
-    private readonly Mock<WorkingHoursService> workingHoursServiceMock = new();
     private readonly Mock<IDocumentSession> documentSessionMock = new();
     public static IEnumerable<object?[]> GetDateTestData()
     {
@@ -48,7 +47,7 @@ public class BasicValidateTest : IAsyncLifetime
     public async Task InitializeAsync()
     {
         dbContext = await DbContextFactory.CreateDbContextAsync();
-        requestValidator = new CreateLeaveRequestValidator(dbContext, workingHoursServiceMock.Object, documentSessionMock.Object);
+        requestValidator = new CreateLeaveRequestValidator(dbContext, documentSessionMock.Object);
     }
     
     public Task DisposeAsync()
@@ -70,7 +69,8 @@ public class BasicValidateTest : IAsyncLifetime
             duration,
             Guid.NewGuid(),
             "fake remarks",
-            FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
+            FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
+            WorkingHoursUtils.DefaultWorkingHours
         );
         //When
         var act = () =>
@@ -97,6 +97,7 @@ public class BasicValidateTest : IAsyncLifetime
             Guid.NewGuid(),
             "fake remarks",
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav")
+            ,WorkingHoursUtils.DefaultWorkingHours
         );
         //When
         var act = () =>

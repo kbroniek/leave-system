@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-LeaveSystem.Api-2DABBCAD-6663-4F2C-AC9A-2B901C808E69</UserSecretsId>
+	<Version>1.0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

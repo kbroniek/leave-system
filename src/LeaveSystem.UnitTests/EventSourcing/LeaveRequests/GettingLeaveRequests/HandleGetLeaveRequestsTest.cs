@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -12,10 +10,8 @@ using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
-using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
-using LeaveSystem.UnitTests.TestHelpers;
 using Marten;
 using Moq;
 using Xunit;
@@ -24,7 +20,7 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.GettingLeaveRequests
 
 public class HandleGetLeaveRequestsTest
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
 
     private async Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession)
     {
@@ -43,21 +39,22 @@ public class HandleGetLeaveRequestsTest
             new DateTimeOffset(2023, 1, 4, 0, 0, 0, TimeSpan.Zero),
             WorkingHours * 3,
             FakeLeaveTypeProvider.FakeSickLeaveId,
-            FakeUserProvider.GetUserWithNameFakeoslav());
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            WorkingHours);
         var shortInfo2 = GetLeaveRequestShortInfo(
             Guid.NewGuid(),
             new DateTimeOffset(2023, 1, 2, 0, 0, 0, TimeSpan.Zero),
             new DateTimeOffset(2023, 1, 4, 0, 0, 0, TimeSpan.Zero),
             WorkingHours * 5,
             FakeLeaveTypeProvider.FakeOnDemandLeaveId,
-            FakeUserProvider.GetUserWithNameFakeoslav(), LeaveRequestStatus.Canceled);
+            FakeUserProvider.GetUserWithNameFakeoslav(), WorkingHours, LeaveRequestStatus.Canceled);
         var shortInfo3 = GetLeaveRequestShortInfo(
             Guid.NewGuid(),
             new DateTimeOffset(2023, 1, 3, 0, 0, 0, TimeSpan.Zero),
             new DateTimeOffset(2023, 1, 5, 0, 0, 0, TimeSpan.Zero),
             WorkingHours * 6,
             FakeLeaveTypeProvider.FakeSickLeaveId,
-            FakeUserProvider.GetUserWithNameFakeoslav(), LeaveRequestStatus.Rejected);
+            FakeUserProvider.GetUserWithNameFakeoslav(), WorkingHours, LeaveRequestStatus.Rejected);
         documentSessionMock.Setup(x => x.Query<LeaveRequestShortInfo>())
             .Returns(new MartenQueryableStub<LeaveRequestShortInfo>(new List<LeaveRequestShortInfo>
             {
@@ -85,11 +82,11 @@ public class HandleGetLeaveRequestsTest
     }
 
     private LeaveRequestShortInfo GetLeaveRequestShortInfo(Guid leaveRequestId, DateTimeOffset dateFrom,
-        DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, FederatedUser createdBy,
+        DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, FederatedUser createdBy, TimeSpan workingHours,
         LeaveRequestStatus status = LeaveRequestStatus.Pending)
     {
         var leaveRequestCreated = LeaveRequestCreated.Create(
-            leaveRequestId, dateFrom, dateTo, duration, leaveTypeId, string.Empty, createdBy
+            leaveRequestId, dateFrom, dateTo, duration, leaveTypeId, string.Empty, createdBy, workingHours
         );
         var leaveRequestShortInfo = new LeaveRequestShortInfo();
         leaveRequestShortInfo.Apply(leaveRequestCreated);

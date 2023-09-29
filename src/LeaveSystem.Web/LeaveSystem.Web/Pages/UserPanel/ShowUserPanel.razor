@@ -7,6 +7,7 @@
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
 @using LeaveSystem.Web.Extensions
+@using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
 @using Microsoft.AspNetCore.Components.Authorization
 @using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService
 @attribute [Authorize(Policy=@PolicyName)]
@@ -75,13 +76,13 @@
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
         var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Id, firstDay, lastDay);
-        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(user.Id, firstDay, lastDay);
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(user.Id);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
         var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
         var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
         var workingHours = getWorkingHoursTask.Result;
-        var workingHoursDuration = workingHours.GetDuration();
+        var workingHoursDuration = workingHours?.Duration ?? TimeSpan.Zero;
         userSummaryCollection = leaveTypes.Select(lt => LeaveRequestPerType.Create(
             lt,
             leaveTypes,

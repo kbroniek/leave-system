@@ -40,7 +40,8 @@ public static class Config
         services
             .AddAuthorizationPolicy(WorkingHoursEndpoints.GetWorkingHoursEndpointsPolicyName, RoleRequirement.AuthorizeAll)
             .AddAuthorizationPolicy(WorkingHoursEndpoints.GetUserWorkingHoursEndpointsPolicyName, RoleRequirement.AuthorizeAll)
-            .AddAuthorizationPolicy(WorkingHoursEndpoints.GetUserWorkingHoursDurationEndpointsPolicyName, RoleRequirement.AuthorizeAll);
+            .AddAuthorizationPolicy(WorkingHoursEndpoints.CreateWorkingHoursPolicyName, RoleType.WorkingHoursAdmin)
+            .AddAuthorizationPolicy(WorkingHoursEndpoints.ModifyUserWorkingHoursPolicyName, RoleType.WorkingHoursAdmin);
     private static IServiceCollection AddEmployeesAuthorization(this IServiceCollection services) =>
         services
             .AddAuthorizationPolicy(EmployeesEndpoints.GetEmployeesPolicyName, RoleType.DecisionMaker)

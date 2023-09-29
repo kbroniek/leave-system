@@ -6,6 +6,7 @@ public enum LeaveRequestStatus
     Accepted = 2,
     Canceled = 3,
     Rejected = 4,
+    Deprecated = 5
 }
 
 public static class LeaveRequestStatusExtensions

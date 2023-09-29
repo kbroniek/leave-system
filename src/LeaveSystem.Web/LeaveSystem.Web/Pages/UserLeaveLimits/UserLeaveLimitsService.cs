@@ -21,23 +21,23 @@ public class UserLeaveLimitsService
         this.httpClient = httpClient;
     }
 
-    public async Task<IEnumerable<UserLeaveLimitDto>> GetLimits(string userId, DateTimeOffset since, DateTimeOffset until)
+    public virtual async Task<IEnumerable<UserLeaveLimitDto>> GetLimits(string userId, DateTimeOffset since, DateTimeOffset until)
     {
         var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<UserLeaveLimitDto>>>($"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))", jsonSerializerOptions);
         return limits?.Data ?? Enumerable.Empty<UserLeaveLimitDto>();
     }
 
-    public async Task<IEnumerable<LeaveLimitDto>> GetLimits(DateTimeOffset since, DateTimeOffset until)
+    public virtual async Task<IEnumerable<LeaveLimitDto>> GetLimits(DateTimeOffset since, DateTimeOffset until)
     {
         var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<LeaveLimitDto>>>($"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))", jsonSerializerOptions);
         return limits?.Data ?? Enumerable.Empty<LeaveLimitDto>();
     }
 
-    public record class LeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property, string AssignedToUserId)
+    public record LeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property, string AssignedToUserId)
     {
         public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
     }
-    public record class UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
+    public record UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
     {
         public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
 
@@ -45,7 +45,7 @@ public class UserLeaveLimitsService
             new UserLeaveLimitDto(limit.Limit, limit.OverdueLimit, limit.LeaveTypeId, limit.ValidSince, limit.ValidUntil, limit.Property);
     }
 
-    public record class UserLeaveLimitPropertyDto(string? Description);
+    public record UserLeaveLimitPropertyDto(string? Description);
 
     private sealed class TimeSpanToStringConverter : JsonConverter<TimeSpan>
     {

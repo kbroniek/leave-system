@@ -1,6 +1,5 @@
 ﻿using GoldenEye.Objects.General;
 using LeaveSystem.Shared;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeaveSystem.Db.Entities;
 

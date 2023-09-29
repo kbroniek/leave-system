@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using GoldenEye.Aggregates;
 using Marten.Linq;
 using Moq;
 
 namespace LeaveSystem.UnitTests.Stubs;
 
-internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>, IQueryProvider
+internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>, IQueryProvider 
 {
     public MartenQueryableStub(IEnumerable<T> enumerable) : base(enumerable)
     {
@@ -34,7 +36,7 @@ internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>,
 
     public Task<int> CountAsync(CancellationToken token)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(this.Count());
     }
 
     public Task<long> CountLongAsync(CancellationToken token)
@@ -62,11 +64,10 @@ internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>,
         throw new NotImplementedException();
     }
 
-    public Task<TResult?> FirstOrDefaultAsync<TResult>(CancellationToken token)
-    {
-        throw new NotImplementedException();
-    }
-
+    public virtual Task<TResult?> FirstOrDefaultAsync<TResult>(CancellationToken token) =>
+        Task.FromResult(this.FirstOrDefault().As<TResult?>());
+    
+    
     public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback) where TInclude : notnull
     {
         throw new NotImplementedException();
@@ -124,5 +125,8 @@ internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>,
     }
 
     public Task<IReadOnlyList<TResult>> ToListAsync<TResult>(CancellationToken token) =>
-        Task.FromResult(this.ToList().AsReadOnly().As<IReadOnlyList<TResult>>());
+        Task.FromResult(ToListReadOnlyList<TResult>());
+    
+    private IReadOnlyList<TResult> ToListReadOnlyList<TResult>() =>
+        this.ToList().AsReadOnly().As<IReadOnlyList<TResult>>();
 }

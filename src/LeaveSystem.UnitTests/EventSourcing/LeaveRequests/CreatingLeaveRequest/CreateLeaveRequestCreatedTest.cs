@@ -10,9 +10,9 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest
 
 public class CreateLeaveRequestCreatedTest
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
 
-    [Fact]
+[Fact]
     public void WhenEmailIsInvalid_ThenThrowArgumentException()
     {
         //Given
@@ -27,8 +27,9 @@ public class CreateLeaveRequestCreatedTest
                 WorkingHours * 3,
                 Guid.NewGuid(),
                 "fake remarks",
-                fakeUser
-            );
+                fakeUser,
+                WorkingHoursUtils.DefaultWorkingHours
+                );
         };
         //Then
         act.Should().Throw<ArgumentException>();
@@ -49,8 +50,9 @@ public class CreateLeaveRequestCreatedTest
                 WorkingHours * 3,
                 Guid.NewGuid(),
                 "fake remarks",
-                fakeUser
-            );
+                fakeUser,
+                WorkingHoursUtils.DefaultWorkingHours
+                );
         };
         //Then
         act.Should().Throw<ArgumentNullException>();
@@ -71,8 +73,9 @@ public class CreateLeaveRequestCreatedTest
                 WorkingHours * 3,
                 Guid.NewGuid(),
                 "fake remarks",
-                fakeUser
-            );
+                fakeUser,
+                WorkingHoursUtils.DefaultWorkingHours
+                );
         };
         //Then
         act.Should().Throw<ArgumentOutOfRangeException>();
@@ -111,8 +114,9 @@ public class CreateLeaveRequestCreatedTest
                 WorkingHours * 3,
                 Guid.NewGuid(),
                 "fake remarks",
-                fakeUser
-            );
+                fakeUser,
+                WorkingHoursUtils.DefaultWorkingHours
+                );
         };
         //Then
         act.Should().Throw<ArgumentOutOfRangeException>().WithMessage("*Date from has to be less than date to.*");

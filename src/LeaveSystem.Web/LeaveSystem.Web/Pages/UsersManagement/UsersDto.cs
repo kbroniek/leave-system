@@ -1,6 +1,6 @@
-﻿namespace LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
+﻿namespace LeaveSystem.Web.Pages.UsersManagement;
 
-public record class UsersDto(IEnumerable<UserDto> Items);
+public record UsersDto(IEnumerable<UserDto> Items);
 public class UserDto
 {
     public UserDto() { }
