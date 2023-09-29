@@ -16,25 +16,11 @@ public class UserRolesGraphServiceGetTest
     public async Task WhenGetting_ThenReturnGraphUsers()
     {
         //Given
-        const string roleAttributeName = "fakeAttrName";
-        const string rolesJson = """
-            {
-              "Roles": [
-                "nulla",
-                "aliquip",
-                "amet",
-                "aliqua",
-                "magna",
-                "cillum",
-                "excepteur"
-              ]
-            }
-            """;
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(rolesJson);
-        var users = GraphServiceUsersCollectionPageProvider.Get(roleAttributeName, rolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
+        var users = GraphServiceUsersCollectionPageProvider.Get(TestData.FakeRoleAttributeName, TestData.FakeRolesJson);
         var graphClientFactoryMock = new Mock<IGraphClientFactory>();
         var graphServiceUsersCollectionRequestMock = new Mock<IGraphServiceUsersCollectionRequest>();
-        graphServiceUsersCollectionRequestMock.Setup(m => m.Select($"id,{roleAttributeName}"))
+        graphServiceUsersCollectionRequestMock.Setup(m => m.Select($"id,{TestData.FakeRoleAttributeName}"))
             .Returns(graphServiceUsersCollectionRequestMock.Object);
         graphServiceUsersCollectionRequestMock.Setup(m => m.GetAsync(CancellationToken.None))
             .ReturnsAsync(users);
@@ -47,14 +33,13 @@ public class UserRolesGraphServiceGetTest
             .Returns(graphServiceUsersCollectionRequestBuilderMock.Object);
         graphClientFactoryMock.Setup(x => x.Create())
             .Returns(graphClientMock.Object);
-
-        var rolesAttributeNameResolver = new RoleAttributeNameResolver(roleAttributeName);
+        var rolesAttributeNameResolver = new RoleAttributeNameResolver(TestData.FakeRoleAttributeName);
         var sut = new UserRolesGraphService(graphClientFactoryMock.Object, rolesAttributeNameResolver);
         //When
         var result = await sut.Get(CancellationToken.None);
         //Then
         graphClientMock.Verify(m => m.Users);
-        graphServiceUsersCollectionRequestMock.Verify(m => m.Select($"id,{roleAttributeName}"));
+        graphServiceUsersCollectionRequestMock.Verify(m => m.Select($"id,{TestData.FakeRoleAttributeName}"));
         graphServiceUsersCollectionRequestMock.Verify(m => m.GetAsync(It.IsAny<CancellationToken>()));
         graphServiceUsersCollectionRequestBuilderMock.Verify(m => m.Request());
         result.Should().BeEquivalentTo(new[]

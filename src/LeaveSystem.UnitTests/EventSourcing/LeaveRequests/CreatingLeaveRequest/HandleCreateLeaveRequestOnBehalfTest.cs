@@ -38,7 +38,7 @@ public class HandleCreateLeaveRequestOnBehalfTest
             command.Remarks,
             command.CreatedBy,
             WorkingHoursUtils.DefaultWorkingHours
-        );
+            );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createdEvent);
         factoryMock
             .Setup(f => f.Create(command, It.IsAny<CancellationToken>()))

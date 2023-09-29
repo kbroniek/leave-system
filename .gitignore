@@ -362,5 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-#JetBrains IDE file
-src/.idea/
+#.idea folder
+src/.idea

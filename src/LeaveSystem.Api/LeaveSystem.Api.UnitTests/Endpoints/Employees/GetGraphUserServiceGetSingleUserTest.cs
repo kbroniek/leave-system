@@ -16,25 +16,11 @@ public class GetGraphUserServiceGetSingleUserTest
     public async Task WhenUserFound_ThenReturnHimAsFederatedUser()
     {
         //Given
-        const string roleAttributeName = "fakeAttrName";
-        const string rolesJson = """
-            {
-              "Roles": [
-                "nulla",
-                "aliquip",
-                "amet",
-                "aliqua",
-                "magna",
-                "cillum",
-                "excepteur"
-              ]
-            }
-            """;
         var graphClientFactoryMock = Substitute.For<IGraphClientFactory>();
         var graphClientMock = Substitute.For<GraphServiceClient>(Substitute.For<IAuthenticationProvider>(), Substitute.For<IHttpProvider>());
         var userRequestBuilderMock = Substitute.For<IUserRequestBuilder>();
         var userRequestMock = Substitute.For<IUserRequest>();
-        const string query = $"id,mail,displayName,identities,{roleAttributeName}";
+        const string query = $"id,mail,displayName,identities,{TestData.FakeRoleAttributeName}";
         userRequestMock.Select(query).Returns(userRequestMock);
         const string fakeId = "1";
         var user = new User()
@@ -45,19 +31,19 @@ public class GetGraphUserServiceGetSingleUserTest
             AdditionalData = new Dictionary<string, object>()
             {
                 {"fakeattr", "fakedata"},
-                {roleAttributeName, rolesJson}
+                {TestData.FakeRoleAttributeName, TestData.FakeRolesJson}
             }
         };
         userRequestMock.GetAsync(CancellationToken.None).Returns(user);
         userRequestBuilderMock.Request().Returns(userRequestMock);
         graphClientMock.Users[fakeId].Returns(userRequestBuilderMock);
         graphClientFactoryMock.Create().Returns(graphClientMock);
-        var resolver = new RoleAttributeNameResolver(roleAttributeName);
+        var resolver = new RoleAttributeNameResolver(TestData.FakeRoleAttributeName);
         var sut = new GetGraphUserService(graphClientFactoryMock, resolver);
         //When
         var result = await sut.Get(fakeId, CancellationToken.None);
         //Then
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(rolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
         result.Should().BeEquivalentTo(new
         {
             Id = user.Id,

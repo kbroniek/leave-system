@@ -56,7 +56,7 @@ public class CreatePendingLeaveRequestTest
             remarks,
             FakeUserProvider.GetUserWithNameFakeoslav(),
             WorkingHoursUtils.DefaultWorkingHours
-        );
+            );
         //When
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //Then

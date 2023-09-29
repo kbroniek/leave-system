@@ -34,15 +34,15 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TEntity entity, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Post([FromBody] TEntity TEntity, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            GetSet().Add(entity);
+            GetSet().Add(TEntity);
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Created(entity);
+            return Created(TEntity);
         }
 
         [HttpPatch]
@@ -68,7 +68,10 @@ namespace LeaveSystem.Api.Controllers
                 {
                     return NotFound();
                 }
-                throw;
+                else
+                {
+                    throw;
+                }
             }
             return Updated(entity);
         }
@@ -84,13 +87,6 @@ namespace LeaveSystem.Api.Controllers
             {
                 return BadRequest();
             }
-            var local = GetSet()
-                .Local
-                .FirstOrDefault(entry => entry.Id.Equals(key));
-            if (local != null)
-            {
-                dbContext.Entry(local).State = EntityState.Detached;
-            }
             dbContext.Entry(update).State = EntityState.Modified;
             try
             {
@@ -102,7 +98,10 @@ namespace LeaveSystem.Api.Controllers
                 {
                     return NotFound();
                 }
-                throw;
+                else
+                {
+                    throw;
+                }
             }
             return Updated(update);
         }

@@ -12,7 +12,7 @@ public class CreateLeaveRequestCreatedTest
 {
     private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
 
-    [Fact]
+[Fact]
     public void WhenEmailIsInvalid_ThenThrowArgumentException()
     {
         //Given
@@ -29,8 +29,7 @@ public class CreateLeaveRequestCreatedTest
                 "fake remarks",
                 fakeUser,
                 WorkingHoursUtils.DefaultWorkingHours
-
-            );
+                );
         };
         //Then
         act.Should().Throw<ArgumentException>();
@@ -53,7 +52,7 @@ public class CreateLeaveRequestCreatedTest
                 "fake remarks",
                 fakeUser,
                 WorkingHoursUtils.DefaultWorkingHours
-            );
+                );
         };
         //Then
         act.Should().Throw<ArgumentNullException>();
@@ -76,7 +75,7 @@ public class CreateLeaveRequestCreatedTest
                 "fake remarks",
                 fakeUser,
                 WorkingHoursUtils.DefaultWorkingHours
-            );
+                );
         };
         //Then
         act.Should().Throw<ArgumentOutOfRangeException>();
@@ -117,7 +116,7 @@ public class CreateLeaveRequestCreatedTest
                 "fake remarks",
                 fakeUser,
                 WorkingHoursUtils.DefaultWorkingHours
-            );
+                );
         };
         //Then
         act.Should().Throw<ArgumentOutOfRangeException>().WithMessage("*Date from has to be less than date to.*");
