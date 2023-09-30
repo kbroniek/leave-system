@@ -9,6 +9,7 @@ using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Extensions;
 using LeaveSystem.UnitTests.Providers;
@@ -25,6 +26,7 @@ public class LimitValidatorTest
     private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private readonly Mock<IDocumentSession> documentSessionMock = new ();
     private readonly Mock<IEventStore> eventStoreMock = new ();
+    private readonly CurrentDateService currentDateService = new();
     private readonly LeaveRequestCreated fakeLeaveRequestCreatedEvent =
         FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
     private readonly FederatedUser fakeUser = FakeUserProvider.GetUserWithNameFakeoslav();
@@ -102,7 +104,7 @@ public class LimitValidatorTest
     }
 
     private CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
-        new(dbContext, documentSessionMock.Object);
+        new(dbContext, documentSessionMock.Object, currentDateService);
 
     [Fact]
     public async Task

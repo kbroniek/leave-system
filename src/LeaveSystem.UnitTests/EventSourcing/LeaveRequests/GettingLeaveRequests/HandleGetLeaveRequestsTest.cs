@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -21,6 +23,8 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.GettingLeaveRequests
 public class HandleGetLeaveRequestsTest
 {
     private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
+    private static readonly DateTimeOffset Now = DateTimeOffset.Now;
+    private static readonly LeaveRequestShortInfo[] Data = FakeLeaveRequestShortInfoProvider.Get(Now);
 
     private async Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession)
     {
@@ -28,85 +32,46 @@ public class HandleGetLeaveRequestsTest
         return new(documentSession, dbContext);
     }
 
-    [Fact]
-    public async Task WhenMoreThenZeroStatuses_ThenReturnSameStatuses()
+    [Theory]
+    [MemberData(nameof(Get_WhenMoreThenZeroStatuses_ThenReturnSameStatuses_TestData))]
+    public async Task WhenMoreThenZeroStatuses_ThenReturnSameStatuses(
+        GetLeaveRequests request, LeaveRequestShortInfo[] expectedInfo)
     {
         //Given
         var documentSessionMock = new Mock<IDocumentSession>();
-        var shortInfo1 = GetLeaveRequestShortInfo(
-            Guid.NewGuid(),
-            new DateTimeOffset(2023, 1, 2, 0, 0, 0, TimeSpan.Zero),
-            new DateTimeOffset(2023, 1, 4, 0, 0, 0, TimeSpan.Zero),
-            WorkingHours * 3,
-            FakeLeaveTypeProvider.FakeSickLeaveId,
-            FakeUserProvider.GetUserWithNameFakeoslav(),
-            WorkingHours);
-        var shortInfo2 = GetLeaveRequestShortInfo(
-            Guid.NewGuid(),
-            new DateTimeOffset(2023, 1, 2, 0, 0, 0, TimeSpan.Zero),
-            new DateTimeOffset(2023, 1, 4, 0, 0, 0, TimeSpan.Zero),
-            WorkingHours * 5,
-            FakeLeaveTypeProvider.FakeOnDemandLeaveId,
-            FakeUserProvider.GetUserWithNameFakeoslav(), WorkingHours, LeaveRequestStatus.Canceled);
-        var shortInfo3 = GetLeaveRequestShortInfo(
-            Guid.NewGuid(),
-            new DateTimeOffset(2023, 1, 3, 0, 0, 0, TimeSpan.Zero),
-            new DateTimeOffset(2023, 1, 5, 0, 0, 0, TimeSpan.Zero),
-            WorkingHours * 6,
-            FakeLeaveTypeProvider.FakeSickLeaveId,
-            FakeUserProvider.GetUserWithNameFakeoslav(), WorkingHours, LeaveRequestStatus.Rejected);
         documentSessionMock.Setup(x => x.Query<LeaveRequestShortInfo>())
-            .Returns(new MartenQueryableStub<LeaveRequestShortInfo>(new List<LeaveRequestShortInfo>
-            {
-                shortInfo1, shortInfo2, shortInfo3
-            }));
-        var request = GetLeaveRequests.Create(
-            null,
-            null,
-            new DateTimeOffset(2023, 1, 2, 0, 0, 0, TimeSpan.Zero),
-            new DateTimeOffset(2023, 1, 6, 0, 0, 0, TimeSpan.Zero),
-            null,
-            new[] { LeaveRequestStatus.Pending, LeaveRequestStatus.Rejected },
-            null,
-            null,
-            FakeUserProvider.GetUserWithNameFakeoslav()
-        );
+            .Returns(new MartenQueryableStub<LeaveRequestShortInfo>(Data));
         var sut = await GetSut(documentSessionMock.Object);
         //When
         var results = await sut.Handle(request, CancellationToken.None);
-        results.Should().BeEquivalentTo(new []
-        {
-            shortInfo1, shortInfo3
-        });
+        results.Should().BeEquivalentTo(expectedInfo);
         documentSessionMock.Verify(x => x.Query<LeaveRequestShortInfo>());
     }
 
-    private LeaveRequestShortInfo GetLeaveRequestShortInfo(Guid leaveRequestId, DateTimeOffset dateFrom,
-        DateTimeOffset dateTo, TimeSpan duration, Guid leaveTypeId, FederatedUser createdBy, TimeSpan workingHours,
-        LeaveRequestStatus status = LeaveRequestStatus.Pending)
+    public static IEnumerable<object[]> Get_WhenMoreThenZeroStatuses_ThenReturnSameStatuses_TestData()
     {
-        var leaveRequestCreated = LeaveRequestCreated.Create(
-            leaveRequestId, dateFrom, dateTo, duration, leaveTypeId, string.Empty, createdBy, workingHours
-        );
-        var leaveRequestShortInfo = new LeaveRequestShortInfo();
-        leaveRequestShortInfo.Apply(leaveRequestCreated);
-        switch (status)
+        var user = FakeUserProvider.GetUserWithNameFakeoslav();
+        yield return new object[]
         {
-            case LeaveRequestStatus.Accepted:
-                leaveRequestShortInfo.Apply(LeaveRequestAccepted.Create(leaveRequestId, string.Empty, createdBy));
-                break;
-            case LeaveRequestStatus.Canceled:
-                leaveRequestShortInfo.Apply(LeaveRequestCanceled.Create(leaveRequestId, string.Empty, createdBy));
-                break;
-            case LeaveRequestStatus.Rejected:
-                leaveRequestShortInfo.Apply(LeaveRequestRejected.Create(leaveRequestId, string.Empty, createdBy));
-                break;
-            case LeaveRequestStatus.Pending:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(status), status, null);
-        }
-
-        return leaveRequestShortInfo;
+            GetLeaveRequests.Create(
+                1,
+                5,
+                Now.AddYears(-5),
+                Now.AddYears(5),
+                null,
+                new [] { LeaveRequestStatus.Accepted , LeaveRequestStatus.Canceled, LeaveRequestStatus.Deprecated, LeaveRequestStatus.Pending, LeaveRequestStatus.Rejected},
+                null,
+                null,
+                user
+            ),
+            new LeaveRequestShortInfo[]
+            {
+                Data[0],
+                Data[1],
+                Data[2],
+                Data[3],
+                Data[4]
+            }
+        };
     }
 }

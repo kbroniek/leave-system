@@ -36,6 +36,7 @@ public class LeaveRequestFactory
         var duration = command.Duration ?? maxDuration;
         var leaveRequestCreated = LeaveRequestCreated.Create(command.LeaveRequestId, command.DateFrom, command.DateTo,
             duration, command.LeaveTypeId, command.Remarks, command.CreatedBy, workingHours);
+        validator.DateValidator(leaveRequestCreated);
         validator.BasicValidate(leaveRequestCreated, minDuration, maxDuration, leaveType.Properties?.IncludeFreeDays);
         await validator.ImpositionValidator(leaveRequestCreated);
         await validator.LimitValidator(leaveRequestCreated);

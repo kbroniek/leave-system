@@ -1,15 +1,22 @@
+using System.Runtime.Serialization;
 using System.Text.Json;
 using FluentAssertions;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.UnitTests.TestExtensions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared;
 using LeaveSystem.UnitTests;
 using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using MockQueryable.Moq;
 using Moq;
+using NSubstitute;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
 
@@ -19,8 +26,8 @@ public class SettingsControllerPutTest
     public async Task WhenModelStateIsNotValid_ThenReturnBadRequest()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new SettingsController(dbContext);
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var sut = new SettingsController(dbContextMock.Object);
         sut.ModelState.AddModelError("fakeKey", "fake error message");
         var fakeSettingId = FakeSettingsProvider.AcceptedSettingId;
         var fakeSetting = FakeSettingsProvider.GetAcceptedSetting();
@@ -34,10 +41,13 @@ public class SettingsControllerPutTest
     public async Task WhenProvidedIdIsDifferentThanEntityId_ThenReturnBadRequest()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new SettingsController(dbContext);
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         var fakeSettingId = FakeSettingsProvider.AcceptedSettingId;
         var fakeSetting = FakeSettingsProvider.GetCanceledSetting();
+        var settingEntityEntryMock = new Mock<EntityEntry<Setting>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
+                dbContextMock.Setup(m => m.Entry(fakeSetting))
+                    .Returns(settingEntityEntryMock.Object); 
+        var sut = new SettingsController(dbContextMock.Object);
         //When
         var result = await sut.Put(fakeSettingId, fakeSetting);
         //Then
@@ -48,14 +58,22 @@ public class SettingsControllerPutTest
     public async Task WhenProvidedSettingNotExistsInDatabase_ThenReturnNotFound()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        var sut = new SettingsController(dbContext);
         var fakeSettingId = FakeSettingsProvider.AcceptedSettingId;
         var fakeSetting = FakeSettingsProvider.GetAcceptedSetting();
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var settingEntityEntryMock = new Mock<EntityEntry<Setting>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
+        
+        dbContextMock.Setup(m => m.Entry(fakeSetting))
+            .Returns(settingEntityEntryMock.Object);
+        dbContextMock.Setup(m => m.SaveChangesAsync(default))
+            .ThrowsAsync(new DbUpdateConcurrencyException());
+        dbContextMock.Setup(x => x.Set<Setting>()).Returns(FakeSettingsProvider.GetSettings().Skip(3).BuildMockDbSet().Object);
+        var sut = new SettingsController(dbContextMock.Object);
         //When
         var result = await sut.Put(fakeSettingId, fakeSetting);
         //Then
         result.Should().BeOfType<NotFoundResult>();
+        settingEntityEntryMock.VerifySet(m => m.State = EntityState.Modified);
     }
     
     [Fact]
@@ -66,20 +84,15 @@ public class SettingsControllerPutTest
         var fakeSettingFromDb = FakeSettingsProvider.GetAcceptedSetting();
         var fakeSettingToChange = fakeSettingFromDb.Clone()!;
         fakeSettingToChange.Value = JsonDocument.Parse("{\"fake\": \"fakeJsonValue\"}");
-        
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        await dbContext.AddAsync(fakeSettingFromDb);
-        await dbContext.SaveChangesAsync();
-
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var settingEntityEntryMock = EntityEntryMockFactory.Create<Setting>();
+        
         dbContextMock.Setup(m => m.SaveChangesAsync(default))
             .ThrowsAsync(new DbUpdateConcurrencyException());
-        dbContextMock.Setup(m => m.Set<Setting>())
-            .Returns(dbContext.Set<Setting>());
-        dbContextMock.Setup(m => m.Entry(fakeSettingFromDb))
-            .Returns(dbContext.Entry(fakeSettingFromDb));
         dbContextMock.Setup(m => m.Entry(fakeSettingToChange))
-            .Returns(dbContext.Entry(fakeSettingToChange));
+            .Returns(settingEntityEntryMock.Object);
+        dbContextMock.Setup(m => m.Set<Setting>())
+            .Returns(FakeSettingsProvider.GetSettings().BuildMockDbSet().Object);
         var sut = new SettingsController(dbContextMock.Object);
         //When
         var act = async () =>
@@ -89,27 +102,33 @@ public class SettingsControllerPutTest
         //Then
         await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));
+        settingEntityEntryMock.VerifySet(m => m.State = EntityState.Modified);
     }
     
     [Fact]
     public async Task WhenModelIsValidAndSameProvidedIdAndSettingIdAndNoExceptionWasThrown_ThenReturnUpdated()
     {
         //Given
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        await dbContext.AddRangeAsync(FakeSettingsProvider.GetSettings());
-        await dbContext.SaveChangesAsync();
-        var sut = new SettingsController(dbContext);
-        var fakeSettingToChange = FakeSettingsProvider.GetAcceptedSetting();
-        fakeSettingToChange.Value = JsonDocument.Parse("{\"fake\": \"fakeJsonValue\"}");
+        var fakeSettingToChange = new Setting()
+        {
+            Value = JsonDocument.Parse("{\"fake\": \"fakeJsonValue\"}"),
+            Id = FakeSettingsProvider.AcceptedSettingId,
+            Category = SettingCategoryType.LeaveStatus
+        };
         var updatedSettingId = FakeSettingsProvider.AcceptedSettingId;
+        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var settingEntityEntryMock = EntityEntryMockFactory.Create<Setting>();
+        
+        dbContextMock.Setup(m => m.Entry(fakeSettingToChange))
+            .Returns(settingEntityEntryMock.Object);
+        dbContextMock.Setup(m => m.Set<Setting>())
+            .Returns(FakeSettingsProvider.GetSettings().BuildMockDbSet().Object);
+        var sut = new SettingsController(dbContextMock.Object);
         //When
         var result = await sut.Put(updatedSettingId, fakeSettingToChange);
         //Then
         result.Should().BeOfType<UpdatedODataResult<Setting>>();
-        sut.Get(updatedSettingId).Queryable.First().Should().BeEquivalentTo(new
-            {
-                Value = fakeSettingToChange.Value,
-            }, o => o.ExcludingMissingMembers().ComparingByMembers<JsonElement>()
-        );
+        dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));
+        settingEntityEntryMock.VerifySet(m => m.State = EntityState.Modified);
     }
 }

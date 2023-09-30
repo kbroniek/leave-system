@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;

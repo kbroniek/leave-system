@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
@@ -37,11 +38,15 @@ public class FakeSettingsProvider
         Value = JsonDocument.Parse("{\"color\": \"transparent\"}")
     };
 
-    public static IEnumerable<Setting> GetSettings()
+    public static IQueryable<Setting> GetSettings()
     {
-        yield return GetPendingSetting();
-        yield return GetRejectedSetting();
-        yield return GetAcceptedSetting();
-        yield return GetCanceledSetting();
+        return new List<Setting>
+        {
+            GetPendingSetting(),
+            GetRejectedSetting(),
+            GetAcceptedSetting(),
+            GetCanceledSetting()
+        }.AsQueryable();
+
     }
 }
