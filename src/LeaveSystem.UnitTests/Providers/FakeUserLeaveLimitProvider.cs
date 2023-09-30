@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
 
@@ -51,10 +52,13 @@ public static class FakeUserLeaveLimitProvider
         };
     }
 
-    public static IEnumerable<UserLeaveLimit> GetLimits()
+    public static IQueryable<UserLeaveLimit> GetLimits()
     {
-        yield return GetLimitForSickLeave();
-        yield return GetLimitForHolidayLeave();
-        yield return GetLimitForOnDemandLeave();
+        return new List<UserLeaveLimit>
+        {
+            GetLimitForSickLeave(),
+            GetLimitForHolidayLeave(),
+            GetLimitForOnDemandLeave(),
+        }.AsQueryable();
     }
 }
