@@ -8,6 +8,7 @@ using GoldenEye.Exceptions;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
@@ -57,6 +58,7 @@ public class LeaveRequestFactoryTest
         //Then
         await act.Should().ThrowAsync<Ardalis.GuardClauses.NotFoundException>();
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Times.Never);
+        validatorMock.Verify(x => x.DateValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
         validatorMock.Verify(x => x.BasicValidate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
             ), Times.Never
@@ -66,7 +68,7 @@ public class LeaveRequestFactoryTest
     }
 
     private Mock<CreateLeaveRequestValidator> GetValidatorMock(LeaveSystemDbContext dbContext) =>
-        new(dbContext, new Mock<IDocumentSession>().Object);
+        new(dbContext, new Mock<IDocumentSession>().Object, new CurrentDateService());
 
     [Fact]
     public async Task WhenDurationGreaterThanYear_ThenThrowArgumentOutOfRangeException()
@@ -96,6 +98,7 @@ public class LeaveRequestFactoryTest
         //Then
         await act.Should().ThrowAsync<ArgumentOutOfRangeException>();
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Times.Once);
+        validatorMock.Verify(x => x.DateValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
         validatorMock.Verify(x => x.BasicValidate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
             ), Times.Never
@@ -129,6 +132,7 @@ public class LeaveRequestFactoryTest
         var leaveRequest = await sut.Create(fakeEvent, It.IsAny<CancellationToken>());
         //Then
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>());
+        validatorMock.Verify(x => x.DateValidator(It.IsAny<LeaveRequestCreated>()), Times.Once);
         validatorMock.Verify(x => x.BasicValidate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
             ), Times.Once
@@ -176,6 +180,7 @@ public class LeaveRequestFactoryTest
         //Then
         await act.Should().ThrowAsync<InvalidOperationException>();
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>());
+        validatorMock.Verify(x => x.DateValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
         validatorMock.Verify(x => x.BasicValidate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
             ), Times.Never
