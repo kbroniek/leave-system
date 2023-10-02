@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeLeaveTypeProvider
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     public static Guid FakeOnDemandLeaveId = Guid.NewGuid();
     public static Guid FakeSickLeaveId = Guid.NewGuid();
     public static Guid FakeHolidayLeaveGuid = Guid.NewGuid();
@@ -56,14 +55,12 @@ public static class FakeLeaveTypeProvider
             Catalog = LeaveTypeCatalog.OnDemand,
         }
     };
-
     public static LeaveType GetFakeWrongLeave() => new()
     {
         Id = Guid.Empty,
         Name = "niezdolność do pracy z powodu choroby",
         Order = 3
     };
-
     public static IQueryable<LeaveType> GetLeaveTypes()
     {
         return new List<LeaveType> {

@@ -2,20 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
-using LeaveSystem.UnitTests.TestHelpers;
 using Marten;
 using Marten.Events;
 using Moq;
@@ -25,10 +23,10 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest
 
 public class LimitValidatorTest
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
-    private readonly Mock<WorkingHoursService> workingHoursServiceMock = new ();
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private readonly Mock<IDocumentSession> documentSessionMock = new ();
     private readonly Mock<IEventStore> eventStoreMock = new ();
+    private readonly CurrentDateService currentDateService = new();
     private readonly LeaveRequestCreated fakeLeaveRequestCreatedEvent =
         FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
     private readonly FederatedUser fakeUser = FakeUserProvider.GetUserWithNameFakeoslav();
@@ -70,7 +68,7 @@ public class LimitValidatorTest
         var act = async () => { await sut.LimitValidator(@event); };
         //Then
         await act.Should().ThrowAsync<ValidationException>().WithMessage("You don't have enough free days for this type of leave");
-        documentSessionMock.VerifyLeaveRequestValidatorFunctions(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
+        VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Once(), Times.Exactly(2));
     }
 
     private void VerifyDocumentSessionMockCalled(Guid leaveRequestId, Times queryRawEventDataOnlyTimes, Times aggregateStreamAsyncTimes)
@@ -106,7 +104,7 @@ public class LimitValidatorTest
     }
 
     private CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
-        new(dbContext, workingHoursServiceMock.Object, documentSessionMock.Object);
+        new(dbContext, documentSessionMock.Object, currentDateService);
 
     [Fact]
     public async Task
@@ -126,13 +124,14 @@ public class LimitValidatorTest
             WorkingHours,
             FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
             fakeLeaveRequestCreatedEvent.Remarks,
-            FakeUserProvider.GetUserWithNameFakeoslav()
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            WorkingHoursUtils.DefaultWorkingHours
         );
         //When
         var act = async () => { await sut.LimitValidator(@event); };
         //Then
         await act.Should().NotThrowAsync<ValidationException>();
-        documentSessionMock.VerifyLeaveRequestValidatorFunctions(leaveRequestEntity.Id, Times.Exactly(2), Times.Exactly(2));
+        VerifyDocumentSessionMockCalled(leaveRequestEntity.Id, Times.Exactly(2), Times.Exactly(2));
     }
 
     [Fact]
@@ -145,7 +144,7 @@ public class LimitValidatorTest
         //When
         var act = async () => { await sut.LimitValidator(fakeLeaveRequestCreatedEvent); };
         await act.Should().ThrowAsync<ValidationException>().WithMessage("Cannot find limits for the leave type id*");
-        documentSessionMock.VerifyLeaveRequestValidatorFunctions(It.IsAny<Guid>(), Times.Never(), Times.Never());
+        VerifyDocumentSessionMockCalled(It.IsAny<Guid>(), Times.Never(), Times.Never());
     }
 
     [Fact]
@@ -174,11 +173,12 @@ public class LimitValidatorTest
             WorkingHours * 3,
             FakeLeaveTypeProvider.FakeSickLeaveId,
             fakeLeaveRequestCreatedEvent.Remarks,
-            fakeUser
+            fakeUser,
+            WorkingHoursUtils.DefaultWorkingHours
         );
         //When
         var act = async () => { await sut.LimitValidator(@event); };
         await act.Should().ThrowAsync<ValidationException>().WithMessage("Two or more limits found which are the same for the leave type id*");
-        documentSessionMock.VerifyLeaveRequestValidatorFunctions(It.IsAny<Guid>(), Times.Never(), Times.Never());
+        VerifyDocumentSessionMockCalled(It.IsAny<Guid>(), Times.Never(), Times.Never());
     }
 }

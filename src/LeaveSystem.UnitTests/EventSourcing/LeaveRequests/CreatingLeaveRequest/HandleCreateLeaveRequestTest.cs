@@ -5,6 +5,7 @@ using GoldenEye.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 using Moq;
 using Xunit;
 
@@ -36,8 +37,9 @@ public class HandleCreateLeaveRequestTest
             command.Duration!.Value,
             command.LeaveTypeId,
             command.Remarks,
-            command.CreatedBy
-        );
+            command.CreatedBy,
+            WorkingHoursUtils.DefaultWorkingHours
+            );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createdEvent);
         factoryMock
             .Setup(f => f.Create(command, It.IsAny<CancellationToken>()))

@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
+<BlazoredToasts />
+
 <RadzenLayout>
     <RadzenHeader>
         <div class="row">
@@ -14,9 +16,10 @@
     </RadzenHeader>
     <NavMenu SidebarExpanded=@sidebarExpanded />
     <RadzenBody>
-            <RadzenNotification />
-            @Body
+        <RadzenNotification />
+        @Body
     </RadzenBody>
+    <RadzenDialog></RadzenDialog>
 </RadzenLayout>
 
 @code {

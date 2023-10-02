@@ -2,13 +2,15 @@
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.DeprecatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
+using LeaveSystem.Periods;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
 
-public class LeaveRequest : Aggregate
+public class LeaveRequest : Aggregate, INotNullablePeriod
 {
     public DateTimeOffset DateFrom { get; private set; }
 
@@ -27,6 +29,8 @@ public class LeaveRequest : Aggregate
     public FederatedUser LastModifiedBy { get; private set; }
 
     public FederatedUser? CreatedByOnBehalf { get; private set; }
+
+    public TimeSpan WorkingHours { get; private set; }
 
     //For serialization
     public LeaveRequest() { }
@@ -97,6 +101,17 @@ public class LeaveRequest : Aggregate
         Apply(@event);
     }
 
+    internal void Deprecate(string? remarks, FederatedUser deprecatedBy)
+    {
+        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Accepted)
+        {
+            throw new InvalidOperationException($"Deprecating leave request in '{Status}' status is not allowed.");
+        }
+        var @event = LeaveRequestDeprecated.Create(Id, remarks, deprecatedBy);
+        Enqueue(@event);
+        Apply(@event);
+    }
+
     private void Apply(LeaveRequestCreated @event)
     {
         Id = @event.LeaveRequestId;
@@ -139,6 +154,14 @@ public class LeaveRequest : Aggregate
     {
         CreatedByOnBehalf = @event.CreatedByOnBehalf;
         LastModifiedBy = @event.CreatedByOnBehalf;
+        Version++;
+    }
+
+    private void Apply(LeaveRequestDeprecated @event)
+    {
+        LastModifiedBy = @event.DeprecatedBy;
+        Status = LeaveRequestStatus.Deprecated;
+        AddRemarks(@event.Remarks, @event.DeprecatedBy);
         Version++;
     }
 

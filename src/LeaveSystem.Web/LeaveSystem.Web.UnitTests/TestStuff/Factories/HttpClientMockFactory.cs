@@ -39,6 +39,16 @@ public static class HttpClientMockFactory
         return httpClient;
     } 
     
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, HttpContent responseContent,
+        string baseFakeUrl = "http://localhost:5047/")
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        mockHttpMessageHandler.When(baseFakeUrl + url).WithJsonContent(content).Respond(httpStatusCode, responseContent);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(baseFakeUrl);
+        return httpClient;
+    } 
+    
     public static HttpClient Create(string url, HttpStatusCode httpStatusCode, 
         string baseFakeUrl = "http://localhost:5047/")
     {

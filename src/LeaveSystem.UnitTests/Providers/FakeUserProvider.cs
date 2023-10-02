@@ -15,17 +15,17 @@ public static class FakeUserProvider
     {
         return FederatedUser.Create(FakseoslavId, "fakeUser@fake.com", "Fakeoslav.Wagner", new[] { RoleType.GlobalAdmin.ToString() });
     }
-
+    
     public static FederatedUser GetUserBen()
     {
         return FederatedUser.Create(BenId, "ben@fake.com", "Ben.Shapiro", new[] { RoleType.Employee.ToString() });
     }
-
+    
     public static FederatedUser GetUserHabib()
     {
         return FederatedUser.Create(HabibId, "habib@arabia.com", "Ben.Shapiro", new[] { RoleType.Employee.ToString() });
     }
-
+    
     public static FederatedUser GetUserPhilip()
     {
         return FederatedUser.Create(PhilipId, "philip.nov@fakemail.com", "Philip.Novak", new[] { RoleType.Employee.ToString() });

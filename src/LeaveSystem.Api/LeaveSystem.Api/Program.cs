@@ -3,6 +3,7 @@ using LeaveSystem;
 using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
+using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
@@ -16,6 +17,7 @@ const string azureConfigSection = "AzureAdB2C";
 const string azureReadUsersSection = "ManageAzureUsers";
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddConsole();
 
 builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddRoleBasedAuthorization();
@@ -66,6 +68,8 @@ if (app.Environment.IsDevelopment())
     app.UseODataRouteDebug();
 }
 
+app.UseMiddleware<ErrorHandlerMiddleware>(app.Environment.IsDevelopment(), app.Logger);
+
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
@@ -93,7 +97,7 @@ app
     .AddEmployeesEndpoints(azureScpes)
     .AddUsersEndpoints(azureScpes);
 
-app.MigrateDb();
+await app.MigrateDb();
 if (app.Environment.IsDevelopment())
 {
     _ = app.FillInDatabase();

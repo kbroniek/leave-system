@@ -1,25 +1,25 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using System.ComponentModel.DataAnnotations;
+using LeaveSystem.Shared.Date;
 using EFExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 public class CreateLeaveRequestValidator
 {
     private readonly LeaveSystemDbContext dbContext;
-    private readonly WorkingHoursService workingHoursService;
     private readonly IDocumentSession documentSession;
+    private readonly CurrentDateService currentDateService;
 
-    public CreateLeaveRequestValidator(LeaveSystemDbContext dbContext, WorkingHoursService workingHoursService, IDocumentSession documentSession)
+    public CreateLeaveRequestValidator(LeaveSystemDbContext dbContext, IDocumentSession documentSession, CurrentDateService currentDateService)
     {
         this.dbContext = dbContext;
-        this.workingHoursService = workingHoursService;
         this.documentSession = documentSession;
+        this.currentDateService = currentDateService;
     }
 
     public virtual void BasicValidate(LeaveRequestCreated creatingLeaveRequest, TimeSpan minDuration, TimeSpan maxDuration, bool? includeFreeDays)
@@ -177,5 +177,20 @@ public class CreateLeaveRequestValidator
             throw new ValidationException($"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userId}.");
         }
         return limits.First();
+    }
+
+    public virtual void DateValidator(LeaveRequestCreated creatingLeaveRequest)
+    {
+        var dateFromWithoutTime = creatingLeaveRequest.DateFrom.GetDayWithoutTime();
+        var dateToWithoutTime = creatingLeaveRequest.DateTo.GetDayWithoutTime();
+        var now = currentDateService.GetWithoutTime();
+        var firstDay = now.GetFirstDayOfYear();
+        var lastDay = now.GetLastDayOfYear();
+        Guard.Against.OutOfRange(dateFromWithoutTime, nameof(creatingLeaveRequest.DateFrom), firstDay, lastDay);
+        Guard.Against.OutOfRange(dateToWithoutTime, nameof(creatingLeaveRequest.DateTo), firstDay, lastDay);
+        if (dateFromWithoutTime > dateToWithoutTime)
+        {
+            throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateFrom), "Date from has to be less than date to.");
+        }
     }
 }

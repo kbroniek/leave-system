@@ -2,16 +2,14 @@ using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
-using LeaveSystem.Services;
 using LeaveSystem.Shared;
-using LeaveSystem.UnitTests.TestHelpers;
 using Marten;
 using Marten.Events;
 using Moq;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.UnitTests.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
@@ -21,10 +19,10 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest
 
 public class ImpositionValidatorTest
 {
-    private static readonly TimeSpan WorkingHours = WorkingHoursCollection.DefaultWorkingHours;
-    private readonly Mock<WorkingHoursService> workingHoursServiceMock = new();
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private readonly Mock<IDocumentSession> documentSessionMock = new();
     private readonly Mock<IEventStore> eventStoreMock = new();
+    private readonly CurrentDateService currentDateService = new();
 
     private readonly LeaveRequestCreated fakeLeaveRequestCreatedEvent =
         FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
@@ -58,7 +56,7 @@ public class ImpositionValidatorTest
     }
 
     private CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
-        new(dbContext, workingHoursServiceMock.Object, documentSessionMock.Object);
+        new(dbContext, documentSessionMock.Object, currentDateService);
 
     [Fact]
     public async Task

@@ -13,31 +13,64 @@ using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
+using WorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
 namespace LeaveSystem.Api.Db;
+
 public static class DbContextExtenstions
 {
-    private sealed class DbContextExtenstionsLogger { }
-    private static readonly TimeSpan workingHours = WorkingHoursCollection.DefaultWorkingHours;
+    private sealed class DbContextExtenstionsLogger
+    {
+    }
+
+    private static readonly TimeSpan workingHours = TimeSpan.FromHours(8);
     private const string DefaultUserEmail = "karolbr5@gmail.com";
-    private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22", DefaultUserEmail, "Karol Volt", new[] { RoleType.GlobalAdmin.ToString() });
+
+    private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22",
+        DefaultUserEmail, "Karol Volt", new[] { RoleType.GlobalAdmin.ToString() });
+
     private static FederatedUser defaultUser;
     private static FederatedUser[] testUsers = Array.Empty<FederatedUser>();
+
     private static readonly FederatedUser[] testUserMock = new[]
     {
-        FederatedUser.Create("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski", new[] { RoleType.DecisionMaker.ToString() }),
-        FederatedUser.Create("88fa3c20-0c52-4da4-8389-868d9a487aa0", "mnowak@test.com", "Maria Nowak", new[] { RoleType.HumanResource.ToString() }),
-        FederatedUser.Create("1374e2d6-15f5-4543-b7bf-95118701f315", "jszczepanek@test.com", "Jadwiga Szczepanek", new[] { RoleType.LeaveLimitAdmin.ToString() }),
-        FederatedUser.Create("59ed14ff-edc4-421c-8f22-28973f4ccd76", "aszewczyk@test.com", "Aleksandra Szewczyk", new[] { RoleType.UserAdmin.ToString() }),
-        FederatedUser.Create("d5ff6b57-a701-4ce8-82ef-593ef207fb76", "ourbanek@test.com", "Olgierd Urbanek", new[] { RoleType.Employee.ToString() })
+        FederatedUser.Create("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski",
+            new[] { RoleType.DecisionMaker.ToString() }),
+        FederatedUser.Create("88fa3c20-0c52-4da4-8389-868d9a487aa0", "mnowak@test.com", "Maria Nowak",
+            new[] { RoleType.HumanResource.ToString() }),
+        FederatedUser.Create("1374e2d6-15f5-4543-b7bf-95118701f315", "jszczepanek@test.com", "Jadwiga Szczepanek",
+            new[] { RoleType.LeaveLimitAdmin.ToString() }),
+        FederatedUser.Create("59ed14ff-edc4-421c-8f22-28973f4ccd76", "aszewczyk@test.com", "Aleksandra Szewczyk",
+            new[] { RoleType.UserAdmin.ToString() }),
+        FederatedUser.Create("d5ff6b57-a701-4ce8-82ef-593ef207fb76", "ourbanek@test.com", "Olgierd Urbanek",
+            new[] { RoleType.Employee.ToString() })
     };
+
     private static Setting[] settings = new Setting[]
     {
-        new Setting {Id = LeaveRequestStatus.Canceled.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#525252\"}") },
-        new Setting {Id = LeaveRequestStatus.Rejected.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#850000\"}") },
-        new Setting {Id = LeaveRequestStatus.Pending.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"#CFFF98\"}") },
-        new Setting {Id = LeaveRequestStatus.Accepted.ToString(), Category = SettingCategoryType.LeaveStatus, Value = JsonDocument.Parse("{\"color\": \"transparent\"}") }
+        new Setting
+        {
+            Id = LeaveRequestStatus.Canceled.ToString(), Category = SettingCategoryType.LeaveStatus,
+            Value = JsonDocument.Parse("{\"color\": \"#525252\"}")
+        },
+        new Setting
+        {
+            Id = LeaveRequestStatus.Rejected.ToString(), Category = SettingCategoryType.LeaveStatus,
+            Value = JsonDocument.Parse("{\"color\": \"#850000\"}")
+        },
+        new Setting
+        {
+            Id = LeaveRequestStatus.Pending.ToString(), Category = SettingCategoryType.LeaveStatus,
+            Value = JsonDocument.Parse("{\"color\": \"#CFFF98\"}")
+        },
+        new Setting
+        {
+            Id = LeaveRequestStatus.Accepted.ToString(), Category = SettingCategoryType.LeaveStatus,
+            Value = JsonDocument.Parse("{\"color\": \"transparent\"}")
+        }
     };
+
     private static LeaveType holidayLeave = new LeaveType
     {
         Id = Guid.NewGuid(),
@@ -51,6 +84,7 @@ public static class DbContextExtenstions
             Catalog = LeaveTypeCatalog.Holiday,
         }
     };
+
     private static LeaveType onDemandLeave = new LeaveType
     {
         Id = Guid.NewGuid(),
@@ -65,6 +99,7 @@ public static class DbContextExtenstions
             Catalog = LeaveTypeCatalog.OnDemand,
         }
     };
+
     private static LeaveType sickLeave = new LeaveType
     {
         Id = Guid.NewGuid(),
@@ -77,6 +112,7 @@ public static class DbContextExtenstions
             Catalog = LeaveTypeCatalog.Sick,
         }
     };
+
     private static LeaveType saturdayLeave = new LeaveType
     {
         Id = Guid.NewGuid(),
@@ -90,7 +126,8 @@ public static class DbContextExtenstions
             Catalog = LeaveTypeCatalog.Saturday,
         }
     };
-    public static void MigrateDb(this IApplicationBuilder app)
+
+    public static async Task MigrateDb(this IApplicationBuilder app)
     {
         using (var scope = app.ApplicationServices.CreateScope())
         {
@@ -101,9 +138,10 @@ public static class DbContextExtenstions
             {
                 throw new InvalidOperationException("Cannot find DB context.");
             }
+
             try
             {
-                dbContext.Database.Migrate();
+                await dbContext.Database.MigrateAsync();
             }
             catch (Exception ex)
             {
@@ -125,14 +163,15 @@ public static class DbContextExtenstions
                 var graphUserService = services.GetRequiredService<GetGraphUserService>();
                 var saveGraphUserService = services.GetRequiredService<SaveGraphUserService>();
                 var graphUsers = await graphUserService.Get(cancellationToken);
-                defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email, defaultUserMock.Name, defaultUserMock.Roles);
+                defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email,
+                    defaultUserMock.Name, defaultUserMock.Roles);
                 testUsers = testUserMock
                     .Select(t => CreateFederatedUser(graphUsers, t.Id, t.Email, t.Name, t.Roles))
                     .Union(new FederatedUser[] { defaultUser })
                     .ToArray();
                 await FillInGraphUsers(graphUsers, saveGraphUserService, logger, cancellationToken);
                 await FillInSimpleData(dbContext);
-                await FillInLeaveRequests(services);
+                await FillInEventSourcingData(services);
             }
             catch (Exception ex)
             {
@@ -141,7 +180,8 @@ public static class DbContextExtenstions
         }
     }
 
-    private static FederatedUser CreateFederatedUser(IEnumerable<FederatedUser> graphUsers, string id, string? email, string? name, IEnumerable<string> roles)
+    private static FederatedUser CreateFederatedUser(IEnumerable<FederatedUser> graphUsers, string id, string? email,
+        string? name, IEnumerable<string> roles)
     {
         var graphUser = graphUsers.FirstOrDefault(u =>
             string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase) ||
@@ -149,7 +189,9 @@ public static class DbContextExtenstions
         return FederatedUser.Create(graphUser.Id ?? id, graphUser.Email ?? email, graphUser.Name ?? name, roles);
     }
 
-    private static async Task FillInGraphUsers(IEnumerable<FederatedUser> graphUsers, SaveGraphUserService saveGraphUserService, ILogger<DbContextExtenstionsLogger> logger, CancellationToken cancellationToken)
+    private static async Task FillInGraphUsers(IEnumerable<FederatedUser> graphUsers,
+        SaveGraphUserService saveGraphUserService, ILogger<DbContextExtenstionsLogger> logger,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -159,10 +201,12 @@ public static class DbContextExtenstions
                 Guard.Against.Null(userToAdd.Email);
                 await saveGraphUserService.Add(userToAdd.Email, userToAdd.Name, userToAdd.Roles, cancellationToken);
             }
+
             var usersToUpdate = testUsers.Where(u => IsRoleNotEqual(graphUsers, u));
             foreach (var userToUpdate in usersToUpdate)
             {
-                await saveGraphUserService.Update(userToUpdate.Id, userToUpdate.Email, userToUpdate.Name, userToUpdate.Roles, cancellationToken);
+                await saveGraphUserService.Update(userToUpdate.Id, userToUpdate.Email, userToUpdate.Name,
+                    userToUpdate.Roles, cancellationToken);
             }
         }
         catch (Exception ex)
@@ -178,6 +222,7 @@ public static class DbContextExtenstions
         {
             return false;
         }
+
         var userFound = usersFound.First();
         return !userFound.Roles.SequenceEqual(federatedUser.Roles);
     }
@@ -190,18 +235,95 @@ public static class DbContextExtenstions
         await dbContext.SaveChangesAsync();
     }
 
-    private static async Task FillInLeaveRequests(IServiceProvider services)
+    private static async Task FillInEventSourcingData(IServiceProvider services)
     {
         var queryBus = services.GetRequiredService<IQueryBus>();
         var commandBus = services.GetRequiredService<ICommandBus>();
-        var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(
-                   null, null, null, null, null, null, null,
-                   testUsers.Take(5).Select(u => u.Id).ToArray(),
-                   defaultUser));
+        await FillInWorkingHours(queryBus, commandBus);
+        await FillInLeaveRequests(queryBus, commandBus);
+    }
+
+    private static async Task FillInWorkingHours(IQueryBus queryBus, ICommandBus commandBus)
+    {
+        var workingHoursFromDb = await queryBus.Send<GetWorkingHours, IPagedList<WorkingHours>>(GetWorkingHours.Create(
+            null, null, null, null,
+            testUsers.Take(5).Select(u => u.Id).ToArray(), defaultUser,
+            null));
+        if (workingHoursFromDb.Any())
+        {
+            return;
+        }
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[0].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2025, 1, 1),
+            TimeSpan.FromHours(8),
+            defaultUser);
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[1].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2018, 3, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2025, 3, 1),
+            TimeSpan.FromHours(8),
+            defaultUser);
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[2].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2021, 12, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2027, 7, 10),
+            TimeSpan.FromHours(4),
+            defaultUser);
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[3].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2028, 1, 1),
+            TimeSpan.FromHours(8),
+            defaultUser);
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[4].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2015, 6, 9),
+            DateTimeOffsetExtensions.CreateFromDate(2020, 1, 1),
+            TimeSpan.FromHours(8),
+            defaultUser);
+        await CreateWorkingHours(
+            commandBus,
+            testUsers[4].Id,
+            DateTimeOffsetExtensions.CreateFromDate(2020, 1, 2),
+            DateTimeOffsetExtensions.CreateFromDate(2024, 5, 6),
+            TimeSpan.FromHours(4),
+            defaultUser);
+        await CreateWorkingHours(
+            commandBus,
+            defaultUser.Id,
+            DateTimeOffsetExtensions.CreateFromDate(2020, 2, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2026, 7, 1),
+            TimeSpan.FromHours(8),
+            defaultUser);
+    }
+
+    private static Task CreateWorkingHours(ICommandBus commandBus, string? userId, DateTimeOffset? dateFrom,
+        DateTimeOffset? dateTo, TimeSpan? duration, FederatedUser? createdBy)
+    {
+        var workingHoursId = Guid.NewGuid();
+        var command = EventSourcing.WorkingHours.CreatingWorkingHours.CreateWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, createdBy);
+        return commandBus.Send(command);
+    }
+
+    private static async Task FillInLeaveRequests(IQueryBus queryBus, ICommandBus commandBus)
+    {
+        var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(
+            GetLeaveRequests.Create(
+                null, null, null, null, null, null, null,
+                testUsers.Take(5).Select(u => u.Id).ToArray(),
+                defaultUser));
         if (pagedList.Any())
         {
             return;
         }
+
         await SetupUser0(commandBus, defaultUser, testUsers[0]);
         await SetupUser1(commandBus, defaultUser, testUsers[1]);
         await SetupUser2(commandBus, defaultUser, testUsers[2]);
@@ -321,7 +443,8 @@ public static class DbContextExtenstions
         await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser, TimeSpan.FromHours(4));
     }
 
-    private static async Task AddSaturdayLeaveRequest(ICommandBus commandBus, FederatedUser testUser, DateTimeOffset now, int month)
+    private static async Task AddSaturdayLeaveRequest(ICommandBus commandBus, FederatedUser testUser,
+        DateTimeOffset now, int month)
     {
         var startDay = GetFirstWorkingDay(new DateTimeOffset(now.Year, month, 10, 0, 0, 0, TimeSpan.Zero));
         var endDay = startDay;
@@ -360,7 +483,10 @@ public static class DbContextExtenstions
 
     private static DateTimeOffset GetFirstWorkingDay(DateTimeOffset now)
     {
-        for (; DateCalculator.GetDayKind(now) != DateCalculator.DayKind.WORKING; now = now.AddDays(2)) { }
+        for (; DateCalculator.GetDayKind(now) != DateCalculator.DayKind.WORKING; now = now.AddDays(2))
+        {
+        }
+
         return now;
     }
 
@@ -373,14 +499,14 @@ public static class DbContextExtenstions
     {
         var leaveRequestId = Guid.NewGuid();
         var command = EventSourcing.LeaveRequests.CreatingLeaveRequest.CreateLeaveRequest.Create(
-                    leaveRequestId,
-                    dateFrom,
-                    dateTo,
-                    duration,
-                    leaveTypeId,
-                    null,
-                    createdBy
-                );
+            leaveRequestId,
+            dateFrom,
+            dateTo,
+            duration,
+            leaveTypeId,
+            null,
+            createdBy
+        );
         await commandBus.Send(command);
         return leaveRequestId;
     }
@@ -391,6 +517,7 @@ public static class DbContextExtenstions
         {
             return;
         }
+
         var now = GetNow();
         var holidayLimits = testUsers.Select(u => new UserLeaveLimit
         {
@@ -463,78 +590,78 @@ public static class DbContextExtenstions
                 Order = 4,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#30D5C8" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop wychowawczy",
                 Order = 5,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#2EB82E" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop macierzyński",
                 Order = 6,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop bezpłatny",
                 Order = 7,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#0033CC" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "opieka nad chorym dzieckiem lub innym członkiem rodziny",
                 Order = 8,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF3333" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "nieobecność usprawiedliwiona płatna",
                 Order = 9,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#80AAFF" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "nieobecność nieusprawiedliwiona",
                 Order = 10,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#0066FF" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "opieka nad dzieckiem do 14 lat - art. 188 KP",
                 Order = 11,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF4DA6" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop ojcowski",
                 Order = 12,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop tacierzyński",
                 Order = 13,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = true, Color = "#FF99DD" }
             },
-                saturdayLeave,
-                new LeaveType
+            saturdayLeave,
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop od firmy",
                 Order = 15,
                 Properties = new LeaveType.LeaveTypeProperties { IncludeFreeDays = false, Color = "#0137C9" }
             },
-                new LeaveType
+            new LeaveType
             {
                 Id = Guid.NewGuid(),
                 Name = "urlop szkoleniowy",
@@ -557,6 +684,7 @@ public static class DbContextExtenstions
         {
             return;
         }
+
         await dbContext.Settings.AddRangeAsync(settings);
     }
 }

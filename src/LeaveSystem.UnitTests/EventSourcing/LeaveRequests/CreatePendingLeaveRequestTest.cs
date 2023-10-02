@@ -5,6 +5,7 @@ using GoldenEye.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using Xunit;
 
@@ -53,8 +54,9 @@ public class CreatePendingLeaveRequestTest
             TimeSpan.FromHours(16),
             Guid.NewGuid(),
             remarks,
-            FakeUserProvider.GetUserWithNameFakeoslav()
-        );
+            FakeUserProvider.GetUserWithNameFakeoslav(),
+            WorkingHoursUtils.DefaultWorkingHours
+            );
         //When
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //Then

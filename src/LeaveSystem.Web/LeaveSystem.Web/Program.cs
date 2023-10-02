@@ -1,3 +1,4 @@
+using Blazored.Toast;
 using LeaveSystem.Web;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -7,6 +8,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+builder.Services.AddRadzenComponents();
+builder.Services.AddBlazoredToast();
 builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddLeaveSystemModule();

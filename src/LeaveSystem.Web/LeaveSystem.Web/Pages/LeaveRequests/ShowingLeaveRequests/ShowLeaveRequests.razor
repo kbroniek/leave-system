@@ -9,6 +9,7 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Text.Json.Serialization
 @using System.Text.Json
+@using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
 @attribute [Authorize(Policy=@PolicyName)]
 @inject HttpClient Http
 @inject ILogger<ShowLeaveRequests> Logger
@@ -116,9 +117,8 @@ else
                 .Select(u => u.First())
                 .OrderBy(u => u.Name)
                 .ToArray();
-            var allUserIds = employees.Select(e => e.Id);
-            var workingHours = await WorkingHoursService.GetWorkingHours(allUserIds, leaveRequestsQuery.DateFrom, leaveRequestsQuery.DateTo);
-
+            var workingHoursQuery = GetWorkingHoursQuery.GetDefault();
+            var workingHours = await WorkingHoursService.GetWorkingHours(workingHoursQuery);
             await Timeline.CreateAsync(
                 "timeline-visualization",
                 employees,
@@ -127,7 +127,7 @@ else
                     lr.DateFrom,
                     lr.DateTo,
                     lr.Duration,
-                    workingHours.GetDuration(lr.CreatedBy.Id),
+                    workingHours?.Items?.FirstOrDefault(wh => wh.UserId == lr.CreatedBy.Id)?.Duration ?? TimeSpan.Zero,
                     leaveTypes.FirstOrDefault(lt => lt.Id == lr.LeaveTypeId)?.Name ?? lr.LeaveTypeId.ToString(),
                     lr.LeaveTypeId,
                     lr.Status,

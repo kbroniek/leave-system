@@ -7,8 +7,6 @@ using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using Marten.Pagination;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 

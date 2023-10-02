@@ -31,7 +31,7 @@ public class UsersService
             throw new InvalidOperationException("Can't update users");
         }
     }
-    public async Task Create(UserDto user)
+    public async Task<string?> Create(UserDto user)
     {
         var jsonString = JsonSerializer.Serialize(user);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
@@ -41,6 +41,7 @@ public class UsersService
             // TODO: Log an error
             throw new InvalidOperationException("Can't update users");
         }
+        return await response.Content.ReadAsStringAsync();
     }
     public async Task Delete(string userId)
     {

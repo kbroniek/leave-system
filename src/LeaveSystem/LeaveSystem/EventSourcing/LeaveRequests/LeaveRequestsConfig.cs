@@ -15,12 +15,12 @@ internal static class LeaveRequestsConfig
 {
     internal static IServiceCollection AddLeaveRequests(this IServiceCollection services) =>
         services.AddMartenEventSourcedRepository<LeaveRequest>()
-            .AddCommandHandlers()
-            .AddQueryHandlers()
-            .AddValidators()
-            .AddFactories();
+            .AddLeaveRequestCommandHandlers()
+            .AddLeaveRequestQueryHandlers()
+            .AddLeaveRequestValidators()
+            .AddLeaveRequestFactories();
 
-    private static IServiceCollection AddCommandHandlers(this IServiceCollection services) =>
+    private static IServiceCollection AddLeaveRequestCommandHandlers(this IServiceCollection services) =>
         services
             .AddCommandHandler<CreateLeaveRequest, HandleCreateLeaveRequest>()
             .AddCommandHandler<CreateLeaveRequestOnBehalf, HandleCreateLeaveRequestOnBehalf>()
@@ -28,16 +28,16 @@ internal static class LeaveRequestsConfig
             .AddCommandHandler<RejectLeaveRequest, HandleRejectLeaveRequest>()
             .AddCommandHandler<CancelLeaveRequest, HandleCancelLeaveRequest>();
 
-    private static IServiceCollection AddQueryHandlers(this IServiceCollection services) =>
+    private static IServiceCollection AddLeaveRequestQueryHandlers(this IServiceCollection services) =>
         services
             .AddQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>, HandleGetLeaveRequests>()
             .AddQueryHandler<GetLeaveRequestDetails, LeaveRequest, HandleGetLeaveRequestDetails>();
 
-    private static IServiceCollection AddValidators(this IServiceCollection services) =>
+    private static IServiceCollection AddLeaveRequestValidators(this IServiceCollection services) =>
         services
             .AddScoped<CreateLeaveRequestValidator>();
 
-    private static IServiceCollection AddFactories(this IServiceCollection services) =>
+    private static IServiceCollection AddLeaveRequestFactories(this IServiceCollection services) =>
         services
             .AddScoped<LeaveRequestFactory>();
 

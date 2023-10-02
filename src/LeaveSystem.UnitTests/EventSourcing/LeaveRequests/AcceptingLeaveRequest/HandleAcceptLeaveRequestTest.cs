@@ -7,6 +7,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.WorkingHours;
 using Moq;
 using Xunit;
 using LeaveRequest = LeaveSystem.EventSourcing.LeaveRequests.LeaveRequest;
@@ -44,7 +45,8 @@ public class HandleAcceptLeaveRequestTest
             TimeSpan.FromHours(8),
             Guid.NewGuid(),
             "fakeRemarks",
-            command.AcceptedBy
+            command.AcceptedBy,
+            WorkingHoursUtils.DefaultWorkingHours
             );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createdEvent);
         repositoryMock

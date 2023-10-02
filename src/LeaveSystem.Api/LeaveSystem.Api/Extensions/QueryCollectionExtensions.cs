@@ -1,4 +1,5 @@
 ﻿using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.Api.Extensions;
 
@@ -56,6 +57,18 @@ public static class QueryCollectionExtensions
         }
     }
 
+    public static WorkingHoursStatus[]? TryParseWorkingHoursStatuses(this IQueryCollection query, string paramName)
+    {
+        var paramValue = query[paramName];
+        try
+        {
+            return !string.IsNullOrEmpty(paramValue) ? paramValue.Select(x => Enum.Parse<WorkingHoursStatus>(x!)).ToArray() : null;
+        }
+        catch (Exception ex)
+        {
+            throw new FormatException($"Cannot parse the {paramName} query parameter to LeaveRequestStatus type.", ex);
+        }
+    }
     public static Guid[]? TryParseGuids(this IQueryCollection query, string paramName)
     {
         var paramValue = query[paramName];

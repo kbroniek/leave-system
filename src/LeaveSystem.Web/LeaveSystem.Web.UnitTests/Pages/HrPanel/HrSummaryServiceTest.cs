@@ -1,5 +1,8 @@
+using Blazored.Toast.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Extensions;
 using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.HrPanel;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
@@ -7,6 +10,7 @@ using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.UserPanel;
 using LeaveSystem.Web.Pages.WorkingHours;
+using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 
@@ -35,7 +39,7 @@ public class HrSummaryServiceTest
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
         var fakeLeaveRequests =
             FakeLeaveRequestShortInfoProvider.GetAll(DateTimeOffsetExtensions.CreateFromDate(year, 4, 5))
-                .ToPagedListResponse(1000);
+                .ToPagedListResponse();
         getLeaveRequestsServiceMock.GetLeaveRequests(ArgExtensions.IsEquivalentTo<GetLeaveRequestsQuery>(query))
             .Returns(fakeLeaveRequests);
         var leaveTypesServiceMock = Substitute.For<LeaveTypesService>(httpClientMock);
@@ -47,10 +51,11 @@ public class HrSummaryServiceTest
         var employeeServiceMock = Substitute.For<EmployeeService>(httpClientMock);
         var employees = FakeGetEmployeesDtoProvider.GetAll().ToArray();
         employeeServiceMock.Get().Returns(employees);
-        var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock);
+        var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock, Substitute.For<IToastService>());
         var fakeUserIds = new[] { FakeUserProvider.BenId, FakeUserProvider.PhilipId, FakeUserProvider.HabibId, FakeUserProvider.FakseoslavId};
-        var fakeWorkingHours = FakeWorkingHoursProvider.GetAllAsWorkingHoursCollection();
-        workingHoursServiceMock.GetWorkingHours(ArgExtensions.IsCollectionEquivalentTo(fakeUserIds), firstDay, lastDay)
+        var fakeWorkingHours = FakeWorkingHoursProvider.GetAll(DateTimeOffset.Now).ToDto().ToPagedListResponse();
+        var getWorkingHoursQuery = GetWorkingHoursQuery.GetDefaultForUsers(fakeUserIds);
+        workingHoursServiceMock.GetWorkingHours(ArgExtensions.IsEquivalentTo<GetWorkingHoursQuery>(getWorkingHoursQuery))
             .Returns(fakeWorkingHours);
         var sut = GetSut(getLeaveRequestsServiceMock, leaveTypesServiceMock, workingHoursServiceMock,
             userLeaveLimitsServiceMock, employeeServiceMock);
@@ -61,22 +66,22 @@ public class HrSummaryServiceTest
         await leaveTypesServiceMock.Received().GetLeaveTypes();
         await userLeaveLimitsServiceMock.Received().GetLimits(firstDay, lastDay);
         await employeeServiceMock.Received().Get();
-        await workingHoursServiceMock.Received().GetWorkingHours(ArgExtensions.IsCollectionEquivalentTo(fakeUserIds), firstDay, lastDay);
+        await workingHoursServiceMock.Received().GetWorkingHours(ArgExtensions.IsEquivalentTo<GetWorkingHoursQuery>(getWorkingHoursQuery));
         var items = employees.Union(fakeLeaveRequests.Items.Select(lr =>
             GetEmployeeDto.Create(lr.CreatedBy)
-        )).Select(e => 
+        )).Select(e =>
             new HrSummaryService.UserLeaveRequestSummary(e, fakeLeaveTypes.Select(lt => LeaveRequestPerType.Create(
                 lt,
                 fakeLeaveTypes,
                 fakeLeaveRequests.Items.Where(lr => lr.CreatedBy.Id == e.Id),
                 fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
-                fakeWorkingHours.GetDuration(e.Id))))
+                fakeWorkingHours.Items.DurationOrZero(e.Id))))
         );
         result.Should().BeEquivalentTo(new
         {
             LeaveTypes = fakeLeaveTypes,
-            Items = items 
+            Items = items
         }, o => o.ExcludingMissingMembers());
-    } 
-    
+    }
+
 }
