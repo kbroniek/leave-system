@@ -1,9 +1,6 @@
-using System.Runtime.InteropServices;
-using System.Text.Json;
-using FluentAssertions;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
-using Microsoft.Graph;
+using System.Text.Json;
 
 namespace LeaveSystem.Api.UnitTests.GraphApi;
 

@@ -1,4 +1,5 @@
 ﻿using LeaveSystem.Db;
+using LeaveSystem.UnitTests.Providers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
@@ -52,4 +53,3 @@ public static class DbContextFactory
         await dbContext.UserLeaveLimits.AddRangeAsync(FakeUserLeaveLimitProvider.GetLimits());
     }
 }
-

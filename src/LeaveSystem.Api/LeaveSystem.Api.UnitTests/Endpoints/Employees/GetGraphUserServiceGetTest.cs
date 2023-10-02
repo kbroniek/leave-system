@@ -65,7 +65,6 @@ public class GetGraphUserServiceGetTest
                 Roles = fakeRolesAttribute.Roles,
                 Name = users[2].DisplayName
             },
-            
         }, o => o.ExcludingMissingMembers());
     }
 }

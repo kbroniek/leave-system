@@ -1,6 +1,7 @@
 ﻿using LeaveSystem.Shared;
 using Microsoft.Graph;
 using System.Text.Json;
+using Ardalis.GuardClauses;
 using LeaveSystem.Api.GraphApi;
 
 namespace LeaveSystem.Api.Endpoints.Users;
@@ -9,12 +10,23 @@ public class SaveGraphUserService
 {
     private readonly IGraphClientFactory graphClientFactory;
     private readonly string roleAttributeName;
+    private readonly string defaultPassword;
+    private readonly string issuer;
 
-    public SaveGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
+    private SaveGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver, string defaultPassword, string issuer)
     {
         this.graphClientFactory = graphClientFactory;
+        this.defaultPassword = defaultPassword;
+        this.issuer = issuer;
         roleAttributeName = roleAttributeNameResolver.RoleAttributeName;
     }
+
+    public static SaveGraphUserService Create(IGraphClientFactory? graphClientFactory,
+        RoleAttributeNameResolver? roleAttributeNameResolver, string? defaultPassword, string? issuer)
+        => new(Guard.Against.Nill(graphClientFactory),
+            Guard.Against.Nill(roleAttributeNameResolver),
+            Guard.Against.NullOrWhiteSpace(defaultPassword),
+            Guard.Against.NullOrWhiteSpace(issuer));
 
     public async Task<FederatedUser> Add(string email, string? name, IEnumerable<string> roles, CancellationToken cancellationToken)
     {
@@ -23,7 +35,6 @@ public class SaveGraphUserService
         {
             { roleAttributeName, JsonSerializer.Serialize(new RolesAttribute(roles)) }
         };
-        var issuer = "leavesystem.onmicrosoft.com";
         try
         {
             var principalId = Guid.NewGuid();
@@ -36,7 +47,7 @@ public class SaveGraphUserService
                 PasswordProfile = new PasswordProfile
                 {
                     ForceChangePasswordNextSignIn = false,
-                    Password = "$illy-Wood?" // TODO: Get from config
+                    Password = defaultPassword
                 },
                 MailNickname = email.Split('@').First(),
                 Identities = new ObjectIdentity[]
@@ -69,7 +80,6 @@ public class SaveGraphUserService
         {
             { roleAttributeName, JsonSerializer.Serialize(new RolesAttribute(roles)) }
         };
-        var issuer = "leavesystem.onmicrosoft.com";
         await graphClient.Users[userId]
             .Request()
             .UpdateAsync(new User
