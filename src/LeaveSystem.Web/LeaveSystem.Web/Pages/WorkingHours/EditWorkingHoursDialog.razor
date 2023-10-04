@@ -7,6 +7,7 @@
 @inject WorkingHoursService WorkingHoursService
 
 <RadzenStack Gap="1.5rem">
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Working Hours" Click="@InsertRow" Disabled=@(workingHoursToInsert != null || editingWorkingHours) />
     <RadzenDataGrid @ref="workingHoursGrid" Data="WorkingHours" EditMode="DataGridEditMode.Single" TItem="WorkingHoursDto" AllowColumnResize="true" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow">
         <Columns>
             <RadzenDataGridColumn TItem="WorkingHoursDto" Property="DateFrom" Title="Date From" Frozen="true">
@@ -49,7 +50,6 @@
     </RadzenDataGrid>
     <RadzenStack Orientation="Orientation.Horizontal">
         <RadzenButton Text="Close" Click="Close" Style="width: 80px;"/>
-        <RadzenButton Text="Add" Click="InsertRow"></RadzenButton>
     </RadzenStack>
 </RadzenStack>
 
@@ -64,6 +64,8 @@
     RadzenDataGrid<WorkingHoursDto>? workingHoursGrid;
     List<WorkingHoursDto> workingHoursToReset = new();
     WorkingHoursDto? workingHoursToInsert;
+    WorkingHoursDto? editWorkingHoursBackup;
+    bool editingWorkingHours = false;
 
     protected override void OnInitialized()
     {
@@ -74,6 +76,7 @@
             return;
         }
         workingHoursToReset = WorkingHours.ToList();
+        editWorkingHoursBackup = null;
     }
 
     void Reset()
@@ -105,17 +108,19 @@
         var addedWorkingHours = await WorkingHoursService.AddAndReturnDto(new AddWorkingHoursDto(workingHours.UserId, workingHours.DateFrom, workingHours.DateTo, workingHours.Duration));
         if (addedWorkingHours is not null)
         {
-            workingHours = addedWorkingHours;
+            workingHours.Id = addedWorkingHours.Id;
         }
         workingHoursToInsert = null;
     }
 
     async Task EditRow(WorkingHoursDto workingHours)
     {
+        editingWorkingHours = true;
         if (workingHoursGrid is null)
         {
             return;
         }
+        editWorkingHoursBackup = ObjectCopier.Copy(workingHours);
         await workingHoursGrid.EditRow(workingHours);
     }
 
@@ -134,9 +139,10 @@
         {
             workingHoursToInsert = null;
         }
-        
+
         await WorkingHoursService.Edit(workingHours);
         workingHoursToInsert = null;
+        editingWorkingHours = false;
     }
 
     void CancelEdit(WorkingHoursDto workingHours)
@@ -146,6 +152,14 @@
             workingHoursToInsert = null;
         }
         workingHoursGrid?.CancelEditRow(workingHours);
+        if (editWorkingHoursBackup is not null && workingHours.Id == editWorkingHoursBackup.Id)
+        {
+            workingHours.DateFrom = editWorkingHoursBackup.DateFrom;
+            workingHours.DateTo = editWorkingHoursBackup.DateTo;
+            workingHours.Duration = editWorkingHoursBackup.Duration;
+            workingHours.UserId = editWorkingHoursBackup.UserId;
+        }
+        editingWorkingHours = false;
     }
 
     string DateToString(DateTimeOffset? date) => date.HasValue ? date.Value.ToString("dd.MM.yyyy") : "";
