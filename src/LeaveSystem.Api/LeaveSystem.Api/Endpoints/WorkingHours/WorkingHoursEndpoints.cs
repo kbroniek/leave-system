@@ -83,7 +83,12 @@ public static class WorkingHoursEndpoints
                         user
                     );
                     await commandBus.Send(command, cancellationToken);
-                    return Results.Created("api/workingHours", workingHoursId);
+                    return Results.Created("api/workingHours", new WorkingHoursDto(
+                        addWorkingHoursDto.UserId,
+                        addWorkingHoursDto.DateFrom.Value,
+                        addWorkingHoursDto.DateTo,
+                        addWorkingHoursDto.Duration.Value,
+                        workingHoursId));
                 })
             .WithName(CreateWorkingHoursPolicyName)
             .RequireAuthorization(CreateWorkingHoursPolicyName);

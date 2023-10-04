@@ -21,7 +21,7 @@ public class EditWorkingHoursTest
     public async Task WhenErrorOccuredDuringEditing_ShowErrorToastAndReturnFalse()
     {
         //Given
-        var workingHoursToEdit = FakeWorkingHoursProvider.GetAll(DateTimeOffset.Now).ToDto().ToList();
+        var workingHoursToEdit = FakeWorkingHoursProvider.GetCurrentForBen(DateTimeOffset.Now).ToDto();
         const string fakeContentText = "fake response content";
         var problemDto =
             new ProblemDto(string.Empty, fakeContentText, 400, string.Empty, string.Empty, "dev", "1.0.0.0");
@@ -29,13 +29,10 @@ public class EditWorkingHoursTest
         var responseContent = new StringContent(serializedProblemDto, Encoding.UTF8, "application/json");
         var mockHttpMessageHandler = new MockHttpMessageHandler();
         const string baseUrl = "http://localhost:5047";
-        foreach (var singleWorkingHours in workingHoursToEdit)
-        {
-            mockHttpMessageHandler
-                .When($"{baseUrl}/api/workingHours/{singleWorkingHours.Id}/modify")
-                .WithJsonContent(singleWorkingHours)
-                .Respond(HttpStatusCode.BadRequest, responseContent); 
-        }
+        mockHttpMessageHandler
+            .When($"{baseUrl}/api/workingHours/{workingHoursToEdit.Id}/modify")
+            .WithJsonContent(workingHoursToEdit)
+            .Respond(HttpStatusCode.BadRequest, responseContent);
         httpClientMock = new HttpClient(mockHttpMessageHandler);
         httpClientMock.BaseAddress = new Uri(baseUrl);
         toastServiceMock = Substitute.For<IToastService>();
@@ -52,16 +49,13 @@ public class EditWorkingHoursTest
     public async Task WhenEditingPassedSuccessfully_ShowSuccessToastAndReturnTrue()
     {
         //Given
-        var workingHoursToEdit = FakeWorkingHoursProvider.GetAll(DateTimeOffset.Now).ToDto().ToList();
+        var workingHoursToEdit = FakeWorkingHoursProvider.GetCurrentForBen(DateTimeOffset.Now).ToDto();
         var mockHttpMessageHandler = new MockHttpMessageHandler();
         const string baseUrl = "http://localhost:5047";
-        foreach (var singleWorkingHours in workingHoursToEdit)
-        {
-            mockHttpMessageHandler
-                .When($"{baseUrl}/api/workingHours/{singleWorkingHours.Id}/modify")
-                .WithJsonContent(singleWorkingHours)
-                .Respond(HttpStatusCode.NoContent); 
-        }
+        mockHttpMessageHandler
+                .When($"{baseUrl}/api/workingHours/{workingHoursToEdit.Id}/modify")
+                .WithJsonContent(workingHoursToEdit)
+                .Respond(HttpStatusCode.NoContent);
         httpClientMock = new HttpClient(mockHttpMessageHandler);
         httpClientMock.BaseAddress = new Uri(baseUrl);
         toastServiceMock = Substitute.For<IToastService>();
