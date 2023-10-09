@@ -36,8 +36,9 @@ public class WorkingHoursService
             return await httpClient.GetFromJsonAsync<WorkingHoursDto>(uri,
                 new JsonSerializerOptions(JsonSerializerDefaults.Web));
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
+            toastService.ShowError(ex.Message);
             return null;
         }
     }
