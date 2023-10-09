@@ -84,10 +84,10 @@ public static class WorkingHoursEndpoints
                     );
                     await commandBus.Send(command, cancellationToken);
                     return Results.Created("api/workingHours", new WorkingHoursDto(
-                        addWorkingHoursDto.UserId,
-                        addWorkingHoursDto.DateFrom.Value,
-                        addWorkingHoursDto.DateTo,
-                        addWorkingHoursDto.Duration.Value,
+                        command.UserId,
+                        command.DateFrom,
+                        command.DateTo,
+                        command.Duration,
                         workingHoursId));
                 })
             .WithName(CreateWorkingHoursPolicyName)
