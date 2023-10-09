@@ -7,11 +7,13 @@
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.Extensions
 @using System.Collections
+@using GoldenEye.Extensions.Basic
 
 @attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
 @inject WorkingHoursService WorkingHoursService
 @inject DialogService DialogService
+@inject IToastService ToastService
 
 
 @if (users is null)
@@ -219,12 +221,18 @@ else
 
     async Task ShowWorkingHoursDialog(string? userId)
     {
-        await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours", 
+        if (userId.IsNullOrWhiteSpace())
+        {
+            ToastService.ShowError("Can not open the dialog");
+            return;
+        }
+        await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours",
             new Dictionary<string, object>
             {
-                {"WorkingHours", workingHoursToUpdate.OrEmptyIfNull().ToList()},
-                {"UserId", userId ?? string.Empty}
+                { "WorkingHours", workingHoursToUpdate.OrEmptyIfNull().ToList() },
+                { "UserId", userId ?? string.Empty }
             },
             new DialogOptions { Width = "800px", Resizable = true, Draggable = true });
     }
+
 }
