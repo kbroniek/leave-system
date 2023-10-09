@@ -1,7 +1,5 @@
 @using LeaveSystem.Shared.WorkingHours
-@using FluentAssertions
-@using LeaveSystem.Shared
-@using LeaveSystem.Shared.Extensions
+@using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
 @inject DialogService DialogService
 @inject IToastService ToastService
 @inject WorkingHoursService WorkingHoursService
@@ -62,10 +60,9 @@
     public List<WorkingHoursDto>? WorkingHours { get; set; }
 
     RadzenDataGrid<WorkingHoursDto>? workingHoursGrid;
-    List<WorkingHoursDto> workingHoursToReset = new();
     WorkingHoursDto? workingHoursToInsert;
-    WorkingHoursDto? editWorkingHoursBackup;
     bool editingWorkingHours = false;
+    private string userIdNotNull = string.Empty;
 
     protected override void OnInitialized()
     {
@@ -75,18 +72,24 @@
             DialogService.Close();
             return;
         }
-        workingHoursToReset = WorkingHours.ToList();
-        editWorkingHoursBackup = null;
+        userIdNotNull = UserId;
     }
 
-    void Reset()
+    async Task Reset()
     {
-        WorkingHours = workingHoursToReset.ToList();
+        var query = GetWorkingHoursQuery.GetAllForUsers(new[] { userIdNotNull });
+        var workingHours = (await WorkingHoursService.GetWorkingHours(query))?.Items?.ToList();
+        if (workingHours is null)
+        {
+            ToastService.ShowError("Error occured during resetting working hours");
+            return;
+        }
+        WorkingHours = workingHours;
     }
 
-    void Close()
+    async Task Close()
     {
-        Reset();
+        await Reset();
         DialogService.Close();
     }
 
@@ -94,7 +97,7 @@
     {
         workingHoursToInsert = new()
         {
-            UserId = UserId!
+            UserId = userIdNotNull
         };
         if (workingHoursGrid is null)
         {
@@ -120,7 +123,6 @@
         {
             return;
         }
-        editWorkingHoursBackup = ObjectCopier.Copy(workingHours);
         await workingHoursGrid.EditRow(workingHours);
     }
 
@@ -145,20 +147,14 @@
         editingWorkingHours = false;
     }
 
-    void CancelEdit(WorkingHoursDto workingHours)
+    async Task CancelEdit(WorkingHoursDto workingHours)
     {
         if (workingHours == workingHoursToInsert)
         {
             workingHoursToInsert = null;
         }
         workingHoursGrid?.CancelEditRow(workingHours);
-        if (editWorkingHoursBackup is not null && workingHours.Id == editWorkingHoursBackup.Id)
-        {
-            workingHours.DateFrom = editWorkingHoursBackup.DateFrom;
-            workingHours.DateTo = editWorkingHoursBackup.DateTo;
-            workingHours.Duration = editWorkingHoursBackup.Duration;
-            workingHours.UserId = editWorkingHoursBackup.UserId;
-        }
+        await Reset();
         editingWorkingHours = false;
     }
 
