@@ -101,6 +101,7 @@
         };
         if (workingHoursGrid is null)
         {
+            ToastService.ShowError("Error occured during inserting row!");
             return;
         }
         await workingHoursGrid.InsertRow(workingHoursToInsert);
@@ -121,6 +122,7 @@
         editingWorkingHours = true;
         if (workingHoursGrid is null)
         {
+            ToastService.ShowError("Error occured during entering edition mode!");
             return;
         }
         await workingHoursGrid.EditRow(workingHours);
@@ -130,6 +132,7 @@
     {
         if (workingHoursGrid is null)
         {
+            ToastService.ShowError("Error occured during saving working hours!");
             return;
         }
         await workingHoursGrid.UpdateRow(workingHours);
