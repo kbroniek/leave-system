@@ -15,6 +15,8 @@ using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using Microsoft.Extensions.Logging;
+using ArgExtensions = LeaveSystem.Shared.Extensions.ArgExtensions;
+using FakeWorkingHoursProvider = LeaveSystem.UnitTests.Providers.FakeWorkingHoursProvider;
 
 namespace LeaveSystem.Web.UnitTests.Pages.HrPanel;
 

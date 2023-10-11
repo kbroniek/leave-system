@@ -1,8 +1,6 @@
-using System.Globalization;
 using System.Text.Json;
 using Blazored.Toast.Services;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
@@ -10,7 +8,7 @@ using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
+using FakeWorkingHoursProvider = LeaveSystem.UnitTests.Providers.FakeWorkingHoursProvider;
 
 namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
 

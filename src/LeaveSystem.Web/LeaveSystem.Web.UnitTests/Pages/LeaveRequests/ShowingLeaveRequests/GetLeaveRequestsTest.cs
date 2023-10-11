@@ -23,7 +23,7 @@ public class GetLeaveRequestsTest
         //Given
         const int year = 2021;
         data = FakeLeaveRequestShortInfoProvider.GetAll(DateTimeOffsetExtensions.CreateFromDate(year, 4, 5))
-            .ToPagedListResponse(1000);
+            .ToPagedListResponse();
         var mockHttp = new MockHttpMessageHandler();
         var firstDay = DateTimeOffsetExtensions.GetFirstDayOfYear(year);
         var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(year);
