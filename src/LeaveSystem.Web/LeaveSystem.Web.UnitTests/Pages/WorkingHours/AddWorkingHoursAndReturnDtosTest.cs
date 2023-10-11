@@ -4,11 +4,12 @@ using System.Text.Json;
 using Blazored.Toast.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Extensions;
-using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
+using Microsoft.Extensions.Logging;
 using RichardSzalay.MockHttp;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
 
@@ -16,10 +17,11 @@ public class AddWorkingHoursAndReturnDtosTest
 {
     private HttpClient httpClientMock;
     private IToastService toastServiceMock;
+    private ILogger<WorkingHoursService> logger;
     private const string BaseUrl = "http://localhost:5047";
     private const string RequestUrl = "http://localhost:5047/api/workingHours";
 
-    private WorkingHoursService GetSut() => new(httpClientMock, toastServiceMock);
+    private WorkingHoursService GetSut() => new(httpClientMock, toastServiceMock, logger);
 
     [Fact]
     public async Task WhenErrorOccuredDuringAdding_ShowErrorToastAndReturnNull()
@@ -27,8 +29,9 @@ public class AddWorkingHoursAndReturnDtosTest
         //Given
         var workingHoursToAdd = FakeWorkingHoursProvider.GetCurrentForBen(DateTimeOffset.Now).ToAddWorkingHoursDto();
         const string fakeContentText = "fake response content";
+        const string fakeDetailsText = "fake error in 404 line";
         var problemDto =
-            new ProblemDto(string.Empty, fakeContentText, 400, string.Empty, string.Empty, "dev", "1.0.0.0");
+            new ProblemDto(string.Empty, fakeContentText, 400, fakeDetailsText, string.Empty, "dev", "1.0.0.0");
         var serializedProblemDto = JsonSerializer.Serialize(problemDto);
         var responseContent = new StringContent(serializedProblemDto, Encoding.UTF8, "application/json");
         var mockHttpMessageHandler = new MockHttpMessageHandler();
@@ -39,12 +42,14 @@ public class AddWorkingHoursAndReturnDtosTest
         httpClientMock = new HttpClient(mockHttpMessageHandler);
         httpClientMock.BaseAddress = new Uri(BaseUrl);
         toastServiceMock = Substitute.For<IToastService>();
+        logger = Substitute.For<ILogger<WorkingHoursService>>();
         var sut = GetSut();
         //When
         var result = await sut.AddAndReturnDto(workingHoursToAdd);
         //Then
         toastServiceMock.Received(1).ShowError(fakeContentText);
         toastServiceMock.DidNotReceiveWithAnyArgs().ShowSuccess(string.Empty);
+        logger.ReceivedWithAnyArgs(1).LogError("");
         result.Should().BeNull();
     }
 
@@ -64,12 +69,14 @@ public class AddWorkingHoursAndReturnDtosTest
         httpClientMock = new HttpClient(mockHttpMessageHandler);
         httpClientMock.BaseAddress = new Uri(BaseUrl);
         toastServiceMock = Substitute.For<IToastService>();
+        logger = Substitute.For<ILogger<WorkingHoursService>>();
         var sut = GetSut();
         //When
         var result = await sut.AddAndReturnDto(workingHoursToAdd);
         //Then
         toastServiceMock.Received(1).ShowSuccess(Arg.Any<string>());
         toastServiceMock.DidNotReceiveWithAnyArgs().ShowError(string.Empty);
+        logger.DidNotReceiveWithAnyArgs().LogError("");
         result.Should().BeEquivalentTo(expectedResult);
     }
 }
