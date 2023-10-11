@@ -1,74 +1,174 @@
 @using LeaveSystem.Shared.WorkingHours
-@using FluentAssertions
-@using LeaveSystem.Shared
-@using LeaveSystem.Shared.Extensions
+@using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
 @inject DialogService DialogService
 @inject IToastService ToastService
+@inject WorkingHoursService WorkingHoursService
+@inject ILogger<EditWorkingHoursDialog> Logger
 
 <RadzenStack Gap="1.5rem">
-    @foreach (var singleWorkingHours in WorkingHoursToUpdate.OrEmptyIfNull())
-    {
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
-            <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
-            <RadzenDatePicker @bind-Value="singleWorkingHours.DateTo" DateFormat="d" Style="width: 150px"/>
-            <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
-        </RadzenStack>
-    }
-    @foreach (var singleWorkingHours in WorkingHoursToAdd.OrEmptyIfNull())
-    {
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
-            <RadzenDatePicker @bind-Value="singleWorkingHours.DateFrom" DateFormat="d" Style="width: 150px"/>
-            <RadzenDatePicker @bind-Value="singleWorkingHours.DateTo" DateFormat="d" Style="width: 150px"/>
-            <RadzenDatePicker @bind-Value="singleWorkingHours.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
-            <RadzenButton ButtonStyle="ButtonStyle.Danger" Text="-" Click="() => WorkingHoursToAdd?.Remove(singleWorkingHours)">
-                <span class="rz-button-text">
-                    <i class="fa-solid fa-minus"></i>
-                </span>
-            </RadzenButton>
-        </RadzenStack>
-    }
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Working Hours" Click="@InsertRow" Disabled=@(workingHoursToInsert != null || editingWorkingHours) />
+    <RadzenDataGrid @ref="workingHoursGrid" Data="WorkingHours" EditMode="DataGridEditMode.Single" TItem="WorkingHoursDto" AllowColumnResize="true" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow">
+        <Columns>
+            <RadzenDataGridColumn TItem="WorkingHoursDto" Property="DateFrom" Title="Date From" Frozen="true">
+                <Template Context="data">
+                    @DateToString(data.DateFrom)
+                </Template>
+                <EditTemplate Context="data">
+                    <RadzenDatePicker @bind-Value="data.DateFrom" DateFormat="d" Style="width: 150px"/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="WorkingHoursDto" Property="DateTo" Title="Date To">
+                <Template Context="data">
+                    @DateToString(data.DateTo)
+                </Template>
+                <EditTemplate Context="data">
+                    <RadzenDatePicker @bind-Value="data.DateTo" DateFormat="d" Style="width: 150px"/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="WorkingHoursDto" Property="DurationAsDateTime" Title="Duration">
+                <Template Context="data">
+                    @DayTimeToString(data.Duration)
+                </Template>
+                <EditTemplate Context="data">
+                    <RadzenDatePicker @bind-Value="data.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="WorkingHoursDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+                <Template Context="data">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(data))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                </Template>
+                <EditTemplate Context="data">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(data))">
+                    </RadzenButton>
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(data))">
+                    </RadzenButton>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
     <RadzenStack Orientation="Orientation.Horizontal">
         <RadzenButton Text="Close" Click="Close" Style="width: 80px;"/>
-        <RadzenButton Text="Add" Click="() => WorkingHoursToAdd?.Add(new(UserId))"></RadzenButton>
-        <RadzenButton Text="Reset" Click="Reset" ButtonStyle="ButtonStyle.Secondary"></RadzenButton>
     </RadzenStack>
 </RadzenStack>
 
 @code {
 
     [Parameter]
-    public string UserId { get; set; } = string.Empty;
+    public string? UserId { get; set; }
 
     [Parameter]
-    public IEnumerable<WorkingHoursDto>? WorkingHoursToUpdate { get; set; }
+    public List<WorkingHoursDto>? WorkingHours { get; set; }
 
-    [Parameter]
-    public List<AddWorkingHoursDto>? WorkingHoursToAdd { get; set; }
-
-    IEnumerable<WorkingHoursDto> workingHoursToUpdateToReset = Enumerable.Empty<WorkingHoursDto>();
-    List<AddWorkingHoursDto> workingHoursToAddToReset = new ();
+    RadzenDataGrid<WorkingHoursDto>? workingHoursGrid;
+    WorkingHoursDto? workingHoursToInsert;
+    bool editingWorkingHours = false;
+    private string userIdNotNull = string.Empty;
 
     protected override void OnInitialized()
     {
-        if (WorkingHoursToUpdate is null || WorkingHoursToAdd is null)
+        if (WorkingHours is null || UserId is null)
         {
             ToastService.ShowError("Error while initializing dialog");
+            Logger.LogError("WorkingHours or UserId is null");
             DialogService.Close();
             return;
-        }   
-        workingHoursToUpdateToReset = ObjectCopier.Copy(WorkingHoursToUpdate);
-        workingHoursToAddToReset = WorkingHoursToAdd.ToList();
+        }
+        userIdNotNull = UserId;
     }
 
-    void Reset()
+    async Task Reset()
     {
-        WorkingHoursToUpdate = ObjectCopier.Copy(workingHoursToUpdateToReset);
-        WorkingHoursToAdd = workingHoursToAddToReset.ToList();
+        var query = GetWorkingHoursQuery.GetAllForUsers(new[] { userIdNotNull });
+        var workingHours = (await WorkingHoursService.GetWorkingHours(query))?.Items?.ToList();
+        if (workingHours is null)
+        {
+            ToastService.ShowError("Error occured during resetting working hours");
+            Logger.LogError("workingHours is null");
+            return;
+        }
+        WorkingHours = workingHours;
     }
 
-    void Close()
+    async Task Close()
     {
+        await Reset();
         DialogService.Close();
     }
+
+    async Task InsertRow()
+    {
+        workingHoursToInsert = new()
+        {
+            UserId = userIdNotNull
+        };
+        if (workingHoursGrid is null)
+        {
+            ToastService.ShowError("Error occured during inserting row!");
+            Logger.LogError("workingHoursGrid is null");
+            return;
+        }
+        await workingHoursGrid.InsertRow(workingHoursToInsert);
+    }
+
+    async Task OnCreateRow(WorkingHoursDto workingHours)
+    {
+        var addedWorkingHours = await WorkingHoursService.AddAndReturnDto(new AddWorkingHoursDto(workingHours.UserId, workingHours.DateFrom, workingHours.DateTo, workingHours.Duration));
+        if (addedWorkingHours is not null)
+        {
+            workingHours.Id = addedWorkingHours.Id;
+        }
+        workingHoursToInsert = null;
+    }
+
+    async Task EditRow(WorkingHoursDto workingHours)
+    {
+        editingWorkingHours = true;
+        if (workingHoursGrid is null)
+        {
+            ToastService.ShowError("Error occured during entering edition mode!");
+            Logger.LogError("workingHoursGrid is null");
+            return;
+        }
+        await workingHoursGrid.EditRow(workingHours);
+    }
+
+    async Task SaveRow(WorkingHoursDto workingHours)
+    {
+        if (workingHoursGrid is null)
+        {
+            ToastService.ShowError("Error occured during saving working hours!");
+            Logger.LogError("workingHoursGrid is null");
+            return;
+        }
+        await workingHoursGrid.UpdateRow(workingHours);
+    }
+
+    async Task OnUpdateRow(WorkingHoursDto workingHours)
+    {
+        if (workingHours == workingHoursToInsert)
+        {
+            workingHoursToInsert = null;
+        }
+
+        await WorkingHoursService.Edit(workingHours);
+        workingHoursToInsert = null;
+        editingWorkingHours = false;
+    }
+
+    async Task CancelEdit(WorkingHoursDto workingHours)
+    {
+        if (workingHours == workingHoursToInsert)
+        {
+            workingHoursToInsert = null;
+        }
+        workingHoursGrid?.CancelEditRow(workingHours);
+        await Reset();
+        editingWorkingHours = false;
+    }
+
+    string DateToString(DateTimeOffset? date) => date.HasValue ? date.Value.ToString("dd.MM.yyyy") : "";
+
+    string DayTimeToString(TimeSpan timeSpan) => $"{timeSpan:hh\\:mm}";
 
 }

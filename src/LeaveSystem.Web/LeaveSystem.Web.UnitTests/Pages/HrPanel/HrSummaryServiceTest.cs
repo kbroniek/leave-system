@@ -1,4 +1,5 @@
 using Blazored.Toast.Services;
+using Castle.Core.Logging;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Extensions;
 using LeaveSystem.UnitTests.Providers;
@@ -13,6 +14,7 @@ using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
+using Microsoft.Extensions.Logging;
 
 namespace LeaveSystem.Web.UnitTests.Pages.HrPanel;
 
@@ -51,7 +53,7 @@ public class HrSummaryServiceTest
         var employeeServiceMock = Substitute.For<EmployeeService>(httpClientMock);
         var employees = FakeGetEmployeesDtoProvider.GetAll().ToArray();
         employeeServiceMock.Get().Returns(employees);
-        var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock, Substitute.For<IToastService>());
+        var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock, Substitute.For<IToastService>(), Substitute.For<ILogger<WorkingHoursService>>());
         var fakeUserIds = new[] { FakeUserProvider.BenId, FakeUserProvider.PhilipId, FakeUserProvider.HabibId, FakeUserProvider.FakseoslavId};
         var fakeWorkingHours = FakeWorkingHoursProvider.GetAll(DateTimeOffset.Now).ToDto().ToPagedListResponse();
         var getWorkingHoursQuery = GetWorkingHoursQuery.GetDefaultForUsers(fakeUserIds);

@@ -9,6 +9,7 @@ using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared.Date;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
@@ -48,6 +49,7 @@ IEdmModel GetEdmModel()
     return builder.GetEdmModel();
 }
 
+builder.Services.AddScoped<CurrentDateService>();
 builder.Services.AddDDD();
 builder.Services.AddLeaveSystemModule(builder.Configuration);
 

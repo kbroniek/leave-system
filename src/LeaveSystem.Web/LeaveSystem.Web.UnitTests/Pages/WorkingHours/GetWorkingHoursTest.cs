@@ -9,6 +9,7 @@ using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
 namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
@@ -17,8 +18,9 @@ public class GetWorkingHoursTest
 {
     private HttpClient httpClient;
     private IToastService toastService;
+    private ILogger<WorkingHoursService> logger;
 
-    private WorkingHoursService GetSut() => new(httpClient, toastService);
+    private WorkingHoursService GetSut() => new(httpClient, toastService, logger);
 
     [Fact]
     public async Task WhenGetWorkingHours_ThenReturnExceptedDeserializedResult()
@@ -29,11 +31,11 @@ public class GetWorkingHoursTest
         var url = query.CreateQueryString("api/workingHours");
         httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, expectedResponse, new JsonSerializerOptions(JsonSerializerDefaults.Web), out var mockedHttpValues);
         toastService = Substitute.For<IToastService>();
+        logger = Substitute.For<ILogger<WorkingHoursService>>();
         var sut = GetSut();
         //When
         var result = await sut.GetWorkingHours(query);
         //Then
-        //Todo: discover why items in result are objects with default properties values
         result.Should().BeEquivalentTo(expectedResponse);
         mockedHttpValues.ShouldMatchCount();
     }

@@ -7,11 +7,14 @@
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.Extensions
 @using System.Collections
+@using GoldenEye.Extensions.Basic
 
 @attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
 @inject WorkingHoursService WorkingHoursService
 @inject DialogService DialogService
+@inject IToastService ToastService
+@inject ILogger<UsersPage> Logger
 
 
 @if (users is null)
@@ -53,7 +56,7 @@ else
                     @WorkingHoursToString(data.WorkingHours)
                 </Template>
                 <EditTemplate Context="data">
-                    <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.Id))>
+                    <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.Id)) Disabled="data.WorkingHours is null">
                         <span class="rz-button-text">
                             <i class="fa-solid fa-clock"> </i>
                             <i class="fa-solid fa-pen"></i>
@@ -90,7 +93,6 @@ else
     UserWithWorkingHoursDto? userWithWorkingHoursToInsert;
     UserDto? userToUpdate;
     IEnumerable<WorkingHoursDto>? workingHoursToUpdate;
-    List<AddWorkingHoursDto>? workingHoursToAdd = new();
     readonly DateTimeOffset now = DateTimeOffset.Now.GetDayWithoutTime();
 
 
@@ -118,7 +120,6 @@ else
     {
         userToUpdate = userWithWorkingHours.GetUser();
         workingHoursToUpdate = userWithWorkingHours.WorkingHours;
-        workingHoursToAdd = new();
         if (usersGrid is null)
         {
             return;
@@ -137,13 +138,6 @@ else
         workingHoursToUpdate = null;
 
         await UsersService.Edit(userWithWorkingHours.GetUser());
-        await WorkingHoursService.Edit(userWithWorkingHours.WorkingHours.OrEmptyIfNull());
-        var createdWorkingHours = await WorkingHoursService.AddAndReturnDtos(workingHoursToAdd.OrEmptyIfNull());
-        if (createdWorkingHours is not null)
-        {
-            userWithWorkingHours.WorkingHours?.AddRange(createdWorkingHours);
-        }
-        workingHoursToAdd = null;
     }
 
     async Task SaveRow(UserWithWorkingHoursDto userWithWorkingHours)
@@ -164,7 +158,6 @@ else
 
         userToUpdate = null;
         workingHoursToUpdate = null;
-        workingHoursToAdd = null;
 
         usersGrid?.CancelEditRow(userWithWorkingHours);
     }
@@ -218,16 +211,6 @@ else
     {
         var userId = await UsersService.Create(userWithWorkingHoursDto);
         userWithWorkingHoursDto.Id = userId;
-        foreach (var addWorkingHoursDto in workingHoursToAdd.OrEmptyIfNull())
-        {
-            addWorkingHoursDto.UserId = userId;
-        }
-        var createdWorkingHours = await WorkingHoursService.AddAndReturnDtos(workingHoursToAdd.OrEmptyIfNull());
-        if (createdWorkingHours is not null)
-        {
-            userWithWorkingHoursDto.WorkingHours = createdWorkingHours;
-        }
-        workingHoursToAdd = null;
         userWithWorkingHoursToInsert = null;
     }
 
@@ -239,13 +222,19 @@ else
 
     async Task ShowWorkingHoursDialog(string? userId)
     {
-        workingHoursToAdd ??= new();
-        await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours", 
+        if (userId.IsNullOrWhiteSpace())
+        {
+            ToastService.ShowError("Can not open the dialog");
+            Logger.LogError("userId is null or white space");
+            return;
+        }
+        await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours",
             new Dictionary<string, object>
             {
-                {"UserId", userId ?? string.Empty},
-                {"WorkingHoursToUpdate", workingHoursToUpdate.OrEmptyIfNull()},
-                {"WorkingHoursToAdd", workingHoursToAdd}
-            });
+                { "WorkingHours", workingHoursToUpdate.OrEmptyIfNull().ToList() },
+                { "UserId", userId! }
+            },
+            new DialogOptions { Width = "800px", Resizable = true, Draggable = true });
     }
+
 }
