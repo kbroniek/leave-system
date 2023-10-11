@@ -10,7 +10,7 @@ public static class WorkingHoursExpression
         {
             WorkingHoursStatus.Deprecated => x => currentDate > x.DateTo,
             WorkingHoursStatus.Future => x => currentDate < x.DateFrom,
-            WorkingHoursStatus.Current => x => currentDate < x.DateTo && currentDate > x.DateFrom,
+            WorkingHoursStatus.Current => x => currentDate <= x.DateTo && currentDate >= x.DateFrom,
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
         };
 }
