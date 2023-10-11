@@ -14,6 +14,7 @@
 @inject WorkingHoursService WorkingHoursService
 @inject DialogService DialogService
 @inject IToastService ToastService
+@inject ILogger<UsersPage> Logger
 
 
 @if (users is null)
@@ -224,13 +225,14 @@ else
         if (userId.IsNullOrWhiteSpace())
         {
             ToastService.ShowError("Can not open the dialog");
+            Logger.LogError("userId is null or white space");
             return;
         }
         await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours",
             new Dictionary<string, object>
             {
                 { "WorkingHours", workingHoursToUpdate.OrEmptyIfNull().ToList() },
-                { "UserId", userId ?? string.Empty }
+                { "UserId", userId! }
             },
             new DialogOptions { Width = "800px", Resizable = true, Draggable = true });
     }

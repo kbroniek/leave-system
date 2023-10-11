@@ -1,12 +1,10 @@
-﻿using System.Net;
-using LeaveSystem.Shared;
+﻿using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Blazored.Toast.Services;
-using LeaveSystem.Shared.Extensions;
 
 namespace LeaveSystem.Web.Pages.WorkingHours;
 
@@ -14,11 +12,13 @@ public class WorkingHoursService
 {
     private readonly HttpClient httpClient;
     private readonly IToastService toastService;
+    private readonly ILogger<WorkingHoursService> logger;
 
-    public WorkingHoursService(HttpClient httpClient, IToastService toastService)
+    public WorkingHoursService(HttpClient httpClient, IToastService toastService, ILogger<WorkingHoursService> logger)
     {
         this.httpClient = httpClient;
         this.toastService = toastService;
+        this.logger = logger;
     }
 
     public virtual async Task<PagedListResponse<WorkingHoursDto>?> GetWorkingHours(GetWorkingHoursQuery query)
@@ -38,7 +38,8 @@ public class WorkingHoursService
         }
         catch (HttpRequestException ex)
         {
-            toastService.ShowError(ex.Message);
+            toastService.ShowError("Error occured while getting working hours");
+            logger.LogError("{Message}", ex.Message);
             return null;
         }
     }
@@ -53,9 +54,8 @@ public class WorkingHoursService
             toastService.ShowSuccess("Working hours updated successfully");
             return true;
         }
-
-        // TODO: Log an error
         var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
+        logger.LogError("{Message}", problemDto?.Detail);
         var message = problemDto?.Title ?? "Something went wrong";
         toastService.ShowError(message);
         return false;
@@ -79,8 +79,8 @@ public class WorkingHoursService
             }
             return resultWorkingHoursDto;
         }
-        // TODO: Log an error
         var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
+        logger.LogError("{Message}", problemDto?.Detail);
         var message = problemDto?.Title ?? "Something went wrong";
         toastService.ShowError(message);
         return null;

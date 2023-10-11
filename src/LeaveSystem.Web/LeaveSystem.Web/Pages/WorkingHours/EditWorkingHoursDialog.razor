@@ -3,6 +3,7 @@
 @inject DialogService DialogService
 @inject IToastService ToastService
 @inject WorkingHoursService WorkingHoursService
+@inject ILogger<EditWorkingHoursDialog> Logger
 
 <RadzenStack Gap="1.5rem">
     <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Working Hours" Click="@InsertRow" Disabled=@(workingHoursToInsert != null || editingWorkingHours) />
@@ -69,6 +70,7 @@
         if (WorkingHours is null || UserId is null)
         {
             ToastService.ShowError("Error while initializing dialog");
+            Logger.LogError("WorkingHours or UserId is null");
             DialogService.Close();
             return;
         }
@@ -82,6 +84,7 @@
         if (workingHours is null)
         {
             ToastService.ShowError("Error occured during resetting working hours");
+            Logger.LogError("workingHours is null");
             return;
         }
         WorkingHours = workingHours;
@@ -102,6 +105,7 @@
         if (workingHoursGrid is null)
         {
             ToastService.ShowError("Error occured during inserting row!");
+            Logger.LogError("workingHoursGrid is null");
             return;
         }
         await workingHoursGrid.InsertRow(workingHoursToInsert);
@@ -123,6 +127,7 @@
         if (workingHoursGrid is null)
         {
             ToastService.ShowError("Error occured during entering edition mode!");
+            Logger.LogError("workingHoursGrid is null");
             return;
         }
         await workingHoursGrid.EditRow(workingHours);
@@ -133,6 +138,7 @@
         if (workingHoursGrid is null)
         {
             ToastService.ShowError("Error occured during saving working hours!");
+            Logger.LogError("workingHoursGrid is null");
             return;
         }
         await workingHoursGrid.UpdateRow(workingHours);
