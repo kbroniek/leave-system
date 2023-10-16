@@ -207,7 +207,7 @@ You can find more info in [documentation](https://learn.microsoft.com/en-us/aspn
 3. Save secrets to store:
 
 ```
-type .\appsecretsinput.json | dotnet user-secrets set
+type .\secrets.json | dotnet user-secrets set
 ```
 
 ## Hot reload BLAZOR
