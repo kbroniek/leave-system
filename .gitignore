@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 #.idea folder
 src/.idea
+
+# input for app secrets
+secrets.json

@@ -178,6 +178,38 @@ az login -t leavesystem.onmicrosoft.com --allow-no-subscriptions
 az account get-access-token --resource api://4f24b978-403f-47fe-9cae-52deea03661d
 ```
 
+## Storage of app secrets
+
+You can find more info in [documentation](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-7.0&tabs=windows)
+
+1. Go to `src\LeaveSystem.Api\LeaveSystem.Api`
+2. Create `secrets.json` file with following content:
+
+```json
+{
+   "AzureAdB2C:Instance": "your instance",
+   "AzureAdB2C:Domain": "your domain",
+   "AzureAdB2C:ClientId": "your client id",
+   "AzureAdB2C:Scopes": "your scopes",
+   "AzureAdB2C:SignUpSignInPolicyId": "your policy id",
+   "ManageAzureUsers:TenantId": "your tenat id",
+   "ManageAzureUsers:ClientId": "your client id",
+   "ManageAzureUsers:Scopes": [
+      "your scope"
+   ],
+   "ManageAzureUsers:Secret": "your secret",
+   "ManageAzureUsers:B2cExtensionAppClientId": "your app client id", // Find this Application (client) ID in the App registrations pane in the Azure portal. The app registration is named 'b2c-extensions-app. Do not modify. Used by AADB2C for storing user data.'.
+   "ManageAzureUsers:DefaultPassword": "your default password",
+   "ManageAzureUsers:Issuer": "your issuer"
+}
+```
+
+3. Save secrets to store:
+
+```
+type .\secrets.json | dotnet user-secrets set
+```
+
 ## Hot reload BLAZOR
 
 If you want to hot reload blazor app you have to run LeaveSystem.App and then run the command:
