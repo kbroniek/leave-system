@@ -22,10 +22,7 @@ jobs:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore ./src/LeaveSystem/LeaveSystem/LeaveSystem.csproj
-      working-directory: src
     - name: Build
-      run: dotnet build --no-restore ./src/LeaveSystem/LeaveSystem/LeaveSystem.csproj 
-      working-directory: src
+      run: dotnet build --no-restore ./src/LeaveSystem/LeaveSystem/LeaveSystem.csproj
     - name: Test
       run: dotnet dotnet test --no-build --verbosity normal ./src/LeaveSystem/LeaveSystem.UnitTests/LeaveSystem.UnitTests.csproj
-      working-directory: src
