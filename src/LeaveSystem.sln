@@ -41,9 +41,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem.Shared", "Leave
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Shared", "LeaveSystem.Shared\LeaveSystem.Shared.csproj", "{9E0A9888-B83A-4DA9-B7AF-DA98C9F8FB1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Api.UnitTests", "LeaveSystem.Api\LeaveSystem.Api.UnitTests\LeaveSystem.Api.UnitTests.csproj", "{17A555DA-D952-4066-8820-13ED97770DE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Api.UnitTests", "LeaveSystem.Api\LeaveSystem.Api.UnitTests\LeaveSystem.Api.UnitTests.csproj", "{17A555DA-D952-4066-8820-13ED97770DE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Web.UnitTests", "LeaveSystem.Web\LeaveSystem.Web.UnitTests\LeaveSystem.Web.UnitTests.csproj", "{617DE4BD-5862-483D-BDB8-316C4C6F143C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Web.UnitTests", "LeaveSystem.Web\LeaveSystem.Web.UnitTests\LeaveSystem.Web.UnitTests.csproj", "{617DE4BD-5862-483D-BDB8-316C4C6F143C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.UnitTests", "LeaveSystem\LeaveSystem.UnitTests\LeaveSystem.UnitTests.csproj", "{80F052BC-DE9F-46A4-9BC3-5829946041D7}"
 EndProject

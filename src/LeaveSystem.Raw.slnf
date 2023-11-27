@@ -1,0 +1,14 @@
+{
+  "solution": {
+    "path": "LeaveSystem.sln",
+    "projects": [
+      "LeaveSystem.Api\\LeaveSystem.Api.UnitTests\\LeaveSystem.Api.UnitTests.csproj",
+      "LeaveSystem.Api\\LeaveSystem.Api\\LeaveSystem.Api.csproj",
+      "LeaveSystem.Shared\\LeaveSystem.Shared.csproj",
+      "LeaveSystem.Web\\LeaveSystem.Web.UnitTests\\LeaveSystem.Web.UnitTests.csproj",
+      "LeaveSystem.Web\\LeaveSystem.Web\\LeaveSystem.Web.csproj",
+      "LeaveSystem\\LeaveSystem.UnitTests\\LeaveSystem.UnitTests.csproj",
+      "LeaveSystem\\LeaveSystem\\LeaveSystem.csproj"
+    ]
+  }
+}

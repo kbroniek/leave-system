@@ -22,22 +22,8 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: LeaveSystem - Restore dependencies
-      run: dotnet restore ./src/LeaveSystem/LeaveSystem.UnitTests/LeaveSystem.UnitTests.csproj
+      run: dotnet restore ./src/LeaveSystem.Raw.slnf
     - name: LeaveSystem - Build
-      run: dotnet build --no-restore ./src/LeaveSystem/LeaveSystem.UnitTests/LeaveSystem.UnitTests.csproj
+      run: dotnet build --no-restore ./src/LeaveSystem.Raw.slnf
     - name: LeaveSystem - Test
-      run: dotnet dotnet test --no-build --verbosity normal ./src/LeaveSystem/LeaveSystem.UnitTests/LeaveSystem.UnitTests.csproj
-
-    - name: LeaveSystem.Api - Restore dependencies
-      run: dotnet restore ./src/LeaveSystem.Api/LeaveSystem.Api.UnitTests/LeaveSystem.UnitTests.csproj
-    - name: LeaveSystem.Api - Build
-      run: dotnet build --no-restore ./src/LeaveSystem.Api/LeaveSystem.Api.UnitTests/LeaveSystem.UnitTests.csproj
-    - name: LeaveSystem.Api - Test
-      run: dotnet dotnet test --no-build --verbosity normal ./src/LeaveSystem.Api/LeaveSystem.Api.UnitTests/LeaveSystem.UnitTests.csproj
-
-    - name: LeaveSystem.Web - Restore dependencies
-      run: dotnet restore ./src/LeaveSystem.Web/LeaveSystem.Web.UnitTests/LeaveSystem.UnitTests.csproj
-    - name: LeaveSystem.Web - Build
-      run: dotnet build --no-restore ./src/LeaveSystem.Web/LeaveSystem.Web.UnitTests/LeaveSystem.UnitTests.csproj
-    - name: LeaveSystem.Web - Test
-      run: dotnet dotnet test --no-build --verbosity normal ./src/LeaveSystem.Web/LeaveSystem.Web.UnitTests/LeaveSystem.UnitTests.csproj
+      run: dotnet dotnet test --no-build --verbosity normal ./src/LeaveSystem.Raw.slnf
