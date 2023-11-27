@@ -20,9 +20,9 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore ./src/LeaveSystem/LeaveSystem/LeaveSystem.csproj
-    - name: Build
-      run: dotnet build --no-restore ./src/LeaveSystem/LeaveSystem/LeaveSystem.csproj
-    - name: Test
+    - name: LeaveSystem - Restore dependencies
+      run: dotnet restore ./src/LeaveSystem/LeaveSystem.UnitTests/LeaveSystem.UnitTests.csproj
+    - name: LeaveSystem - Build
+      run: dotnet build --no-restore ./src/LeaveSystem/LeaveSystem.UnitTests/LeaveSystem.UnitTests.csproj
+    - name: LeaveSystem - Test
       run: dotnet dotnet test --no-build --verbosity normal ./src/LeaveSystem/LeaveSystem.UnitTests/LeaveSystem.UnitTests.csproj
