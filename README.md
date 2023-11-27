@@ -1,6 +1,8 @@
 # Leave system
 
-System to manage leaves. 
+[![status](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml)
+
+System to manage leaves.
 
 ## How to run a project
 

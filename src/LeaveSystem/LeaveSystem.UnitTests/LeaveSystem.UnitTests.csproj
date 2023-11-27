@@ -34,8 +34,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
-    <ProjectReference Include="..\LeaveSystem\LeaveSystem\LeaveSystem.csproj" />
+    <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
+    <ProjectReference Include="..\LeaveSystem\LeaveSystem.csproj" />
   </ItemGroup>
   <PropertyGroup>
     <SsdtUnitTestVersion>3.1</SsdtUnitTestVersion>
