@@ -5,7 +5,6 @@ using LeaveSystem.Api.Extensions;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;
-using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
