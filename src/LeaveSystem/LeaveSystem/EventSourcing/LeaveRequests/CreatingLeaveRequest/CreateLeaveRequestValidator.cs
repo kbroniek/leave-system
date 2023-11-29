@@ -5,32 +5,39 @@ using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
+using LeaveSystem.Linq;
 using LeaveSystem.Shared.Date;
 using EFExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+
 public class CreateLeaveRequestValidator
 {
     private readonly LeaveSystemDbContext dbContext;
     private readonly IDocumentSession documentSession;
     private readonly CurrentDateService currentDateService;
 
-    public CreateLeaveRequestValidator(LeaveSystemDbContext dbContext, IDocumentSession documentSession, CurrentDateService currentDateService)
+    public CreateLeaveRequestValidator(LeaveSystemDbContext dbContext, IDocumentSession documentSession,
+        CurrentDateService currentDateService)
     {
         this.dbContext = dbContext;
         this.documentSession = documentSession;
         this.currentDateService = currentDateService;
     }
 
-    public virtual void BasicValidate(LeaveRequestCreated creatingLeaveRequest, TimeSpan minDuration, TimeSpan maxDuration, bool? includeFreeDays)
+    public virtual void BasicValidate(LeaveRequestCreated creatingLeaveRequest, TimeSpan minDuration,
+        TimeSpan maxDuration, bool? includeFreeDays)
     {
-        Guard.Against.OutOfRange(creatingLeaveRequest.Duration, nameof(creatingLeaveRequest.Duration), minDuration, maxDuration);
+        Guard.Against.OutOfRange(creatingLeaveRequest.Duration, nameof(creatingLeaveRequest.Duration), minDuration,
+            maxDuration);
         if (includeFreeDays != false) return;
         var dateFromDayKind = DateCalculator.GetDayKind(creatingLeaveRequest.DateFrom);
         if (dateFromDayKind != DateCalculator.DayKind.WORKING)
         {
             throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateFrom), "The date is off work.");
         }
+
         var dateToDayKind = DateCalculator.GetDayKind(creatingLeaveRequest.DateTo);
         if (dateToDayKind != DateCalculator.DayKind.WORKING)
         {
@@ -42,18 +49,18 @@ public class CreateLeaveRequestValidator
     {
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
             .Where(x => x.CreatedBy.Id == creatingLeaveRequest.CreatedBy.Id && ((
-                    x.DateFrom >= creatingLeaveRequest.DateTo &&
-                    x.DateTo <= creatingLeaveRequest.DateTo
-                ) || (
-                    x.DateFrom >= creatingLeaveRequest.DateFrom &&
-                    x.DateTo <= creatingLeaveRequest.DateFrom
-                ) || (
-                    x.DateFrom >= creatingLeaveRequest.DateFrom &&
-                    x.DateTo <= creatingLeaveRequest.DateTo
-                ) || (
-                    x.DateFrom <= creatingLeaveRequest.DateFrom &&
-                    x.DateTo >= creatingLeaveRequest.DateTo
-                )))
+                x.DateFrom >= creatingLeaveRequest.DateTo &&
+                x.DateTo <= creatingLeaveRequest.DateTo
+            ) || (
+                x.DateFrom >= creatingLeaveRequest.DateFrom &&
+                x.DateTo <= creatingLeaveRequest.DateFrom
+            ) || (
+                x.DateFrom >= creatingLeaveRequest.DateFrom &&
+                x.DateTo <= creatingLeaveRequest.DateTo
+            ) || (
+                x.DateFrom <= creatingLeaveRequest.DateFrom &&
+                x.DateTo >= creatingLeaveRequest.DateTo
+            )))
             .ToListAsync();
 
         foreach (var @event in leaveRequestCreatedEvents)
@@ -61,7 +68,8 @@ public class CreateLeaveRequestValidator
             var leaveRequestFromDb = await documentSession.Events.AggregateStreamAsync<LeaveRequest>(@event.StreamId);
             if (leaveRequestFromDb?.Status.IsValid() == true)
             {
-                throw new ValidationException("Cannot create a new leave request in this time. The other leave is overlapping with this date.");
+                throw new ValidationException(
+                    "Cannot create a new leave request in this time. The other leave is overlapping with this date.");
             }
         }
     }
@@ -74,7 +82,7 @@ public class CreateLeaveRequestValidator
             creatingLeaveRequest.LeaveTypeId,
             creatingLeaveRequest.CreatedBy.Id,
             creatingLeaveRequest.LeaveTypeId,
-            connectedLeaveTypeIds.nestedLeaveTypeId);
+            connectedLeaveTypeIds.nestedLeaveTypeIds);
 
         if (connectedLeaveTypeIds.baseLeaveTypeId != null)
         {
@@ -83,7 +91,8 @@ public class CreateLeaveRequestValidator
                 creatingLeaveRequest.DateTo,
                 baseLeaveTypeId,
                 creatingLeaveRequest.CreatedBy.Id,
-                baseLeaveTypeId);
+                baseLeaveTypeId,
+                Enumerable.Empty<Guid>());
         }
     }
 
@@ -93,17 +102,18 @@ public class CreateLeaveRequestValidator
         Guid currentLeaveTypeId,
         string userId,
         Guid leaveTypeId,
-        Guid? nestedLeaveTypeId = null)
+        IEnumerable<Guid> nestedLeaveTypeIds)
     {
         UserLeaveLimit leaveLimit = await GetLimits(dateFrom,
-               dateTo,
-               currentLeaveTypeId,
-               userId);
+            dateTo,
+            currentLeaveTypeId,
+            userId);
         var totalUsed = await GetUsedLeavesDuration(dateFrom,
             userId,
             leaveTypeId,
-            nestedLeaveTypeId);
-        if (leaveLimit.Limit != null && CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed) <= TimeSpan.Zero)
+            nestedLeaveTypeIds);
+        if (leaveLimit.Limit != null &&
+            CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed) <= TimeSpan.Zero)
         {
             throw new ValidationException("You don't have enough free days for this type of leave");
         }
@@ -114,7 +124,7 @@ public class CreateLeaveRequestValidator
         return limit + (overdueLimit ?? TimeSpan.Zero) - usedLimits;
     }
 
-    private async Task<(Guid? baseLeaveTypeId, Guid? nestedLeaveTypeId)> GetConnectedLeaveTypeIds(Guid leaveTypeId)
+    private async Task<(Guid? baseLeaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds)> GetConnectedLeaveTypeIds(Guid leaveTypeId)
     {
         var leaveTypes = await EFExtensions.ToListAsync(dbContext.LeaveTypes.Where(l =>
             l.BaseLeaveTypeId == leaveTypeId || l.Id == leaveTypeId));
@@ -122,28 +132,36 @@ public class CreateLeaveRequestValidator
         {
             return (null, null);
         }
-        var nestedLeaveType = leaveTypes.FirstOrDefault(l => l.BaseLeaveTypeId == leaveTypeId);
+
+        var nestedLeaveTypes = leaveTypes.Where(l => l.BaseLeaveTypeId == leaveTypeId);
         var currentLeaveType = leaveTypes.FirstOrDefault(l => l.Id == leaveTypeId);
-        return (currentLeaveType?.BaseLeaveTypeId, nestedLeaveType?.Id);
+        return (currentLeaveType?.BaseLeaveTypeId, nestedLeaveTypes.Select(x => x.Id));
     }
 
     private async Task<TimeSpan> GetUsedLeavesDuration(
         DateTimeOffset dateFrom,
         string userId,
         Guid leaveTypeId,
-        Guid? nestedLeaveTypeId)
+        IEnumerable<Guid> nestedLeaveTypeIds)
     {
         var firstDay = dateFrom.GetFirstDayOfYear();
         var lastDay = dateFrom.GetLastDayOfYear();
-        var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
-            .Where(x => x.CreatedBy.Id == userId &&
+        var nestedLeaveTypeIdsExpression = PredicateBuilder
+            .Create<LeaveRequestCreated>(x => x.LeaveTypeId == leaveTypeId);
+        var leaveTypeIdArray = nestedLeaveTypeIds as Guid[] ?? nestedLeaveTypeIds.ToArray();
+        if (leaveTypeIdArray.Any())
+        {
+            nestedLeaveTypeIdsExpression = nestedLeaveTypeIdsExpression
+                .Or(PredicateBuilder.MatchAny<LeaveRequestCreated, Guid>(x => x.LeaveTypeId,
+                    leaveTypeIdArray));
+        }
+        var connectedLeaveRequestsCreatedExpression = PredicateBuilder.Create<LeaveRequestCreated>(x =>
+                x.CreatedBy.Id == userId &&
                 x.DateFrom >= firstDay &&
-                x.DateTo <= lastDay &&
-                (
-                    x.LeaveTypeId == leaveTypeId ||
-                    (nestedLeaveTypeId != null && x.LeaveTypeId == nestedLeaveTypeId)
-                )
-             ).ToListAsync();
+                x.DateTo <= lastDay)
+            .And(nestedLeaveTypeIdsExpression);
+        var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
+            .Where(connectedLeaveRequestsCreatedExpression).ToListAsync();
 
         TimeSpan usedLimits = TimeSpan.Zero;
         foreach (var @event in leaveRequestCreatedEvents)
@@ -154,6 +172,7 @@ public class CreateLeaveRequestValidator
                 usedLimits += leaveRequestFromDb.Duration;
             }
         }
+
         return usedLimits;
     }
 
@@ -164,18 +183,22 @@ public class CreateLeaveRequestValidator
         string userId)
     {
         var limits = await EFExtensions.ToListAsync(dbContext.UserLeaveLimits.Where(l =>
-                        (l.AssignedToUserId == null || l.AssignedToUserId == userId) &&
-                        (l.ValidSince == null || l.ValidSince <= dateFrom) &&
-                        (l.ValidUntil == null || l.ValidUntil >= dateTo) &&
-                        l.LeaveTypeId == leaveTypeId));
+            (l.AssignedToUserId == null || l.AssignedToUserId == userId) &&
+            (l.ValidSince == null || l.ValidSince <= dateFrom) &&
+            (l.ValidUntil == null || l.ValidUntil >= dateTo) &&
+            l.LeaveTypeId == leaveTypeId));
         if (limits == null || limits.Count == 0)
         {
-            throw new ValidationException($"Cannot find limits for the leave type id: {leaveTypeId}. Add limits for the user {userId}.");
+            throw new ValidationException(
+                $"Cannot find limits for the leave type id: {leaveTypeId}. Add limits for the user {userId}.");
         }
+
         if (limits.Count > 1)
         {
-            throw new ValidationException($"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userId}.");
+            throw new ValidationException(
+                $"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userId}.");
         }
+
         return limits.First();
     }
 
@@ -190,7 +213,8 @@ public class CreateLeaveRequestValidator
         Guard.Against.OutOfRange(dateToWithoutTime, nameof(creatingLeaveRequest.DateTo), firstDay, lastDay);
         if (dateFromWithoutTime > dateToWithoutTime)
         {
-            throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateFrom), "Date from has to be less than date to.");
+            throw new ArgumentOutOfRangeException(nameof(creatingLeaveRequest.DateFrom),
+                "Date from has to be less than date to.");
         }
     }
 }

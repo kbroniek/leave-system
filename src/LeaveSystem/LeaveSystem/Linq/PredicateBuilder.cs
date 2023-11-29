@@ -5,6 +5,7 @@ public static class PredicateBuilder
 {
     public static Expression<Func<T, bool>> True<T>() { return _ => true; }
     public static Expression<Func<T, bool>> False<T>() { return _ => false; }
+    public static Expression<Func<T, bool>> Create<T>(Expression<Func<T, bool>> func) => func;
 
     public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> expr1,
                                                         Expression<Func<T, bool>> expr2)
@@ -29,7 +30,9 @@ public static class PredicateBuilder
               (Expression.AndAlso(expr1.Body, invokedExpr), expr1.Parameters);
     }
     
-    public static Expression<Func<T, bool>> MatchAny<T, TValue>(this Expression<Func<T,TValue>> expression, TValue[]? values) where T : class where TValue : IComparable
+    public static Expression<Func<T, bool>> MatchAny<T, TValue>(
+        Expression<Func<T,TValue>> searchingExpression , 
+        TValue[]? values) where T : class where TValue : IComparable
     {
         if (values is null or {Length: < 1})
         {
@@ -40,7 +43,7 @@ public static class PredicateBuilder
         return values.Aggregate(predicate, (current, value) =>
         {
             var constValue = Expression.Constant(value);
-            var equal = Expression.Equal(Expression.Invoke(expression, param), constValue);
+            var equal = Expression.Equal(Expression.Invoke(searchingExpression, param), constValue);
             return current.Or(Expression.Lambda<Func<T, bool>>(equal, param));
         });
     }
