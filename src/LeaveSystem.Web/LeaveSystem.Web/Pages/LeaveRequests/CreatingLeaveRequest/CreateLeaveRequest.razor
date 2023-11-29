@@ -139,7 +139,7 @@
     private LeaveSummary? leaveSummary;
     private DateSummary? dateSummary;
     private IEnumerable<LeaveRequestShortInfo> submittedLeaveRequests = Enumerable.Empty<LeaveRequestShortInfo>();
-    private IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
+    private IEnumerable<UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitDto>();
     private TimeSpan workingHours;
     private bool durationEnabled = true;
     private IEnumerable<GetEmployeeDto> employees = Enumerable.Empty<GetEmployeeDto>();

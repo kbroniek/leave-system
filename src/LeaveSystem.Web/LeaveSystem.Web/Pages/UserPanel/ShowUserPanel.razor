@@ -40,7 +40,7 @@
                 </RadzenTabsItem>
                 <AuthorizeView Policy="@LeaveLimitsPolicyName" Context="ShowUserPage">
                     <RadzenTabsItem Text="Leave Limits">
-                        <UserPanelLeaveLimits/>
+                        <UserPanelLeaveLimits LeaveTypesWithUserLimits="@leaveTypesWithUserLimits"/>
                     </RadzenTabsItem>
                 </AuthorizeView>
 
@@ -62,13 +62,12 @@
     private IEnumerable<LeaveRequestPerType>? userSummaryCollection;
     private IEnumerable<LeaveRequestForView>? leaveRequestsForView;
     private string? userName;
-    private IEnumerable<string>? userRoles;
+    private IEnumerable<LeaveTypeWithUserLimits>? leaveTypesWithUserLimits; 
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User.CreateModel();
-        userRoles = user.Roles;
         if (UserId is null)
         {
             UserId = user.Id;
@@ -92,8 +91,8 @@
         var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(user.Id);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
-        var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
-        var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
+        var leaveTypes = getLeaveTypesTask.Result.ToArray();
+        var limits = getLimitsTask.Result;
         var workingHours = getWorkingHoursTask.Result;
         var workingHoursDuration = workingHours?.Duration ?? TimeSpan.Zero;
         userSummaryCollection = leaveTypes.Select(lt => LeaveRequestPerType.Create(
@@ -105,6 +104,7 @@
         leaveRequestsForView = leaveRequests
             .OrderBy(lr => lr.DateFrom)
             .Select(lr => LeaveRequestForView.Create(lr, leaveTypes, workingHoursDuration));
+        leaveTypesWithUserLimits = leaveTypes.Select(lt => LeaveTypeWithUserLimits.Create(lt.Id, lt.Name, limits, lt.Properties));
     }
 
     private async Task<int?> YearChanged(int? year)

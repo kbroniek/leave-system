@@ -33,20 +33,6 @@ public class UserLeaveLimitsService
         return limits?.Data ?? Enumerable.Empty<LeaveLimitDto>();
     }
 
-    public record LeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property, string AssignedToUserId)
-    {
-        public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
-    }
-    public record UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
-    {
-        public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
-
-        public static UserLeaveLimitDto Create(LeaveLimitDto limit) =>
-            new UserLeaveLimitDto(limit.Limit, limit.OverdueLimit, limit.LeaveTypeId, limit.ValidSince, limit.ValidUntil, limit.Property);
-    }
-
-    public record UserLeaveLimitPropertyDto(string? Description);
-
     private sealed class TimeSpanToStringConverter : JsonConverter<TimeSpan>
     {
         public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
