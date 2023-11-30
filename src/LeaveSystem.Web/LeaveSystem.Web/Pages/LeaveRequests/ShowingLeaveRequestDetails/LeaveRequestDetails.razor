@@ -1,18 +1,23 @@
 ﻿@page "/leave-requests/{LeaveRequestId}"
 @using System.Text.Json.Serialization
 @using System.Text.Json
+@using Ardalis.GuardClauses
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Web.Extensions
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.WorkingHours
 @using Microsoft.AspNetCore.Authorization
+@using static LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequestDetails.ChangeStatusDialog
 @attribute [Authorize(Policy=@PolicyName)]
 @inject HttpClient HttpClient
 @inject ILogger<LeaveRequestDetails> Logger
 @inject LeaveTypesService LeaveTypesService
 @inject WorkingHoursService WorkingHoursService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ChangeStatusService ChangeStatusService
+@inject DialogService DialogService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Show leave request</PageTitle>
 
@@ -78,18 +83,40 @@ else
         workingHours = (await getWorkingHoursTask).DurationOrZero();
     }
 
-    private void OnAcceptClick()
+    private async Task OnAcceptClick()
     {
-        
+        Guard.Against.Null(LeaveRequestId);
+        await ChangeStatus(remarks => ChangeStatusService.Accept(LeaveRequestId, remarks));
     }
 
-    private void OnRejectClick()
+    private async Task OnRejectClick()
     {
-
+        Guard.Against.Null(LeaveRequestId);
+        await ChangeStatus(remarks => ChangeStatusService.Reject(LeaveRequestId, remarks));
     }
 
-    private void OnCancelClick()
+    private async Task OnCancelClick()
     {
+        Guard.Against.Null(LeaveRequestId);
+        await ChangeStatus(remarks => ChangeStatusService.Cancel(LeaveRequestId, remarks));
+    }
+
+    private async Task ChangeStatus(Func<string?, Task> onChange)
+    {
+        DialogResult result = await DialogService.OpenAsync<ChangeStatusDialog>("Change status",
+               null,
+               new DialogOptions() { Draggable = true });
+        if (result.IsSuccess)
+        {
+            try
+            {
+                await onChange(result.Remarks);
+            }
+            finally
+            {
+                NavigationManager.ReloadPage();
+            }
+        }
 
     }
 
