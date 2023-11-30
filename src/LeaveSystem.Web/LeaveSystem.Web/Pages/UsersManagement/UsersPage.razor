@@ -8,6 +8,7 @@
 @using LeaveSystem.Shared.Extensions
 @using System.Collections
 @using GoldenEye.Extensions.Basic
+@using LeaveSystem.Web.Pages.UsersManagement
 
 @attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
@@ -85,7 +86,7 @@ else
 }
 
 @code {
-        public const string PolicyName = "ShowUserPage";
+    public const string PolicyName = "ShowUserPage";
     string[] allRoles = Enum.GetNames<RoleType>();
     RadzenDataGrid<UserWithWorkingHoursDto>? usersGrid;
     IEnumerable<UserDto>? users;

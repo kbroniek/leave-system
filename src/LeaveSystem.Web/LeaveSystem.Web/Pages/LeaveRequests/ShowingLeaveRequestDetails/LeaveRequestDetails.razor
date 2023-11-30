@@ -39,24 +39,35 @@ else
         {
             <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">On behalf: <strong>@leaveRequest.CreatedByOnBehalf?.Name</strong></RadzenText>
         }
-        <hr class="mt-2 mb-3"/>
+        <hr class="mt-2 mb-3" />
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
+            <AuthorizeView Policy="@AcceptPolicyName" Context="AcceptLeaveRequest">
+                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnAcceptClick()) Text="Accpet" ButtonStyle="ButtonStyle.Success" />
+                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnRejectClick()) Text="Reject" ButtonStyle="ButtonStyle.Danger" />
+            </AuthorizeView>
+            @if (leaveRequest.CreatedBy.Id == currentUser.Id)
+            {
+                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnCancelClick()) Text="Cancel" ButtonStyle="ButtonStyle.Warning" />
+            }
+        </RadzenStack>
     </RadzenCard>
 }
 
-
 @code {
     public const string PolicyName = "LeaveRequestDetails";
+    public const string AcceptPolicyName = "LeaveRequestDetailsAccept";
     [Parameter]
     public string? LeaveRequestId { get; set; }
     private LeaveRequest? leaveRequest;
     private LeaveTypesService.LeaveTypeDto? leaveType;
     private TimeSpan workingHours;
+    private FederatedUser currentUser;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User.CreateModel();
-        var userId = user.Id;
+        currentUser = authState.User.CreateModel();
+        var userId = currentUser.Id;
         var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(userId);
         leaveRequest = await HttpClient.GetFromJsonAsync<LeaveRequest>($"api/leaveRequests/{LeaveRequestId}", new JsonSerializerOptions(JsonSerializerDefaults.Web));
         if(leaveRequest is null)
@@ -65,6 +76,21 @@ else
         }
         leaveType = await LeaveTypesService.GetLeaveType(leaveRequest.LeaveTypeId);
         workingHours = (await getWorkingHoursTask).DurationOrZero();
+    }
+
+    private void OnAcceptClick()
+    {
+        
+    }
+
+    private void OnRejectClick()
+    {
+
+    }
+
+    private void OnCancelClick()
+    {
+
     }
 
     public record LeaveRequest(DateTimeOffset DateFrom, DateTimeOffset DateTo, TimeSpan Duration, Guid LeaveTypeId, IEnumerable<RemarksModel> Remarks, LeaveRequestStatus Status, FederatedUser CreatedBy, FederatedUser? LastModifiedBy, FederatedUser? CreatedByOnBehalf);
