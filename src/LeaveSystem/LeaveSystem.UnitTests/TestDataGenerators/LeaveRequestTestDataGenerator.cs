@@ -1,21 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
+using System.Collections.Generic;
 
 namespace LeaveSystem.UnitTests.TestDataGenerators;
 
-public static class LeaveRequestTestDataGenerator 
+public static class LeaveRequestTestDataGenerator
 {
     public static IEnumerable<object[]> GetCancelAcceptAndRejectMethods()
     {
         void Cancel(LeaveRequest l, string r, FederatedUser u) => l.Cancel(r, u);
         void Accept(LeaveRequest l, string r, FederatedUser u) => l.Accept(r, u);
-        void Reject(LeaveRequest l, string r, FederatedUser u) => l.Reject(r, u);
+        void Deprecate(LeaveRequest l, string r, FederatedUser u) => l.Deprecate(r, u);
         yield return new object[] { Cancel };
         yield return new object[] { Accept };
-        yield return new object[] { Reject };
+        yield return new object[] { Deprecate };
     }
 
     public static IEnumerable<object[]> GetDoNothingMethodWithTwoRemarksOrAcceptMethodWithThreeRemarksAndFakeRemarksAndEvent(FederatedUser user)
@@ -23,11 +22,11 @@ public static class LeaveRequestTestDataGenerator
         var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
         var fakeRemarks = "fake remarks";
         var fakeRejectRemarks = "fake reject remarks";
-        void DoNoting(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) {}
+        void DoNoting(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) { }
         void Accept(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) => leaveRequest.Accept(remarks, federatedUser);
         yield return new object[]
         {
-            DoNoting, 
+            DoNoting,
             new List<LeaveRequest.RemarksModel>
             {
                 new(@event.Remarks, @event.CreatedBy),

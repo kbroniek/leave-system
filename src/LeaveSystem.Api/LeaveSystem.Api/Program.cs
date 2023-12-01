@@ -7,7 +7,7 @@ using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
-using LeaveSystem.Api.Factories;
+using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared.Date;
 using Microsoft.AspNetCore.OData;
