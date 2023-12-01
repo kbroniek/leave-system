@@ -1,4 +1,5 @@
 @using LeaveSystem.Shared.WorkingHours
+@using LeaveSystem.Web.Extensions
 @using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
 @inject DialogService DialogService
 @inject IToastService ToastService
@@ -11,7 +12,7 @@
         <Columns>
             <RadzenDataGridColumn TItem="WorkingHoursDto" Property="DateFrom" Title="Date From" Frozen="true">
                 <Template Context="data">
-                    @DateToString(data.DateFrom)
+                    @data.DateFrom.GetReadableDate()
                 </Template>
                 <EditTemplate Context="data">
                     <RadzenDatePicker @bind-Value="data.DateFrom" DateFormat="d" Style="width: 150px"/>
@@ -19,7 +20,7 @@
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="WorkingHoursDto" Property="DateTo" Title="Date To">
                 <Template Context="data">
-                    @DateToString(data.DateTo)
+                    @data.DateTo.GetReadableDate()
                 </Template>
                 <EditTemplate Context="data">
                     <RadzenDatePicker @bind-Value="data.DateTo" DateFormat="d" Style="width: 150px"/>

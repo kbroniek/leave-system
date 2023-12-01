@@ -1,8 +1,10 @@
+using LeaveSystem.Web.Extensions;
+
 namespace LeaveSystem.Web.Pages.UserLeaveLimits;
 
 public class UserLeaveLimitDto
 {
-    public UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
+    private UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
     {
         this.Limit = Limit;
         this.OverdueLimit = OverdueLimit;
@@ -22,6 +24,8 @@ public class UserLeaveLimitDto
 
     public static UserLeaveLimitDto Create(LeaveLimitDto limit) =>
         new(limit.Limit, limit.OverdueLimit, limit.LeaveTypeId, limit.ValidSince, limit.ValidUntil, limit.Property);
+    private UserLeaveLimitDto(){}
+    public static UserLeaveLimitDto CreateEmpty() => new();
 }
 
 public record LeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property, string AssignedToUserId)

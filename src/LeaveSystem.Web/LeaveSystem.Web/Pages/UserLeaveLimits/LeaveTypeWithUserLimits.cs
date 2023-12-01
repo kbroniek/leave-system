@@ -1,25 +1,47 @@
+using System.Linq.Expressions;
+using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.Pages.LeaveTypes.GettingLeaveTypes;
 
 namespace LeaveSystem.Web.Pages.UserLeaveLimits;
 
-public record LeaveTypeWithUserLimits(
-    Guid Id,
-    string Name, 
-    IEnumerable<UserLeaveLimitDto> Limits,
-    LeaveTypesService.LeaveTypeProperties Properties)
+public class LeaveTypeWithUserLimits
 {
-    public TimeSpan Limit => Limits.Aggregate(TimeSpan.Zero, (acc, x) => x.Limit + acc);
-    public TimeSpan OverdueLimit => Limits.Aggregate(TimeSpan.Zero, (acc, x) => x.Limit + acc);
-    public TimeSpan TotalLimit => Limits.Aggregate(TimeSpan.Zero, (acc, x) => x.Limit + acc);
+    public string Limit => GetReadableSumTimespanFromTicks(x => x.Limit.Ticks);
+    public string OverdueLimit => GetReadableSumTimespanFromTicks(x => x.OverdueLimit.Ticks);
+    public string TotalLimit => GetReadableSumTimespanFromTicks(x => x.TotalLimit.Ticks);
+    public Guid Id { get; init; }
+    public string Name { get; init; }
+    public IEnumerable<UserLeaveLimitDto> Limits { get; init; }
+    public LeaveTypesService.LeaveTypeProperties Properties { get; init; }
+    private TimeSpan workingHours;
+
+    public LeaveTypeWithUserLimits(
+        Guid id,
+        string name, 
+        IEnumerable<UserLeaveLimitDto> limits,
+        LeaveTypesService.LeaveTypeProperties properties,
+        TimeSpan workingHours)
+    {
+        Id = id;
+        Name = name;
+        Limits = limits;
+        Properties = properties;
+        this.workingHours = workingHours;
+    }
+
     public static LeaveTypeWithUserLimits Create(
         Guid id,
         string name,
         IEnumerable<UserLeaveLimitDto> limits,
-        LeaveTypesService.LeaveTypeProperties properties)
+        LeaveTypesService.LeaveTypeProperties properties,
+        TimeSpan workingHours)
     {
         var limitsForType = limits.Where(x => x.LeaveTypeId == id);
-        return new LeaveTypeWithUserLimits(id, name, limitsForType, properties);
+        return new LeaveTypeWithUserLimits(id, name, limitsForType, properties, workingHours);
     }
+
+    private string GetReadableSumTimespanFromTicks(Func<UserLeaveLimitDto, long> expression) 
+        => TimeSpan.FromTicks(Limits.Sum(expression)).GetReadableTimeSpan(workingHours);
 }
 
