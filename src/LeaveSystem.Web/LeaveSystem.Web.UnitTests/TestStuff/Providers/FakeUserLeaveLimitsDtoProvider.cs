@@ -6,19 +6,19 @@ namespace LeaveSystem.Web.UnitTests.TestStuff.Providers;
 
 public static class FakeUserLeaveLimitsDtoProvider
 {
-    public static IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> GetAll(int year)
+    public static IEnumerable<UserLeaveLimitDto> GetAll(int year)
     {
         return new[]
         {
-            new UserLeaveLimitsService.UserLeaveLimitDto(
+            new UserLeaveLimitDto(
                 TimeSpan.FromHours(8), TimeSpan.FromHours(16), FakeLeaveTypeDtoProvider.HolidayLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
-                DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fakeDesc")),
-            new UserLeaveLimitsService.UserLeaveLimitDto(
+                DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitPropertyDto("fakeDesc")),
+            new UserLeaveLimitDto(
                 TimeSpan.FromHours(16), TimeSpan.FromHours(16), FakeLeaveTypeDtoProvider.OnDemandLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
-                DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fakeDesc")),
-            new UserLeaveLimitsService.UserLeaveLimitDto(
+                DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitPropertyDto("fakeDesc")),
+            new UserLeaveLimitDto(
                 TimeSpan.FromHours(16), TimeSpan.FromHours(24), FakeLeaveTypeDtoProvider.OnDemandLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
-                DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fakeDesc")),
+                DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitPropertyDto("fakeDesc")),
         };
     }
 }

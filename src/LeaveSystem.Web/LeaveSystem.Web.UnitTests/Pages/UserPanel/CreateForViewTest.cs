@@ -15,25 +15,25 @@ public class CreateForViewTest
     public void WhenCreatingForView_ThenCreateWithFirstMatchingLimit()
     {
         //Given
-        var exceptedLimit = new UserLeaveLimitsService.UserLeaveLimitDto(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
+        var exceptedLimit = new UserLeaveLimitDto(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
             DateTimeOffsetExtensions.CreateFromDate(2023, 5, 6),
             DateTimeOffsetExtensions.CreateFromDate(2023, 9, 3),
-            new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fake desc3"));
+            new UserLeaveLimitPropertyDto("fake desc3"));
         var limits = new[]
         {
             new(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
                 DateTimeOffsetExtensions.CreateFromDate(2022, 1, 3),
                 DateTimeOffsetExtensions.CreateFromDate(2022, 5, 6),
-                new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fake desc1")),
+                new UserLeaveLimitPropertyDto("fake desc1")),
             new(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
                 DateTimeOffsetExtensions.CreateFromDate(2022, 11, 3),
                 DateTimeOffsetExtensions.CreateFromDate(2022, 12, 3),
-                new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fake desc2")),
+                new UserLeaveLimitPropertyDto("fake desc2")),
             exceptedLimit,
             new(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
                 DateTimeOffsetExtensions.CreateFromDate(2023, 12, 23),
                 DateTimeOffsetExtensions.CreateFromDate(2024, 6, 22),
-                new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fake desc4"))
+                new UserLeaveLimitPropertyDto("fake desc4"))
         };
         var leaveRequest =
             new LeaveRequestShortInfo(Guid.NewGuid(), DateTimeOffsetExtensions.CreateFromDate(2023, 6, 7),
@@ -59,25 +59,25 @@ public class CreateForViewTest
     public void WhenNoLimitInLeaveRequestPeriod_ThenDescriptionIsNull()
     {
         //Given
-        var exceptedLimit = new UserLeaveLimitsService.UserLeaveLimitDto(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
+        var exceptedLimit = new UserLeaveLimitDto(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
             DateTimeOffsetExtensions.CreateFromDate(2023, 5, 6),
             DateTimeOffsetExtensions.CreateFromDate(2023, 9, 3),
-            new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fake desc3"));
+            new UserLeaveLimitPropertyDto("fake desc3"));
         var limits = new[]
         {
             new(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
                 DateTimeOffsetExtensions.CreateFromDate(2022, 1, 3),
                 DateTimeOffsetExtensions.CreateFromDate(2022, 5, 6),
-                new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fake desc1")),
+                new UserLeaveLimitPropertyDto("fake desc1")),
             new(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
                 DateTimeOffsetExtensions.CreateFromDate(2022, 11, 3),
                 DateTimeOffsetExtensions.CreateFromDate(2022, 12, 3),
-                new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fake desc2")),
+                new UserLeaveLimitPropertyDto("fake desc2")),
             exceptedLimit,
             new(TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
                 DateTimeOffsetExtensions.CreateFromDate(2023, 12, 23),
                 DateTimeOffsetExtensions.CreateFromDate(2024, 6, 22),
-                new UserLeaveLimitsService.UserLeaveLimitPropertyDto("fake desc4"))
+                new UserLeaveLimitPropertyDto("fake desc4"))
         };
         var leaveRequest =
             new LeaveRequestShortInfo(Guid.NewGuid(), DateTimeOffsetExtensions.CreateFromDate(2023, 6, 7),

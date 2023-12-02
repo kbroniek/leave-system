@@ -17,7 +17,7 @@ public class CreateLeaveRequestPerTypeTest
         LeaveTypesService.LeaveTypeDto leaveType, 
         IEnumerable<LeaveTypesService.LeaveTypeDto> allLeaveTypes, 
         IEnumerable<LeaveRequestShortInfo> leaveRequests, 
-        IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits, 
+        IEnumerable<UserLeaveLimitDto> limits, 
         TimeSpan workingHours,
         TimeSpan leaveRequestsUsed,
         TimeSpan limitsSum,

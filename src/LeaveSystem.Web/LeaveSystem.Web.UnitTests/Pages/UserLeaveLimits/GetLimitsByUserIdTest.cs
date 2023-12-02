@@ -1,20 +1,25 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
+using Blazored.Toast.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.UnitTests.TestStuff.Converters;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace LeaveSystem.Web.UnitTests.Pages.UserLeaveLimits;
 
 public class GetLimitsByUserIdTest
 {
     private HttpClient httpClient;
+    private Mock<IToastService> toastServiceMock = new();
+    private Mock<ILogger<UserLeaveLimitsService>> loggerMock = new();
 
-    public UserLeaveLimitsService GetSut() => new(httpClient);
+    public UserLeaveLimitsService GetSut() => new(httpClient, toastServiceMock.Object, loggerMock.Object);
 
     [Fact]
     public async Task WhenGettingResponse_ThenReturnDeserializedLimits()
@@ -74,7 +79,7 @@ public class GetLimitsByUserIdTest
 
     [Theory]
     [MemberData(nameof(Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData))]
-    public async Task WhenResponseDataIsNull_ThenReturnEmptyCollection(ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto> userLeaveLimits)
+    public async Task WhenResponseDataIsNull_ThenReturnEmptyCollection(ODataResponse<UserLeaveLimitDto> userLeaveLimits)
     {
         //Given
         var userId = Guid.NewGuid().ToString();
@@ -93,7 +98,7 @@ public class GetLimitsByUserIdTest
     public static IEnumerable<object[]> Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData()
     {
         yield return new object[] { null };
-        yield return new object[] { new ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto>() };
+        yield return new object[] { new ODataResponse<UserLeaveLimitDto>() };
     }
 
 

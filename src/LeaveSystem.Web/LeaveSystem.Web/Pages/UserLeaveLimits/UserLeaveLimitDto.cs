@@ -4,7 +4,7 @@ namespace LeaveSystem.Web.Pages.UserLeaveLimits;
 
 public class UserLeaveLimitDto
 {
-    private UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
+    public UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
     {
         this.Limit = Limit;
         this.OverdueLimit = OverdueLimit;

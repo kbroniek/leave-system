@@ -1,7 +1,5 @@
 using Blazored.Toast.Services;
-using Castle.Core.Logging;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.HrPanel;
@@ -49,7 +47,7 @@ public class HrSummaryServiceTest
         var leaveTypesServiceMock = Substitute.For<LeaveTypesService>(httpClientMock);
         var fakeLeaveTypes = FakeLeaveTypeDtoProvider.GetAll();
         leaveTypesServiceMock.GetLeaveTypes().Returns(fakeLeaveTypes);
-        var userLeaveLimitsServiceMock = Substitute.For<UserLeaveLimitsService>(httpClientMock);
+        var userLeaveLimitsServiceMock = Substitute.For<UserLeaveLimitsService>(httpClientMock, Substitute.For<IToastService>(), Substitute.For<ILogger<UserLeaveLimitsService>>());
         var fakeLimits = FakeLeaveLimitsDtoProvider.GetAll(year);
         userLeaveLimitsServiceMock.GetLimits(firstDay, lastDay).Returns(fakeLimits);
         var employeeServiceMock = Substitute.For<EmployeeService>(httpClientMock);
@@ -78,7 +76,7 @@ public class HrSummaryServiceTest
                 lt,
                 fakeLeaveTypes,
                 fakeLeaveRequests.Items.Where(lr => lr.CreatedBy.Id == e.Id),
-                fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
+                fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitDto.Create(l)),
                 fakeWorkingHours.Items.DurationOrZero(e.Id))))
         );
         result.Should().BeEquivalentTo(new

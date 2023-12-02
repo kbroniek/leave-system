@@ -1,21 +1,26 @@
 using System.Text.Json;
+using Blazored.Toast.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.UnitTests.TestStuff.Converters;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace LeaveSystem.Web.UnitTests.Pages.UserLeaveLimits;
 
 public class GetLimitsTest
 {
     private HttpClient httpClient;
+    private Mock<IToastService> toastServiceMock = new();
+    private Mock<ILogger<UserLeaveLimitsService>> loggerMock = new();
 
     private string GetUrl(DateTimeOffset since, DateTimeOffset until) =>
         $"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
 
-    private UserLeaveLimitsService GetSut() => new(httpClient);
+    private UserLeaveLimitsService GetSut() => new(httpClient, toastServiceMock.Object, loggerMock.Object);
 
     [Fact]
     public async Task WhenGettingResponse_ThenReturnDeserializedLimits()
@@ -74,7 +79,7 @@ public class GetLimitsTest
     [Theory]
     [MemberData(nameof(Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData))]
     public async Task WhenResponseDataIsNull_ThenReturnEmptyCollection(
-        ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto> userLeaveLimits)
+        ODataResponse<UserLeaveLimitDto> userLeaveLimits)
     {
         //Given
         var since = DateTimeOffsetExtensions.CreateFromDate(2020, 1, 3);
@@ -92,6 +97,6 @@ public class GetLimitsTest
     public static IEnumerable<object[]> Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData()
     {
         yield return new object[] { null };
-        yield return new object[] { new ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto>() };
+        yield return new object[] { new ODataResponse<UserLeaveLimitDto>() };
     }
 }

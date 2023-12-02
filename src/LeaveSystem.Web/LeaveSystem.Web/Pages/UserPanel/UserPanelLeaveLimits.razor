@@ -97,6 +97,10 @@
 
     async Task EditRow(UserLeaveLimitDto limit)
     {
+        if (editingLimits)
+        {
+            
+        }
         editingLimits = true;
         if (limitsGrid is null)
         {
@@ -146,4 +150,5 @@
         await limitsGrid.InsertRow(limitToInsert);
     }
     
+
 }
