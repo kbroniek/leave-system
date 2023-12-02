@@ -1,5 +1,6 @@
 ﻿using GoldenEye.Objects.General;
 using LeaveSystem.Db;
+using LeaveSystem.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -15,6 +16,7 @@ namespace LeaveSystem.Api.Controllers
         where TEntity : class, IHaveId<TId>
     {
         private readonly LeaveSystemDbContext dbContext;
+        //Todo: Methods should throw errors instead HTTPs responses
 
         public GenericCrudController(LeaveSystemDbContext dbContext)
         {

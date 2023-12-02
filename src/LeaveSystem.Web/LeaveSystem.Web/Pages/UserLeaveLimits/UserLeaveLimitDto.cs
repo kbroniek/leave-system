@@ -1,19 +1,25 @@
+using System.Text.Json.Serialization;
 using LeaveSystem.Web.Extensions;
 
 namespace LeaveSystem.Web.Pages.UserLeaveLimits;
 
 public class UserLeaveLimitDto
 {
-    public UserLeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property)
+    public UserLeaveLimitDto(Guid id, TimeSpan limit, TimeSpan overdueLimit, Guid leaveTypeId, DateTimeOffset? validSince, DateTimeOffset? validUntil, UserLeaveLimitPropertyDto? property)
     {
-        this.Limit = Limit;
-        this.OverdueLimit = OverdueLimit;
-        this.LeaveTypeId = LeaveTypeId;
-        this.ValidSince = ValidSince;
-        this.ValidUntil = ValidUntil;
-        this.Property = Property;
+        Limit = limit;
+        OverdueLimit = overdueLimit;
+        LeaveTypeId = leaveTypeId;
+        ValidSince = validSince;
+        ValidUntil = validUntil;
+        Property = property;
+        Id = id;
     }
 
+    public UserLeaveLimitDto(){}
+
+    public Guid Id { get; set; } = Guid.NewGuid();
+    [JsonIgnore]
     public TimeSpan TotalLimit => Limit + OverdueLimit;
     public TimeSpan Limit { get; set; }
     public TimeSpan OverdueLimit { get; set; }
@@ -23,12 +29,15 @@ public class UserLeaveLimitDto
     public UserLeaveLimitPropertyDto? Property { get; set; }
 
     public static UserLeaveLimitDto Create(LeaveLimitDto limit) =>
-        new(limit.Limit, limit.OverdueLimit, limit.LeaveTypeId, limit.ValidSince, limit.ValidUntil, limit.Property);
-    private UserLeaveLimitDto(){}
-    public static UserLeaveLimitDto CreateEmpty() => new();
+        new(limit.Id, limit.Limit, limit.OverdueLimit, limit.LeaveTypeId, limit.ValidSince, limit.ValidUntil, limit.Property);
+    private UserLeaveLimitDto(Guid leaveTypeId)
+    {
+        LeaveTypeId = leaveTypeId;
+    }
+    public static UserLeaveLimitDto Create(Guid leaveTypeId) => new(leaveTypeId);
 }
 
-public record LeaveLimitDto(TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property, string AssignedToUserId)
+public record LeaveLimitDto(Guid Id, TimeSpan Limit, TimeSpan OverdueLimit, Guid LeaveTypeId, DateTimeOffset? ValidSince, DateTimeOffset? ValidUntil, UserLeaveLimitPropertyDto? Property, string AssignedToUserId)
 {
     public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
 }

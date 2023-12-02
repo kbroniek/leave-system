@@ -11,13 +11,13 @@ public static class FakeUserLeaveLimitsDtoProvider
         return new[]
         {
             new UserLeaveLimitDto(
-                TimeSpan.FromHours(8), TimeSpan.FromHours(16), FakeLeaveTypeDtoProvider.HolidayLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
+                Guid.NewGuid(),TimeSpan.FromHours(8), TimeSpan.FromHours(16), FakeLeaveTypeDtoProvider.HolidayLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
                 DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitPropertyDto("fakeDesc")),
             new UserLeaveLimitDto(
-                TimeSpan.FromHours(16), TimeSpan.FromHours(16), FakeLeaveTypeDtoProvider.OnDemandLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
+                Guid.NewGuid(),TimeSpan.FromHours(16), TimeSpan.FromHours(16), FakeLeaveTypeDtoProvider.OnDemandLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
                 DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitPropertyDto("fakeDesc")),
             new UserLeaveLimitDto(
-                TimeSpan.FromHours(16), TimeSpan.FromHours(24), FakeLeaveTypeDtoProvider.OnDemandLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
+                Guid.NewGuid(),TimeSpan.FromHours(16), TimeSpan.FromHours(24), FakeLeaveTypeDtoProvider.OnDemandLeaveId,DateTimeOffsetExtensions.GetFirstDayOfYear(year),
                 DateTimeOffsetExtensions.GetLastDayOfYear(year), new UserLeaveLimitPropertyDto("fakeDesc")),
         };
     }

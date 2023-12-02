@@ -168,8 +168,6 @@
         editingWorkingHours = false;
     }
 
-    string DateToString(DateTimeOffset? date) => date.HasValue ? date.Value.ToString("dd.MM.yyyy") : "";
-
     string DayTimeToString(TimeSpan timeSpan) => $"{timeSpan:hh\\:mm}";
 
 }

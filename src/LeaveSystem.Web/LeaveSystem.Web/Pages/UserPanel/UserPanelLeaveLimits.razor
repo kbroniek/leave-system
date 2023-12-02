@@ -1,23 +1,35 @@
 @using LeaveSystem.Web.Pages.UserLeaveLimits
 @using LeaveSystem.Web.Extensions
+@using LeaveSystem.Web.Pages.LeaveTypes
 
-@inject ToastService ToastService
+@inject IToastService ToastService
 @inject ILogger<UserPanelLeaveLimits> Logger
+@inject UserLeaveLimitsService LimitsService
 
-<RadzenDataGrid AllowFiltering="true" AllowSorting="true" ExpandMode="DataGridExpandMode.Single"
-                Data="@LeaveTypesWithUserLimits" TItem="LeaveTypeWithUserLimits" EditMode="DataGridEditMode.Single">
+<RadzenDataGrid @ref="leaveTypeGrid" AllowFiltering="true" AllowSorting="true" ExpandMode="DataGridExpandMode.Single"
+                Data="@LeaveTypesWithUserLimits" TItem="LeaveTypeWithUserLimits">
     <Template Context="leaveType">
-        <RadzenDataGrid @ref="limitsGrid" AllowFiltering="true" AllowPaging="true" AllowSorting="true" Data="@leaveType.Limits" TItem="UserLeaveLimitDto">
+        <RadzenButton
+            ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Limit"
+            Click="@(() => InsertRow(leaveType.Id))" Disabled=@(limitToInsert != null || editingLimits)/>
+        <RadzenDataGrid @ref="limitsGrid" AllowFiltering="true" AllowPaging="true" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow"
+                        AllowSorting="true" Data="@leaveType.Limits" TItem="UserLeaveLimitDto" EditMode="DataGridEditMode.Single">
             <Columns>
                 <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidSince" Title="Since">
                     <Template Context="limit">
                         @limit.ValidSince.GetReadableDate()
                     </Template>
+                    <EditTemplate Context="limit">
+                        <RadzenDatePicker @bind-Value="limit.ValidSince" DateFormat="d" Style="width: 150px"/>
+                    </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidUntil" Title="To">
                     <Template Context="limit">
                         @limit.ValidUntil.GetReadableDate()
                     </Template>
+                    <EditTemplate Context="limit">
+                        <RadzenDatePicker @bind-Value="limit.ValidUntil" DateFormat="d" Style="width: 150px"/>
+                    </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.Limit" Title="Limit">
                     <Template Context="limit">
@@ -41,9 +53,11 @@
                         </RadzenButton>
                     </Template>
                     <EditTemplate Context="data">
-                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(data))">
+                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
+                                      Size="ButtonSize.Medium" Click="@((args) => SaveRow(data))" @onclick:stopPropagation="true">
                         </RadzenButton>
-                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(data))">
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
+                                      Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(data))" @onclick:stopPropagation="true">
                         </RadzenButton>
                     </EditTemplate>
                 </RadzenDataGridColumn>
@@ -86,10 +100,13 @@
 
     [Parameter]
     public TimeSpan WorkingHours { get; set; }
-    [Parameter]
-    public EventCallback RefreshLimitsCallback { get; set; }
 
+    [Parameter]
+    public EventCallback<Guid> RefreshLimitsCallback { get; set; }
+
+    RadzenDataGrid<LeaveTypeWithUserLimits>? leaveTypeGrid;
     RadzenDataGrid<UserLeaveLimitDto>? limitsGrid;
+    
     bool editingLimits = false;
     UserLeaveLimitDto? limitToInsert;
 
@@ -97,10 +114,6 @@
 
     async Task EditRow(UserLeaveLimitDto limit)
     {
-        if (editingLimits)
-        {
-            
-        }
         editingLimits = true;
         if (limitsGrid is null)
         {
@@ -110,7 +123,7 @@
         }
         await limitsGrid.EditRow(limit);
     }
-    
+
     async Task SaveRow(UserLeaveLimitDto limit)
     {
         if (limitsGrid is null)
@@ -121,7 +134,7 @@
         }
         await limitsGrid.UpdateRow(limit);
     }
-    
+
     async Task CancelEdit(UserLeaveLimitDto limit)
     {
         if (limit == limitToInsert)
@@ -129,18 +142,33 @@
             limitToInsert = null;
         }
         limitsGrid?.CancelEditRow(limit);
-        await Reset();
+        await ResetOne(limit.Id);
         editingLimits = false;
     }
 
-    async Task Reset()
+    public void UpdateLeaveLimit(UserLeaveLimitDto limit)
     {
-        await RefreshLimitsCallback.InvokeAsync();
+        var limitToChange = LeaveTypesWithUserLimits?
+            .FirstOrDefault(lt => lt.Id == limit.LeaveTypeId)?
+            .Limits.FirstOrDefault(ull => ull.Id == limit.Id);
+        if (limitToChange is null)
+        {
+            return;
+        }
+        limitToChange.OverdueLimit = limit.OverdueLimit;
+        limitToChange.Limit = limit.Limit;
+        limitToChange.ValidSince = limit.ValidSince;
+        limitToChange.ValidUntil = limit.ValidUntil;
     }
-    
-    async Task InsertRow()
+
+    async Task ResetOne(Guid limitId)
     {
-        limitToInsert = UserLeaveLimitDto.CreateEmpty();
+        await RefreshLimitsCallback.InvokeAsync(limitId);
+    }
+
+    async Task InsertRow(Guid leaveTypeId)
+    {
+        limitToInsert = UserLeaveLimitDto.Create(leaveTypeId);
         if (limitsGrid is null)
         {
             ToastService.ShowError("Error occured during inserting row!");
@@ -149,6 +177,27 @@
         }
         await limitsGrid.InsertRow(limitToInsert);
     }
-    
+
+    async Task OnUpdateRow(UserLeaveLimitDto limit)
+    {
+        if (limit == limitToInsert)
+        {
+            limitToInsert = null;
+        }
+
+        await LimitsService.EditAsync(limit);
+        limitToInsert = null;
+        editingLimits = false;
+    }
+
+    async Task OnCreateRow(UserLeaveLimitDto limit)
+    {
+        var addedLimit = await LimitsService.AddAsync(limit);
+        if (addedLimit is not null)
+        {
+            limit.Id = addedLimit.Id;
+        }
+        limitToInsert = null;
+    }
 
 }

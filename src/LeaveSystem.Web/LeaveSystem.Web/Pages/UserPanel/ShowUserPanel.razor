@@ -41,10 +41,10 @@
                 </RadzenTabsItem>
                 <AuthorizeView Policy="@LeaveLimitsPolicyName" Context="ShowUserPage">
                     <RadzenTabsItem Text="Leave Limits">
-                        <UserPanelLeaveLimits 
+                        <UserPanelLeaveLimits @ref="limitsPanel"
                             LeaveTypesWithUserLimits="@leaveTypesWithUserLimits" 
                             WorkingHours="workingHoursDuration"
-                            RefreshLimitsCallback="GetLimits"/>
+                            RefreshLimitsCallback="ResetLimit"/>
                     </RadzenTabsItem>
                 </AuthorizeView>
 
@@ -68,7 +68,8 @@
     private string? userName;
     private IEnumerable<LeaveTypeWithUserLimits>? leaveTypesWithUserLimits; 
     TimeSpan workingHoursDuration;
-
+    UserPanelLeaveLimits? limitsPanel;
+    
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -114,21 +115,13 @@
             .Where(lt => lt.Limits.Any());
     }
 
-    async Task GetLimits()
+    async Task ResetLimit(Guid limitId)
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User.CreateModel();
-        Year ??= DateTimeOffset.UtcNow.Year;
-        var firstDay = DateTimeOffsetExtensions.GetFirstDayOfYear(Year.Value);
-        var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(Year.Value);
-        var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
-        var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Id, firstDay, lastDay);
-        await Task.WhenAll(getLeaveTypesTask, getLimitsTask);
-        var leaveTypes = getLeaveTypesTask.Result.ToArray();
-        var limits = getLimitsTask.Result;
-        leaveTypesWithUserLimits = leaveTypes.Select(lt => 
-            LeaveTypeWithUserLimits.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration))
-            .Where(lt => lt.Limits.Any());
+        var limitToReset = await UserLeaveLimitsService.GetSingleAsync(limitId);
+        if (limitToReset is not null)
+        {
+            limitsPanel?.UpdateLeaveLimit(limitToReset);
+        }
     }
 
     private async Task<int?> YearChanged(int? year)
