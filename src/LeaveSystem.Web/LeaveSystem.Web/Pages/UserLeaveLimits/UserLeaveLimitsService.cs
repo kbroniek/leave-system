@@ -43,8 +43,8 @@ public class UserLeaveLimitsService : UniversalHttpService<UserLeaveLimitDto>
         return limits?.Data ?? Enumerable.Empty<LeaveLimitDto>();
     }
 
-    public Task<UserLeaveLimitDto?> AddAsync(UserLeaveLimitDto entityToAdd) => AddAsync("odata/UserLeaveLimits", entityToAdd);
-    public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) => EditAsync("odata/UserLeaveLimits", entityToEdit);
+    public Task<UserLeaveLimitDto?> AddAsync(UserLeaveLimitDto entityToAdd) => AddAsync("odata/UserLeaveLimits", entityToAdd, "User leave limit added successfully");
+    public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) => EditAsync("odata/UserLeaveLimits", entityToEdit, "User leave limit edited successfully");
 
     private sealed class TimeSpanToStringConverter : JsonConverter<TimeSpan>
     {

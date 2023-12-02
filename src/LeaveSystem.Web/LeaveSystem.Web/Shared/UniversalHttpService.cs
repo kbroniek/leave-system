@@ -22,7 +22,7 @@ public abstract class UniversalHttpService<T> where T : class
         this.entityName = entityName;
     }
 
-    public virtual async Task<T?> AddAsync(string uri, T entityToAdd)
+    protected virtual async Task<T?> AddAsync(string uri, T entityToAdd, string successMessage)
     {
         var jsonString = JsonSerializer.Serialize(entityToAdd);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
@@ -32,7 +32,7 @@ public abstract class UniversalHttpService<T> where T : class
             var resultWorkingHoursDto = await response.Content.ReadFromJsonAsync<T>();
             if (resultWorkingHoursDto is not null)
             {
-                toastService.ShowSuccess($"{entityName} added successfully");
+                toastService.ShowSuccess(successMessage);
             }
             else
             {
@@ -47,14 +47,14 @@ public abstract class UniversalHttpService<T> where T : class
         return null;
     }
 
-    public virtual async Task<bool> EditAsync(string uri, T entityToEdit)
+    protected virtual async Task<bool> EditAsync(string uri, T entityToEdit, string successMessage)
     {
         var jsonString = JsonSerializer.Serialize(entityToEdit);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
         var response = await httpClient.PutAsync(uri, httpContent);
         if (response.IsSuccessStatusCode)
         {
-            toastService.ShowSuccess($"{entityName} updated successfully");
+            toastService.ShowSuccess(successMessage);
             return true;
         }
         var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
@@ -64,7 +64,7 @@ public abstract class UniversalHttpService<T> where T : class
         return false;
     }
     
-    public virtual async Task<T?> GetSingleAsync(string uri)
+    protected virtual async Task<T?> GetSingleAsync(string uri, string errorMessage)
     {
         try
         {
@@ -72,13 +72,13 @@ public abstract class UniversalHttpService<T> where T : class
         }
         catch (HttpRequestException ex)
         {
-            toastService.ShowError($"Error occured while getting {entityName}");
+            toastService.ShowError(errorMessage);
             logger.LogError("{Message}", ex.Message);
             return null;
         }
     }
 
-    public virtual async Task<IEnumerable<T>?> GetManyAsync(string uri)
+    protected virtual async Task<IEnumerable<T>?> GetManyAsync(string uri, string errorMessage)
     {
         try
         {
@@ -86,7 +86,7 @@ public abstract class UniversalHttpService<T> where T : class
         }
         catch (HttpRequestException ex)
         {
-            toastService.ShowError("Error occured while getting working hours");
+            toastService.ShowError(errorMessage);
             logger.LogError("{Message}", ex.Message);
             return null;
         }
