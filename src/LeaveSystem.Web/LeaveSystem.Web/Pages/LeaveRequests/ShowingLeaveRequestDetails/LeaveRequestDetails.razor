@@ -1,18 +1,23 @@
 ﻿@page "/leave-requests/{LeaveRequestId}"
 @using System.Text.Json.Serialization
 @using System.Text.Json
+@using Ardalis.GuardClauses
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Web.Extensions
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.WorkingHours
 @using Microsoft.AspNetCore.Authorization
+@using static LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequestDetails.ChangeStatusDialog
 @attribute [Authorize(Policy=@PolicyName)]
 @inject HttpClient HttpClient
 @inject ILogger<LeaveRequestDetails> Logger
 @inject LeaveTypesService LeaveTypesService
 @inject WorkingHoursService WorkingHoursService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ChangeStatusService ChangeStatusService
+@inject DialogService DialogService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Show leave request</PageTitle>
 
@@ -39,24 +44,35 @@ else
         {
             <RadzenText TextStyle="TextStyle.Body1" class="mb-1 mt-2">On behalf: <strong>@leaveRequest.CreatedByOnBehalf?.Name</strong></RadzenText>
         }
-        <hr class="mt-2 mb-3"/>
+        <hr class="mt-2 mb-3" />
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
+            <AuthorizeView Policy="@AcceptPolicyName" Context="AcceptLeaveRequest">
+                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnAcceptClick()) Text="Accpet" ButtonStyle="ButtonStyle.Success" />
+                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnRejectClick()) Text="Reject" ButtonStyle="ButtonStyle.Danger" />
+            </AuthorizeView>
+            @if (leaveRequest.CreatedBy.Id == currentUser.Id)
+            {
+                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnCancelClick()) Text="Cancel" ButtonStyle="ButtonStyle.Warning" />
+            }
+        </RadzenStack>
     </RadzenCard>
 }
 
-
 @code {
     public const string PolicyName = "LeaveRequestDetails";
+    public const string AcceptPolicyName = "LeaveRequestDetailsAccept";
     [Parameter]
     public string? LeaveRequestId { get; set; }
     private LeaveRequest? leaveRequest;
     private LeaveTypesService.LeaveTypeDto? leaveType;
     private TimeSpan workingHours;
+    private FederatedUser currentUser;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User.CreateModel();
-        var userId = user.Id;
+        currentUser = authState.User.CreateModel();
+        var userId = currentUser.Id;
         var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(userId);
         leaveRequest = await HttpClient.GetFromJsonAsync<LeaveRequest>($"api/leaveRequests/{LeaveRequestId}", new JsonSerializerOptions(JsonSerializerDefaults.Web));
         if(leaveRequest is null)
@@ -65,6 +81,43 @@ else
         }
         leaveType = await LeaveTypesService.GetLeaveType(leaveRequest.LeaveTypeId);
         workingHours = (await getWorkingHoursTask).DurationOrZero();
+    }
+
+    private async Task OnAcceptClick()
+    {
+        Guard.Against.Null(LeaveRequestId);
+        await ChangeStatus(remarks => ChangeStatusService.Accept(LeaveRequestId, remarks));
+    }
+
+    private async Task OnRejectClick()
+    {
+        Guard.Against.Null(LeaveRequestId);
+        await ChangeStatus(remarks => ChangeStatusService.Reject(LeaveRequestId, remarks));
+    }
+
+    private async Task OnCancelClick()
+    {
+        Guard.Against.Null(LeaveRequestId);
+        await ChangeStatus(remarks => ChangeStatusService.Cancel(LeaveRequestId, remarks));
+    }
+
+    private async Task ChangeStatus(Func<string?, Task> onChange)
+    {
+        DialogResult result = await DialogService.OpenAsync<ChangeStatusDialog>("Change status",
+               null,
+               new DialogOptions() { Draggable = true });
+        if (result.IsSuccess)
+        {
+            try
+            {
+                await onChange(result.Remarks);
+            }
+            finally
+            {
+                NavigationManager.ReloadPage();
+            }
+        }
+
     }
 
     public record LeaveRequest(DateTimeOffset DateFrom, DateTimeOffset DateTo, TimeSpan Duration, Guid LeaveTypeId, IEnumerable<RemarksModel> Remarks, LeaveRequestStatus Status, FederatedUser CreatedBy, FederatedUser? LastModifiedBy, FederatedUser? CreatedByOnBehalf);

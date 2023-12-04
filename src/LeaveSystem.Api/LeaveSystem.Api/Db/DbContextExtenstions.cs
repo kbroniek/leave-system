@@ -255,6 +255,13 @@ public static class DbContextExtenstions
         }
         await CreateWorkingHours(
             commandBus,
+            defaultUser.Id,
+            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(2025, 1, 1),
+            TimeSpan.FromHours(8),
+            defaultUser);
+        await CreateWorkingHours(
+            commandBus,
             testUsers[0].Id,
             DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
             DateTimeOffsetExtensions.CreateFromDate(2025, 1, 1),

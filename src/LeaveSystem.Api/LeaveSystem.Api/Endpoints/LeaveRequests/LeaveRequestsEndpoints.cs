@@ -25,11 +25,6 @@ public static class LeaveRequestsEndpoints
     public const string CancelLeaveRequestPolicyName = "CancelLeaveRequest";
     public static IEndpointRouteBuilder AddLeaveRequestEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
-        endpoint.MapGet("api/exception", () =>
-        {
-            throw new BadHttpRequestException("Throtting", StatusCodes.Status429TooManyRequests);
-        });
-
         endpoint.MapGet("api/leaveRequests", async (HttpContext httpContext, IQueryBus queryBus, GetLeaveRequestsQuery query, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
@@ -131,7 +126,7 @@ public static class LeaveRequestsEndpoints
         .WithName(RejectLeaveRequestPolicyName)
         .RequireAuthorization(RejectLeaveRequestPolicyName);
 
-        endpoint.MapDelete("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, [FromBody] CancelLeaveRequestDto cancelLeaveRequest, CancellationToken cancellationToken) =>
+        endpoint.MapPut("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, CancelLeaveRequestDto cancelLeaveRequest, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 

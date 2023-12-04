@@ -44,6 +44,8 @@ public static class Config
                 policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource)));
             options.AddPolicy(UsersPage.PolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin)));
+            options.AddPolicy(LeaveRequestDetails.AcceptPolicyName, policy =>
+                policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker)));
         });
         services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
     }
@@ -58,7 +60,8 @@ public static class Config
             .AddTransient<WorkingHoursService>()
             .AddTransient<HrSummaryService>()
             .AddTransient<GetLeaveStatusSettingsService>()
-            .AddTransient<UsersService>();
+            .AddTransient<UsersService>()
+            .AddTransient<ChangeStatusService>();
     }
     private static IServiceCollection AddHttpClient(this IServiceCollection services, IConfiguration configuration, string scopes)
     {

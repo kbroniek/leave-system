@@ -57,7 +57,7 @@ echo '\x \\ DROP DATABASE "leave-system"; CREATE DATABASE "leave-system";' | .\p
 You can create a new application or use existing the `Blazor Server AAD B2C` app.
 
 1. Copy client id and tenant id and paste to the `ManageAzureUsers` in the [appsettings.json](./src/LeaveSystem.Api/LeaveSystem.Api/appsettings.json) config file.
-1. Generate `client secret`. Go to the app details and click `Certificates & secrets`. Click `New client secret`. Copy secret and paste to the `ManageAzureUsers/Secret` in the `appsettings.json` config file.
+1. To to Azure Portal. Generate `client secret`. Go to the app details and click `Certificates & secrets`. Click `New client secret`. Copy secret and paste to the `ManageAzureUsers/Secret` in the `appsettings.json` config file.
 1. Go to the `API permissions`, `Add a permission` and add `User.ReadWrite.All`.
 1. Click `Grant admin consent for ...`
 1. Find Application (client) ID in the App registrations pane in the Azure portal. The app registration is named 'b2c-extensions-app. Do not modify. Used by AADB2C for storing user data.'. Copy clientId and paste to the `B2cExtensionAppClientId`.
@@ -181,6 +181,12 @@ az account get-access-token --resource api://4f24b978-403f-47fe-9cae-52deea03661
 ```
 
 ## Storage of app secrets
+
+If you have the following error, follow these steps:
+
+```
+System.ArgumentNullException: IDW10106: The 'ClientId' option must be provided.
+```
 
 You can find more info in [documentation](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-7.0&tabs=windows)
 

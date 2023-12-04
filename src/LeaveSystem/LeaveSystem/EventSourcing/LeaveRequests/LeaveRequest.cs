@@ -45,7 +45,7 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
 
     internal void Accept(string? remarks, FederatedUser acceptedBy)
     {
-        if (Status != LeaveRequestStatus.Pending)
+        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Rejected)
         {
             throw new InvalidOperationException($"Accepting leave request in '{Status}' status is not allowed.");
         }
