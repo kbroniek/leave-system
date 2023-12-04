@@ -6,7 +6,7 @@ namespace LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 
 public static class MockHttpHandlerExtensions
 {
-    public static readonly string BaseFakeUrl = "http://localhost:5047/";
+    public const string BaseFakeUrl = "http://localhost:5047/";
 
     public static MockedRequest WhenWithBaseUrl(this MockHttpMessageHandler source, string restOfUrl)
     {
@@ -20,11 +20,14 @@ public static class MockHttpHandlerExtensions
     {
         var jsonContent = JsonSerializer.Serialize(objectToSerialize, jsonSerializerOptions);
         return source.Respond("application/json", jsonContent);
-    } 
-    
+    }
+
     public static MockedRequest WithJsonContent(this MockedRequest source, object objectToSerialize)
+        => WithJsonContent(source, objectToSerialize, JsonSerializerOptions.Default);
+    
+    public static MockedRequest WithJsonContent(this MockedRequest source, object objectToSerialize, JsonSerializerOptions jsonSerializerOptions)
     {
-        var serializedObject = JsonSerializer.Serialize(objectToSerialize);
+        var serializedObject = JsonSerializer.Serialize(objectToSerialize, jsonSerializerOptions);
         return source.WithContent(serializedObject);
     } 
 }

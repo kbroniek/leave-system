@@ -7,7 +7,8 @@ namespace LeaveSystem.Web.UnitTests.TestStuff.Factories;
 
 public static class HttpClientMockFactory
 {
-    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, string baseFakeUrl = "http://localhost:5047/") =>
+    private const string baseFakeUrl = "http://localhost:5047/";
+    public static HttpClient CreateWithJsonResponse<T>(string url, T? response) =>
         CreateWithJsonResponse(url, response, JsonSerializerOptions.Default, baseFakeUrl);
 
     public static HttpClient CreateWithJsonResponse<T>(string url, T? response, JsonSerializerOptions options, string baseFakeUrl = "http://localhost:5047/")
@@ -28,29 +29,31 @@ public static class HttpClientMockFactory
         httpClient.BaseAddress = new Uri(baseFakeUrl);
         return httpClient;
     }
-    
-    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, 
-        string baseFakeUrl = "http://localhost:5047/")
+
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode)
+        => CreateWithJsonContent(url, content, httpStatusCode, JsonSerializerOptions.Default);
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, JsonSerializerOptions options)
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();
-        mockHttpMessageHandler.When(baseFakeUrl + url).WithJsonContent(content).Respond(httpStatusCode);
+        mockHttpMessageHandler.When(baseFakeUrl + url).WithJsonContent(content, options).Respond(httpStatusCode);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(baseFakeUrl);
+        return httpClient;
+    }
+
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode,
+        HttpContent responseContent)
+        => CreateWithJsonContent(url, content, httpStatusCode, responseContent, JsonSerializerOptions.Default);
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, HttpContent responseContent, JsonSerializerOptions options)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        mockHttpMessageHandler.When(baseFakeUrl + url).WithJsonContent(content, options).Respond(httpStatusCode, responseContent);
         var httpClient = new HttpClient(mockHttpMessageHandler);
         httpClient.BaseAddress = new Uri(baseFakeUrl);
         return httpClient;
     } 
     
-    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, HttpContent responseContent,
-        string baseFakeUrl = "http://localhost:5047/")
-    {
-        var mockHttpMessageHandler = new MockHttpMessageHandler();
-        mockHttpMessageHandler.When(baseFakeUrl + url).WithJsonContent(content).Respond(httpStatusCode, responseContent);
-        var httpClient = new HttpClient(mockHttpMessageHandler);
-        httpClient.BaseAddress = new Uri(baseFakeUrl);
-        return httpClient;
-    } 
-    
-    public static HttpClient Create(string url, HttpStatusCode httpStatusCode, 
-        string baseFakeUrl = "http://localhost:5047/")
+    public static HttpClient Create(string url, HttpStatusCode httpStatusCode)
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();
         mockHttpMessageHandler.When(baseFakeUrl + url).Respond(httpStatusCode);

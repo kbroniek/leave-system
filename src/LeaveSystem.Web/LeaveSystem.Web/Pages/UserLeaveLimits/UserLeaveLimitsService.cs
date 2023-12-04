@@ -12,23 +12,19 @@ namespace LeaveSystem.Web.Pages.UserLeaveLimits;
 public class UserLeaveLimitsService : UniversalHttpService
 {
     private readonly HttpClient httpClient;
-    private readonly IToastService toastService;
-    private readonly ILogger<UserLeaveLimitsService> logger;
     
     private static readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web)
     {
         Converters =
             {
                 new TimeSpanToStringConverter()
-            }
+            },
     };
 
     public UserLeaveLimitsService(HttpClient httpClient, IToastService toastService, ILogger<UserLeaveLimitsService> logger) 
         : base(httpClient, toastService, logger)
     {
         this.httpClient = httpClient;
-        this.toastService = toastService;
-        this.logger = logger;
     }
 
     public virtual async Task<IEnumerable<UserLeaveLimitDto>> GetLimits(string userId, DateTimeOffset since, DateTimeOffset until)
@@ -53,7 +49,7 @@ public class UserLeaveLimitsService : UniversalHttpService
 
     public async Task<UserLeaveLimitDto?> AddAsync(UserLeaveLimitDto entityToAdd)
     {
-        var odataResponse = await AddAsync<UserLeaveLimitDto, UserLeaveLimitDtoODataResponse>($"odata/UserLeaveLimits({entityToAdd.Id})", entityToAdd, "User leave limit added successfully", jsonSerializerOptions);
+        var odataResponse = await AddAsync<UserLeaveLimitDto, UserLeaveLimitDtoODataResponse>("odata/UserLeaveLimits", entityToAdd, "User leave limit added successfully", jsonSerializerOptions);
         return odataResponse?.ToUserLeaveLimitDto();
     } 
     public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) => EditAsync($"odata/UserLeaveLimits({entityToEdit.Id})", entityToEdit, "User leave limit edited successfully", jsonSerializerOptions);

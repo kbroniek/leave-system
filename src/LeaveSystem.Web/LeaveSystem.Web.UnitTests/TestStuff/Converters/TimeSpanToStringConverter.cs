@@ -17,4 +17,5 @@ internal class TimeSpanToStringConverter : JsonConverter<TimeSpan>
         var timeSpanValue = XmlConvert.ToString(value);
         writer.WriteStringValue(timeSpanValue);
     }
+    
 }

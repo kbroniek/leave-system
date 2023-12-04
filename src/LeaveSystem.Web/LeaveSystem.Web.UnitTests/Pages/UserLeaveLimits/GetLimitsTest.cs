@@ -18,7 +18,7 @@ public class GetLimitsTest
     private Mock<ILogger<UserLeaveLimitsService>> loggerMock = new();
 
     private string GetUrl(DateTimeOffset since, DateTimeOffset until) =>
-        $"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
+        $"odata/UserLeaveLimits?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
 
     private UserLeaveLimitsService GetSut() => new(httpClient, toastServiceMock.Object, loggerMock.Object);
 

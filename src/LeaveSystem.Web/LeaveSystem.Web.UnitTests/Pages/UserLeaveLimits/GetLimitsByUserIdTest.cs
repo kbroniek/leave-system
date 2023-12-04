@@ -8,6 +8,7 @@ using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.UnitTests.TestStuff.Converters;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
+using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -32,6 +33,7 @@ public class GetLimitsByUserIdTest
         {
             new
             {
+                Id = Guid.NewGuid(),
                 Limit = TimeSpan.FromHours(16), 
                 OverdueLimit = TimeSpan.FromHours(4), 
                 LeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId, 
@@ -44,6 +46,7 @@ public class GetLimitsByUserIdTest
             },
             new
             {
+                Id = Guid.NewGuid(),
                 Limit = TimeSpan.FromHours(8), 
                 OverdueLimit = TimeSpan.FromHours(16), 
                 LeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId, 
@@ -56,6 +59,7 @@ public class GetLimitsByUserIdTest
             },
             new
             {
+                Id = Guid.NewGuid(),
                 Limit = TimeSpan.FromHours(16), 
                 OverdueLimit = TimeSpan.FromHours(4), 
                 LeaveTypeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid, 
@@ -68,8 +72,8 @@ public class GetLimitsByUserIdTest
             }
         }.ToODataResponse();
         var url =
-            $"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
-        httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, data, new JsonSerializerOptions { Converters = { new TimeSpanToStringConverter() }});
+            $"odata/UserLeaveLimits?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
+        httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, data, FakeJsonSerializerOptionsProvider.GetWithTimespanConverter());
         var sut = GetSut();
         //When
         var result = await sut.GetLimits(userId, since, until);
@@ -86,7 +90,7 @@ public class GetLimitsByUserIdTest
         var since = DateTimeOffsetExtensions.CreateFromDate(2020, 1, 3);
         var until = DateTimeOffsetExtensions.CreateFromDate(2021, 5, 24);
         var url =
-            $"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
+            $"odata/UserLeaveLimits?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
         httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, userLeaveLimits, new JsonSerializerOptions { Converters = { new TimeSpanToStringConverter() }});
         var sut = GetSut();
         //When

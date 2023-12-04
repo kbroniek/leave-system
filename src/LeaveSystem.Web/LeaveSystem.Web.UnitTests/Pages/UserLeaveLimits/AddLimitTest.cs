@@ -6,8 +6,10 @@ using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.WorkingHours;
+using LeaveSystem.Web.UnitTests.TestStuff.Converters;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
+using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using RichardSzalay.MockHttp;
@@ -33,7 +35,7 @@ public class AddLimitTest
             new ProblemDto(string.Empty, fakeContentText, 400, fakeDetailsText, string.Empty, "dev", "1.0.0.0");
         var serializedProblemDto = JsonSerializer.Serialize(problemDto);
         var responseContent = new StringContent(serializedProblemDto, Encoding.UTF8, "application/json");
-        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.BadRequest, responseContent);
+        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.BadRequest, responseContent, FakeJsonSerializerOptionsProvider.GetWithTimespanConverter());
         toastServiceMock = new Mock<IToastService>();
         loggerMock = new Mock<ILogger<UserLeaveLimitsService>>();
         var sut = GetSut();
@@ -54,9 +56,16 @@ public class AddLimitTest
         const string fakeContentText = "fake response content";
         const string fakeDetailsText = "fake error in 404 line";
         var problemDto = (ProblemDto) null;
+        var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        {
+            Converters =
+            {
+                new TimeSpanToStringConverter()
+            },
+        };
         var serializedProblemDto = JsonSerializer.Serialize(problemDto);
         var responseContent = new StringContent(serializedProblemDto, Encoding.UTF8, "application/json");
-        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.OK, responseContent);
+        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.OK, responseContent, jsonOptions);
         toastServiceMock = new Mock<IToastService>();
         loggerMock = new Mock<ILogger<UserLeaveLimitsService>>();
         var sut = GetSut();
@@ -75,7 +84,7 @@ public class AddLimitTest
         var limitToAdd = FakeUserLeaveLimitProvider.GetLimitForHolidayLeave().ToDto();
         var serializedAddedLimit = JsonSerializer.Serialize(limitToAdd);
         var responseContent = new StringContent(serializedAddedLimit, Encoding.UTF8, "application/json");
-        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.OK, responseContent);
+        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.OK, responseContent, FakeJsonSerializerOptionsProvider.GetWithTimespanConverter());
         toastServiceMock = new Mock<IToastService>();
         loggerMock = new Mock<ILogger<UserLeaveLimitsService>>();
         var sut = GetSut();

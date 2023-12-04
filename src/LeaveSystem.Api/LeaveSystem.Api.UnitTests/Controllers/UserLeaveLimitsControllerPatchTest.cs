@@ -4,6 +4,7 @@ using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.UnitTests.TestExtensions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared;
 using LeaveSystem.UnitTests;
 using LeaveSystem.UnitTests.Providers;
 using Microsoft.AspNetCore.Mvc;
@@ -122,8 +123,8 @@ public class UserLeaveLimitsControllerPatchTest
         {
             AssignedToUserId = Guid.NewGuid().ToString(),
             Limit = TimeSpan.FromHours(16),
-            ValidSince = DateTimeOffset.Now + TimeSpan.FromDays(2),
-            ValidUntil = DateTimeOffset.Now + TimeSpan.FromDays(5),
+            ValidSince = DateTimeOffset.Now.GetDayWithoutTime() + TimeSpan.FromDays(2),
+            ValidUntil = DateTimeOffset.Now.GetDayWithoutTime() + TimeSpan.FromDays(5),
             LeaveTypeId = FakeLeaveTypeProvider.FakeSickLeaveId,
             Property = new UserLeaveLimit.UserLeaveLimitProperties
             {
