@@ -21,9 +21,13 @@ public class WorkingHoursDto
     public DateTimeOffset? DateTo { get; set; }
     public TimeSpan Duration { get; set; }
 
-    public DateTime DurationAsDateTime
+    public string DurationProxy
     {
-        get => new(Duration.Ticks);
-        set => Duration = TimeSpan.FromTicks(value.Ticks);
+        get => Duration.ToString() ?? "";
+        set
+        {
+            TimeSpan.TryParse(value, out var parsedValue);
+            Duration = parsedValue;
+        }
     }
 }

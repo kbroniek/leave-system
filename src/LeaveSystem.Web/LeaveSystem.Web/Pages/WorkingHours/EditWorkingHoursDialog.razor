@@ -25,12 +25,12 @@
                     <RadzenDatePicker @bind-Value="data.DateTo" DateFormat="d" Style="width: 150px"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="WorkingHoursDto" Property="DurationAsDateTime" Title="Duration">
+            <RadzenDataGridColumn TItem="WorkingHoursDto" Property="Duration" Title="Duration">
                 <Template Context="data">
                     @DayTimeToString(data.Duration)
                 </Template>
                 <EditTemplate Context="data">
-                    <RadzenDatePicker @bind-Value="data.DurationAsDateTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm" Style="width: 150px"/>
+                    <InputText type="time" @bind-Value="data.DurationProxy" Style="width: 150px" />
                 </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="WorkingHoursDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
