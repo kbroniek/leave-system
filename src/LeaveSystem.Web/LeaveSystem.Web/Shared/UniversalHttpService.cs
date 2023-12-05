@@ -12,7 +12,7 @@ public abstract class UniversalHttpService
     private readonly HttpClient httpClient;
     private readonly IToastService toastService;
     private readonly ILogger logger;
-
+    //Todo: dodać jako klasę wstrzykiwaną, a nie taką po której się dziedziczy
     protected UniversalHttpService(HttpClient httpClient, IToastService toastService, ILogger logger)
     {
         this.httpClient = httpClient;

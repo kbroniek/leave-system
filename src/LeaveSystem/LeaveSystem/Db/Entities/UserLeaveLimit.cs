@@ -1,5 +1,8 @@
-﻿using GoldenEye.Objects.General;
+﻿using FluentValidation;
+using GoldenEye.Objects.General;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.FluentValidation;
+using NSubstitute;
 
 namespace LeaveSystem.Db.Entities;
 public class UserLeaveLimit : IHaveId<Guid>
@@ -30,5 +33,16 @@ public class UserLeaveLimit : IHaveId<Guid>
     public class UserLeaveLimitProperties
     {
         public string? Description { get; set; }
+    }
+}
+
+public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
+{
+    public UserLeaveLimitValidator()
+    {
+        RuleFor(x => x.ValidSince)
+            .LessThan(x => x.ValidUntil)
+            .When(x => x.ValidUntil is not null || x.ValidSince is not null)
+            .WithErrorCode(FvErrorCodes.ArgumentOutOfRange);
     }
 }

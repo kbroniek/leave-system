@@ -15,22 +15,6 @@
         <RadzenDataGrid @ref="limitsGrid" AllowFiltering="true" AllowPaging="true" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow"
                         AllowSorting="true" Data="@leaveType.Limits" TItem="UserLeaveLimitDto" EditMode="DataGridEditMode.Single">
             <Columns>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidSince" Title="Since">
-                    <Template Context="limit">
-                        @limit.ValidSince.GetReadableDate()
-                    </Template>
-                    <EditTemplate Context="limit">
-                        <RadzenDatePicker @bind-Value="limit.ValidSince" DateFormat="d" Style="width: 150px"/>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidUntil" Title="To">
-                    <Template Context="limit">
-                        @limit.ValidUntil.GetReadableDate()
-                    </Template>
-                    <EditTemplate Context="limit">
-                        <RadzenDatePicker @bind-Value="limit.ValidUntil" DateFormat="d" Style="width: 150px"/>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.Limit" Title="Limit">
                     <Template Context="limit">
                         @limit.Limit.GetReadableTimeSpan(WorkingHours)
@@ -67,7 +51,7 @@
     <Columns>
         <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Name">
             <Template Context="leaveType">
-                @leaveType.Name;
+                @leaveType.Name
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Limit">
@@ -141,8 +125,11 @@
         {
             limitToInsert = null;
         }
+        else
+        {
+            await ResetOne(limit.Id);
+        }
         limitsGrid?.CancelEditRow(limit);
-        await ResetOne(limit.Id);
         editingLimits = false;
     }
 

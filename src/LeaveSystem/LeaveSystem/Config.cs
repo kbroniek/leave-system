@@ -1,5 +1,7 @@
-﻿using GoldenEye.Marten.Registration;
+﻿using FluentValidation;
+using GoldenEye.Marten.Registration;
 using LeaveSystem.Db;
+using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,5 +17,10 @@ public static class Config
         services
             .AddDbContext<LeaveSystemDbContext>(options => options.UseNpgsql(martenConfig.ConnectionString))
             .AddEventSourcing(config);
+    }
+
+    public static void AddValidators(this IServiceCollection services)
+    {
+        services.AddScoped<IValidator<UserLeaveLimit>, UserLeaveLimitValidator>();
     }
 }

@@ -11,6 +11,7 @@ using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared.Date;
 using Microsoft.AspNetCore.OData;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -52,6 +53,8 @@ IEdmModel GetEdmModel()
 builder.Services.AddScoped<CurrentDateService>();
 builder.Services.AddDDD();
 builder.Services.AddLeaveSystemModule(builder.Configuration);
+builder.Services.AddMvc();
+builder.Services.AddValidators();
 
 var app = builder.Build();
 
@@ -104,5 +107,7 @@ if (app.Environment.IsDevelopment())
 {
     _ = app.FillInDatabase();
 }
+
+IdentityModelEventSource.ShowPII = true;
 
 await app.RunAsync();

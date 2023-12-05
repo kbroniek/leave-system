@@ -1,4 +1,7 @@
-﻿using GoldenEye.Objects.General;
+﻿using Ardalis.GuardClauses;
+using GoldenEye.Exceptions;
+using GoldenEye.Objects.General;
+using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Db;
 using LeaveSystem.Shared;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +11,8 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
+using RestSharp.Validation;
+using NotFoundException = GoldenEye.Exceptions.NotFoundException;
 
 namespace LeaveSystem.Api.Controllers
 {
@@ -17,7 +22,9 @@ namespace LeaveSystem.Api.Controllers
     {
         private readonly LeaveSystemDbContext dbContext;
         //Todo: Methods should throw errors instead HTTPs responses
-
+        protected string InvalidModelStateErrorMessage = "This request is not valid oDataRequest";
+        protected string NotFoundMessage = "";
+        protected string BadIdMessage = "";
         public GenericCrudController(LeaveSystemDbContext dbContext)
         {
             this.dbContext = dbContext;
@@ -25,7 +32,7 @@ namespace LeaveSystem.Api.Controllers
 
         [HttpGet]
         [EnableQuery]
-        public IQueryable<TEntity>? Get() => dbContext.Set<TEntity>();
+        public virtual IQueryable<TEntity>? Get() => dbContext.Set<TEntity>();
 
         [HttpGet("{key}")]
         [EnableQuery]
@@ -36,28 +43,28 @@ namespace LeaveSystem.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TEntity TEntity, CancellationToken cancellationToken = default)
+        public virtual async Task<IActionResult> Post([FromBody] TEntity entity, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                throw new BadHttpRequestException(InvalidModelStateErrorMessage);
             }
-            GetSet().Add(TEntity);
+            GetSet().Add(entity);
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Created(TEntity);
+            return Created(entity);
         }
 
         [HttpPatch]
-        public async Task<IActionResult> Patch([FromODataUri] TId key, [FromBody] Delta<TEntity> update, CancellationToken cancellationToken = default)
+        public virtual async Task<IActionResult> Patch([FromODataUri] TId key, [FromBody] Delta<TEntity> update, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                throw new BadHttpRequestException(InvalidModelStateErrorMessage);
             }
             var entity = await GetSet().FindAsync(new object[] { key }, cancellationToken);
             if (entity == null)
             {
-                return NotFound();
+                throw new EntityNotFoundException(NotFoundMessage);
             }
             update.Patch(entity);
             try
@@ -68,12 +75,9 @@ namespace LeaveSystem.Api.Controllers
             {
                 if (!await ProductExists(key, cancellationToken))
                 {
-                    return NotFound();
+                    throw new EntityNotFoundException(NotFoundMessage);
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
             return Updated(entity);
         }
@@ -83,11 +87,11 @@ namespace LeaveSystem.Api.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                throw new BadHttpRequestException(InvalidModelStateErrorMessage);
             }
             if (key.CompareTo(update.Id) != 0)
             {
-                return BadRequest();
+                throw new BadHttpRequestException(BadIdMessage);
             }
             dbContext.Entry(update).State = EntityState.Modified;
             try
@@ -98,12 +102,9 @@ namespace LeaveSystem.Api.Controllers
             {
                 if (!await ProductExists(key, cancellationToken))
                 {
-                    return NotFound();
+                    throw new EntityNotFoundException(NotFoundMessage);
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
             return Updated(update);
         }
@@ -114,13 +115,12 @@ namespace LeaveSystem.Api.Controllers
             var product = await GetSet().FindAsync(new object[] { key }, cancellationToken);
             if (product == null)
             {
-                return NotFound();
+                throw new EntityNotFoundException(NotFoundMessage);
             }
             GetSet().Remove(product);
             await dbContext.SaveChangesAsync(cancellationToken);
             return NoContent();
         }
-
         private Task<bool> ProductExists(TId key, CancellationToken cancellationToken)
         {
             return GetSet().AnyAsync(l => l.Id.CompareTo(key) == 0, cancellationToken);

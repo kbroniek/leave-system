@@ -110,9 +110,8 @@
         leaveRequestsForView = leaveRequests
             .OrderBy(lr => lr.DateFrom)
             .Select(lr => LeaveRequestForView.Create(lr, leaveTypes, workingHoursDuration));
-        leaveTypesWithUserLimits = leaveTypes.Select(lt => 
-            LeaveTypeWithUserLimits.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration))
-            .Where(lt => lt.Limits.Any());
+        leaveTypesWithUserLimits = leaveTypes.Select(lt =>
+            LeaveTypeWithUserLimits.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration));
     }
 
     async Task ResetLimit(Guid limitId)
