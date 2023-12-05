@@ -7,12 +7,15 @@ using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
+using LeaveSystem.Api.Extensions;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared.Date;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 const string azureConfigSection = "AzureAdB2C";
 const string azureReadUsersSection = "ManageAzureUsers";
@@ -29,7 +32,7 @@ builder.Services.AddRazorPages();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwagger();
 builder.Services.AddCors();
 builder.Services.AddControllers().AddOData(opt =>
     opt.AddRouteComponents("odata", GetEdmModel())
