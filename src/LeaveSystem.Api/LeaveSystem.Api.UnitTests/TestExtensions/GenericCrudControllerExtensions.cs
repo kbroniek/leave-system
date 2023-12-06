@@ -9,7 +9,7 @@ namespace LeaveSystem.Api.UnitTests.TestExtensions;
 
 public static class GenericCrudControllerExtensions
 {
-    public static async Task CheckGetMethodAsync<TEntity,TId>(this GenericCrudController<TEntity, TId> source, LeaveSystemDbContext dbContext)
+    public static async Task CheckGetMethodAsync<TEntity,TId>(this GenericCrudService<TEntity, TId> source, LeaveSystemDbContext dbContext)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId>
     {
@@ -19,7 +19,7 @@ public static class GenericCrudControllerExtensions
         set.Should().BeEquivalentTo(dbContext.Set<LeaveType>());
     }
     
-    public static async Task CheckGetSingleResultMethodAsync<TEntity,TId>(this GenericCrudController<TEntity, TId> source, LeaveSystemDbContext dbContext)
+    public static async Task CheckGetSingleResultMethodAsync<TEntity,TId>(this GenericCrudService<TEntity, TId> source, LeaveSystemDbContext dbContext)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId>
     {

@@ -21,7 +21,7 @@ public class SettingsControllerDeleteTest
         var sut = new SettingsController(dbContext);
         var fakeId = Guid.NewGuid().ToString();
         //When
-        var result = await sut.Delete(fakeId);
+        var result = await sut.DeleteAsync(fakeId);
         //Then
         result.Should().BeOfType<NotFoundResult>();
     }
@@ -42,7 +42,7 @@ public class SettingsControllerDeleteTest
         var sut = new SettingsController(dbContext);
         var fakeId = FakeSettingsProvider.CanceledSettingId;
         //When
-        var result = await sut.Delete(fakeId);
+        var result = await sut.DeleteAsync(fakeId);
         //Then
         result.Should().BeOfType<NoContentResult>();
         sut.Get().Should().BeEquivalentTo(new[]

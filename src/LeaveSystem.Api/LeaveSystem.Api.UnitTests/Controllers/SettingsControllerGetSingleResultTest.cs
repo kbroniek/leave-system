@@ -19,7 +19,7 @@ public class SettingsControllerGetSingleResultTest
         var fakeId = Guid.NewGuid().ToString();
         var sut = new SettingsController(dbContext);
         //When
-        var result = sut.Get(fakeId);
+        var result = sut.GetAsQueryable(fakeId);
         //Then
         result.Queryable.Should().BeEquivalentTo(
             Enumerable.Empty<LeaveType>()
@@ -37,7 +37,7 @@ public class SettingsControllerGetSingleResultTest
         var fakeId = FakeSettingsProvider.AcceptedSettingId;
         var sut = new SettingsController(dbContext);
         //When
-        var result = sut.Get(fakeId);
+        var result = sut.GetAsQueryable(fakeId);
         //Then
         result.Queryable.Should().BeEquivalentTo(
             new [] {FakeSettingsProvider.GetAcceptedSetting()}

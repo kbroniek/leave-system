@@ -26,7 +26,7 @@ public class LeaveTypesControllerPutTest
         var fakeLeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId;
         var fakeLeaveType = FakeLeaveTypeProvider.GetFakeOnDemandLeave();
         //When
-        var result = await sut.Put(fakeLeaveTypeId, fakeLeaveType);
+        var result = await sut.PutAsync(fakeLeaveTypeId, fakeLeaveType);
         //Then
         result.Should().BeOfType<BadRequestObjectResult>();
     }
@@ -43,7 +43,7 @@ public class LeaveTypesControllerPutTest
             .Returns(leaveTypeEntityEntryMock.Object);
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
-        var result = await sut.Put(fakeLeaveTypeId, fakeLeaveType);
+        var result = await sut.PutAsync(fakeLeaveTypeId, fakeLeaveType);
         //Then
         result.Should().BeOfType<BadRequestResult>();
     }
@@ -64,7 +64,7 @@ public class LeaveTypesControllerPutTest
         dbContextMock.Setup(x => x.Set<LeaveType>()).Returns(FakeLeaveTypeProvider.GetLeaveTypes().Skip(2).BuildMockDbSet().Object);
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
-        var result = await sut.Put(fakeLeaveTypeId, fakeLeaveType);
+        var result = await sut.PutAsync(fakeLeaveTypeId, fakeLeaveType);
         //Then
         result.Should().BeOfType<NotFoundResult>();
         leaveTypeEntityEntryMock.VerifySet(m => m.State = EntityState.Modified);
@@ -91,7 +91,7 @@ public class LeaveTypesControllerPutTest
         //When
         var act = async () =>
         {
-            await sut.Put(holidayLeaveGuid, fakeLeaveTypeToChange);
+            await sut.PutAsync(holidayLeaveGuid, fakeLeaveTypeToChange);
         };
         //Then
         await act.Should().ThrowAsync<Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException>();
@@ -118,7 +118,7 @@ public class LeaveTypesControllerPutTest
         dbContextMock.Setup(x => x.Set<LeaveType>()).Returns(FakeLeaveTypeProvider.GetLeaveTypes().BuildMockDbSet().Object);
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
-        var result = await sut.Put(updatedLeaveTypeId, fakeLeaveTypeToChange);
+        var result = await sut.PutAsync(updatedLeaveTypeId, fakeLeaveTypeToChange);
         //Then
         result.Should().BeOfType<UpdatedODataResult<LeaveType>>();
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));

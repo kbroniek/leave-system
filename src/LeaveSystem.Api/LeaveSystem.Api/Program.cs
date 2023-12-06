@@ -1,6 +1,8 @@
+using System.Configuration;
 using GoldenEye.Registration;
 using LeaveSystem;
 using LeaveSystem.Api.Auth;
+using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Errors;
@@ -10,7 +12,9 @@ using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared.Date;
+using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.AspNetCore.OData;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
@@ -42,12 +46,14 @@ builder.Services.AddControllers().AddOData(opt =>
 
 IEdmModel GetEdmModel()
 {
-    var builder = new ODataConventionModelBuilder();
-    builder.EntitySet<LeaveType>("LeaveTypes");
-    builder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
-    builder.EntitySet<Setting>("Settings");
+    var modelBuilder = new ODataConventionModelBuilder();
+    modelBuilder.EntitySet<LeaveType>("LeaveTypes");
+    var leaveTypeConfig = modelBuilder.EntityType<UserLeaveLimit>();
+    leaveTypeConfig.Ignore(x => x.LeaveType);
+    modelBuilder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
+    modelBuilder.EntitySet<Setting>("Settings");
 
-    return builder.GetEdmModel();
+    return modelBuilder.GetEdmModel();
 }
 
 builder.Services.AddScoped<CurrentDateService>();
@@ -55,6 +61,8 @@ builder.Services.AddDDD();
 builder.Services.AddLeaveSystemModule(builder.Configuration);
 builder.Services.AddMvc();
 builder.Services.AddValidators();
+builder.Services.AddDeltaValidators();
+builder.Services.AddCrudService();
 
 var app = builder.Build();
 

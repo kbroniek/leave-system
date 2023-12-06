@@ -26,7 +26,7 @@ public class LeaveTypesControllerPatchTest
         var fakeLeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId;
         var fakeDelta = new Delta<LeaveType>();
         //When
-        var result = await sut.Patch(fakeLeaveTypeId, fakeDelta);
+        var result = await sut.PatchAsync(fakeLeaveTypeId, fakeDelta);
         //Then
         result.Should().BeOfType<BadRequestObjectResult>();
     }
@@ -44,7 +44,7 @@ public class LeaveTypesControllerPatchTest
             await sut.Post(leaveType);
         }
         //When
-        var result = await sut.Patch(Guid.NewGuid(), fakeDelta);
+        var result = await sut.PatchAsync(Guid.NewGuid(), fakeDelta);
         //Then
         result.Should().BeOfType<NotFoundResult>();
     }
@@ -76,7 +76,7 @@ public class LeaveTypesControllerPatchTest
         fakeDelta.TrySetPropertyValue(nameof(LeaveType.Name), "fake changed name");
         var sut = new LeaveTypesController(dbContextMock.Object);
         //When
-        var result = await sut.Patch(FakeLeaveTypeProvider.FakeHolidayLeaveGuid, fakeDelta);
+        var result = await sut.PatchAsync(FakeLeaveTypeProvider.FakeHolidayLeaveGuid, fakeDelta);
         //Then
         result.Should().BeOfType<NotFoundResult>();
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));
@@ -100,7 +100,7 @@ public class LeaveTypesControllerPatchTest
         //When
         var act = async () =>
         {
-            await sut.Patch(FakeLeaveTypeProvider.FakeHolidayLeaveGuid, fakeDelta);
+            await sut.PatchAsync(FakeLeaveTypeProvider.FakeHolidayLeaveGuid, fakeDelta);
         };
         //Then
         await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
@@ -122,10 +122,10 @@ public class LeaveTypesControllerPatchTest
         fakeDelta.TrySetPropertyValue(nameof(LeaveType.Name), updatedLeaveTypeName);
         var updatedLeaveTypeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid;
         //When
-        var result = await sut.Patch(updatedLeaveTypeId, fakeDelta);
+        var result = await sut.PatchAsync(updatedLeaveTypeId, fakeDelta);
         //Then
         result.Should().BeOfType<UpdatedODataResult<LeaveType>>();
-        sut.Get(updatedLeaveTypeId).Queryable.First().Should().BeEquivalentTo(new
+        sut.GetAsQueryable(updatedLeaveTypeId).Queryable.First().Should().BeEquivalentTo(new
             {
                 Name = updatedLeaveTypeName
             }, o => o.ExcludingMissingMembers()

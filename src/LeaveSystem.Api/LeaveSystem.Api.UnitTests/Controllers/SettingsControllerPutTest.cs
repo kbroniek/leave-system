@@ -32,7 +32,7 @@ public class SettingsControllerPutTest
         var fakeSettingId = FakeSettingsProvider.AcceptedSettingId;
         var fakeSetting = FakeSettingsProvider.GetAcceptedSetting();
         //When
-        var result = await sut.Put(fakeSettingId, fakeSetting);
+        var result = await sut.PutAsync(fakeSettingId, fakeSetting);
         //Then
         result.Should().BeOfType<BadRequestObjectResult>();
     }
@@ -49,7 +49,7 @@ public class SettingsControllerPutTest
                     .Returns(settingEntityEntryMock.Object); 
         var sut = new SettingsController(dbContextMock.Object);
         //When
-        var result = await sut.Put(fakeSettingId, fakeSetting);
+        var result = await sut.PutAsync(fakeSettingId, fakeSetting);
         //Then
         result.Should().BeOfType<BadRequestResult>();
     }
@@ -70,7 +70,7 @@ public class SettingsControllerPutTest
         dbContextMock.Setup(x => x.Set<Setting>()).Returns(FakeSettingsProvider.GetSettings().Skip(3).BuildMockDbSet().Object);
         var sut = new SettingsController(dbContextMock.Object);
         //When
-        var result = await sut.Put(fakeSettingId, fakeSetting);
+        var result = await sut.PutAsync(fakeSettingId, fakeSetting);
         //Then
         result.Should().BeOfType<NotFoundResult>();
         settingEntityEntryMock.VerifySet(m => m.State = EntityState.Modified);
@@ -97,7 +97,7 @@ public class SettingsControllerPutTest
         //When
         var act = async () =>
         {
-            await sut.Put(acceptedSettingId, fakeSettingToChange);
+            await sut.PutAsync(acceptedSettingId, fakeSettingToChange);
         };
         //Then
         await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
@@ -125,7 +125,7 @@ public class SettingsControllerPutTest
             .Returns(FakeSettingsProvider.GetSettings().BuildMockDbSet().Object);
         var sut = new SettingsController(dbContextMock.Object);
         //When
-        var result = await sut.Put(updatedSettingId, fakeSettingToChange);
+        var result = await sut.PutAsync(updatedSettingId, fakeSettingToChange);
         //Then
         result.Should().BeOfType<UpdatedODataResult<Setting>>();
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));

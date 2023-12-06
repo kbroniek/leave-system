@@ -27,7 +27,7 @@ public class SettingsControllerPatchTest
         var fakeSettingId = FakeSettingsProvider.AcceptedSettingId;
         var fakeDelta = new Delta<Setting>();
         //When
-        var result = await sut.Patch(fakeSettingId, fakeDelta);
+        var result = await sut.PatchAsync(fakeSettingId, fakeDelta);
         //Then
         result.Should().BeOfType<BadRequestObjectResult>();
     }
@@ -43,7 +43,7 @@ public class SettingsControllerPatchTest
         var sut = new SettingsController(dbContext);
         var fakeDelta = new Delta<Setting>();
         //When
-        var result = await sut.Patch(Guid.NewGuid().ToString(), fakeDelta);
+        var result = await sut.PatchAsync(Guid.NewGuid().ToString(), fakeDelta);
         //Then
         result.Should().BeOfType<NotFoundResult>();
     }
@@ -76,7 +76,7 @@ public class SettingsControllerPatchTest
         fakeDelta.TrySetPropertyValue(nameof(Setting.Value), JsonDocument.Parse("{\"color\": \"white\"}"));
         var sut = new SettingsController(dbContextMock.Object);
         //When
-        var result = await sut.Patch(FakeSettingsProvider.AcceptedSettingId, fakeDelta);
+        var result = await sut.PatchAsync(FakeSettingsProvider.AcceptedSettingId, fakeDelta);
         //Then
         result.Should().BeOfType<NotFoundResult>();
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()));
@@ -102,7 +102,7 @@ public class SettingsControllerPatchTest
         //When
         var act = async () =>
         {
-            await sut.Patch(FakeSettingsProvider.AcceptedSettingId, fakeDelta);
+            await sut.PatchAsync(FakeSettingsProvider.AcceptedSettingId, fakeDelta);
         };
         //Then
         await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
@@ -121,10 +121,10 @@ public class SettingsControllerPatchTest
         fakeDelta.TrySetPropertyValue(nameof(Setting.Value), updatedSettingValue);
         var updatedSettingId = FakeSettingsProvider.AcceptedSettingId;
         //When
-        var result = await sut.Patch(updatedSettingId, fakeDelta);
+        var result = await sut.PatchAsync(updatedSettingId, fakeDelta);
         //Then
         result.Should().BeOfType<UpdatedODataResult<Setting>>();
-        sut.Get(updatedSettingId).Queryable.First().Should().BeEquivalentTo(new
+        sut.GetAsQueryable(updatedSettingId).Queryable.First().Should().BeEquivalentTo(new
             {
                 Name = updatedSettingValue
             }, o => o.ExcludingMissingMembers()

@@ -36,6 +36,8 @@
                 <AuthorizeView Policy="@LeaveLimitsPolicyName" Context="ShowUserPage">
                     <RadzenTabsItem Text="Leave Limits">
                         <UserPanelLeaveLimits @ref="limitsPanel"
+                                              UserId="@UserId"
+                                              Year="@Year"
                             LeaveTypesWithUserLimits="@leaveTypesWithUserLimits" 
                             WorkingHours="workingHoursDuration"
                             RefreshLimitsCallback="ResetLimit"/>

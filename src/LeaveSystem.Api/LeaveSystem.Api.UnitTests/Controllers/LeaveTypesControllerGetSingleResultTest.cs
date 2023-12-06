@@ -19,7 +19,7 @@ public class LeaveTypesControllerGetSingleResultTest
         var fakeId = Guid.NewGuid();
         var sut = new LeaveTypesController(dbContext);
         //When
-        var result = sut.Get(fakeId);
+        var result = sut.GetAsQueryable(fakeId);
         //Then
         result.Queryable.Should().BeEquivalentTo(
             Enumerable.Empty<LeaveType>()
@@ -37,7 +37,7 @@ public class LeaveTypesControllerGetSingleResultTest
         var fakeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid;
         var sut = new LeaveTypesController(dbContext);
         //When
-        var result = sut.Get(fakeId);
+        var result = sut.GetAsQueryable(fakeId);
         //Then
         result.Queryable.Should().BeEquivalentTo(
             new [] {FakeLeaveTypeProvider.GetFakeHolidayLeave()}

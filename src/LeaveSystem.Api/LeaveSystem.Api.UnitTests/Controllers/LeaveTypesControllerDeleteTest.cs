@@ -20,7 +20,7 @@ public class LeaveTypesControllerDeleteTest
         var sut = new LeaveTypesController(dbContext);
         var fakeId = Guid.NewGuid();
         //When
-        var result = await sut.Delete(fakeId);
+        var result = await sut.DeleteAsync(fakeId);
         //Then
         result.Should().BeOfType<NotFoundResult>();
     }
@@ -41,7 +41,7 @@ public class LeaveTypesControllerDeleteTest
         var sut = new LeaveTypesController(dbContext);
         var fakeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid;
         //When
-        var result = await sut.Delete(fakeId);
+        var result = await sut.DeleteAsync(fakeId);
         //Then
         result.Should().BeOfType<NoContentResult>();
         sut.Get().Should().BeEquivalentTo(new[]

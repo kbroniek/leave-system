@@ -1,74 +1,108 @@
-﻿using Ardalis.GuardClauses;
-using FluentValidation;
+﻿using FluentValidation;
+using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Date;
+using LeaveSystem.Shared.UserLeaveLimits;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Results;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace LeaveSystem.Api.Controllers
+namespace LeaveSystem.Api.Controllers;
+
+//TODO: Set permissions to get limits only for current user.
+[Route("api/[controller]")]
+[Authorize]
+public class UserLeaveLimitsController : ODataController
 {
-    //TODO: Set permissions to get limits only for current user.
-    [Route("api/[controller]")]
-    [Authorize]
-    public class UserLeaveLimitsController : GenericCrudController<UserLeaveLimit, Guid>
+    private readonly LeaveSystemDbContext dbContext;
+    private readonly GenericCrudService<UserLeaveLimit, Guid> crudService;
+    private readonly IValidator<UserLeaveLimit> limitValidator;
+    private const string InvalidModelMessage = "This request is not valid oDataRequest";
+
+    public UserLeaveLimitsController(LeaveSystemDbContext dbContext,
+        GenericCrudService<UserLeaveLimit, Guid> crudService,
+        IValidator<UserLeaveLimit> limitValidator)
     {
-        private readonly CurrentDateService currentDateService;
-        private readonly IValidator<UserLeaveLimit> validator;
+        this.dbContext = dbContext;
+        this.crudService = crudService;
+        this.limitValidator = limitValidator;
+    }
 
-        public UserLeaveLimitsController(LeaveSystemDbContext dbContext, CurrentDateService currentDateService, IValidator<UserLeaveLimit> validator)
-            : base(dbContext)
+    [HttpGet]
+    [EnableQuery]
+    public IQueryable<UserLeaveLimit>? Get()
+    {
+        return crudService.Get();
+    }
+
+    [HttpGet]
+    [EnableQuery]
+    public SingleResult<UserLeaveLimit> Get([FromODataUri] Guid key)
+    {
+        var entity = crudService.GetAsQueryable(key);
+        return SingleResult.Create(entity);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] UserLeaveLimit entity, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
         {
-            this.currentDateService = currentDateService;
-            this.validator = validator;
+            throw new BadHttpRequestException(InvalidModelMessage);
         }
-
-        [HttpPost]
-        public override async Task<IActionResult> Post([FromBody] UserLeaveLimit entity, CancellationToken cancellationToken = default)
+        var leaveTypeExists = await dbContext.LeaveTypes.AnyAsync(lt => lt.Id == entity.LeaveTypeId, cancellationToken);
+        if (!leaveTypeExists)
         {
-            await validator.ValidateAsync(entity, cancellationToken);
-            return await base.Post(entity, cancellationToken);
+            throw new EntityNotFoundException("Leave type with provided Id not exists");
         }
-
-        public override async Task<IActionResult> Patch(Guid key, Delta<UserLeaveLimit> update, CancellationToken cancellationToken = default)
+        var entity1 = new UserLeaveLimit()
         {
-            ValidateDelta(update);
-            return await base.Patch(key, update, cancellationToken);
-        }
-
-        protected void ValidateEntity(UserLeaveLimit entity)
-        {
-            var now = currentDateService.GetWithoutTime();
-            var firstDay = now.GetFirstDayOfYear();
-            var lastDay = now.GetLastDayOfYear();
-            if (entity.ValidSince is not null)
+            Id = new Guid(),
+            OverdueLimit = entity.OverdueLimit,
+            Limit = entity.Limit,
+            AssignedToUserId = entity.AssignedToUserId,
+            ValidSince = entity.ValidSince,
+            ValidUntil = entity.ValidUntil,
+            Property = new()
             {
-                Guard.Against.OutOfRange(entity.ValidSince.Value, nameof(entity.ValidSince), firstDay, lastDay);
+                Description = entity.Property?.Description
             }
-            if (entity.ValidUntil is not null)
-            {
-                Guard.Against.OutOfRange(entity.ValidUntil.Value, nameof(entity.ValidUntil), firstDay, lastDay);
-            }
-            if (entity.ValidSince > entity.ValidUntil)
-            {
-                throw new ArgumentOutOfRangeException(nameof(entity.ValidUntil),
-                    "Valid until date has to be less than valid since date.");
-            }
-        }
+        };
+        await limitValidator.ValidateAsync(entity1, cancellationToken);
+        var addedEntity = crudService.AddAsync(entity1, cancellationToken);
+        return Created(addedEntity);
+    }
 
-        protected void ValidateDelta(Delta<UserLeaveLimit> delta)
+    [HttpPut]
+    public async Task<IActionResult> Put(
+        [FromODataUri] Guid key,
+        [FromBody] Delta<UserLeaveLimit> delta,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
         {
-            var validSincePropertyExists = delta.TryGetPropertyValue("ValidSince", out var validSinceValue);
-            var validSince = validSinceValue as DateTimeOffset?;
-            var validUntilPropertyExists = delta.TryGetPropertyValue("ValidUntil", out var validUntilValue);
-            var validUntil = validUntilValue as DateTimeOffset?;
-            if (validSincePropertyExists && validUntilPropertyExists && validSince > validUntil)
-            {
-                throw new ArgumentOutOfRangeException(nameof(UserLeaveLimit.ValidUntil),
-                    "Valid until date has to be less than valid since date.");
-            }
+            throw new BadHttpRequestException(InvalidModelMessage);
         }
+        return Updated(await crudService.PutAsync(key, delta, cancellationToken));
+    }
+
+    [HttpPatch]
+    public async Task<IActionResult> Patch(
+        [FromODataUri] Guid key,
+        [FromBody] Delta<UserLeaveLimit> delta,
+        CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            throw new BadHttpRequestException(InvalidModelMessage);
+        }
+        return Updated(await crudService.PatchAsync(key, delta, cancellationToken));
     }
 }
