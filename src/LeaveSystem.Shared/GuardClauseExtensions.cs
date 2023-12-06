@@ -26,6 +26,13 @@ public static class GuardClauseExtensions
         var notNull = AgainstNill(input, parameterName, message).Value;
         return Guard.Against.Default(notNull, parameterName, message);
     }
+    
+    [return: NotNull]
+    public static T NillAndDefault<T>(this IGuardClause _, [NotNull][ValidatedNotNull] T? input, [CallerArgumentExpression("input")] string? parameterName = null, string? message = null) where T : class
+    {
+        var notNull = AgainstNill(input, parameterName, message);
+        return Guard.Against.Default(notNull, parameterName, message);
+    }
 
     public static string InvalidEmail(this IGuardClause _, [NotNull][ValidatedNotNull] string? input, [CallerArgumentExpression("input")] string? parameterName = null, string? message = null)
     {
@@ -36,7 +43,7 @@ public static class GuardClauseExtensions
     [return: NotNull]
     private static T AgainstNill<T>([NotNull][ValidatedNotNull] T? input, string? parameterName, string? message)
     {
-        if (input == null)
+        if (input is null)
         {
             if (string.IsNullOrEmpty(message))
             {

@@ -1,10 +1,13 @@
 @using LeaveSystem.Web.Pages.UserLeaveLimits
 @using LeaveSystem.Web.Extensions
 @using LeaveSystem.Web.Pages.LeaveTypes
+@using LeaveSystem.Shared.UserLeaveLimits
+@using LeaveSystem.Shared
 
 @inject IToastService ToastService
 @inject ILogger<UserPanelLeaveLimits> Logger
 @inject UserLeaveLimitsService LimitsService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <RadzenDataGrid @ref="leaveTypeGrid" AllowFiltering="true" AllowSorting="true" ExpandMode="DataGridExpandMode.Single"
                 Data="@LeaveTypesWithUserLimits" TItem="LeaveTypeWithUserLimits">
@@ -19,6 +22,10 @@
                     <Template Context="limit">
                         @limit.Limit.GetReadableTimeSpan(WorkingHours)
                     </Template>
+                    <EditTemplate Context="limit">
+                        <RadzenNumeric TValue="int" Value="limit.Limit.GetDurationDays(WorkingHours)"
+                                       Change="x => limit.Limit = DurationExtensions.GetDurationFromDays(x, WorkingHours)"/>
+                    </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.OverdueLimit" Title="Overdue Limit">
                     <Template Context="limit">
@@ -88,11 +95,24 @@
     [Parameter]
     public EventCallback<Guid> RefreshLimitsCallback { get; set; }
 
+    [Parameter]
+    public int Year { get; set; }
+
+    [Parameter]
+    public string? UserId { get; set; }
+
     RadzenDataGrid<LeaveTypeWithUserLimits>? leaveTypeGrid;
     RadzenDataGrid<UserLeaveLimitDto>? limitsGrid;
-    
+
     bool editingLimits = false;
     UserLeaveLimitDto? limitToInsert;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User.CreateModel();
+        UserId ??= user.Id;
+    }
 
     string GetCssStyleForLeaveType(string? leaveTypeColor) => $"background-color: {leaveTypeColor}; width: 30px;";
 
@@ -179,7 +199,16 @@
 
     async Task OnCreateRow(UserLeaveLimitDto limit)
     {
-        var addedLimit = await LimitsService.AddAsync(limit);
+        var addDto = new AddUserLeaveLimitDto()
+        {
+            Limit = limit.Limit,
+            OverdueLimit = limit.OverdueLimit,
+            Description = limit.Property?.Description,
+            AssignedToUserId = UserId,
+            LeaveTypeId = limit.LeaveTypeId,
+            Year = Year
+        };
+        var addedLimit = await LimitsService.AddAsync(addDto);
         if (addedLimit is not null)
         {
             limit.Id = addedLimit.Id;

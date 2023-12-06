@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
 using Blazored.Toast.Services;
+using LeaveSystem.Shared.UserLeaveLimits;
 using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.Shared;
 
@@ -47,9 +48,9 @@ public class UserLeaveLimitsService : UniversalHttpService
         return limits?.Data ?? Enumerable.Empty<LeaveLimitDto>();
     }
 
-    public async Task<UserLeaveLimitDto?> AddAsync(UserLeaveLimitDto entityToAdd)
+    public async Task<UserLeaveLimitDto?> AddAsync(AddUserLeaveLimitDto entityToAdd)
     {
-        var odataResponse = await AddAsync<UserLeaveLimitDto, UserLeaveLimitDtoODataResponse>("odata/UserLeaveLimits", entityToAdd, "User leave limit added successfully", jsonSerializerOptions);
+        var odataResponse = await AddAsync<AddUserLeaveLimitDto, UserLeaveLimitDtoODataResponse>("odata/UserLeaveLimits", entityToAdd, "User leave limit added successfully", jsonSerializerOptions);
         return odataResponse?.ToUserLeaveLimitDto();
     } 
     public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) => EditAsync($"odata/UserLeaveLimits({entityToEdit.Id})", entityToEdit, "User leave limit edited successfully", jsonSerializerOptions);
