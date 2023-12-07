@@ -2,6 +2,7 @@
 using GoldenEye.Commands;
 using GoldenEye.Repositories;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using MediatR;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
@@ -31,10 +32,12 @@ internal class HandleCancelLeaveRequest :
     ICommandHandler<CancelLeaveRequest>
 {
     private readonly IRepository<LeaveRequest> repository;
+    private readonly IBaseDateService baseDateService;
 
-    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository)
+    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository, IBaseDateService baseDateService)
     {
         this.repository = repository;
+        this.baseDateService = baseDateService;
     }
 
     public async Task<Unit> Handle(CancelLeaveRequest command, CancellationToken cancellationToken)
@@ -42,7 +45,7 @@ internal class HandleCancelLeaveRequest :
         var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
                              ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
-        leaveRequest.Cancel(command.Remarks, command.CanceledBy);
+        leaveRequest.Cancel(command.Remarks, command.CanceledBy, baseDateService);
 
         await repository.Update(leaveRequest, cancellationToken);
 

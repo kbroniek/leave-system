@@ -13,7 +13,9 @@ using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using LeaveSystem.Api.Date;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
+using LeaveSystem.Shared.Date;
 using WorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
 namespace LeaveSystem.Api.Db;
@@ -25,10 +27,10 @@ public static class DbContextExtenstions
     }
 
     private static readonly TimeSpan workingHours = TimeSpan.FromHours(8);
-    private const string DefaultUserEmail = "karolbr5@gmail.com";
+    private const string DefaultUserEmail = "broniekf@gmail.com";
 
-    private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22",
-        DefaultUserEmail, "Karol Volt", new[] { RoleType.GlobalAdmin.ToString() });
+    private static readonly FederatedUser defaultUserMock = FederatedUser.Create("94465469-9845-49fc-8d68-ef92a88b0ae3",
+        DefaultUserEmail, "Filip Broniek", new[] { RoleType.GlobalAdmin.ToString() });
 
     private static FederatedUser defaultUser;
     private static FederatedUser[] testUsers = Array.Empty<FederatedUser>();
@@ -131,6 +133,7 @@ public static class DbContextExtenstions
     {
         using (var scope = app.ApplicationServices.CreateScope())
         {
+            
             var services = scope.ServiceProvider;
 
             var dbContext = services.GetRequiredService<LeaveSystemDbContext>();
@@ -152,6 +155,7 @@ public static class DbContextExtenstions
 
     public static async Task FillInDatabase(this IApplicationBuilder app)
     {
+        DateConfig.DateServiceType = DateServiceType.CustomDateService;
         var cancellationToken = new CancellationToken();
         await using (var scope = app.ApplicationServices.CreateAsyncScope())
         {
@@ -159,6 +163,7 @@ public static class DbContextExtenstions
             var logger = services.GetRequiredService<ILogger<DbContextExtenstionsLogger>>();
             try
             {
+                var dateService = services.GetRequiredService<IBaseDateService>();
                 var dbContext = services.GetRequiredService<LeaveSystemDbContext>();
                 var graphUserService = services.GetRequiredService<GetGraphUserService>();
                 var saveGraphUserService = services.GetRequiredService<SaveGraphUserService>();
@@ -170,7 +175,7 @@ public static class DbContextExtenstions
                     .Union(new FederatedUser[] { defaultUser })
                     .ToArray();
                 await FillInGraphUsers(graphUsers, saveGraphUserService, logger, cancellationToken);
-                await FillInSimpleData(dbContext);
+                await FillInSimpleData(dbContext, dateService);
                 await FillInEventSourcingData(services);
             }
             catch (Exception ex)
@@ -178,6 +183,7 @@ public static class DbContextExtenstions
                 logger.LogError(ex, "Something went wrong when fill in database.");
             }
         }
+        DateConfig.DateServiceType = DateServiceType.CurrentDateService;
     }
 
     private static FederatedUser CreateFederatedUser(IEnumerable<FederatedUser> graphUsers, string id, string? email,
@@ -227,10 +233,10 @@ public static class DbContextExtenstions
         return !userFound.Roles.SequenceEqual(federatedUser.Roles);
     }
 
-    private static async Task FillInSimpleData(LeaveSystemDbContext dbContext)
+    private static async Task FillInSimpleData(LeaveSystemDbContext dbContext, IBaseDateService dateService)
     {
         await dbContext.FillInLeaveTypes();
-        await dbContext.FillInUserLeaveLimits();
+        await dbContext.FillInUserLeaveLimits(dateService);
         await dbContext.FillInSettings();
         await dbContext.SaveChangesAsync();
     }
@@ -239,11 +245,12 @@ public static class DbContextExtenstions
     {
         var queryBus = services.GetRequiredService<IQueryBus>();
         var commandBus = services.GetRequiredService<ICommandBus>();
-        await FillInWorkingHours(queryBus, commandBus);
-        await FillInLeaveRequests(queryBus, commandBus);
+        var dateService = services.GetRequiredService<IBaseDateService>();
+        await FillInWorkingHours(queryBus, commandBus, dateService);
+        await FillInLeaveRequests(queryBus, commandBus, dateService);
     }
 
-    private static async Task FillInWorkingHours(IQueryBus queryBus, ICommandBus commandBus)
+    private static async Task FillInWorkingHours(IQueryBus queryBus, ICommandBus commandBus, IBaseDateService baseDateService)
     {
         var workingHoursFromDb = await queryBus.Send<GetWorkingHours, IPagedList<WorkingHours>>(GetWorkingHours.Create(
             null, null, null, null,
@@ -253,60 +260,62 @@ public static class DbContextExtenstions
         {
             return;
         }
+
+        var baseDate = baseDateService.GetWithoutTime();
         await CreateWorkingHours(
             commandBus,
             defaultUser.Id,
-            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2025, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 1, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year + 2, 1, 1),
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[0].Id,
-            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2025, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 1, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year + 2, 1, 1),
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[1].Id,
-            DateTimeOffsetExtensions.CreateFromDate(2018, 3, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2025, 3, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 5, 3, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year + 2, 3, 1),
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[2].Id,
-            DateTimeOffsetExtensions.CreateFromDate(2021, 12, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2027, 7, 10),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 2, 12, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year + 4, 7, 10),
             TimeSpan.FromHours(4),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[3].Id,
-            DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2028, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 1, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year + 5, 1, 1),
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[4].Id,
-            DateTimeOffsetExtensions.CreateFromDate(2015, 6, 9),
-            DateTimeOffsetExtensions.CreateFromDate(2020, 1, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 8, 6, 9),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 3, 1, 1),
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[4].Id,
-            DateTimeOffsetExtensions.CreateFromDate(2020, 1, 2),
-            DateTimeOffsetExtensions.CreateFromDate(2024, 5, 6),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 3, 1, 2),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year + 1, 5, 6),
             TimeSpan.FromHours(4),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             defaultUser.Id,
-            DateTimeOffsetExtensions.CreateFromDate(2020, 2, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2026, 7, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 4, 2, 1),
+            DateTimeOffsetExtensions.CreateFromDate(baseDate.Year - 2, 12, 31),
             TimeSpan.FromHours(8),
             defaultUser);
     }
@@ -319,7 +328,7 @@ public static class DbContextExtenstions
         return commandBus.Send(command);
     }
 
-    private static async Task FillInLeaveRequests(IQueryBus queryBus, ICommandBus commandBus)
+    private static async Task FillInLeaveRequests(IQueryBus queryBus, ICommandBus commandBus, IBaseDateService dateService)
     {
         var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(
             GetLeaveRequests.Create(
@@ -331,20 +340,20 @@ public static class DbContextExtenstions
             return;
         }
 
-        await SetupUser0(commandBus, defaultUser, testUsers[0]);
-        await SetupUser1(commandBus, defaultUser, testUsers[1]);
-        await SetupUser2(commandBus, defaultUser, testUsers[2]);
-        await SetupUser3(commandBus, defaultUser, testUsers[3]);
-        await SetupUser4(commandBus, defaultUser, testUsers[4]);
-        await SetupUser4(commandBus, defaultUser, defaultUser);
+        await SetupUser0(commandBus, defaultUser, testUsers[0], dateService);
+        await SetupUser1(commandBus, defaultUser, testUsers[1], dateService);
+        await SetupUser2(commandBus, defaultUser, testUsers[2], dateService);
+        await SetupUser3(commandBus, defaultUser, testUsers[3], dateService);
+        await SetupUser4(commandBus, defaultUser, testUsers[4], dateService);
+        await SetupUser4(commandBus, defaultUser, defaultUser, dateService);
 
-        var now = GetNow();
-        int firstMonth = now.Month > 6 ? 1 : 9;
-        int secondMonth = now.Month > 6 ? 5 : 12;
-        await AddSaturdayLeaveRequest(commandBus, testUsers[0], now, firstMonth);
-        await AddSaturdayLeaveRequest(commandBus, testUsers[1], now, secondMonth);
-        await AddSaturdayLeaveRequest(commandBus, defaultUser, now, firstMonth);
-        await AddOnDemandLeaveRequest(commandBus, defaultUser, now);
+        var baseDate = dateService.GetWithoutTime();
+        int firstMonth = baseDate.Month > 6 ? 1 : 9;
+        int secondMonth = baseDate.Month > 6 ? 5 : 12;
+        await AddSaturdayLeaveRequest(commandBus, testUsers[0], baseDate, firstMonth);
+        await AddSaturdayLeaveRequest(commandBus, testUsers[1], baseDate, secondMonth);
+        await AddSaturdayLeaveRequest(commandBus, defaultUser, baseDate, firstMonth);
+        await AddOnDemandLeaveRequest(commandBus, defaultUser, baseDate);
     }
 
     private static async Task AddOnDemandLeaveRequest(ICommandBus commandBus, FederatedUser user, DateTimeOffset date)
@@ -353,99 +362,99 @@ public static class DbContextExtenstions
         await CreateLeaveRequest(commandBus, date, date, onDemandLeave.Id, user);
     }
 
-    private static async Task SetupUser4(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
+    private static async Task SetupUser4(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, IBaseDateService dateService)
     {
-        var now = GetNow();
-        var start = GetFirstWorkingDay(now.GetFirstDayOfYear());
+        var baseDate = dateService.GetWithoutTime();
+        var start = GetFirstWorkingDay(baseDate.GetFirstDayOfYear());
         var end = start;
 
         var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, sickLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
-        start = GetFirstWorkingDay(new DateTimeOffset(now.Year, 12, 10, 0, 0, 0, TimeSpan.Zero));
+        start = GetFirstWorkingDay(new DateTimeOffset(baseDate.Year, 12, 10, 0, 0, 0, TimeSpan.Zero));
         end = start;
 
         leaveRequestId = await CreateLeaveRequest(commandBus, start, end, sickLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
-    private static async Task SetupUser3(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
+    private static async Task SetupUser3(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, IBaseDateService dateService)
     {
-        var now = GetNow();
-        var start = GetFirstWorkingDay(now.GetFirstDayOfYear());
-        var end = GetFirstWorkingDay(new DateTimeOffset(now.Year, 12, 20, 0, 0, 0, TimeSpan.Zero));
+        var baseDate = dateService.GetWithoutTime();
+        var start = GetFirstWorkingDay(baseDate.GetFirstDayOfYear());
+        var end = GetFirstWorkingDay(new DateTimeOffset(baseDate.Year, 12, 20, 0, 0, 0, TimeSpan.Zero));
 
         var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, sickLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
-    private static async Task SetupUser2(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
+    private static async Task SetupUser2(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, IBaseDateService dateService)
     {
-        var now = GetNow();
-        var start = GetFirstWorkingDay(now);
+        var baseDate = dateService.GetWithoutTime();
+        var start = GetFirstWorkingDay(baseDate);
         var end = start;
 
         var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
-    private static async Task SetupUser1(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
+    private static async Task SetupUser1(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, IBaseDateService dateService)
     {
-        var now = GetNow();
-        var start = GetFirstWorkingDay(now.AddDays(-5));
-        var end = GetFirstWorkingDay(now.AddDays(2));
+        var baseDate = dateService.GetWithoutTime();
+        var start = GetFirstWorkingDay(baseDate.AddDays(-5));
+        var end = GetFirstWorkingDay(baseDate.AddDays(2));
 
         var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
-        start = GetFirstWorkingDay(now.AddDays(8));
+        start = GetFirstWorkingDay(baseDate.AddDays(8));
         end = start;
         leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await RejectLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
-        start = GetFirstWorkingDay(now.AddDays(10));
+        start = GetFirstWorkingDay(baseDate.AddDays(10));
         end = start;
         leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await CancelLeaveRequest(commandBus, leaveRequestId, testUser);
 
-        start = GetFirstWorkingDay(now.AddDays(8));
-        end = GetFirstWorkingDay(now.AddDays(10));
+        start = GetFirstWorkingDay(baseDate.AddDays(8));
+        end = GetFirstWorkingDay(baseDate.AddDays(10));
         await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
 
-        start = now.AddDays(14);
-        end = now.AddDays(18);
+        start = baseDate.AddDays(14);
+        end = baseDate.AddDays(18);
         leaveRequestId = await CreateLeaveRequest(commandBus, start, end, sickLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
-    private static async Task SetupUser0(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser)
+    private static async Task SetupUser0(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, IBaseDateService dateService)
     {
-        var now = GetNow();
-        var start = GetFirstWorkingDay(now);
-        var end = GetFirstWorkingDay(now.AddDays(7));
+        var baseDate = dateService.GetWithoutTime();
+        var start = GetFirstWorkingDay(baseDate);
+        var end = GetFirstWorkingDay(baseDate.AddDays(7));
 
         var leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
-        start = GetFirstWorkingDay(now.AddDays(-14));
+        start = GetFirstWorkingDay(baseDate.AddDays(-14));
         end = start;
         leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await RejectLeaveRequest(commandBus, leaveRequestId, defaultUser);
 
-        start = GetFirstWorkingDay(now.AddDays(14));
+        start = GetFirstWorkingDay(baseDate.AddDays(14));
         end = start;
         leaveRequestId = await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
         await CancelLeaveRequest(commandBus, leaveRequestId, testUser);
 
-        start = GetFirstWorkingDay(now.AddDays(-15));
-        end = GetFirstWorkingDay(now.AddDays(-10));
+        start = GetFirstWorkingDay(baseDate.AddDays(-15));
+        end = GetFirstWorkingDay(baseDate.AddDays(-10));
         await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser);
 
-        start = now.AddDays(8);
-        end = now.AddDays(30);
+        start = baseDate.AddDays(8);
+        end = baseDate.AddDays(30);
         await CreateLeaveRequest(commandBus, start, end, sickLeave.Id, testUser);
 
-        start = GetFirstWorkingDay(now.AddDays(-7));
+        start = GetFirstWorkingDay(baseDate.AddDays(-7));
         end = start;
         await CreateLeaveRequest(commandBus, start, end, holidayLeave.Id, testUser, TimeSpan.FromHours(4));
     }
@@ -518,21 +527,21 @@ public static class DbContextExtenstions
         return leaveRequestId;
     }
 
-    private static async Task FillInUserLeaveLimits(this LeaveSystemDbContext dbContext)
+    private static async Task FillInUserLeaveLimits(this LeaveSystemDbContext dbContext, IBaseDateService dateService)
     {
         if (await dbContext.UserLeaveLimits.AnyAsync())
         {
             return;
         }
 
-        var now = GetNow();
+        var baseDate = dateService.GetWithoutTime();
         var holidayLimits = testUsers.Select(u => new UserLeaveLimit
         {
             LeaveTypeId = holidayLeave.Id,
             Limit = holidayLeave.Properties?.DefaultLimit,
             AssignedToUserId = u.Id,
-            ValidSince = now.GetFirstDayOfYear(),
-            ValidUntil = now.GetLastDayOfYear(),
+            ValidSince = baseDate.GetFirstDayOfYear(),
+            ValidUntil = baseDate.GetLastDayOfYear(),
         });
         await dbContext.UserLeaveLimits.AddRangeAsync(holidayLimits);
         var onDemandLimits = testUsers.Select(u => new UserLeaveLimit
@@ -540,15 +549,15 @@ public static class DbContextExtenstions
             LeaveTypeId = onDemandLeave.Id,
             Limit = onDemandLeave.Properties?.DefaultLimit,
             AssignedToUserId = u.Id,
-            ValidSince = now.GetFirstDayOfYear(),
-            ValidUntil = now.GetLastDayOfYear(),
+            ValidSince = baseDate.GetFirstDayOfYear(),
+            ValidUntil = baseDate.GetLastDayOfYear(),
         });
         await dbContext.UserLeaveLimits.AddRangeAsync(onDemandLimits);
-        int firstMonth = now.Month > 6 ? 1 : 9;
-        int secondMonth = now.Month > 6 ? 5 : 12;
-        var saturdayFirsLimits = GetSaturdayLimits(now, firstMonth);
+        int firstMonth = baseDate.Month > 6 ? 1 : 9;
+        int secondMonth = baseDate.Month > 6 ? 5 : 12;
+        var saturdayFirsLimits = GetSaturdayLimits(baseDate, firstMonth);
         await dbContext.UserLeaveLimits.AddRangeAsync(saturdayFirsLimits);
-        var saturdaySecondLimits = GetSaturdayLimits(now, secondMonth);
+        var saturdaySecondLimits = GetSaturdayLimits(baseDate, secondMonth);
         await dbContext.UserLeaveLimits.AddRangeAsync(saturdaySecondLimits);
         await dbContext.UserLeaveLimits.AddAsync(new UserLeaveLimit
         {

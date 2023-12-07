@@ -1,6 +1,7 @@
 using GoldenEye.Registration;
 using LeaveSystem;
 using LeaveSystem.Api.Auth;
+using LeaveSystem.Api.Date;
 using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Errors;
@@ -49,7 +50,8 @@ IEdmModel GetEdmModel()
     return builder.GetEdmModel();
 }
 
-builder.Services.AddScoped<CurrentDateService>();
+DateConfig.CustomBaseDate = new DateTimeOffset(DateTime.Now.Year, 5, 1, 0, 0, 0, TimeSpan.Zero);
+builder.Services.AddBaseDateServices();
 builder.Services.AddDDD();
 builder.Services.AddLeaveSystemModule(builder.Configuration);
 

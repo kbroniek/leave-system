@@ -6,6 +6,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.DeprecatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
@@ -68,7 +69,7 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
         Apply(@event);
     }
 
-    internal void Cancel(string? remarks, FederatedUser canceledBy)
+    internal void Cancel(string? remarks, FederatedUser canceledBy, IBaseDateService dateService)
     {
         if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
         {
@@ -78,7 +79,7 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
         {
             throw new InvalidOperationException($"Canceling leave requests in '{Status}' status is not allowed.");
         }
-        if (DateFrom < DateTimeOffset.UtcNow)
+        if (DateFrom < dateService.GetWithoutTime())
         {
             throw new InvalidOperationException("Canceling of past leave requests is not allowed.");
         }
