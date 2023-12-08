@@ -5,7 +5,7 @@ namespace LeaveSystem.Web.Pages.UsersManagement;
 
 public class UserWithWorkingHoursDto : UserDto
 {
-    public List<WorkingHoursDto>? WorkingHours { get; set; }
+    public List<WorkingHoursDto> WorkingHours { get; set; }
 
     public UserWithWorkingHoursDto()
     {
@@ -20,22 +20,25 @@ public class UserWithWorkingHoursDto : UserDto
     public UserDto GetUser() => new(Id, Name, Email, Roles);
 
 
-    public string TimeProxy
+    public string CurrentDurationProxy
     {
-        get => CurrentWorkingHours?.ToString() ?? "";
+        get => CurrentWorkingHours?.DurationProxy ?? "";
         set
         {
-            TimeSpan.TryParse(value, out var parsedValue);
+            if (CurrentWorkingHours is not null)
+            {
+                CurrentWorkingHours.DurationProxy = value;
+            }
         }
     }
 
 
-    public TimeSpan? CurrentWorkingHours
+    public WorkingHoursDto? CurrentWorkingHours
     {
         get
         {
             DateTimeOffset now = DateTimeOffset.Now.GetDayWithoutTime();
-            return WorkingHours?.FirstOrDefault(x => x.DateFrom <= now && (x.DateTo >= now || x.DateTo is null))?.Duration;
+            return WorkingHours?.FirstOrDefault(x => x.DateFrom <= now && (x.DateTo >= now || x.DateTo is null));
         }
     }
 }

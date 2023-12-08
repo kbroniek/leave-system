@@ -59,7 +59,7 @@ else
                 </Template>
                 <EditTemplate Context="data">
                     <RadzenStack Orientation="Orientation.Horizontal">
-                        <InputText type="time" Style="width: 100%" @bind-Value="data.TimeProxy"  />
+                        <InputText type="time" Style="width: 100%" @bind-Value="data.CurrentDurationProxy"  />
                         <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.Id)) Disabled="data.WorkingHours is null">
                             <span class="rz-button-text">
                                 <i class="fa-solid fa-pen"></i>
@@ -124,8 +124,26 @@ else
     {
         userToUpdate = userWithWorkingHours.GetUser();
         workingHoursToUpdate = userWithWorkingHours.WorkingHours;
+        if(!workingHoursToUpdate.Any())
+        {
+            var userId = userToUpdate?.Id;
+            if (userId is null)
+            {
+                // TODO: Log an error. Can't find user to edit.
+                return;
+            }
+            var firstDayOfYear = DateTimeOffset.UtcNow.GetFirstDayOfYear();
+            var workingHours = await WorkingHoursService.AddAndReturnDto(new AddWorkingHoursDto(userId, firstDayOfYear, null, WorkingHoursUtils.DefaultWorkingHours));
+            if (workingHours is not null)
+            {
+                userWithWorkingHours.WorkingHours = new List<WorkingHoursDto> { workingHours };
+                workingHoursToUpdate = userWithWorkingHours.WorkingHours;
+            }
+            // TODO: Log an error. Can't find working hours
+        }
         if (usersGrid is null)
         {
+            // TODO: Log an error. Can't find user to edit.
             return;
         }
         await usersGrid.EditRow(userWithWorkingHours);
@@ -142,12 +160,18 @@ else
         workingHoursToUpdate = null;
 
         await UsersService.Edit(userWithWorkingHours.GetUser());
+        var currentWorkingHours = userWithWorkingHours.CurrentWorkingHours;
+        if (currentWorkingHours is not null)
+        {
+            await WorkingHoursService.Edit(currentWorkingHours);
+        }
     }
 
     async Task SaveRow(UserWithWorkingHoursDto userWithWorkingHours)
     {
         if (usersGrid is null)
         {
+            // TODO: Log an error. Can't find user to save.
             return;
         }
         await usersGrid.UpdateRow(userWithWorkingHours);
@@ -185,6 +209,7 @@ else
 
             if (usersGrid is null)
             {
+                // TODO: Log an error. Can't find user to delete.
                 return;
             }
             await usersGrid.Reload();
@@ -206,6 +231,7 @@ else
         userWithWorkingHoursToInsert = new UserWithWorkingHoursDto();
         if (usersGrid is null)
         {
+            // TODO: Log an error. Can't find user to delete.
             return;
         }
         await usersGrid.InsertRow(userWithWorkingHoursToInsert);
@@ -215,18 +241,19 @@ else
     {
         var userId = await UsersService.Create(userWithWorkingHoursDto);
         var firstDayOfYear = DateTimeOffset.UtcNow.GetFirstDayOfYear();
-        var workingHours = await WorkingHoursService.AddAndReturnDto(new AddWorkingHoursDto(userId, firstDayOfYear, null, WorkingHoursUtils.DefaultWorkingHours));
         userWithWorkingHoursDto.Id = userId;
+        var workingHours = await WorkingHoursService.AddAndReturnDto(new AddWorkingHoursDto(userId, firstDayOfYear, null, WorkingHoursUtils.DefaultWorkingHours));
         if (workingHours is not null)
         {
             userWithWorkingHoursDto.WorkingHours = new List<WorkingHoursDto> { workingHours };
         }
+        // TODO: Log an error. Can't find working hours
         userWithWorkingHoursToInsert = null;
     }
     
     string CurrentWorkingHoursToString(UserWithWorkingHoursDto workingHours)
     {
-        var currentWorkingHours = workingHours.CurrentWorkingHours;
+        var currentWorkingHours = workingHours.CurrentWorkingHours?.Duration;
         return currentWorkingHours is null ? "undefined" : currentWorkingHours.Value.GetReadableTimeSpan(TimeSpan.FromDays(1));
     }
 
