@@ -257,7 +257,7 @@ public static class DbContextExtenstions
             commandBus,
             defaultUser.Id,
             DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2025, 1, 1),
+            null,
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
@@ -271,21 +271,21 @@ public static class DbContextExtenstions
             commandBus,
             testUsers[1].Id,
             DateTimeOffsetExtensions.CreateFromDate(2018, 3, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2025, 3, 1),
+            null,
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[2].Id,
             DateTimeOffsetExtensions.CreateFromDate(2021, 12, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2027, 7, 10),
+            null,
             TimeSpan.FromHours(4),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[3].Id,
             DateTimeOffsetExtensions.CreateFromDate(2022, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2028, 1, 1),
+            null,
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
@@ -301,13 +301,6 @@ public static class DbContextExtenstions
             DateTimeOffsetExtensions.CreateFromDate(2020, 1, 2),
             DateTimeOffsetExtensions.CreateFromDate(2024, 5, 6),
             TimeSpan.FromHours(4),
-            defaultUser);
-        await CreateWorkingHours(
-            commandBus,
-            defaultUser.Id,
-            DateTimeOffsetExtensions.CreateFromDate(2020, 2, 1),
-            DateTimeOffsetExtensions.CreateFromDate(2026, 7, 1),
-            TimeSpan.FromHours(8),
             defaultUser);
     }
 
