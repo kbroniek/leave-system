@@ -9,6 +9,7 @@
 @using System.Collections
 @using GoldenEye.Extensions.Basic
 @using LeaveSystem.Web.Pages.UsersManagement
+@using LeaveSystem.Web.Extensions
 
 @attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
@@ -33,17 +34,17 @@ else
                     EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset"
                     Data="@usersWithWorkingHours" TItem="UserWithWorkingHoursDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
         <Columns>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Property="Name" Title="Name" Frozen="true">
+            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Property="Name" Title="Name" Frozen="true" Width="auto">
                 <EditTemplate Context="data">
                     <RadzenTextBox @bind-Value="data.Name" Style="width:100%; display: block" Name="Name"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Property="Email" Title="Email">
+            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Property="Email" Title="Email" Width="auto">
                 <EditTemplate Context="data">
                     <RadzenTextBox @bind-Value="data.Email" Style="width:100%; display: block" Name="Email"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Title="Roles" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Title="Roles" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Width="auto">
                 <Template Context="data">
                     @RolesToString(data.Roles)
                 </Template>
@@ -52,17 +53,19 @@ else
                                     Multiple=true AllowClear=true Placeholder="Select roles" Chips=true Style="width:100%; display: block"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Title="WorkingHours" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Title="WorkingHours" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Width="auto">
                 <Template Context="data">
-                    @WorkingHoursToString(data.WorkingHours)
+                    @CurrentWorkingHoursToString(data)
                 </Template>
                 <EditTemplate Context="data">
-                    <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.Id)) Disabled="data.WorkingHours is null">
-                        <span class="rz-button-text">
-                            <i class="fa-solid fa-clock"> </i>
-                            <i class="fa-solid fa-pen"></i>
-                        </span>
-                    </RadzenButton>
+                    <RadzenStack Orientation="Orientation.Horizontal">
+                        <InputText type="time" Style="width: 100%" @bind-Value="data.TimeProxy"  />
+                        <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.Id)) Disabled="data.WorkingHours is null">
+                            <span class="rz-button-text">
+                                <i class="fa-solid fa-pen"></i>
+                            </span>
+                        </RadzenButton>
+                    </RadzenStack>
                 </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
@@ -188,7 +191,7 @@ else
         }
         else
         {
-    // TODO: Log an error. Can't find user to delete.
+            // TODO: Log an error. Can't find user to delete.
             if (usersGrid is null)
             {
                 return;
@@ -211,14 +214,20 @@ else
     async Task OnCreateRow(UserWithWorkingHoursDto userWithWorkingHoursDto)
     {
         var userId = await UsersService.Create(userWithWorkingHoursDto);
+        var firstDayOfYear = DateTimeOffset.UtcNow.GetFirstDayOfYear();
+        var workingHours = await WorkingHoursService.AddAndReturnDto(new AddWorkingHoursDto(userId, firstDayOfYear, null, WorkingHoursUtils.DefaultWorkingHours));
         userWithWorkingHoursDto.Id = userId;
+        if (workingHours is not null)
+        {
+            userWithWorkingHoursDto.WorkingHours = new List<WorkingHoursDto> { workingHours };
+        }
         userWithWorkingHoursToInsert = null;
     }
-
-    string WorkingHoursToString(IEnumerable<WorkingHoursDto>? workingHours)
+    
+    string CurrentWorkingHoursToString(UserWithWorkingHoursDto workingHours)
     {
-        var currentWorkingHours = workingHours?.FirstOrDefault(x => x.DateFrom <= now && x.DateTo >= now)?.Duration ?? TimeSpan.Zero;
-        return $"{currentWorkingHours.Hours}h";
+        var currentWorkingHours = workingHours.CurrentWorkingHours;
+        return currentWorkingHours is null ? "undefined" : currentWorkingHours.Value.GetReadableTimeSpan(TimeSpan.FromDays(1));
     }
 
     async Task ShowWorkingHoursDialog(string? userId)
