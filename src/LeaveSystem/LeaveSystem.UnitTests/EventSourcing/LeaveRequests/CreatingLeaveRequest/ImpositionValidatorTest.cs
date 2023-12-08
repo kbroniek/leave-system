@@ -23,6 +23,7 @@ public class ImpositionValidatorTest
     private readonly Mock<IDocumentSession> documentSessionMock = new();
     private readonly Mock<IEventStore> eventStoreMock = new();
     private readonly CurrentDateService currentDateService = new();
+    private readonly Mock<IBaseDateService> dateServiceMock = new();
 
     private readonly LeaveRequestCreated fakeLeaveRequestCreatedEvent =
         FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
@@ -84,7 +85,7 @@ public class ImpositionValidatorTest
     {
         //Given
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeLeaveRequestCreatedEvent);
-        entity.Cancel("cancel fake remarks", fakeUser);
+        entity.Cancel("cancel fake remarks", fakeUser, dateServiceMock.Object);
         var events = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds();
         events.Add(fakeLeaveRequestCreatedEvent);
         eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);

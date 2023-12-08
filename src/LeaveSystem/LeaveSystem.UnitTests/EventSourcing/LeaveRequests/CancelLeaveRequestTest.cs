@@ -7,10 +7,12 @@ using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestDataGenerators;
+using Moq;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
@@ -18,6 +20,7 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
 public class CancelLeaveRequestTest
 {
     private static readonly FederatedUser User = FakeUserProvider.GetUserWithNameFakeoslav();
+    private Mock<IBaseDateService> dateServiceMock = new();
     [Fact]
     public void WhenCreatedByIdNotEqualsCanceledById_ThenThrowInvalidOperationException()
     {
@@ -28,7 +31,7 @@ public class CancelLeaveRequestTest
         //When
         var act = () =>
         {
-            leaveRequest.Cancel("fake remarks", canceledBy);    
+            leaveRequest.Cancel("fake remarks", canceledBy, dateServiceMock.Object);    
         } ;
         //Then
         act.Should().Throw<InvalidOperationException>()
@@ -47,7 +50,7 @@ public class CancelLeaveRequestTest
         //When
         var act = () =>
         {
-            leaveRequest.Cancel("fake cancel remarks", canceledBy);    
+            leaveRequest.Cancel("fake cancel remarks", canceledBy, dateServiceMock.Object);    
         } ;
         //Then
         act.Should().Throw<InvalidOperationException>()
@@ -57,7 +60,7 @@ public class CancelLeaveRequestTest
     public static IEnumerable<object[]>
         Get_WhenLeaveRequestStatusDifferentThanPendingOrAccepted_thenThrowInvalidOperationException_TestData()
     {
-        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u);
+        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u, new Mock<IBaseDateService>().Object);
         void Reject(LeaveRequest l, string? r, FederatedUser u) => l.Reject(r, u);
         yield return new object[] { Cancel };
         yield return new object[] { Reject };
@@ -80,10 +83,12 @@ public class CancelLeaveRequestTest
             WorkingHoursUtils.DefaultWorkingHours
         );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
+        dateServiceMock = new();
+        dateServiceMock.Setup(x => x.GetWithoutTime()).Returns(utcNow);
         //When
         var act = () =>
         {
-            leaveRequest.Cancel("fake cancel remarks", User);    
+            leaveRequest.Cancel("fake cancel remarks", User, dateServiceMock.Object);    
         } ;
         //Then
         act.Should().Throw<InvalidOperationException>()
@@ -107,7 +112,7 @@ public class CancelLeaveRequestTest
         var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //When
-        leaveRequest.Cancel(remarks, User);
+        leaveRequest.Cancel(remarks, User, dateServiceMock.Object);
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {
@@ -136,7 +141,7 @@ public class CancelLeaveRequestTest
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         actionBeforeReject(leaveRequest, fakeRemarks, User);
         //When
-        leaveRequest.Cancel(fakeRejectRemarks, User);
+        leaveRequest.Cancel(fakeRejectRemarks, User, dateServiceMock.Object);
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {

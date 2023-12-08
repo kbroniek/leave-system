@@ -8,6 +8,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using Moq;
@@ -19,13 +20,14 @@ public class HandleCancelLeaveRequestTest
 {
     private readonly Mock<IRepository<LeaveRequest>> repositoryMock = new();
     private readonly CancelLeaveRequest command = CancelLeaveRequest.Create(Guid.NewGuid(), "testRemarks", FederatedUser.Create("1", "john@fake.com", "John"));
+    private readonly Mock<IBaseDateService> dateServiceMock = new();
     
     [Fact]
     public async Task
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenThrowNotFoundException()
     {
         //Given
-        var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object);
+        var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object, dateServiceMock.Object);
         //When
         var act = () =>
             handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
@@ -53,7 +55,7 @@ public class HandleCancelLeaveRequestTest
         repositoryMock
             .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest);
-        var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object);
+        var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object, dateServiceMock.Object);
         //When
         await handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
         //Then

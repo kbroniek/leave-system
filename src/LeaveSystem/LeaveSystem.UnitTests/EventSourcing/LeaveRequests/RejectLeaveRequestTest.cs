@@ -10,6 +10,8 @@ using LeaveSystem.UnitTests.TestDataGenerators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LeaveSystem.Shared.Date;
+using Moq;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
@@ -41,7 +43,7 @@ public class RejectLeaveRequestTest
     public static IEnumerable<object[]>
         Get_WhenLeaveRequestStatusOtherThenPendingAndAccepted_ThenThrowInvalidOperationException_TestData()
     {
-        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u);
+        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u, new Mock<IBaseDateService>().Object);
         void Reject(LeaveRequest l, string? r, FederatedUser u) => l.Reject(r, u);
         void Deprecate(LeaveRequest l, string? r, FederatedUser u) => l.Deprecate(r, u);
         yield return new object[] { Cancel };

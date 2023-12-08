@@ -2,6 +2,8 @@ using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using System.Collections.Generic;
+using LeaveSystem.Shared.Date;
+using Moq;
 
 namespace LeaveSystem.UnitTests.TestDataGenerators;
 
@@ -9,7 +11,7 @@ public static class LeaveRequestTestDataGenerator
 {
     public static IEnumerable<object[]> GetCancelAcceptAndRejectMethods()
     {
-        void Cancel(LeaveRequest l, string r, FederatedUser u) => l.Cancel(r, u);
+        void Cancel(LeaveRequest l, string r, FederatedUser u) => l.Cancel(r, u, new Mock<IBaseDateService>().Object);
         void Accept(LeaveRequest l, string r, FederatedUser u) => l.Accept(r, u);
         void Deprecate(LeaveRequest l, string r, FederatedUser u) => l.Deprecate(r, u);
         yield return new object[] { Cancel };
