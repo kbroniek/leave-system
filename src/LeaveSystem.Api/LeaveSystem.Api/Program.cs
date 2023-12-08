@@ -11,8 +11,10 @@ using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Shared.Converters;
 using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.UserLeaveLimits;
 using Microsoft.AspNetCore.OData;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.IdentityModel.Logging;
@@ -36,7 +38,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
-builder.Services.AddControllers().AddOData(opt =>
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>  o.JsonSerializerOptions.Converters.Add(new TimeSpanIso8601Converter()))
+    .AddOData(opt =>
     opt.AddRouteComponents("odata", GetEdmModel())
         .Select()
         .Filter()
@@ -48,10 +52,9 @@ IEdmModel GetEdmModel()
 {
     var modelBuilder = new ODataConventionModelBuilder();
     modelBuilder.EntitySet<LeaveType>("LeaveTypes");
-    var leaveTypeConfig = modelBuilder.EntityType<UserLeaveLimit>();
-    leaveTypeConfig.Ignore(x => x.LeaveType);
     modelBuilder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
     modelBuilder.EntitySet<Setting>("Settings");
+    modelBuilder.ComplexType<AddLeaveTypeDto>();
 
     return modelBuilder.GetEdmModel();
 }

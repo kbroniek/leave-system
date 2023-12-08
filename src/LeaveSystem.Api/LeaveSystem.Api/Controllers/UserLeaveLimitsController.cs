@@ -51,13 +51,13 @@ public class UserLeaveLimitsController : ODataController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] UserLeaveLimit entity, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Post([FromBody] AddUserLeaveLimitDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
             throw new BadHttpRequestException(InvalidModelMessage);
         }
-        var leaveTypeExists = await dbContext.LeaveTypes.AnyAsync(lt => lt.Id == entity.LeaveTypeId, cancellationToken);
+        var leaveTypeExists = await dbContext.LeaveTypes.AnyAsync(lt => lt.Id == dto.LeaveTypeId, cancellationToken);
         if (!leaveTypeExists)
         {
             throw new EntityNotFoundException("Leave type with provided Id not exists");
@@ -65,18 +65,19 @@ public class UserLeaveLimitsController : ODataController
         var entity1 = new UserLeaveLimit()
         {
             Id = new Guid(),
-            OverdueLimit = entity.OverdueLimit,
-            Limit = entity.Limit,
-            AssignedToUserId = entity.AssignedToUserId,
-            ValidSince = entity.ValidSince,
-            ValidUntil = entity.ValidUntil,
+            OverdueLimit = dto.OverdueLimit,
+            Limit = dto.Limit,
+            AssignedToUserId = dto.AssignedToUserId,
+            ValidSince = dto.ValidSince,
+            ValidUntil = dto.ValidUntil,
+            LeaveTypeId = dto.LeaveTypeId,
             Property = new()
             {
-                Description = entity.Property?.Description
+                Description = dto.Property?.Description
             }
         };
         await limitValidator.ValidateAsync(entity1, cancellationToken);
-        var addedEntity = crudService.AddAsync(entity1, cancellationToken);
+        var addedEntity = await crudService.AddAsync(entity1, cancellationToken);
         return Created(addedEntity);
     }
 

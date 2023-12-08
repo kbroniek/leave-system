@@ -232,9 +232,9 @@
         {
             Limit = limit.Limit,
             OverdueLimit = limit.OverdueLimit,
-            Properties = new()
+            Property = new ()
             {
-                Description = limit.Property?.Description
+                Description = limit.Property?.Description   
             },
             AssignedToUserId = UserId,
             LeaveTypeId = limit.LeaveTypeId,

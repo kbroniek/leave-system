@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace LeaveSystem.Shared.Converters;
 
-public class TimeSpanToStringConverter : JsonConverter<TimeSpan>
+public class TimeSpanIso8601Converter : JsonConverter<TimeSpan>
 {
     public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
