@@ -1,5 +1,6 @@
 using GoldenEye.Registration;
 using LeaveSystem;
+using LeaveSystem.Api;
 using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
@@ -7,15 +8,12 @@ using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
-using LeaveSystem.Api.Extensions;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared.Date;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
 
 const string azureConfigSection = "AzureAdB2C";
 const string azureReadUsersSection = "ManageAzureUsers";

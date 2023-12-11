@@ -1,7 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
-using System.Reflection;
 
-namespace LeaveSystem.Api.Extensions;
+namespace LeaveSystem.Api;
 
 public static class Config
 {
