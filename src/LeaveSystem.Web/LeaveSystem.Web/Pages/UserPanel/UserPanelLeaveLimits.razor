@@ -32,7 +32,7 @@
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidUntil" Title="Valid Until">
                     <Template Context="limit">
-                        @limit.ValidSince.GetReadableDate()
+                        @limit.ValidUntil.GetReadableDate()
                     </Template>
                     <EditTemplate Context="limit">
                         <RadzenDatePicker
@@ -55,6 +55,10 @@
                     <Template Context="limit">
                         @limit.OverdueLimit.GetReadableTimeSpan(WorkingHours)
                     </Template>
+                    <EditTemplate Context="limit">
+                        <RadzenNumeric TValue="int" Value="limit.OverdueLimit.GetDurationDays(WorkingHours)"
+                                       Change="x => limit.OverdueLimit = DurationExtensions.GetDurationFromDays(x, WorkingHours)"/>
+                    </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.TotalLimit" Title="Total Limit">
                     <Template Context="limit">
@@ -232,9 +236,9 @@
         {
             Limit = limit.Limit,
             OverdueLimit = limit.OverdueLimit,
-            Property = new ()
+            Property = new()
             {
-                Description = limit.Property?.Description   
+                Description = limit.Property?.Description
             },
             AssignedToUserId = UserId,
             LeaveTypeId = limit.LeaveTypeId,

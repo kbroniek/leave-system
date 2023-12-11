@@ -31,13 +31,13 @@ namespace LeaveSystem.Api.Controllers
             return crudService.Get();
         }
 
-        [HttpGet]
-        [EnableQuery]
-        public SingleResult<Setting> Get([FromODataUri] string key)
-        {
-            var entity = crudService.GetAsQueryable(key);
-            return SingleResult.Create(entity);
-        }
+        // [HttpGet]
+        // [EnableQuery]
+        // public SingleResult<Setting> Get([FromODataUri] string key)
+        // {
+        //     var entity = crudService.GetAsQueryable(key);
+        //     return SingleResult.Create(entity);
+        // }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] AddSettingDto dto, CancellationToken cancellationToken = default)
