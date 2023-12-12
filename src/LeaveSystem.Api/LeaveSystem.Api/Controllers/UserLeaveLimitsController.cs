@@ -42,7 +42,7 @@ public class UserLeaveLimitsController : ODataController
         return crudService.Get();
     }
 
-    [HttpGet]
+    [HttpGet("{key}")]
     [EnableQuery]
     public SingleResult<UserLeaveLimit> Get([FromODataUri] Guid key)
     {

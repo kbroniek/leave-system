@@ -34,7 +34,7 @@ namespace LeaveSystem.Api.Controllers
             return crudService.Get();
         }
 
-        [HttpGet]
+        [HttpGet("{key}")]
         [EnableQuery]
         public SingleResult<LeaveType> Get([FromODataUri] Guid key)
         {
@@ -54,7 +54,7 @@ namespace LeaveSystem.Api.Controllers
                 var baseLeaveTypeExists = await dbContext.LeaveTypes.AnyAsync(lt => lt.BaseLeaveTypeId == dto.BaseLeaveTypeId, cancellationToken);
                 if (!baseLeaveTypeExists)
                 {
-                    throw new EntityNotFoundException("Leave type with provided Id not exists");
+                    throw new EntityNotFoundException("Base leave type with provided Id not exists");
                 }
             }
             var orderExists = await dbContext.LeaveTypes.AnyAsync(x => x.Order == dto.Order, cancellationToken);
