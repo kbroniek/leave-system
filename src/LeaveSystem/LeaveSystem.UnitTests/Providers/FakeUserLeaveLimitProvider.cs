@@ -8,9 +8,9 @@ namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeUserLeaveLimitProvider
 {
-    public static readonly Guid FakeLimitForSickLeaveId = Guid.NewGuid();
-    public static readonly Guid FakeLimitForOnDemandLeaveId = Guid.NewGuid();
-    public static readonly Guid FakeLimitForHolidayLeaveId = Guid.NewGuid();
+    public static readonly Guid FakeLimitForSickLeaveId = Guid.Parse("e12b8ce4-3e5c-4b1c-be7a-eb3276383261");
+    public static readonly Guid FakeLimitForOnDemandLeaveId = Guid.Parse("e12b8ce4-3e5c-4b1c-be7a-eb3276383262");
+    public static readonly Guid FakeLimitForHolidayLeaveId = Guid.Parse("e12b8ce4-3e5c-4b1c-be7a-eb3276383263");
 
     public static UserLeaveLimit GetLimitForSickLeave()
     {
