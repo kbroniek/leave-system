@@ -32,12 +32,12 @@ internal class HandleCancelLeaveRequest :
     ICommandHandler<CancelLeaveRequest>
 {
     private readonly IRepository<LeaveRequest> repository;
-    private readonly IBaseDateService baseDateService;
+    private readonly CurrentDateService currentDateService;
 
-    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository, IBaseDateService baseDateService)
+    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository, CurrentDateService currentDateService)
     {
         this.repository = repository;
-        this.baseDateService = baseDateService;
+        this.currentDateService = currentDateService;
     }
 
     public async Task<Unit> Handle(CancelLeaveRequest command, CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ internal class HandleCancelLeaveRequest :
         var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
                              ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
-        leaveRequest.Cancel(command.Remarks, command.CanceledBy, baseDateService);
+        leaveRequest.Cancel(command.Remarks, command.CanceledBy, currentDateService);
 
         await repository.Update(leaveRequest, cancellationToken);
 

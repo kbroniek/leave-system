@@ -1,6 +1,6 @@
 namespace LeaveSystem.Shared.Date;
 
-public class CurrentDateService : IBaseDateService
+public class CurrentDateService
 {
-    public virtual DateTimeOffset GetWithoutTime() => DateTimeOffset.UtcNow.GetDayWithoutTime();
+    public virtual DateTimeOffset GetWithoutTime() => DateTimeOffset.Now.GetDayWithoutTime();
 }

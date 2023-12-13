@@ -69,7 +69,7 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
         Apply(@event);
     }
 
-    internal void Cancel(string? remarks, FederatedUser canceledBy, IBaseDateService dateService)
+    internal void Cancel(string? remarks, FederatedUser canceledBy, CurrentDateService dateService)
     {
         if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
         {

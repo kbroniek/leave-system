@@ -1,6 +1,6 @@
 namespace LeaveSystem.Shared.Date;
 
-public class CustomDateService : IBaseDateService
+public class CustomDateService : CurrentDateService
 {
     private readonly DateTimeOffset customDate;
 
@@ -9,5 +9,5 @@ public class CustomDateService : IBaseDateService
         this.customDate = customDate;
     }
 
-    public virtual DateTimeOffset GetWithoutTime() => customDate;
+    public override DateTimeOffset GetWithoutTime() => customDate;
 }
