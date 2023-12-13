@@ -39,7 +39,7 @@ public class HandleRejectLeaveRequestTest
     {
         //Given
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedWithSickLeave()
+            FakeLeaveRequestCreatedProvider.GetSickLeaveRequest()
         );
         var command = RejectLeaveRequest.Create(leaveRequest.Id, "fake remarks", FakeUserProvider.GetUserWithNameFakeoslav());
         var repositoryMock = new Mock<IRepository<LeaveRequest>>();

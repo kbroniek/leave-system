@@ -32,11 +32,11 @@ public static class FakeLeaveRequestCreatedProvider
         );
     }
 
-    internal static LeaveRequestCreated GetLeaveRequestCreatedCalculatedFromCurrentDate(TimeSpan duration, Guid leaveType)
+    internal static LeaveRequestCreated GetHolodayLeaveRequest(TimeSpan duration, Guid leaveType)
     {
         var currentDate = DateTimeOffset.Now;
-        var dateFrom = DateCalculator.GetNextWorkingDay(currentDate + new TimeSpan(2, 0, 0, 0));
-        var twoDaysAfterDateFrom = dateFrom + new TimeSpan(2, 0, 0, 0);
+        var dateFrom = DateCalculator.GetNextWorkingDay(currentDate.AddDays(2));
+        var twoDaysAfterDateFrom = dateFrom.AddDays(2);
         var dateTo = DateCalculator.GetNextWorkingDay(twoDaysAfterDateFrom);
         return LeaveRequestCreated.Create(
             FakeLeaveRequestId,
@@ -50,7 +50,7 @@ public static class FakeLeaveRequestCreatedProvider
         );
     }
 
-    internal static LeaveRequestCreated GetLeaveRequestWithHolidayLeaveCreated()
+    internal static LeaveRequestCreated GetHolidayLeaveRequest()
     {
         return LeaveRequestCreated.Create(
             FakeLeaveRequestId,
@@ -64,7 +64,7 @@ public static class FakeLeaveRequestCreatedProvider
         );
     }
 
-    internal static LeaveRequestCreated GetLeaveRequestCreatedWithOnDemandLeave()
+    internal static LeaveRequestCreated GetOnDemandLeaveRequest()
     {
         return LeaveRequestCreated.Create(
             FakeLeaveRequestId,
@@ -78,14 +78,14 @@ public static class FakeLeaveRequestCreatedProvider
         );
     }
 
-    internal static LeaveRequestCreated GetLeaveRequestCreatedWithSickLeave()
+    internal static LeaveRequestCreated GetSickLeaveRequest()
     {
         return LeaveRequestCreated.Create(
             FakeLeaveRequestId,
             new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
             new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
             WorkingHours * 30,
-            FakeLeaveTypeProvider.FakeOnDemandLeaveId,
+            FakeLeaveTypeProvider.FakeSickLeaveId,
             "fake remarks",
             FakeUserProvider.GetUserWithNameFakeoslav(),
             WorkingHoursUtils.DefaultWorkingHours
@@ -124,40 +124,40 @@ public static class FakeLeaveRequestCreatedProvider
         return new List<LeaveRequestCreated>
         {
             LeaveRequestCreated.Create(
-                Guid.NewGuid(),
+                Guid.Parse("8b8b2922-8b14-4a9a-843f-bb341f1938a1"),
                 new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
                 new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
                 TimeSpan.FromDays(6),
-                Guid.NewGuid(),
+                Guid.Parse("59689db1-10dc-492e-9da8-00628cb1a701"),
                 "fake remarks",
                 FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
                 WorkingHoursUtils.DefaultWorkingHours
             ),
             LeaveRequestCreated.Create(
-                Guid.NewGuid(),
+                Guid.Parse("8b8b2922-8b14-4a9a-843f-bb341f1938a2"),
                 new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
                 new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
                 TimeSpan.FromDays(6),
-                Guid.NewGuid(),
+                Guid.Parse("59689db1-10dc-492e-9da8-00628cb1a702"),
                 "fake remarks",
                 FakeLeaveRequestCreatedEvent.CreatedBy,
                 WorkingHoursUtils.DefaultWorkingHours
             ),
             LeaveRequestCreated.Create(
-                Guid.NewGuid(),
+                Guid.Parse("8b8b2922-8b14-4a9a-843f-bb341f1938a3"),
                 new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
                 new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
                 TimeSpan.FromDays(6),
-                Guid.NewGuid(),
+                Guid.Parse("59689db1-10dc-492e-9da8-00628cb1a703"),
                 "fake remarks",
                 FakeLeaveRequestCreatedEvent.CreatedBy,WorkingHoursUtils.DefaultWorkingHours
             ),
             LeaveRequestCreated.Create(
-                Guid.NewGuid(),
+                Guid.Parse("8b8b2922-8b14-4a9a-843f-bb341f1938a4"),
                 new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
                 new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
                 TimeSpan.FromDays(6),
-                Guid.NewGuid(),
+                Guid.Parse("59689db1-10dc-492e-9da8-00628cb1a704"),
                 "fake remarks",
                 FakeLeaveRequestCreatedEvent.CreatedBy,
                 WorkingHoursUtils.DefaultWorkingHours

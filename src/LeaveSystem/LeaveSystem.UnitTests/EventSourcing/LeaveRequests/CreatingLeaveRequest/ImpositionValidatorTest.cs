@@ -41,7 +41,7 @@ public class ImpositionValidatorTest
         //Given
         var events = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds();
         var fakeEvent =
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2,
+            FakeLeaveRequestCreatedProvider.GetHolodayLeaveRequest(WorkingHours * 2,
                 FakeLeaveTypeProvider.FakeSickLeaveId);
         events.Add(fakeEvent);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
@@ -65,7 +65,7 @@ public class ImpositionValidatorTest
         //Given
         var events = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds();
         var fakeEvent =
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2,
+            FakeLeaveRequestCreatedProvider.GetHolodayLeaveRequest(WorkingHours * 2,
                 FakeLeaveTypeProvider.FakeSickLeaveId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);

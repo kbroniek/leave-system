@@ -41,15 +41,15 @@ public class LimitValidatorTest
     {
         yield return new object[]
         {
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedWithSickLeave()
+            FakeLeaveRequestCreatedProvider.GetSickLeaveRequest()
         };
         yield return new object[]
         {
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreated()
+            FakeLeaveRequestCreatedProvider.GetHolidayLeaveRequest()
         };
         yield return new object[]
         {
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedWithOnDemandLeave()
+            FakeLeaveRequestCreatedProvider.GetOnDemandLeaveRequest()
         };
     }
 
@@ -112,7 +112,7 @@ public class LimitValidatorTest
     {
         //Given
         var events = FakeLeaveRequestCreatedProvider.GetMartenQueryableStub();
-        var fakeEvent = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2, FakeLeaveTypeProvider.FakeHolidayLeaveGuid);
+        var fakeEvent = FakeLeaveRequestCreatedProvider.GetHolodayLeaveRequest(WorkingHours * 2, FakeLeaveTypeProvider.FakeHolidayLeaveGuid);
         var leaveRequestEntity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), leaveRequestEntity);
         await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
