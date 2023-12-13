@@ -32,7 +32,6 @@ public static class FakeLeaveTypeProvider
         Id = FakeHolidayLeaveGuid,
         Name = "urlop wypoczynkowy",
         Order = 1,
-        BaseLeaveTypeId = FakeOnDemandLeaveId,
         Properties = new LeaveType.LeaveTypeProperties
         {
             DefaultLimit = WorkingHours * 26,
@@ -47,6 +46,7 @@ public static class FakeLeaveTypeProvider
         Id = FakeOnDemandLeaveId,
         Name = "urlop na żądanie",
         Order = 2,
+        BaseLeaveTypeId = FakeHolidayLeaveGuid,
         Properties = new LeaveType.LeaveTypeProperties
         {
             DefaultLimit = WorkingHours * 4,
