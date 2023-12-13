@@ -82,6 +82,7 @@ public class CreateLeaveRequestValidator
             creatingLeaveRequest.LeaveTypeId,
             creatingLeaveRequest.CreatedBy.Id,
             creatingLeaveRequest.LeaveTypeId,
+            creatingLeaveRequest.Duration,
             connectedLeaveTypeIds.nestedLeaveTypeIds);
 
         if (connectedLeaveTypeIds.baseLeaveTypeId != null)
@@ -92,6 +93,7 @@ public class CreateLeaveRequestValidator
                 baseLeaveTypeId,
                 creatingLeaveRequest.CreatedBy.Id,
                 baseLeaveTypeId,
+                creatingLeaveRequest.Duration,
                 Enumerable.Empty<Guid>());
         }
     }
@@ -102,18 +104,21 @@ public class CreateLeaveRequestValidator
         Guid currentLeaveTypeId,
         string userId,
         Guid leaveTypeId,
+        TimeSpan duration,
         IEnumerable<Guid> nestedLeaveTypeIds)
     {
         UserLeaveLimit leaveLimit = await GetLimits(dateFrom,
             dateTo,
             currentLeaveTypeId,
             userId);
-        var totalUsed = await GetUsedLeavesDuration(dateFrom,
+        var totalUsed = await GetUsedLeavesDuration(
+            dateFrom.GetFirstDayOfYear(),
+            dateFrom.GetLastDayOfYear(),
             userId,
             leaveTypeId,
             nestedLeaveTypeIds);
         if (leaveLimit.Limit != null &&
-            CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed) <= TimeSpan.Zero)
+            CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed + duration) <= TimeSpan.Zero)
         {
             throw new ValidationException("You don't have enough free days for this type of leave");
         }
@@ -139,13 +144,12 @@ public class CreateLeaveRequestValidator
     }
 
     private async Task<TimeSpan> GetUsedLeavesDuration(
-        DateTimeOffset dateFrom,
+        DateTimeOffset firstDayOfYear,
+        DateTimeOffset lastDayOfYear,
         string userId,
         Guid leaveTypeId,
         IEnumerable<Guid> nestedLeaveTypeIds)
     {
-        var firstDay = dateFrom.GetFirstDayOfYear();
-        var lastDay = dateFrom.GetLastDayOfYear();
         var nestedLeaveTypeIdsExpression = PredicateBuilder
             .Create<LeaveRequestCreated>(x => x.LeaveTypeId == leaveTypeId);
         var leaveTypeIdArray = nestedLeaveTypeIds as Guid[] ?? nestedLeaveTypeIds.ToArray();
@@ -157,8 +161,8 @@ public class CreateLeaveRequestValidator
         }
         var connectedLeaveRequestsCreatedExpression = PredicateBuilder.Create<LeaveRequestCreated>(x =>
                 x.CreatedBy.Id == userId &&
-                x.DateFrom >= firstDay &&
-                x.DateTo <= lastDay)
+                x.DateFrom >= firstDayOfYear &&
+                x.DateTo <= lastDayOfYear)
             .And(nestedLeaveTypeIdsExpression);
         var leaveRequestCreatedEvents = await documentSession.Events.QueryRawEventDataOnly<LeaveRequestCreated>()
             .Where(connectedLeaveRequestsCreatedExpression).ToListAsync();
