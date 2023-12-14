@@ -7,15 +7,38 @@ public static class PeriodResolver
     {
         if (firstDateFrom > firstDateTo || secondDateFrom > secondDateTo)
             throw new ArgumentOutOfRangeException();
-        if (firstDateTo == null && secondDateTo == null)
-            return firstDateTo == secondDateTo;
-        if (firstDateTo == null)
+        if (firstDateTo is null && secondDateTo is null)
+            return false;
+        if (firstDateTo is null)
             return DateIsInPeriod(secondDateFrom, secondDateTo, firstDateFrom);
-        if (secondDateTo == null)
+        if (secondDateTo is null)
             return DateIsInPeriod(firstDateFrom, firstDateTo, secondDateFrom);
         return firstDateFrom < secondDateTo && secondDateFrom < firstDateTo;
     }
-    
-    public static bool DateIsInPeriod(DateTimeOffset dateFrom, DateTimeOffset? dateTo, DateTimeOffset date) => 
+
+    public static bool PeriodsOverlap(DateTimeOffset? firstDateFrom, DateTimeOffset? firstDateTo,
+        DateTimeOffset? secondDateFrom, DateTimeOffset? secondDateTo)
+    {
+        if (firstDateFrom > firstDateTo || secondDateFrom > secondDateTo)
+            throw new ArgumentOutOfRangeException();
+        var firstDateFromIsNull = firstDateFrom is null;
+        var firstDateToIsNull = firstDateTo is null;
+        var secondDateFromIsNull = secondDateFrom is null;
+        var secondDateToIsNull = secondDateTo is null;
+        var cantComparePeriods =
+            (firstDateFromIsNull && firstDateToIsNull) || (secondDateFromIsNull && secondDateToIsNull)
+                                                       || (firstDateFromIsNull && secondDateFromIsNull)
+                                                       || (firstDateToIsNull && secondDateToIsNull);
+        return !cantComparePeriods
+               && (
+                   (firstDateToIsNull && DateIsInPeriod(secondDateFrom, secondDateTo, firstDateFrom!.Value))
+                   || (secondDateToIsNull && DateIsInPeriod(firstDateFrom, firstDateTo, secondDateFrom!.Value))
+                   || (firstDateFromIsNull && DateIsInPeriod(secondDateFrom, secondDateTo, firstDateTo!.Value))
+                   || (secondDateFromIsNull && DateIsInPeriod(firstDateFrom, firstDateTo, secondDateTo!.Value))
+                   || (firstDateFrom < secondDateTo && secondDateFrom < firstDateTo)
+               );
+    }
+
+    public static bool DateIsInPeriod(DateTimeOffset? dateFrom, DateTimeOffset? dateTo, DateTimeOffset date) =>
         date >= dateFrom && date >= dateTo;
 }

@@ -250,6 +250,10 @@
         {
             limit.Id = addedLimit.Id;
         }
+        else
+        {
+            limitsGrid?.CancelEditRow(limit);
+        }
         limitToInsert = null;
     }
 

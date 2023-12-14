@@ -48,8 +48,8 @@ public class GenericCrudService<TEntity, TId>
         {
             throw new EntityNotFoundException(NotFoundMessage);
         }
-        deltaValidator.Validate(update);
-        update.Patch(entity);
+        var validatedDelta = deltaValidator.CreateDeltaWithoutProtectedProperties(update);
+        validatedDelta.Patch(entity);
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
@@ -72,8 +72,8 @@ public class GenericCrudService<TEntity, TId>
         {
             throw new EntityNotFoundException(NotFoundMessage);
         }
-        deltaValidator.Validate(update);
-        update.Put(entity);
+        var validatedDelta = deltaValidator.CreateDeltaWithoutProtectedProperties(update);
+        validatedDelta.Put(entity);
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
@@ -89,7 +89,7 @@ public class GenericCrudService<TEntity, TId>
         return entity;
     }
 
-    public async Task DeleteAsync([FromODataUri] TId key, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(TId key, CancellationToken cancellationToken = default)
     {
         var product = await GetSet().FindAsync(new object[] { key }, cancellationToken);
         if (product == null)
@@ -128,12 +128,17 @@ public class DeltaValidator<TEntity> where TEntity : class
         this.protectedPropertyNames = protectedPropertyNames;
     }
 
-    public void Validate(Delta<TEntity> delta)
+    public Delta<TEntity> CreateDeltaWithoutProtectedProperties(Delta<TEntity> delta)
     {
-        if (delta.UpdatableProperties.Intersect(protectedPropertyNames).Any())
+        var deltaWithoutProtectedProperties = new Delta<TEntity>();
+        foreach (var propertyName in delta.GetChangedPropertyNames())
         {
-            throw new BadHttpRequestException("You cant modify those properties");
+            if (!protectedPropertyNames.Contains(propertyName) 
+                && delta.TryGetPropertyValue(propertyName, out var propertyValue))
+            {
+                deltaWithoutProtectedProperties.TrySetPropertyValue(propertyName, propertyValue);
+            }
         }
-    } 
+        return deltaWithoutProtectedProperties;
+    }
 }
-

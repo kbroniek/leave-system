@@ -44,5 +44,8 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
             .LessThan(x => x.ValidUntil)
             .When(x => x.ValidUntil is not null || x.ValidSince is not null)
             .WithErrorCode(FvErrorCodes.ArgumentOutOfRange);
+        RuleFor(x => x.ValidUntil)
+            .Equal(x => x.ValidSince)
+            .When(x => x.ValidUntil is null && x.ValidSince is null);
     }
 }

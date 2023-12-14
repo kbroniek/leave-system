@@ -2,6 +2,7 @@
 using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Periods;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.UserLeaveLimits;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
 
 namespace LeaveSystem.Api.Controllers;
 
@@ -51,18 +53,28 @@ public class UserLeaveLimitsController : ODataController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] AddUserLeaveLimitDto dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Post([FromBody] AddUserLeaveLimitDto dto,
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
             throw new BadHttpRequestException(InvalidModelMessage);
         }
+
         var leaveTypeExists = await dbContext.LeaveTypes.AnyAsync(lt => lt.Id == dto.LeaveTypeId, cancellationToken);
         if (!leaveTypeExists)
         {
-            throw new EntityNotFoundException("Leave type with provided Id not exists");
+            throw new ValidationException("Leave type with provided Id not exists");
         }
-        var entity1 = new UserLeaveLimit()
+
+        var overlapsOtherLimit = await CheckIfPeriodOverlapsAnyLimit(dto.ValidSince, dto.ValidUntil, cancellationToken);
+        if (overlapsOtherLimit)
+        {
+            throw new ValidationException(
+                "Cannot create a new limit in this time. The other limit is overlapping with this date.");
+        }
+
+        var entity = new UserLeaveLimit()
         {
             Id = new Guid(),
             OverdueLimit = dto.OverdueLimit,
@@ -76,9 +88,74 @@ public class UserLeaveLimitsController : ODataController
                 Description = dto.Property?.Description
             }
         };
-        await limitValidator.ValidateAsync(entity1, cancellationToken);
-        var addedEntity = await crudService.AddAsync(entity1, cancellationToken);
+        await limitValidator.ValidateAsync(entity, cancellationToken);
+        var addedEntity = await crudService.AddAsync(entity, cancellationToken);
+        if (addedEntity.ValidSince.HasValue)
+        {
+            await SetEndDateForPreviousLimitIfDontHaveAsync(addedEntity.ValidSince.Value, cancellationToken);
+        }
+        if (addedEntity.ValidUntil.HasValue)
+        {
+            await SetStartDateForNextLimitIfDontHaveAsync(addedEntity.ValidUntil.Value, cancellationToken);
+        }
+
         return Created(addedEntity);
+    }
+
+    private Task<bool> CheckIfPeriodOverlapsAnyLimit(DateTimeOffset? dateFrom, DateTimeOffset? dateTo,
+        CancellationToken cancellationToken)
+    {
+        return dbContext.UserLeaveLimits.AnyAsync(
+            ull =>
+                !(
+                    // checking if periods can't overlap
+                    (!ull.ValidSince.HasValue && !ull.ValidUntil.HasValue) ||
+                    (!dateFrom.HasValue && !dateTo.HasValue) ||
+                    (!ull.ValidSince.HasValue && !dateFrom.HasValue) ||
+                    (!ull.ValidUntil.HasValue && !dateTo.HasValue)
+                ) && (
+                    // checking if periods overlaps
+                    (!ull.ValidSince.HasValue && ull.ValidUntil >= dateFrom && ull.ValidUntil >= dateTo) ||
+                    (!dateFrom.HasValue && dateTo >= ull.ValidSince && dateTo >= ull.ValidUntil) ||
+                    (!ull.ValidUntil.HasValue && ull.ValidSince >= dateFrom && ull.ValidSince >= dateTo) ||
+                    (!dateTo.HasValue && dateFrom >= ull.ValidSince && dateFrom >= ull.ValidUntil) ||
+                    (ull.ValidSince < dateTo && dateFrom < ull.ValidUntil)
+                )
+            , cancellationToken);
+    }
+
+    private async Task SetEndDateForPreviousLimitIfDontHaveAsync(DateTimeOffset validSince,
+        CancellationToken cancellationToken)
+    {
+        var limitWithoutEndDateBeforeThisLimit = await dbContext.UserLeaveLimits
+            .LastOrDefaultAsync(
+                x => !x.ValidUntil.HasValue && x.ValidSince < validSince
+                , cancellationToken);
+        if (limitWithoutEndDateBeforeThisLimit is null)
+        {
+            return;
+        }
+
+        limitWithoutEndDateBeforeThisLimit.ValidUntil = validSince;
+        dbContext.Update(limitWithoutEndDateBeforeThisLimit);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task SetStartDateForNextLimitIfDontHaveAsync(DateTimeOffset validUntil,
+        CancellationToken cancellationToken)
+    {
+        var limitWithoutStartDateAfterThisLimit = await dbContext.UserLeaveLimits
+            .LastOrDefaultAsync(
+                x => !x.ValidSince.HasValue && x.ValidUntil > validUntil
+                , cancellationToken);
+        if (limitWithoutStartDateAfterThisLimit is null)
+        {
+            return;
+        }
+
+        limitWithoutStartDateAfterThisLimit.ValidSince = validUntil;
+        dbContext.Update(limitWithoutStartDateAfterThisLimit);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     [HttpPut]
@@ -91,7 +168,25 @@ public class UserLeaveLimitsController : ODataController
         {
             throw new BadHttpRequestException(InvalidModelMessage);
         }
-        return Updated(await crudService.PutAsync(key, delta, cancellationToken));
+        var updatedEntity = await crudService.PutAsync(key, delta, cancellationToken);
+        await SetStartAndEndDateForNeighbourLimitsIfDontHaveAsync(delta, cancellationToken, updatedEntity);
+        return Updated(updatedEntity);
+    }
+
+    private async Task SetStartAndEndDateForNeighbourLimitsIfDontHaveAsync(
+        Delta<UserLeaveLimit> delta, 
+        CancellationToken cancellationToken,
+        UserLeaveLimit updatedEntity)
+    {
+        if (delta.GetChangedPropertyNames().Contains("ValidSince") && updatedEntity.ValidSince.HasValue)
+        {
+            await SetEndDateForPreviousLimitIfDontHaveAsync(updatedEntity.ValidSince.Value, cancellationToken);
+        }
+        if (delta.GetChangedPropertyNames().Contains("ValidUntil") && updatedEntity.ValidUntil.HasValue)
+        {
+            await SetEndDateForPreviousLimitIfDontHaveAsync(updatedEntity.ValidUntil.Value, cancellationToken);
+
+        }
     }
 
     [HttpPatch]
@@ -104,6 +199,8 @@ public class UserLeaveLimitsController : ODataController
         {
             throw new BadHttpRequestException(InvalidModelMessage);
         }
-        return Updated(await crudService.PatchAsync(key, delta, cancellationToken));
+        var updatedEntity = await crudService.PutAsync(key, delta, cancellationToken);
+        await SetStartAndEndDateForNeighbourLimitsIfDontHaveAsync(delta, cancellationToken, updatedEntity);
+        return Updated(updatedEntity);
     }
 }
