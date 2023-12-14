@@ -152,12 +152,11 @@ public class CreateLeaveRequestValidator
     {
         var nestedLeaveTypeIdsExpression = PredicateBuilder
             .Create<LeaveRequestCreated>(x => x.LeaveTypeId == leaveTypeId);
-        var leaveTypeIdArray = nestedLeaveTypeIds as Guid[] ?? nestedLeaveTypeIds.ToArray();
-        if (leaveTypeIdArray.Any())
+        if (nestedLeaveTypeIds.Any())
         {
             nestedLeaveTypeIdsExpression = nestedLeaveTypeIdsExpression
                 .Or(PredicateBuilder.MatchAny<LeaveRequestCreated, Guid>(x => x.LeaveTypeId,
-                    leaveTypeIdArray));
+                    nestedLeaveTypeIds.ToArray()));
         }
         var connectedLeaveRequestsCreatedExpression = PredicateBuilder.Create<LeaveRequestCreated>(x =>
                 x.CreatedBy.Id == userId &&
