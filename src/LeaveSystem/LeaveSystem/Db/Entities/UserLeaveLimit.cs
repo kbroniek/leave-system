@@ -59,11 +59,12 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
         RuleFor(x => x.AssignedToUserId).NotNull().NotEmpty();
         RuleFor(x => x)
             .MustAsync(async (limit, cancellation) => !await CheckIfPeriodOverlapsAnyLimitAsync(
-                limit.LeaveTypeId, limit.AssignedToUserId!, limit.ValidSince, limit.ValidUntil, cancellation))
+                limit.Id, limit.LeaveTypeId, limit.AssignedToUserId!, limit.ValidSince, limit.ValidUntil, cancellation))
             .WithMessage("Cannot create a new limit in this time. The other limit is overlapping with this date.");
     }
     
     private Task<bool> CheckIfPeriodOverlapsAnyLimitAsync(
+        Guid id,
         Guid leaveTypeId,
         string userId,
         DateTimeOffset? dateFrom, 
@@ -72,7 +73,9 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
     {
         return  dbContext.UserLeaveLimits.AnyAsync(
             ull =>
-                ull.LeaveTypeId == leaveTypeId && ull.AssignedToUserId == userId &&
+                ull.Id != id &&
+                ull.LeaveTypeId == leaveTypeId && 
+                ull.AssignedToUserId == userId &&
                 !(
                     // checking if periods can't overlap
                     (!ull.ValidSince.HasValue && !ull.ValidUntil.HasValue) ||

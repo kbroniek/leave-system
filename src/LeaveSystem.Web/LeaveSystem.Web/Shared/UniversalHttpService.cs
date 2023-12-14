@@ -3,7 +3,9 @@ using System.Text;
 using System.Text.Json;
 using Blazored.Toast.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Logger;
 using LeaveSystem.Shared.WorkingHours;
+using Microsoft.JSInterop;
 
 namespace LeaveSystem.Web.Shared;
 
@@ -30,23 +32,34 @@ public abstract class UniversalHttpService
         var response = await httpClient.PostAsync(uri, httpContent);
         if (response.IsSuccessStatusCode)
         {
-            var resultWorkingHoursDto = await response.Content.ReadFromJsonAsync<TResponse>();
-            if (resultWorkingHoursDto is not null)
-            {
-                toastService.ShowSuccess(successMessage);
-            }
-            else
-            {
-                toastService.ShowError("Unexpected empty result");
-            }
-
-            return resultWorkingHoursDto;
+            return await DeserializeResponseContent<TResponse>(response, successMessage, options);
         }
-
         var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>(options);
         logger.LogError("{Message}", problemDto?.Detail);
         var message = problemDto?.Title ?? "Something went wrong";
         toastService.ShowError(message);
+        return null;
+    }
+
+    private async Task<TResponse?> DeserializeResponseContent<TResponse> (
+        HttpResponseMessage response, string successMessage, JsonSerializerOptions options) 
+        where TResponse : class
+    {
+        try
+        {
+            var resultWorkingHoursDto = await response.Content.ReadFromJsonAsync<TResponse>(options);
+            if (resultWorkingHoursDto is not null)
+            {
+                toastService.ShowSuccess(successMessage);
+                return resultWorkingHoursDto;
+            }
+            toastService.ShowError("Unexpected empty result");
+        }
+        catch (Exception e)
+        {
+            toastService.ShowError("Error occured while adding");
+            logger.LogException(e);
+        }
         return null;
     }
 
@@ -61,7 +74,6 @@ public abstract class UniversalHttpService
             toastService.ShowSuccess(successMessage);
             return true;
         }
-
         var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>(options);
         logger.LogError("{Message}", problemDto?.Detail);
         var message = problemDto?.Title ?? "Something went wrong";
