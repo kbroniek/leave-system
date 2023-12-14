@@ -54,6 +54,7 @@ public class GenericCrudService<TEntity, TId>
         {
             o.ThrowOnFailures();
         }, cancellationToken);
+        dbContext.Entry(entity).State = EntityState.Modified;
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
@@ -82,6 +83,7 @@ public class GenericCrudService<TEntity, TId>
         {
             o.ThrowOnFailures();
         }, cancellationToken);
+        dbContext.Entry(entity).State = EntityState.Modified;
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);

@@ -5,7 +5,7 @@ namespace LeaveSystem.Web.Pages.UserLeaveLimits;
 
 public class UserLeaveLimitDto
 {
-    public UserLeaveLimitDto(Guid id, TimeSpan limit, TimeSpan overdueLimit, Guid leaveTypeId, DateTimeOffset? validSince, DateTimeOffset? validUntil, UserLeaveLimitPropertyDto? property)
+    public UserLeaveLimitDto(Guid id, TimeSpan limit, TimeSpan overdueLimit, Guid leaveTypeId, DateTimeOffset? validSince, DateTimeOffset? validUntil, UserLeaveLimitPropertyDto property)
     {
         Limit = limit;
         OverdueLimit = overdueLimit;
@@ -26,10 +26,10 @@ public class UserLeaveLimitDto
     public Guid LeaveTypeId { get; set; }
     public DateTimeOffset? ValidSince { get; set; }
     public DateTimeOffset? ValidUntil { get; set; }
-    public UserLeaveLimitPropertyDto? Property { get; set; }
+    public UserLeaveLimitPropertyDto Property { get; set; } = new();
 
     public static UserLeaveLimitDto Create(LeaveLimitDto limit) =>
-        new(limit.Id, limit.Limit, limit.OverdueLimit, limit.LeaveTypeId, limit.ValidSince, limit.ValidUntil, limit.Property);
+        new(limit.Id, limit.Limit, limit.OverdueLimit, limit.LeaveTypeId, limit.ValidSince, limit.ValidUntil, limit.Property ?? new ());
     private UserLeaveLimitDto(Guid leaveTypeId)
     {
         LeaveTypeId = leaveTypeId;
@@ -42,4 +42,13 @@ public record LeaveLimitDto(Guid Id, TimeSpan Limit, TimeSpan OverdueLimit, Guid
     public TimeSpan TotalLimit { get => Limit + OverdueLimit; }
 }
 
-public record UserLeaveLimitPropertyDto(string? Description);
+public class UserLeaveLimitPropertyDto
+{
+    public UserLeaveLimitPropertyDto(string? Description)
+    {
+        this.Description = Description;
+    }
+    public UserLeaveLimitPropertyDto(){}
+
+    public string? Description { get; set; }
+}

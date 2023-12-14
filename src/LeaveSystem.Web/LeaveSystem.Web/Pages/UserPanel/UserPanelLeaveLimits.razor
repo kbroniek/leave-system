@@ -67,7 +67,14 @@
                             @limit.TotalLimit.GetReadableTimeSpan(WorkingHours)
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.Property.Description" Title="Description"/>
+                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.Property.Description" Title="Description">
+                        <Template Context="limit">
+                            @limit.Property.Description
+                        </Template>
+                        <EditTemplate Context="limit">
+                            <RadzenTextArea @bind-Value="limit.Property.Description"/>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn TItem="UserLeaveLimitDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
                         <Template Context="data">
                             <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(data))" @onclick:stopPropagation="true">
@@ -261,6 +268,7 @@ else
         {
             limitsGrid?.CancelEditRow(limit);
         }
+
         limitToInsert = null;
     }
 
