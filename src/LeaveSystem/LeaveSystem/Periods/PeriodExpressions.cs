@@ -30,5 +30,5 @@ public class PeriodExpressions
         x =>
             (!x.DateTo.HasValue && x.DateFrom >= period.DateFrom && x.DateFrom <= period.DateTo) ||
             (period.DateTo.HasValue && x.DateFrom <= period.DateTo && period.DateFrom <= x.DateTo) ||
-            !period.DateTo.HasValue && period.DateFrom >= x.DateFrom && period.DateFrom <= x.DateTo;
+            (!period.DateTo.HasValue && period.DateFrom >= x.DateFrom && period.DateFrom <= x.DateTo);
 }

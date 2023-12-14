@@ -9,125 +9,129 @@
 @inject UserLeaveLimitsService LimitsService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<RadzenDataGrid @ref="leaveTypeGrid" AllowFiltering="true" AllowSorting="true" ExpandMode="DataGridExpandMode.Single"
-                Data="@LeaveTypesWithUserLimits" TItem="LeaveTypeWithUserLimits">
-    <Template Context="leaveType">
-        <RadzenButton
-            ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Limit"
-            Click="@(() => InsertRow(leaveType.Id))" Disabled=@(limitToInsert != null || editingLimits)/>
-        <RadzenDataGrid @ref="limitsGrid" AllowFiltering="true" AllowPaging="true" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow"
-                        AllowSorting="true" Data="@leaveType.Limits" TItem="UserLeaveLimitDto" EditMode="DataGridEditMode.Single">
-            <Columns>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidSince" Title="Valid Since">
-                    <Template Context="limit">
-                        @limit.ValidSince.GetReadableDate()
-                    </Template>
-                    <EditTemplate Context="limit">
-                        <RadzenDatePicker
-                            @bind-Value="limit.ValidSince"
-                            Min="firstDayOfYear" Max="lastDayOfYear"
-                            DateFormat="yyyy/MM/dd">
-                        </RadzenDatePicker>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidUntil" Title="Valid Until">
-                    <Template Context="limit">
-                        @limit.ValidUntil.GetReadableDate()
-                    </Template>
-                    <EditTemplate Context="limit">
-                        <RadzenDatePicker
-                            @bind-Value="limit.ValidUntil"
-                            Min="firstDayOfYear" Max="lastDayOfYear"
-                            DateFormat="yyyy/MM/dd">
-                        </RadzenDatePicker>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.Limit" Title="Limit">
-                    <Template Context="limit">
-                        @limit.Limit.GetReadableTimeSpan(WorkingHours)
-                    </Template>
-                    <EditTemplate Context="limit">
-                        <RadzenNumeric TValue="int" Value="limit.Limit.GetDurationDays(WorkingHours)"
-                                       Change="x => limit.Limit = DurationExtensions.GetDurationFromDays(x, WorkingHours)"/>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.OverdueLimit" Title="Overdue Limit">
-                    <Template Context="limit">
-                        @limit.OverdueLimit.GetReadableTimeSpan(WorkingHours)
-                    </Template>
-                    <EditTemplate Context="limit">
-                        <RadzenNumeric TValue="int" Value="limit.OverdueLimit.GetDurationDays(WorkingHours)"
-                                       Change="x => limit.OverdueLimit = DurationExtensions.GetDurationFromDays(x, WorkingHours)"/>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.TotalLimit" Title="Total Limit">
-                    <Template Context="limit">
-                        @limit.TotalLimit.GetReadableTimeSpan(WorkingHours)
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.Property.Description" Title="Description"/>
-                <RadzenDataGridColumn TItem="UserLeaveLimitDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
-                    <Template Context="data">
-                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(data))" @onclick:stopPropagation="true">
-                        </RadzenButton>
-                    </Template>
-                    <EditTemplate Context="data">
-                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
-                                      Size="ButtonSize.Medium" Click="@((args) => SaveRow(data))" @onclick:stopPropagation="true">
-                        </RadzenButton>
-                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
-                                      Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(data))" @onclick:stopPropagation="true">
-                        </RadzenButton>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-            </Columns>
-        </RadzenDataGrid>
-    </Template>
-    <Columns>
-        <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Name">
-            <Template Context="leaveType">
-                @leaveType.Name
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Limit">
-            <Template Context="leaveType">
-                @leaveType.Limit
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Overdue Limit">
-            <Template Context="leaveType">
-                @leaveType.OverdueLimit
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Total Limit">
-            <Template Context="leaveType">
-                @leaveType.TotalLimit
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits">
-            <Template Context="leaveType">
-                <div style="@GetCssStyleForLeaveType(leaveType.Properties.Color)"></div>
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid>
+@if (UserId is not null)
+{
+    <RadzenDataGrid @ref="leaveTypeGrid" AllowFiltering="true" AllowSorting="true" ExpandMode="DataGridExpandMode.Single"
+                    Data="@LeaveTypesWithUserLimits" TItem="LeaveTypeWithUserLimits">
+        <Template Context="leaveType">
+            <RadzenButton
+                ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Limit"
+                Click="@(() => InsertRow(leaveType.Id))" Disabled=@(limitToInsert is not null || editingLimits)/>
+            <RadzenDataGrid @ref="limitsGrid" AllowFiltering="true" AllowPaging="true" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow"
+                            AllowSorting="true" Data="@leaveType.Limits" TItem="UserLeaveLimitDto" EditMode="DataGridEditMode.Single">
+                <Columns>
+                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidSince" Title="Valid Since">
+                        <Template Context="limit">
+                            @limit.ValidSince.GetReadableDate()
+                        </Template>
+                        <EditTemplate Context="limit">
+                            <RadzenDatePicker
+                                @bind-Value="limit.ValidSince"
+                                Min="firstDayOfYear" Max="lastDayOfYear"
+                                DateFormat="yyyy/MM/dd">
+                            </RadzenDatePicker>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.ValidUntil" Title="Valid Until">
+                        <Template Context="limit">
+                            @limit.ValidUntil.GetReadableDate()
+                        </Template>
+                        <EditTemplate Context="limit">
+                            <RadzenDatePicker
+                                @bind-Value="limit.ValidUntil"
+                                Min="firstDayOfYear" Max="lastDayOfYear"
+                                DateFormat="yyyy/MM/dd">
+                            </RadzenDatePicker>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.Limit" Title="Limit">
+                        <Template Context="limit">
+                            @limit.Limit.GetReadableTimeSpan(WorkingHours)
+                        </Template>
+                        <EditTemplate Context="limit">
+                            <RadzenNumeric TValue="int" Value="limit.Limit.GetDurationDays(WorkingHours)"
+                                           Change="x => limit.Limit = DurationExtensions.GetDurationFromDays(x, WorkingHours)"/>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.OverdueLimit" Title="Overdue Limit">
+                        <Template Context="limit">
+                            @limit.OverdueLimit.GetReadableTimeSpan(WorkingHours)
+                        </Template>
+                        <EditTemplate Context="limit">
+                            <RadzenNumeric TValue="int" Value="limit.OverdueLimit.GetDurationDays(WorkingHours)"
+                                           Change="x => limit.OverdueLimit = DurationExtensions.GetDurationFromDays(x, WorkingHours)"/>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.TotalLimit" Title="Total Limit">
+                        <Template Context="limit">
+                            @limit.TotalLimit.GetReadableTimeSpan(WorkingHours)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Property="UserLeaveLimitDto.Property.Description" Title="Description"/>
+                    <RadzenDataGridColumn TItem="UserLeaveLimitDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+                        <Template Context="data">
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(data))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </Template>
+                        <EditTemplate Context="data">
+                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
+                                          Size="ButtonSize.Medium" Click="@((args) => SaveRow(data))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat"
+                                          Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(data))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </Template>
+        <Columns>
+            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Name">
+                <Template Context="leaveType">
+                    @leaveType.Name
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Limit">
+                <Template Context="leaveType">
+                    @leaveType.Limit
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Overdue Limit">
+                <Template Context="leaveType">
+                    @leaveType.OverdueLimit
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Total Limit">
+                <Template Context="leaveType">
+                    @leaveType.TotalLimit
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits">
+                <Template Context="leaveType">
+                    <div style="@GetCssStyleForLeaveType(leaveType.Properties.Color)"></div>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+}
+else
+{
+    <div class="d-flex justify-content-center">
+        <RadzenText TextStyle="TextStyle.H1">Error occured while displaying leave limits</RadzenText>
+    </div>
+}
 
 @code {
 
-    [Parameter]
-    public IEnumerable<LeaveTypeWithUserLimits>? LeaveTypesWithUserLimits { get; set; }
+    [Parameter] public IEnumerable<LeaveTypeWithUserLimits>? LeaveTypesWithUserLimits { get; set; }
 
-    [Parameter]
-    public TimeSpan WorkingHours { get; set; }
+    [Parameter] public TimeSpan WorkingHours { get; set; }
 
-    [Parameter]
-    public EventCallback<Guid> RefreshLimitsCallback { get; set; }
+    [Parameter] public EventCallback<Guid> RefreshLimitsCallback { get; set; }
 
-    [Parameter]
-    public string? UserId { get; set; }
+    [Parameter] public string? UserId { get; set; }
 
-    [Parameter]
-    public int? Year { get; set; }
+    [Parameter] public int? Year { get; set; }
 
     RadzenDataGrid<LeaveTypeWithUserLimits>? leaveTypeGrid;
     RadzenDataGrid<UserLeaveLimitDto>? limitsGrid;
@@ -137,11 +141,8 @@
     bool editingLimits = false;
     UserLeaveLimitDto? limitToInsert;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User.CreateModel();
-        UserId ??= user.Id;
         var currentYear = Year ?? DateTimeOffset.UtcNow.Year;
         firstDayOfYear = new DateTime(currentYear, 1, 1, 0, 0, 0);
         lastDayOfYear = new DateTime(currentYear, 12, 31, 23, 59, 59, 999);
@@ -156,8 +157,10 @@
         {
             ToastService.ShowError("Error occured during entering edition mode!");
             Logger.LogError("workingHoursGrid is null");
+            editingLimits = false;
             return;
         }
+
         await limitsGrid.EditRow(limit);
     }
 
@@ -169,6 +172,7 @@
             Logger.LogError("workingHoursGrid is null");
             return;
         }
+
         await limitsGrid.UpdateRow(limit);
     }
 
@@ -182,6 +186,7 @@
         {
             await ResetOne(limit.Id);
         }
+
         limitsGrid?.CancelEditRow(limit);
         editingLimits = false;
     }
@@ -195,6 +200,7 @@
         {
             return;
         }
+
         limitToChange.OverdueLimit = limit.OverdueLimit;
         limitToChange.Limit = limit.Limit;
         limitToChange.ValidSince = limit.ValidSince;
@@ -215,6 +221,7 @@
             Logger.LogError("limitsGrid is null");
             return;
         }
+
         await limitsGrid.InsertRow(limitToInsert);
     }
 

@@ -1,18 +1,9 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Exceptions;
+﻿using FluentValidation;
 using GoldenEye.Objects.General;
 using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Db;
-using LeaveSystem.Shared;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
-using Microsoft.AspNetCore.OData.Formatter;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Results;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
-using RestSharp.Validation;
-using NotFoundException = GoldenEye.Exceptions.NotFoundException;
 
 namespace LeaveSystem.Api.Controllers;
 
@@ -22,11 +13,16 @@ public class GenericCrudService<TEntity, TId>
 {
     private readonly LeaveSystemDbContext dbContext;
     private readonly DeltaValidator<TEntity> deltaValidator;
+    private readonly IValidator<TEntity> entityValidator;
     private const string NotFoundMessage = "Entity Not Found";
-    public GenericCrudService(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator)
+    public GenericCrudService(
+        LeaveSystemDbContext dbContext, 
+        DeltaValidator<TEntity> deltaValidator, 
+        IValidator<TEntity> entityValidator)
     {
         this.dbContext = dbContext;
         this.deltaValidator = deltaValidator;
+        this.entityValidator = entityValidator;
     }
         
     public virtual IQueryable<TEntity>? Get() => dbContext.Set<TEntity>();
@@ -36,6 +32,10 @@ public class GenericCrudService<TEntity, TId>
         
     public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        await entityValidator.ValidateAsync(entity, o =>
+            {
+                o.ThrowOnFailures();
+            }, cancellationToken);
         GetSet().Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
         return entity;
@@ -50,6 +50,10 @@ public class GenericCrudService<TEntity, TId>
         }
         var validatedDelta = deltaValidator.CreateDeltaWithoutProtectedProperties(update);
         validatedDelta.Patch(entity);
+        await entityValidator.ValidateAsync(entity, o =>
+        {
+            o.ThrowOnFailures();
+        }, cancellationToken);
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);
@@ -74,6 +78,10 @@ public class GenericCrudService<TEntity, TId>
         }
         var validatedDelta = deltaValidator.CreateDeltaWithoutProtectedProperties(update);
         validatedDelta.Put(entity);
+        await entityValidator.ValidateAsync(entity, o =>
+        {
+            o.ThrowOnFailures();
+        }, cancellationToken);
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken);

@@ -21,6 +21,8 @@ public static class Config
 
     public static void AddValidators(this IServiceCollection services)
     {
-        services.AddScoped<IValidator<UserLeaveLimit>, UserLeaveLimitValidator>();
+        services.AddScoped<IValidator<UserLeaveLimit>, UserLeaveLimitValidator>()
+            .AddScoped<IValidator<LeaveType>, LeaveTypeValidator>()
+            .AddScoped<IValidator<Setting>, SettingValidator>();
     }
 }

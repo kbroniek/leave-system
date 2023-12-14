@@ -49,20 +49,6 @@ namespace LeaveSystem.Api.Controllers
             {
                 throw new BadHttpRequestException(InvalidModelMessage);
             }
-            if (dto.BaseLeaveTypeId is not null)
-            {
-                var baseLeaveTypeExists = await dbContext.LeaveTypes.AnyAsync(lt => lt.BaseLeaveTypeId == dto.BaseLeaveTypeId, cancellationToken);
-                if (!baseLeaveTypeExists)
-                {
-                    throw new EntityNotFoundException("Base leave type with provided Id not exists");
-                }
-            }
-            var orderExists = await dbContext.LeaveTypes.AnyAsync(x => x.Order == dto.Order, cancellationToken);
-            if (orderExists)
-            {
-                throw new BadHttpRequestException("Leave type with this order already exists");
-            }
-            Guard.Against.NullOrWhiteSpace(dto.Name);
             var entity = new LeaveType
             {
                 Id = Guid.NewGuid(),

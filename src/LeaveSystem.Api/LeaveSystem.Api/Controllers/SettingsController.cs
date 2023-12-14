@@ -44,8 +44,8 @@ namespace LeaveSystem.Api.Controllers
         {
             var entity = new Setting
             {
-                Id = Guard.Against.NullOrWhiteSpace(dto.Id),
-                Value = Guard.Against.NillAndDefault(dto.Value),
+                Id = dto.Id,
+                Value = dto.Value,
                 Category = dto.Category
 
             };

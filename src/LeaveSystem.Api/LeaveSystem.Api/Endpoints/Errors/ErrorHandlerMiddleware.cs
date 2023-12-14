@@ -61,6 +61,7 @@ public class ErrorHandlerMiddleware
                     "Error while handling ValidationException.");
                 return;
             }
+
             var statusCode = error.ErrorCode switch
             {
                 FvErrorCodes.ArgumentOutOfRange => StatusCodes.Status416RequestedRangeNotSatisfiable,
@@ -68,6 +69,10 @@ public class ErrorHandlerMiddleware
                 _ => StatusCodes.Status400BadRequest
             };
             await HandleExceptionAsync(httpContext, statusCode, e, error.ErrorMessage);
+        }
+        catch (System.ComponentModel.DataAnnotations.ValidationException e)
+        {
+            await HandleExceptionAsync(httpContext, StatusCodes.Status400BadRequest, e, e.Message);
         }
         catch (Exception e)
         {
