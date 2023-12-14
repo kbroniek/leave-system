@@ -1,24 +1,23 @@
-using System;
-using System.Collections.Generic;
-using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
+using System;
+using System.Collections.Generic;
 
 namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeLeaveRequestCreatedProvider
 {
-    internal static Guid FakeLeaveRequestId = Guid.NewGuid();
-    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
+    internal static Guid FakeLeaveRequestId = Guid.Parse("ebfd08ea-d8ec-4587-81f5-3dad479b7a8c");
+    private static readonly TimeSpan WorkingHours = WorkingHoursUtils.DefaultWorkingHours;
     private static readonly LeaveRequestCreated FakeLeaveRequestCreatedEvent =
         GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
 
     internal static LeaveRequestCreated GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate()
     {
         var now = DateTimeOffset.Now;
-        var dateFrom = DateCalculator.GetNextWorkingDay(now + new TimeSpan(2, 0, 0, 0));
-        var twoDaysAfterDateFrom = dateFrom + new TimeSpan(2, 0, 0, 0);
+        var dateFrom = DateCalculator.GetNextWorkingDay(now.AddDays(2));
+        var twoDaysAfterDateFrom = dateFrom.AddDays(2);
         var dateTo = DateCalculator.GetNextWorkingDay(twoDaysAfterDateFrom);
         return LeaveRequestCreated.Create(
             FakeLeaveRequestId,
@@ -50,13 +49,13 @@ public static class FakeLeaveRequestCreatedProvider
         );
     }
 
-    internal static LeaveRequestCreated GetHolidayLeaveRequest()
+    internal static LeaveRequestCreated GetHolidayLeaveRequest(TimeSpan? duration = null)
     {
         return LeaveRequestCreated.Create(
             FakeLeaveRequestId,
             new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
             new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
-            WorkingHours * 30,
+            duration ?? WorkingHours * 30,
             FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
             "fake remarks",
             FakeUserProvider.GetUserWithNameFakeoslav(),
@@ -78,13 +77,13 @@ public static class FakeLeaveRequestCreatedProvider
         );
     }
 
-    internal static LeaveRequestCreated GetSickLeaveRequest()
+    internal static LeaveRequestCreated GetSickLeaveRequest(TimeSpan? duration = null)
     {
         return LeaveRequestCreated.Create(
             FakeLeaveRequestId,
             new DateTimeOffset(2023, 7, 11, 0, 0, 0, TimeSpan.FromHours(5)),
             new DateTimeOffset(2023, 7, 13, 0, 0, 0, TimeSpan.FromHours(5)),
-            WorkingHours * 30,
+            duration ?? WorkingHours * 30,
             FakeLeaveTypeProvider.FakeSickLeaveId,
             "fake remarks",
             FakeUserProvider.GetUserWithNameFakeoslav(),

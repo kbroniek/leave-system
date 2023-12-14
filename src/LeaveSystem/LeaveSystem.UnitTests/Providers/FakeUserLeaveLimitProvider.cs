@@ -45,7 +45,7 @@ public static class FakeUserLeaveLimitProvider
         {
             Id = FakeLimitForHolidayLeaveId,
             LeaveTypeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
-            Limit = FakeLeaveTypeProvider.GetFakeSickLeave().Properties?.DefaultLimit,
+            Limit = FakeLeaveTypeProvider.GetFakeHolidayLeave().Properties?.DefaultLimit,
             AssignedToUserId = FakeUserProvider.GetUserWithNameFakeoslav().Id,
             ValidSince = now.GetFirstDayOfYear(),
             ValidUntil = now.GetLastDayOfYear(),
