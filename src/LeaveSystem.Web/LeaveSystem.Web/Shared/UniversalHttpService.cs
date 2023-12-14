@@ -9,20 +9,20 @@ using Microsoft.JSInterop;
 
 namespace LeaveSystem.Web.Shared;
 
-public abstract class UniversalHttpService
+public class UniversalHttpService
 {
     private readonly HttpClient httpClient;
     private readonly IToastService toastService;
-    private readonly ILogger logger;
+    private readonly ILogger<UniversalHttpService> logger;
     //Todo: dodać jako klasę wstrzykiwaną, a nie taką po której się dziedziczy
-    protected UniversalHttpService(HttpClient httpClient, IToastService toastService, ILogger logger)
+    public UniversalHttpService(HttpClient httpClient, IToastService toastService, ILogger<UniversalHttpService> logger)
     {
         this.httpClient = httpClient;
         this.toastService = toastService;
         this.logger = logger;
     }
 
-    protected virtual async Task<TResponse?> AddAsync<TContent, TResponse>(string uri, TContent entityToAdd,
+    internal virtual async Task<TResponse?> AddAsync<TContent, TResponse>(string uri, TContent entityToAdd,
         string successMessage, JsonSerializerOptions options)
         where TContent : class
         where TResponse : class
@@ -41,7 +41,7 @@ public abstract class UniversalHttpService
         return null;
     }
 
-    private async Task<TResponse?> DeserializeResponseContent<TResponse> (
+    internal async Task<TResponse?> DeserializeResponseContent<TResponse> (
         HttpResponseMessage response, string successMessage, JsonSerializerOptions options) 
         where TResponse : class
     {
@@ -63,7 +63,7 @@ public abstract class UniversalHttpService
         return null;
     }
 
-    protected virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage, JsonSerializerOptions options)
+    internal virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage, JsonSerializerOptions options)
         where TContent : class
     {
         var jsonString = JsonSerializer.Serialize(entityToEdit, options);
@@ -81,7 +81,7 @@ public abstract class UniversalHttpService
         return false;
     }
 
-    protected virtual async Task<TResponse?> GetAsync<TResponse>(string uri, string errorMessage, JsonSerializerOptions options)
+    internal  virtual async Task<TResponse?> GetAsync<TResponse>(string uri, string errorMessage, JsonSerializerOptions options)
         where TResponse : class
     {
         try

@@ -4,39 +4,41 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml;
 using Blazored.Toast.Services;
+using LeaveSystem.Shared.Converters;
 using LeaveSystem.Shared.UserLeaveLimits;
 using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.Shared;
 
 namespace LeaveSystem.Web.Pages.UserLeaveLimits;
 
-public class UserLeaveLimitsService : UniversalHttpService
+public class UserLeaveLimitsService
 {
-    private readonly HttpClient httpClient;
+    private readonly UniversalHttpService universalHttpService;
     
     private static readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web)
     {
         Converters =
             {
-                new TimeSpanToStringConverter()
+                new TimeSpanIso8601Converter()
             },
     };
 
-    public UserLeaveLimitsService(HttpClient httpClient, IToastService toastService, ILogger<UserLeaveLimitsService> logger) 
-        : base(httpClient, toastService, logger)
+    public UserLeaveLimitsService(UniversalHttpService universalHttpService)
     {
-        this.httpClient = httpClient;
+        this.universalHttpService = universalHttpService;
     }
 
     public virtual async Task<IEnumerable<UserLeaveLimitDto>> GetLimits(string userId, DateTimeOffset since, DateTimeOffset until)
     {
-        var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<UserLeaveLimitDto>>>($"odata/UserLeaveLimits?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))", jsonSerializerOptions);
+        var limits = await universalHttpService.GetAsync<ODataResponse<IEnumerable<UserLeaveLimitDto>>>(
+            $"odata/UserLeaveLimits?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))"
+            , "Can't get user leave limit", jsonSerializerOptions);
         return limits?.Data ?? Enumerable.Empty<UserLeaveLimitDto>();
     }
 
     public virtual async Task<UserLeaveLimitDto?> GetSingleAsync(Guid id)
     {
-        var odataResponse = await GetAsync<UserLeaveLimitDtoODataResponse>(
+        var odataResponse = await universalHttpService.GetAsync<UserLeaveLimitDtoODataResponse>(
             $"odata/UserLeaveLimits({id})?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property",
             "Can't get user leave limit", jsonSerializerOptions);
         return odataResponse?.ToUserLeaveLimitDto();
@@ -44,16 +46,18 @@ public class UserLeaveLimitsService : UniversalHttpService
 
     public virtual async Task<IEnumerable<LeaveLimitDto>> GetLimits(DateTimeOffset since, DateTimeOffset until)
     {
-        var limits = await httpClient.GetFromJsonAsync<ODataResponse<IEnumerable<LeaveLimitDto>>>($"odata/UserLeaveLimits?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))", jsonSerializerOptions);
+        var limits = await universalHttpService.GetAsync<ODataResponse<IEnumerable<LeaveLimitDto>>>(
+            $"odata/UserLeaveLimits?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))"
+            , "Can't get user leave limit", jsonSerializerOptions);
         return limits?.Data ?? Enumerable.Empty<LeaveLimitDto>();
     }
 
     public async Task<UserLeaveLimitDto?> AddAsync(AddUserLeaveLimitDto entityToAdd)
     {
-        var odataResponse = await AddAsync<AddUserLeaveLimitDto, UserLeaveLimitDtoODataResponse>("odata/UserLeaveLimits", entityToAdd, "User leave limit added successfully", jsonSerializerOptions);
+        var odataResponse = await universalHttpService.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitDtoODataResponse>("odata/UserLeaveLimits", entityToAdd, "User leave limit added successfully", jsonSerializerOptions);
         return odataResponse?.ToUserLeaveLimitDto();
     } 
-    public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) => EditAsync($"odata/UserLeaveLimits({entityToEdit.Id})", entityToEdit, "User leave limit edited successfully", jsonSerializerOptions);
+    public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) => universalHttpService.EditAsync($"odata/UserLeaveLimits({entityToEdit.Id})", entityToEdit, "User leave limit edited successfully", jsonSerializerOptions);
     
     private class UserLeaveLimitDtoODataResponse : UserLeaveLimitDto
     {
@@ -61,20 +65,6 @@ public class UserLeaveLimitsService : UniversalHttpService
         public string? ContextUrl { get; set; }
         public UserLeaveLimitDto ToUserLeaveLimitDto() =>
             new(Id, Limit, OverdueLimit, LeaveTypeId, ValidSince, ValidUntil, Property);
-    }
-
-    private sealed class TimeSpanToStringConverter : JsonConverter<TimeSpan>
-    {
-        public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            var value = reader.GetString();
-            return value == null ? TimeSpan.Zero : XmlConvert.ToTimeSpan(value);
-        }
-
-        public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(XmlConvert.ToString(value));
-        }
     }
 }
 

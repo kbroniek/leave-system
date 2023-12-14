@@ -159,4 +159,11 @@ public class UserLeaveLimitsController : ODataController
         await SetStartAndEndDateForNeighbourLimitsIfDontHaveAsync(updatedEntity, cancellationToken);
         return Updated(updatedEntity);
     }
+
+    [HttpDelete]
+    public async Task<IActionResult> Delete([FromODataUri] Guid key, CancellationToken cancellationToken = default)
+    {
+        await crudService.DeleteAsync(key, cancellationToken);
+        return NoContent();
+    }
 }
