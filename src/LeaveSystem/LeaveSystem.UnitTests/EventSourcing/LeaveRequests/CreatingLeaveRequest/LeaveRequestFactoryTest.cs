@@ -8,6 +8,7 @@ using GoldenEye.Exceptions;
 using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
 using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
@@ -51,24 +52,21 @@ public class LeaveRequestFactoryTest
             );
         querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
             .Returns(martenQueryableStub);
-        var validatorMock = GetValidatorMock(dbContext);
+        var validatorMock = GetValidatorMock();
         var sut = GetSut(dbContext, querySessionMock.Object, validatorMock.Object);
         //When
         var act = async () => { await sut.Create(fakeEvent, It.IsAny<CancellationToken>()); };
         //Then
         await act.Should().ThrowAsync<Ardalis.GuardClauses.NotFoundException>();
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Times.Never);
-        validatorMock.Verify(x => x.DateValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
-        validatorMock.Verify(x => x.BasicValidate(
+        validatorMock.Verify(x => x.Validate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
             ), Times.Never
         );
-        validatorMock.Verify(x => x.ImpositionValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
-        validatorMock.Verify(x => x.LimitValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
     }
 
-    private Mock<CreateLeaveRequestValidator> GetValidatorMock(LeaveSystemDbContext dbContext) =>
-        new(dbContext, new Mock<IDocumentSession>().Object, new CurrentDateService());
+    private Mock<CreateLeaveRequestValidator> GetValidatorMock() =>
+        new(null, null, null);
 
     [Fact]
     public async Task WhenDurationGreaterThanYear_ThenThrowArgumentOutOfRangeException()
@@ -91,19 +89,17 @@ public class LeaveRequestFactoryTest
         );
         querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
             .Returns(martenQueryableStub);
-        var validatorMock = GetValidatorMock(dbContext);
+        var validatorMock = GetValidatorMock();
         var sut = GetSut(dbContext, querySessionMock.Object, validatorMock.Object);
         //When
         var act = async () => { await sut.Create(fakeEvent, It.IsAny<CancellationToken>()); };
         //Then
         await act.Should().ThrowAsync<ArgumentOutOfRangeException>();
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Times.Once);
-        validatorMock.Verify(x => x.DateValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
-        validatorMock.Verify(x => x.BasicValidate(
+        validatorMock.Verify(x => x.Validate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
             ), Times.Never
         );
-        validatorMock.Verify(x => x.LimitValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
     }
 
     [Fact]
@@ -126,18 +122,16 @@ public class LeaveRequestFactoryTest
         );
         querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
             .Returns(martenQueryableStub);
-        var validatorMock = GetValidatorMock(dbContext);
+        var validatorMock = GetValidatorMock();
         var sut = GetSut(dbContext, querySessionMock.Object, validatorMock.Object);
         //When
         var leaveRequest = await sut.Create(fakeEvent, It.IsAny<CancellationToken>());
         //Then
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>());
-        validatorMock.Verify(x => x.DateValidator(It.IsAny<LeaveRequestCreated>()), Times.Once);
-        validatorMock.Verify(x => x.BasicValidate(
+        validatorMock.Verify(x => x.Validate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
             ), Times.Once
         );
-        validatorMock.Verify(x => x.LimitValidator(It.IsAny<LeaveRequestCreated>()), Times.Once);
         leaveRequest.Should().BeEquivalentTo(new
         {
             Id = fakeEvent.LeaveRequestId,
@@ -173,19 +167,16 @@ public class LeaveRequestFactoryTest
         );
         querySessionMock.Setup(m => m.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>())
             .Returns(martenQueryableStub);
-        var validatorMock = GetValidatorMock(dbContext);
+        var validatorMock = GetValidatorMock();
         var sut = GetSut(dbContext, querySessionMock.Object, validatorMock.Object);
         //When
         var act = async () => { await sut.Create(fakeEvent, It.IsAny<CancellationToken>()); };
         //Then
         await act.Should().ThrowAsync<InvalidOperationException>();
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>());
-        validatorMock.Verify(x => x.DateValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
-        validatorMock.Verify(x => x.BasicValidate(
+        validatorMock.Verify(x => x.Validate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
             ), Times.Never
         );
-        validatorMock.Verify(x => x.LimitValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
-        validatorMock.Verify(x => x.ImpositionValidator(It.IsAny<LeaveRequestCreated>()), Times.Never);
     }
 }

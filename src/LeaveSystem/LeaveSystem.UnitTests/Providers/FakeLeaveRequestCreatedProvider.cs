@@ -13,14 +13,14 @@ public static class FakeLeaveRequestCreatedProvider
     private static readonly LeaveRequestCreated FakeLeaveRequestCreatedEvent =
         GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
 
-    internal static LeaveRequestCreated GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate()
+    internal static LeaveRequestCreated GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate(Guid? leaveRequestId = null)
     {
         var now = DateTimeOffset.Now;
         var dateFrom = DateCalculator.GetNextWorkingDay(now.AddDays(2));
         var twoDaysAfterDateFrom = dateFrom.AddDays(2);
         var dateTo = DateCalculator.GetNextWorkingDay(twoDaysAfterDateFrom);
         return LeaveRequestCreated.Create(
-            FakeLeaveRequestId,
+            leaveRequestId ?? FakeLeaveRequestId,
             dateFrom,
             dateTo,
             TimeSpan.FromDays(6),
@@ -91,26 +91,26 @@ public static class FakeLeaveRequestCreatedProvider
         );
     }
 
-    internal static IList<LeaveRequestCreated> GetMartenQueryableStub()
+    internal static IList<LeaveRequestCreated> GetMartenQueryableStub(Guid? leaveTypeId = null)
     {
         return new List<LeaveRequestCreated>
         {
             LeaveRequestCreated.Create(
-                FakeLeaveRequestCreatedEvent.LeaveRequestId,
+                Guid.Parse("ebfd08ea-d8ec-4587-81f5-3dad479b7a81"),
                 FakeLeaveRequestCreatedEvent.DateFrom + (WorkingHours * 3),
                 FakeLeaveRequestCreatedEvent.DateTo - (WorkingHours * 2),
                 WorkingHours,
-                FakeLeaveRequestCreatedEvent.LeaveTypeId,
+                leaveTypeId ?? FakeLeaveRequestCreatedEvent.LeaveTypeId,
                 FakeLeaveRequestCreatedEvent.Remarks,
                 FakeLeaveRequestCreatedEvent.CreatedBy,
                 WorkingHoursUtils.DefaultWorkingHours
             ),
             LeaveRequestCreated.Create(
-                FakeLeaveRequestCreatedEvent.LeaveRequestId,
+                Guid.Parse("ebfd08ea-d8ec-4587-81f5-3dad479b7a82"),
                 FakeLeaveRequestCreatedEvent.DateFrom + (WorkingHours * 2),
                 FakeLeaveRequestCreatedEvent.DateTo - (WorkingHours * 3),
                 WorkingHours * 2,
-                FakeLeaveRequestCreatedEvent.LeaveTypeId,
+                leaveTypeId ?? FakeLeaveRequestCreatedEvent.LeaveTypeId,
                 FakeLeaveRequestCreatedEvent.Remarks,
                 FakeLeaveRequestCreatedEvent.CreatedBy,
                 WorkingHoursUtils.DefaultWorkingHours
