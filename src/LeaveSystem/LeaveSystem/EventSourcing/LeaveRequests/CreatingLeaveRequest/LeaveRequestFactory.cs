@@ -1,9 +1,9 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
 using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.WorkingHours;
 using Marten;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -26,9 +26,9 @@ public class LeaveRequestFactory
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
         var now = DateTimeOffset.Now.GetDayWithoutTime();
-         var workingHoursModel =
-            await querySession.GetCurrentWorkingHoursForUser(command.CreatedBy.Id, now, cancellationToken)
-            ?? throw new InvalidOperationException($"User with ID {command.CreatedBy.Id} does not have working Hours");
+        var workingHoursModel =
+           await querySession.GetCurrentWorkingHoursForUser(command.CreatedBy.Id, now, cancellationToken)
+           ?? throw new InvalidOperationException($"User with ID {command.CreatedBy.Id} does not have working Hours");
         var workingHours = workingHoursModel.Duration;
         var maxDuration = DateCalculator.CalculateDuration(command.DateFrom, command.DateTo, workingHours,
             leaveType.Properties?.IncludeFreeDays);
@@ -36,10 +36,9 @@ public class LeaveRequestFactory
         var duration = command.Duration ?? maxDuration;
         var leaveRequestCreated = LeaveRequestCreated.Create(command.LeaveRequestId, command.DateFrom, command.DateTo,
             duration, command.LeaveTypeId, command.Remarks, command.CreatedBy, workingHours);
-        validator.DateValidator(leaveRequestCreated);
-        validator.BasicValidate(leaveRequestCreated, minDuration, maxDuration, leaveType.Properties?.IncludeFreeDays);
-        await validator.ImpositionValidator(leaveRequestCreated);
-        await validator.LimitValidator(leaveRequestCreated);
+
+        await validator.Validate(leaveRequestCreated, minDuration, maxDuration, leaveType.Properties?.IncludeFreeDays);
+
         return LeaveRequest.CreatePendingLeaveRequest(leaveRequestCreated);
     }
 
