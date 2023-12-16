@@ -58,7 +58,9 @@ public class UserLeaveLimitsService
         return odataResponse?.ToUserLeaveLimitDto();
     } 
     public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) => universalHttpService.EditAsync($"odata/UserLeaveLimits({entityToEdit.Id})", entityToEdit, "User leave limit edited successfully", jsonSerializerOptions);
-    
+
+    public Task<bool> DeleteAsync(Guid id) =>
+        universalHttpService.DeleteAsync($"odata/UserLeaveLimits({id})", "Successfully deleted leave limit", jsonSerializerOptions);
     private class UserLeaveLimitDtoODataResponse : UserLeaveLimitDto
     {
         [JsonPropertyName(name: "@odata.context")]

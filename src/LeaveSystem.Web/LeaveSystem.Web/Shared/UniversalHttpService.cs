@@ -14,7 +14,7 @@ public class UniversalHttpService
     private readonly HttpClient httpClient;
     private readonly IToastService toastService;
     private readonly ILogger<UniversalHttpService> logger;
-    //Todo: dodać jako klasę wstrzykiwaną, a nie taką po której się dziedziczy
+
     public UniversalHttpService(HttpClient httpClient, IToastService toastService, ILogger<UniversalHttpService> logger)
     {
         this.httpClient = httpClient;
@@ -29,70 +29,105 @@ public class UniversalHttpService
     {
         var jsonString = JsonSerializer.Serialize(entityToAdd, options);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-        var response = await httpClient.PostAsync(uri, httpContent);
-        if (response.IsSuccessStatusCode)
-        {
-            return await DeserializeResponseContent<TResponse>(response, successMessage, options);
-        }
-        var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>(options);
-        logger.LogError("{Message}", problemDto?.Detail);
-        var message = problemDto?.Title ?? "Something went wrong";
-        toastService.ShowError(message);
-        return null;
-    }
-
-    internal async Task<TResponse?> DeserializeResponseContent<TResponse> (
-        HttpResponseMessage response, string successMessage, JsonSerializerOptions options) 
-        where TResponse : class
-    {
         try
         {
-            var resultWorkingHoursDto = await response.Content.ReadFromJsonAsync<TResponse>(options);
-            if (resultWorkingHoursDto is not null)
+            var response = await httpClient.PostAsync(uri, httpContent);
+            if (response.IsSuccessStatusCode)
             {
-                toastService.ShowSuccess(successMessage);
-                return resultWorkingHoursDto;
+                return await DeserializeResponseContent<TResponse>(response, successMessage, options);
             }
-            toastService.ShowError("Unexpected empty result");
+
+            await HandleProblemAsync(options, response);
         }
         catch (Exception e)
         {
             toastService.ShowError("Error occured while adding");
             logger.LogException(e);
         }
+
         return null;
     }
 
-    internal virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage, JsonSerializerOptions options)
-        where TContent : class
+    private async Task<TResponse?> DeserializeResponseContent<TResponse>(
+        HttpResponseMessage response, string successMessage, JsonSerializerOptions options)
+        where TResponse : class
     {
-        var jsonString = JsonSerializer.Serialize(entityToEdit, options);
-        var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-        var response = await httpClient.PatchAsync(uri, httpContent);
-        if (response.IsSuccessStatusCode)
+        var resultWorkingHoursDto = await response.Content.ReadFromJsonAsync<TResponse>(options);
+        if (resultWorkingHoursDto is not null)
         {
             toastService.ShowSuccess(successMessage);
-            return true;
+            return resultWorkingHoursDto;
         }
+        toastService.ShowError("Unexpected empty result");
+        logger.LogError("{Variable} is null", nameof(resultWorkingHoursDto));
+        return null;
+    }
+    
+    private async Task HandleProblemAsync(JsonSerializerOptions options, HttpResponseMessage response)
+    {
         var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>(options);
         logger.LogError("{Message}", problemDto?.Detail);
         var message = problemDto?.Title ?? "Something went wrong";
         toastService.ShowError(message);
+    }
+
+    internal virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage,
+        JsonSerializerOptions options)
+        where TContent : class
+    {
+        var jsonString = JsonSerializer.Serialize(entityToEdit, options);
+        var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
+        try
+        {
+            var response = await httpClient.PatchAsync(uri, httpContent);
+            if (response.IsSuccessStatusCode)
+            {
+                toastService.ShowSuccess(successMessage);
+                return true;
+            }
+            await HandleProblemAsync(options, response);
+        }
+        catch (Exception e)
+        {
+            toastService.ShowError("Error occured while adding");
+            logger.LogException(e);
+        }
         return false;
     }
 
-    internal  virtual async Task<TResponse?> GetAsync<TResponse>(string uri, string errorMessage, JsonSerializerOptions options)
+    internal virtual async Task<TResponse?> GetAsync<TResponse>(string uri, string errorMessage,
+        JsonSerializerOptions options)
         where TResponse : class
     {
         try
         {
-            return await httpClient.GetFromJsonAsync<TResponse>(uri,options);
+            return await httpClient.GetFromJsonAsync<TResponse>(uri, options);
         }
         catch (HttpRequestException ex)
         {
             toastService.ShowError(errorMessage);
-            logger.LogError("{Message}", ex.Message);
+            logger.LogException(ex);
             return null;
         }
+    }
+
+    internal virtual async Task<bool> DeleteAsync(string uri, string successMessage, JsonSerializerOptions options)
+    {
+        try
+        {
+            var response = await httpClient.DeleteAsync(uri);
+            if (response.IsSuccessStatusCode)
+            {
+                toastService.ShowSuccess(successMessage);
+                return true;
+            }
+            await HandleProblemAsync(options, response);
+        }
+        catch (Exception e)
+        {
+            toastService.ShowError("Error occured while deleting");
+            logger.LogException(e);
+        }
+        return false;
     }
 }

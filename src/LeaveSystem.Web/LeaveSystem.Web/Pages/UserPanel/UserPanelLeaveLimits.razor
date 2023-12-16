@@ -79,6 +79,11 @@
                         <Template Context="data">
                             <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(data))" @onclick:stopPropagation="true">
                             </RadzenButton>
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" 
+                                          Icon="delete" Variant="Variant.Flat" 
+                                          Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" 
+                                          Click="@(args => DeleteRow(data))" @onclick:stopPropagation="true">
+                            </RadzenButton>
                         </Template>
                         <EditTemplate Context="data">
                             <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat"
@@ -270,6 +275,31 @@ else
         }
 
         limitToInsert = null;
+    }
+
+    private async Task DeleteRow(UserLeaveLimitDto limit)
+    {
+        if (limit == limitToInsert)
+        {
+            limitToInsert = null;
+        }
+        if (LeaveTypesWithUserLimits?.Any(lt => lt.Limits.Contains(limit)) == true)
+        {
+            var deletedLimitSuccessfully = await LimitsService.DeleteAsync(limit.Id);
+            if (!deletedLimitSuccessfully) {return;}
+            if (limitsGrid is null)
+            {
+                return;
+            }
+            await limitsGrid.Reload();
+            return;
+        }
+        if (limitsGrid is null)
+        {
+            return;
+        }
+        limitsGrid.CancelEditRow(limit);
+        await limitsGrid.Reload();
     }
 
 }
