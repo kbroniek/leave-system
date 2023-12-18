@@ -2,9 +2,8 @@ using FluentAssertions;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.WorkingHours;
-using Moq;
+using LeaveSystem.UnitTests.Providers;
 using System;
 using Xunit;
 
@@ -29,7 +28,7 @@ public class BasicValidatorTest
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
             WorkingHoursUtils.DefaultWorkingHours
         );
-        var sut = new BasicValidator(GetDateService());
+        var sut = new BasicValidator(FakeDateServiceProvider.GetDateService());
         //When
         var act = () =>
         {
@@ -62,7 +61,7 @@ public class BasicValidatorTest
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
             WorkingHoursUtils.DefaultWorkingHours
         );
-        var sut = new BasicValidator(GetDateService());
+        var sut = new BasicValidator(FakeDateServiceProvider.GetDateService());
         //When
         var act = () =>
         {
@@ -96,7 +95,7 @@ public class BasicValidatorTest
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
             WorkingHoursUtils.DefaultWorkingHours
         );
-        var sut = new BasicValidator(GetDateService());
+        var sut = new BasicValidator(FakeDateServiceProvider.GetDateService());
         //When
         var act = () =>
         {
@@ -131,7 +130,7 @@ public class BasicValidatorTest
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
             WorkingHoursUtils.DefaultWorkingHours
         );
-        var sut = new BasicValidator(GetDateService());
+        var sut = new BasicValidator(FakeDateServiceProvider.GetDateService());
         //When Then
         sut.Validate(
                 leaveRequestCreated,
@@ -160,7 +159,7 @@ public class BasicValidatorTest
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
             WorkingHoursUtils.DefaultWorkingHours
         );
-        var sut = new BasicValidator(GetDateService());
+        var sut = new BasicValidator(FakeDateServiceProvider.GetDateService());
         //When
         var act = () =>
         {
@@ -189,7 +188,7 @@ public class BasicValidatorTest
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
             WorkingHoursUtils.DefaultWorkingHours
         );
-        var sut = new BasicValidator(GetDateService());
+        var sut = new BasicValidator(FakeDateServiceProvider.GetDateService());
         //When
         var act = () =>
         {
@@ -220,17 +219,9 @@ public class BasicValidatorTest
             FederatedUser.Create("1", "fakeUser@fake.com", "Fakeoslav"),
             WorkingHoursUtils.DefaultWorkingHours
         );
-        var sut = new BasicValidator(GetDateService());
+        var sut = new BasicValidator(FakeDateServiceProvider.GetDateService());
         //When
         //When Then
         sut.DataRangeValidate(leaveRequestCreated);
-    }
-
-    private static CurrentDateService GetDateService()
-    {
-        var dateServiceMock = new Mock<CurrentDateService>();
-        dateServiceMock.Setup(x => x.GetWithoutTime())
-            .Returns(DateTimeOffset.Parse("2023-12-15T09:40:41.8087272+01:00"));
-        return dateServiceMock.Object;
     }
 }
