@@ -15,7 +15,7 @@ public static class FakeLeaveRequestCreatedProvider
 
     internal static LeaveRequestCreated GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate(Guid? leaveRequestId = null)
     {
-        var now = DateTimeOffset.Now;
+        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
         var dateFrom = DateCalculator.GetNextWorkingDay(now.AddDays(2));
         var twoDaysAfterDateFrom = dateFrom.AddDays(2);
         var dateTo = DateCalculator.GetNextWorkingDay(twoDaysAfterDateFrom);
@@ -33,8 +33,8 @@ public static class FakeLeaveRequestCreatedProvider
 
     internal static LeaveRequestCreated GetHolodayLeaveRequest(TimeSpan duration, Guid leaveType)
     {
-        var currentDate = DateTimeOffset.Now;
-        var dateFrom = DateCalculator.GetNextWorkingDay(currentDate.AddDays(2));
+        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var dateFrom = DateCalculator.GetNextWorkingDay(now.AddDays(2));
         var twoDaysAfterDateFrom = dateFrom.AddDays(2);
         var dateTo = DateCalculator.GetNextWorkingDay(twoDaysAfterDateFrom);
         return LeaveRequestCreated.Create(
