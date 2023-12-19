@@ -47,7 +47,7 @@ else
         <hr class="mt-2 mb-3" />
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
             <AuthorizeView Policy="@AcceptPolicyName" Context="AcceptLeaveRequest">
-                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnAcceptClick()) Text="Accpet" ButtonStyle="ButtonStyle.Success" />
+                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnAcceptClick()) Text="Accept" ButtonStyle="ButtonStyle.Success" />
                 <RadzenButton Variant="Variant.Outlined" Click=@(args => OnRejectClick()) Text="Reject" ButtonStyle="ButtonStyle.Danger" />
             </AuthorizeView>
             @if (leaveRequest.CreatedBy.Id == currentUser.Id)
