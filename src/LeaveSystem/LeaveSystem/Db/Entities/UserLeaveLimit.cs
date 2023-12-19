@@ -1,11 +1,11 @@
-﻿using FluentValidation;
+﻿using System.Linq.Dynamic.Core;
+using System.Text.Json;
+using FluentValidation;
 using GoldenEye.Objects.General;
-using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.FluentValidation;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
-using NSubstitute;
+using Microsoft.Extensions.Logging;
 
 namespace LeaveSystem.Db.Entities;
 public class UserLeaveLimit : IHaveId<Guid>
@@ -42,9 +42,11 @@ public class UserLeaveLimit : IHaveId<Guid>
 public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
 {
     private readonly LeaveSystemDbContext dbContext;
-    public UserLeaveLimitValidator(LeaveSystemDbContext dbContext)
+    private readonly ILogger<UserLeaveLimitValidator> logger;
+    public UserLeaveLimitValidator(LeaveSystemDbContext dbContext, ILogger<UserLeaveLimitValidator> logger)
     {
         this.dbContext = dbContext;
+        this.logger = logger;
         RuleFor(x => x.ValidSince)
             .LessThan(x => x.ValidUntil)
             .When(x => x.ValidUntil is not null || x.ValidSince is not null)
@@ -58,12 +60,24 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
             .WithMessage("Leave type with provided Id not exists");
         RuleFor(x => x.AssignedToUserId).NotNull().NotEmpty();
         RuleFor(x => x)
-            .MustAsync(async (limit, cancellation) => !await CheckIfPeriodOverlapsAnyLimitAsync(
-                limit.Id, limit.LeaveTypeId, limit.AssignedToUserId!, limit.ValidSince, limit.ValidUntil, cancellation))
+            .MustAsync(async (limit, cancellation) =>
+            {
+                var overlappingLimits = await GetAllLimitThatOverlapsPeriodAsync(
+                    limit.Id, limit.LeaveTypeId, limit.AssignedToUserId!, limit.ValidSince, limit.ValidUntil,
+                    cancellation);
+                if (!overlappingLimits.Any())
+                {
+                    return true;
+                }
+
+                var overlappingLimitsJson = JsonSerializer.Serialize(overlappingLimits, new JsonSerializerOptions { WriteIndented = true });
+                logger.LogError("Following Limits overlapping this limit:\n{OverlappingLimits}", overlappingLimitsJson);
+                return false;
+            })
             .WithMessage("Cannot create a new limit in this time. The other limit is overlapping with this date.");
     }
     
-    private Task<bool> CheckIfPeriodOverlapsAnyLimitAsync(
+    private Task<List<UserLeaveLimit>> GetAllLimitThatOverlapsPeriodAsync(
         Guid id,
         Guid leaveTypeId,
         string userId,
@@ -71,7 +85,7 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
         DateTimeOffset? dateTo,
         CancellationToken cancellationToken)
     {
-        return  dbContext.UserLeaveLimits.AnyAsync(
+        return dbContext.UserLeaveLimits.Where(
             ull =>
                 ull.Id != id &&
                 ull.LeaveTypeId == leaveTypeId && 
@@ -89,7 +103,6 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
                     (!ull.ValidUntil.HasValue && ull.ValidSince >= dateFrom && ull.ValidSince >= dateTo) ||
                     (!dateTo.HasValue && dateFrom >= ull.ValidSince && dateFrom >= ull.ValidUntil) ||
                     (ull.ValidSince <= dateTo && dateFrom <= ull.ValidUntil)
-                )
-            , cancellationToken);
+                )).ToListAsync(cancellationToken);
     }
 }

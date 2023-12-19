@@ -62,7 +62,7 @@
     private IEnumerable<LeaveRequestPerType>? userSummaryCollection;
     private IEnumerable<LeaveRequestForView>? leaveRequestsForView;
     private string? userName;
-    private IEnumerable<LeaveTypeWithUserLimits>? leaveTypesWithUserLimits; 
+    private List<LeaveTypeWithUserLimits>? leaveTypesWithUserLimits; 
     TimeSpan workingHoursDuration;
     UserPanelLeaveLimits? limitsPanel;
     
@@ -85,12 +85,12 @@
         var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(Year.Value);
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000, Enum.GetValues<LeaveRequestStatus>())
         {
-            CreatedByUserIds = new string[] { UserId }
+            CreatedByUserIds = new[] { UserId }
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
-        var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Id, firstDay, lastDay);
-        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(user.Id);
+        var getLimitsTask = UserLeaveLimitsService.GetLimits(UserId, firstDay, lastDay);
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(UserId);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
         var leaveTypes = getLeaveTypesTask.Result.ToArray();
@@ -107,7 +107,7 @@
             .OrderBy(lr => lr.DateFrom)
             .Select(lr => LeaveRequestForView.Create(lr, leaveTypes, workingHoursDuration));
         leaveTypesWithUserLimits = leaveTypes.Select(lt =>
-            LeaveTypeWithUserLimits.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration));
+            LeaveTypeWithUserLimits.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration)).ToList();
     }
 
     async Task ResetLimit(Guid limitId)

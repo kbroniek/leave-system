@@ -12,14 +12,14 @@ public class LeaveTypeWithUserLimits
     public string TotalLimit => GetReadableSumTimespanFromTicks(x => x.TotalLimit.Ticks);
     public Guid Id { get; init; }
     public string Name { get; init; }
-    public IEnumerable<UserLeaveLimitDto> Limits { get; init; }
+    public List<UserLeaveLimitDto> Limits { get; init; }
     public LeaveTypesService.LeaveTypeProperties Properties { get; init; }
     private TimeSpan workingHours;
 
     public LeaveTypeWithUserLimits(
         Guid id,
         string name, 
-        IEnumerable<UserLeaveLimitDto> limits,
+        List<UserLeaveLimitDto> limits,
         LeaveTypesService.LeaveTypeProperties properties,
         TimeSpan workingHours)
     {
@@ -37,7 +37,7 @@ public class LeaveTypeWithUserLimits
         LeaveTypesService.LeaveTypeProperties properties,
         TimeSpan workingHours)
     {
-        var limitsForType = limits.Where(x => x.LeaveTypeId == id);
+        var limitsForType = limits.Where(x => x.LeaveTypeId == id).ToList();
         return new LeaveTypeWithUserLimits(id, name, limitsForType, properties, workingHours);
     }
 
