@@ -21,7 +21,6 @@ public class LimitValidator
         var connectedLeaveTypeIds = await connectedLeaveTypesService.GetConnectedLeaveTypeIds(creatingLeaveRequest.LeaveTypeId);
         await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
             creatingLeaveRequest.DateTo,
-            creatingLeaveRequest.LeaveTypeId,
             creatingLeaveRequest.CreatedBy.Id,
             creatingLeaveRequest.LeaveTypeId,
             creatingLeaveRequest.Duration,
@@ -32,7 +31,6 @@ public class LimitValidator
             var baseLeaveTypeId = connectedLeaveTypeIds.baseLeaveTypeId.Value;
             await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
                 creatingLeaveRequest.DateTo,
-                baseLeaveTypeId,
                 creatingLeaveRequest.CreatedBy.Id,
                 baseLeaveTypeId,
                 creatingLeaveRequest.Duration,
@@ -43,15 +41,14 @@ public class LimitValidator
     private async Task CheckLimitForBaseLeave(
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,
-        Guid currentLeaveTypeId,
         string userId,
         Guid leaveTypeId,
         TimeSpan duration,
         IEnumerable<Guid> nestedLeaveTypeIds)
     {
-        UserLeaveLimit leaveLimit = await leaveLimitsService.GetLimits(dateFrom,
+        var leaveLimit = await leaveLimitsService.GetLimit(dateFrom,
             dateTo,
-            currentLeaveTypeId,
+            leaveTypeId,
             userId);
         var totalUsed = await usedLeavesService.GetUsedLeavesDuration(
             dateFrom.GetFirstDayOfYear(),
@@ -60,7 +57,7 @@ public class LimitValidator
             leaveTypeId,
             nestedLeaveTypeIds);
         if (leaveLimit.Limit != null &&
-            CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed + duration) <= TimeSpan.Zero)
+            CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed + duration) < TimeSpan.Zero)
         {
             throw new ValidationException("You don't have enough free days for this type of leave");
         }

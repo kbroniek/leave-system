@@ -13,7 +13,7 @@ public class LeaveLimitsService
     {
         this.dbContext = dbContext;
     }
-    public virtual async Task<UserLeaveLimit> GetLimits(
+    public virtual async Task<UserLeaveLimit> GetLimit(
         DateTimeOffset dateFrom,
         DateTimeOffset dateTo,
         Guid leaveTypeId,
