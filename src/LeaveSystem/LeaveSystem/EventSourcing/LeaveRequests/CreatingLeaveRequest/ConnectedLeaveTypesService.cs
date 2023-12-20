@@ -18,7 +18,7 @@ public class ConnectedLeaveTypesService
             l.BaseLeaveTypeId == leaveTypeId || l.Id == leaveTypeId).ToListAsync();
         if (leaveTypes.Count == 0)
         {
-            return (null, null);
+            return (null, Enumerable.Empty<Guid>());
         }
 
         var nestedLeaveTypes = leaveTypes.Where(l => l.BaseLeaveTypeId == leaveTypeId);
