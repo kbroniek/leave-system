@@ -138,7 +138,7 @@ public class DeltaValidator<TEntity> where TEntity : class
         this.protectedPropertyNames = protectedPropertyNames;
     }
 
-    public Delta<TEntity> CreateDeltaWithoutProtectedProperties(Delta<TEntity> delta)
+    public virtual Delta<TEntity> CreateDeltaWithoutProtectedProperties(Delta<TEntity> delta)
     {
         var deltaWithoutProtectedProperties = new Delta<TEntity>();
         foreach (var propertyName in delta.GetChangedPropertyNames())
