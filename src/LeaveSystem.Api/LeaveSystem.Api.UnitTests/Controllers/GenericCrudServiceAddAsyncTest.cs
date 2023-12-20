@@ -12,7 +12,7 @@ using NSubstitute.ExceptionExtensions;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
 
-public class GenericCrudControllerAddAsyncTest
+public class GenericCrudServiceAddAsyncTest
 {
     private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator) 
         where TId : IComparable<TId>
