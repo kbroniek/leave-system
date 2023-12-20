@@ -1,7 +1,7 @@
 ﻿using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using EFExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
@@ -19,11 +19,11 @@ public class LeaveLimitsService
         Guid leaveTypeId,
         string userId)
     {
-        var limits = await EFExtensions.ToListAsync(dbContext.UserLeaveLimits.Where(l =>
+        var limits = await dbContext.UserLeaveLimits.Where(l =>
             (l.AssignedToUserId == null || l.AssignedToUserId == userId) &&
             (l.ValidSince == null || l.ValidSince <= dateFrom) &&
             (l.ValidUntil == null || l.ValidUntil >= dateTo) &&
-            l.LeaveTypeId == leaveTypeId));
+            l.LeaveTypeId == leaveTypeId).ToListAsync();
         if (limits == null || limits.Count == 0)
         {
             throw new ValidationException(
