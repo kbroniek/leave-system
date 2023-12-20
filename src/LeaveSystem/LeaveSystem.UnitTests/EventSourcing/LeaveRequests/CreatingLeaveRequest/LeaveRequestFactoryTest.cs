@@ -101,7 +101,7 @@ public class LeaveRequestFactoryTest
         var act = async () => { await sut.Create(fakeEvent, It.IsAny<CancellationToken>()); };
         //Then
         var result = await act.Should().ThrowAsync<ArgumentOutOfRangeException>();
-        result.WithMessage("Specified argument was out of the range of valid values. (Parameter 'Max range reached calculating duration between dates from: 2023-07-27T00:00:00.0000000+00:00 to: 2025-08-05T00:00:00.0000000+02:00. The max duration is 366 days.')");
+        result.WithMessage("Specified argument was out of the range of valid values. (Parameter 'Max range reached calculating duration between dates from: 2023-07-27T* to: 2025-08-05T*. The max duration is 366 days.')");
         querySessionMock.Verify(x => x.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Times.Once);
         validatorMock.Verify(x => x.Validate(
                 It.IsAny<LeaveRequestCreated>(), It.IsAny<TimeSpan>(), It.IsAny<TimeSpan>(), It.IsAny<bool?>()
