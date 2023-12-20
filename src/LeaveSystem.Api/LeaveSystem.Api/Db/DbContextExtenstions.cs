@@ -6,14 +6,13 @@ using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
+using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.LeaveRequests;
-using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using WorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
 namespace LeaveSystem.Api.Db;

@@ -14,7 +14,7 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest
 public class HandleCreateLeaveRequestTest
 {
     private readonly Mock<IRepository<LeaveRequest>> repositoryMock = new();
-    private readonly Mock<LeaveRequestFactory> factoryMock = new(null, null, null);
+    private readonly Mock<LeaveRequestFactory> factoryMock = new(null, null, null, null);
     private readonly CreateLeaveRequest command = CreateLeaveRequest.Create(
         Guid.NewGuid(),
         new DateTimeOffset(638242288542961190, TimeSpan.Zero),
@@ -26,8 +26,7 @@ public class HandleCreateLeaveRequestTest
     );
     
     [Fact]
-    public async Task
-        WhenCreateLeaveRequestHandled_Create()
+    public async Task WhenCreateLeaveRequestHandled_ThenCreate()
     {
         //Given
         var createdEvent = LeaveRequestCreated.Create(
