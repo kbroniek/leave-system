@@ -48,4 +48,13 @@ internal static class EventStoreMockExtensions
                 It.IsAny<long>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequestFromAggregateStreamAsync);
+    internal static void Verify_AggregateStreamAsync(
+        this Mock<IEventStore> eventStoreMock, Guid leaveRequestId, Func<Times> times) => 
+        eventStoreMock.Verify(v => v.AggregateStreamAsync(
+            leaveRequestId,
+            It.IsAny<long>(),
+            It.IsAny<DateTimeOffset?>(),
+            It.IsAny<LeaveRequest>(),
+            It.IsAny<long>(),
+            It.IsAny<CancellationToken>()), times);
 }
