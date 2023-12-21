@@ -35,7 +35,7 @@ namespace LeaveSystem.Api.Controllers
         [EnableQuery]
         public SingleResult<Setting> Get([FromODataUri] string key)
         {
-            var entity = crudService.GetAsQueryable(key);
+            var entity = crudService.GetSingleAsQueryable(key);
             return SingleResult.Create(entity);
         }
 

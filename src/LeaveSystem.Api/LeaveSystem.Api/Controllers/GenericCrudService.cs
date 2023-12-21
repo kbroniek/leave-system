@@ -27,7 +27,7 @@ public class GenericCrudService<TEntity, TId>
         
     public virtual IQueryable<TEntity>? Get() => dbContext.Set<TEntity>();
         
-    public IQueryable<TEntity> GetSingleAsQueryable(TId key)
+    public virtual IQueryable<TEntity> GetSingleAsQueryable(TId key)
     {
         return GetSet().Where(p => p.Id.CompareTo(key) == 0);
     }

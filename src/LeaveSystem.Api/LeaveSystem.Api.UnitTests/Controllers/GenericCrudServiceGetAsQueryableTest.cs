@@ -55,7 +55,7 @@ public class GenericCrudServiceGetAsQueryableTest
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
         var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
-        var result = sut.GetAsQueryable(key);
+        var result = sut.GetSingleAsQueryable(key);
         result.Count().Should().Be(1);
         if (config is not null)
         {
