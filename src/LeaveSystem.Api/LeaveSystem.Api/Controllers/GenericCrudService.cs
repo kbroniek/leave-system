@@ -40,20 +40,19 @@ public class GenericCrudService<TEntity, TId>
         await dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
-        
-    public virtual async Task<TEntity> PatchAsync(TId key, Delta<TEntity> update, CancellationToken cancellationToken = default)
+
+    public virtual async Task<TEntity> PatchAsync(TId key, Delta<TEntity> update,
+        CancellationToken cancellationToken = default)
     {
         var entity = await FindAsync(key, cancellationToken);
         if (entity == null)
         {
             throw new EntityNotFoundException(NotFoundMessage);
         }
+
         var validatedDelta = deltaValidator.CreateDeltaWithoutProtectedProperties(update);
         validatedDelta.Patch(entity);
-        await entityValidator.ValidateAsync(entity, o =>
-        {
-            o.ThrowOnFailures();
-        }, cancellationToken);
+        await entityValidator.ValidateAsync(entity, o => { o.ThrowOnFailures(); }, cancellationToken);
         dbContext.Entry(entity).State = EntityState.Modified;
         try
         {
@@ -65,37 +64,10 @@ public class GenericCrudService<TEntity, TId>
             {
                 throw new EntityNotFoundException(NotFoundMessage);
             }
+
             throw;
         }
-        return entity;
-    }
-        
-    public async Task<TEntity> PutAsync(TId key, Delta<TEntity> update, CancellationToken cancellationToken = default)
-    {
-        var entity = await FindAsync(key, cancellationToken);
-        if (entity == null)
-        {
-            throw new EntityNotFoundException(NotFoundMessage);
-        }
-        var validatedDelta = deltaValidator.CreateDeltaWithoutProtectedProperties(update);
-        validatedDelta.Put(entity);
-        await entityValidator.ValidateAsync(entity, o =>
-        {
-            o.ThrowOnFailures();
-        }, cancellationToken);
-        dbContext.Entry(entity).State = EntityState.Modified;
-        try
-        {
-            await dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await ProductExists(key, cancellationToken))
-            {
-                throw new EntityNotFoundException(NotFoundMessage);
-            }
-            throw;
-        }
+
         return entity;
     }
 

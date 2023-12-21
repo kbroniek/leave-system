@@ -4,6 +4,7 @@ using FluentAssertions.Equivalency;
 using FluentValidation;
 using GoldenEye.Objects.General;
 using LeaveSystem.Api.Controllers;
+using LeaveSystem.Api.UnitTests.Providers;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.UnitTests.Providers;
@@ -32,10 +33,7 @@ public class GenericCrudServiceGetAsQueryableTest
             FakeSettingsProvider.GetSettings(),
             FakeSettingsProvider.AcceptedSettingId,
             FakeSettingsProvider.GetAcceptedSetting(), 
-            o => o
-                .Using<JsonDocument>(ctx => 
-                    ctx.Subject.RootElement.GetRawText().Should().BeEquivalentTo(ctx.Expectation.RootElement.GetRawText()))
-                .When(info => info.Path.EndsWith("Value"))
+            JsonDocumentCompareOptionsProvider.Get<Setting>("Value")
             );
         await WhenGettingByKey_ReturnEntityWithKey_Helper<LeaveType, Guid>(
             FakeLeaveTypeProvider.GetLeaveTypes().ToList(),

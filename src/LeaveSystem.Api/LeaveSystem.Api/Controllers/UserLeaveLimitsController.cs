@@ -130,21 +130,6 @@ public class UserLeaveLimitsController : ODataController
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    [HttpPut]
-    public async Task<IActionResult> Put(
-        [FromODataUri] Guid key,
-        [FromBody] Delta<UserLeaveLimit> delta,
-        CancellationToken cancellationToken = default)
-    {
-        if (!ModelState.IsValid)
-        {
-            throw new BadHttpRequestException(InvalidModelMessage);
-        }
-        var updatedEntity = await crudService.PutAsync(key, delta, cancellationToken);
-        await SetStartAndEndDateForNeighbourLimitsIfDontHaveAsync(updatedEntity, cancellationToken);
-        return Updated(updatedEntity);
-    }
-
     [HttpPatch]
     public async Task<IActionResult> Patch(
         [FromODataUri] Guid key,
