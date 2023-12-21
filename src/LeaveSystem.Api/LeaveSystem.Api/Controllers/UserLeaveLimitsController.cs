@@ -45,7 +45,7 @@ public class UserLeaveLimitsController : ODataController
     [EnableQuery]
     public SingleResult<UserLeaveLimit> Get([FromODataUri] Guid key)
     {
-        var entity = crudService.GetAsQueryable(key);
+        var entity = crudService.GetSingleAsQueryable(key);
         return SingleResult.Create(entity);
     }
 

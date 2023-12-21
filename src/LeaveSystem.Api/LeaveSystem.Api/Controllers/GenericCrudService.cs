@@ -27,9 +27,11 @@ public class GenericCrudService<TEntity, TId>
         
     public virtual IQueryable<TEntity>? Get() => dbContext.Set<TEntity>();
         
-    public IQueryable<TEntity> GetAsQueryable(TId key) 
-        => GetSet().Where(p => p.Id.CompareTo(key) == 0);
-        
+    public IQueryable<TEntity> GetSingleAsQueryable(TId key)
+    {
+        return GetSet().Where(p => p.Id.CompareTo(key) == 0);
+    }
+
     public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await entityValidator.ValidateAsync(entity, o =>
