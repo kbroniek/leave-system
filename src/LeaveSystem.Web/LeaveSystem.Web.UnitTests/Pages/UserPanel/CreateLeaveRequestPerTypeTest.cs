@@ -57,12 +57,12 @@ public class CreateLeaveRequestPerTypeTest
             firstFakeLeaveRequests,
             firstFakeLimits,
             firstFakeWorkingHours,
-            TimeSpan.FromHours(0),
+            TimeSpan.FromHours(24),
             TimeSpan.FromHours(8),
             TimeSpan.FromHours(16),
             TimeSpan.FromHours(24),
-            TimeSpan.FromHours(24),
-            new [] {LeaveRequestPerType.ForView.CreateForView(firstFakeLeaveRequests.ElementAt(2), firstFakeLimits, firstFakeWorkingHours) }
+            TimeSpan.FromHours(0),
+            firstFakeLeaveRequests.Select(lr => LeaveRequestPerType.ForView.CreateForView(lr, firstFakeLimits, firstFakeWorkingHours))
         };
         var secondFakeLeaveRequests = FakeLeaveRequestShortInfoProvider.GetAllV2(now);
         var secondFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAll(now.Year);
@@ -81,7 +81,6 @@ public class CreateLeaveRequestPerTypeTest
             TimeSpan.FromHours(52),
             secondFakeLeaveRequests.Select(lr =>
                 LeaveRequestPerType.ForView.CreateForView(lr, secondFakeLimits, secondFakeWorkingHours))
-
         };
     }
     [Fact]

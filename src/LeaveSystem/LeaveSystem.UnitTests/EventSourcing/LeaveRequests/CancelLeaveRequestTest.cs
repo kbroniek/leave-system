@@ -64,40 +64,6 @@ public class CancelLeaveRequestTest
     }
 
     [Theory]
-    [MemberData(nameof(Get_WhenDateFromIsPastDate_ThenThrowInvalidOperationException_TestData))]
-    public void WhenDateFromIsPastDate_ThenThrowInvalidOperationException(TimeSpan timeToSubtract)
-    {
-        //Given
-        var utcNow = DateTimeOffset.UtcNow;
-        var @event = LeaveRequestCreated.Create(
-            Guid.NewGuid(),
-            utcNow - timeToSubtract,
-            utcNow + TimeSpan.FromDays(5),
-            TimeSpan.FromHours(16),
-            Guid.NewGuid(), 
-            "fake created remarks",
-            User,
-            WorkingHoursUtils.DefaultWorkingHours
-        );
-        var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
-        //When
-        var act = () =>
-        {
-            leaveRequest.Cancel("fake cancel remarks", User);    
-        } ;
-        //Then
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("Canceling of past leave requests is not allowed.");
-    }
-
-    public static IEnumerable<object[]> Get_WhenDateFromIsPastDate_ThenThrowInvalidOperationException_TestData()
-    {
-        yield return new object[] { TimeSpan.FromHours(8) };
-        yield return new object[] { TimeSpan.FromDays(2) };
-        yield return new object[] { TimeSpan.FromMilliseconds(1) };
-    }
-
-    [Theory]
     [InlineData("")]
     [InlineData("  ")]
     [InlineData(null)]

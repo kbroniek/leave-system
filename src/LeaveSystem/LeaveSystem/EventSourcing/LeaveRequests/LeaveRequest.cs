@@ -78,10 +78,6 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
         {
             throw new InvalidOperationException($"Canceling leave requests in '{Status}' status is not allowed.");
         }
-        if (DateFrom < DateTimeOffset.UtcNow)
-        {
-            throw new InvalidOperationException("Canceling of past leave requests is not allowed.");
-        }
 
         var @event = LeaveRequestCanceled.Create(Id, remarks, canceledBy);
 

@@ -1,10 +1,9 @@
 ﻿using LeaveSystem.Db;
 using LeaveSystem.UnitTests.Providers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
-using LeaveSystem.UnitTests.Providers;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LeaveSystem.UnitTests;
 
@@ -30,7 +29,7 @@ public static class DbContextFactory
 
         return dbContext;
     }
-    
+
     public static async Task<LeaveSystemDbContext> CreateAndFillDbAsync()
     {
         var dbContext = await CreateDbContextAsync();

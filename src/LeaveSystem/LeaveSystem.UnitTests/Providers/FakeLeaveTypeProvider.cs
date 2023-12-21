@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeLeaveTypeProvider
 {
-    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
-    public static Guid FakeOnDemandLeaveId = Guid.NewGuid();
-    public static Guid FakeSickLeaveId = Guid.NewGuid();
-    public static Guid FakeHolidayLeaveGuid = Guid.NewGuid();
+    private static readonly TimeSpan WorkingHours = WorkingHoursUtils.DefaultWorkingHours;
+    public static Guid FakeOnDemandLeaveId = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0921");
+    public static Guid FakeSickLeaveId = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0922");
+    public static Guid FakeHolidayLeaveGuid = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0923");
     
     public static LeaveType GetFakeSickLeave() => new()
     {
@@ -32,7 +33,6 @@ public static class FakeLeaveTypeProvider
         Id = FakeHolidayLeaveGuid,
         Name = "urlop wypoczynkowy",
         Order = 1,
-        BaseLeaveTypeId = FakeOnDemandLeaveId,
         Properties = new LeaveType.LeaveTypeProperties
         {
             DefaultLimit = WorkingHours * 26,
@@ -47,6 +47,7 @@ public static class FakeLeaveTypeProvider
         Id = FakeOnDemandLeaveId,
         Name = "urlop na żądanie",
         Order = 2,
+        BaseLeaveTypeId = FakeHolidayLeaveGuid,
         Properties = new LeaveType.LeaveTypeProperties
         {
             DefaultLimit = WorkingHours * 4,

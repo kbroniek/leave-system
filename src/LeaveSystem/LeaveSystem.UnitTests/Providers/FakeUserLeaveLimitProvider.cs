@@ -8,13 +8,13 @@ namespace LeaveSystem.UnitTests.Providers;
 
 public static class FakeUserLeaveLimitProvider
 {
-    public static readonly Guid FakeLimitForSickLeaveId = Guid.NewGuid();
-    public static readonly Guid FakeLimitForOnDemandLeaveId = Guid.NewGuid();
-    public static readonly Guid FakeLimitForHolidayLeaveId = Guid.NewGuid();
+    public static readonly Guid FakeLimitForSickLeaveId = Guid.Parse("e12b8ce4-3e5c-4b1c-be7a-eb3276383261");
+    public static readonly Guid FakeLimitForOnDemandLeaveId = Guid.Parse("e12b8ce4-3e5c-4b1c-be7a-eb3276383262");
+    public static readonly Guid FakeLimitForHolidayLeaveId = Guid.Parse("e12b8ce4-3e5c-4b1c-be7a-eb3276383263");
 
     public static UserLeaveLimit GetLimitForSickLeave()
     {
-        var now = DateTimeOffset.Now;
+        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
         return new UserLeaveLimit
         {
             Id = FakeLimitForSickLeaveId,
@@ -27,7 +27,7 @@ public static class FakeUserLeaveLimitProvider
     }
     public static UserLeaveLimit GetLimitForOnDemandLeave()
     {
-        var now = DateTimeOffset.Now;
+        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
         return new UserLeaveLimit
         {
             Id = FakeLimitForOnDemandLeaveId,
@@ -40,12 +40,12 @@ public static class FakeUserLeaveLimitProvider
     }
     public static UserLeaveLimit GetLimitForHolidayLeave()
     {
-        var now = DateTimeOffset.Now;
+        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
         return new UserLeaveLimit
         {
             Id = FakeLimitForHolidayLeaveId,
             LeaveTypeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
-            Limit = FakeLeaveTypeProvider.GetFakeSickLeave().Properties?.DefaultLimit,
+            Limit = FakeLeaveTypeProvider.GetFakeHolidayLeave().Properties?.DefaultLimit,
             AssignedToUserId = FakeUserProvider.GetUserWithNameFakeoslav().Id,
             ValidSince = now.GetFirstDayOfYear(),
             ValidUntil = now.GetLastDayOfYear(),
