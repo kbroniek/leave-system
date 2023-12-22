@@ -5,9 +5,15 @@ namespace LeaveSystem.Api.Controllers;
 
 public static class ControllersConfig
 {
-    public static void AddDeltaValidators(this IServiceCollection services)
+    public static IServiceCollection AddODataControllersServices(this IServiceCollection services)
     {
-        services.AddScoped<DeltaValidator<UserLeaveLimit>>(x =>
+        return services.AddDeltaValidators()
+            .AddCrudService()
+            .AddEntityServices();
+    }
+    private static IServiceCollection AddDeltaValidators(this IServiceCollection services)
+    {
+        return services.AddScoped<DeltaValidator<UserLeaveLimit>>(x =>
                 new(
                     nameof(UserLeaveLimit.LeaveTypeId),
                     nameof(UserLeaveLimit.AssignedToUserId),
@@ -18,10 +24,15 @@ public static class ControllersConfig
                 new(nameof(UserLeaveLimit.Id)));
     }
 
-    public static void AddCrudService(this IServiceCollection services)
+    private static IServiceCollection AddCrudService(this IServiceCollection services)
     {
-        services.AddScoped<GenericCrudService<UserLeaveLimit, Guid>>()
+        return services.AddScoped<GenericCrudService<UserLeaveLimit, Guid>>()
             .AddScoped<GenericCrudService<LeaveType, Guid>>()
             .AddScoped<GenericCrudService<Setting, string>>();
+    }
+
+    private static IServiceCollection AddEntityServices(this IServiceCollection services)
+    {
+        return services.AddScoped<NeighbouringLimitsService>();
     }
 }

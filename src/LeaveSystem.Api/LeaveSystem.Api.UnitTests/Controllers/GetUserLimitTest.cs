@@ -15,7 +15,7 @@ public class GetUserLimitTest
     [Fact]
     public void WhenGetting_ThenReturnData()
     {
-        var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
+        var neighbouringLimitsServiceMock = GetNeighbouringLimitsServiceMock();
         var crudServiceMock = GetCrudServiceMock();
         var fakeId = FakeUserLeaveLimitProvider.FakeLimitForOnDemandLeaveId;
         crudServiceMock.Setup(x => x.GetSingleAsQueryable(fakeId))
@@ -23,7 +23,7 @@ public class GetUserLimitTest
             {
                 FakeUserLeaveLimitProvider.GetLimitForOnDemandLeave()
             }.AsQueryable());
-        var sut = new UserLeaveLimitsController(dbContextMock.Object, crudServiceMock.Object);
+        var sut = new UserLeaveLimitsController(crudServiceMock.Object,  neighbouringLimitsServiceMock.Object);
         var result = sut.Get(fakeId);
         var expectedResult = SingleResult.Create(new[]
         {
@@ -31,6 +31,9 @@ public class GetUserLimitTest
         }.AsQueryable());
         result.Should().BeEquivalentTo(expectedResult);
     }
+    
+    private Mock<NeighbouringLimitsService> GetNeighbouringLimitsServiceMock() =>
+        new(new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>()).Object);
     
     private Mock<GenericCrudService<UserLeaveLimit, Guid>> GetCrudServiceMock() =>
         new(new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>()).Object,

@@ -64,8 +64,7 @@ builder.Services.AddDDD();
 builder.Services.AddLeaveSystemModule(builder.Configuration);
 builder.Services.AddMvc();
 builder.Services.AddValidators();
-builder.Services.AddDeltaValidators();
-builder.Services.AddCrudService();
+builder.Services.AddODataControllersServices();
 
 var app = builder.Build();
 

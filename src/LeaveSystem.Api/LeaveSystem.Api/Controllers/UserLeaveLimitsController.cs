@@ -1,6 +1,5 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Api.Endpoints.Errors;
-using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
@@ -23,15 +22,14 @@ namespace LeaveSystem.Api.Controllers;
 [Authorize]
 public class UserLeaveLimitsController : ODataController
 {
-    private readonly LeaveSystemDbContext dbContext;
+    private readonly NeighbouringLimitsService neighbouringLimitsService;
     private readonly GenericCrudService<UserLeaveLimit, Guid> crudService;
     private const string InvalidModelMessage = "This request is not valid oDataRequest";
 
-    public UserLeaveLimitsController(LeaveSystemDbContext dbContext,
-        GenericCrudService<UserLeaveLimit, Guid> crudService)
+    public UserLeaveLimitsController(GenericCrudService<UserLeaveLimit, Guid> crudService, NeighbouringLimitsService neighbouringLimitsService)
     {
-        this.dbContext = dbContext;
         this.crudService = crudService;
+        this.neighbouringLimitsService = neighbouringLimitsService;
     }
 
     [HttpGet]
@@ -72,63 +70,11 @@ public class UserLeaveLimitsController : ODataController
             }
         };
         var addedEntity = await crudService.AddAsync(entity, cancellationToken);
-        await SetStartAndEndDateForNeighbourLimitsIfDontHaveAsync(addedEntity, cancellationToken);
+        await neighbouringLimitsService.CloseNeighbourLimitsPeriodsAsync(addedEntity, cancellationToken);
         return Created(addedEntity);
     }
 
-    private async Task SetStartAndEndDateForNeighbourLimitsIfDontHaveAsync(
-        UserLeaveLimit limit,
-        CancellationToken cancellationToken)
-    {
-        var userLimitsForSameLeaveType = dbContext.UserLeaveLimits
-            .Where(ull => ull.LeaveTypeId == limit.LeaveTypeId && ull.AssignedToUserId == limit.AssignedToUserId);;
-        if (limit.ValidSince.HasValue)
-        {
-            await SetEndDateForPreviousLimitIfDontHaveAsync(userLimitsForSameLeaveType, limit.ValidSince.Value, cancellationToken);
-        }
-        if (limit.ValidUntil.HasValue)
-        {
-            await SetStartDateForNextLimitIfDontHaveAsync(userLimitsForSameLeaveType, limit.ValidUntil.Value, cancellationToken);
-        }
-    }
-    
-    private async Task SetEndDateForPreviousLimitIfDontHaveAsync(
-        IQueryable<UserLeaveLimit> userLeaveLimits,
-        DateTimeOffset validSince,
-        CancellationToken cancellationToken)
-    {
-        var limitWithoutEndDateBeforeThisLimit = await userLeaveLimits
-            .OrderBy(x => x.ValidSince)
-            .LastOrDefaultAsync(
-                x => !x.ValidUntil.HasValue && x.ValidSince < validSince
-                , cancellationToken);
-        if (limitWithoutEndDateBeforeThisLimit is null)
-        {
-            return;
-        }
-        limitWithoutEndDateBeforeThisLimit.ValidUntil = validSince;
-        dbContext.Update(limitWithoutEndDateBeforeThisLimit);
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
 
-    private async Task SetStartDateForNextLimitIfDontHaveAsync(
-        IQueryable<UserLeaveLimit> userLeaveLimits,
-        DateTimeOffset validUntil,
-        CancellationToken cancellationToken)
-    {
-        var limitWithoutStartDateAfterThisLimit = await userLeaveLimits
-            .OrderBy(x => x.ValidSince)
-            .FirstOrDefaultAsync(
-                x => !x.ValidSince.HasValue && x.ValidUntil > validUntil
-                , cancellationToken);
-        if (limitWithoutStartDateAfterThisLimit is null)
-        {
-            return;
-        }
-        limitWithoutStartDateAfterThisLimit.ValidSince = validUntil;
-        dbContext.Update(limitWithoutStartDateAfterThisLimit);
-        await dbContext.SaveChangesAsync(cancellationToken);
-    }
 
     [HttpPatch]
     public async Task<IActionResult> Patch(
@@ -141,7 +87,7 @@ public class UserLeaveLimitsController : ODataController
             throw new BadHttpRequestException(InvalidModelMessage);
         }
         var updatedEntity = await crudService.PatchAsync(key, delta, cancellationToken);
-        await SetStartAndEndDateForNeighbourLimitsIfDontHaveAsync(updatedEntity, cancellationToken);
+        await neighbouringLimitsService.CloseNeighbourLimitsPeriodsAsync(updatedEntity, cancellationToken);
         return Updated(updatedEntity);
     }
 
