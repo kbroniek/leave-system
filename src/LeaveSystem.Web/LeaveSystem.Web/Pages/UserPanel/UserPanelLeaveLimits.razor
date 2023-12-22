@@ -155,6 +155,11 @@ else
 
     protected override void OnInitialized()
     {
+        GetDate();
+    }
+
+    public void GetDate()
+    {
         var currentYear = Year ?? DateTimeOffset.UtcNow.Year;
         firstDayOfYear = new DateTime(currentYear, 1, 1, 0, 0, 0);
         lastDayOfYear = new DateTime(currentYear, 12, 31, 23, 59, 59, 999);
@@ -226,7 +231,12 @@ else
 
     async Task InsertRow(Guid leaveTypeId)
     {
-        limitToInsert = UserLeaveLimitDto.Create(leaveTypeId);
+        limitToInsert = new()
+        {
+            LeaveTypeId = leaveTypeId,
+            ValidSince = firstDayOfYear,
+            ValidUntil = lastDayOfYear
+        };
         if (limitsGrid is null)
         {
             ToastService.ShowError("Error occured during inserting row!");

@@ -124,6 +124,7 @@
         Year = year;
         NavManager.NavigateTo($"/user-panel/{UserId}/{year}");
         await OnInitializedAsync();
+        limitsPanel?.GetDate();
         return year;
     }
 

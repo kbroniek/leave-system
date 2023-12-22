@@ -33,6 +33,7 @@ public class UserLeaveLimitDto
     private UserLeaveLimitDto(Guid leaveTypeId)
     {
         LeaveTypeId = leaveTypeId;
+        
     }
     public static UserLeaveLimitDto Create(Guid leaveTypeId) => new(leaveTypeId);
 }
