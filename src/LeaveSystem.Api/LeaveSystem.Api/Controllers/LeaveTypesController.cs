@@ -1,6 +1,5 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Api.Endpoints.Errors;
-using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.AspNetCore.Authorization;
@@ -17,13 +16,10 @@ namespace LeaveSystem.Api.Controllers
     [Authorize]
     public class LeaveTypesController : ODataController
     {
-        private readonly LeaveSystemDbContext dbContext;
         private readonly GenericCrudService<LeaveType, Guid> crudService;
-        private const string InvalidModelMessage = "This request is not valid oDataRequest";
 
-        public LeaveTypesController(LeaveSystemDbContext dbContext, GenericCrudService<LeaveType, Guid> crudService)
+        public LeaveTypesController(GenericCrudService<LeaveType, Guid> crudService)
         {
-            this.dbContext = dbContext;
             this.crudService = crudService;
         }
         

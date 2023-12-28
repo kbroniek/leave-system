@@ -25,6 +25,7 @@ public class GetUserLimitsTest
         var sut = GetSut(crudServiceMock.Object, limitsServiceMock.Object);
         var result = sut.Get();
         result.Should().BeEquivalentTo(fakeUserLimits);
+        crudServiceMock.Verify(m => m.Get(), Times.Once);
     }
     
     private Mock<NeighbouringLimitsService> GetNeighbouringLimitsServiceMock() =>
