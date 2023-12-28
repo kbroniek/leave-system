@@ -73,7 +73,7 @@ public class GenericCrudService<TEntity, TId>
         return entity;
     }
 
-    public async Task DeleteAsync(TId key, CancellationToken cancellationToken = default)
+    public virtual async Task DeleteAsync(TId key, CancellationToken cancellationToken = default)
     {
         var product = await GetSet().FindAsync(new object[] { key }, cancellationToken);
         if (product == null)
