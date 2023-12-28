@@ -1,11 +1,15 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Blazored.Toast.Services;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Converters;
+using LeaveSystem.Shared.UserLeaveLimits;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.WorkingHours;
+using LeaveSystem.Web.Shared;
 using LeaveSystem.Web.UnitTests.TestStuff.Converters;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
@@ -18,81 +22,76 @@ namespace LeaveSystem.Web.UnitTests.Pages.UserLeaveLimits;
 
 public class AddLimitTest
 {
-    private HttpClient httpClientMock;
-    private Mock<IToastService> toastServiceMock = new();
-    private Mock<ILogger<UserLeaveLimitsService>> loggerMock = new();
-
-    private UserLeaveLimitsService GetSut() => new(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-    
     [Fact]
-    public async Task WhenNotSuccessfulStatusCodeAfterAdding_ShowErrorToastAndLogErrorAndReturnNull()
+    public async Task WhenEntityAdded_ThenReturnResultDto()
     {
-        //Given
-        var limitToAdd = FakeUserLeaveLimitProvider.GetLimitForHolidayLeave().ToDto();
-        const string fakeContentText = "fake response content";
-        const string fakeDetailsText = "fake error in 404 line";
-        var problemDto =
-            new ProblemDto(string.Empty, fakeContentText, 400, fakeDetailsText, string.Empty, "dev", "1.0.0.0");
-        var serializedProblemDto = JsonSerializer.Serialize(problemDto);
-        var responseContent = new StringContent(serializedProblemDto, Encoding.UTF8, "application/json");
-        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.BadRequest, responseContent, FakeJsonSerializerOptionsProvider.GetWithTimespanConverter());
-        toastServiceMock = new Mock<IToastService>();
-        loggerMock = new Mock<ILogger<UserLeaveLimitsService>>();
-        var sut = GetSut();
-        //When
-        var result = await sut.AddAsync(limitToAdd);
-        //Then
-        toastServiceMock.Verify(m => m.ShowError(fakeContentText, null), Times.Once);
-        toastServiceMock.Verify(x => x.ShowSuccess(It.IsAny<string>(), null), Times.Never);
-        loggerMock.VerifyLogError(fakeDetailsText, Times.Once);
-        result.Should().BeNull();
-    }
-    
-    [Fact]
-    public async Task WhenDeserializedResponseContentIsNull_ThenShowErrorToastAndReturnNull()
-    {
-        //Given
-        var limitToAdd = FakeUserLeaveLimitProvider.GetLimitForHolidayLeave().ToDto();
-        const string fakeContentText = "fake response content";
-        const string fakeDetailsText = "fake error in 404 line";
-        var problemDto = (ProblemDto) null;
-        var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+        var universalHttpServiceMock = GetUniversalHttpServiceMock();
+        var fakeEntityToAdd = new AddUserLeaveLimitDto()
         {
-            Converters =
+            AssignedToUserId = "fakeuserid",
+            LeaveTypeId = Guid.Parse("54d432e0-68f2-4819-82e1-33107f8dd1de"),
+            ValidSince = DateTimeOffset.Parse("2023-04-05"),
+            ValidUntil = DateTimeOffset.Parse("2023-04-21"),
+            Limit = TimeSpan.FromHours(8),
+            OverdueLimit = TimeSpan.FromHours(2),
+            Property = new AddUserLeaveLimitPropertiesDto()
             {
-                new TimeSpanToStringConverter()
-            },
+                Description = "fake description"
+            }
         };
-        var serializedProblemDto = JsonSerializer.Serialize(problemDto);
-        var responseContent = new StringContent(serializedProblemDto, Encoding.UTF8, "application/json");
-        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.OK, responseContent, jsonOptions);
-        toastServiceMock = new Mock<IToastService>();
-        loggerMock = new Mock<ILogger<UserLeaveLimitsService>>();
-        var sut = GetSut();
-        //When
-        var result = await sut.AddAsync(limitToAdd);
-        //Then
-        toastServiceMock.Verify(m => m.ShowError("Unexpected empty result", null), Times.Once);
-        toastServiceMock.Verify(x => x.ShowSuccess(It.IsAny<string>(), null), Times.Never);
-        result.Should().BeNull();
+        var expectedResult = new UserLeaveLimitsService.UserLeaveLimitDtoODataResponse()
+        {
+            Id = Guid.Parse("14497429-e3c7-428c-933f-5b69c28a73eb"),
+            LeaveTypeId = Guid.Parse("54d432e0-68f2-4819-82e1-33107f8dd1de"),
+            ValidSince = DateTimeOffset.Parse("2023-04-05"),
+            ValidUntil = DateTimeOffset.Parse("2023-04-21"),
+            Limit = TimeSpan.FromHours(8),
+            OverdueLimit = TimeSpan.FromHours(2),
+            Property = new()
+            {
+                Description = "fake description"
+            }
+        };
+        universalHttpServiceMock.Setup(m =>
+            m.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
+                "odata/UserLeaveLimits", 
+                It.Is<AddUserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToAdd)), 
+                It.IsAny<string>(),
+                It.IsAny<JsonSerializerOptions>()))
+            .ReturnsAsync(expectedResult);
+        var sut = new UserLeaveLimitsService(universalHttpServiceMock.Object);
+
+        var result = await sut.AddAsync(fakeEntityToAdd);
+        result.Should().BeEquivalentTo(
+            new
+            {
+                Id = Guid.Parse("14497429-e3c7-428c-933f-5b69c28a73eb"),
+                LeaveTypeId = Guid.Parse("54d432e0-68f2-4819-82e1-33107f8dd1de"),
+                ValidSince = DateTimeOffset.Parse("2023-04-05"),
+                ValidUntil = DateTimeOffset.Parse("2023-04-21"),
+                Limit = TimeSpan.FromHours(8),
+                OverdueLimit = TimeSpan.FromHours(2),
+                Property = new
+                {
+                    Description = "fake description"
+                }
+            });
+        universalHttpServiceMock.Verify(
+            m => m.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
+                "odata/UserLeaveLimits", 
+                It.Is<AddUserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToAdd)),
+                "User leave limit added successfully", 
+                It.Is<JsonSerializerOptions>(o => o.Converters.Any(c => c.GetType() == typeof(TimeSpanIso8601Converter)))));
     }
 
-    [Fact]
-    public async Task WhenStatusCodeIsSuccessfulAndResponseContentIsNotNull_ThenReturnAddedEntity()
-    {
-        //Given
-        var limitToAdd = FakeUserLeaveLimitProvider.GetLimitForHolidayLeave().ToDto();
-        var serializedAddedLimit = JsonSerializer.Serialize(limitToAdd);
-        var responseContent = new StringContent(serializedAddedLimit, Encoding.UTF8, "application/json");
-        httpClientMock = HttpClientMockFactory.CreateWithJsonContent("odata/UserLeaveLimits", limitToAdd, HttpStatusCode.OK, responseContent, FakeJsonSerializerOptionsProvider.GetWithTimespanConverter());
-        toastServiceMock = new Mock<IToastService>();
-        loggerMock = new Mock<ILogger<UserLeaveLimitsService>>();
-        var sut = GetSut();
-        //When
-        var result = await sut.AddAsync(limitToAdd);
-        //Then
-        toastServiceMock.Verify(m => m.ShowError(It.IsAny<string>(), null), Times.Never);
-        toastServiceMock.Verify(x => x.ShowSuccess(It.IsAny<string>(), null), Times.Once);
-        result.Should().BeEquivalentTo(limitToAdd);
-    }
+    private static bool IsDtoEquivalentTo(AddUserLeaveLimitDto firstDto, AddUserLeaveLimitDto secondDto) =>
+        firstDto.OverdueLimit == secondDto.OverdueLimit &&
+        firstDto.Limit == secondDto.Limit &&
+        firstDto.ValidUntil == secondDto.ValidUntil &&
+        firstDto.ValidSince == secondDto.ValidSince &&
+        firstDto.LeaveTypeId == secondDto.LeaveTypeId &&
+        firstDto.AssignedToUserId == secondDto.AssignedToUserId;
+
+    private Mock<UniversalHttpService> GetUniversalHttpServiceMock() =>
+        new(new Mock<HttpClient>().Object, new Mock<IToastService>().Object, new Mock<ILogger<UniversalHttpService>>().Object);
 }

@@ -22,7 +22,7 @@ public class UniversalHttpService
         this.logger = logger;
     }
 
-    internal virtual async Task<TResponse?> AddAsync<TContent, TResponse>(string uri, TContent entityToAdd,
+    public virtual async Task<TResponse?> AddAsync<TContent, TResponse>(string uri, TContent entityToAdd,
         string successMessage, JsonSerializerOptions options)
         where TContent : class
         where TResponse : class
@@ -71,7 +71,7 @@ public class UniversalHttpService
         toastService.ShowError(message);
     }
 
-    internal virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage,
+    public virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage,
         JsonSerializerOptions options)
         where TContent : class
     {
@@ -95,7 +95,7 @@ public class UniversalHttpService
         return false;
     }
 
-    internal virtual async Task<TResponse?> GetAsync<TResponse>(string uri, string errorMessage,
+    public virtual async Task<TResponse?> GetAsync<TResponse>(string uri, string errorMessage,
         JsonSerializerOptions options)
         where TResponse : class
     {
@@ -111,7 +111,7 @@ public class UniversalHttpService
         }
     }
 
-    internal virtual async Task<bool> DeleteAsync(string uri, string successMessage, JsonSerializerOptions options)
+    public virtual async Task<bool> DeleteAsync(string uri, string successMessage, JsonSerializerOptions options)
     {
         try
         {

@@ -61,7 +61,7 @@ public class UserLeaveLimitsService
 
     public Task<bool> DeleteAsync(Guid id) =>
         universalHttpService.DeleteAsync($"odata/UserLeaveLimits({id})", "Successfully deleted leave limit", jsonSerializerOptions);
-    private class UserLeaveLimitDtoODataResponse : UserLeaveLimitDto
+    public class UserLeaveLimitDtoODataResponse : UserLeaveLimitDto
     {
         [JsonPropertyName(name: "@odata.context")]
         public string? ContextUrl { get; set; }
