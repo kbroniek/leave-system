@@ -57,7 +57,7 @@ public class UserLeaveLimitsController : ODataController
         }
         var entity = new UserLeaveLimit()
         {
-            Id = new Guid(),
+            Id = Guid.NewGuid(),
             OverdueLimit = dto.OverdueLimit,
             Limit = dto.Limit,
             AssignedToUserId = dto.AssignedToUserId,

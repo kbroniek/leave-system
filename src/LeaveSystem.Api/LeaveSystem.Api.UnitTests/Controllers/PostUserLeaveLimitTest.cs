@@ -6,6 +6,7 @@ using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.UserLeaveLimits;
 using LeaveSystem.UnitTests.Providers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.OData.Results;
 using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
@@ -14,8 +15,7 @@ namespace LeaveSystem.Api.UnitTests.Controllers;
 
 public class PostUserLeaveLimitTest
 {
-    private readonly CurrentDateService currentDateService = FakeDateServiceProvider.GetDateService();
-        
+    
     [Fact]
     public async Task WhenModelStateIsNotValid_ThenThrowBadHttpRequestException()
     {
@@ -40,7 +40,6 @@ public class PostUserLeaveLimitTest
     {
         var neighbouringLimitsServiceMock = GetNeighbouringLimitsServiceMock();
         var crudServiceMock = GetCrudServiceMock();
-        var now = currentDateService.GetWithoutTime();
         var postDto = new AddUserLeaveLimitDto()
         {
             AssignedToUserId = "0f203ba9-517c-4d1b-b756-32e7905abe73",
@@ -51,25 +50,52 @@ public class PostUserLeaveLimitTest
             {
                 Description = "fake desc"
             },
-            ValidSince = DateTimeOffset.Parse("2023-12-21 18:29:38 UTC")
+            ValidSince = DateTimeOffset.Parse("2023-12-21"),
+            ValidUntil = DateTimeOffset.Parse("2023-12-15")
         };
-        var sut = new UserLeaveLimitsController(crudServiceMock.Object, neighbouringLimitsServiceMock.Object);
-        var act = async () =>
+        var entityFromDto = new UserLeaveLimit
         {
-            await sut.Post(postDto);
+            Id = Guid.NewGuid(),
+            OverdueLimit = postDto.OverdueLimit,
+            Limit = postDto.Limit,
+            AssignedToUserId = postDto.AssignedToUserId,
+            ValidSince = postDto.ValidSince,
+            ValidUntil = postDto.ValidUntil,
+            LeaveTypeId = postDto.LeaveTypeId,
+            Property = new()
+            {
+                Description = postDto.Property?.Description
+            }
         };
-        await act.Should().ThrowAsync<BadHttpRequestException>();
+        crudServiceMock.Setup(m => m.AddAsync(
+                It.Is<UserLeaveLimit>(ull => LimitAreEquivalents(ull, entityFromDto)),
+                default))
+            .ReturnsAsync(entityFromDto);
+        var sut = new UserLeaveLimitsController(crudServiceMock.Object, neighbouringLimitsServiceMock.Object);
+        var result = await sut.Post(postDto);
+        result.Should().BeOfType<CreatedODataResult<UserLeaveLimit>>();
         crudServiceMock.Verify(
-            m => m.AddAsync(It.IsAny<UserLeaveLimit>(), It.IsAny<CancellationToken>()), Times.Never);
+            m => m.AddAsync(It.IsAny<UserLeaveLimit>(), It.IsAny<CancellationToken>()), Times.Once);
         neighbouringLimitsServiceMock.Verify(m => 
-            m.CloseNeighbourLimitsPeriodsAsync(It.IsAny<UserLeaveLimit>(), It.IsAny<CancellationToken>()), Times.Never);
+            m.CloseNeighbourLimitsPeriodsAsync(It.IsAny<UserLeaveLimit>(), It.IsAny<CancellationToken>()), Times.Once);
     }
-    
-    private Mock<NeighbouringLimitsService> GetNeighbouringLimitsServiceMock() =>
+
+    private static bool LimitAreEquivalents(UserLeaveLimit firstLimit, UserLeaveLimit secondLimit) =>
+        firstLimit.OverdueLimit == secondLimit.OverdueLimit &&
+        firstLimit.Limit == secondLimit.Limit &&
+        firstLimit.ValidSince == secondLimit.ValidSince &&
+        firstLimit.ValidUntil == secondLimit.ValidUntil &&
+        firstLimit.LeaveTypeId == secondLimit.LeaveTypeId &&
+        firstLimit.AssignedToUserId == secondLimit.AssignedToUserId;
+
+
+    private static Mock<NeighbouringLimitsService> GetNeighbouringLimitsServiceMock() =>
         new(new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>()).Object);
     
-    private Mock<GenericCrudService<UserLeaveLimit, Guid>> GetCrudServiceMock() =>
+    private static Mock<GenericCrudService<UserLeaveLimit, Guid>> GetCrudServiceMock() =>
         new(new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>()).Object,
             new Mock<DeltaValidator<UserLeaveLimit>>().Object,
             new Mock<IValidator<UserLeaveLimit>>().Object);
+
+
 }
