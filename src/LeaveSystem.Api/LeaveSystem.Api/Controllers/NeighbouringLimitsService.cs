@@ -15,11 +15,10 @@ public class NeighbouringLimitsService
 
     public virtual async Task CloseNeighbourLimitsPeriodsAsync(
         UserLeaveLimit limit,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         var userLimitsForSameLeaveType = dbContext.UserLeaveLimits
             .Where(ull => ull.LeaveTypeId == limit.LeaveTypeId && ull.AssignedToUserId == limit.AssignedToUserId);
-        ;
         if (limit.ValidSince.HasValue)
         {
             await ClosePreviousLimitPeriodAsync(userLimitsForSameLeaveType, limit.ValidSince.Value,
@@ -38,18 +37,18 @@ public class NeighbouringLimitsService
         DateTimeOffset validSince,
         CancellationToken cancellationToken)
     {
-        var limitWithoutEndDateBeforeThisLimit = await userLeaveLimits
+        var limitWithPeriodToClose = await userLeaveLimits
             .OrderBy(x => x.ValidSince)
             .LastOrDefaultAsync(
                 x => !x.ValidUntil.HasValue && x.ValidSince < validSince
                 , cancellationToken);
-        if (limitWithoutEndDateBeforeThisLimit is null)
+        if (limitWithPeriodToClose is null)
         {
             return;
         }
 
-        limitWithoutEndDateBeforeThisLimit.ValidUntil = validSince;
-        dbContext.Update(limitWithoutEndDateBeforeThisLimit);
+        limitWithPeriodToClose.ValidUntil = validSince.AddDays(-1);
+        dbContext.Update(limitWithPeriodToClose);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -58,18 +57,18 @@ public class NeighbouringLimitsService
         DateTimeOffset validUntil,
         CancellationToken cancellationToken)
     {
-        var limitWithoutStartDateAfterThisLimit = await userLeaveLimits
+        var limitWithPeriodToClose = await userLeaveLimits
             .OrderBy(x => x.ValidSince)
             .FirstOrDefaultAsync(
                 x => !x.ValidSince.HasValue && x.ValidUntil > validUntil
                 , cancellationToken);
-        if (limitWithoutStartDateAfterThisLimit is null)
+        if (limitWithPeriodToClose is null)
         {
             return;
         }
 
-        limitWithoutStartDateAfterThisLimit.ValidSince = validUntil;
-        dbContext.Update(limitWithoutStartDateAfterThisLimit);
+        limitWithPeriodToClose.ValidSince = validUntil.AddDays(1);
+        dbContext.Update(limitWithPeriodToClose);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 }
