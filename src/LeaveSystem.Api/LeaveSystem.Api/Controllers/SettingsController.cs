@@ -38,19 +38,5 @@ namespace LeaveSystem.Api.Controllers
             var entity = crudService.GetSingleAsQueryable(key);
             return SingleResult.Create(entity);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] AddSettingDto dto, CancellationToken cancellationToken = default)
-        {
-            var entity = new Setting
-            {
-                Id = dto.Id,
-                Value = dto.Value,
-                Category = dto.Category
-
-            };
-            var createdEntity = await crudService.AddAsync(entity, cancellationToken);
-            return Created(createdEntity);
-        }
     }
 }

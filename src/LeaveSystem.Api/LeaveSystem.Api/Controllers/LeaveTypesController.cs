@@ -41,30 +41,5 @@ namespace LeaveSystem.Api.Controllers
             var entity = crudService.GetSingleAsQueryable(key);
             return SingleResult.Create(entity);
         }
-        
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] AddLeaveTypeDto dto, CancellationToken cancellationToken = default)
-        {
-            if (!ModelState.IsValid)
-            {
-                throw new BadHttpRequestException(InvalidModelMessage);
-            }
-            var entity = new LeaveType
-            {
-                Id = Guid.NewGuid(),
-                BaseLeaveTypeId = dto.BaseLeaveTypeId,
-                Name = dto.Name,
-                Order = dto.Order,
-                Properties = new ()
-                {
-                    Catalog = dto.Catalog,
-                    DefaultLimit = dto.DefaultLimit,
-                    Color = dto.Color,
-                    IncludeFreeDays = dto.IncludeFreeDays
-                }
-            };
-            var createdEntity = await crudService.AddAsync(entity, cancellationToken);
-            return Created(createdEntity);
-        }
     }
 }
