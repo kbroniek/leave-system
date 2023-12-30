@@ -10,6 +10,7 @@ using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.UserPanel;
 using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
+using LeaveSystem.Web.Shared;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using Microsoft.Extensions.Logging;
@@ -47,7 +48,7 @@ public class HrSummaryServiceTest
         var leaveTypesServiceMock = Substitute.For<LeaveTypesService>(httpClientMock);
         var fakeLeaveTypes = FakeLeaveTypeDtoProvider.GetAll();
         leaveTypesServiceMock.GetLeaveTypes().Returns(fakeLeaveTypes);
-        var userLeaveLimitsServiceMock = Substitute.For<UserLeaveLimitsService>(httpClientMock, Substitute.For<IToastService>(), Substitute.For<ILogger<UserLeaveLimitsService>>());
+        var userLeaveLimitsServiceMock = Substitute.For<UserLeaveLimitsService>(Substitute.For<UniversalHttpService>(httpClientMock, Substitute.For<IToastService>(), Substitute.For<ILogger<UniversalHttpService>>()));
         var fakeLimits = FakeLeaveLimitsDtoProvider.GetAll(year);
         userLeaveLimitsServiceMock.GetLimits(firstDay, lastDay).Returns(fakeLimits);
         var employeeServiceMock = Substitute.For<EmployeeService>(httpClientMock);

@@ -39,7 +39,7 @@ public static class Config
             options.AddPolicy(ShowUserPanel.PolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.Employee)));
             options.AddPolicy(ShowUserPanel.LeaveLimitsPolicyName, policy =>
-                policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource, RoleType.DecisionMaker, RoleType.LeaveLimitAdmin)));
+                policy.Requirements.Add(new RoleRequirement(RoleType.LeaveLimitAdmin)));
             options.AddPolicy(ShowHrPanel.PolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource, RoleType.DecisionMaker, RoleType.LeaveLimitAdmin)));
             options.AddPolicy(UsersPage.PolicyName, policy =>
