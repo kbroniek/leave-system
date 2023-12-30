@@ -24,8 +24,6 @@ public class UniversalHttpService
 
     public virtual async Task<TResponse?> AddAsync<TContent, TResponse>(string uri, TContent entityToAdd,
         string successMessage, JsonSerializerOptions options)
-        where TContent : class
-        where TResponse : class
     {
         var jsonString = JsonSerializer.Serialize(entityToAdd, options);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
@@ -45,12 +43,11 @@ public class UniversalHttpService
             logger.LogException(e);
         }
 
-        return null;
+        return default;
     }
 
     private async Task<TResponse?> DeserializeResponseContent<TResponse>(
         HttpResponseMessage response, string successMessage, JsonSerializerOptions options)
-        where TResponse : class
     {
         var resultWorkingHoursDto = await response.Content.ReadFromJsonAsync<TResponse>(options);
         if (resultWorkingHoursDto is not null)
@@ -60,7 +57,7 @@ public class UniversalHttpService
         }
         toastService.ShowError("Unexpected empty result");
         logger.LogError("{Variable} is null", nameof(resultWorkingHoursDto));
-        return null;
+        return default;
     }
     
     private async Task HandleProblemAsync(JsonSerializerOptions options, HttpResponseMessage response)
@@ -73,7 +70,6 @@ public class UniversalHttpService
 
     public virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage,
         JsonSerializerOptions options)
-        where TContent : class
     {
         var jsonString = JsonSerializer.Serialize(entityToEdit, options);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
@@ -97,7 +93,6 @@ public class UniversalHttpService
 
     public virtual async Task<TResponse?> GetAsync<TResponse>(string uri, string errorMessage,
         JsonSerializerOptions options)
-        where TResponse : class
     {
         try
         {
@@ -107,7 +102,7 @@ public class UniversalHttpService
         {
             toastService.ShowError(errorMessage);
             logger.LogException(ex);
-            return null;
+            return default;
         }
     }
 
