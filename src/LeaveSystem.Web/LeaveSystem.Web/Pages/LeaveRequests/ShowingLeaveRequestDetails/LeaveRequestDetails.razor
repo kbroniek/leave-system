@@ -47,7 +47,7 @@ else
         <hr class="mt-2 mb-3" />
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
             <AuthorizeView Policy="@AcceptPolicyName" Context="AcceptLeaveRequest">
-                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnAcceptClick()) Text="Accpet" ButtonStyle="ButtonStyle.Success" />
+                <RadzenButton Variant="Variant.Outlined" Click=@(args => OnAcceptClick()) Text="Accept" ButtonStyle="ButtonStyle.Success" />
                 <RadzenButton Variant="Variant.Outlined" Click=@(args => OnRejectClick()) Text="Reject" ButtonStyle="ButtonStyle.Danger" />
             </AuthorizeView>
             @if (leaveRequest.CreatedBy.Id == currentUser.Id)
@@ -72,15 +72,14 @@ else
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         currentUser = authState.User.CreateModel();
-        var userId = currentUser.Id;
-        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(userId);
         leaveRequest = await HttpClient.GetFromJsonAsync<LeaveRequest>($"api/leaveRequests/{LeaveRequestId}", new JsonSerializerOptions(JsonSerializerDefaults.Web));
         if(leaveRequest is null)
         {
             throw new InvalidOperationException($"Cannot find the leave request id: {LeaveRequestId}");
         }
         leaveType = await LeaveTypesService.GetLeaveType(leaveRequest.LeaveTypeId);
-        workingHours = (await getWorkingHoursTask).DurationOrZero();
+        var userWorkingHours = await WorkingHoursService.GetUserWorkingHours(leaveRequest.CreatedBy.Id);
+        workingHours = userWorkingHours.DurationOrZero();
     }
 
     private async Task OnAcceptClick()
