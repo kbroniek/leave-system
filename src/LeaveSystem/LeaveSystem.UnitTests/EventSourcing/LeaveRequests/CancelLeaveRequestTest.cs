@@ -20,7 +20,6 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
 public class CancelLeaveRequestTest
 {
     private static readonly FederatedUser User = FakeUserProvider.GetUserWithNameFakeoslav();
-    private Mock<IBaseDateService> dateServiceMock = new();
     [Fact]
     public void WhenCreatedByIdNotEqualsCanceledById_ThenThrowInvalidOperationException()
     {
@@ -31,7 +30,7 @@ public class CancelLeaveRequestTest
         //When
         var act = () =>
         {
-            leaveRequest.Cancel("fake remarks", canceledBy, dateServiceMock.Object);    
+            leaveRequest.Cancel("fake remarks", canceledBy, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));    
         } ;
         //Then
         act.Should().Throw<InvalidOperationException>()
@@ -50,7 +49,7 @@ public class CancelLeaveRequestTest
         //When
         var act = () =>
         {
-            leaveRequest.Cancel("fake cancel remarks", canceledBy, dateServiceMock.Object);    
+            leaveRequest.Cancel("fake cancel remarks", canceledBy, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));    
         } ;
         //Then
         act.Should().Throw<InvalidOperationException>()
@@ -71,7 +70,7 @@ public class CancelLeaveRequestTest
     public void WhenDateFromIsPastDate_ThenThrowInvalidOperationException(TimeSpan timeToSubtract)
     {
         //Given
-        var utcNow = DateTimeOffset.UtcNow;
+        var utcNow = DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00");
         var @event = LeaveRequestCreated.Create(
             Guid.NewGuid(),
             utcNow - timeToSubtract,
@@ -83,12 +82,10 @@ public class CancelLeaveRequestTest
             WorkingHoursUtils.DefaultWorkingHours
         );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
-        dateServiceMock = new();
-        dateServiceMock.Setup(x => x.GetWithoutTime()).Returns(utcNow);
         //When
         var act = () =>
         {
-            leaveRequest.Cancel("fake cancel remarks", User, dateServiceMock.Object);    
+            leaveRequest.Cancel("fake cancel remarks", User, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));    
         } ;
         //Then
         act.Should().Throw<InvalidOperationException>()
@@ -112,7 +109,7 @@ public class CancelLeaveRequestTest
         var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //When
-        leaveRequest.Cancel(remarks, User, dateServiceMock.Object);
+        leaveRequest.Cancel(remarks, User, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {
@@ -141,7 +138,7 @@ public class CancelLeaveRequestTest
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         actionBeforeReject(leaveRequest, fakeRemarks, User);
         //When
-        leaveRequest.Cancel(fakeRejectRemarks, User, dateServiceMock.Object);
+        leaveRequest.Cancel(fakeRejectRemarks, User, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {

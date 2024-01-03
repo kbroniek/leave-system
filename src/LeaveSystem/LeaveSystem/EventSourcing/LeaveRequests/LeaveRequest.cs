@@ -69,7 +69,7 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
         Apply(@event);
     }
 
-    internal void Cancel(string? remarks, FederatedUser canceledBy, CurrentDateService dateService)
+    internal void Cancel(string? remarks, FederatedUser canceledBy, DateTimeOffset now)
     {
         if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
         {
@@ -79,7 +79,7 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
         {
             throw new InvalidOperationException($"Canceling leave requests in '{Status}' status is not allowed.");
         }
-        if (DateFrom < dateService.GetWithoutTime())
+        if (DateFrom < now)
         {
             throw new InvalidOperationException("Canceling of past leave requests is not allowed.");
         }

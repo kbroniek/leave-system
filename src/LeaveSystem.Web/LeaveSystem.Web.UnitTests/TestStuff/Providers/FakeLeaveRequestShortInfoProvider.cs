@@ -11,7 +11,7 @@ public class FakeLeaveRequestShortInfoProvider
         return new[]
         {
             new LeaveRequestShortInfo(
-                Guid.NewGuid(),
+                Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63490"),
                 baseDate + TimeSpan.FromDays(3),
                 baseDate + TimeSpan.FromDays(6),
                 TimeSpan.FromHours(16),
@@ -19,7 +19,7 @@ public class FakeLeaveRequestShortInfoProvider
                 LeaveRequestStatus.Accepted,
                 FakeUserProvider.GetUserWithNameFakeoslav()),
             new LeaveRequestShortInfo(
-                Guid.NewGuid(),
+                Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63491"),
                 baseDate + TimeSpan.FromDays(7),
                 baseDate + TimeSpan.FromDays(8),
                 TimeSpan.FromHours(8),
@@ -27,7 +27,7 @@ public class FakeLeaveRequestShortInfoProvider
                 LeaveRequestStatus.Accepted,
                 FakeUserProvider.GetUserWithNameFakeoslav()),
             new LeaveRequestShortInfo(
-                Guid.NewGuid(),
+                Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63492"),
                 baseDate + TimeSpan.FromDays(1),
                 baseDate + TimeSpan.FromDays(5),
                 TimeSpan.FromHours(16),
