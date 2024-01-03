@@ -23,7 +23,7 @@ public class WorkingHoursDto
 
     public string DurationProxy
     {
-        get => Duration.ToString() ?? "";
+        get => Duration.ToString();
         set
         {
             TimeSpan.TryParse(value, out var parsedValue);

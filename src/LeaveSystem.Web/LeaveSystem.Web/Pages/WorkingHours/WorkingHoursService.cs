@@ -61,7 +61,7 @@ public class WorkingHoursService
         return false;
     }
 
-    public virtual async Task<WorkingHoursDto?> AddAndReturnDto(AddWorkingHoursDto addWorkingHoursDto)
+    public virtual async Task<WorkingHoursDto?> Add(AddWorkingHoursDto addWorkingHoursDto)
     {
         var jsonString = JsonSerializer.Serialize(addWorkingHoursDto);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");

@@ -45,7 +45,7 @@ public class AddWorkingHoursAndReturnDtosTest
         logger = Substitute.For<ILogger<WorkingHoursService>>();
         var sut = GetSut();
         //When
-        var result = await sut.AddAndReturnDto(workingHoursToAdd);
+        var result = await sut.Add(workingHoursToAdd);
         //Then
         toastServiceMock.Received(1).ShowError(fakeContentText);
         toastServiceMock.DidNotReceiveWithAnyArgs().ShowSuccess(string.Empty);
@@ -72,7 +72,7 @@ public class AddWorkingHoursAndReturnDtosTest
         logger = Substitute.For<ILogger<WorkingHoursService>>();
         var sut = GetSut();
         //When
-        var result = await sut.AddAndReturnDto(workingHoursToAdd);
+        var result = await sut.Add(workingHoursToAdd);
         //Then
         toastServiceMock.Received(1).ShowSuccess(Arg.Any<string>());
         toastServiceMock.DidNotReceiveWithAnyArgs().ShowError(string.Empty);

@@ -183,7 +183,7 @@ public class CreateLeaveRequestValidator
     {
         var dateFromWithoutTime = creatingLeaveRequest.DateFrom.GetDayWithoutTime();
         var dateToWithoutTime = creatingLeaveRequest.DateTo.GetDayWithoutTime();
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         var firstDay = now.GetFirstDayOfYear();
         var lastDay = now.GetLastDayOfYear();
         Guard.Against.OutOfRange(dateFromWithoutTime, nameof(creatingLeaveRequest.DateFrom), firstDay, lastDay);

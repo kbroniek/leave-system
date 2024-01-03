@@ -1,4 +1,5 @@
 using Blazored.Toast;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Web;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -14,5 +15,6 @@ builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddLeaveSystemModule();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<CurrentDateService>();
 
 await builder.Build().RunAsync();
