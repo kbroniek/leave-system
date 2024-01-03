@@ -6,9 +6,9 @@ namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validator
 
 public class BasicValidator
 {
-    private readonly DateService currentDateService;
+    private readonly CurrentDateService currentDateService;
 
-    public BasicValidator(DateService currentDateService)
+    public BasicValidator(CurrentDateService currentDateService)
     {
         this.currentDateService = currentDateService;
     }

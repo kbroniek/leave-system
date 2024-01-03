@@ -14,10 +14,10 @@ public class LeaveRequestFactory
     private readonly CreateLeaveRequestValidator validator;
     private readonly LeaveSystemDbContext dbContext;
     private readonly IQuerySession querySession;
-    private readonly DateService dateService;
+    private readonly CurrentDateService dateService;
 
     public LeaveRequestFactory(CreateLeaveRequestValidator validator, LeaveSystemDbContext dbContext,
-        IQuerySession querySession, DateService dateService)
+        IQuerySession querySession, CurrentDateService dateService)
     {
         this.validator = validator;
         this.dbContext = dbContext;

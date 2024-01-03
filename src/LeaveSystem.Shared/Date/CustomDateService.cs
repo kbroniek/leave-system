@@ -1,6 +1,6 @@
 namespace LeaveSystem.Shared.Date;
 
-public class CustomDateService : DateService
+public class CustomDateService : CurrentDateService
 {
     private readonly DateTimeOffset customDate;
 

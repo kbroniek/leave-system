@@ -6,9 +6,9 @@ namespace LeaveSystem.Api.UnitTests.Providers;
 
 internal class FakeDateServiceProvider
 {
-    internal static DateService GetDateService()
+    internal static CurrentDateService GetDateService()
     {
-        var dateServiceMock = new Mock<DateService>();
+        var dateServiceMock = new Mock<CurrentDateService>();
         dateServiceMock.Setup(x => x.GetWithoutTime())
             .Returns(DateTimeOffset.Parse("2023-12-15T09:40:41.8087272+01:00"));
         return dateServiceMock.Object;

@@ -156,7 +156,7 @@ public static class DbContextExtenstions
             var serviceCollection = new ServiceCollection();
             var serviceProvider = serviceCollection
                 .AddServices(configuration)
-                .AddScoped<DateService, CustomDateService>()
+                .AddScoped<CurrentDateService, CustomDateService>()
                 .BuildServiceProvider();
             var dbContext = serviceProvider.GetRequiredService<LeaveSystemDbContext>();
             var graphUserService = serviceProvider.GetRequiredService<GetGraphUserService>();
@@ -228,7 +228,7 @@ public static class DbContextExtenstions
     private static async Task FillInSimpleData(LeaveSystemDbContext dbContext, IServiceProvider services)
     {
         await dbContext.FillInLeaveTypes();
-        var currentDateService = services.GetRequiredService<DateService>();
+        var currentDateService = services.GetRequiredService<CurrentDateService>();
         await dbContext.FillInUserLeaveLimits(currentDateService);
         await dbContext.FillInSettings();
         await dbContext.SaveChangesAsync();
@@ -238,12 +238,12 @@ public static class DbContextExtenstions
     {
         var queryBus = services.GetRequiredService<IQueryBus>();
         var commandBus = services.GetRequiredService<ICommandBus>();
-        var currentDateService = services.GetRequiredService<DateService>();
+        var currentDateService = services.GetRequiredService<CurrentDateService>();
         await FillInWorkingHours(queryBus, commandBus, currentDateService);
         await FillInLeaveRequests(queryBus, commandBus, currentDateService);
     }
 
-    private static async Task FillInWorkingHours(IQueryBus queryBus, ICommandBus commandBus, DateService currentDateService)
+    private static async Task FillInWorkingHours(IQueryBus queryBus, ICommandBus commandBus, CurrentDateService currentDateService)
     {
         var workingHoursFromDb = await queryBus.Send<GetWorkingHours, IPagedList<WorkingHours>>(GetWorkingHours.Create(
             null, null, null, null,
@@ -320,7 +320,7 @@ public static class DbContextExtenstions
         return commandBus.Send(command);
     }
 
-    private static async Task FillInLeaveRequests(IQueryBus queryBus, ICommandBus commandBus, DateService currentDateService)
+    private static async Task FillInLeaveRequests(IQueryBus queryBus, ICommandBus commandBus, CurrentDateService currentDateService)
     {
         var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(
             GetLeaveRequests.Create(
@@ -354,7 +354,7 @@ public static class DbContextExtenstions
         await CreateLeaveRequest(commandBus, date, date, onDemandLeave.Id, user);
     }
 
-    private static async Task SetupUser4(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, DateService currentDateService)
+    private static async Task SetupUser4(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
         var now = currentDateService.GetWithoutTime();
         var start = GetFirstWorkingDay(now.GetFirstDayOfYear());
@@ -370,7 +370,7 @@ public static class DbContextExtenstions
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
-    private static async Task SetupUser3(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, DateService currentDateService)
+    private static async Task SetupUser3(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
         var now = currentDateService.GetWithoutTime();
         var start = GetFirstWorkingDay(now.GetFirstDayOfYear());
@@ -380,7 +380,7 @@ public static class DbContextExtenstions
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
-    private static async Task SetupUser2(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, DateService currentDateService)
+    private static async Task SetupUser2(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
         var now = currentDateService.GetWithoutTime();
         var start = GetFirstWorkingDay(now);
@@ -390,7 +390,7 @@ public static class DbContextExtenstions
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
-    private static async Task SetupUser1(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, DateService currentDateService)
+    private static async Task SetupUser1(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
         var now = currentDateService.GetWithoutTime();
         var start = GetFirstWorkingDay(now.AddDays(-5));
@@ -419,7 +419,7 @@ public static class DbContextExtenstions
         await AcceptLeaveRequest(commandBus, leaveRequestId, defaultUser);
     }
 
-    private static async Task SetupUser0(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, DateService currentDateService)
+    private static async Task SetupUser0(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
         var now = currentDateService.GetWithoutTime();
         var start = GetFirstWorkingDay(now);
@@ -519,7 +519,7 @@ public static class DbContextExtenstions
         return leaveRequestId;
     }
 
-    private static async Task FillInUserLeaveLimits(this LeaveSystemDbContext dbContext, DateService currentDateService)
+    private static async Task FillInUserLeaveLimits(this LeaveSystemDbContext dbContext, CurrentDateService currentDateService)
     {
         if (await dbContext.UserLeaveLimits.AnyAsync())
         {
