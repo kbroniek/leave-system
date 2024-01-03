@@ -82,7 +82,7 @@ public class ImpositionValidatorTest
     {
         //Given
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeLeaveRequestCreatedEvent);
-        entity.Cancel("cancel fake remarks", fakeUser, dateServiceMock.Object);
+        entity.Cancel("cancel fake remarks", fakeUser, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         var events = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds();
         events.Add(fakeLeaveRequestCreatedEvent);
         eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);

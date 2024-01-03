@@ -32,9 +32,9 @@ internal class HandleCancelLeaveRequest :
     ICommandHandler<CancelLeaveRequest>
 {
     private readonly IRepository<LeaveRequest> repository;
-    private readonly CurrentDateService dateService;
+    private readonly DateService dateService;
 
-    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository, CurrentDateService dateService)
+    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository, DateService dateService)
     {
         this.repository = repository;
         this.dateService = dateService;

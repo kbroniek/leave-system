@@ -11,7 +11,7 @@ public class GetGraphUserService
     private readonly IGraphClientFactory graphClientFactory;
     private readonly string roleAttributeName;
 
-    public GetGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver, CurrentDateService CurrentDateService)
+    public GetGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver, DateService CurrentDateService)
     {
         this.graphClientFactory = graphClientFactory;
         roleAttributeName = roleAttributeNameResolver.RoleAttributeName;

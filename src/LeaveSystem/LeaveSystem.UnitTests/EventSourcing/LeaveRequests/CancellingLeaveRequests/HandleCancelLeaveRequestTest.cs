@@ -28,7 +28,7 @@ public class HandleCancelLeaveRequestTest
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenThrowNotFoundException()
     {
         //Given
-        var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
+        var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object, FakeDateServiceProvider.GetDateService());
         //When
         var act = () =>
             handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
@@ -56,7 +56,7 @@ public class HandleCancelLeaveRequestTest
         repositoryMock
             .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest);
-        var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
+        var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object, FakeDateServiceProvider.GetDateService());
         //When
         await handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
         //Then

@@ -2,7 +2,7 @@
 using Moq;
 using System;
 
-namespace LeaveSystem.UnitTests.Providers;
+namespace LeaveSystem.Api.UnitTests.Providers;
 
 internal class FakeDateServiceProvider
 {

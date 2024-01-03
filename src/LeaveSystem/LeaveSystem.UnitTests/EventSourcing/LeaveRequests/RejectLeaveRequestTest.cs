@@ -43,7 +43,7 @@ public class RejectLeaveRequestTest
     public static IEnumerable<object[]>
         Get_WhenLeaveRequestStatusOtherThenPendingAndAccepted_ThenThrowInvalidOperationException_TestData()
     {
-        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u, new Mock<IBaseDateService>().Object);
+        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         void Reject(LeaveRequest l, string? r, FederatedUser u) => l.Reject(r, u);
         void Deprecate(LeaveRequest l, string? r, FederatedUser u) => l.Deprecate(r, u);
         yield return new object[] { Cancel };
