@@ -17,7 +17,7 @@ public class CreatePendingLeaveRequestTest
     public void WhenEventProvided_ThenCreateLeaveRequestWithThoseProperties()
     {
         //Given
-        var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedWithSickLeave();
+        var @event = FakeLeaveRequestCreatedProvider.GetSickLeaveRequest();
         //When
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //Then

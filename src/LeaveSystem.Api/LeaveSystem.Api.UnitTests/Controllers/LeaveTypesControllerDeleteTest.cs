@@ -39,14 +39,15 @@ public class LeaveTypesControllerDeleteTest
         await dbContext.LeaveTypes.AddRangeAsync(FakeLeaveTypeProvider.GetLeaveTypes());
         await dbContext.SaveChangesAsync();
         var sut = new LeaveTypesController(dbContext);
-        var fakeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid;
+        var fakeId = FakeLeaveTypeProvider.FakeSickLeaveId;
         //When
         var result = await sut.Delete(fakeId);
         //Then
         result.Should().BeOfType<NoContentResult>();
-        sut.Get().Should().BeEquivalentTo(new[]
+        var leaveTypesLeft = sut.Get().ToList();
+        leaveTypesLeft.Should().BeEquivalentTo(new[]
         {
-            FakeLeaveTypeProvider.GetFakeSickLeave(), FakeLeaveTypeProvider.GetFakeOnDemandLeave()
+            FakeLeaveTypeProvider.GetFakeHolidayLeave(), FakeLeaveTypeProvider.GetFakeOnDemandLeave()
         });
     }
 }

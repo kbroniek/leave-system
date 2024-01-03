@@ -36,7 +36,7 @@ public class HandleGetLeaveRequestDetailsTest
         //Given
         var repository = new InMemoryRepository<LeaveRequest>();
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedWithSickLeave()
+            FakeLeaveRequestCreatedProvider.GetSickLeaveRequest()
         );
         await repository.Add(leaveRequest, It.IsAny<CancellationToken>());
         var request = GetLeaveRequestDetails.Create(leaveRequest.Id);

@@ -1,33 +1,33 @@
 using FluentAssertions;
-using LeaveSystem.Db;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
 using LeaveSystem.Shared;
+using LeaveSystem.UnitTests.Extensions;
+using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.UnitTests.Stubs;
 using Marten;
 using Marten.Events;
 using Moq;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using LeaveSystem.Shared.Date;
-using LeaveSystem.UnitTests.Extensions;
-using LeaveSystem.UnitTests.Providers;
 using Xunit;
-using LeaveSystem.UnitTests.Stubs;
 
-namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
+namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
 
 public class ImpositionValidatorTest
 {
     private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private readonly Mock<IDocumentSession> documentSessionMock = new();
     private readonly Mock<IEventStore> eventStoreMock = new();
-    private readonly CurrentDateService currentDateService = new();
 
     private readonly LeaveRequestCreated fakeLeaveRequestCreatedEvent =
         FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
 
     private readonly FederatedUser fakeUser = FakeUserProvider.GetUserWithNameFakeoslav();
+
+    private ImpositionValidator GetSut() => new(documentSessionMock.Object);
 
     public ImpositionValidatorTest()
     {
@@ -41,22 +41,20 @@ public class ImpositionValidatorTest
         //Given
         var events = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds();
         var fakeEvent =
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2,
+            FakeLeaveRequestCreatedProvider.GetHolodayLeaveRequest(WorkingHours * 2,
                 FakeLeaveTypeProvider.FakeSickLeaveId);
         events.Add(fakeEvent);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);
         await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
-        var sut = GetSut(dbContext);
+        var sut = GetSut();
         //When
-        var act = async () => { await sut.ImpositionValidator(fakeLeaveRequestCreatedEvent); };
+        var act = async () => { await sut.Validate(fakeLeaveRequestCreatedEvent); };
         //Then
-        await act.Should().ThrowAsync<ValidationException>();
+        var result = await act.Should().ThrowAsync<ValidationException>();
+        result.WithMessage("Cannot create a new leave request in this time. The other leave is overlapping with this date.");
         documentSessionMock.VerifyLeaveRequestValidatorFunctions(entity.Id, Times.Once(), Times.AtLeastOnce());
     }
-
-    private CreateLeaveRequestValidator GetSut(LeaveSystemDbContext dbContext) =>
-        new(dbContext, documentSessionMock.Object, currentDateService);
 
     [Fact]
     public async Task
@@ -65,16 +63,16 @@ public class ImpositionValidatorTest
         //Given
         var events = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds();
         var fakeEvent =
-            FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedCalculatedFromCurrentDate(WorkingHours * 2,
+            FakeLeaveRequestCreatedProvider.GetHolodayLeaveRequest(WorkingHours * 2,
                 FakeLeaveTypeProvider.FakeSickLeaveId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);
         await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
-        var sut = GetSut(dbContext);
+        var sut = GetSut();
         //When
-        var act = async () => { await sut.ImpositionValidator(fakeLeaveRequestCreatedEvent); };
+        var act = async () => { await sut.Validate(fakeLeaveRequestCreatedEvent); };
         //Then
-        await act.Should().NotThrowAsync<ValidationException>();
+        var result = await act.Should().NotThrowAsync<ValidationException>();
         documentSessionMock.VerifyLeaveRequestValidatorFunctions(entity.Id, Times.Once(), Times.Never());
     }
 
@@ -88,10 +86,9 @@ public class ImpositionValidatorTest
         var events = FakeLeaveRequestCreatedProvider.GetLeaveRequestCreatedEventsWithDifferentIds();
         events.Add(fakeLeaveRequestCreatedEvent);
         eventStoreMock.SetupLimitValidatorFunctions(new MartenQueryableStub<LeaveRequestCreated>(events), entity);
-        await using var dbContext = await DbContextFactory.CreateAndFillDbAsync();
-        var sut = GetSut(dbContext);
+        var sut = GetSut();
         //When
-        var act = async () => { await sut.ImpositionValidator(fakeLeaveRequestCreatedEvent); };
+        var act = async () => { await sut.Validate(fakeLeaveRequestCreatedEvent); };
         //Then
         await act.Should().NotThrowAsync<ValidationException>();
         documentSessionMock.VerifyLeaveRequestValidatorFunctions(entity.Id, Times.Once(), Times.AtLeastOnce());
