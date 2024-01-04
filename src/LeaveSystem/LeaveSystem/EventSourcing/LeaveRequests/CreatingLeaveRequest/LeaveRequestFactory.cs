@@ -28,7 +28,7 @@ public class LeaveRequestFactory
     public virtual async Task<LeaveRequest> Create(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveType = await GetLeaveType(command.LeaveTypeId);
-        var now = dateService.GetWithoutTime();
+        var now = dateService.UtcNowWithoutTime();
         var workingHoursModel =
            await querySession.GetCurrentWorkingHoursForUser(command.CreatedBy.Id, now, cancellationToken)
            ?? throw new InvalidOperationException($"User with ID {command.CreatedBy.Id} does not have working Hours");

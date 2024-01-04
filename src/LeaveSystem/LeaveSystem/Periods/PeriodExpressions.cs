@@ -28,7 +28,51 @@ public class PeriodExpressions
         IDateToNullablePeriod period)
         where TDateToNullablePeriod : IDateToNullablePeriod =>
         x =>
+        // true statements:
+        // period = {
+        //      DateFrom = 2023-01-01
+        //      DateTo = null
+        // }
+        // x = {
+        //      DateFrom = 2023-01-02
+        //      DateTo = null
+        // }
+            (!x.DateTo.HasValue && !period.DateTo.HasValue && x.DateFrom >= period.DateFrom) ||
+        // period = {
+        //      DateFrom = 2023-01-01
+        //      DateTo = 2023-12-31
+        // }
+        // x = {
+        //      DateFrom = 2023-12-30
+        //      DateTo = null
+        // }
             (!x.DateTo.HasValue && x.DateFrom >= period.DateFrom && x.DateFrom <= period.DateTo) ||
-            (period.DateTo.HasValue && x.DateFrom <= period.DateTo && period.DateFrom <= x.DateTo) ||
-            !period.DateTo.HasValue && period.DateFrom >= x.DateFrom && period.DateFrom <= x.DateTo;
+        // period = {
+        //      DateFrom = 2023-01-01
+        //      DateTo = null
+        // }
+        // x = {
+        //      DateFrom = 2022-12-30
+        //      DateTo = 2023-01-02
+        // }
+            (!period.DateTo.HasValue && x.DateFrom >= period.DateFrom || x.DateTo >= period.DateFrom) ||
+        // period = {
+        //      DateFrom = 2023-01-01
+        //      DateTo = 2023-12-31
+        // }
+        // x = {
+        //      DateFrom = 2023-12-30
+        //      DateTo = 2024-01-02
+        // }
+            (x.DateTo.HasValue && period.DateTo.HasValue &&
+            ((x.DateFrom >= period.DateFrom && x.DateFrom <= period.DateTo) ||
+        // period = {
+        //      DateFrom = 2023-01-01
+        //      DateTo = 2023-12-31
+        // }
+        // x = {
+        //      DateFrom = 2022-12-30
+        //      DateTo = 2023-01-02
+        // }
+            (x.DateTo >= period.DateFrom && x.DateTo <= (period.DateTo ?? DateTimeOffset.MinValue)))); // nedded because throws an error
 }

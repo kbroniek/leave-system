@@ -44,7 +44,7 @@ public class UsedLeavesServiceTests
             .Setup_AggregateStreamAsync(entity, leaveRequestId)
             .Verifiable();
         var sut = GetSut();
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         // When
         var result = await sut.GetUsedLeavesDuration(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), userId, leaveTypeId, Enumerable.Empty<Guid>());
         // Then
@@ -69,7 +69,7 @@ public class UsedLeavesServiceTests
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
             .Verifiable();
         var sut = GetSut();
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         // When
         var result = await sut.GetUsedLeavesDuration(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), userId, leaveTypeId, Enumerable.Empty<Guid>());
         // Then
@@ -90,7 +90,7 @@ public class UsedLeavesServiceTests
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
             .Verifiable();
         var sut = GetSut();
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         // When
         var result = await sut.GetUsedLeavesDuration(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), "fakeAnotherUserId", leaveTypeId, Enumerable.Empty<Guid>());
         // Then
@@ -112,7 +112,7 @@ public class UsedLeavesServiceTests
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
             .Verifiable();
         var sut = GetSut();
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         // When
         var result = await sut.GetUsedLeavesDuration(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), userId, Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139627"), Enumerable.Empty<Guid>());
         // Then
@@ -134,7 +134,7 @@ public class UsedLeavesServiceTests
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
             .Verifiable();
         var sut = GetSut();
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         // When
         var result = await sut.GetUsedLeavesDuration(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), userId, leaveTypeId, Enumerable.Empty<Guid>());
         // Then
@@ -160,7 +160,7 @@ public class UsedLeavesServiceTests
             .Setup_AggregateStreamAsync(entity, leaveRequestId)
             .Verifiable();
         var sut = GetSut();
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         // When
         var result = await sut.GetUsedLeavesDuration(now.GetFirstDayOfYear(), now.GetLastDayOfYear(), userId, leaveTypeId, Enumerable.Empty<Guid>());
         // Then

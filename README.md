@@ -15,7 +15,7 @@ Install PostgreSQL and set up a database `leave-system` and a user `postgres` wi
 Run:
 
 ```
-cd  "$env:LOCALAPPDATA\Programs\pgAdmin 4\runtime"
+cd  "$env:LOCALAPPDATA\Programs\pgAdmin 4\v7\runtime"
 echo '\x \\ DROP DATABASE "leave-system"; CREATE DATABASE "leave-system";' | .\psql.exe -U postgres
 ```
 

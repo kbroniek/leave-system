@@ -41,6 +41,7 @@ public static class UsersEndpoints
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
             Guard.Against.Null(userId);
+            Guard.Against.InvalidEmail(userToUpdate.Email);
 
             await graphUserService.Update(userId, userToUpdate.Email, userToUpdate.Name, userToUpdate.Roles ?? Enumerable.Empty<string>(), cancellationToken);
 

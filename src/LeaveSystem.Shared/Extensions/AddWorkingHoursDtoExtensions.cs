@@ -5,6 +5,7 @@ namespace LeaveSystem.Shared.Extensions;
 
 public static class AddWorkingHoursDtoExtensions
 {
+    // TODO Move to unit tests.
     public static WorkingHoursDto ToWorkingHoursDto(this AddWorkingHoursDto source, Guid id) =>
         new(
             Guard.Against.NullOrWhiteSpace(source.UserId),
