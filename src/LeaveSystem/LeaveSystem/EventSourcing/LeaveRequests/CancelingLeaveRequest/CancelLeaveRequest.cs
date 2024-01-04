@@ -45,7 +45,7 @@ internal class HandleCancelLeaveRequest :
         var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
                              ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
-        leaveRequest.Cancel(command.Remarks, command.CanceledBy, dateService.GetWithoutTime());
+        leaveRequest.Cancel(command.Remarks, command.CanceledBy, dateService.UtcNowWithoutTime());
 
         await repository.Update(leaveRequest, cancellationToken);
 

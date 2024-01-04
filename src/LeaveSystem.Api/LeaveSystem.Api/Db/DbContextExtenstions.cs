@@ -253,19 +253,19 @@ public static class DbContextExtenstions
         {
             return;
         }
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         await CreateWorkingHours(
             commandBus,
             defaultUser.Id,
             DateTimeOffsetExtensions.CreateFromDate(now.Year - 1, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(now.Year + 2, 1, 1),
+            null,
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
             commandBus,
             testUsers[0].Id,
             DateTimeOffsetExtensions.CreateFromDate(now.Year - 1, 1, 1),
-            DateTimeOffsetExtensions.CreateFromDate(now.Year + 2, 1, 1),
+            null,
             TimeSpan.FromHours(8),
             defaultUser);
         await CreateWorkingHours(
@@ -303,13 +303,6 @@ public static class DbContextExtenstions
             DateTimeOffsetExtensions.CreateFromDate(now.Year + 1, 5, 6),
             TimeSpan.FromHours(4),
             defaultUser);
-        await CreateWorkingHours(
-            commandBus,
-            defaultUser.Id,
-            DateTimeOffsetExtensions.CreateFromDate(now.Year - 4, 2, 1),
-            DateTimeOffsetExtensions.CreateFromDate(now.Year - 2, 12, 31),
-            TimeSpan.FromHours(8),
-            defaultUser);
     }
 
     private static Task CreateWorkingHours(ICommandBus commandBus, string? userId, DateTimeOffset? dateFrom,
@@ -339,7 +332,7 @@ public static class DbContextExtenstions
         await SetupUser4(commandBus, defaultUser, testUsers[4], currentDateService);
         await SetupUser4(commandBus, defaultUser, defaultUser, currentDateService);
 
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         int firstMonth = now.Month > 6 ? 1 : 9;
         int secondMonth = now.Month > 6 ? 5 : 12;
         await AddSaturdayLeaveRequest(commandBus, testUsers[0], now, firstMonth);
@@ -356,7 +349,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser4(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         var start = GetFirstWorkingDay(now.GetFirstDayOfYear());
         var end = start;
 
@@ -372,7 +365,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser3(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         var start = GetFirstWorkingDay(now.GetFirstDayOfYear());
         var end = GetFirstWorkingDay(new DateTimeOffset(now.Year, 12, 20, 0, 0, 0, TimeSpan.Zero));
 
@@ -382,7 +375,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser2(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         var start = GetFirstWorkingDay(now);
         var end = start;
 
@@ -392,7 +385,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser1(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         var start = GetFirstWorkingDay(now.AddDays(-5));
         var end = GetFirstWorkingDay(now.AddDays(2));
 
@@ -421,7 +414,7 @@ public static class DbContextExtenstions
 
     private static async Task SetupUser0(ICommandBus commandBus, FederatedUser defaultUser, FederatedUser testUser, CurrentDateService currentDateService)
     {
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         var start = GetFirstWorkingDay(now);
         var end = GetFirstWorkingDay(now.AddDays(7));
 
@@ -526,7 +519,7 @@ public static class DbContextExtenstions
             return;
         }
 
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         var holidayLimits = testUsers.Select(u => new UserLeaveLimit
         {
             LeaveTypeId = holidayLeave.Id,

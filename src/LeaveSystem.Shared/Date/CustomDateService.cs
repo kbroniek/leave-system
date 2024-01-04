@@ -9,5 +9,5 @@ public class CustomDateService : CurrentDateService
         this.customDate = customDate;
     }
 
-    public override DateTimeOffset GetWithoutTime() => customDate;
+    public override DateTimeOffset UtcNowWithoutTime() => customDate;
 }
