@@ -4,7 +4,7 @@ namespace LeaveSystem.Shared.Auth;
 
 public class RoleRequirement : IAuthorizationRequirement
 {
-    public static RoleRequirement AuthorizeAll = new RoleRequirement(Enum.GetValues<RoleType>());
+    public static readonly RoleRequirement AuthorizeAll = new(Enum.GetValues<RoleType>());
     public RoleRequirement(params RoleType[] roles) =>
         Roles = roles;
 

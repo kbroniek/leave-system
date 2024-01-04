@@ -44,7 +44,7 @@ public class UserRolesGraphService
         var graphClient = graphClientFactory.Create();
         IDictionary<string, object> extensionInstance = new Dictionary<string, object>
         {
-            { roleAttributeName, JsonSerializer.Serialize(new RolesAttribute(roles)) }
+            { roleAttributeName, JsonSerializer.Serialize(new RolesResult(roles)) }
         };
         await graphClient.Users[userId]
             .Request()

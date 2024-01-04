@@ -43,7 +43,7 @@ public class GetGraphUserServiceGetSingleUserTest
         //When
         var result = await sut.Get(fakeId, CancellationToken.None);
         //Then
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesResult>(TestData.FakeRolesJson);
         result.Should().BeEquivalentTo(new
         {
             Id = user.Id,

@@ -14,7 +14,7 @@ public class GetGraphUserServiceGetTest
     public async Task WhenGetting_ThenReturnUsers()
     {
         //Given
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesResult>(TestData.FakeRolesJson);
         var users = GraphServiceUsersCollectionPageProvider.Get(TestData.FakeRoleAttributeName, TestData.FakeRolesJson);
         var graphClientFactoryMock = new Mock<IGraphClientFactory>();
         var graphServiceUsersCollectionRequestMock = new Mock<IGraphServiceUsersCollectionRequest>();

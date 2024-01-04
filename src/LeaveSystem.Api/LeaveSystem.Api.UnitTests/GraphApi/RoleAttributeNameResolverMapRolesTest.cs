@@ -15,8 +15,8 @@ public class RoleAttributeNameResolverMapRolesTest
         //When
         var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(
-            RolesAttribute.Empty,
-            o => o.ComparingByMembers<RolesAttribute>());
+            RolesResult.Empty,
+            o => o.ComparingByMembers<RolesResult>());
     }
 
     public static IEnumerable<object?[]>
@@ -38,7 +38,7 @@ public class RoleAttributeNameResolverMapRolesTest
     public void WhenThereIsSuchRolesRawInAdditionalData_ThenReturnRolesAttributeWithRolesFromRaw()
     {
         //Given
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesResult>(TestData.FakeRolesJson);
         var additionalData = new Dictionary<string, object>
         {
             {
@@ -57,7 +57,7 @@ public class RoleAttributeNameResolverMapRolesTest
         //When
         var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(fakeRolesAttribute
-        , o => o.ComparingByMembers<RolesAttribute>());
+        , o => o.ComparingByMembers<RolesResult>());
     }
 
     [Theory]
@@ -85,7 +85,7 @@ public class RoleAttributeNameResolverMapRolesTest
         //When
         var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(
-            RolesAttribute.Empty
-            , o => o.ComparingByMembers<RolesAttribute>());
+            RolesResult.Empty
+            , o => o.ComparingByMembers<RolesResult>());
     }
 }
