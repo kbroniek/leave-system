@@ -1,8 +1,4 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Graph;
-using System.Net;
-using static LeaveSystem.Api.Endpoints.Errors.ErrorHandlerMiddleware;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace LeaveSystem.Api.Endpoints.Errors;
 

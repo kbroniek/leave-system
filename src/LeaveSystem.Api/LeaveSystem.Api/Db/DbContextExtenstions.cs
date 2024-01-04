@@ -1,8 +1,7 @@
-﻿using Ardalis.GuardClauses;
-using FluentAssertions.Common;
+﻿using System.Text.Json;
+using Ardalis.GuardClauses;
 using GoldenEye.Commands;
 using GoldenEye.Queries;
-using GoldenEye.Registration;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Db;
@@ -15,7 +14,6 @@ using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 using WorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
 namespace LeaveSystem.Api.Db;
@@ -156,7 +154,7 @@ public static class DbContextExtenstions
             var serviceCollection = new ServiceCollection();
             var serviceProvider = serviceCollection
                 .AddServices(configuration)
-                .AddScoped<DateService>(_ => new CustomDateService(DateTimeOffset.Parse("2024-02-01 00:00:00 +01:00")))
+                .AddScoped<DateService>(_ => new CustomDateService(DateTimeOffset.Parse("2024-02-01 00:00:00 +00:00")))
                 .BuildServiceProvider();
             var dbContext = serviceProvider.GetRequiredService<LeaveSystemDbContext>();
             var graphUserService = serviceProvider.GetRequiredService<GetGraphUserService>();
