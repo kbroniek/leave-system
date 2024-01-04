@@ -16,7 +16,7 @@ public class BasicValidator
     {
         var dateFromWithoutTime = @event.DateFrom.GetDayWithoutTime();
         var dateToWithoutTime = @event.DateTo.GetDayWithoutTime();
-        var now = currentDateService.GetWithoutTime();
+        var now = currentDateService.UtcNowWithoutTime();
         var firstDay = now.GetFirstDayOfYear();
         var lastDay = now.GetLastDayOfYear();
         Guard.Against.OutOfRange(dateFromWithoutTime, nameof(@event.DateFrom), firstDay, lastDay);

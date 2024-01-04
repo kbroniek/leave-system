@@ -45,7 +45,7 @@ internal class HandleCancelLeaveRequest :
         var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
                              ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
-        if (leaveRequest.DateFrom < dateService.GetWithoutTime())
+        if (leaveRequest.DateFrom < dateService.UtcNowWithoutTime())
         {
             throw new InvalidOperationException("Canceling of past leave requests is not allowed.");
         }

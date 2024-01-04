@@ -40,7 +40,7 @@ public class HandleCancelLeaveRequestTest
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenUpdate()
     {
         //Given
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         var createdEvent = LeaveRequestCreated.Create(
             command.LeaveRequestId,
             now + TimeSpan.FromDays(1),
@@ -78,7 +78,7 @@ public class HandleCancelLeaveRequestTest
     public void WhenDateFromIsPastDate_ThenThrowInvalidOperationException()
     {
         //Given
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         var @event = LeaveRequestCreated.Create(
             command.LeaveRequestId,
             now - TimeSpan.FromMilliseconds(1),

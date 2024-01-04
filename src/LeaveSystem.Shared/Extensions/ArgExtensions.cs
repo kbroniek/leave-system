@@ -7,6 +7,7 @@ namespace LeaveSystem.Shared.Extensions;
 
 public static class ArgExtensions
 {
+    // TODO Move to unit tests.
     public static T IsEquivalentTo<T>(object target) where T : class
     {
         return Arg.Is<T>(x => x.IsEquivalentTo(target));

@@ -1,5 +1,6 @@
 using GoldenEye.Registration;
 using LeaveSystem;
+using LeaveSystem.Api;
 using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
@@ -29,7 +30,7 @@ builder.Services.AddRazorPages();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwagger();
 builder.Services.AddCors();
 builder.Services.AddControllers().AddOData(opt =>
     opt.AddRouteComponents("odata", GetEdmModel())

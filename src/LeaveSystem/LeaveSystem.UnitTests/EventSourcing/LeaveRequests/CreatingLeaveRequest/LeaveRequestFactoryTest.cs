@@ -22,7 +22,7 @@ public class LeaveRequestFactoryTest
     private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
 
 
-    private static readonly DateTimeOffset FakeNow = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+    private static readonly DateTimeOffset FakeNow = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
 
     [Fact]
     public async Task WhenLeaveTypeNotFound_ThenThrowNotFoundException()
