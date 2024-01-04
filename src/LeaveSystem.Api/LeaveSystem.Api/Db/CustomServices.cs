@@ -2,7 +2,13 @@
 
 namespace LeaveSystem.Api.Db;
 
-public class CustomDateService : CurrentDateService
+public class CustomDateService : DateService
 {
-    public override DateTimeOffset UtcNowWithoutTime() => DateTimeOffset.Parse("2023-12-01 00:00:00 +01:00");
+    private readonly DateTimeOffset dateTime;
+
+    public CustomDateService(DateTimeOffset dateTime)
+    {
+        this.dateTime = dateTime;
+    }
+    public override DateTimeOffset UtcNowWithoutTime() => dateTime;
 }

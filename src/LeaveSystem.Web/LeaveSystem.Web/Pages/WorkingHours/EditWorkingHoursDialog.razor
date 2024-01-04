@@ -7,7 +7,7 @@
 @inject IToastService ToastService
 @inject WorkingHoursService WorkingHoursService
 @inject ILogger<EditWorkingHoursDialog> Logger
-@inject CurrentDateService DateService
+@inject DateService DateService
 
 @if (workingHours is null)
 {
@@ -107,7 +107,7 @@ else
         IEnumerable<string> userIds,
         WorkingHoursStatus[] statuses,
         TimeSpan timeout,
-        CurrentDateService dateService,
+        DateService dateService,
         WorkingHoursService workingHoursService)
     {
         var now = dateService.UtcNow();

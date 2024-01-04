@@ -6,17 +6,17 @@ namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validator
 
 public class BasicValidator
 {
-    private readonly CurrentDateService currentDateService;
+    private readonly DateService dateService;
 
-    public BasicValidator(CurrentDateService currentDateService)
+    public BasicValidator(DateService dateService)
     {
-        this.currentDateService = currentDateService;
+        this.dateService = dateService;
     }
     public virtual void DataRangeValidate(LeaveRequestCreated @event)
     {
         var dateFromWithoutTime = @event.DateFrom.GetDayWithoutTime();
         var dateToWithoutTime = @event.DateTo.GetDayWithoutTime();
-        var now = currentDateService.UtcNowWithoutTime();
+        var now = dateService.UtcNowWithoutTime();
         var firstDay = now.GetFirstDayOfYear();
         var lastDay = now.GetLastDayOfYear();
         Guard.Against.OutOfRange(dateFromWithoutTime, nameof(@event.DateFrom), firstDay, lastDay);

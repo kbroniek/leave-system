@@ -24,7 +24,7 @@ public class HandleGetWorkingHoursTest
     private HandleGetWorkingHours GetSut() => new(querySession);
 
     private static readonly LeaveSystem.EventSourcing.WorkingHours.WorkingHours[] Data = FakeWorkingHoursProvider
-        .GetAll(FakeDateServiceProvider.GetDateService().UtcNow())
+        .GetAll(FakeDateServiceProvider.GetDateService().UtcNowWithoutTime())
         .ToArray();
 
 

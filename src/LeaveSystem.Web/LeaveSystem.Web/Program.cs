@@ -15,6 +15,6 @@ builder.Services.AddAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddLeaveSystemModule();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<CurrentDateService>();
+builder.Services.AddScoped<DateService>();
 
 await builder.Build().RunAsync();

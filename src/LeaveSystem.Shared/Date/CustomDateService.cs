@@ -1,6 +1,6 @@
 namespace LeaveSystem.Shared.Date;
 
-public class CustomDateService : CurrentDateService
+public class CustomDateService : DateService
 {
     private readonly DateTimeOffset customDate;
 
@@ -10,4 +10,5 @@ public class CustomDateService : CurrentDateService
     }
 
     public override DateTimeOffset UtcNowWithoutTime() => customDate;
+    public override DateTimeOffset UtcNow() => customDate;
 }

@@ -49,7 +49,7 @@ IEdmModel GetEdmModel()
 }
 
 builder.Services.AddServices(builder.Configuration)
-    .AddScoped<CurrentDateService>();
+    .AddScoped<DateService>();
 
 var app = builder.Build();
 
