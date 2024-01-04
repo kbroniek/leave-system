@@ -2,6 +2,9 @@ using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using System.Collections.Generic;
+using LeaveSystem.Shared.Date;
+using Moq;
+using System;
 
 namespace LeaveSystem.UnitTests.TestDataGenerators;
 
@@ -9,7 +12,7 @@ public static class LeaveRequestTestDataGenerator
 {
     public static IEnumerable<object[]> GetCancelAcceptAndRejectMethods()
     {
-        void Cancel(LeaveRequest l, string r, FederatedUser u) => l.Cancel(r, u);
+        void Cancel(LeaveRequest l, string r, FederatedUser u) => l.Cancel(r, u, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         void Accept(LeaveRequest l, string r, FederatedUser u) => l.Accept(r, u);
         void Deprecate(LeaveRequest l, string r, FederatedUser u) => l.Deprecate(r, u);
         yield return new object[] { Cancel };

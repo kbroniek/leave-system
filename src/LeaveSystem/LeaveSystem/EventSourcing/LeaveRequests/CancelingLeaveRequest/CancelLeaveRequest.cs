@@ -32,9 +32,9 @@ internal class HandleCancelLeaveRequest :
     ICommandHandler<CancelLeaveRequest>
 {
     private readonly IRepository<LeaveRequest> repository;
-    private readonly CurrentDateService dateService;
+    private readonly DateService dateService;
 
-    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository, CurrentDateService dateService)
+    public HandleCancelLeaveRequest(IRepository<LeaveRequest> repository, DateService dateService)
     {
         this.repository = repository;
         this.dateService = dateService;
@@ -45,11 +45,7 @@ internal class HandleCancelLeaveRequest :
         var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
                              ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
-        if (leaveRequest.DateFrom < dateService.UtcNowWithoutTime())
-        {
-            throw new InvalidOperationException("Canceling of past leave requests is not allowed.");
-        }
-        leaveRequest.Cancel(command.Remarks, command.CanceledBy);
+        leaveRequest.Cancel(command.Remarks, command.CanceledBy, dateService.UtcNowWithoutTime());
 
         await repository.Update(leaveRequest, cancellationToken);
 

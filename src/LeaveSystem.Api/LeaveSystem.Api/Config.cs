@@ -1,9 +1,13 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using GoldenEye.Registration;
+using LeaveSystem.Api.GraphApi;
+using LeaveSystem.Shared.Date;
+using Microsoft.OpenApi.Models;
 
 namespace LeaveSystem.Api;
 
 public static class Config
 {
+    private const string azureReadUsersSection = "ManageAzureUsers";
     public static IServiceCollection AddSwagger(this IServiceCollection services)
     {
         return services.AddSwaggerGen(c =>
@@ -40,4 +44,9 @@ public static class Config
         });
         });
     }
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration) =>
+        services.AddGraphFactory(configuration.GetSection(azureReadUsersSection))
+            .AddDDD()
+            .AddLeaveSystemModule(configuration);
+
 }

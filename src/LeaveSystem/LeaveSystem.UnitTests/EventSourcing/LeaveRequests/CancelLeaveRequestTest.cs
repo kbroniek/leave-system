@@ -7,10 +7,12 @@ using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestDataGenerators;
+using Moq;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
@@ -28,7 +30,7 @@ public class CancelLeaveRequestTest
         //When
         var act = () =>
         {
-            leaveRequest.Cancel("fake remarks", canceledBy);    
+            leaveRequest.Cancel("fake remarks", canceledBy, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));    
         } ;
         //Then
         act.Should().Throw<InvalidOperationException>()
@@ -47,7 +49,7 @@ public class CancelLeaveRequestTest
         //When
         var act = () =>
         {
-            leaveRequest.Cancel("fake cancel remarks", canceledBy);    
+            leaveRequest.Cancel("fake cancel remarks", canceledBy, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));    
         } ;
         //Then
         act.Should().Throw<InvalidOperationException>()
@@ -57,10 +59,44 @@ public class CancelLeaveRequestTest
     public static IEnumerable<object[]>
         Get_WhenLeaveRequestStatusDifferentThanPendingOrAccepted_thenThrowInvalidOperationException_TestData()
     {
-        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u);
+        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         void Reject(LeaveRequest l, string? r, FederatedUser u) => l.Reject(r, u);
         yield return new object[] { Cancel };
         yield return new object[] { Reject };
+    }
+
+    [Theory]
+    [MemberData(nameof(Get_WhenDateFromIsPastDate_ThenThrowInvalidOperationException_TestData))]
+    public void WhenDateFromIsPastDate_ThenThrowInvalidOperationException(TimeSpan timeToSubtract)
+    {
+        //Given
+        var utcNow = DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00");
+        var @event = LeaveRequestCreated.Create(
+            Guid.NewGuid(),
+            utcNow - timeToSubtract,
+            utcNow + TimeSpan.FromDays(5),
+            TimeSpan.FromHours(16),
+            Guid.NewGuid(), 
+            "fake created remarks",
+            User,
+            WorkingHoursUtils.DefaultWorkingHours
+        );
+        var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
+        //When
+        var act = () =>
+        {
+            leaveRequest.Cancel("fake cancel remarks", User, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));    
+        } ;
+        //Then
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("Canceling of past leave requests is not allowed.");
+    }
+
+    public static IEnumerable<object[]> Get_WhenDateFromIsPastDate_ThenThrowInvalidOperationException_TestData()
+    {
+        yield return new object[] { TimeSpan.FromHours(8) };
+        yield return new object[] { TimeSpan.FromDays(2) };
+        yield return new object[] { TimeSpan.FromMilliseconds(1) };
     }
 
     [Theory]
@@ -73,7 +109,7 @@ public class CancelLeaveRequestTest
         var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //When
-        leaveRequest.Cancel(remarks, User);
+        leaveRequest.Cancel(remarks, User, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {
@@ -102,7 +138,7 @@ public class CancelLeaveRequestTest
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         actionBeforeReject(leaveRequest, fakeRemarks, User);
         //When
-        leaveRequest.Cancel(fakeRejectRemarks, User);
+        leaveRequest.Cancel(fakeRejectRemarks, User, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         //Then
         leaveRequest.Should().BeEquivalentTo(new
             {

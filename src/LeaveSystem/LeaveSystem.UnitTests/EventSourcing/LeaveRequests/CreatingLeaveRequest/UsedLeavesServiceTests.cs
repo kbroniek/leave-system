@@ -152,7 +152,7 @@ public class UsedLeavesServiceTests
         const string userId = "fakeUserId";
         LeaveRequestCreated fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, userId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
-        entity.Cancel("fake remarks", FederatedUser.Create(userId, "fakeUser@fake.com", "Fakeoslav"));
+        entity.Cancel("fake remarks", FederatedUser.Create(userId, "fakeUser@fake.com", "Fakeoslav"), DateTimeOffset.Parse("2023-07-10T00:00:00.0000000+00:00"));
         eventStoreMock
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
             .Verifiable();

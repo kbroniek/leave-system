@@ -1,12 +1,10 @@
-using System.Text.Json;
-using FluentAssertions;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Api.UnitTests.Providers;
-using LeaveSystem.Api.UnitTests.Stubs;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
 using Moq;
+using System.Text.Json;
 
 namespace LeaveSystem.Api.UnitTests.Endpoints.Employees;
 
@@ -34,7 +32,7 @@ public class GetGraphUserServiceGetTest
         graphClientFactoryMock.Setup(x => x.Create())
             .Returns(graphClientMock.Object);
         var rolesAttributeNameResolver = new RoleAttributeNameResolver(TestData.FakeRoleAttributeName);
-        var sut = new GetGraphUserService(graphClientFactoryMock.Object, rolesAttributeNameResolver);
+        var sut = new GetGraphUserService(graphClientFactoryMock.Object, rolesAttributeNameResolver, FakeDateServiceProvider.GetDateService());
         //When
         var federatedUsers = await sut.Get(CancellationToken.None);
         //Then

@@ -1,5 +1,3 @@
-using GoldenEye.Registration;
-using LeaveSystem;
 using LeaveSystem.Api;
 using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Db;
@@ -50,9 +48,8 @@ IEdmModel GetEdmModel()
     return builder.GetEdmModel();
 }
 
-builder.Services.AddScoped<CurrentDateService>();
-builder.Services.AddDDD();
-builder.Services.AddLeaveSystemModule(builder.Configuration);
+builder.Services.AddServices(builder.Configuration)
+    .AddScoped<DateService>();
 
 var app = builder.Build();
 
@@ -103,7 +100,7 @@ app
 await app.MigrateDb();
 if (app.Environment.IsDevelopment())
 {
-    _ = app.FillInDatabase();
+    _ = app.FillInDatabase(builder.Configuration);
 }
 
 await app.RunAsync();
