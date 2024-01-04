@@ -63,8 +63,6 @@ public class LimitValidator
         }
     }
 
-    private TimeSpan CalculateRemaningLimit(TimeSpan limit, TimeSpan? overdueLimit, TimeSpan usedLimits)
-    {
-        return limit + (overdueLimit ?? TimeSpan.Zero) - usedLimits;
-    }
+    private static TimeSpan CalculateRemaningLimit(TimeSpan limit, TimeSpan? overdueLimit, TimeSpan usedLimits) => 
+        limit + (overdueLimit ?? TimeSpan.Zero) - usedLimits;
 }

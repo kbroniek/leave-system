@@ -1,4 +1,4 @@
-using LeaveSystem.Api.Controllers;
+﻿using LeaveSystem.Api.Controllers;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.UnitTests;
@@ -7,10 +7,8 @@ namespace LeaveSystem.Api.UnitTests.Controllers;
 
 public class LeaveTypesControllerGetTest
 {
-    private LeaveTypesController GetSut(LeaveSystemDbContext dbContext)
-    {
-        return new LeaveTypesController(dbContext);
-    }
+    private static LeaveTypesController GetSut(LeaveSystemDbContext dbContext) => 
+        new(dbContext);
 
     [Fact]
     public async Task WhenGettingSet_ThenReturnThisSet()

@@ -1,16 +1,15 @@
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.LeaveTypes;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
-using Marten.Linq.Includes;
 
 namespace LeaveSystem.Web.UnitTests.Pages.LeaveTypes;
 
 public class GetLeaveTypeTest
 {
-    private HttpClient httpClient;
+    private HttpClient httpClient = null!;
 
-    private LeaveTypesService GetSut() => new (httpClient);
-    
+    private LeaveTypesService GetSut() => new(httpClient);
+
     [Fact]
     public async Task WhenGettingTypeWithThisId_ThenReturnIt()
     {

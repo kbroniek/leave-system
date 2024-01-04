@@ -1,4 +1,5 @@
-﻿using LeaveSystem.Shared.LeaveRequests;
+﻿using System.Globalization;
+using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.Api.Extensions;
@@ -49,7 +50,9 @@ public static class QueryCollectionExtensions
         var paramValue = query[paramName];
         try
         {
-            return !string.IsNullOrEmpty(paramValue) ? paramValue.Select(x => Enum.Parse<LeaveRequestStatus>(x)).ToArray() : null;
+            return !string.IsNullOrEmpty(paramValue) ?
+                paramValue.Where(x => x is not null).Select(x => Enum.Parse<LeaveRequestStatus>(x!)).ToArray() :
+                null;
         }
         catch (Exception ex)
         {
@@ -62,7 +65,9 @@ public static class QueryCollectionExtensions
         var paramValue = query[paramName];
         try
         {
-            return !string.IsNullOrEmpty(paramValue) ? paramValue.Select(x => Enum.Parse<WorkingHoursStatus>(x!)).ToArray() : null;
+            return !string.IsNullOrEmpty(paramValue) ?
+                paramValue.Where(x => x is not null).Select(x => Enum.Parse<WorkingHoursStatus>(x!)).ToArray() :
+                null;
         }
         catch (Exception ex)
         {
@@ -74,7 +79,9 @@ public static class QueryCollectionExtensions
         var paramValue = query[paramName];
         try
         {
-            return !string.IsNullOrEmpty(paramValue) ? paramValue.Select(x => Guid.Parse(x)).ToArray() : null;
+            return !string.IsNullOrEmpty(paramValue) ?
+                paramValue.Where(x => x is not null).Select(x => Guid.Parse(x!)).ToArray() :
+                null;
         }
         catch (Exception ex)
         {
@@ -87,7 +94,7 @@ public static class QueryCollectionExtensions
         var paramValue = query[paramName];
         try
         {
-            return !string.IsNullOrEmpty(paramValue) ? DateTimeOffset.Parse(paramValue) : null;
+            return !string.IsNullOrEmpty(paramValue) ? DateTimeOffset.Parse(paramValue!, CultureInfo.CurrentCulture) : null;
         }
         catch (Exception ex)
         {
@@ -105,7 +112,7 @@ public static class QueryCollectionExtensions
         var paramValue = query[paramName];
         try
         {
-            return !string.IsNullOrEmpty(paramValue) ? int.Parse(paramValue) : null;
+            return !string.IsNullOrEmpty(paramValue) ? int.Parse(paramValue!, CultureInfo.CurrentCulture) : null;
         }
         catch (Exception ex)
         {

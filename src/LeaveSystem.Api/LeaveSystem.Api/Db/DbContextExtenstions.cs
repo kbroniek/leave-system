@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using Ardalis.GuardClauses;
 using GoldenEye.Commands;
 using GoldenEye.Queries;
@@ -154,7 +155,7 @@ public static class DbContextExtenstions
             var serviceCollection = new ServiceCollection();
             var serviceProvider = serviceCollection
                 .AddServices(configuration)
-                .AddScoped<DateService>(_ => new CustomDateService(DateTimeOffset.Parse("2024-02-01 00:00:00 +00:00")))
+                .AddScoped<DateService>(_ => new CustomDateService(DateTimeOffset.Parse("2024-02-01 00:00:00 +00:00", CultureInfo.CurrentCulture)))
                 .BuildServiceProvider();
             var dbContext = serviceProvider.GetRequiredService<LeaveSystemDbContext>();
             var graphUserService = serviceProvider.GetRequiredService<GetGraphUserService>();
@@ -201,6 +202,7 @@ public static class DbContextExtenstions
             var usersToUpdate = testUsers.Where(u => IsRoleNotEqual(graphUsers, u));
             foreach (var userToUpdate in usersToUpdate)
             {
+                Guard.Against.InvalidEmail(userToUpdate.Email);
                 await saveGraphUserService.Update(userToUpdate.Id, userToUpdate.Email, userToUpdate.Name,
                     userToUpdate.Roles, cancellationToken);
             }

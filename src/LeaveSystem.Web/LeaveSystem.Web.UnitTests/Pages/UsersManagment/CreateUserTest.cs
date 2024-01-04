@@ -1,5 +1,4 @@
 using System.Net;
-using System.Text;
 using LeaveSystem.Web.Pages.UsersManagement;
 using LeaveSystem.Web.UnitTests.TestStuff.Factories;
 
@@ -7,7 +6,7 @@ namespace LeaveSystem.Web.UnitTests.Pages.UsersManagment;
 
 public class CreateUserTest
 {
-    private HttpClient httpClient;
+    private HttpClient httpClient = null!;
 
     private UsersService GetSut() => new(httpClient);
 
@@ -21,15 +20,12 @@ public class CreateUserTest
         var sut = GetSut();
         //When
         var id = string.Empty;
-        var act = async () =>
-        {
-            id = await sut.Create(user);
-        };
+        var act = async () => id = await sut.Create(user);
         //Then
         await act.Should().NotThrowAsync<Exception>();
         id.Should().Be(user.Id);
     }
-    
+
     [Theory]
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.Forbidden)]
@@ -42,10 +38,7 @@ public class CreateUserTest
         httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users", user, statusCode);
         var sut = GetSut();
         //When
-        var act = async () =>
-        {
-            await sut.Create(user);
-        };
+        var act = async () => await sut.Create(user);
         //Then
         await act.Should().ThrowAsync<InvalidOperationException>();
     }

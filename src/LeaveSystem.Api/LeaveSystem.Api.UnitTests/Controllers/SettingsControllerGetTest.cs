@@ -1,4 +1,4 @@
-using LeaveSystem.Api.Controllers;
+﻿using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.UnitTests.TestExtensions;
 using LeaveSystem.Db;
 using LeaveSystem.UnitTests;
@@ -7,10 +7,8 @@ namespace LeaveSystem.Api.UnitTests.Controllers;
 
 public class SettingsControllerGetTest
 {
-    private SettingsController GetSut(LeaveSystemDbContext dbContext)
-    {
-        return new SettingsController(dbContext);
-    }
+    private static SettingsController GetSut(LeaveSystemDbContext dbContext) => 
+        new(dbContext);
 
     [Fact]
     public async Task WhenGettingSet_ThenReturnThisSet()
@@ -20,6 +18,6 @@ public class SettingsControllerGetTest
         var sut = GetSut(dbContext);
         //When
         //Then
-        await sut.CheckGetMethodAsync(dbContext);
+        sut.CheckGetMethod(dbContext);
     }
 }

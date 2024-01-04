@@ -23,7 +23,7 @@ public class BasicValidator
         Guard.Against.OutOfRange(dateToWithoutTime, nameof(@event.DateTo), firstDay, lastDay);
         if (dateFromWithoutTime > dateToWithoutTime)
         {
-            throw new ArgumentOutOfRangeException(nameof(@event.DateFrom),
+            throw new ArgumentOutOfRangeException(nameof(@event),
                 "Date from has to be less than date to.");
         }
     }
@@ -37,13 +37,13 @@ public class BasicValidator
         var dateFromDayKind = DateCalculator.GetDayKind(@event.DateFrom);
         if (dateFromDayKind != DateCalculator.DayKind.WORKING)
         {
-            throw new ArgumentOutOfRangeException(nameof(@event.DateFrom), "The date from is off work.");
+            throw new ArgumentOutOfRangeException(nameof(@event), "The date from is off work.");
         }
 
         var dateToDayKind = DateCalculator.GetDayKind(@event.DateTo);
         if (dateToDayKind != DateCalculator.DayKind.WORKING)
         {
-            throw new ArgumentOutOfRangeException(nameof(@event.DateTo), "The date to is off work.");
+            throw new ArgumentOutOfRangeException(nameof(@event), "The date to is off work.");
         }
     }
 }

@@ -20,7 +20,7 @@ public class LeaveSystemDbContext : DbContext
         OnSettingsCreating(modelBuilder);
     }
 
-    private void OnSettingsCreating(ModelBuilder modelBuilder)
+    private static void OnSettingsCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Setting>()
              .HasKey(e => e.Id);
@@ -35,7 +35,7 @@ public class LeaveSystemDbContext : DbContext
             .HasConversion(new TypeToJsonConverter<JsonDocument>());
     }
 
-    private void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)
+    private static void OnUserLeaveLimitCreating(ModelBuilder modelBuilder)
     {
         var userLeaveLimitProperties = new TypeToJsonConverter<UserLeaveLimit.UserLeaveLimitProperties?>();
         modelBuilder.Entity<UserLeaveLimit>()

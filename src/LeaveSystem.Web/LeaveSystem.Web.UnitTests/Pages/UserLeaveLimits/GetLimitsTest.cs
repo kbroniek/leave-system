@@ -10,9 +10,9 @@ namespace LeaveSystem.Web.UnitTests.Pages.UserLeaveLimits;
 
 public class GetLimitsTest
 {
-    private HttpClient httpClient;
+    private HttpClient httpClient = null!;
 
-    private string GetUrl(DateTimeOffset since, DateTimeOffset until) =>
+    private static string GetUrl(DateTimeOffset since, DateTimeOffset until) =>
         $"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
 
     private UserLeaveLimitsService GetSut() => new(httpClient);
@@ -74,7 +74,7 @@ public class GetLimitsTest
     [Theory]
     [MemberData(nameof(Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData))]
     public async Task WhenResponseDataIsNull_ThenReturnEmptyCollection(
-        ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto> userLeaveLimits)
+        ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto>? userLeaveLimits)
     {
         //Given
         var since = DateTimeOffsetExtensions.CreateFromDate(2020, 1, 3);
@@ -89,9 +89,9 @@ public class GetLimitsTest
         result.Should().BeEquivalentTo(Enumerable.Empty<object>());
     }
 
-    public static IEnumerable<object[]> Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData()
+    public static IEnumerable<object?[]> Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData()
     {
-        yield return new object[] { null };
+        yield return new object?[] { null };
         yield return new object[] { new ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto>() };
     }
 }

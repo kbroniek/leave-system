@@ -1,1 +1,9 @@
 # Project level configuraiton
+
+[*.{cs}]
+# CS8974: Converting method group 'Method_Name' to non-delegate type 'object'.
+dotnet_diagnostic.CS8974.severity = none
+# CA1707: Identifiers should not contain underscores
+dotnet_diagnostic.CA1707.severity = none
+# CA1305: Specify IFormatProvider
+dotnet_diagnostic.CA1305.severity = none

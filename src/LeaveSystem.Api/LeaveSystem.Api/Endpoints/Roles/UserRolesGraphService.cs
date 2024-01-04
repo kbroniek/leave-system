@@ -1,8 +1,7 @@
-﻿using LeaveSystem.Shared;
-using Microsoft.Graph;
-using System.Text.Json;
+﻿using System.Text.Json;
 using LeaveSystem.Api.GraphApi;
-using GraphClientFactory = LeaveSystem.Api.GraphApi.GraphClientFactory;
+using LeaveSystem.Shared;
+using Microsoft.Graph;
 
 namespace LeaveSystem.Api.Endpoints.Roles;
 
@@ -56,7 +55,7 @@ public class UserRolesGraphService
 
     public record GraphUserRole(string Id, IEnumerable<string> Roles)
     {
-        public static GraphUserRole Create(string id, IDictionary<string, object>? additionalData, string roleAttributeName) =>
+        public static GraphUserRole Create(string id, IDictionary<string, object?>? additionalData, string roleAttributeName) =>
             new(id, RoleAttributeNameResolver.MapRoles(additionalData, roleAttributeName).Roles);
     }
 }

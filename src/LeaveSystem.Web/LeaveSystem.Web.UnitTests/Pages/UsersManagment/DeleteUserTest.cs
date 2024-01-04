@@ -6,7 +6,7 @@ namespace LeaveSystem.Web.UnitTests.Pages.UsersManagment;
 
 public class DeleteUserTest
 {
-    private HttpClient httpClient;
+    private HttpClient httpClient = null!;
 
     private UsersService GetSut() => new(httpClient);
 
@@ -18,14 +18,11 @@ public class DeleteUserTest
         httpClient = HttpClientMockFactory.Create($"api/users/{userId}", HttpStatusCode.Created);
         var sut = GetSut();
         //When
-        var act = async () =>
-        {
-            await sut.Delete(userId);
-        };
+        var act = async () => await sut.Delete(userId);
         //Then
         await act.Should().NotThrowAsync<Exception>();
     }
-    
+
     [Theory]
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.Forbidden)]
@@ -38,10 +35,7 @@ public class DeleteUserTest
         httpClient = HttpClientMockFactory.Create($"api/users", statusCode);
         var sut = GetSut();
         //When
-        var act = async () =>
-        {
-            await sut.Delete(userId);
-        };
+        var act = async () => await sut.Delete(userId);
         //Then
         await act.Should().ThrowAsync<InvalidOperationException>();
     }

@@ -66,8 +66,8 @@ public class HandleCancelLeaveRequestTest
             LastModifiedBy = command.CanceledBy,
             Remarks = new[]
             {
-                new LeaveRequest.RemarksModel(createdEvent.Remarks, createdEvent.CreatedBy),
-                new LeaveRequest.RemarksModel(command.Remarks, command.CanceledBy)
+                new LeaveRequest.RemarksModel(createdEvent.Remarks!, createdEvent.CreatedBy),
+                new LeaveRequest.RemarksModel(command.Remarks!, command.CanceledBy)
             },
             Version = 2
         }, o => o.ExcludingMissingMembers());

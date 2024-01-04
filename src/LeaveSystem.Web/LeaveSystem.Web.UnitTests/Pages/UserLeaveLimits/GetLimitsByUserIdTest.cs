@@ -1,6 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Xml;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
@@ -12,7 +10,7 @@ namespace LeaveSystem.Web.UnitTests.Pages.UserLeaveLimits;
 
 public class GetLimitsByUserIdTest
 {
-    private HttpClient httpClient;
+    private HttpClient httpClient = null!;
 
     public UserLeaveLimitsService GetSut() => new(httpClient);
 
@@ -27,11 +25,11 @@ public class GetLimitsByUserIdTest
         {
             new
             {
-                Limit = TimeSpan.FromHours(16), 
-                OverdueLimit = TimeSpan.FromHours(4), 
-                LeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId, 
+                Limit = TimeSpan.FromHours(16),
+                OverdueLimit = TimeSpan.FromHours(4),
+                LeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 ValidSince = DateTimeOffsetExtensions.CreateFromDate(2020, 1, 4),
-                ValidUntil = DateTimeOffsetExtensions.CreateFromDate(2020, 3, 6), 
+                ValidUntil = DateTimeOffsetExtensions.CreateFromDate(2020, 3, 6),
                 Property = new
                 {
                     Description = "fake desc"
@@ -39,11 +37,11 @@ public class GetLimitsByUserIdTest
             },
             new
             {
-                Limit = TimeSpan.FromHours(8), 
-                OverdueLimit = TimeSpan.FromHours(16), 
-                LeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId, 
+                Limit = TimeSpan.FromHours(8),
+                OverdueLimit = TimeSpan.FromHours(16),
+                LeaveTypeId = FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 ValidSince = DateTimeOffsetExtensions.CreateFromDate(2021, 1, 4),
-                ValidUntil = DateTimeOffsetExtensions.CreateFromDate(2021, 4, 6), 
+                ValidUntil = DateTimeOffsetExtensions.CreateFromDate(2021, 4, 6),
                 Property = new
                 {
                     Description = "fake desc"
@@ -51,11 +49,11 @@ public class GetLimitsByUserIdTest
             },
             new
             {
-                Limit = TimeSpan.FromHours(16), 
-                OverdueLimit = TimeSpan.FromHours(4), 
-                LeaveTypeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid, 
+                Limit = TimeSpan.FromHours(16),
+                OverdueLimit = TimeSpan.FromHours(4),
+                LeaveTypeId = FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
                 ValidSince = DateTimeOffsetExtensions.CreateFromDate(2020, 9, 4),
-                ValidUntil = DateTimeOffsetExtensions.CreateFromDate(2020, 12, 6), 
+                ValidUntil = DateTimeOffsetExtensions.CreateFromDate(2020, 12, 6),
                 Property = new
                 {
                     Description = "fake desc"
@@ -64,7 +62,7 @@ public class GetLimitsByUserIdTest
         }.ToODataResponse();
         var url =
             $"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
-        httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, data, new JsonSerializerOptions { Converters = { new TimeSpanToStringConverter() }});
+        httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, data, new JsonSerializerOptions { Converters = { new TimeSpanToStringConverter() } });
         var sut = GetSut();
         //When
         var result = await sut.GetLimits(userId, since, until);
@@ -74,7 +72,7 @@ public class GetLimitsByUserIdTest
 
     [Theory]
     [MemberData(nameof(Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData))]
-    public async Task WhenResponseDataIsNull_ThenReturnEmptyCollection(ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto> userLeaveLimits)
+    public async Task WhenResponseDataIsNull_ThenReturnEmptyCollection(ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto>? userLeaveLimits)
     {
         //Given
         var userId = Guid.NewGuid().ToString();
@@ -82,7 +80,7 @@ public class GetLimitsByUserIdTest
         var until = DateTimeOffsetExtensions.CreateFromDate(2021, 5, 24);
         var url =
             $"odata/UserLeaveLimits?$select=Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property&$filter=AssignedToUserId eq '{userId}' and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))";
-        httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, userLeaveLimits, new JsonSerializerOptions { Converters = { new TimeSpanToStringConverter() }});
+        httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, userLeaveLimits, new JsonSerializerOptions { Converters = { new TimeSpanToStringConverter() } });
         var sut = GetSut();
         //When
         var result = await sut.GetLimits(userId, since, until);
@@ -90,9 +88,9 @@ public class GetLimitsByUserIdTest
         result.Should().BeEquivalentTo(Enumerable.Empty<object>());
     }
 
-    public static IEnumerable<object[]> Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData()
+    public static IEnumerable<object?[]> Get_WhenResponseDataIsNull_ThenReturnEmptyCollection_TestData()
     {
-        yield return new object[] { null };
+        yield return new object?[] { null };
         yield return new object[] { new ODataResponse<UserLeaveLimitsService.UserLeaveLimitDto>() };
     }
 

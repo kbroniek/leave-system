@@ -1,7 +1,5 @@
 using Blazored.Toast.Services;
-using Castle.Core.Logging;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.HrPanel;
@@ -22,15 +20,13 @@ namespace LeaveSystem.Web.UnitTests.Pages.HrPanel;
 
 public class HrSummaryServiceTest
 {
-    private HrSummaryService GetSut(
+    private static HrSummaryService GetSut(
         GetLeaveRequestsService getLeaveRequestsService,
         LeaveTypesService leaveTypesService,
         WorkingHoursService workingHoursService,
         UserLeaveLimitsService userLeaveLimitsService,
-        EmployeeService employeeService)
-    {
-        return new HrSummaryService(getLeaveRequestsService, leaveTypesService, workingHoursService, userLeaveLimitsService, employeeService);
-    }
+        EmployeeService employeeService) =>
+        new(getLeaveRequestsService, leaveTypesService, workingHoursService, userLeaveLimitsService, employeeService);
 
     [Fact]
     public async Task WhenOperationIsSuccessful_ThenReturnSummary()
@@ -56,7 +52,7 @@ public class HrSummaryServiceTest
         var employees = FakeGetEmployeesDtoProvider.GetAll().ToArray();
         employeeServiceMock.Get().Returns(employees);
         var workingHoursServiceMock = Substitute.For<WorkingHoursService>(httpClientMock, Substitute.For<IToastService>(), Substitute.For<ILogger<WorkingHoursService>>());
-        var fakeUserIds = new[] { FakeUserProvider.BenId, FakeUserProvider.PhilipId, FakeUserProvider.HabibId, FakeUserProvider.FakseoslavId};
+        var fakeUserIds = new[] { FakeUserProvider.BenId, FakeUserProvider.PhilipId, FakeUserProvider.HabibId, FakeUserProvider.FakseoslavId };
         var fakeWorkingHours = FakeWorkingHoursProvider.GetAll(DateTimeOffset.Now).ToDto().ToPagedListResponse();
         var getWorkingHoursQuery = GetWorkingHoursQuery.GetDefaultForUsers(fakeUserIds);
         workingHoursServiceMock.GetWorkingHours(ArgExtensions.IsEquivalentTo<GetWorkingHoursQuery>(getWorkingHoursQuery))
@@ -71,13 +67,13 @@ public class HrSummaryServiceTest
         await userLeaveLimitsServiceMock.Received().GetLimits(firstDay, lastDay);
         await employeeServiceMock.Received().Get();
         await workingHoursServiceMock.Received().GetWorkingHours(ArgExtensions.IsEquivalentTo<GetWorkingHoursQuery>(getWorkingHoursQuery));
-        var items = employees.Union(fakeLeaveRequests.Items.Select(lr =>
+        var items = employees.Union(fakeLeaveRequests.Items!.Select(lr =>
             GetEmployeeDto.Create(lr.CreatedBy)
         )).Select(e =>
             new HrSummaryService.UserLeaveRequestSummary(e, fakeLeaveTypes.Select(lt => LeaveRequestPerType.Create(
                 lt,
                 fakeLeaveTypes,
-                fakeLeaveRequests.Items.Where(lr => lr.CreatedBy.Id == e.Id),
+                fakeLeaveRequests.Items!.Where(lr => lr.CreatedBy.Id == e.Id),
                 fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
                 fakeWorkingHours.Items.DurationOrZero(e.Id))))
         );

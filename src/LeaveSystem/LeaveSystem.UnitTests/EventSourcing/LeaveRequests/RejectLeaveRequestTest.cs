@@ -67,7 +67,7 @@ public class RejectLeaveRequestTest
         {
             Status = LeaveRequestStatus.Rejected,
             LastModifiedBy = User,
-            Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks, @event.CreatedBy) },
+            Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers()
         );
         leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(

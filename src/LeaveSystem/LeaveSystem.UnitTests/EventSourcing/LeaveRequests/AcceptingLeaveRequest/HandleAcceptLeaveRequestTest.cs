@@ -18,7 +18,7 @@ public class HandleAcceptLeaveRequestTest
 {
     private readonly Mock<IRepository<LeaveRequest>> repositoryMock = new();
     private readonly AcceptLeaveRequest command = AcceptLeaveRequest.Create(Guid.NewGuid(), "testRemarks", FederatedUser.Create("1", "john@fake.com", "John"));
-    
+
     [Fact]
     public async Task
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenThrowNotFoundException()
@@ -62,8 +62,8 @@ public class HandleAcceptLeaveRequestTest
             LastModifiedBy = command.AcceptedBy,
             Remarks = new[]
             {
-                new LeaveRequest.RemarksModel(createdEvent.Remarks, createdEvent.CreatedBy),
-                new LeaveRequest.RemarksModel(command.Remarks, command.AcceptedBy)
+                new LeaveRequest.RemarksModel(createdEvent.Remarks!, createdEvent.CreatedBy),
+                new LeaveRequest.RemarksModel(command.Remarks!, command.AcceptedBy)
             },
             Version = 2
         }, o => o.ExcludingMissingMembers());

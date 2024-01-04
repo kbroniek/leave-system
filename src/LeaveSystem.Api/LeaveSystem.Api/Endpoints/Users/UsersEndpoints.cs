@@ -29,6 +29,8 @@ public static class UsersEndpoints
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
+            Guard.Against.InvalidEmail(userToAdd.Email);
+
             var addedUser = await graphUserService.Add(userToAdd.Email, userToAdd.Name, userToAdd.Roles ?? Enumerable.Empty<string>(), cancellationToken);
 
             return Results.Created("api/users", addedUser.Id);

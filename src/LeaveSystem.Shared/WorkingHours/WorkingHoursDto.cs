@@ -10,7 +10,7 @@ public class WorkingHoursDto
         this.Duration = duration;
         Id = id;
     }
-    
+
     public WorkingHoursDto()
     {
     }
@@ -24,10 +24,6 @@ public class WorkingHoursDto
     public string DurationProxy
     {
         get => Duration.ToString();
-        set
-        {
-            TimeSpan.TryParse(value, out var parsedValue);
-            Duration = parsedValue;
-        }
+        set => Duration = TimeSpan.TryParse(value, out var parsedValue) ? parsedValue : TimeSpan.Zero;
     }
 }

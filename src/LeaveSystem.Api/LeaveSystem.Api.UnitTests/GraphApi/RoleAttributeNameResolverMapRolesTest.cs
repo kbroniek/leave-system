@@ -1,4 +1,4 @@
-using LeaveSystem.Api.GraphApi;
+﻿using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
 using System.Text.Json;
 
@@ -9,7 +9,7 @@ public class RoleAttributeNameResolverMapRolesTest
     [Theory]
     [MemberData(nameof(Get_WhenThereIsNoSuchRoleInAdditionalData_ThenReturnEmptyRolesAttribute_TestData))]
     public void WhenThereIsNoSuchRoleInAdditionalData_ThenReturnEmptyRolesAttribute(
-        Dictionary<string, object>? additionalData)
+        Dictionary<string, object?>? additionalData)
     {
         //Given
         //When
@@ -39,7 +39,7 @@ public class RoleAttributeNameResolverMapRolesTest
     {
         //Given
         var fakeRolesAttribute = JsonSerializer.Deserialize<RolesResult>(TestData.FakeRolesJson);
-        var additionalData = new Dictionary<string, object>
+        var additionalData = new Dictionary<string, object?>
         {
             {
                 "fakeKey",
@@ -67,7 +67,7 @@ public class RoleAttributeNameResolverMapRolesTest
     public void WhenRolesRawIsNullOrWhiteSpace_ThenReturnEmptyRolesAttribute(string? rolesRaw)
     {
         //Given
-        var additionalData = new Dictionary<string, object>
+        var additionalData = new Dictionary<string, object?>
         {
             {
                 "fakeKey",

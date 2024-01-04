@@ -1,5 +1,5 @@
-﻿using LeaveSystem.Shared;
-using System.Text;
+﻿using System.Globalization;
+using LeaveSystem.Shared;
 
 namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 
@@ -16,7 +16,7 @@ public static class HolidaysStyleCreator
                 && currentDate.DayOfWeek != DayOfWeek.Sunday
                 && DateCalculator.GetDayKind(currentDate) == DateCalculator.DayKind.HOLIDAY)
             {
-                cssClasses.Add($".vis-time-axis .vis-grid.vis-day{currentDate.Day}.vis-{currentDate.ToString("MMMM").ToLower()}");
+                cssClasses.Add($".vis-time-axis .vis-grid.vis-day{currentDate.Day}.vis-{currentDate.ToString("MMMM", CultureInfo.CreateSpecificCulture("en-US")).ToLowerInvariant()}");
             }
         }
         // TODO: Get color from setting

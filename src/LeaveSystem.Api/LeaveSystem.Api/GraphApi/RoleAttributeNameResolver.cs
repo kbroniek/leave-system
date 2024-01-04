@@ -19,9 +19,9 @@ public record RoleAttributeNameResolver(string RoleAttributeName)
         return $"extension_{b2cExtensionAppClientId}_{attributeName}";
     }
 
-    public static RolesResult MapRoles(IDictionary<string, object>? additionalData, string roleAttributeName)
+    public static RolesResult MapRoles(IDictionary<string, object?>? additionalData, string roleAttributeName)
     {
-        if (additionalData?.TryGetValue(roleAttributeName, out object? rolesRaw) == true && rolesRaw is not null)
+        if (additionalData?.TryGetValue(roleAttributeName, out var rolesRaw) == true && rolesRaw is not null)
         {
             return new RolesResult(FederatedUser.MapRoles(rolesRaw.ToString()));
         }

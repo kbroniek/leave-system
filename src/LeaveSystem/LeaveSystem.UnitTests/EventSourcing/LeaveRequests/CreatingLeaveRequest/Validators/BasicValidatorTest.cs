@@ -77,11 +77,11 @@ public class BasicValidatorTest
     }
 
     [Theory]
-    [InlineData("2023-12-17", "2023-12-18", "DateFrom")] //DateFrom free day
-    [InlineData("2023-12-15", "2023-12-16", "DateTo")] //DateTo free day
-    [InlineData("2023-12-16", "2023-12-17", "DateFrom")] //DateFrom and DateTo free days
+    [InlineData("2023-12-17", "2023-12-18")] //DateFrom free day
+    [InlineData("2023-12-15", "2023-12-16")] //DateTo free day
+    [InlineData("2023-12-16", "2023-12-17")] //DateFrom and DateTo free days
     public void WhenDateFromDateToOrDurationIsWorkingDay_ThenThrowArgumentOutOfRangeException(
-        string dateFrom, string dateTo, string invalidParameterName
+        string dateFrom, string dateTo
     )
     {
         //Given
@@ -107,7 +107,7 @@ public class BasicValidatorTest
         };
         //Then
         var result = act.Should().Throw<ArgumentOutOfRangeException>();
-        result.WithMessage($"The date * is off work. (Parameter '{invalidParameterName}')");
+        result.WithMessage($"The date * is off work. (Parameter 'event')");
     }
 
     [Theory]
@@ -196,7 +196,7 @@ public class BasicValidatorTest
         };
         //Then
         var result = act.Should().Throw<ArgumentOutOfRangeException>();
-        result.WithMessage("Date from has to be less than date to. (Parameter 'DateFrom')");
+        result.WithMessage("Date from has to be less than date to. (Parameter 'event')");
     }
 
     [Theory]

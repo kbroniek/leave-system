@@ -7,9 +7,9 @@ namespace LeaveSystem.Web.UnitTests.Pages.UserLeaveLimits;
 
 public class GetSingleEmployeeTest
 {
-    private HttpClient httpClient;
+    private HttpClient httpClient = null!;
     private EmployeeService GetSut() => new(httpClient);
-    
+
     [Fact]
     public async Task WhenRequestReturnedResult_ThenReturnDeserializedEmployee()
     {
@@ -28,7 +28,7 @@ public class GetSingleEmployeeTest
     public async Task WhenRequestReturnedNoResult_ThenReturnNull()
     {
         //Given
-        GetEmployeeDto employee = null;
+        GetEmployeeDto? employee = null;
         var fakeId = Guid.NewGuid().ToString();
         var url = $"api/employees/{fakeId}";
         httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, employee);
