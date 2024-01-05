@@ -1,0 +1,43 @@
+<!-- https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory?view=vs-2022-->
+<Project>
+    <PropertyGroup>
+        <IsTestProject Condition="$(MSBuildProjectName.Contains('Test')) == 'true'">true</IsTestProject>
+    </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <SourceRoot>${MSBuildThisFileDirectory}</SourceRoot>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>11</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Company></Company>
+        <Authors>Karol Broniek, Filip Broniek</Authors>
+        <Product>Leave System</Product>
+        <Copyright>Copyright © Karol Broniek</Copyright>
+        <Version>1.0.0.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- <PackageReference Include="Roslynator.Analyzers" >
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" >
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference> -->
+    </ItemGroup>
+    <ItemGroup Condition="'$(IsTestProject)' == 'true'">
+        <PackageReference Include="xunit.analyzers" >
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+</Project>

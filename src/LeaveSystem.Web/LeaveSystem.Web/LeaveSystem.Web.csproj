@@ -1,25 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-    <LangVersion>11</LangVersion>
     <UserSecretsId>0990c43f-7f48-42c3-bdd0-f3fd47ab71c6</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="Blazored.FluentValidation" Version="2.0.3" />
-	  <PackageReference Include="Blazored.Toast" Version="4.1.0" />
-	  <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.15.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
-    <PackageReference Include="Radzen.Blazor" Version="4.16.0" />
+	  <PackageReference Include="Blazored.FluentValidation" />
+	  <PackageReference Include="Blazored.Toast" />
+	  <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" />
+    <PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Web.LibraryManager.Build" />
+    <PackageReference Include="Radzen.Blazor" />
   </ItemGroup>
 
   <ItemGroup>

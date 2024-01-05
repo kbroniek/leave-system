@@ -5,6 +5,7 @@
     <PackageId>GoldenEye</PackageId>
     <AssemblyName>GoldenEye</AssemblyName>
     <RootNamespace>GoldenEye</RootNamespace>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>

@@ -154,7 +154,7 @@ public class LeaveRequestFactoryTest
     {
         return new LeaveRequestFactory(validator, dbContext, querySession, FakeDateServiceProvider.GetDateService());
     }
-    private static Mock<CreateLeaveRequestValidator> GetValidatorMock() => new(null, null, null);
+    private static Mock<CreateLeaveRequestValidator> GetValidatorMock() => new(null!, null!, null!);
 
     private static Mock<IQuerySession> GetQuerySessionMock(IEnumerable<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>? workingHours = null)
     {
