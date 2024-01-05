@@ -28,9 +28,9 @@ public class CreateLeaveRequestValidatorTest
         var minDuration = TimeSpan.FromHours(1);
         var maxDuration = TimeSpan.FromHours(8);
         bool? includeFreeDays = true;
-        var basicValidatorMock = new Mock<BasicValidator>(null);
-        var impositionValidatorMock = new Mock<ImpositionValidator>(null);
-        var limitValidatorMock = new Mock<LimitValidator>(null, null, null);
+        var basicValidatorMock = new Mock<BasicValidator>(null!);
+        var impositionValidatorMock = new Mock<ImpositionValidator>(null!);
+        var limitValidatorMock = new Mock<LimitValidator>(null!, null!, null!);
 
         var sut = new CreateLeaveRequestValidator(basicValidatorMock.Object, impositionValidatorMock.Object, limitValidatorMock.Object);
         //When

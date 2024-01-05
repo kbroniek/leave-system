@@ -1,0 +1,21 @@
+<!-- https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory?view=vs-2022-->
+<Project>
+    <PropertyGroup>
+        <SourceRoot>${MSBuildThisFileDirectory}</SourceRoot>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Company></Company>
+        <Authors>Karol Broniek, Filip Broniek</Authors>
+        <Product>Leave System</Product>
+        <Copyright>Copyright © Karol Broniek</Copyright>
+        <Version>1.0.0.0</Version>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    </PropertyGroup>
+</Project>
