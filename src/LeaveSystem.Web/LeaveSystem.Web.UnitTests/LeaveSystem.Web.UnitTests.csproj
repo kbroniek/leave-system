@@ -1,11 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-
-        <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -25,8 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\LeaveSystem\LeaveSystem.UnitTests\LeaveSystem.UnitTests.csproj" />
-      <ProjectReference Include="..\LeaveSystem.Web\LeaveSystem.Web.csproj" />
+        <ProjectReference Include="..\..\LeaveSystem\LeaveSystem.UnitTests\LeaveSystem.UnitTests.csproj" />
+        <ProjectReference Include="..\LeaveSystem.Web\LeaveSystem.Web.csproj" />
     </ItemGroup>
-
 </Project>

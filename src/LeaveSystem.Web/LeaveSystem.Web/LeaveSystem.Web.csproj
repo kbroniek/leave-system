@@ -1,12 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-    <LangVersion>11</LangVersion>
     <UserSecretsId>0990c43f-7f48-42c3-bdd0-f3fd47ab71c6</UserSecretsId>
   </PropertyGroup>
 
