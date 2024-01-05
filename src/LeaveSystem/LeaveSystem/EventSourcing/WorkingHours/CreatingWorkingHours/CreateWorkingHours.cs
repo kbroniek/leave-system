@@ -1,7 +1,6 @@
 using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Repositories;
-using LeaveSystem.Extensions;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.Linq;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
@@ -66,8 +65,8 @@ internal class HandleCreateWorkingHours : ICommandHandler<CreateWorkingHours>
             throw new InvalidOperationException("You cant add working hours in this period, because other overlap it");
         }
         var workingHours = factory.Create(request);
-        await workingHoursRepository.Add(workingHours, cancellationToken);
-        await workingHoursRepository.SaveChanges(cancellationToken);
+        await workingHoursRepository.AddAsync(workingHours, cancellationToken);
+        await workingHoursRepository.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }

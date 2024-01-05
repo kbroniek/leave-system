@@ -17,7 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
         <ProjectReference Include="..\..\LeaveSystem\LeaveSystem.UnitTests\LeaveSystem.UnitTests.csproj" />
         <ProjectReference Include="..\LeaveSystem.Api\LeaveSystem.Api.csproj" />
     </ItemGroup>

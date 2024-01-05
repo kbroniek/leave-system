@@ -4,7 +4,7 @@
         <IsTestProject Condition="$(MSBuildProjectName.Contains('Test')) == 'true'">true</IsTestProject>
     </PropertyGroup>
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <SourceRoot>${MSBuildThisFileDirectory}</SourceRoot>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
         <Nullable>enable</Nullable>

@@ -6,7 +6,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" />
     <PackageReference Include="Microsoft.AspNetCore.OData" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" >
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Web\LeaveSystem.Web\LeaveSystem.Web.csproj" />
     <ProjectReference Include="..\..\LeaveSystem\LeaveSystem\LeaveSystem.csproj" />

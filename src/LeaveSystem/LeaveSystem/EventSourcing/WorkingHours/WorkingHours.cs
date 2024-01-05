@@ -1,4 +1,4 @@
-﻿using GoldenEye.Aggregates;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;
 using LeaveSystem.Periods;
@@ -6,20 +6,21 @@ using LeaveSystem.Shared;
 
 namespace LeaveSystem.EventSourcing.WorkingHours;
 
-public class WorkingHours : Aggregate, IDateToNullablePeriod
+public class WorkingHours : EventSource, IDateToNullablePeriod
 {
     public string UserId { get; private set; } = null!;
     public DateTimeOffset DateFrom { get; private set; }
     public DateTimeOffset? DateTo { get; private set; }
     public TimeSpan Duration { get; private set; }
     public FederatedUser LastModifiedBy { get; private set; }
+    public int Version { get; private set; }
 
     //For serialization
     public WorkingHours() { }
 
     private WorkingHours(WorkingHoursCreated @event)
     {
-        Enqueue(@event);
+        Append(@event);
         Apply(@event);
     }
 
@@ -29,7 +30,7 @@ public class WorkingHours : Aggregate, IDateToNullablePeriod
     {
         var @event = WorkingHoursModified.Create(
             command.WorkingHoursId, command.DateFrom, command.DateTo, command.Duration, command.ModifiedBy);
-        Enqueue(@event);
+        Append(@event);
         Apply(@event);
     }
 

@@ -1,10 +1,11 @@
-﻿using GoldenEye.Objects.General;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Shared;
 
 namespace LeaveSystem.Db.Entities;
 
 public class LeaveType : IHaveId<Guid>
 {
+    object IHaveId.Id => this.Id;
     public Guid Id { get; set; }
     public Guid? BaseLeaveTypeId { get; set; }
     public string Name { get; set; } = null!;

@@ -1,6 +1,6 @@
 using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Repositories;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.Shared;
 using MediatR;
 
@@ -23,7 +23,7 @@ public class DeprecateLeaveRequest : ICommand
     {
         var deprecatedByNotNull = Guard.Against.Nill(deprecatedBy);
         Guard.Against.InvalidEmail(deprecatedByNotNull.Email, $"{nameof(deprecatedByNotNull)}.{nameof(deprecatedByNotNull.Email)}");
-        return new (
+        return new(
             Guard.Against.NillAndDefault(leaveRequestId),
             remarks,
             deprecatedByNotNull
@@ -35,18 +35,16 @@ internal class HandleDeprecateLeaveRequest : ICommandHandler<DeprecateLeaveReque
 {
     private readonly IRepository<LeaveRequest> repository;
 
-    public HandleDeprecateLeaveRequest(IRepository<LeaveRequest> repository)
-    {
+    public HandleDeprecateLeaveRequest(IRepository<LeaveRequest> repository) =>
         this.repository = repository;
-    }
 
     public async Task<Unit> Handle(DeprecateLeaveRequest request, CancellationToken cancellationToken)
     {
-        var leaveRequest = await repository.FindById(request.LeaveRequestId, cancellationToken)
-            ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(request.LeaveRequestId);
+        var leaveRequest = await repository.FindByIdAsync(request.LeaveRequestId, cancellationToken)
+            ?? throw GoldenEye.Backend.Core.Exceptions.NotFoundException.For<LeaveRequest>(request.LeaveRequestId);
         leaveRequest.Deprecate(request.Remarks, request.DeprecatedBy);
-        await repository.Update(leaveRequest, cancellationToken);
-        await repository.SaveChanges(cancellationToken);
+        await repository.UpdateAsync(leaveRequest, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }
