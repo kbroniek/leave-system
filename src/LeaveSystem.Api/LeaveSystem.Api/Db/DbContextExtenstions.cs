@@ -1,8 +1,8 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.Json;
 using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Queries;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.DDD.Queries;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Db;
@@ -21,7 +21,7 @@ namespace LeaveSystem.Api.Db;
 
 public static class DbContextExtenstions
 {
-    private static readonly TimeSpan workingHours = TimeSpan.FromHours(8);
+    private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private const string DefaultUserEmail = "karolbr5@gmail.com";
 
     private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22",
@@ -30,7 +30,7 @@ public static class DbContextExtenstions
     private static FederatedUser defaultUser;
     private static FederatedUser[] testUsers = Array.Empty<FederatedUser>();
 
-    private static readonly FederatedUser[] testUserMock = new[]
+    private static readonly FederatedUser[] TestUserMock = new[]
     {
         FederatedUser.Create("aa379a52-7e8f-4471-b948-fbba4284bebb", "jkowalski@test.com", "Jan Kowalski",
             new[] { RoleType.DecisionMaker.ToString() }),
@@ -75,7 +75,7 @@ public static class DbContextExtenstions
         Order = 1,
         Properties = new LeaveType.LeaveTypeProperties
         {
-            DefaultLimit = workingHours * 26,
+            DefaultLimit = WorkingHours * 26,
             IncludeFreeDays = false,
             Color = "#0137C9",
             Catalog = LeaveTypeCatalog.Holiday,
@@ -90,7 +90,7 @@ public static class DbContextExtenstions
         Order = 2,
         Properties = new LeaveType.LeaveTypeProperties
         {
-            DefaultLimit = workingHours * 4,
+            DefaultLimit = WorkingHours * 4,
             IncludeFreeDays = false,
             Color = "#B88E1E",
             Catalog = LeaveTypeCatalog.OnDemand,
@@ -117,7 +117,7 @@ public static class DbContextExtenstions
         Order = 14,
         Properties = new LeaveType.LeaveTypeProperties
         {
-            DefaultLimit = workingHours,
+            DefaultLimit = WorkingHours,
             IncludeFreeDays = false,
             Color = "#FFFF33",
             Catalog = LeaveTypeCatalog.Saturday,
@@ -163,7 +163,7 @@ public static class DbContextExtenstions
             var graphUsers = await graphUserService.Get(cancellationToken);
             defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email,
                 defaultUserMock.Name, defaultUserMock.Roles);
-            testUsers = testUserMock
+            testUsers = TestUserMock
                 .Select(t => CreateFederatedUser(graphUsers, t.Id, t.Email, t.Name, t.Roles))
                 .Union(new FederatedUser[] { defaultUser })
                 .ToArray();
@@ -245,7 +245,7 @@ public static class DbContextExtenstions
 
     private static async Task FillInWorkingHours(IQueryBus queryBus, ICommandBus commandBus, DateService dateService)
     {
-        var workingHoursFromDb = await queryBus.Send<GetWorkingHours, IPagedList<WorkingHours>>(GetWorkingHours.Create(
+        var workingHoursFromDb = await queryBus.SendAsync<GetWorkingHours, IPagedList<WorkingHours>>(GetWorkingHours.Create(
             null, null, null, null,
             testUsers.Take(5).Select(u => u.Id).ToArray(), defaultUser,
             null));
@@ -310,12 +310,12 @@ public static class DbContextExtenstions
     {
         var workingHoursId = Guid.NewGuid();
         var command = EventSourcing.WorkingHours.CreatingWorkingHours.CreateWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, createdBy);
-        return commandBus.Send(command);
+        return commandBus.SendAsync(command);
     }
 
     private static async Task FillInLeaveRequests(IQueryBus queryBus, ICommandBus commandBus, DateService dateService)
     {
-        var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(
+        var pagedList = await queryBus.SendAsync<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(
             GetLeaveRequests.Create(
                 null, null, null, null, null, null, null,
                 testUsers.Take(5).Select(u => u.Id).ToArray(),
@@ -459,7 +459,7 @@ public static class DbContextExtenstions
             "",
             canceledBy
         );
-        await commandBus.Send(command);
+        await commandBus.SendAsync(command);
     }
 
     private static async Task AcceptLeaveRequest(ICommandBus commandBus, Guid leaveRequestId, FederatedUser acceptedBy)
@@ -469,7 +469,7 @@ public static class DbContextExtenstions
             "",
             acceptedBy
         );
-        await commandBus.Send(command);
+        await commandBus.SendAsync(command);
     }
 
     private static async Task RejectLeaveRequest(ICommandBus commandBus, Guid leaveRequestId, FederatedUser rejectedBy)
@@ -479,7 +479,7 @@ public static class DbContextExtenstions
             "",
             rejectedBy
         );
-        await commandBus.Send(command);
+        await commandBus.SendAsync(command);
     }
 
     private static DateTimeOffset GetFirstWorkingDay(DateTimeOffset now)
@@ -508,7 +508,7 @@ public static class DbContextExtenstions
             null,
             createdBy
         );
-        await commandBus.Send(command);
+        await commandBus.SendAsync(command);
         return leaveRequestId;
     }
 
