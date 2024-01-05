@@ -1,7 +1,4 @@
-using Azure.Identity;
-using FluentAssertions;
-using Microsoft.Graph;
-using GraphClientFactory = LeaveSystem.Api.GraphApi.GraphClientFactory;
+﻿using GraphClientFactory = LeaveSystem.Api.GraphApi.GraphClientFactory;
 
 namespace LeaveSystem.Api.UnitTests.GraphApi;
 
@@ -15,7 +12,7 @@ public class GraphClientFactoryCreateClientTest
         const string clientId = "fakeClientId";
         const string secret = "fakeSecret";
         string[] scopes = { "fakeScp1", "fakeScp2" };
-        var factory = GraphClientFactory.Create(tenantId,clientId ,secret ,scopes);
+        var factory = GraphClientFactory.Create(tenantId, clientId, secret, scopes);
         //When 
         var client = factory.Create();
         //Then

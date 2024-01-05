@@ -17,9 +17,9 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest
 
 public class LimitValidatorTest
 {
-    private readonly Mock<LeaveLimitsService> leaveLimitsServiceMock = new(null);
-    private readonly Mock<UsedLeavesService> usedLeavesServiceMock = new(null);
-    private readonly Mock<ConnectedLeaveTypesService> connectedLeaveTypesServiceMock = new(null);
+    private readonly Mock<LeaveLimitsService> leaveLimitsServiceMock = new(null!);
+    private readonly Mock<UsedLeavesService> usedLeavesServiceMock = new(null!);
+    private readonly Mock<ConnectedLeaveTypesService> connectedLeaveTypesServiceMock = new(null!);
 
     private static LeaveRequestCreated GetFakeEvent(TimeSpan duration) => LeaveRequestCreated.Create(
         Guid.Parse("f34262fb-53c0-46bd-a64f-66e6834d94f1"),
