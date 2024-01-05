@@ -1,10 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
-using GoldenEye.Repositories;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
-using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequestDetails;
 using LeaveSystem.UnitTests.Providers;
 using Moq;
@@ -22,12 +18,9 @@ public class HandleGetLeaveRequestDetailsTest
         var request = GetLeaveRequestDetails.Create(Guid.NewGuid());
         var sut = new HandleGetLeaveRequestDetails(repository);
         //When
-        var act = async () =>
-        {
-            await sut.Handle(request, It.IsAny<CancellationToken>());
-        };
+        var act = async () => await sut.Handle(request, It.IsAny<CancellationToken>());
         //Then
-        await act.Should().ThrowAsync<GoldenEye.Exceptions.NotFoundException>();
+        await act.Should().ThrowAsync<GoldenEye.Backend.Core.Exceptions.NotFoundException>();
     }
 
     [Fact]
@@ -38,7 +31,7 @@ public class HandleGetLeaveRequestDetailsTest
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(
             FakeLeaveRequestCreatedProvider.GetSickLeaveRequest()
         );
-        await repository.Add(leaveRequest, It.IsAny<CancellationToken>());
+        await repository.AddAsync(leaveRequest, It.IsAny<CancellationToken>());
         var request = GetLeaveRequestDetails.Create(leaveRequest.Id);
         var sut = new HandleGetLeaveRequestDetails(repository);
         //When

@@ -27,7 +27,7 @@ public class WorkingHoursFactoryTest
             command.DateTo,
             command.Duration
         });
-        result.DequeueUncommittedEvents().Should().BeEquivalentTo(new[]
+        result.PendingEvents.Should().BeEquivalentTo(new[]
         {
             WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom, command.DateTo, command.Duration, command.CreatedBy)
         });

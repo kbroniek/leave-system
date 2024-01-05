@@ -1,15 +1,9 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
-using GoldenEye.Repositories;
-using LamarCodeGeneration.Frames;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
-using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
@@ -22,7 +16,7 @@ public class HandleCancelLeaveRequestTest
 {
     private readonly Mock<IRepository<LeaveRequest>> repositoryMock = new();
     private readonly CancelLeaveRequest command = CancelLeaveRequest.Create(Guid.NewGuid(), "testRemarks", FederatedUser.Create("1", "john@fake.com", "John"));
-    
+
     [Fact]
     public async Task
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenThrowNotFoundException()
@@ -33,7 +27,7 @@ public class HandleCancelLeaveRequestTest
         var act = () =>
             handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
         //Then
-        await act.Should().ThrowAsync<GoldenEye.Exceptions.NotFoundException>();
+        await act.Should().ThrowAsync<GoldenEye.Backend.Core.Exceptions.NotFoundException>();
     }
 
     [Fact]
@@ -54,7 +48,7 @@ public class HandleCancelLeaveRequestTest
         );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createdEvent);
         repositoryMock
-            .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))
+            .Setup(s => s.FindByIdAsync(command.LeaveRequestId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest);
         var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object, FakeDateServiceProvider.GetDateService());
         //When
@@ -71,8 +65,8 @@ public class HandleCancelLeaveRequestTest
             },
             Version = 2
         }, o => o.ExcludingMissingMembers());
-        repositoryMock.Verify(x => x.Update(leaveRequest, null, It.IsAny<CancellationToken>()), Times.Once);
-        repositoryMock.Verify(x => x.SaveChanges(It.IsAny<CancellationToken>()), Times.Once);
+        repositoryMock.Verify(x => x.UpdateAsync(leaveRequest, It.IsAny<CancellationToken>()), Times.Once);
+        repositoryMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -92,7 +86,7 @@ public class HandleCancelLeaveRequestTest
         );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         repositoryMock
-            .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))
+            .Setup(s => s.FindByIdAsync(command.LeaveRequestId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest);
         var handleAcceptLeaveRequest = new HandleCancelLeaveRequest(repositoryMock.Object, FakeDateServiceProvider.GetDateService());
         //When
