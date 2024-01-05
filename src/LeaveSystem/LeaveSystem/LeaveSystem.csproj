@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -25,13 +25,5 @@
     <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
     <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EditorConfigFiles Remove="D:\repos\LeaveSystem\src\LeaveSystem\LeaveSystem\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="D:\repos\LeaveSystem\src\LeaveSystem\LeaveSystem\.editorconfig" />
   </ItemGroup>
 </Project>
