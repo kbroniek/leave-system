@@ -14,7 +14,7 @@ namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.GettingWorkingHours;
 
 public class HandleGetWorkingHoursByUserIdTest
 {
-    private IDocumentSession querySessionMock;
+    private readonly IDocumentSession querySessionMock = Substitute.For<IDocumentSession>();
 
     private HandleGetWorkingHoursByUserId GetSut() => new(querySessionMock);
 
@@ -26,9 +26,8 @@ public class HandleGetWorkingHoursByUserIdTest
             .Select(LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours);
         var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
             workingHours
-            //Todo: Add deprecated WorkingHours
+        //Todo: Add deprecated WorkingHours
         );
-        querySessionMock = Substitute.For<IDocumentSession>();
         querySessionMock.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>()
             .Returns(martenQueryableStub);
         var request = GetCurrentWorkingHoursByUserId.Create(FakeUserProvider.BenId);
@@ -47,9 +46,8 @@ public class HandleGetWorkingHoursByUserIdTest
             .Select(LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours).ToArray();
         var martenQueryableStub = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
             fakeWorkingHours
-            //Todo: Add deprecated WorkingHours
+        //Todo: Add deprecated WorkingHours
         );
-        querySessionMock = Substitute.For<IDocumentSession>();
         querySessionMock.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>()
             .Returns(martenQueryableStub);
         var request = GetCurrentWorkingHoursByUserId.Create(FakeUserProvider.BenId);

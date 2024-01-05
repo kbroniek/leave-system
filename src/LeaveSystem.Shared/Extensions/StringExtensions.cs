@@ -4,11 +4,10 @@ public static class StringExtensions
 {
     public static TimeSpan? ToTimeSpan(this string? value)
     {
-        if(value == null)
+        if (value == null)
         {
             return null;
         }
-        TimeSpan.TryParse(value, out var parsedValue);
-        return parsedValue;
+        return TimeSpan.TryParse(value, out var parsedValue) ? parsedValue : TimeSpan.Zero;
     }
 }

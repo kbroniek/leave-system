@@ -9,7 +9,7 @@ internal class FakeDateServiceProvider
     {
         var dateServiceMock = new Mock<DateService>();
         dateServiceMock.Setup(x => x.UtcNowWithoutTime())
-            .Returns(DateTimeOffset.Parse("2023-12-15T09:40:41.8087272+01:00"));
+            .Returns(DateTimeOffset.Parse("2023-12-15T09:40:41.8087272+00:00"));
         return dateServiceMock.Object;
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
@@ -8,10 +8,7 @@ public class UsersService
 {
     private readonly HttpClient httpClient;
 
-    public UsersService(HttpClient httpClient)
-    {
-        this.httpClient = httpClient;
-    }
+    public UsersService(HttpClient httpClient) => this.httpClient = httpClient;
 
     public async Task<IEnumerable<UserDto>> Get()
     {

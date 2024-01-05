@@ -1,5 +1,4 @@
-using FluentAssertions;
-using LeaveSystem.Api.Controllers;
+﻿using LeaveSystem.Api.Controllers;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.UnitTests;
 using LeaveSystem.UnitTests.Providers;
@@ -30,7 +29,7 @@ public class LeaveTypesControllerDeleteTest
         yield return new object[] { Enumerable.Empty<LeaveType>() };
         yield return new object[] { FakeLeaveTypeProvider.GetLeaveTypes() };
     }
-    
+
     [Fact]
     public async Task WhenEntityWithProvidedIdExistsInSet_ThenRemoveFromSetAndReturnNoContent()
     {
@@ -42,9 +41,9 @@ public class LeaveTypesControllerDeleteTest
         var fakeId = FakeLeaveTypeProvider.FakeSickLeaveId;
         //When
         var result = await sut.Delete(fakeId);
+        var leaveTypesLeft = sut.Get()?.ToList();
         //Then
         result.Should().BeOfType<NoContentResult>();
-        var leaveTypesLeft = sut.Get().ToList();
         leaveTypesLeft.Should().BeEquivalentTo(new[]
         {
             FakeLeaveTypeProvider.GetFakeHolidayLeave(), FakeLeaveTypeProvider.GetFakeOnDemandLeave()

@@ -10,15 +10,6 @@ public class AddWorkingHoursDto
         Duration = duration;
     }
 
-    public AddWorkingHoursDto()
-    {
-    }
-    
-    public AddWorkingHoursDto(string userId)
-    {
-        UserId = userId;
-    }
-
     public string? UserId { get; set; }
     public DateTimeOffset? DateFrom { get; set; }
     public DateTimeOffset? DateTo { get; set; }
@@ -26,10 +17,6 @@ public class AddWorkingHoursDto
     public string DurationProxy
     {
         get => Duration.ToString() ?? "";
-        set
-        {
-            TimeSpan.TryParse(value, out var parsedValue);
-            Duration = parsedValue;
-        }
+        set => Duration = TimeSpan.TryParse(value, out var parsedValue) ? parsedValue : TimeSpan.Zero;
     }
 }

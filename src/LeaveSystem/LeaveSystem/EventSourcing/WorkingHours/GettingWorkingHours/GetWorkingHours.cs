@@ -1,4 +1,4 @@
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using GoldenEye.Queries;
 using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
@@ -71,7 +71,7 @@ internal class HandleGetWorkingHours : IQueryHandler<GetWorkingHours, IPagedList
         return Query(request, cancellationToken);
     }
 
-    private GetWorkingHours NarrowDownQuery(GetWorkingHours request)
+    private static GetWorkingHours NarrowDownQuery(GetWorkingHours request)
     {
         var privilegedRoles = new[]
         {

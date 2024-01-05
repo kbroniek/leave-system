@@ -1,10 +1,10 @@
+﻿using System.Text.Json;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Api.UnitTests.Providers;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
 using Moq;
-using System.Text.Json;
 
 namespace LeaveSystem.Api.UnitTests.Endpoints.Employees;
 
@@ -14,7 +14,7 @@ public class GetGraphUserServiceGetTest
     public async Task WhenGetting_ThenReturnUsers()
     {
         //Given
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesResult>(TestData.FakeRolesJson)!;
         var users = GraphServiceUsersCollectionPageProvider.Get(TestData.FakeRoleAttributeName, TestData.FakeRolesJson);
         var graphClientFactoryMock = new Mock<IGraphClientFactory>();
         var graphServiceUsersCollectionRequestMock = new Mock<IGraphServiceUsersCollectionRequest>();
@@ -44,23 +44,23 @@ public class GetGraphUserServiceGetTest
         {
             new
             {
-                Id = users[0].Id,
+                users[0].Id,
                 Email = users[0].Mail,
                 Roles = Enumerable.Empty<string>(),
                 Name = users[0].DisplayName
             },
             new
             {
-                Id = users[1].Id,
+                users[1].Id,
                 Email = users[1].Mail,
-                Roles = fakeRolesAttribute.Roles,
+                fakeRolesAttribute.Roles,
                 Name = users[1].DisplayName
             },
             new
             {
-                Id = users[2].Id,
+                users[2].Id,
                 Email = users[2].Mail,
-                Roles = fakeRolesAttribute.Roles,
+                fakeRolesAttribute.Roles,
                 Name = users[2].DisplayName
             },
         }, o => o.ExcludingMissingMembers());

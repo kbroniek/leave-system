@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace LeaveSystem.Web.UnitTests.TestStuff.Converters;
 
-internal class TimeSpanToStringConverter : JsonConverter<TimeSpan>
+internal sealed class TimeSpanToStringConverter : JsonConverter<TimeSpan>
 {
     public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

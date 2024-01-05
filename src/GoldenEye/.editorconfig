@@ -1,0 +1,8 @@
+# Project level configuraiton
+
+# Disable all roules
+root = true
+
+[*.{cs}]
+# CS0618: Obsolete
+dotnet_diagnostic.CS0618.severity = none

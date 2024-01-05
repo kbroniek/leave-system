@@ -22,9 +22,9 @@ namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
 
 public class HandleCreateWorkingHoursTest
 {
-    private IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours> workingHoursRepositoryMock;
-    private WorkingHoursFactory factoryMock;
-    private IDocumentSession documentSessionMock;
+    private readonly IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours> workingHoursRepositoryMock = Substitute.For<IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>>();
+    private readonly WorkingHoursFactory factoryMock = Substitute.For<WorkingHoursFactory>();
+    private readonly IDocumentSession documentSessionMock = Substitute.For<IDocumentSession>();
 
     private HandleCreateWorkingHours GetSut() => new(workingHoursRepositoryMock, factoryMock, documentSessionMock);
 
@@ -34,15 +34,12 @@ public class HandleCreateWorkingHoursTest
     {
         //Given
         var command = FakeCreateWorkingHoursProvider.GetForFakeoslav();
-        factoryMock = Substitute.For<WorkingHoursFactory>();
         var fakeWorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours(
             WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom,
                 command.DateTo, command.Duration, command.CreatedBy));
         factoryMock.Create(command).Returns(
             fakeWorkingHours
         );
-        workingHoursRepositoryMock = Substitute.For<IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>>();
-        documentSessionMock = Substitute.For<IDocumentSession>();
         var workingHoursMartenQueryable = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
             workingHoursEnumerable.ToList()
         );
@@ -64,15 +61,12 @@ public class HandleCreateWorkingHoursTest
     {
         //Given
         var command = FakeCreateWorkingHoursProvider.GetForBen();
-        factoryMock = Substitute.For<WorkingHoursFactory>();
         var fakeWorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours(
             WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom,
                 command.DateTo, command.Duration, command.CreatedBy));
         factoryMock.Create(command).Returns(
             fakeWorkingHours
         );
-        workingHoursRepositoryMock = Substitute.For<IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>>();
-        documentSessionMock = Substitute.For<IDocumentSession>();
         var workingHoursEnumerable = FakeWorkingHoursProvider.GetDeprecated().ToList();
         var martenQueryable = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
             workingHoursEnumerable.ToList()
@@ -99,15 +93,12 @@ public class HandleCreateWorkingHoursTest
     public async Task WhenQueryReturnsTrue_ThenThrowError(CreateWorkingHours command)
     {
         //Given
-        factoryMock = Substitute.For<WorkingHoursFactory>();
         var fakeWorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours(
             WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom,
                 command.DateTo, command.Duration, command.CreatedBy));
         factoryMock.Create(command).Returns(
             fakeWorkingHours
         );
-        workingHoursRepositoryMock = Substitute.For<IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>>();
-        documentSessionMock = Substitute.For<IDocumentSession>();
         var martenQueryable = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
             new LeaveSystem.EventSourcing.WorkingHours.WorkingHours[]
             {

@@ -1,4 +1,4 @@
-using LeaveSystem.Api.GraphApi;
+﻿using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
 using System.Text.Json;
 
@@ -9,14 +9,14 @@ public class RoleAttributeNameResolverMapRolesTest
     [Theory]
     [MemberData(nameof(Get_WhenThereIsNoSuchRoleInAdditionalData_ThenReturnEmptyRolesAttribute_TestData))]
     public void WhenThereIsNoSuchRoleInAdditionalData_ThenReturnEmptyRolesAttribute(
-        Dictionary<string, object>? additionalData)
+        Dictionary<string, object?>? additionalData)
     {
         //Given
         //When
         var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(
-            RolesAttribute.Empty,
-            o => o.ComparingByMembers<RolesAttribute>());
+            RolesResult.Empty,
+            o => o.ComparingByMembers<RolesResult>());
     }
 
     public static IEnumerable<object?[]>
@@ -38,8 +38,8 @@ public class RoleAttributeNameResolverMapRolesTest
     public void WhenThereIsSuchRolesRawInAdditionalData_ThenReturnRolesAttributeWithRolesFromRaw()
     {
         //Given
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
-        var additionalData = new Dictionary<string, object>
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesResult>(TestData.FakeRolesJson);
+        var additionalData = new Dictionary<string, object?>
         {
             {
                 "fakeKey",
@@ -57,7 +57,7 @@ public class RoleAttributeNameResolverMapRolesTest
         //When
         var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(fakeRolesAttribute
-        , o => o.ComparingByMembers<RolesAttribute>());
+        , o => o.ComparingByMembers<RolesResult>());
     }
 
     [Theory]
@@ -67,7 +67,7 @@ public class RoleAttributeNameResolverMapRolesTest
     public void WhenRolesRawIsNullOrWhiteSpace_ThenReturnEmptyRolesAttribute(string? rolesRaw)
     {
         //Given
-        var additionalData = new Dictionary<string, object>
+        var additionalData = new Dictionary<string, object?>
         {
             {
                 "fakeKey",
@@ -85,7 +85,7 @@ public class RoleAttributeNameResolverMapRolesTest
         //When
         var rolesAttribute = RoleAttributeNameResolver.MapRoles(additionalData, TestData.FakeRoleAttributeName);
         rolesAttribute.Should().BeEquivalentTo(
-            RolesAttribute.Empty
-            , o => o.ComparingByMembers<RolesAttribute>());
+            RolesResult.Empty
+            , o => o.ComparingByMembers<RolesResult>());
     }
 }

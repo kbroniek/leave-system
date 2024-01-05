@@ -1,11 +1,9 @@
-using System.Text.Json;
-using FluentAssertions;
+﻿using System.Text.Json;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Api.UnitTests.Providers;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
-using Moq;
 using NSubstitute;
 
 namespace LeaveSystem.Api.UnitTests.Endpoints.Employees;
@@ -43,13 +41,13 @@ public class GetGraphUserServiceGetSingleUserTest
         //When
         var result = await sut.Get(fakeId, CancellationToken.None);
         //Then
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesResult>(TestData.FakeRolesJson)!;
         result.Should().BeEquivalentTo(new
         {
-            Id = user.Id,
+            user.Id,
             Email = user.Mail,
             Name = user.DisplayName,
-            Roles = fakeRolesAttribute.Roles
+            fakeRolesAttribute.Roles
         });
     }
 }

@@ -84,7 +84,7 @@ internal class HandleGetLeaveRequests :
         return await Query(request, cancellationToken);
     }
 
-    private GetLeaveRequests NarrowDownQuery(GetLeaveRequests request)
+    private static GetLeaveRequests NarrowDownQuery(GetLeaveRequests request)
     {
         var privilegedRoles = new[]
         {

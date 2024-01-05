@@ -1,8 +1,4 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Graph;
-using System.Net;
-using static LeaveSystem.Api.Endpoints.Errors.ErrorHandlerMiddleware;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace LeaveSystem.Api.Endpoints.Errors;
 
@@ -49,7 +45,7 @@ public class ErrorHandlerMiddleware
     }
     public async Task HandleExceptionAsync(HttpContext context, int statusCode, Exception error, string? message = null)
     {
-        logger.LogError(error, message);
+        logger.LogError(error, "{Message}", message);
         await Results.Problem(isDevelopment ? error.ToString() : null, nameof(ErrorHandlerMiddleware), statusCode, message ?? error.Message, error.GetType().ToString(), new Dictionary<string, object?>()
             {
                 { "env", isDevelopment ? "dev" : "prod" },

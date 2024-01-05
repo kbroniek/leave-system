@@ -1,10 +1,8 @@
+﻿using System;
+using System.Collections.Generic;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
-using System.Collections.Generic;
-using LeaveSystem.Shared.Date;
-using Moq;
-using System;
 
 namespace LeaveSystem.UnitTests.TestDataGenerators;
 
@@ -25,14 +23,15 @@ public static class LeaveRequestTestDataGenerator
         var @event = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
         var fakeRemarks = "fake remarks";
         var fakeRejectRemarks = "fake reject remarks";
-        void DoNoting(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) { }
+        void DoNoting(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser)
+        { }
         void Accept(LeaveRequest leaveRequest, string? remarks, FederatedUser federatedUser) => leaveRequest.Accept(remarks, federatedUser);
         yield return new object[]
         {
             DoNoting,
             new List<LeaveRequest.RemarksModel>
             {
-                new(@event.Remarks, @event.CreatedBy),
+                new(@event.Remarks!, @event.CreatedBy),
                 new(fakeRejectRemarks, user)
             },
             fakeRemarks,
@@ -44,7 +43,7 @@ public static class LeaveRequestTestDataGenerator
             Accept,
             new List<LeaveRequest.RemarksModel>
             {
-                new(@event.Remarks, @event.CreatedBy),
+                new(@event.Remarks!, @event.CreatedBy),
                 new(fakeRemarks, user),
                 new(fakeRejectRemarks, user)
             },

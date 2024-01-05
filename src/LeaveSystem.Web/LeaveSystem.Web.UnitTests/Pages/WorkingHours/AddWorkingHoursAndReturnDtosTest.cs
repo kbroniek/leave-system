@@ -9,15 +9,14 @@ using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using Microsoft.Extensions.Logging;
 using RichardSzalay.MockHttp;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
 
-public class AddWorkingHoursAndReturnDtosTest
+public class AddWorkingHoursAndReturnDtosTest : IDisposable
 {
-    private HttpClient httpClientMock;
-    private IToastService toastServiceMock;
-    private ILogger<WorkingHoursService> logger;
+    private HttpClient httpClientMock = null!;
+    private readonly IToastService toastServiceMock = Substitute.For<IToastService>();
+    private readonly ILogger<WorkingHoursService> logger = Substitute.For<ILogger<WorkingHoursService>>();
     private const string BaseUrl = "http://localhost:5047";
     private const string RequestUrl = "http://localhost:5047/api/workingHours";
 
@@ -39,10 +38,10 @@ public class AddWorkingHoursAndReturnDtosTest
             .When(RequestUrl)
             .WithJsonContent(workingHoursToAdd)
             .Respond(HttpStatusCode.BadRequest, responseContent);
-        httpClientMock = new HttpClient(mockHttpMessageHandler);
-        httpClientMock.BaseAddress = new Uri(BaseUrl);
-        toastServiceMock = Substitute.For<IToastService>();
-        logger = Substitute.For<ILogger<WorkingHoursService>>();
+        httpClientMock = new(mockHttpMessageHandler)
+        {
+            BaseAddress = new Uri(BaseUrl)
+        };
         var sut = GetSut();
         //When
         var result = await sut.Add(workingHoursToAdd);
@@ -66,10 +65,10 @@ public class AddWorkingHoursAndReturnDtosTest
             .When(RequestUrl)
             .WithJsonContent(workingHoursToAdd)
             .Respond(HttpStatusCode.Created, responseContent);
-        httpClientMock = new HttpClient(mockHttpMessageHandler);
-        httpClientMock.BaseAddress = new Uri(BaseUrl);
-        toastServiceMock = Substitute.For<IToastService>();
-        logger = Substitute.For<ILogger<WorkingHoursService>>();
+        httpClientMock = new(mockHttpMessageHandler)
+        {
+            BaseAddress = new Uri(BaseUrl)
+        };
         var sut = GetSut();
         //When
         var result = await sut.Add(workingHoursToAdd);
@@ -78,5 +77,19 @@ public class AddWorkingHoursAndReturnDtosTest
         toastServiceMock.DidNotReceiveWithAnyArgs().ShowError(string.Empty);
         logger.DidNotReceiveWithAnyArgs().LogError("");
         result.Should().BeEquivalentTo(expectedResult);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            httpClientMock?.Dispose();
+        }
     }
 }
