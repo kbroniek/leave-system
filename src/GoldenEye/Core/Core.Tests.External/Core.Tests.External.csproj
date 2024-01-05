@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
       <RootNamespace>GoldenEye.Tests.External</RootNamespace>
       <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+      <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <ItemGroup>

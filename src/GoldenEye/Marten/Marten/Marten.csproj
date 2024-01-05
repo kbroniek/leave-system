@@ -6,6 +6,7 @@
         <AssemblyName>GoldenEye.Marten</AssemblyName>
         <RootNamespace>GoldenEye.Marten</RootNamespace>
         <NoWarn>$(NoWarn);NU5104</NoWarn>
+        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     </PropertyGroup>
 
     <ItemGroup>
