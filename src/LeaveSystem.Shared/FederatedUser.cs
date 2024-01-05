@@ -24,9 +24,9 @@ public record struct FederatedUser(string Id, string? Email, string? Name, IEnum
     {
         if (string.IsNullOrWhiteSpace(rolesRaw))
         {
-            return RolesAttribute.Empty.Roles;
+            return RolesResult.Empty.Roles;
         }
-        var roleAttribute = JsonSerializer.Deserialize<RolesAttribute?>(rolesRaw) ?? RolesAttribute.Empty;
+        var roleAttribute = JsonSerializer.Deserialize<RolesResult?>(rolesRaw) ?? RolesResult.Empty;
         return roleAttribute.Roles;
     }
 }

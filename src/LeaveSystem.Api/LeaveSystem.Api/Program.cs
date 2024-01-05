@@ -1,3 +1,4 @@
+using LeaveSystem.Api;
 using System.Configuration;
 using GoldenEye.Registration;
 using LeaveSystem;
@@ -36,7 +37,7 @@ builder.Services.AddRazorPages();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwagger();
 builder.Services.AddCors();
 builder.Services.AddControllers()
     .AddJsonOptions(o =>  o.JsonSerializerOptions.Converters.Add(new TimeSpanIso8601Converter()))
@@ -59,6 +60,8 @@ IEdmModel GetEdmModel()
     return modelBuilder.GetEdmModel();
 }
 
+builder.Services.AddServices(builder.Configuration)
+    .AddScoped<DateService>();
 builder.Services.AddScoped<CurrentDateService>();
 builder.Services.AddDDD();
 builder.Services.AddLeaveSystemModule(builder.Configuration);
@@ -115,9 +118,7 @@ app
 await app.MigrateDb();
 if (app.Environment.IsDevelopment())
 {
-    _ = app.FillInDatabase();
+    _ = app.FillInDatabase(builder.Configuration);
 }
-
-IdentityModelEventSource.ShowPII = true;
 
 await app.RunAsync();

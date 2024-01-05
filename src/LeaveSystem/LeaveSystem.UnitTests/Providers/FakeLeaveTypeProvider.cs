@@ -10,10 +10,10 @@ namespace LeaveSystem.UnitTests.Providers;
 public static class FakeLeaveTypeProvider
 {
     private static readonly TimeSpan WorkingHours = WorkingHoursUtils.DefaultWorkingHours;
-    public static Guid FakeOnDemandLeaveId = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0921");
-    public static Guid FakeSickLeaveId = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0922");
-    public static Guid FakeHolidayLeaveGuid = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0923");
-    
+    public static readonly Guid FakeOnDemandLeaveId = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0921");
+    public static readonly Guid FakeSickLeaveId = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0922");
+    public static readonly Guid FakeHolidayLeaveGuid = Guid.Parse("23288f39-4511-4476-b8ac-ff00176f0923");
+
     public static LeaveType GetFakeSickLeave() => new()
     {
         Id = FakeSickLeaveId,
@@ -28,7 +28,7 @@ public static class FakeLeaveTypeProvider
         }
     };
 
-    public  static LeaveType GetFakeHolidayLeave() => new()
+    public static LeaveType GetFakeHolidayLeave() => new()
     {
         Id = FakeHolidayLeaveGuid,
         Name = "urlop wypoczynkowy",
@@ -62,12 +62,10 @@ public static class FakeLeaveTypeProvider
         Name = "niezdolność do pracy z powodu choroby",
         Order = 3
     };
-    public static IQueryable<LeaveType> GetLeaveTypes()
-    {
-        return new List<LeaveType> {
+    public static IQueryable<LeaveType> GetLeaveTypes() =>
+        new List<LeaveType> {
             GetFakeOnDemandLeave(),
             GetFakeHolidayLeave(),
             GetFakeSickLeave()
         }.AsQueryable();
-    }
 }

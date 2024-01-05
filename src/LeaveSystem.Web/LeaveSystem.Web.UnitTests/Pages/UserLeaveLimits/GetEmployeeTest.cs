@@ -7,7 +7,7 @@ namespace LeaveSystem.Web.UnitTests.Pages.UserLeaveLimits;
 
 public class GetEmployeeTest
 {
-    private HttpClient httpClient;
+    private HttpClient httpClient = null!;
 
     private EmployeeService GetSut() => new(httpClient);
 
@@ -16,7 +16,7 @@ public class GetEmployeeTest
     {
         //Given
         var employees = FakeGetEmployeesDtoProvider.GetAll();
-        var employeesDtoWithNullItems = new GetEmployeesDto(employees.Append(null));
+        var employeesDtoWithNullItems = new GetEmployeesDto(employees.Append(null!));
         var url = "api/employees";
         httpClient = HttpClientMockFactory.CreateWithJsonResponse(url, employeesDtoWithNullItems);
         var sut = GetSut();
@@ -25,7 +25,7 @@ public class GetEmployeeTest
         //Then
         result.Should().BeEquivalentTo(employees);
     }
-    
+
     [Fact]
     public async Task WhenRequestReturnedNull_ThenReturnEmptyCollection()
     {

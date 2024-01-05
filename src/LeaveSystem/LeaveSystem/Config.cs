@@ -11,10 +11,10 @@ namespace LeaveSystem;
 
 public static class Config
 {
-    public static void AddLeaveSystemModule(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddLeaveSystemModule(this IServiceCollection services, IConfiguration config)
     {
         var martenConfig = config.GetSection("Marten").Get<MartenConfig>();
-        services
+        return services
             .AddDbContext<LeaveSystemDbContext>(options => options.UseNpgsql(martenConfig.ConnectionString))
             .AddEventSourcing(config);
     }

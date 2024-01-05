@@ -20,7 +20,7 @@ public static class LeaveStatusesStyleCreator
         }
         var color = ConvertColor(colorRaw);
 
-        return $@".vis-timeline .vis-item.leave-status-{status.ToLower()} {{
+        return $@".vis-timeline .vis-item.leave-status-{status.ToLowerInvariant()} {{
     --label-status-h: {color.GetHue()};
     --label-status-s: {color.GetSaturation() * 100};
     --label-status-l: {color.GetBrightness() * 100};

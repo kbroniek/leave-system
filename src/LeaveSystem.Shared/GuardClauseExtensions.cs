@@ -37,7 +37,7 @@ public static class GuardClauseExtensions
     public static string InvalidEmail(this IGuardClause _, [NotNull][ValidatedNotNull] string? input, [CallerArgumentExpression("input")] string? parameterName = null, string? message = null)
     {
         AgainstNill(input, parameterName, message);
-        return Guard.Against.InvalidFormat(input, parameterName!, @"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", message);
+        return Guard.Against.InvalidFormat(input, parameterName!, @"^[-\w\.+]+@([-\w]+\.)+[\w-]{2,4}$", message);
     }
 
     [return: NotNull]

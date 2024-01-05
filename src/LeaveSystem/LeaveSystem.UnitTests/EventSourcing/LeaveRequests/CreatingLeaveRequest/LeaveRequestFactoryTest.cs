@@ -22,7 +22,7 @@ public class LeaveRequestFactoryTest
     private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
 
 
-    private static readonly DateTimeOffset FakeNow = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+    private static readonly DateTimeOffset FakeNow = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
 
     [Fact]
     public async Task WhenLeaveTypeNotFound_ThenThrowNotFoundException()
@@ -154,7 +154,7 @@ public class LeaveRequestFactoryTest
     {
         return new LeaveRequestFactory(validator, dbContext, querySession, FakeDateServiceProvider.GetDateService());
     }
-    private static Mock<CreateLeaveRequestValidator> GetValidatorMock() => new(null, null, null);
+    private static Mock<CreateLeaveRequestValidator> GetValidatorMock() => new(null!, null!, null!);
 
     private static Mock<IQuerySession> GetQuerySessionMock(IEnumerable<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>? workingHours = null)
     {

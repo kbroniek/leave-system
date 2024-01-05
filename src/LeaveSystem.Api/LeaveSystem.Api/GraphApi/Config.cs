@@ -16,10 +16,10 @@ public static class Config
         public string? Issuer { get; set; }
     }
 
-    public static void AddGraphFactory(this IServiceCollection services, IConfigurationSection configuration)
+    public static IServiceCollection AddGraphFactory(this IServiceCollection services, IConfigurationSection configuration)
     {
         var settings = configuration.Get<AppSettings>();
-        services
+        return services
             .AddScoped<IGraphClientFactory, GraphClientFactory>(_ => GraphClientFactory.Create(settings.TenantId,
                                             settings.ClientId,
                                             settings.Secret,

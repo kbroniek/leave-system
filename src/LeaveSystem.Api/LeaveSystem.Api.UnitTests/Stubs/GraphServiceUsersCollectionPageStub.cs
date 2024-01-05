@@ -1,24 +1,18 @@
-using System.Collections;
+﻿using System.Collections;
 using Microsoft.Graph;
-using Moq;
 
 namespace LeaveSystem.Api.UnitTests.Stubs;
 
 public class GraphServiceUsersCollectionPageStub : List<User>, IGraphServiceUsersCollectionPage
 {
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+    bool ICollection<User>.IsReadOnly => false;
+    IEnumerator<User> IEnumerable<User>.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public IList<User> CurrentPage => this;
-    public IDictionary<string, object> AdditionalData { get; set; }
+    public IDictionary<string, object> AdditionalData { get; set; } = null!;
 
-    public void InitializeNextPageRequest(IBaseClient client, string nextPageLinkString)
-    {
-        throw new NotImplementedException();
-    }
+    public void InitializeNextPageRequest(IBaseClient client, string nextPageLinkString) => throw new NotImplementedException();
 
-    public IGraphServiceUsersCollectionRequest NextPageRequest => null;
+    public IGraphServiceUsersCollectionRequest NextPageRequest => null!;
 }

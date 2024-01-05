@@ -1,5 +1,6 @@
 ﻿@page "/users"
 @using LeaveSystem.Shared.Auth;
+@using LeaveSystem.Shared.Date
 @using LeaveSystem.Shared.WorkingHours
 @using LeaveSystem.Web.Pages.WorkingHours
 @using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
@@ -9,6 +10,7 @@
 @using System.Collections
 @using GoldenEye.Extensions.Basic
 @using LeaveSystem.Web.Pages.UsersManagement
+@using LeaveSystem.Web.Extensions
 
 @attribute [Authorize(Policy = @PolicyName)]
 @inject UsersService UsersService
@@ -16,6 +18,7 @@
 @inject DialogService DialogService
 @inject IToastService ToastService
 @inject ILogger<UsersPage> Logger
+@inject DateService DateService
 
 
 @if (users is null)
@@ -26,46 +29,48 @@
 }
 else
 {
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New User" Click="@InsertRow" Disabled=@(userWithWorkingHoursToInsert != null || userToUpdate != null)/>
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New User" Click="@InsertRow" Disabled=@(userToInsert != null || userToUpdate != null)/>
     <RadzenDataGrid @ref="usersGrid" AllowFiltering="true" AllowColumnResize="true"
                     FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="20" AllowPaging="true"
                     PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                     EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset"
-                    Data="@usersWithWorkingHours" TItem="UserWithWorkingHoursDto" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+                    Data="@users" TItem="UserForView" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
         <Columns>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Property="Name" Title="Name" Frozen="true">
+            <RadzenDataGridColumn TItem="UserForView" Property="User.Name" Title="Name" Frozen="true" Width="auto">
                 <EditTemplate Context="data">
-                    <RadzenTextBox @bind-Value="data.Name" Style="width:100%; display: block" Name="Name"/>
+                    <RadzenTextBox @bind-Value="data.User.Name" Style="width:100%; display: block" Name="Name"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Property="Email" Title="Email">
+            <RadzenDataGridColumn TItem="UserForView" Property="User.Email" Title="Email" Width="auto">
                 <EditTemplate Context="data">
-                    <RadzenTextBox @bind-Value="data.Email" Style="width:100%; display: block" Name="Email"/>
+                    <RadzenTextBox @bind-Value="data.User.Email" Style="width:100%; display: block" Name="Email" />
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Title="Roles" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+            <RadzenDataGridColumn TItem="UserForView" Title="Roles" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Width="auto">
                 <Template Context="data">
-                    @RolesToString(data.Roles)
+                    @RolesToString(data.User.Roles)
                 </Template>
                 <EditTemplate Context="data">
-                    <RadzenDropDown @bind-Value=data.Roles Data=@allRoles
+                    <RadzenDropDown @bind-Value=data.User.Roles Data=@allRoles
                                     Multiple=true AllowClear=true Placeholder="Select roles" Chips=true Style="width:100%; display: block"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Title="WorkingHours" TextAlign="TextAlign.Center" Filterable="false" Sortable="false">
+            <RadzenDataGridColumn TItem="UserForView" Title="WorkingHours" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Width="auto">
                 <Template Context="data">
                     @WorkingHoursToString(data.WorkingHours)
                 </Template>
                 <EditTemplate Context="data">
-                    <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.Id)) Disabled="data.WorkingHours is null">
-                        <span class="rz-button-text">
-                            <i class="fa-solid fa-clock"> </i>
-                            <i class="fa-solid fa-pen"></i>
-                        </span>
-                    </RadzenButton>
+                    <RadzenStack Orientation="Orientation.Horizontal">
+                        <InputText type="time" Style="width: 100%" @bind-Value="data.WorkingHours.DurationProxy"  />
+                        <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.User.Id))>
+                            <span class="rz-button-text">
+                                <i class="fa-solid fa-pen"></i>
+                            </span>
+                        </RadzenButton>
+                    </RadzenStack>
                 </EditTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="UserWithWorkingHoursDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
+            <RadzenDataGridColumn TItem="UserForView" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
                 <Template Context="data">
                     <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(data))" @onclick:stopPropagation="true">
                     </RadzenButton>
@@ -88,151 +93,140 @@ else
 @code {
     public const string PolicyName = "ShowUserPage";
     string[] allRoles = Enum.GetNames<RoleType>();
-    RadzenDataGrid<UserWithWorkingHoursDto>? usersGrid;
-    IEnumerable<UserDto>? users;
-    IEnumerable<UserWithWorkingHoursDto>? usersWithWorkingHours;
-    UserWithWorkingHoursDto? userWithWorkingHoursToInsert;
-    UserDto? userToUpdate;
-    IEnumerable<WorkingHoursDto>? workingHoursToUpdate;
-    readonly DateTimeOffset now = DateTimeOffset.Now.GetDayWithoutTime();
-
-
-    string RolesToString(IEnumerable<string>? roles)
-        => roles is null ? "" : string.Join(",", roles);
+    RadzenDataGrid<UserForView>? usersGrid;
+    IEnumerable<UserForView>? users;
+    UserForView? userToInsert;
+    UserForView? userToUpdate;
 
     void Reset()
     {
-        userWithWorkingHoursToInsert = null;
+        userToInsert = null;
         userToUpdate = null;
-        workingHoursToUpdate = null;
     }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        Console.WriteLine("Test");
 
-        users = (await UsersService.Get()).ToArray();
-        var query = GetWorkingHoursQuery.GetAllForUsers(users.Select(x => x.Id ?? "").ToArray());
-        var workingHours = await WorkingHoursService.GetWorkingHours(query);
-        usersWithWorkingHours = users.Select(x => new UserWithWorkingHoursDto(x.Id, x.Name, x.Email, x.Roles, workingHours?.Items?.Where(wh => wh.UserId == x.Id).OrderBy(wh => wh.DateFrom) ?? Enumerable.Empty<WorkingHoursDto>()));
-    }
-
-    async Task EditRow(UserWithWorkingHoursDto userWithWorkingHours)
-    {
-        userToUpdate = userWithWorkingHours.GetUser();
-        workingHoursToUpdate = userWithWorkingHours.WorkingHours;
-        if (usersGrid is null)
+        var users = await UsersService.Get();
+        try
         {
-            return;
+            var workingHours = await EditWorkingHoursDialog.GetWorkingHours(
+                users.Select(x => x.Id!),
+                new[] { WorkingHoursStatus.Current },
+                TimeSpan.FromSeconds(15),
+                DateService,
+                WorkingHoursService);
+            this.users = users.Select(x => new UserForView(x, workingHours.FirstOrDefault(h => h.UserId == x.Id) ?? new WorkingHoursDto()));
         }
-        await usersGrid.EditRow(userWithWorkingHours);
-    }
-
-    async Task OnUpdateRow(UserWithWorkingHoursDto userWithWorkingHours)
-    {
-        if (userWithWorkingHours == userWithWorkingHoursToInsert)
+        catch (Exception ex)
         {
-            userWithWorkingHoursToInsert = null;
+            ToastService.ShowError("Error occured during getting working hours");
+            Logger.LogError(ex, "Error occured during getting working hours");
         }
-
-        userToUpdate = null;
-        workingHoursToUpdate = null;
-
-        await UsersService.Edit(userWithWorkingHours.GetUser());
     }
 
-    async Task SaveRow(UserWithWorkingHoursDto userWithWorkingHours)
+    async Task EditRow(UserForView user)
     {
         if (usersGrid is null)
         {
+            Logger.LogError($"{nameof(EditRow)}: Can't edit row. usersGrid is null");
             return;
         }
-        await usersGrid.UpdateRow(userWithWorkingHours);
+        userToUpdate = user;
+        await usersGrid.EditRow(user);
     }
 
-    void CancelEdit(UserWithWorkingHoursDto userWithWorkingHours)
+    async Task OnUpdateRow(UserForView user)
     {
-        if (userWithWorkingHours == userWithWorkingHoursToInsert)
+        Reset();
+        await UsersService.Edit(user.User);
+        if (user.WorkingHours is not null)
         {
-            userWithWorkingHoursToInsert = null;
+            await WorkingHoursService.Edit(user.WorkingHours);
         }
-
-        userToUpdate = null;
-        workingHoursToUpdate = null;
-
-        usersGrid?.CancelEditRow(userWithWorkingHours);
     }
 
-    async Task DeleteRow(UserWithWorkingHoursDto userWithWorkingHours)
+    async Task SaveRow(UserForView user)
     {
-        var user = userWithWorkingHours.GetUser();
-        if (user == userWithWorkingHoursToInsert)
+        if (usersGrid is null)
         {
-            userWithWorkingHoursToInsert = null;
+            Logger.LogError($"{nameof(SaveRow)}: Can't save row. usersGrid is null");
+            return;
+        }
+        await usersGrid.UpdateRow(user);
+    }
+
+    void CancelEdit(UserForView user)
+    {
+        Reset();
+
+        usersGrid?.CancelEditRow(user);
+    }
+
+    async Task DeleteRow(UserForView user)
+    {
+        Reset();
+
+        if (usersGrid is null)
+        {
+            Logger.LogError($"{nameof(DeleteRow)}: Can't delete row. usersGrid is null");
+            return;
         }
 
-        if (user == userToUpdate)
+        if (user.User.Id is null)
         {
-            userToUpdate = null;
-        }
-
-        if (users?.Contains(user) == true && user.Id is not null)
-        {
-            await UsersService.Delete(user.Id);
-
-            if (usersGrid is null)
-            {
-                return;
-            }
+            Logger.LogError($"{nameof(DeleteRow)}: Can't user because is id null. {user.User.Id} {user.User.Name}");
+            usersGrid.CancelEditRow(user);
             await usersGrid.Reload();
+            return;
         }
-        else
-        {
-    // TODO: Log an error. Can't find user to delete.
-            if (usersGrid is null)
-            {
-                return;
-            }
-            usersGrid.CancelEditRow(userWithWorkingHours);
-            await usersGrid.Reload();
-        }
+        await UsersService.Delete(user.User.Id);
+        await usersGrid.Reload();
     }
 
     async Task InsertRow()
     {
-        userWithWorkingHoursToInsert = new UserWithWorkingHoursDto();
+        userToInsert = UserForView.Create();
         if (usersGrid is null)
         {
+            Logger.LogError($"{nameof(InsertRow)}: Can't insert row. usersGrid is null");
             return;
         }
-        await usersGrid.InsertRow(userWithWorkingHoursToInsert);
+        await usersGrid.InsertRow(userToInsert);
     }
 
-    async Task OnCreateRow(UserWithWorkingHoursDto userWithWorkingHoursDto)
+    async Task OnCreateRow(UserForView userForView)
     {
-        var userId = await UsersService.Create(userWithWorkingHoursDto);
-        userWithWorkingHoursDto.Id = userId;
-        userWithWorkingHoursToInsert = null;
+        var userId = await UsersService.Create(userForView.User);
+        userForView.User.Id = userId;
+        var firstDayOfYear = DateService.UtcNow().GetFirstDayOfYear();
+        var workingHours = await WorkingHoursService.Add(new AddWorkingHoursDto(userId, firstDayOfYear, null, userForView.WorkingHours.Duration));
+        if (workingHours is not null)
+        {
+            Logger.LogError($"{nameof(OnCreateRow)}: Cannot add working hours for user {userForView.User.Id} {userForView.User.Name}");
+        }
+        userToInsert = null;
     }
 
-    string WorkingHoursToString(IEnumerable<WorkingHoursDto>? workingHours)
-    {
-        var currentWorkingHours = workingHours?.FirstOrDefault(x => x.DateFrom <= now && x.DateTo >= now)?.Duration ?? TimeSpan.Zero;
-        return $"{currentWorkingHours.Hours}h";
-    }
+    string WorkingHoursToString(WorkingHoursDto? workingHours) =>
+        workingHours?.DurationProxy ?? "undefined";
+
+    string RolesToString(IEnumerable<string>? roles) => 
+        roles is null ? "" : string.Join(",", roles);
 
     async Task ShowWorkingHoursDialog(string? userId)
     {
         if (userId.IsNullOrWhiteSpace())
         {
             ToastService.ShowError("Can not open the dialog");
-            Logger.LogError("userId is null or white space");
+            Logger.LogError($"{nameof(ShowWorkingHoursDialog)}: userId is null or white space");
             return;
         }
         await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours",
             new Dictionary<string, object>
             {
-                { "WorkingHours", workingHoursToUpdate.OrEmptyIfNull().ToList() },
                 { "UserId", userId! }
             },
             new DialogOptions { Width = "800px", Resizable = true, Draggable = true });

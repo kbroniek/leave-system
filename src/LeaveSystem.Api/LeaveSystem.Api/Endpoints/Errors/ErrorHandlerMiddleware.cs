@@ -3,9 +3,6 @@ using Microsoft.Graph;
 using System.Net;
 using static LeaveSystem.Api.Endpoints.Errors.ErrorHandlerMiddleware;
 using System.Reflection;
-using Ardalis.GuardClauses;
-using FluentValidation;
-using LeaveSystem.Shared.FluentValidation;
 
 namespace LeaveSystem.Api.Endpoints.Errors;
 
@@ -80,24 +77,19 @@ public class ErrorHandlerMiddleware
                 "Internal Server Error from the custom middleware.");
         }
     }
-
-    private async Task HandleExceptionAsync(HttpContext context, int statusCode, Exception error,
-        string? message = null)
+    public async Task HandleExceptionAsync(HttpContext context, int statusCode, Exception error, string? message = null)
     {
-        logger.LogError(error, message);
-        await Results.Problem(isDevelopment ? error.ToString() : null, nameof(ErrorHandlerMiddleware), statusCode,
-            message ?? error.Message, error.GetType().ToString(), new Dictionary<string, object?>()
+        logger.LogError(error, "{Message}", message);
+        await Results.Problem(isDevelopment ? error.ToString() : null, nameof(ErrorHandlerMiddleware), statusCode, message ?? error.Message, error.GetType().ToString(), new Dictionary<string, object?>()
             {
                 { "env", isDevelopment ? "dev" : "prod" },
-                { "version", AppVersionService.Version },
+                { "version", AppVersionService.Version},
             }).ExecuteAsync(context);
     }
-
-
     public static class AppVersionService
     {
         public static readonly string? Version =
-            Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                ?.InformationalVersion;
+            Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
     }
 }
+

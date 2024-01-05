@@ -8,14 +8,12 @@ public static class MockHttpHandlerExtensions
 {
     public const string BaseFakeUrl = "http://localhost:5047/";
 
-    public static MockedRequest WhenWithBaseUrl(this MockHttpMessageHandler source, string restOfUrl)
-    {
-        return source.When(BaseFakeUrl + restOfUrl);
-    }
+    public static MockedRequest WhenWithBaseUrl(this MockHttpMessageHandler source, string restOfUrl) =>
+        source.When(BaseFakeUrl + restOfUrl);
 
     public static MockedRequest RespondWithJson<T>(this MockedRequest source, T objectToSerialize) =>
         RespondWithJson(source, objectToSerialize, JsonSerializerOptions.Default);
-    
+
     public static MockedRequest RespondWithJson<T>(this MockedRequest source, T objectToSerialize, JsonSerializerOptions jsonSerializerOptions)
     {
         var jsonContent = JsonSerializer.Serialize(objectToSerialize, jsonSerializerOptions);
@@ -29,5 +27,5 @@ public static class MockHttpHandlerExtensions
     {
         var serializedObject = JsonSerializer.Serialize(objectToSerialize, jsonSerializerOptions);
         return source.WithContent(serializedObject);
-    } 
+    }
 }

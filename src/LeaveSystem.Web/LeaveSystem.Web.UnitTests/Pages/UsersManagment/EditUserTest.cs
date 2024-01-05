@@ -6,7 +6,7 @@ namespace LeaveSystem.Web.UnitTests.Pages.UsersManagment;
 
 public class EditUserTest
 {
-    private HttpClient httpClient;
+    private HttpClient httpClient = null!;
 
     private UsersService GetSut() => new(httpClient);
 
@@ -18,14 +18,11 @@ public class EditUserTest
         httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users/{user.Id}", user, HttpStatusCode.NoContent);
         var sut = GetSut();
         //When
-        var act = async () =>
-        {
-            await sut.Edit(user);
-        };
+        var act = async () => await sut.Edit(user);
         //Then
         await act.Should().NotThrowAsync<Exception>();
     }
-    
+
     [Theory]
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.Forbidden)]
@@ -38,10 +35,7 @@ public class EditUserTest
         httpClient = HttpClientMockFactory.CreateWithJsonContent($"api/users/{user.Id}", user, statusCode);
         var sut = GetSut();
         //When
-        var act = async () =>
-        {
-            await sut.Edit(user);
-        };
+        var act = async () => await sut.Edit(user);
         //Then
         await act.Should().ThrowAsync<InvalidOperationException>();
     }

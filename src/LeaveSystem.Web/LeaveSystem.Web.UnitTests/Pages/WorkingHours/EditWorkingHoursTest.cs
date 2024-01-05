@@ -7,16 +7,15 @@ using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using Microsoft.Extensions.Logging;
-using Moq;
 using RichardSzalay.MockHttp;
 
 namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
 
-public class EditWorkingHoursTest
+public class EditWorkingHoursTest : IDisposable
 {
-    private HttpClient httpClientMock;
-    private IToastService toastServiceMock;
-    private ILogger<WorkingHoursService> logger;
+    private HttpClient httpClientMock = null!;
+    private readonly IToastService toastServiceMock = Substitute.For<IToastService>();
+    private readonly ILogger<WorkingHoursService> logger = Substitute.For<ILogger<WorkingHoursService>>();
 
     private WorkingHoursService GetSut() => new(httpClientMock, toastServiceMock, logger);
 
@@ -26,7 +25,7 @@ public class EditWorkingHoursTest
         //Given
         var workingHoursToEdit = FakeWorkingHoursProvider.GetCurrentForBen(DateTimeOffset.Now).ToDto();
         const string fakeContentText = "fake response content";
-        const string fakeDetailText = "fake error in 404 line";  
+        const string fakeDetailText = "fake error in 404 line";
         var problemDto =
             new ProblemDto(string.Empty, fakeContentText, 400, fakeDetailText, string.Empty, "dev", "1.0.0.0");
         var serializedProblemDto = JsonSerializer.Serialize(problemDto);
@@ -37,10 +36,10 @@ public class EditWorkingHoursTest
             .When($"{baseUrl}/api/workingHours/{workingHoursToEdit.Id}/modify")
             .WithJsonContent(workingHoursToEdit)
             .Respond(HttpStatusCode.BadRequest, responseContent);
-        httpClientMock = new HttpClient(mockHttpMessageHandler);
-        httpClientMock.BaseAddress = new Uri(baseUrl);
-        toastServiceMock = Substitute.For<IToastService>();
-        logger = Substitute.For<ILogger<WorkingHoursService>>();
+        httpClientMock = new HttpClient(mockHttpMessageHandler)
+        {
+            BaseAddress = new Uri(baseUrl)
+        };
         var sut = GetSut();
         //When
         var result = await sut.Edit(workingHoursToEdit);
@@ -62,10 +61,10 @@ public class EditWorkingHoursTest
                 .When($"{baseUrl}/api/workingHours/{workingHoursToEdit.Id}/modify")
                 .WithJsonContent(workingHoursToEdit)
                 .Respond(HttpStatusCode.NoContent);
-        httpClientMock = new HttpClient(mockHttpMessageHandler);
-        httpClientMock.BaseAddress = new Uri(baseUrl);
-        toastServiceMock = Substitute.For<IToastService>();
-        logger = Substitute.For<ILogger<WorkingHoursService>>();
+        httpClientMock = new HttpClient(mockHttpMessageHandler)
+        {
+            BaseAddress = new Uri(baseUrl)
+        };
         var sut = GetSut();
         //When
         var result = await sut.Edit(workingHoursToEdit);
@@ -74,5 +73,20 @@ public class EditWorkingHoursTest
         toastServiceMock.DidNotReceiveWithAnyArgs().ShowError(string.Empty);
         logger.DidNotReceiveWithAnyArgs().LogError("");
         result.Should().BeTrue();
+    }
+
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            httpClientMock?.Dispose();
+        }
     }
 }

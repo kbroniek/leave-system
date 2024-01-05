@@ -16,7 +16,7 @@ public class UserLeaveLimit : IHaveId<Guid>
     public TimeSpan? Limit { get; set; }
     public TimeSpan? OverdueLimit { get; set; }
     public string? AssignedToUserId { get; set; }
-    public virtual LeaveType LeaveType { get; set; }
+    public virtual LeaveType LeaveType { get; set; } = null!;
     public Guid LeaveTypeId { get; set; }
 
     public DateTimeOffset? ValidSince

@@ -60,7 +60,7 @@ public class AcceptLeaveRequestTest
         {
             Status = LeaveRequestStatus.Accepted,
             LastModifiedBy = user,
-            Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks, @event.CreatedBy) },
+            Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers());
         leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
             new IEvent[] { @event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, user) }
@@ -83,7 +83,7 @@ public class AcceptLeaveRequestTest
             LastModifiedBy = user,
             Remarks = new[]
                 {
-                    new LeaveRequest.RemarksModel(@event.Remarks, @event.CreatedBy),
+                    new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy),
                     new LeaveRequest.RemarksModel(fakeRejectRemarks, user)
                 }
         }, o => o.ExcludingMissingMembers());

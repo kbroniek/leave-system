@@ -12,7 +12,6 @@ using LeaveSystem.Extensions;
 using LeaveSystem.Linq;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Extensions;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
@@ -26,9 +25,9 @@ namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.ModifyingWorkingHours
 
 public class HandleModifyWorkingHoursTest
 {
-    private IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours> workingHoursRepositoryMock;
-    private IDocumentSession documentSessionMock;
-    private IRepository<LeaveRequest> leaveRequestRepositoryMock;
+    private readonly IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours> workingHoursRepositoryMock = Substitute.For<IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>>();
+    private readonly IDocumentSession documentSessionMock = Substitute.For<IDocumentSession>();
+    private readonly IRepository<LeaveRequest> leaveRequestRepositoryMock = Substitute.For<IRepository<LeaveRequest>>();
 
     private HandleModifyWorkingHours GetSut() =>
         new(workingHoursRepositoryMock, documentSessionMock, leaveRequestRepositoryMock);
@@ -49,9 +48,7 @@ public class HandleModifyWorkingHoursTest
         );
         var now = DateTimeOffset.Now;
         var fakeWorkingHours = FakeWorkingHoursProvider.GetCurrentForFakeoslav(now);
-        workingHoursRepositoryMock = Substitute.For<IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>>();
         workingHoursRepositoryMock.FindById(command.WorkingHoursId).Returns(fakeWorkingHours);
-        documentSessionMock = Substitute.For<IDocumentSession>();
         var workingHoursMartenQueryable = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
             workingHoursEnumerable.ToList()
         );
@@ -64,9 +61,8 @@ public class HandleModifyWorkingHoursTest
         documentSessionMock.Query<LeaveRequest>()
             .Returns(leaveRequestsMartenQueryable);
         var overlapPeriodExp = PeriodExpressions.GetPeriodOverlapExp<LeaveRequest, ModifyWorkingHours>(command);
-        var overlappingLeaveRequestsCount = await 
-            leaveRequestsMartenQueryable.CountAsync(overlapPeriodExp.And(x => x.CreatedBy.Id == command.UserId));
-        leaveRequestRepositoryMock = Substitute.For<IRepository<LeaveRequest>>();
+        var overlappingLeaveRequestsCount =
+            await leaveRequestsMartenQueryable.CountAsync(overlapPeriodExp.And(x => x.CreatedBy.Id == command.UserId));
         var sut = GetSut();
         //When
         var result = await sut.Handle(command, CancellationToken.None);
@@ -97,29 +93,23 @@ public class HandleModifyWorkingHoursTest
         var fakeWorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours(
             WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom,
                 command.DateTo, command.Duration, command.ModifiedBy));
-        workingHoursRepositoryMock = Substitute.For<IRepository<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>>();
-        documentSessionMock = Substitute.For<IDocumentSession>();
         var workingHoursEnumerable = FakeWorkingHoursProvider.GetDeprecated().ToList();
         var martenQueryable = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
             workingHoursEnumerable.ToList()
         );
         documentSessionMock.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>()
             .Returns(martenQueryable);
-        leaveRequestRepositoryMock = Substitute.For<IRepository<LeaveRequest>>();
         var sut = GetSut();
         //When
-        var act = async () =>
-        {
-            await sut.Handle(command, CancellationToken.None);
-        };
+        var act = async () => await sut.Handle(command, CancellationToken.None);
         //Then
         await act.Should().ThrowAsync<InvalidOperationException>();
         documentSessionMock.Received(1).Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>();
         await workingHoursRepositoryMock.DidNotReceiveWithAnyArgs()
             .Update(Arg.Any<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Arg.Any<CancellationToken>());
-        await workingHoursRepositoryMock.DidNotReceiveWithAnyArgs().Add(default, Arg.Any<CancellationToken>());
+        await workingHoursRepositoryMock.DidNotReceiveWithAnyArgs().Add(default!, Arg.Any<CancellationToken>());
         await workingHoursRepositoryMock.DidNotReceiveWithAnyArgs().SaveChanges();
-        await leaveRequestRepositoryMock.DidNotReceiveWithAnyArgs().Update(default);
+        await leaveRequestRepositoryMock.DidNotReceiveWithAnyArgs().Update(default!);
         await leaveRequestRepositoryMock.DidNotReceiveWithAnyArgs().SaveChanges();
         var now = DateTimeOffset.Now.GetDayWithoutTime();
         martenQueryable.Any(x => x.UserId == command.UserId && x.GetStatus(now) == WorkingHoursStatus.Current)

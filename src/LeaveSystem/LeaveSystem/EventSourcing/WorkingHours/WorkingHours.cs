@@ -1,4 +1,4 @@
-using GoldenEye.Aggregates;
+﻿using GoldenEye.Aggregates;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;
 using LeaveSystem.Periods;
@@ -8,7 +8,7 @@ namespace LeaveSystem.EventSourcing.WorkingHours;
 
 public class WorkingHours : Aggregate, IDateToNullablePeriod
 {
-    public string UserId { get; private set; }
+    public string UserId { get; private set; } = null!;
     public DateTimeOffset DateFrom { get; private set; }
     public DateTimeOffset? DateTo { get; private set; }
     public TimeSpan Duration { get; private set; }

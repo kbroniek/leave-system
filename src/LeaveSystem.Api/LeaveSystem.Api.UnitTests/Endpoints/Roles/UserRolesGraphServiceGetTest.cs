@@ -1,9 +1,7 @@
-using System.Text.Json;
-using FluentAssertions;
+﻿using System.Text.Json;
 using LeaveSystem.Api.Endpoints.Roles;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Api.UnitTests.Providers;
-using LeaveSystem.Api.UnitTests.Stubs;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
 using Moq;
@@ -16,7 +14,7 @@ public class UserRolesGraphServiceGetTest
     public async Task WhenGetting_ThenReturnGraphUsers()
     {
         //Given
-        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesAttribute>(TestData.FakeRolesJson);
+        var fakeRolesAttribute = JsonSerializer.Deserialize<RolesResult>(TestData.FakeRolesJson)!;
         var users = GraphServiceUsersCollectionPageProvider.Get(TestData.FakeRoleAttributeName, TestData.FakeRolesJson);
         var graphClientFactoryMock = new Mock<IGraphClientFactory>();
         var graphServiceUsersCollectionRequestMock = new Mock<IGraphServiceUsersCollectionRequest>();
@@ -46,20 +44,19 @@ public class UserRolesGraphServiceGetTest
         {
             new
             {
-                Id = users[0].Id,
+                users[0].Id,
                 Roles = Enumerable.Empty<string>()
             },
             new
             {
-                Id = users[1].Id,
-                Roles = fakeRolesAttribute.Roles
+                users[1].Id,
+                fakeRolesAttribute.Roles
             },
             new
             {
-                Id = users[2].Id,
-                Roles = fakeRolesAttribute.Roles
+                users[2].Id,
+                fakeRolesAttribute.Roles
             },
-            
         }, o => o.ExcludingMissingMembers());
     }
 }

@@ -1,8 +1,6 @@
-﻿using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace LeaveSystem.Web.Pages.UsersManagement;
 
@@ -10,10 +8,7 @@ public class UsersService
 {
     private readonly HttpClient httpClient;
 
-    public UsersService(HttpClient httpClient)
-    {
-        this.httpClient = httpClient;
-    }
+    public UsersService(HttpClient httpClient) => this.httpClient = httpClient;
 
     public async Task<IEnumerable<UserDto>> Get()
     {
@@ -31,7 +26,7 @@ public class UsersService
             throw new InvalidOperationException("Can't update users");
         }
     }
-    public async Task<string?> Create(UserDto user)
+    public async Task<string> Create(UserDto user)
     {
         var jsonString = JsonSerializer.Serialize(user);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");

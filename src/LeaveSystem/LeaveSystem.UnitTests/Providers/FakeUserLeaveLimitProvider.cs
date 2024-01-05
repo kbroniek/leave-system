@@ -14,7 +14,7 @@ public static class FakeUserLeaveLimitProvider
 
     public static UserLeaveLimit GetLimitForSickLeave()
     {
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         return new UserLeaveLimit
         {
             Id = FakeLimitForSickLeaveId,
@@ -27,7 +27,7 @@ public static class FakeUserLeaveLimitProvider
     }
     public static UserLeaveLimit GetLimitForOnDemandLeave()
     {
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         return new UserLeaveLimit
         {
             Id = FakeLimitForOnDemandLeaveId,
@@ -40,7 +40,7 @@ public static class FakeUserLeaveLimitProvider
     }
     public static UserLeaveLimit GetLimitForHolidayLeave()
     {
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         return new UserLeaveLimit
         {
             Id = FakeLimitForHolidayLeaveId,

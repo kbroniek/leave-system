@@ -52,15 +52,14 @@ public class GetWorkingHoursQuery
             statuses: ValidStatuses);
     }
 
-    public static GetWorkingHoursQuery GetAllForUsers(string[] userIds)
+    public static GetWorkingHoursQuery GetAllForUsers(string[] userIds, WorkingHoursStatus[] statuses, DateTimeOffset now)
     {
-        var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
         return new(
             pageNumber: 1,
             pageSize: 100,
-            dateFrom: now.AddYears(-100),
-            dateTo: now.AddYears(100),
-            userIds: userIds,
-            statuses: new []{ WorkingHoursStatus.Current, WorkingHoursStatus.Deprecated, WorkingHoursStatus.Future});
+            dateFrom: now.AddYears(-100), // TODO: provide null
+            dateTo: now.AddYears(100), // TODO: provide null
+            userIds,
+            statuses);
     }
 }

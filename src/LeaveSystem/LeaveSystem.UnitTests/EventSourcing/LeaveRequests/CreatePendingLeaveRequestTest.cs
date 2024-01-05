@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using FluentAssertions;
-using GoldenEye.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared.LeaveRequests;
@@ -22,23 +21,22 @@ public class CreatePendingLeaveRequestTest
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //Then
         leaveRequest.Should().BeEquivalentTo(new
-            {
-                Id = @event.LeaveRequestId,
-                DateFrom = @event.DateFrom,
-                DateTo = @event.DateTo,
-                Duration = @event.Duration,
-                LeaveTypeId = @event.LeaveTypeId,
-                Status = LeaveRequestStatus.Pending,
-                CreatedBy = @event.CreatedBy,
-                LastModifiedBy = @event.CreatedBy,
-                Remarks = new[] {new LeaveRequest.RemarksModel(@event.Remarks, @event.CreatedBy)}
-            }, o => o.ExcludingMissingMembers()
-        );
+        {
+            Id = @event.LeaveRequestId,
+            @event.DateFrom,
+            @event.DateTo,
+            @event.Duration,
+            @event.LeaveTypeId,
+            Status = LeaveRequestStatus.Pending,
+            @event.CreatedBy,
+            LastModifiedBy = @event.CreatedBy,
+            Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) }
+        }, o => o.ExcludingMissingMembers());
         leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
-            new [] {@event}
+            new[] { @event }
         );
     }
-    
+
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
@@ -61,20 +59,20 @@ public class CreatePendingLeaveRequestTest
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //Then
         leaveRequest.Should().BeEquivalentTo(new
-            {
-                Id = @event.LeaveRequestId,
-                DateFrom = @event.DateFrom,
-                DateTo = @event.DateTo,
-                Duration = @event.Duration,
-                LeaveTypeId = @event.LeaveTypeId,
-                Status = LeaveRequestStatus.Pending,
-                CreatedBy = @event.CreatedBy,
-                LastModifiedBy = @event.CreatedBy,
-                Remarks = Enumerable.Empty<LeaveRequest.RemarksModel>()
-            }, o => o.ExcludingMissingMembers()
+        {
+            Id = @event.LeaveRequestId,
+            DateFrom = @event.DateFrom,
+            DateTo = @event.DateTo,
+            Duration = @event.Duration,
+            LeaveTypeId = @event.LeaveTypeId,
+            Status = LeaveRequestStatus.Pending,
+            CreatedBy = @event.CreatedBy,
+            LastModifiedBy = @event.CreatedBy,
+            Remarks = Enumerable.Empty<LeaveRequest.RemarksModel>()
+        }, o => o.ExcludingMissingMembers()
         );
         leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
-            new [] {@event}
+            new[] { @event }
         );
     }
 }

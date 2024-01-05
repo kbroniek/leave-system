@@ -46,12 +46,12 @@ public class CreateForViewTest
         //Then
         result.Should().BeEquivalentTo(new
         {
-            Id = leaveRequest.Id,
-            DateFrom = leaveRequest.DateFrom,
-            DateTo = leaveRequest.DateTo,
+            leaveRequest.Id,
+            leaveRequest.DateFrom,
+            leaveRequest.DateTo,
             Duration = leaveRequest.Duration.GetReadableTimeSpan(workingHours),
-            Description = exceptedLimit.Property.Description,
-            Status = leaveRequest.Status
+            exceptedLimit.Property?.Description,
+            leaveRequest.Status
         });
     }
 

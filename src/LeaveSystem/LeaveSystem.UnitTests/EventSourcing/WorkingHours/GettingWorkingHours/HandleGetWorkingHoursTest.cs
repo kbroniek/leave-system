@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -19,12 +17,12 @@ namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.GettingWorkingHours;
 
 public class HandleGetWorkingHoursTest
 {
-    private IDocumentSession querySession;
+    private readonly IDocumentSession querySession = Substitute.For<IDocumentSession>();
 
     private HandleGetWorkingHours GetSut() => new(querySession);
 
     private static readonly LeaveSystem.EventSourcing.WorkingHours.WorkingHours[] Data = FakeWorkingHoursProvider
-        .GetAll(DateTimeOffset.Now)
+        .GetAll(FakeDateServiceProvider.GetDateService().UtcNowWithoutTime())
         .ToArray();
 
 
@@ -35,7 +33,6 @@ public class HandleGetWorkingHoursTest
         IEnumerable<LeaveSystem.EventSourcing.WorkingHours.WorkingHours> expectedData)
     {
         //Given
-        querySession = Substitute.For<IDocumentSession>();
         querySession.Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>().Returns(
             new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
                 Data

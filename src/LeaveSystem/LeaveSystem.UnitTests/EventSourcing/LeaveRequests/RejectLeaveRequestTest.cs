@@ -10,6 +10,8 @@ using LeaveSystem.UnitTests.TestDataGenerators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LeaveSystem.Shared.Date;
+using Moq;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
@@ -41,7 +43,7 @@ public class RejectLeaveRequestTest
     public static IEnumerable<object[]>
         Get_WhenLeaveRequestStatusOtherThenPendingAndAccepted_ThenThrowInvalidOperationException_TestData()
     {
-        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u);
+        void Cancel(LeaveRequest l, string? r, FederatedUser u) => l.Cancel(r, u, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         void Reject(LeaveRequest l, string? r, FederatedUser u) => l.Reject(r, u);
         void Deprecate(LeaveRequest l, string? r, FederatedUser u) => l.Deprecate(r, u);
         yield return new object[] { Cancel };
@@ -65,7 +67,7 @@ public class RejectLeaveRequestTest
         {
             Status = LeaveRequestStatus.Rejected,
             LastModifiedBy = User,
-            Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks, @event.CreatedBy) },
+            Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers()
         );
         leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(

@@ -9,6 +9,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
@@ -40,7 +41,7 @@ public class HandleCancelLeaveRequestTest
         GivenAcceptLeaveRequestSetup_WhenAcceptLeaveRequestHandled_ThenUpdate()
     {
         //Given
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00");
         var createdEvent = LeaveRequestCreated.Create(
             command.LeaveRequestId,
             now + TimeSpan.FromDays(1),
@@ -65,8 +66,8 @@ public class HandleCancelLeaveRequestTest
             LastModifiedBy = command.CanceledBy,
             Remarks = new[]
             {
-                new LeaveRequest.RemarksModel(createdEvent.Remarks, createdEvent.CreatedBy),
-                new LeaveRequest.RemarksModel(command.Remarks, command.CanceledBy)
+                new LeaveRequest.RemarksModel(createdEvent.Remarks!, createdEvent.CreatedBy),
+                new LeaveRequest.RemarksModel(command.Remarks!, command.CanceledBy)
             },
             Version = 2
         }, o => o.ExcludingMissingMembers());
@@ -78,7 +79,7 @@ public class HandleCancelLeaveRequestTest
     public void WhenDateFromIsPastDate_ThenThrowInvalidOperationException()
     {
         //Given
-        var now = FakeDateServiceProvider.GetDateService().GetWithoutTime();
+        var now = DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00");
         var @event = LeaveRequestCreated.Create(
             command.LeaveRequestId,
             now - TimeSpan.FromMilliseconds(1),

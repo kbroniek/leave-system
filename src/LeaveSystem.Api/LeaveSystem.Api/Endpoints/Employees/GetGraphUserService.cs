@@ -1,5 +1,6 @@
 ﻿using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Date;
 using Microsoft.Graph;
 using GraphClientFactory = LeaveSystem.Api.GraphApi.GraphClientFactory;
 
@@ -10,13 +11,13 @@ public class GetGraphUserService
     private readonly IGraphClientFactory graphClientFactory;
     private readonly string roleAttributeName;
 
-    public GetGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
+    public GetGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver, DateService dateService)
     {
         this.graphClientFactory = graphClientFactory;
         roleAttributeName = roleAttributeNameResolver.RoleAttributeName;
     }
 
-    public async Task<IEnumerable<FederatedUser>> Get(CancellationToken cancellationToken)
+    public virtual async Task<IEnumerable<FederatedUser>> Get(CancellationToken cancellationToken)
     {
         var graphClient = graphClientFactory.Create();
 
@@ -40,7 +41,7 @@ public class GetGraphUserService
 
         return graphUsers;
     }
-    public async Task<FederatedUser> Get(string id, CancellationToken cancellationToken)
+    public virtual async Task<FederatedUser> Get(string id, CancellationToken cancellationToken)
     {
         var graphClient = graphClientFactory.Create();
 

@@ -1,16 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using LeaveSystem.EventSourcing.LeaveRequests;
-using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
-using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
-using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
-using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
-using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
@@ -26,7 +19,7 @@ public class HandleGetLeaveRequestsTest
     private static readonly DateTimeOffset Now = DateTimeOffset.Now;
     private static readonly LeaveRequestShortInfo[] Data = FakeLeaveRequestShortInfoProvider.Get(Now);
 
-    private async Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession)
+    private static async Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession)
     {
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
         return new(documentSession, dbContext);

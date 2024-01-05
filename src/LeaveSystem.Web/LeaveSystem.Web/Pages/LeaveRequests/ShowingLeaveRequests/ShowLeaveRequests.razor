@@ -112,7 +112,7 @@ else
         if (leaveRequests?.Items is not null)
         {
             employees = leaveRequests.Items.Select(l => l.CreatedBy)
-                .Union(employeesFromGraph.Select(e => FederatedUser.Create(e.Id, e.Name, e.Email)))
+                .Union(employeesFromGraph.Select(e => FederatedUser.Create(e.Id, e.Email, e.Name)))
                 .GroupBy(u => u.Id)
                 .Select(u => u.First())
                 .OrderBy(u => u.Name)
