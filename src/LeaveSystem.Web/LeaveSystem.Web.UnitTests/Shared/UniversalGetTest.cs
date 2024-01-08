@@ -25,27 +25,23 @@ public class UniversalGetTest
         {
             Data = FakeUserLeaveLimitsDtoProvider.GetAllLimits()
         };
-        await WhenNoException_ThenReturnData_Helper(fakeLimitResponse);
+        await this.WhenNoException_ThenReturnData_Helper(fakeLimitResponse);
     }
 
     private async Task WhenNoException_ThenReturnData_Helper<T>(T response)
     {
         var httpClientMock = HttpClientMockFactory.CreateWithJsonResponse(
             "fakeUrl",
-            response,
-            jsonSerializerOptions
+            response, this.jsonSerializerOptions
         );
         var sut = new UniversalHttpService(httpClientMock, new Mock<IToastService>().Object,
             new Mock<ILogger<UniversalHttpService>>().Object);
-        var result = await sut.GetAsync<T>("fakeUrl", "fake error occured", jsonSerializerOptions);
+        var result = await sut.GetAsync<T>("fakeUrl", "fake error occured", this.jsonSerializerOptions);
         result.Should().BeEquivalentTo(response);
     }
-    
+
     [Fact]
-    public async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt()
-    {
-        await WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<ODataResponse<IEnumerable<LeaveLimitDto>>>();
-    }
+    public async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt() => await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<ODataResponse<IEnumerable<LeaveLimitDto>>>();
 
     private async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<T>()
     {
@@ -58,7 +54,7 @@ public class UniversalGetTest
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.GetAsync<T>(fakeUrl, fakeErrorMessage, jsonSerializerOptions);
+        var result = await sut.GetAsync<T>(fakeUrl, fakeErrorMessage, this.jsonSerializerOptions);
         result.Should().Be(default);
         toastServiceMock.Verify(m => m.ShowError(fakeErrorMessage, null), Times.Once);
         loggerMock.VerifyLogError(null, Times.Once);

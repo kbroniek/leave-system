@@ -29,43 +29,31 @@ public class UniversalHttpService
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
         try
         {
-            var response = await httpClient.PostAsync(uri, httpContent);
+            var response = await this.httpClient.PostAsync(uri, httpContent);
             if (response.IsSuccessStatusCode)
             {
-                return await DeserializeResponseContent<TResponse>(response, successMessage, options);
+                var resultDto = await response.Content.ReadFromJsonAsync<TResponse>(options);
+                this.toastService.ShowSuccess(successMessage);
+                return resultDto;
             }
 
-            await HandleProblemAsync(options, response);
+            await this.HandleProblemAsync(options, response);
         }
         catch (Exception e)
         {
-            toastService.ShowError("Error occured while adding");
-            logger.LogException(e);
+            this.toastService.ShowError("Error occured while adding");
+            this.logger.LogException(e);
         }
 
         return default;
     }
 
-    private async Task<TResponse?> DeserializeResponseContent<TResponse>(
-        HttpResponseMessage response, string successMessage, JsonSerializerOptions options)
-    {
-        var resultWorkingHoursDto = await response.Content.ReadFromJsonAsync<TResponse>(options);
-        if (resultWorkingHoursDto is not null)
-        {
-            toastService.ShowSuccess(successMessage);
-            return resultWorkingHoursDto;
-        }
-        toastService.ShowError("Unexpected empty result");
-        logger.LogError("{Variable} is null", nameof(resultWorkingHoursDto));
-        return default;
-    }
-    
     private async Task HandleProblemAsync(JsonSerializerOptions options, HttpResponseMessage response)
     {
         var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>(options);
-        logger.LogError("{Message}", problemDto?.Detail);
+        this.logger.LogError("{Message}", problemDto?.Detail);
         var message = problemDto?.Title ?? "Something went wrong";
-        toastService.ShowError(message);
+        this.toastService.ShowError(message);
     }
 
     public virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage,
@@ -75,18 +63,18 @@ public class UniversalHttpService
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
         try
         {
-            var response = await httpClient.PatchAsync(uri, httpContent);
+            var response = await this.httpClient.PatchAsync(uri, httpContent);
             if (response.IsSuccessStatusCode)
             {
-                toastService.ShowSuccess(successMessage);
+                this.toastService.ShowSuccess(successMessage);
                 return true;
             }
-            await HandleProblemAsync(options, response);
+            await this.HandleProblemAsync(options, response);
         }
         catch (Exception e)
         {
-            toastService.ShowError("Error occured while adding");
-            logger.LogException(e);
+            this.toastService.ShowError("Error occured while adding");
+            this.logger.LogException(e);
         }
         return false;
     }
@@ -96,12 +84,12 @@ public class UniversalHttpService
     {
         try
         {
-            return await httpClient.GetFromJsonAsync<TResponse>(uri, options);
+            return await this.httpClient.GetFromJsonAsync<TResponse>(uri, options);
         }
         catch (HttpRequestException ex)
         {
-            toastService.ShowError(errorMessage);
-            logger.LogException(ex);
+            this.toastService.ShowError(errorMessage);
+            this.logger.LogException(ex);
             return default;
         }
     }
@@ -110,18 +98,18 @@ public class UniversalHttpService
     {
         try
         {
-            var response = await httpClient.DeleteAsync(uri);
+            var response = await this.httpClient.DeleteAsync(uri);
             if (response.IsSuccessStatusCode)
             {
-                toastService.ShowSuccess(successMessage);
+                this.toastService.ShowSuccess(successMessage);
                 return true;
             }
-            await HandleProblemAsync(options, response);
+            await this.HandleProblemAsync(options, response);
         }
         catch (Exception e)
         {
-            toastService.ShowError("Error occured while deleting");
-            logger.LogException(e);
+            this.toastService.ShowError("Error occured while deleting");
+            this.logger.LogException(e);
         }
         return false;
     }

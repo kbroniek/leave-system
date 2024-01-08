@@ -1,13 +1,9 @@
 using System.Text.Json;
 using LeaveSystem.Converters;
 using LeaveSystem.Db.Entities;
-using Marten.Services.Json;
-using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Text.Json;
 
 namespace LeaveSystem.Db;
 public class LeaveSystemDbContext : DbContext
