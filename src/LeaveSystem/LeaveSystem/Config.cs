@@ -19,10 +19,8 @@ public static class Config
             .AddEventSourcing(config);
     }
 
-    public static void AddValidators(this IServiceCollection services)
-    {
+    public static IServiceCollection AddValidators(this IServiceCollection services) =>
         services.AddScoped<IValidator<UserLeaveLimit>, UserLeaveLimitValidator>()
             .AddScoped<IValidator<LeaveType>, LeaveTypeValidator>()
             .AddScoped<IValidator<Setting>, SettingValidator>();
-    }
 }

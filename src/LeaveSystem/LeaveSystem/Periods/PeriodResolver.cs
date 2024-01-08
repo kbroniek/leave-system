@@ -32,7 +32,7 @@ public static class PeriodResolver
         DateTimeOffset? secondDateFrom, DateTimeOffset? secondDateTo)
     {
         if (firstDateFrom > firstDateTo || secondDateFrom > secondDateTo)
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException(nameof(firstDateFrom));
         var firstDateFromIsNull = firstDateFrom is null;
         var firstDateToIsNull = firstDateTo is null;
         var secondDateFromIsNull = secondDateFrom is null;

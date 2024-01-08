@@ -61,11 +61,9 @@ IEdmModel GetEdmModel()
 }
 
 builder.Services.AddServices(builder.Configuration)
-    .AddScoped<DateService>();
-builder.Services.AddScoped<CurrentDateService>();
-builder.Services.AddDDD();
-builder.Services.AddLeaveSystemModule(builder.Configuration);
-builder.Services.AddMvc();
+    .AddScoped<DateService>()
+    .AddValidators()
+    .AddODataControllersServices();
 builder.Services.AddValidators();
 builder.Services.AddODataControllersServices();
 

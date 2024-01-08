@@ -6,6 +6,7 @@
     </PackageReference>
     <PackageReference Include="Marten" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="System.Linq.Dynamic.Core" />
   </ItemGroup>
 
   <ItemGroup>
