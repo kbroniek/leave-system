@@ -57,7 +57,7 @@ public class LeaveRequestShortInfo
     }
 }
 
-public class LeaveRequestShortInfoProjection : SingleStreamAggregation<LeaveRequestShortInfo>
+public class LeaveRequestShortInfoProjection : SingleStreamProjection<LeaveRequestShortInfo>
 {
     public LeaveRequestShortInfoProjection()
     {

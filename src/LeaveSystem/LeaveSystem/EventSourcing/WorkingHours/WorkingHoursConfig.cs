@@ -1,5 +1,4 @@
-using GoldenEye.Backend.Core.Marten.Registration;
-using LeaveSystem.EventSourcing.LeaveRequests;
+using GoldenEye.Backend.Core.Marten.Registration.Cusom;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;

@@ -1,4 +1,5 @@
 using GoldenEye.Backend.Core.DDD.Events;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -10,7 +11,7 @@ using LeaveSystem.Shared.LeaveRequests;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
 
-public class LeaveRequest : EventSource, INotNullablePeriod
+public class LeaveRequest : IEventSource, INotNullablePeriod
 {
     public DateTimeOffset DateFrom { get; private set; }
 
@@ -33,6 +34,12 @@ public class LeaveRequest : EventSource, INotNullablePeriod
     public TimeSpan WorkingHours { get; private set; }
 
     public int Version { get; private set; }
+
+    public Queue<IEvent> PendingEvents { get; } = new Queue<IEvent>();
+
+    public Guid Id { get; protected set; }
+
+    object IHaveId.Id => Id;
 
     //For serialization
     public LeaveRequest() { }
@@ -177,4 +184,9 @@ public class LeaveRequest : EventSource, INotNullablePeriod
     }
 
     public record RemarksModel(string Remarks, FederatedUser CreatedBy);
+
+    protected void Append(IEvent @event)
+    {
+        PendingEvents.Enqueue(@event);
+    }
 }

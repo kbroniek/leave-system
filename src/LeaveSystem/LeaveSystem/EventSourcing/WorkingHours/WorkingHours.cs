@@ -1,4 +1,5 @@
 using GoldenEye.Backend.Core.DDD.Events;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;
 using LeaveSystem.Periods;
@@ -6,7 +7,7 @@ using LeaveSystem.Shared;
 
 namespace LeaveSystem.EventSourcing.WorkingHours;
 
-public class WorkingHours : EventSource, IDateToNullablePeriod
+public class WorkingHours : IEventSource, IDateToNullablePeriod
 {
     public string UserId { get; private set; } = null!;
     public DateTimeOffset DateFrom { get; private set; }
@@ -14,6 +15,12 @@ public class WorkingHours : EventSource, IDateToNullablePeriod
     public TimeSpan Duration { get; private set; }
     public FederatedUser LastModifiedBy { get; private set; }
     public int Version { get; private set; }
+
+    public Queue<IEvent> PendingEvents { get; } = new Queue<IEvent>();
+
+    public Guid Id { get; protected set; }
+
+    object IHaveId.Id => Id;
 
     //For serialization
     public WorkingHours() { }
@@ -51,5 +58,9 @@ public class WorkingHours : EventSource, IDateToNullablePeriod
         DateTo = @event.DateTo;
         Duration = @event.Duration;
         LastModifiedBy = @event.CreatedBy;
+    }
+    protected void Append(IEvent @event)
+    {
+        PendingEvents.Enqueue(@event);
     }
 }

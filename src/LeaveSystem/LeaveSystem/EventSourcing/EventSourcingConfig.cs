@@ -1,3 +1,5 @@
+using GoldenEye.Backend.Core.DDD.Registration;
+using GoldenEye.Backend.Core.Marten.Events.Storage.Custom;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours;
 using Marten;
@@ -18,6 +20,7 @@ internal static class EventSourcingConfig
             options.ConfigureLeaveRequests();
             options.ConfigureWorkingHours();
         }).UseLightweightSessions();
+        services.AddEventStore<MartenEventStore>();
         return services
              .AddLeaveRequests()
              .AddWorkingHours();

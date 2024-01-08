@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\GoldenEye\GoldenEye\GoldenEye.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
   </ItemGroup>
 </Project>
