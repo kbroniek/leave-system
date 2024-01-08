@@ -40,5 +40,5 @@ public static class WorkingHoursConfig
 
     internal static void ConfigureWorkingHours(this StoreOptions options) =>
         // Snapshots
-        options.Projections.SelfAggregate<WorkingHours>();
+        options.Projections.LiveStreamAggregation<WorkingHours>();
 }

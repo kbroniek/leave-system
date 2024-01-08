@@ -16,7 +16,7 @@ internal static class EventSourcingConfig
             options.Events.DatabaseSchemaName = config.WriteModelSchema;
             options.ConfigureLeaveRequests();
             options.ConfigureWorkingHours();
-        });
+        }).UseLightweightSessions();
         return services
              .AddLeaveRequests()
              .AddWorkingHours();

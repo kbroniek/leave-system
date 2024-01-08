@@ -21,4 +21,11 @@
         <ProjectReference Include="..\LeaveSystem.Api\LeaveSystem.Api.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Update="xunit.analyzers">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
 </Project>

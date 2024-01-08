@@ -112,15 +112,15 @@ internal class HandleGetLeaveRequests :
                                 (x.DateTo >= request.DateFrom && x.DateTo <= request.DateTo) ||
                                 (request.DateFrom >= x.DateFrom && request.DateFrom <= x.DateTo));
 
-        if (request.Statuses.Length > 0)
-        {
-            var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
-            foreach (var status in request.Statuses)
-            {
-                predicate = predicate.Or(x => x.Status == status);
-            }
-            query = query.Where(predicate);
-        }
+        //if (request.Statuses.Length > 0)
+        //{
+        //    var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();
+        //    foreach (var status in request.Statuses)
+        //    {
+        //        predicate = predicate.Or(x => x.Status == status);
+        //    }
+        //    query = query.Where(predicate);
+        //}
         if (request.LeaveTypeIds is { Length: > 0 })
         {
             var predicate = PredicateBuilder.False<LeaveRequestShortInfo>();

@@ -1,4 +1,4 @@
-﻿using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.DeprecatingLeaveRequest;
@@ -68,7 +68,7 @@ public class LeaveRequestShortInfoProjection : SingleStreamAggregation<LeaveRequ
         ProjectEvent<LeaveRequestRejected>((item, @event) => item.Apply(@event));
 
         ProjectEvent<LeaveRequestCanceled>((item, @event) => item.Apply(@event));
-        
+
         ProjectEvent<LeaveRequestDeprecated>((item, @event) => item.Apply(@event));
     }
 }

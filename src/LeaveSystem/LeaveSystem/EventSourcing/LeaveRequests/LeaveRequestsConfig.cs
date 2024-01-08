@@ -61,10 +61,10 @@ internal static class LeaveRequestsConfig
     internal static void ConfigureLeaveRequests(this StoreOptions options)
     {
         // Snapshots
-        options.Projections.SelfAggregate<LeaveRequest>();
+        options.Projections.LiveStreamAggregation<LeaveRequest>();
 
         // projections
-        options.Projections.Add<LeaveRequestShortInfoProjection>();
+        options.Projections.Add<LeaveRequestShortInfoProjection>(Marten.Events.Projections.ProjectionLifecycle.Inline);
     }
 
     public static IServiceCollection AddCommandHandler<TCommand, TCommandHandler>(

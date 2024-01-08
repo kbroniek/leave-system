@@ -19,4 +19,11 @@
         <ProjectReference Include="..\..\LeaveSystem\LeaveSystem.UnitTests\LeaveSystem.UnitTests.csproj" />
         <ProjectReference Include="..\LeaveSystem.Web\LeaveSystem.Web.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="xunit.analyzers">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
 </Project>
