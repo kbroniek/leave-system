@@ -130,11 +130,7 @@ public static class DbContextExtenstions
         {
             var services = scope.ServiceProvider;
 
-            var dbContext = services.GetRequiredService<LeaveSystemDbContext>();
-            if (dbContext == null)
-            {
-                throw new InvalidOperationException("Cannot find DB context.");
-            }
+            var dbContext = services.GetRequiredService<LeaveSystemDbContext>() ?? throw new InvalidOperationException("Cannot find DB context.");
 
             try
             {

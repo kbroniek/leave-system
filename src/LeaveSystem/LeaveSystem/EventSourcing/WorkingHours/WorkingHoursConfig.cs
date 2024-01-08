@@ -11,7 +11,6 @@ namespace LeaveSystem.EventSourcing.WorkingHours;
 
 public static class WorkingHoursConfig
 {
-
     internal static IServiceCollection AddWorkingHours(this IServiceCollection services)
     {
         services.AddMartenEventSourcedRepository<WorkingHours>();

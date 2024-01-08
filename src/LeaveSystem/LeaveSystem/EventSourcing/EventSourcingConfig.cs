@@ -1,8 +1,8 @@
-
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours;
 using Marten;
 using Microsoft.Extensions.DependencyInjection;
+using Weasel.Core;
 
 namespace LeaveSystem.EventSourcing;
 internal static class EventSourcingConfig
@@ -14,6 +14,7 @@ internal static class EventSourcingConfig
             options.Connection(config.ConnectionString);
             options.DatabaseSchemaName = config.ReadModelSchema;
             options.Events.DatabaseSchemaName = config.WriteModelSchema;
+            options.AutoCreateSchemaObjects = AutoCreate.CreateOrUpdate;
             options.ConfigureLeaveRequests();
             options.ConfigureWorkingHours();
         }).UseLightweightSessions();
