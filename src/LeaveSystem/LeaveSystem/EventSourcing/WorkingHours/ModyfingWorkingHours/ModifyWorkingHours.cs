@@ -64,7 +64,8 @@ internal class HandleModifyWorkingHours : ICommandHandler<ModifyWorkingHours>
         {
             throw new InvalidOperationException("You cant add working hours in this period, because other working hours overlap it");
         }
-        var workingHours = await workingHoursRepository.FindByIdAsync(request.WorkingHoursId, cancellationToken);
+        var workingHours = await workingHoursRepository.FindByIdAsync(request.WorkingHoursId, cancellationToken) ??
+            throw GoldenEye.Backend.Core.Exceptions.NotFoundException.For<WorkingHours>(request.WorkingHoursId);
         workingHours.Modify(request);
         await DeprecateLeaveRequests(request, cancellationToken);
         await workingHoursRepository.UpdateAsync(workingHours, cancellationToken);

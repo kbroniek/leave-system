@@ -34,16 +34,16 @@ public class HandleModifyWorkingHoursTest
     {
         //Given
         var command = ModifyWorkingHours.Create(
-            Guid.NewGuid(),
+            Guid.Parse("95e4766c-0b2c-46ed-ad20-00fe76a11637"),
             FakeUserProvider.FakseoslavId,
             DateTimeOffsetExtensions.CreateFromDate(2020, 6, 2),
             DateTimeOffsetExtensions.CreateFromDate(2023, 10, 11),
             TimeSpan.FromHours(8),
             FakeUserProvider.GetUserWithNameFakeoslav()
         );
-        var now = DateTimeOffset.Now;
+        var now = FakeDateServiceProvider.GetDateService().UtcNow();
         var fakeWorkingHours = FakeWorkingHoursProvider.GetCurrentForFakeoslav(now);
-        workingHoursRepositoryMock.FindById(command.WorkingHoursId).Returns(fakeWorkingHours);
+        workingHoursRepositoryMock.FindByIdAsync(command.WorkingHoursId).Returns(Task.FromResult(fakeWorkingHours));
         var workingHoursMartenQueryable = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
             workingHoursEnumerable.ToList()
         );
@@ -78,7 +78,7 @@ public class HandleModifyWorkingHoursTest
     {
         //Given
         var command = ModifyWorkingHours.Create(
-            Guid.NewGuid(),
+            Guid.Parse("95e4766c-0b2c-46ed-ad20-00fe76a11638"),
             FakeUserProvider.FakseoslavId,
             DateTimeOffsetExtensions.CreateFromDate(2020, 1, 1),
             DateTimeOffsetExtensions.CreateFromDate(2023, 10, 11),
@@ -106,7 +106,7 @@ public class HandleModifyWorkingHoursTest
         await workingHoursRepositoryMock.DidNotReceiveWithAnyArgs().SaveChangesAsync();
         await leaveRequestRepositoryMock.DidNotReceiveWithAnyArgs().UpdateAsync(default!);
         await leaveRequestRepositoryMock.DidNotReceiveWithAnyArgs().SaveChangesAsync();
-        var now = DateTimeOffset.Now.GetDayWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         martenQueryable.Any(x => x.UserId == command.UserId && x.GetStatus(now) == WorkingHoursStatus.Current)
             .Should().BeFalse();
     }
@@ -114,7 +114,7 @@ public class HandleModifyWorkingHoursTest
     public static IEnumerable<object[]>
         Get_WhenHandlingSuccessful_PassAllCreateWorkingHoursAndReturnUnitValue_TestData()
     {
-        var now = DateTimeOffset.Now;
+        var now = FakeDateServiceProvider.GetDateService().UtcNow();
         yield return new object[]
         {
             new[] { FakeWorkingHoursProvider.GetCurrentForBen(now), FakeWorkingHoursProvider.GetCurrentForPhilip(now) }
