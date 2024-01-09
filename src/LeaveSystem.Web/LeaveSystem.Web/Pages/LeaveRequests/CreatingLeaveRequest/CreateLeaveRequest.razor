@@ -185,7 +185,7 @@
             {
                 CreatedByUserIds = new string[] { currentUser.Id }
             });
-            var getLimitsTask = UserLeaveLimitsService.GetLimits(currentUser.Id, firstDay, lastDay);
+            var getLimitsTask = UserLeaveLimitsService.GetLimitsAsync(currentUser.Id, firstDay, lastDay);
             var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(currentUser.Id);
             await Task.WhenAll(getLeaveRequestsTask, getLimitsTask, getUserWorkingHoursTask);
 

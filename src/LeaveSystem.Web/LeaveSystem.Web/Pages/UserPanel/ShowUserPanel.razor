@@ -89,7 +89,7 @@
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
-        var getLimitsTask = UserLeaveLimitsService.GetLimits(UserId, firstDay, lastDay);
+        var getLimitsTask = UserLeaveLimitsService.GetLimitsAsync(UserId, firstDay, lastDay);
         var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(UserId);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
