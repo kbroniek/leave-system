@@ -2,7 +2,6 @@ namespace LeaveSystem.Web.UnitTests.Pages.UserLeaveLimits;
 
 using System.Text.Json;
 using LeaveSystem.Shared.Converters;
-using LeaveSystem.Shared.UserLeaveLimits;
 using Moq;
 using Web.Pages.UserLeaveLimits;
 using Web.Shared;

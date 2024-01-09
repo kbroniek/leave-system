@@ -12,6 +12,39 @@ using Web.Shared;
 public class AddLimitTest
 {
     [Fact]
+    public async Task WhenAddingResultedNull_ThenReturnNull()
+    {
+        var universalHttpServiceMock = GetUniversalHttpServiceMock();
+        var fakeEntityToAdd = new AddUserLeaveLimitDto
+        {
+            AssignedToUserId = "fakeuserid",
+            LeaveTypeId = Guid.Parse("54d432e0-68f2-4819-82e1-33107f8dd1de"),
+            ValidSince = DateTimeOffset.Parse("2023-04-05"),
+            ValidUntil = DateTimeOffset.Parse("2023-04-21"),
+            Limit = TimeSpan.FromHours(8),
+            OverdueLimit = TimeSpan.FromHours(2),
+            Property = new AddUserLeaveLimitPropertiesDto { Description = "fake description" }
+        };
+        universalHttpServiceMock.Setup(m =>
+                m.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
+                    "odata/UserLeaveLimits",
+                    It.Is<AddUserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToAdd)),
+                    It.IsAny<string>(),
+                    It.IsAny<JsonSerializerOptions>()))
+            .ReturnsAsync((UserLeaveLimitsService.UserLeaveLimitDtoODataResponse?)null);
+        var sut = new UserLeaveLimitsService(universalHttpServiceMock.Object);
+
+        var result = await sut.AddAsync(fakeEntityToAdd);
+        result.Should().BeNull();
+        universalHttpServiceMock.Verify(
+            m => m.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
+                "odata/UserLeaveLimits",
+                It.Is<AddUserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToAdd)),
+                "User leave limit added successfully",
+                It.Is<JsonSerializerOptions>(
+                    o => o.Converters.Any(c => c.GetType() == typeof(TimeSpanIso8601Converter)))));
+    }
+    [Fact]
     public async Task WhenEntityAdded_ThenReturnResultDto()
     {
         var universalHttpServiceMock = GetUniversalHttpServiceMock();
