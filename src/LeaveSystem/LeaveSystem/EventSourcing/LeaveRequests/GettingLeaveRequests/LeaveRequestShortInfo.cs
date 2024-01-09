@@ -25,7 +25,7 @@ public class LeaveRequestShortInfo
 
     public FederatedUser CreatedBy { get; private set; }
 
-    public void Apply(LeaveRequestCreated @event)
+    internal void Apply(LeaveRequestCreated @event)
     {
         Id = @event.LeaveRequestId;
         DateFrom = @event.DateFrom;
@@ -36,13 +36,13 @@ public class LeaveRequestShortInfo
         CreatedBy = @event.CreatedBy;
     }
 
-    private void Apply(LeaveRequestAccepted _) => Status = LeaveRequestStatus.Accepted;
+    internal void Apply(LeaveRequestAccepted _) => Status = LeaveRequestStatus.Accepted;
 
-    private void Apply(LeaveRequestRejected _) => Status = LeaveRequestStatus.Rejected;
+    internal void Apply(LeaveRequestRejected _) => Status = LeaveRequestStatus.Rejected;
 
-    private void Apply(LeaveRequestCanceled _) => Status = LeaveRequestStatus.Canceled;
+    internal void Apply(LeaveRequestCanceled _) => Status = LeaveRequestStatus.Canceled;
 
-    private void Apply(LeaveRequestDeprecated _) => Status = LeaveRequestStatus.Deprecated;
+    internal void Apply(LeaveRequestDeprecated _) => Status = LeaveRequestStatus.Deprecated;
 
     public class LeaveRequestShortInfoProjection : SingleStreamProjection<LeaveRequestShortInfo>
     {
