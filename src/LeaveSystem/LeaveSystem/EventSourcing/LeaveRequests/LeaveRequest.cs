@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using GoldenEye.Backend.Core.DDD.Events;
 using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
@@ -8,6 +9,7 @@ using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
+using Marten.Events.Aggregation;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
 
@@ -35,6 +37,8 @@ public class LeaveRequest : IEventSource, INotNullablePeriod
 
     public int Version { get; private set; }
 
+    [IgnoreDataMember]
+    //TODO: make it private
     public Queue<IEvent> PendingEvents { get; } = new Queue<IEvent>();
 
     public Guid Id { get; protected set; }
@@ -185,8 +189,20 @@ public class LeaveRequest : IEventSource, INotNullablePeriod
 
     public record RemarksModel(string Remarks, FederatedUser CreatedBy);
 
-    protected void Append(IEvent @event)
+    private void Append(IEvent @event) => (this as IEventSource).PendingEvents.Enqueue(@event);
+    public class LeaveRequestProjection : SingleStreamProjection<LeaveRequest>
     {
-        PendingEvents.Enqueue(@event);
+        public LeaveRequestProjection()
+        {
+            ProjectEvent<LeaveRequestCreated>((item, @event) => item.Apply(@event));
+
+            ProjectEvent<LeaveRequestAccepted>((item, @event) => item.Apply(@event));
+
+            ProjectEvent<LeaveRequestRejected>((item, @event) => item.Apply(@event));
+
+            ProjectEvent<LeaveRequestCanceled>((item, @event) => item.Apply(@event));
+
+            ProjectEvent<LeaveRequestDeprecated>((item, @event) => item.Apply(@event));
+        }
     }
 }

@@ -5,7 +5,6 @@ using LeaveSystem.Linq;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
 using Marten;
-using Marten.Events;
 using MediatR;
 
 namespace LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;

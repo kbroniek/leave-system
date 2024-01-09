@@ -9,6 +9,8 @@ using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using Marten;
 using Marten.Pagination;
 using Microsoft.Extensions.DependencyInjection;
+using static LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests.LeaveRequestShortInfo;
+using static LeaveSystem.EventSourcing.LeaveRequests.LeaveRequest;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
 internal static class LeaveRequestsConfig
@@ -56,10 +58,8 @@ internal static class LeaveRequestsConfig
 
     internal static void ConfigureLeaveRequests(this StoreOptions options)
     {
-        // Snapshots
-        options.Projections.LiveStreamAggregation<LeaveRequest>();
-
         // projections
+        options.Projections.Add<LeaveRequestProjection>(Marten.Events.Projections.ProjectionLifecycle.Inline);
         options.Projections.Add<LeaveRequestShortInfoProjection>(Marten.Events.Projections.ProjectionLifecycle.Inline);
     }
 }

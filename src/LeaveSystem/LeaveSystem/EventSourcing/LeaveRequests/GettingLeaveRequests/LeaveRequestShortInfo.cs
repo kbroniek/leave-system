@@ -36,40 +36,27 @@ public class LeaveRequestShortInfo
         CreatedBy = @event.CreatedBy;
     }
 
-    public void Apply(LeaveRequestAccepted _)
+    private void Apply(LeaveRequestAccepted _) => Status = LeaveRequestStatus.Accepted;
+
+    private void Apply(LeaveRequestRejected _) => Status = LeaveRequestStatus.Rejected;
+
+    private void Apply(LeaveRequestCanceled _) => Status = LeaveRequestStatus.Canceled;
+
+    private void Apply(LeaveRequestDeprecated _) => Status = LeaveRequestStatus.Deprecated;
+
+    public class LeaveRequestShortInfoProjection : SingleStreamProjection<LeaveRequestShortInfo>
     {
-        Status = LeaveRequestStatus.Accepted;
-    }
+        public LeaveRequestShortInfoProjection()
+        {
+            ProjectEvent<LeaveRequestCreated>((item, @event) => item.Apply(@event));
 
-    public void Apply(LeaveRequestRejected _)
-    {
-        Status = LeaveRequestStatus.Rejected;
-    }
+            ProjectEvent<LeaveRequestAccepted>((item, @event) => item.Apply(@event));
 
-    public void Apply(LeaveRequestCanceled _)
-    {
-        Status = LeaveRequestStatus.Canceled;
-    }
+            ProjectEvent<LeaveRequestRejected>((item, @event) => item.Apply(@event));
 
-    public void Apply(LeaveRequestDeprecated _)
-    {
-        Status = LeaveRequestStatus.Deprecated;
-    }
-}
+            ProjectEvent<LeaveRequestCanceled>((item, @event) => item.Apply(@event));
 
-public class LeaveRequestShortInfoProjection : SingleStreamProjection<LeaveRequestShortInfo>
-{
-    public LeaveRequestShortInfoProjection()
-    {
-        ProjectEvent<LeaveRequestCreated>((item, @event) => item.Apply(@event));
-
-        ProjectEvent<LeaveRequestAccepted>((item, @event) => item.Apply(@event));
-
-        ProjectEvent<LeaveRequestRejected>((item, @event) => item.Apply(@event));
-
-        ProjectEvent<LeaveRequestCanceled>((item, @event) => item.Apply(@event));
-
-        ProjectEvent<LeaveRequestDeprecated>((item, @event) => item.Apply(@event));
+            ProjectEvent<LeaveRequestDeprecated>((item, @event) => item.Apply(@event));
+        }
     }
 }
-

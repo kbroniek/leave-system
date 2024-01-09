@@ -5,6 +5,7 @@ using LeaveSystem.EventSourcing.WorkingHours.ModyfingWorkingHours;
 using Marten;
 using Marten.Pagination;
 using Microsoft.Extensions.DependencyInjection;
+using static LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
 namespace LeaveSystem.EventSourcing.WorkingHours;
 
@@ -37,6 +38,6 @@ public static class WorkingHoursConfig
             .AddScoped<WorkingHoursFactory>();
 
     internal static void ConfigureWorkingHours(this StoreOptions options) =>
-        // Snapshots
-        options.Projections.LiveStreamAggregation<WorkingHours>();
+        // Projections
+        options.Projections.Add<WorkingHoursProjection>(Marten.Events.Projections.ProjectionLifecycle.Inline);
 }

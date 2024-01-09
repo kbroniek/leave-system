@@ -302,7 +302,7 @@ public static class DbContextExtenstions
     }
 
     private static Task CreateWorkingHours(ICommandBus commandBus, string? userId, DateTimeOffset? dateFrom,
-        DateTimeOffset? dateTo, TimeSpan? duration, FederatedUser? createdBy)
+        DateTimeOffset? dateTo, TimeSpan? duration, FederatedUser createdBy)
     {
         var workingHoursId = Guid.NewGuid();
         var command = EventSourcing.WorkingHours.CreatingWorkingHours.CreateWorkingHours.Create(workingHoursId, userId, dateFrom, dateTo, duration, createdBy);
