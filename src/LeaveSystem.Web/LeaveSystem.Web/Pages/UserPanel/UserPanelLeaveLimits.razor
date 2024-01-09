@@ -3,6 +3,7 @@
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Shared.UserLeaveLimits
 @using LeaveSystem.Shared
+@using System.Text.Json
 
 @inject IToastService ToastService
 @inject ILogger<UserPanelLeaveLimits> Logger
@@ -12,7 +13,7 @@
 @if (UserId is not null)
 {
     <RadzenDataGrid @ref="leaveTypeGrid" AllowFiltering="true" AllowSorting="true" ExpandMode="DataGridExpandMode.Single"
-                    Data="@LeaveTypesWithUserLimits" TItem="LeaveTypeWithUserLimits">
+                    Data="@LeaveTypesForView" TItem="LeaveTypeForLimitsView">
         <Template Context="leaveType">
             <RadzenButton
                 ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Limit"
@@ -79,9 +80,9 @@
                         <Template Context="data">
                             <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(data))" @onclick:stopPropagation="true">
                             </RadzenButton>
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" 
-                                          Icon="delete" Variant="Variant.Flat" 
-                                          Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" 
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                          Icon="delete" Variant="Variant.Flat"
+                                          Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1"
                                           Click="@(args => DeleteRow(data))" @onclick:stopPropagation="true">
                             </RadzenButton>
                         </Template>
@@ -98,27 +99,27 @@
             </RadzenDataGrid>
         </Template>
         <Columns>
-            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Name">
+            <RadzenDataGridColumn TItem="LeaveTypeForLimitsView" Title="Name">
                 <Template Context="leaveType">
                     @leaveType.Name
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Limit">
+            <RadzenDataGridColumn TItem="LeaveTypeForLimitsView" Title="Limit">
                 <Template Context="leaveType">
                     @leaveType.Limit
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Overdue Limit">
+            <RadzenDataGridColumn TItem="LeaveTypeForLimitsView" Title="Overdue Limit">
                 <Template Context="leaveType">
                     @leaveType.OverdueLimit
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits" Title="Total Limit">
+            <RadzenDataGridColumn TItem="LeaveTypeForLimitsView" Title="Total Limit">
                 <Template Context="leaveType">
                     @leaveType.TotalLimit
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="LeaveTypeWithUserLimits">
+            <RadzenDataGridColumn TItem="LeaveTypeForLimitsView">
                 <Template Context="leaveType">
                     <div style="@GetCssStyleForLeaveType(leaveType.Properties.Color)"></div>
                 </Template>
@@ -135,7 +136,7 @@ else
 
 @code {
 
-    [Parameter] public List<LeaveTypeWithUserLimits>? LeaveTypesWithUserLimits { get; set; }
+    [Parameter] public List<LeaveTypeForLimitsView>? LeaveTypesForView { get; set; }
 
     [Parameter] public TimeSpan WorkingHours { get; set; }
 
@@ -145,7 +146,7 @@ else
 
     [Parameter] public int? Year { get; set; }
 
-    RadzenDataGrid<LeaveTypeWithUserLimits>? leaveTypeGrid;
+    RadzenDataGrid<LeaveTypeForLimitsView>? leaveTypeGrid;
     RadzenDataGrid<UserLeaveLimitDto>? limitsGrid;
     private DateTime firstDayOfYear;
     private DateTime lastDayOfYear;
@@ -210,7 +211,7 @@ else
 
     public void UpdateLeaveLimit(UserLeaveLimitDto limit)
     {
-        var limitToChange = LeaveTypesWithUserLimits?
+        var limitToChange = LeaveTypesForView?
             .FirstOrDefault(lt => lt.Id == limit.LeaveTypeId)?
             .Limits.FirstOrDefault(ull => ull.Id == limit.Id);
         if (limitToChange is null)
@@ -254,7 +255,23 @@ else
             limitToInsert = null;
         }
 
-        await LimitsService.EditAsync(limit);
+        var editLimitResult = await LimitsService.EditAsync(limit);
+        if (!editLimitResult)
+        {
+            var limitToSet = await LimitsService.GetAsync(limit.Id);
+            if (limitToSet is not null)
+            {
+                limit.Limit = limitToSet.Limit;
+                limit.OverdueLimit = limitToSet.OverdueLimit;
+                limit.ValidSince = limitToSet.ValidSince;
+                limit.ValidUntil = limitToSet.ValidUntil;
+                limit.Property = limitToSet.Property;
+            }
+            Logger.LogInformation("{Result}", JsonSerializer.Serialize(limit));
+            // var limitToSet = LeaveTypesForView?.Find(lt => lt.Id == limit.LeaveTypeId)?.Limits
+            //     .Find(l => l.Id == limit.Id);
+            // limitToSet = await LimitsService.GetAsync(limit.Id);
+        }
         limitToInsert = null;
         editingLimits = false;
     }
@@ -278,7 +295,7 @@ else
         if (addedLimit is not null)
         {
             limit.Id = addedLimit.Id;
-            LeaveTypesWithUserLimits?.FirstOrDefault(x => x.Id == limit.LeaveTypeId)?.Limits.Add(limit);
+            LeaveTypesForView?.FirstOrDefault(x => x.Id == limit.LeaveTypeId)?.Limits.Add(limit);
         }
         else
         {
@@ -294,11 +311,11 @@ else
         {
             limitToInsert = null;
         }
-        if (LeaveTypesWithUserLimits?.Any(lt => lt.Limits.Any(ull => ull.Id == limit.Id)) == true)
+        if (LeaveTypesForView?.Any(lt => lt.Limits.Any(ull => ull.Id == limit.Id)) == true)
         {
             var deletedLimitSuccessfully = await LimitsService.DeleteAsync(limit.Id);
             if (!deletedLimitSuccessfully) {return;}
-            LeaveTypesWithUserLimits.FirstOrDefault(lt => lt.Id == limit.LeaveTypeId)?.Limits.Remove(limit);
+            LeaveTypesForView.FirstOrDefault(lt => lt.Id == limit.LeaveTypeId)?.Limits.Remove(limit);
             if (limitsGrid is null)
             {
                 return;

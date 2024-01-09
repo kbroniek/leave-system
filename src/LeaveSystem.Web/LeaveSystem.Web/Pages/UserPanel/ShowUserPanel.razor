@@ -38,7 +38,7 @@
                         <UserPanelLeaveLimits @ref="limitsPanel"
                                               UserId="@UserId"
                                               Year="@Year"
-                            LeaveTypesWithUserLimits="@leaveTypesWithUserLimits" 
+                            LeaveTypesForView="@leaveTypesWithUserLimits" 
                             WorkingHours="workingHoursDuration"
                             RefreshLimitsCallback="ResetLimit"/>
                     </RadzenTabsItem>
@@ -62,7 +62,7 @@
     private IEnumerable<LeaveRequestPerType>? userSummaryCollection;
     private IEnumerable<LeaveRequestForView>? leaveRequestsForView;
     private string? userName;
-    private List<LeaveTypeWithUserLimits>? leaveTypesWithUserLimits; 
+    private List<LeaveTypeForLimitsView>? leaveTypesWithUserLimits; 
     TimeSpan workingHoursDuration;
     UserPanelLeaveLimits? limitsPanel;
     
@@ -107,7 +107,7 @@
             .OrderBy(lr => lr.DateFrom)
             .Select(lr => LeaveRequestForView.Create(lr, leaveTypes, workingHoursDuration));
         leaveTypesWithUserLimits = leaveTypes.Select(lt =>
-            LeaveTypeWithUserLimits.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration)).ToList();
+            LeaveTypeForLimitsView.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration)).ToList();
     }
 
     async Task ResetLimit(Guid limitId)

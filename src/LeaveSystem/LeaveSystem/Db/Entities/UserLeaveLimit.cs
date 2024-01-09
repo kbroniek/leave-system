@@ -47,19 +47,29 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
     {
         this.dbContext = dbContext;
         this.logger = logger;
-        RuleFor(x => x.ValidSince)
+        this.RuleFor(x => x.Limit)
+            .GreaterThanOrEqualTo(TimeSpan.Zero)
+            .WithErrorCode(FvErrorCodes.BadRequest)
+            .WithMessage("Limit can not be negative");
+        this.RuleFor(x => x.OverdueLimit)
+            .GreaterThanOrEqualTo(TimeSpan.Zero)
+            .WithErrorCode(FvErrorCodes.BadRequest)
+            .WithMessage("Limit can not be negative");
+        this.RuleFor(x => x.ValidSince)
             .LessThan(x => x.ValidUntil)
             .When(x => x.ValidUntil is not null || x.ValidSince is not null)
-            .WithErrorCode(FvErrorCodes.ArgumentOutOfRange);
-        RuleFor(x => x.ValidUntil)
+            .WithErrorCode(FvErrorCodes.ArgumentOutOfRange)
+            .WithMessage("Start date of limit must be earlier than end date");
+        this.RuleFor(x => x.ValidUntil)
             .Equal(x => x.ValidSince)
-            .When(x => x.ValidUntil is null && x.ValidSince is null);
-        RuleFor(x => x.LeaveTypeId)
+            .When(x => x.ValidUntil is null && x.ValidSince is null)
+            .WithMessage("Start date of limit must be earlier than end date");;
+        this.RuleFor(x => x.LeaveTypeId)
             .MustAsync((leaveTypeId, cancellation) =>
                 this.dbContext.LeaveTypes.AnyAsync(ull => ull.Id == leaveTypeId, cancellation))
             .WithMessage("Leave type with provided Id not exists");
-        RuleFor(x => x.AssignedToUserId).NotNull().NotEmpty();
-        RuleFor(x => x)
+        this.RuleFor(x => x.AssignedToUserId).NotNull().NotEmpty();
+        this.RuleFor(x => x)
             .MustAsync(async (limit, cancellation) =>
             {
                 var overlappingLimits = await GetAllLimitThatOverlapsPeriodAsync(
@@ -76,19 +86,19 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
             })
             .WithMessage("Cannot create a new limit in this time. The other limit is overlapping with this date.");
     }
-    
+
     private Task<List<UserLeaveLimit>> GetAllLimitThatOverlapsPeriodAsync(
         Guid id,
         Guid leaveTypeId,
         string userId,
-        DateTimeOffset? dateFrom, 
+        DateTimeOffset? dateFrom,
         DateTimeOffset? dateTo,
         CancellationToken cancellationToken)
     {
         return dbContext.UserLeaveLimits.Where(
             ull =>
                 ull.Id != id &&
-                ull.LeaveTypeId == leaveTypeId && 
+                ull.LeaveTypeId == leaveTypeId &&
                 ull.AssignedToUserId == userId &&
                 !(
                     // checking if periods can't overlap
