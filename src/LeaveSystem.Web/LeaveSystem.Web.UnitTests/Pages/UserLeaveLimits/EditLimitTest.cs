@@ -25,7 +25,7 @@ public class EditLimitTest
             Property = new UserLeaveLimitPropertyDto { Description = "fake description" }
         };
         universalHttpServiceMock.Setup(m =>
-                m.EditAsync(
+                m.PatchAsync(
                     $"odata/UserLeaveLimits({fakeEntityToEdit.Id})",
                     It.Is<UserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToEdit)),
                     It.IsAny<string>(),
@@ -36,7 +36,7 @@ public class EditLimitTest
         var result = await sut.EditAsync(fakeEntityToEdit);
         result.Should().Be(updateResult);
         universalHttpServiceMock.Verify(
-            m => m.EditAsync(
+            m => m.PatchAsync(
                 $"odata/UserLeaveLimits({fakeEntityToEdit.Id})",
                 It.Is<UserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToEdit)),
                 "User leave limit edited successfully",

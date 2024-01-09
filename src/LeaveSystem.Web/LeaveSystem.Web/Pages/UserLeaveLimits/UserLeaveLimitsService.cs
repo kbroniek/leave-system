@@ -52,7 +52,7 @@ public class UserLeaveLimitsService
     }
 
     public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) =>
-        this.universalHttpService.EditAsync(
+        this.universalHttpService.PatchAsync(
             $"odata/UserLeaveLimits({entityToEdit.Id})", entityToEdit, "User leave limit edited successfully",
             JsonSerializerOptions);
 

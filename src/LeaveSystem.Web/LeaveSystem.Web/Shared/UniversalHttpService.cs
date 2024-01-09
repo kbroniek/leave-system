@@ -11,6 +11,9 @@ namespace LeaveSystem.Web.Shared;
 
 public class UniversalHttpService
 {
+    private const string PutMethodName = "Put";
+    private const string PatchMethodName = "Patch";
+
     private readonly HttpClient httpClient;
     private readonly IToastService toastService;
     private readonly ILogger<UniversalHttpService> logger;
@@ -56,14 +59,26 @@ public class UniversalHttpService
         this.toastService.ShowError(message);
     }
 
-    public virtual async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage,
-        JsonSerializerOptions options)
+    public virtual Task<bool> PatchAsync<TContent>(string uri, TContent entityToEdit, string successMessage,
+        JsonSerializerOptions options) =>
+        this.EditAsync(uri, entityToEdit, successMessage, PatchMethodName, options);
+
+    public virtual Task<bool> PutAsync<TContent>(string uri, TContent entityToEdit, string successMessage,
+        JsonSerializerOptions options) =>
+        this.EditAsync(uri, entityToEdit, successMessage, PutMethodName, options);
+
+    private async Task<bool> EditAsync<TContent>(string uri, TContent entityToEdit, string successMessage, string editMethodName, JsonSerializerOptions options)
     {
         var jsonString = JsonSerializer.Serialize(entityToEdit, options);
         var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
         try
         {
-            var response = await this.httpClient.PatchAsync(uri, httpContent);
+            var response = await (editMethodName switch
+            {
+                PutMethodName => this.httpClient.PutAsync(uri, httpContent),
+                PatchMethodName => this.httpClient.PatchAsync(uri, httpContent),
+                _ => throw new ArgumentOutOfRangeException(nameof(editMethodName), editMethodName, "Bad edit method name")
+            });
             if (response.IsSuccessStatusCode)
             {
                 this.toastService.ShowSuccess(successMessage);

@@ -21,7 +21,7 @@
 @inject DateService DateService
 
 
-@if (users is null)
+@if (usersForView is null)
 {
     <p>
         <em>Loading...</em>
@@ -34,7 +34,7 @@ else
                     FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="20" AllowPaging="true"
                     PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true"
                     EditMode="DataGridEditMode.Single" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset"
-                    Data="@users" TItem="UserForView" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+                    Data="@usersForView" TItem="UserForView" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
         <Columns>
             <RadzenDataGridColumn TItem="UserForView" Property="User.Name" Title="Name" Frozen="true" Width="auto">
                 <EditTemplate Context="data">
@@ -43,7 +43,7 @@ else
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="UserForView" Property="User.Email" Title="Email" Width="auto">
                 <EditTemplate Context="data">
-                    <RadzenTextBox @bind-Value="data.User.Email" Style="width:100%; display: block" Name="Email" />
+                    <RadzenTextBox @bind-Value="data.User.Email" Style="width:100%; display: block" Name="Email"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="UserForView" Title="Roles" TextAlign="TextAlign.Center" Filterable="false" Sortable="false" Width="auto">
@@ -61,12 +61,17 @@ else
                 </Template>
                 <EditTemplate Context="data">
                     <RadzenStack Orientation="Orientation.Horizontal">
-                        <InputText type="time" Style="width: 100%" @bind-Value="data.WorkingHours.DurationProxy"  />
-                        <RadzenButton Click=@(() => ShowWorkingHoursDialog(data.User.Id))>
-                            <span class="rz-button-text">
-                                <i class="fa-solid fa-pen"></i>
-                            </span>
-                        </RadzenButton>
+                        @if (data.WorkingHours is not null)
+                        {
+                            <InputText type="time" Style="width: 100%" @bind-Value="data.WorkingHours.DurationProxy"/>
+                        }
+                        <div class="@(data.WorkingHours is null ? "d-flex justify-content-center w-100" : "")">
+                            <RadzenButton Click=@(() => ShowWorkingHoursDialog(data))>
+                                <span class="rz-button-text">
+                                    <i class="fa-solid fa-pen"></i>
+                                </span>
+                            </RadzenButton>
+                        </div>
                     </RadzenStack>
                 </EditTemplate>
             </RadzenDataGridColumn>
@@ -94,7 +99,7 @@ else
     public const string PolicyName = "ShowUserPage";
     string[] allRoles = Enum.GetNames<RoleType>();
     RadzenDataGrid<UserForView>? usersGrid;
-    IEnumerable<UserForView>? users;
+    IEnumerable<UserForView>? usersForView;
     UserForView? userToInsert;
     UserForView? userToUpdate;
 
@@ -109,7 +114,8 @@ else
         await base.OnInitializedAsync();
         Console.WriteLine("Test");
 
-        var users = await UsersService.Get();
+        var users = (await UsersService.Get()).ToList();
+        var now = DateService.UtcNowWithoutTime();
         try
         {
             var workingHours = await EditWorkingHoursDialog.GetWorkingHours(
@@ -118,7 +124,8 @@ else
                 TimeSpan.FromSeconds(15),
                 DateService,
                 WorkingHoursService);
-            this.users = users.Select(x => new UserForView(x, workingHours.FirstOrDefault(h => h.UserId == x.Id) ?? new WorkingHoursDto()));
+            usersForView = users.Select(x => new UserForView(x, workingHours.FirstOrDefault(
+                h => h.UserId == x.Id && h.DateFrom <= now && h.DateTo >= now)));
         }
         catch (Exception ex)
         {
@@ -134,6 +141,7 @@ else
             Logger.LogError($"{nameof(EditRow)}: Can't edit row. usersGrid is null");
             return;
         }
+
         userToUpdate = user;
         await usersGrid.EditRow(user);
     }
@@ -155,6 +163,7 @@ else
             Logger.LogError($"{nameof(SaveRow)}: Can't save row. usersGrid is null");
             return;
         }
+
         await usersGrid.UpdateRow(user);
     }
 
@@ -182,6 +191,7 @@ else
             await usersGrid.Reload();
             return;
         }
+
         await UsersService.Delete(user.User.Id);
         await usersGrid.Reload();
     }
@@ -194,6 +204,7 @@ else
             Logger.LogError($"{nameof(InsertRow)}: Can't insert row. usersGrid is null");
             return;
         }
+
         await usersGrid.InsertRow(userToInsert);
     }
 
@@ -207,29 +218,33 @@ else
         {
             Logger.LogError($"{nameof(OnCreateRow)}: Cannot add working hours for user {userForView.User.Id} {userForView.User.Name}");
         }
+
         userToInsert = null;
     }
 
     string WorkingHoursToString(WorkingHoursDto? workingHours) =>
-        workingHours?.DurationProxy ?? "undefined";
+        workingHours?.DurationProxy ?? "---";
 
-    string RolesToString(IEnumerable<string>? roles) => 
+    string RolesToString(IEnumerable<string>? roles) =>
         roles is null ? "" : string.Join(",", roles);
 
-    async Task ShowWorkingHoursDialog(string? userId)
+    async Task ShowWorkingHoursDialog(UserForView userForView)
     {
-        if (userId.IsNullOrWhiteSpace())
+        if (userForView.User.Id.IsNullOrWhiteSpace())
         {
             ToastService.ShowError("Can not open the dialog");
             Logger.LogError($"{nameof(ShowWorkingHoursDialog)}: userId is null or white space");
             return;
         }
-        await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours",
+        var result = await DialogService.OpenAsync<EditWorkingHoursDialog>("Edit workingHours",
             new Dictionary<string, object>
             {
-                { "UserId", userId! }
+                { "UserId", userForView.User.Id! }
             },
-            new DialogOptions { Width = "800px", Resizable = true, Draggable = true });
+            new DialogOptions { Width = "800px", Resizable = true, Draggable = true, ShowClose = false});
+        var workingHoursFromDialog = (List<WorkingHoursDto>)result;
+        var now = DateService.UtcNowWithoutTime();
+        userForView.WorkingHours = workingHoursFromDialog.FirstOrDefault(h => h.DateFrom <= now && h.DateTo >= now);
     }
 
 }

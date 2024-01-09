@@ -8,81 +8,40 @@ using Blazored.Toast.Services;
 
 namespace LeaveSystem.Web.Pages.WorkingHours;
 
+using LeaveSystem.Shared.Converters;
+using Shared;
+
 public class WorkingHoursService
 {
-    private readonly HttpClient httpClient;
-    private readonly IToastService toastService;
-    private readonly ILogger<WorkingHoursService> logger;
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new(JsonSerializerDefaults.Web);
 
-    public WorkingHoursService(HttpClient httpClient, IToastService toastService, ILogger<WorkingHoursService> logger)
-    {
-        this.httpClient = httpClient;
-        this.toastService = toastService;
-        this.logger = logger;
-    }
+    private readonly UniversalHttpService universalHttpService;
 
-    public virtual async Task<PagedListResponse<WorkingHoursDto>?> GetWorkingHours(GetWorkingHoursQuery query)
-    {
-        var uri = query.CreateQueryString("api/workingHours");
-        return await httpClient.GetFromJsonAsync<PagedListResponse<WorkingHoursDto>>(uri,
-            new JsonSerializerOptions(JsonSerializerDefaults.Web));
-    }
+    public WorkingHoursService(UniversalHttpService universalHttpService) => this.universalHttpService = universalHttpService;
 
-    public virtual async Task<WorkingHoursDto?> GetUserWorkingHours(string userId)
-    {
-        var uri = $"api/workingHours/{userId}";
-        try
-        {
-            return await httpClient.GetFromJsonAsync<WorkingHoursDto>(uri,
-                new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        }
-        catch (HttpRequestException ex)
-        {
-            toastService.ShowError("Error occured while getting working hours");
-            logger.LogError("{Message}", ex.Message);
-            return null;
-        }
-    }
+    public virtual Task<PagedListResponse<WorkingHoursDto>?> GetWorkingHours(GetWorkingHoursQuery query) =>
+        this.universalHttpService.GetAsync<PagedListResponse<WorkingHoursDto>>(
+            query.CreateQueryString("api/workingHours"),
+            "Error occured during getting working hours",
+            JsonSerializerOptions);
 
-    public virtual async Task<bool> Edit(WorkingHoursDto workingHoursDto)
-    {
-        var jsonString = JsonSerializer.Serialize(workingHoursDto);
-        var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-        var response = await httpClient.PutAsync($"api/workingHours/{workingHoursDto.Id}/modify", httpContent);
-        if (response.IsSuccessStatusCode)
-        {
-            toastService.ShowSuccess("Working hours updated successfully");
-            return true;
-        }
-        var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
-        logger.LogError("{Message}", problemDto?.Detail);
-        var message = problemDto?.Title ?? "Something went wrong";
-        toastService.ShowError(message);
-        return false;
-    }
+    public virtual Task<WorkingHoursDto?> GetUserWorkingHours(string userId) =>
+        this.universalHttpService.GetAsync<WorkingHoursDto>(
+            $"api/workingHours/{userId}",
+            "Error occured during getting working hours",
+            JsonSerializerOptions);
 
-    public virtual async Task<WorkingHoursDto?> Add(AddWorkingHoursDto addWorkingHoursDto)
-    {
-        var jsonString = JsonSerializer.Serialize(addWorkingHoursDto);
-        var httpContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-        var response = await httpClient.PostAsync($"api/workingHours", httpContent);
-        if (response.IsSuccessStatusCode)
-        {
-            var resultWorkingHoursDto = await response.Content.ReadFromJsonAsync<WorkingHoursDto>();
-            if (resultWorkingHoursDto is not null)
-            {
-                toastService.ShowSuccess("Working hours added successfully");
-            }
-            else
-            {
-                toastService.ShowError("Unexpected empty result");
-            }
-            return resultWorkingHoursDto;
-        }
-        var problemDto = await response.Content.ReadFromJsonAsync<ProblemDto>();
-        logger.LogError("{Message}", problemDto?.Detail);
-        var message = problemDto?.Title ?? "Something went wrong";
-        toastService.ShowError(message);
-        return null;
-    }
+    public virtual Task<bool> Edit(WorkingHoursDto workingHoursDto) =>
+        this.universalHttpService.PutAsync(
+            $"api/workingHours/{workingHoursDto.Id}/modify",
+            workingHoursDto,
+            "Edited working hours successfully",
+            JsonSerializerOptions);
+
+    public virtual Task<WorkingHoursDto?> Add(AddWorkingHoursDto addWorkingHoursDto) =>
+        this.universalHttpService.AddAsync<AddWorkingHoursDto, WorkingHoursDto>(
+            "api/workingHours",
+            addWorkingHoursDto,
+            "Added working hours successfully",
+            JsonSerializerOptions);
 }

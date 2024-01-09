@@ -32,7 +32,7 @@ public static class StringExtensions
         return string.IsNullOrEmpty(str);
     }
 
-    public static bool IsNullOrWhiteSpace(this string str)
+    public static bool IsNullOrWhiteSpace(this string? str)
     {
         return string.IsNullOrWhiteSpace(str);
     }

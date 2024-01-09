@@ -15,7 +15,7 @@ using TestStuff.Helpers;
 using Web.Pages.UserLeaveLimits;
 using Web.Shared;
 
-public class UniversalEditAsyncTest
+public class UniversalPatchAsyncTest
 {
     private readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web)
     {
@@ -44,7 +44,7 @@ public class UniversalEditAsyncTest
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PatchAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
         result.Should().BeFalse();
         toastServiceMock.Verify(m => m.ShowError("Error occured while editing", null), Times.Once);
         loggerMock.VerifyLogError("fake exception\nfakeStackTrace", Times.Once);
@@ -77,7 +77,7 @@ public class UniversalEditAsyncTest
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PatchAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
         result.Should().BeFalse();
         toastServiceMock.Verify(m => m.ShowError("fake error", null), Times.Once);
         loggerMock.VerifyLogError("fake error occured", Times.Once);
@@ -107,7 +107,7 @@ public class UniversalEditAsyncTest
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PatchAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
         result.Should().BeTrue();
         toastServiceMock.Verify(m => m.ShowSuccess("success", null), Times.Once);
         mockedHttpValues.RequestShouldBeMatched();
