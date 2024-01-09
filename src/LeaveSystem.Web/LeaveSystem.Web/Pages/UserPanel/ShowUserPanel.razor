@@ -89,7 +89,7 @@
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
-        var getLimitsTask = UserLeaveLimitsService.GetLimitsAsync(UserId, firstDay, lastDay);
+        var getLimitsTask = UserLeaveLimitsService.GetAsync(UserId, firstDay, lastDay);
         var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(UserId);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
@@ -112,7 +112,7 @@
 
     async Task ResetLimit(Guid limitId)
     {
-        var limitToReset = await UserLeaveLimitsService.GetSingleAsync(limitId);
+        var limitToReset = await UserLeaveLimitsService.GetAsync(limitId);
         if (limitToReset is not null)
         {
             limitsPanel?.UpdateLeaveLimit(limitToReset);

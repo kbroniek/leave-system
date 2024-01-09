@@ -39,7 +39,7 @@ public class HrSummaryService
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
         var getLeaveRequestsTask = getLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = leaveTypesService.GetLeaveTypes();
-        var getLimitsTask = userLeaveLimitsService.GetLimitsAsync(firstDay, lastDay);
+        var getLimitsTask = userLeaveLimitsService.GetAsync(firstDay, lastDay);
         var getEmployeesTask = employeeService.Get();
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getEmployeesTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();

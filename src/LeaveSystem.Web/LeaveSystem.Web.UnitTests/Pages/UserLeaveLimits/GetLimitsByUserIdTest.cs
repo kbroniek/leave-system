@@ -22,7 +22,7 @@ public class GetLimitsByUserIdTest
                     uri, "Can't get user leave limit", It.IsAny<JsonSerializerOptions>()))
             .ReturnsAsync(data);
         var sut = new UserLeaveLimitsService(universalHttpServiceMock.Object);
-        var result = await sut.GetLimitsAsync(userId, since, until);
+        var result = await sut.GetAsync(userId, since, until);
         result.Should().BeEmpty();
         universalHttpServiceMock.Verify(m => m.GetAsync<ODataResponse<IEnumerable<UserLeaveLimitDto>>>(uri, "Can't get user leave limit", It.IsAny<JsonSerializerOptions>()), Times.Once);
     }
@@ -44,7 +44,7 @@ public class GetLimitsByUserIdTest
                     uri, "Can't get user leave limit", It.IsAny<JsonSerializerOptions>()))
             .ReturnsAsync(data);
         var sut = new UserLeaveLimitsService(universalHttpServiceMock.Object);
-        var result = await sut.GetLimitsAsync(userId, since, until);
+        var result = await sut.GetAsync(userId, since, until);
         result.Should().BeEquivalentTo(data.Data);
         universalHttpServiceMock.Verify(m => m.GetAsync<ODataResponse<IEnumerable<UserLeaveLimitDto>>>(uri, "Can't get user leave limit", It.IsAny<JsonSerializerOptions>()), Times.Once);
     }

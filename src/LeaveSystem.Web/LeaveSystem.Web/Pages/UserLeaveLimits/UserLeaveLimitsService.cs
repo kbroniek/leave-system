@@ -18,7 +18,7 @@ public class UserLeaveLimitsService
     public UserLeaveLimitsService(UniversalHttpService universalHttpService) =>
         this.universalHttpService = universalHttpService;
 
-    public virtual async Task<IEnumerable<UserLeaveLimitDto>> GetLimitsAsync(string userId, DateTimeOffset since,
+    public virtual async Task<IEnumerable<UserLeaveLimitDto>> GetAsync(string userId, DateTimeOffset since,
         DateTimeOffset until)
     {
         var limits = await this.universalHttpService.GetAsync<ODataResponse<IEnumerable<UserLeaveLimitDto>>>(
@@ -27,7 +27,7 @@ public class UserLeaveLimitsService
         return limits?.Data ?? Enumerable.Empty<UserLeaveLimitDto>();
     }
 
-    public virtual async Task<UserLeaveLimitDto?> GetSingleAsync(Guid id)
+    public virtual async Task<UserLeaveLimitDto?> GetAsync(Guid id)
     {
         var odataResponse = await this.universalHttpService.GetAsync<UserLeaveLimitDtoODataResponse>(
             $"odata/UserLeaveLimits({id})?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property",
@@ -35,7 +35,7 @@ public class UserLeaveLimitsService
         return odataResponse?.ToUserLeaveLimitDto();
     }
 
-    public virtual async Task<IEnumerable<LeaveLimitDto>> GetLimitsAsync(DateTimeOffset since, DateTimeOffset until)
+    public virtual async Task<IEnumerable<LeaveLimitDto>> GetAsync(DateTimeOffset since, DateTimeOffset until)
     {
         var limits = await this.universalHttpService.GetAsync<ODataResponse<IEnumerable<LeaveLimitDto>>>(
             $"odata/UserLeaveLimits?$select=Id,Limit,OverdueLimit,LeaveTypeId,ValidSince,ValidUntil,Property,AssignedToUserId&$filter=not(AssignedToUserId eq null) and ((ValidSince ge {since:s}Z or ValidSince eq null) and (ValidUntil le {until:s}.999Z or ValidUntil eq null))"
