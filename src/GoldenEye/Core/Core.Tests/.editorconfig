@@ -1,0 +1,9 @@
+[*.cs]
+# CS8602: Dereference of a possibly null reference.
+dotnet_diagnostic.CS8602.severity = none
+# CS8600: Converting null literal or possible null value to non-nullable type.
+dotnet_diagnostic.CS8600.severity = none
+# CS8625: Cannot convert null literal to non-nullable reference type.
+dotnet_diagnostic.CS8625.severity = none
+# CS8604: Possible null reference argument for parameter.
+dotnet_diagnostic.CS8604.severity = none
