@@ -35,6 +35,18 @@ public static class HttpClientMockFactory
         return httpClient;
     }
 
+    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, HttpStatusCode statusCode, JsonSerializerOptions options, out MockedHttpValues mockedHttpValues)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        var request = mockHttpMessageHandler.When(BaseFakeUrl + url).RespondWithJson(response, statusCode, options);
+        mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
+        var httpClient = new HttpClient(mockHttpMessageHandler)
+        {
+            BaseAddress = new Uri(BaseFakeUrl)
+        };
+        return httpClient;
+    }
+
     public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode)
         => CreateWithJsonContent(url, content, httpStatusCode, JsonSerializerOptions.Default);
     public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, JsonSerializerOptions options)
@@ -79,8 +91,19 @@ public static class HttpClientMockFactory
         return httpClient;
     }
 
+    public static HttpClient CreateWithException(string url, Exception exception, out MockedHttpValues mockedHttpValues)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        var fakeResponseContent = new ExceptionThrowingContent(exception);
+        var request = mockHttpMessageHandler.When(BaseFakeUrl + url).Respond(fakeResponseContent);
+        mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(BaseFakeUrl);
+        return httpClient;
+    }
+
     public record MockedHttpValues(MockedRequest Request, MockHttpMessageHandler MockHttpMessageHandler)
     {
-        public void ShouldMatchCount(int count = 1) => this.MockHttpMessageHandler.GetMatchCount(this.Request).Should().Be(count);
+        public void RequestShouldBeMatched(int expectedMatchedCount = 1) => this.MockHttpMessageHandler.GetMatchCount(this.Request).Should().Be(expectedMatchedCount);
     }
 }

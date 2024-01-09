@@ -40,13 +40,13 @@ public class UniversalEditAsyncTest
     private async Task WhenResponseThrowsException_InformAboutError_Helper<TContent>(TContent data)
     {
         var fakeException = new FakeException("fake exception", "fakeStackTrace");
-        var httpClientMock = HttpClientMockFactory.CreateWithException("fakeadd", fakeException);
+        var httpClientMock = HttpClientMockFactory.CreateWithException("fakeedit", fakeException);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fakeadd", data, "success", this.jsonSerializerOptions);
+        var result = await sut.EditAsync("/fakeedit", data, "success", this.jsonSerializerOptions);
         result.Should().BeFalse();
-        toastServiceMock.Verify(m => m.ShowError("Error occured while adding", null), Times.Once);
+        toastServiceMock.Verify(m => m.ShowError("Error occured while editing", null), Times.Once);
         loggerMock.VerifyLogError("fake exception\nfakeStackTrace", Times.Once);
     }
 
@@ -71,12 +71,12 @@ public class UniversalEditAsyncTest
             JsonSerializer.Serialize(new ProblemDto("", "fake error", 400, "fake error occured", "", "", "1.0.0"),
                 this.jsonSerializerOptions);
         var fakeResponse = new StringContent(problem, Encoding.UTF8, "application/json");
-        var httpClientMock = HttpClientMockFactory.CreateWithJsonContent("fakeadd", data, HttpStatusCode.BadRequest,
+        var httpClientMock = HttpClientMockFactory.CreateWithJsonContent("fakeedit", data, HttpStatusCode.BadRequest,
             fakeResponse, this.jsonSerializerOptions);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fakeadd", data, "success", this.jsonSerializerOptions);
+        var result = await sut.EditAsync("/fakeedit", data, "success", this.jsonSerializerOptions);
         result.Should().BeFalse();
         toastServiceMock.Verify(m => m.ShowError("fake error", null), Times.Once);
         loggerMock.VerifyLogError("fake error occured", Times.Once);
@@ -100,12 +100,12 @@ public class UniversalEditAsyncTest
     private async Task WhenResponseStatusSuccessful_ReturnTrue_Helper<TContent>(TContent data)
     {
         var httpClientMock =
-            HttpClientMockFactory.CreateWithJsonContent("fakeadd", data, HttpStatusCode.Created,
+            HttpClientMockFactory.CreateWithJsonContent("fakeedit", data, HttpStatusCode.Created,
                 this.jsonSerializerOptions);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fakeadd", data, "success", this.jsonSerializerOptions);
+        var result = await sut.EditAsync("/fakeedit", data, "success", this.jsonSerializerOptions);
         result.Should().BeTrue();
         toastServiceMock.Verify(m => m.ShowSuccess("success", null), Times.Once);
     }

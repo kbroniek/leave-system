@@ -73,7 +73,7 @@ public class UniversalHttpService
         }
         catch (Exception e)
         {
-            this.toastService.ShowError("Error occured while adding");
+            this.toastService.ShowError("Error occured while editing");
             this.logger.LogException(e);
         }
         return false;
