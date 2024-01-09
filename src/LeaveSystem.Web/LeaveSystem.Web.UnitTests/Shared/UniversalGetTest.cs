@@ -31,13 +31,13 @@ public class UniversalGetTest
     private async Task WhenNoException_ThenReturnData_Helper<T>(T response)
     {
         var httpClientMock = HttpClientMockFactory.CreateWithJsonResponse(
-            "fakeUrl",
-            response, this.jsonSerializerOptions
+            "fakeUrl", response, this.jsonSerializerOptions, out var mockedHttpValues
         );
         var sut = new UniversalHttpService(httpClientMock, new Mock<IToastService>().Object,
             new Mock<ILogger<UniversalHttpService>>().Object);
         var result = await sut.GetAsync<T>("fakeUrl", "fake error occured", this.jsonSerializerOptions);
         result.Should().BeEquivalentTo(response);
+        mockedHttpValues.RequestShouldBeMatched();
     }
 
     [Fact]
@@ -48,8 +48,7 @@ public class UniversalGetTest
         const string fakeUrl = "fakeUrl";
         const string fakeErrorMessage = "fake error occured";
         var httpClientMock = HttpClientMockFactory.Create(
-            fakeUrl,
-            HttpStatusCode.InternalServerError
+            fakeUrl, HttpStatusCode.InternalServerError, out var mockedHttpValues
         );
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
@@ -58,5 +57,6 @@ public class UniversalGetTest
         result.Should().Be(default);
         toastServiceMock.Verify(m => m.ShowError(fakeErrorMessage, null), Times.Once);
         loggerMock.VerifyLogError(null, Times.Once);
+        mockedHttpValues.RequestShouldBeMatched();
     }
 }
