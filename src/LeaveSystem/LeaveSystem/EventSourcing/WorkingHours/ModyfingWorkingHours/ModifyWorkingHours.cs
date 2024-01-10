@@ -1,11 +1,10 @@
 using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Repositories;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.Linq;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using MediatR;
 
@@ -60,29 +59,31 @@ internal class HandleModifyWorkingHours : ICommandHandler<ModifyWorkingHours>
     {
         var periodOverlapExp = PeriodExpressions.GetPeriodOverlapExp<WorkingHours>(request);
         var requestOverlappingOtherWorkingHours = querySession.Query<WorkingHours>()
-            .Any(periodOverlapExp.And( x => x.UserId == request.UserId && x.Id != request.WorkingHoursId));
+            .Any(periodOverlapExp.And(x => x.UserId == request.UserId && x.Id != request.WorkingHoursId));
         if (requestOverlappingOtherWorkingHours)
         {
             throw new InvalidOperationException("You cant add working hours in this period, because other working hours overlap it");
         }
-        var workingHours = await workingHoursRepository.FindById(request.WorkingHoursId, cancellationToken);
+        var workingHours = await workingHoursRepository.FindByIdAsync(request.WorkingHoursId, cancellationToken) ??
+            throw GoldenEye.Backend.Core.Exceptions.NotFoundException.For<WorkingHours>(request.WorkingHoursId);
         workingHours.Modify(request);
         await DeprecateLeaveRequests(request, cancellationToken);
-        await workingHoursRepository.Update(workingHours, cancellationToken);
-        await workingHoursRepository.SaveChanges(cancellationToken);
+        await workingHoursRepository.UpdateAsync(workingHours, cancellationToken);
+        await workingHoursRepository.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 
     private async Task DeprecateLeaveRequests(ModifyWorkingHours command, CancellationToken cancellationToken)
     {
+        //TODO: Deprecate anly future
         var periodOverlapExp = PeriodExpressions.GetPeriodOverlapExp<LeaveRequest, ModifyWorkingHours>(command);
         var overlappingLeaveRequestsOfUser = querySession.Query<LeaveRequest>()
             .Where(periodOverlapExp.And(x => x.CreatedBy.Id == command.UserId).And(LeaveRequestExpressions.IsValidExpression));
         foreach (var leaveRequest in overlappingLeaveRequestsOfUser)
         {
             leaveRequest.Deprecate("deprecated due to changing working Hours", command.ModifiedBy);
-            await leaveRequestRepository.Update(leaveRequest, cancellationToken);
-            await leaveRequestRepository.SaveChanges(cancellationToken);
+            await leaveRequestRepository.UpdateAsync(leaveRequest, cancellationToken);
+            await leaveRequestRepository.SaveChangesAsync(cancellationToken);
         }
     }
 }

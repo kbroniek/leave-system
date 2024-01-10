@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="GoldenEye.Backend.Core.Marten" />
+    <PackageReference Include="Marten" />
+  </ItemGroup>
+</Project>

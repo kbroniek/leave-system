@@ -1,8 +1,9 @@
-﻿using GoldenEye.Objects.General;
+using GoldenEye.Shared.Core.Objects.General;
 
 namespace LeaveSystem.Db.Entities;
 public class UserLeaveLimit : IHaveId<Guid>
 {
+    object IHaveId.Id => this.Id;
     public Guid Id { get; set; }
     public TimeSpan? Limit { get; set; }
     public TimeSpan? OverdueLimit { get; set; }
@@ -12,6 +13,7 @@ public class UserLeaveLimit : IHaveId<Guid>
     public DateTimeOffset? ValidSince { get; set; }
     public DateTimeOffset? ValidUntil { get; set; }
     public UserLeaveLimitProperties? Property { get; set; }
+
 
     public class UserLeaveLimitProperties
     {

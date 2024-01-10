@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 
 namespace LeaveSystem.Api.Endpoints.Errors;
 
@@ -25,7 +25,7 @@ public class ErrorHandlerMiddleware
         {
             await HandleExceptionAsync(httpContext, StatusCodes.Status416RequestedRangeNotSatisfiable, e);
         }
-        catch (GoldenEye.Exceptions.NotFoundException e)
+        catch (GoldenEye.Backend.Core.Exceptions.NotFoundException e)
         {
             await HandleExceptionAsync(httpContext, StatusCodes.Status404NotFound, e, "Resource not found");
         }

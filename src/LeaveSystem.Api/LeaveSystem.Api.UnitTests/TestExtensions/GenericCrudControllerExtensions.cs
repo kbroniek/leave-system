@@ -1,4 +1,4 @@
-﻿using GoldenEye.Objects.General;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;

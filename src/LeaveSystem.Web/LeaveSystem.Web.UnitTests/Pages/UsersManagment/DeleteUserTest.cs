@@ -32,7 +32,7 @@ public class DeleteUserTest
     {
         //Given
         var userId = "fakeId123";
-        httpClient = HttpClientMockFactory.Create($"api/users", statusCode);
+        httpClient = HttpClientMockFactory.Create($"api/users/{userId}", statusCode);
         var sut = GetSut();
         //When
         var act = async () => await sut.Delete(userId);

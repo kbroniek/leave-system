@@ -1,5 +1,5 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Events;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.Shared;
 using Newtonsoft.Json;
 
@@ -21,7 +21,7 @@ public class LeaveRequestCreated : IEvent
     public string? Remarks { get; }
 
     public FederatedUser CreatedBy { get; }
-    
+
     public TimeSpan WorkingHours { get; }
 
     [JsonConstructor]

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Shared.LeaveRequests;
@@ -19,11 +15,7 @@ public class HandleGetLeaveRequestsTest
     private static readonly DateTimeOffset Now = DateTimeOffset.Now;
     private static readonly LeaveRequestShortInfo[] Data = FakeLeaveRequestShortInfoProvider.Get(Now);
 
-    private static async Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession)
-    {
-        await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        return new(documentSession, dbContext);
-    }
+    private static async Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession) => new(documentSession);
 
     [Theory]
     [MemberData(nameof(Get_WhenMoreThenZeroStatuses_ThenReturnSameStatuses_TestData))]

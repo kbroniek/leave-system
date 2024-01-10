@@ -1,4 +1,4 @@
-﻿using GoldenEye.Objects.General;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Db;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Deltas;
@@ -8,130 +8,120 @@ using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 
-namespace LeaveSystem.Api.Controllers
+namespace LeaveSystem.Api.Controllers;
+
+public abstract class GenericCrudController<TEntity, TId> : ODataController
+    where TId : IComparable<TId>
+    where TEntity : class, IHaveId<TId>
 {
-    public abstract class GenericCrudController<TEntity, TId> : ODataController
-        where TId : IComparable<TId>
-        where TEntity : class, IHaveId<TId>
+    private readonly LeaveSystemDbContext dbContext;
+
+    public GenericCrudController(LeaveSystemDbContext dbContext) => this.dbContext = dbContext;
+
+    [HttpGet]
+    [EnableQuery]
+    public IQueryable<TEntity>? Get() => dbContext.Set<TEntity>();
+
+    [HttpGet("{key}")]
+    [EnableQuery]
+    public SingleResult<TEntity> Get([FromODataUri] TId key)
     {
-        private readonly LeaveSystemDbContext dbContext;
+        var result = GetSet().Where(p => p.Id.CompareTo(key) == 0);
+        return SingleResult.Create(result);
+    }
 
-        public GenericCrudController(LeaveSystemDbContext dbContext)
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] TEntity entity, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
         {
-            this.dbContext = dbContext;
+            return BadRequest(ModelState);
         }
+        GetSet().Add(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Created(entity);
+    }
 
-        [HttpGet]
-        [EnableQuery]
-        public IQueryable<TEntity>? Get() => dbContext.Set<TEntity>();
-
-        [HttpGet("{key}")]
-        [EnableQuery]
-        public SingleResult<TEntity> Get([FromODataUri] TId key)
+    [HttpPatch]
+    public async Task<IActionResult> Patch([FromODataUri] TId key, [FromBody] Delta<TEntity> update, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
         {
-            IQueryable<TEntity> result = GetSet().Where(p => p.Id.CompareTo(key) == 0);
-            return SingleResult.Create(result);
+            return BadRequest(ModelState);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TEntity TEntity, CancellationToken cancellationToken = default)
+        var entity = await GetSet().FindAsync(new object[] { key }, cancellationToken);
+        if (entity == null)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            GetSet().Add(TEntity);
+            return NotFound();
+        }
+        update.Patch(entity);
+        try
+        {
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Created(TEntity);
         }
-
-        [HttpPatch]
-        public async Task<IActionResult> Patch([FromODataUri] TId key, [FromBody] Delta<TEntity> update, CancellationToken cancellationToken = default)
+        catch (DbUpdateConcurrencyException)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var entity = await GetSet().FindAsync(new object[] { key }, cancellationToken);
-            if (entity == null)
+            if (!await ProductExists(key, cancellationToken))
             {
                 return NotFound();
             }
-            update.Patch(entity);
-            try
+            else
             {
-                await dbContext.SaveChangesAsync(cancellationToken);
+                throw;
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await ProductExists(key, cancellationToken))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return Updated(entity);
         }
+        return Updated(entity);
+    }
 
-        [HttpPut]
-        public async Task<IActionResult> Put([FromODataUri] TId key, [FromBody] TEntity update, CancellationToken cancellationToken = default)
+    [HttpPut]
+    public async Task<IActionResult> Put([FromODataUri] TId key, [FromBody] TEntity update, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            if (key.CompareTo(update.Id) != 0)
-            {
-                return BadRequest();
-            }
-            dbContext.Entry(update).State = EntityState.Modified;
-            try
-            {
-                await dbContext.SaveChangesAsync(cancellationToken);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await ProductExists(key, cancellationToken))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return Updated(update);
+            return BadRequest(ModelState);
         }
-
-        [HttpDelete]
-        public async Task<IActionResult> Delete([FromODataUri] TId key, CancellationToken cancellationToken = default)
+        if (key.CompareTo(update.Id) != 0)
         {
-            var product = await GetSet().FindAsync(new object[] { key }, cancellationToken);
-            if (product == null)
+            return BadRequest();
+        }
+        dbContext.Entry(update).State = EntityState.Modified;
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!await ProductExists(key, cancellationToken))
             {
                 return NotFound();
             }
-            GetSet().Remove(product);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            return NoContent();
-        }
-
-        private Task<bool> ProductExists(TId key, CancellationToken cancellationToken)
-        {
-            return GetSet().AnyAsync(l => l.Id.CompareTo(key) == 0, cancellationToken);
-        }
-
-        private DbSet<TEntity> GetSet()
-        {
-            var dbSet = dbContext.Set<TEntity>();
-            if (dbSet == null)
+            else
             {
-                throw new InvalidOperationException($"The {typeof(TEntity)} table in the {nameof(LeaveSystemDbContext)} is null.");
+                throw;
             }
-            return dbSet;
         }
+        return Updated(update);
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> Delete([FromODataUri] TId key, CancellationToken cancellationToken = default)
+    {
+        var product = await GetSet().FindAsync(new object[] { key }, cancellationToken);
+        if (product == null)
+        {
+            return NotFound();
+        }
+        GetSet().Remove(product);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return NoContent();
+    }
+
+    private Task<bool> ProductExists(TId key, CancellationToken cancellationToken) =>
+        GetSet().AnyAsync(l => l.Id.CompareTo(key) == 0, cancellationToken);
+
+    private DbSet<TEntity> GetSet()
+    {
+        var dbSet = dbContext.Set<TEntity>() ?? throw new InvalidOperationException($"The {typeof(TEntity)} table in the {nameof(LeaveSystemDbContext)} is null.");
+        return dbSet;
     }
 }

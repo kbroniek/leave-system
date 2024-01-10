@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using LeaveSystem.EventSourcing.WorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Shared;
-using NSubstitute.Core;
 
 namespace LeaveSystem.UnitTests.Providers;
 
@@ -12,7 +8,7 @@ public static class FakeWorkingHoursProvider
 {
     private static readonly FederatedUser FakeAdmin = FakeUserProvider.GetUserWithNameFakeoslav();
     public static IEnumerable<WorkingHours> GetCurrent(DateTimeOffset baseDate) =>
-        new [] { GetCurrentForBen(baseDate), GetCurrentForPhilip(baseDate), GetCurrentForFakeoslav(baseDate)};
+        new[] { GetCurrentForBen(baseDate), GetCurrentForPhilip(baseDate), GetCurrentForFakeoslav(baseDate) };
 
     public static WorkingHours GetCurrentForBen(DateTimeOffset baseDate) =>
         Create(Guid.NewGuid(), FakeUserProvider.BenId, DateTimeOffsetExtensions.CreateFromDate(2018, 3, 21),
@@ -37,7 +33,7 @@ public static class FakeWorkingHoursProvider
         };
         return workingHoursToDeprecate;
     }
-    
+
     public static IEnumerable<WorkingHours> GetDeprecatedForPhilip()
     {
         var workingHoursToDeprecate = new[]
@@ -65,7 +61,7 @@ public static class FakeWorkingHoursProvider
 
     public static IEnumerable<WorkingHours> GetAll(DateTimeOffset baseDate) =>
         GetCurrent(baseDate).Union(GetDeprecated());
-    private static WorkingHours Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration) => 
+    private static WorkingHours Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration) =>
         WorkingHours.CreateWorkingHours(WorkingHoursCreated.Create(
             workingHoursId, userId, dateFrom, dateTo, duration, FakeAdmin)
         );

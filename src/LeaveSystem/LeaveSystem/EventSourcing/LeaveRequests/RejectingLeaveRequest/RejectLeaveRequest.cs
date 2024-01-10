@@ -1,6 +1,6 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Repositories;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.Shared;
 using MediatR;
 
@@ -32,21 +32,18 @@ internal class HandleRejectLeaveRequest :
 {
     private readonly IRepository<LeaveRequest> repository;
 
-    public HandleRejectLeaveRequest(IRepository<LeaveRequest> repository)
-    {
-        this.repository = repository;
-    }
+    public HandleRejectLeaveRequest(IRepository<LeaveRequest> repository) => this.repository = repository;
 
     public async Task<Unit> Handle(RejectLeaveRequest command, CancellationToken cancellationToken)
     {
-        var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
-                             ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
+        var leaveRequest = await repository.FindByIdAsync(command.LeaveRequestId, cancellationToken)
+                             ?? throw GoldenEye.Backend.Core.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
         leaveRequest.Reject(command.Remarks, command.RejectedBy);
 
-        await repository.Update(leaveRequest, cancellationToken);
+        await repository.UpdateAsync(leaveRequest, cancellationToken);
 
-        await repository.SaveChanges(cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

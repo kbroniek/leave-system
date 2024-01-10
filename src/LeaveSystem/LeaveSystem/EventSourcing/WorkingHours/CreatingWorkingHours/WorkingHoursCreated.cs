@@ -1,4 +1,4 @@
-using GoldenEye.Events;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.Shared;
 using Newtonsoft.Json;
 
@@ -13,7 +13,7 @@ public class WorkingHoursCreated : IEvent
     public DateTimeOffset? DateTo { get; }
     public TimeSpan Duration { get; }
     public FederatedUser CreatedBy { get; }
-    
+
     [JsonConstructor]
     private WorkingHoursCreated(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration, FederatedUser createdBy)
     {
@@ -24,7 +24,7 @@ public class WorkingHoursCreated : IEvent
         Duration = duration;
         CreatedBy = createdBy;
     }
-    
+
     public static WorkingHoursCreated Create(Guid workingHoursId, string userId, DateTimeOffset dateFrom, DateTimeOffset? dateTo, TimeSpan duration, FederatedUser createdBy)
     {
         if (dateFrom > dateTo)

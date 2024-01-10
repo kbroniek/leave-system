@@ -1,4 +1,4 @@
-﻿using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
+using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.DeprecatingLeaveRequest;
@@ -25,7 +25,7 @@ public class LeaveRequestShortInfo
 
     public FederatedUser CreatedBy { get; private set; }
 
-    public void Apply(LeaveRequestCreated @event)
+    internal void Apply(LeaveRequestCreated @event)
     {
         Id = @event.LeaveRequestId;
         DateFrom = @event.DateFrom;
@@ -36,40 +36,27 @@ public class LeaveRequestShortInfo
         CreatedBy = @event.CreatedBy;
     }
 
-    public void Apply(LeaveRequestAccepted _)
+    internal void Apply(LeaveRequestAccepted _) => Status = LeaveRequestStatus.Accepted;
+
+    internal void Apply(LeaveRequestRejected _) => Status = LeaveRequestStatus.Rejected;
+
+    internal void Apply(LeaveRequestCanceled _) => Status = LeaveRequestStatus.Canceled;
+
+    internal void Apply(LeaveRequestDeprecated _) => Status = LeaveRequestStatus.Deprecated;
+
+    public class LeaveRequestShortInfoProjection : SingleStreamProjection<LeaveRequestShortInfo>
     {
-        Status = LeaveRequestStatus.Accepted;
-    }
+        public LeaveRequestShortInfoProjection()
+        {
+            ProjectEvent<LeaveRequestCreated>((item, @event) => item.Apply(@event));
 
-    public void Apply(LeaveRequestRejected _)
-    {
-        Status = LeaveRequestStatus.Rejected;
-    }
+            ProjectEvent<LeaveRequestAccepted>((item, @event) => item.Apply(@event));
 
-    public void Apply(LeaveRequestCanceled _)
-    {
-        Status = LeaveRequestStatus.Canceled;
-    }
+            ProjectEvent<LeaveRequestRejected>((item, @event) => item.Apply(@event));
 
-    public void Apply(LeaveRequestDeprecated _)
-    {
-        Status = LeaveRequestStatus.Deprecated;
-    }
-}
+            ProjectEvent<LeaveRequestCanceled>((item, @event) => item.Apply(@event));
 
-public class LeaveRequestShortInfoProjection : SingleStreamAggregation<LeaveRequestShortInfo>
-{
-    public LeaveRequestShortInfoProjection()
-    {
-        ProjectEvent<LeaveRequestCreated>((item, @event) => item.Apply(@event));
-
-        ProjectEvent<LeaveRequestAccepted>((item, @event) => item.Apply(@event));
-
-        ProjectEvent<LeaveRequestRejected>((item, @event) => item.Apply(@event));
-
-        ProjectEvent<LeaveRequestCanceled>((item, @event) => item.Apply(@event));
-        
-        ProjectEvent<LeaveRequestDeprecated>((item, @event) => item.Apply(@event));
+            ProjectEvent<LeaveRequestDeprecated>((item, @event) => item.Apply(@event));
+        }
     }
 }
-

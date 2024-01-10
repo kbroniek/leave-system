@@ -1,4 +1,3 @@
-using GoldenEye.Extensions.Collections;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
@@ -14,10 +13,10 @@ public class CreateLeaveRequestPerTypeTest
     [Theory]
     [MemberData(nameof(Get_WhenProvidingArguments_ThenCreateCorrectLeaveRequestPerType_TestData))]
     public void WhenProvidingArguments_ThenCreateCorrectLeaveRequestPerType(
-        LeaveTypesService.LeaveTypeDto leaveType, 
-        IEnumerable<LeaveTypesService.LeaveTypeDto> allLeaveTypes, 
-        IEnumerable<LeaveRequestShortInfo> leaveRequests, 
-        IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits, 
+        LeaveTypesService.LeaveTypeDto leaveType,
+        IEnumerable<LeaveTypesService.LeaveTypeDto> allLeaveTypes,
+        IEnumerable<LeaveRequestShortInfo> leaveRequests,
+        IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits,
         TimeSpan workingHours,
         TimeSpan leaveRequestsUsed,
         TimeSpan limitsSum,

@@ -1,10 +1,11 @@
-using GoldenEye.Objects.General;
-using LeaveSystem.Shared;
 using System.Text.Json;
+using GoldenEye.Shared.Core.Objects.General;
+using LeaveSystem.Shared;
 
 namespace LeaveSystem.Db.Entities;
 public class Setting : IHaveId<string>, IDisposable
 {
+    object IHaveId.Id => this.Id;
     public string Id { get; set; } = null!;
     public SettingCategoryType Category { get; set; }
     public JsonDocument Value { get; set; } = null!;

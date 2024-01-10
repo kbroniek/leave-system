@@ -1,16 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="GoldenEye.Backend.Core.Marten" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Marten" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\GoldenEye\Core\Core\Core.csproj" />
-    <ProjectReference Include="..\..\GoldenEye\Marten\Marten\Marten.csproj" />
+    <ProjectReference Include="..\..\GoldenEye\GoldenEye\GoldenEye.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
   </ItemGroup>
 </Project>
