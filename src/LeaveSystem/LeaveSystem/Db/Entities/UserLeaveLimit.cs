@@ -49,11 +49,11 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
         this.logger = logger;
         this.RuleFor(x => x.Limit)
             .GreaterThanOrEqualTo(TimeSpan.Zero)
-            .WithErrorCode(FvErrorCodes.BadRequest)
+            .WithErrorCode(FvErrorCodes.Argument)
             .WithMessage("Limit can not be negative");
         this.RuleFor(x => x.OverdueLimit)
             .GreaterThanOrEqualTo(TimeSpan.Zero)
-            .WithErrorCode(FvErrorCodes.BadRequest)
+            .WithErrorCode(FvErrorCodes.Argument)
             .WithMessage("Limit can not be negative");
         this.RuleFor(x => x.ValidSince)
             .LessThan(x => x.ValidUntil)
