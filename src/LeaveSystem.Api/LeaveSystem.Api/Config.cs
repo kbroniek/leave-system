@@ -70,7 +70,6 @@ public static class Config
         modelBuilder.EntitySet<LeaveType>("LeaveTypes");
         modelBuilder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
         modelBuilder.EntitySet<Setting>("Settings");
-        modelBuilder.ComplexType<AddLeaveTypeDto>();
         return modelBuilder.GetEdmModel();
     }
 }
