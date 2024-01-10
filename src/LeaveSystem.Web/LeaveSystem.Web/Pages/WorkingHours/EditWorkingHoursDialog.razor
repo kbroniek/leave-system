@@ -167,7 +167,7 @@ else
     async Task OnUpdateRow(WorkingHoursDto workingHours)
     {
         Reset();
-        var editResult = await WorkingHoursService.Edit(workingHours);
+        var editResult = await WorkingHoursService.EditAsync(workingHours);
         if (!editResult)
         {
             this.workingHours = (await GetWorkingHours(

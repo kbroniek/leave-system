@@ -152,7 +152,7 @@ else
         await UsersService.Edit(user.User);
         if (user.WorkingHours is not null)
         {
-            await WorkingHoursService.Edit(user.WorkingHours);
+            await WorkingHoursService.EditAsync(user.WorkingHours);
         }
     }
 

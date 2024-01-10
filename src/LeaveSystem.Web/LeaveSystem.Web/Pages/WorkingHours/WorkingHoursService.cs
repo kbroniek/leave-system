@@ -31,7 +31,7 @@ public class WorkingHoursService
             "Error occured during getting working hours",
             JsonSerializerOptions);
 
-    public virtual Task<bool> Edit(WorkingHoursDto workingHoursDto) =>
+    public virtual Task<bool> EditAsync(WorkingHoursDto workingHoursDto) =>
         this.universalHttpService.PutAsync(
             $"api/workingHours/{workingHoursDto.Id}/modify",
             workingHoursDto,
