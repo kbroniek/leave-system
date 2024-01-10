@@ -1,10 +1,7 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text.Json;
 using FluentAssertions.Equivalency;
 using FluentValidation;
-using GoldenEye.Objects.General;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.UnitTests.Providers;
@@ -17,13 +14,14 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using MockQueryable.Moq;
 using Moq;
-using NSubstitute;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
 
+using GoldenEye.Shared.Core.Objects.General;
+
 public class GenericCrudServicePatchTest
 {
-    private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator) 
+    private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId> =>
         new (dbContext, deltaValidator, entityValidator);
@@ -87,7 +85,7 @@ public class GenericCrudServicePatchTest
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         deltaValidatorMock.Setup(m => m.CreateDeltaWithoutProtectedProperties(delta)).Returns(delta);
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
-        entityValidatorMock.Setup(m => 
+        entityValidatorMock.Setup(m =>
                 m.ValidateAsync(It.IsAny<IValidationContext>(), new CancellationToken()))
             .ThrowsAsync(new Exception());
         var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
@@ -215,7 +213,7 @@ public class GenericCrudServicePatchTest
         var fakeUserLimitDelta = new Delta<UserLeaveLimit>();
         fakeUserLimitDelta.TrySetPropertyValue("Limit", TimeSpan.FromHours(1));
         await WhenNoProblems_ThenReturnModifiedEntity_Helper<UserLeaveLimit, Guid>(
-            FakeUserLeaveLimitProvider.GetLimits().ToList(), 
+            FakeUserLeaveLimitProvider.GetLimits().ToList(),
             fakeExpectedChangedUserLimit,
             fakeUserLimitDelta
             );
@@ -224,7 +222,7 @@ public class GenericCrudServicePatchTest
         var fakeLeaveTypeDelta = new Delta<LeaveType>();
         fakeLeaveTypeDelta.TrySetPropertyValue("BaseLeaveTypeId", Guid.Parse("9ea8f494-222d-40a4-a8f0-844fa01bf8ac"));
         await WhenNoProblems_ThenReturnModifiedEntity_Helper<LeaveType, Guid>(
-            FakeLeaveTypeProvider.GetLeaveTypes().ToList(), 
+            FakeLeaveTypeProvider.GetLeaveTypes().ToList(),
             fakeExpectedChangedLeaveType,
             fakeLeaveTypeDelta);
         var fakeExpectedChangedSetting = FakeSettingsProvider.GetPendingSetting();
@@ -232,7 +230,7 @@ public class GenericCrudServicePatchTest
         var fakeSettingDelta = new Delta<Setting>();
         fakeSettingDelta.TrySetPropertyValue("Value", JsonDocument.Parse("{\"value\": \"fake value\"}"));
         await WhenNoProblems_ThenReturnModifiedEntity_Helper<Setting, string>(
-            FakeSettingsProvider.GetSettings().ToList(), 
+            FakeSettingsProvider.GetSettings().ToList(),
             fakeExpectedChangedSetting,
             fakeSettingDelta,
             JsonDocumentCompareOptionsProvider.Get<Setting>("Value")

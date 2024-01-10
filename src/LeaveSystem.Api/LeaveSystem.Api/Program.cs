@@ -1,6 +1,4 @@
 using LeaveSystem.Api;
-using System.Configuration;
-using GoldenEye.Registration;
 using LeaveSystem;
 using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Controllers;
@@ -15,10 +13,7 @@ using LeaveSystem.Db.Entities;
 using LeaveSystem.Shared.Converters;
 using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
-using LeaveSystem.Shared.UserLeaveLimits;
 using Microsoft.AspNetCore.OData;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
@@ -64,8 +59,6 @@ builder.Services.AddServices(builder.Configuration)
     .AddScoped<DateService>()
     .AddValidators()
     .AddODataControllersServices();
-builder.Services.AddValidators();
-builder.Services.AddODataControllersServices();
 
 var app = builder.Build();
 
