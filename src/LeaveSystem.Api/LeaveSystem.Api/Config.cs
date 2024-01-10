@@ -5,6 +5,12 @@ using Microsoft.OpenApi.Models;
 
 namespace LeaveSystem.Api;
 
+using LeaveSystem.Db.Entities;
+using Microsoft.AspNetCore.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
+using Shared.LeaveRequests;
+
 public static class Config
 {
     private const string azureReadUsersSection = "ManageAzureUsers";
@@ -15,7 +21,7 @@ public static class Config
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Leave System API", Version = "v1" });
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n
                       Enter 'Bearer' [space] and then your token in the text input below.
                       \r\n\r\nExample: 'Bearer 12345abcdef'",
                 Name = "Authorization",
@@ -49,4 +55,22 @@ public static class Config
             .AddDDD()
             .AddLeaveSystemModule(configuration);
 
+    public static IMvcBuilder AddODataConfig(this IMvcBuilder mvcBuilder) =>
+        mvcBuilder.AddOData(opt =>
+            opt.AddRouteComponents("odata", GetEdmModel())
+                .Select()
+                .Filter()
+                .Count()
+                .Expand()
+                .OrderBy());
+
+    private static IEdmModel GetEdmModel()
+    {
+        var modelBuilder = new ODataConventionModelBuilder();
+        modelBuilder.EntitySet<LeaveType>("LeaveTypes");
+        modelBuilder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
+        modelBuilder.EntitySet<Setting>("Settings");
+        modelBuilder.ComplexType<AddLeaveTypeDto>();
+        return modelBuilder.GetEdmModel();
+    }
 }
