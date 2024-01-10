@@ -9,6 +9,7 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using System.Text.Json.Serialization
 @using System.Text.Json
+@using LeaveSystem.Shared.Date
 @using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
 @attribute [Authorize(Policy=@PolicyName)]
 @inject HttpClient Http
@@ -19,6 +20,7 @@
 @inject EmployeeService EmployeeService
 @inject WorkingHoursService WorkingHoursService
 @inject GetLeaveStatusSettingsService GetLeaveStatusSettingsService
+@inject DateService DateService
 
 <PageTitle>Show leave request</PageTitle>
 <style type="text/css">
@@ -117,7 +119,15 @@ else
                 .Select(u => u.First())
                 .OrderBy(u => u.Name)
                 .ToArray();
-            var workingHoursQuery = GetWorkingHoursQuery.GetDefault();
+            var now = DateService.UtcNowWithoutTime();
+            var workingHoursQuery = new GetWorkingHoursQuery(
+                1,
+                1000,
+                now.GetFirstDayOfYear(),
+                    now.GetLastDayOfYear(),
+                    null,
+                    null
+                );
             var workingHours = await WorkingHoursService.GetWorkingHoursAsync(workingHoursQuery);
             await Timeline.CreateAsync(
                 "timeline-visualization",
