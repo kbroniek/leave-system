@@ -1,8 +1,6 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Exceptions;
-using GoldenEye.Repositories;
-using LeaveSystem.Extensions;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.Shared;
 using MediatR;
 
@@ -34,9 +32,8 @@ public class CreateLeaveRequest : ICommand
         Remarks = remarks;
         CreatedBy = createdBy;
     }
-    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy)
-    {
-        return new(
+    public static CreateLeaveRequest Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy) =>
+        new(
             Guard.Against.NillAndDefault(leaveRequestId),
             Guard.Against.NillAndDefault(dateFrom),
             Guard.Against.NillAndDefault(dateTo),
@@ -44,7 +41,6 @@ public class CreateLeaveRequest : ICommand
             Guard.Against.NillAndDefault(leaveTypeId),
             remarks,
             Guard.Against.NillAndDefault(createdBy));
-    }
 }
 
 internal class HandleCreateLeaveRequest :
@@ -62,8 +58,8 @@ internal class HandleCreateLeaveRequest :
     public async Task<Unit> Handle(CreateLeaveRequest command, CancellationToken cancellationToken)
     {
         var leaveRequest = await leaveRequestFactory.Create(command, cancellationToken);
-        await repository.Add(leaveRequest, cancellationToken);
-        await repository.SaveChanges(cancellationToken);
+        await repository.AddAsync(leaveRequest, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }

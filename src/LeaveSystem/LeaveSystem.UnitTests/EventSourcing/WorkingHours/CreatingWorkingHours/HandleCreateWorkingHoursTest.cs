@@ -1,5 +1,5 @@
 using FluentAssertions;
-using GoldenEye.Repositories;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
@@ -11,11 +11,6 @@ using Marten;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
@@ -51,8 +46,8 @@ public class HandleCreateWorkingHoursTest
         //Then
         documentSessionMock.Received(1).Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>();
         factoryMock.Received(1).Create(ArgExtensions.IsEquivalentTo<CreateWorkingHours>(command));
-        await workingHoursRepositoryMock.Received(1).Add(fakeWorkingHours, Arg.Any<CancellationToken>());
-        await workingHoursRepositoryMock.Received(1).SaveChanges();
+        await workingHoursRepositoryMock.Received(1).AddAsync(fakeWorkingHours, Arg.Any<CancellationToken>());
+        await workingHoursRepositoryMock.Received(1).SaveChangesAsync();
         result.Should().BeEquivalentTo(Unit.Value);
     }
 
@@ -79,9 +74,9 @@ public class HandleCreateWorkingHoursTest
         //Then
         documentSessionMock.Received(1).Query<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>();
         factoryMock.Received(1).Create(ArgExtensions.IsEquivalentTo<CreateWorkingHours>(command));
-        await workingHoursRepositoryMock.DidNotReceiveWithAnyArgs().Update(Arg.Any<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Arg.Any<CancellationToken>());
-        await workingHoursRepositoryMock.Received(1).Add(fakeWorkingHours, Arg.Any<CancellationToken>());
-        await workingHoursRepositoryMock.Received(1).SaveChanges();
+        await workingHoursRepositoryMock.DidNotReceiveWithAnyArgs().UpdateAsync(Arg.Any<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(), Arg.Any<CancellationToken>());
+        await workingHoursRepositoryMock.Received(1).AddAsync(fakeWorkingHours, Arg.Any<CancellationToken>());
+        await workingHoursRepositoryMock.Received(1).SaveChangesAsync();
         result.Should().BeEquivalentTo(Unit.Value);
         var now = DateTimeOffset.Now.GetDayWithoutTime();
         martenQueryable.Any(x => x.UserId == command.UserId && x.GetStatus(now) == WorkingHoursStatus.Current)

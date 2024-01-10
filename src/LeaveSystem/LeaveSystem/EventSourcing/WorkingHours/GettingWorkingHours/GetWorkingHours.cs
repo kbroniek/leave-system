@@ -1,5 +1,5 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Queries;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Queries;
 using LeaveSystem.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
@@ -60,10 +60,7 @@ internal class HandleGetWorkingHours : IQueryHandler<GetWorkingHours, IPagedList
 {
     private readonly IDocumentSession querySession;
 
-    public HandleGetWorkingHours(IDocumentSession querySession)
-    {
-        this.querySession = querySession;
-    }
+    public HandleGetWorkingHours(IDocumentSession querySession) => this.querySession = querySession;
 
     public Task<IPagedList<WorkingHours>> Handle(GetWorkingHours request, CancellationToken cancellationToken)
     {

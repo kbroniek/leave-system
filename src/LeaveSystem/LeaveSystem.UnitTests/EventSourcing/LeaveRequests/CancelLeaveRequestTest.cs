@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using FluentAssertions;
-using GoldenEye.Events;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -26,10 +23,7 @@ public class CancelLeaveRequestTest
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         var canceledBy = FederatedUser.Create("2", "second.user@fake.com", "Stanislaw");
         //When
-        var act = () =>
-        {
-            leaveRequest.Cancel("fake remarks", canceledBy, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
-        };
+        var act = () => leaveRequest.Cancel("fake remarks", canceledBy, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         //Then
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("Canceling a non-your leave request is not allowed.");
@@ -45,10 +39,7 @@ public class CancelLeaveRequestTest
         var canceledBy = FakeUserProvider.GetUserWithNameFakeoslav();
         actionBeforeCancel(leaveRequest, "fake remarks", @event.CreatedBy);
         //When
-        var act = () =>
-        {
-            leaveRequest.Cancel("fake cancel remarks", canceledBy, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
-        };
+        var act = () => leaveRequest.Cancel("fake cancel remarks", canceledBy, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         //Then
         act.Should().Throw<InvalidOperationException>()
             .WithMessage($"Canceling leave requests in '{leaveRequest.Status}' status is not allowed.");
@@ -81,10 +72,7 @@ public class CancelLeaveRequestTest
         );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(@event);
         //When
-        var act = () =>
-        {
-            leaveRequest.Cancel("fake cancel remarks", User, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
-        };
+        var act = () => leaveRequest.Cancel("fake cancel remarks", User, DateTimeOffset.Parse("2023-12-15T00:00:00.0000000+00:00"));
         //Then
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("Canceling of past leave requests is not allowed.");
@@ -115,7 +103,7 @@ public class CancelLeaveRequestTest
             LastModifiedBy = User,
             Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers());
-        leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
+        leaveRequest.PendingEvents.Should().BeEquivalentTo(
             new IEvent[] { @event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, User) }
         );
     }
@@ -144,8 +132,8 @@ public class CancelLeaveRequestTest
             Remarks = fakeRemarksCollection
         }, o => o.ExcludingMissingMembers()
         );
-        var dequeuedEvents = leaveRequest.DequeueUncommittedEvents();
-        dequeuedEvents.Length.Should().Be(fakeRemarksCollection.Count);
+        var dequeuedEvents = leaveRequest.PendingEvents;
+        dequeuedEvents.Count.Should().Be(fakeRemarksCollection.Count);
         dequeuedEvents.Last().Should().BeEquivalentTo(new
         {
             LeaveRequestId = leaveRequest.Id,

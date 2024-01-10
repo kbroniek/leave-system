@@ -1,8 +1,5 @@
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
-using GoldenEye.Exceptions;
+using GoldenEye.Backend.Core.Exceptions;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
@@ -33,7 +30,7 @@ public class HandleGetWorkingHoursByUserIdTest
         var request = GetCurrentWorkingHoursByUserId.Create(FakeUserProvider.BenId);
         var sut = GetSut();
         //When
-        var act = async () => { await sut.Handle(request, CancellationToken.None); };
+        var act = () => sut.Handle(request, CancellationToken.None);
         //Then
         await act.Should().ThrowAsync<NotFoundException>();
     }

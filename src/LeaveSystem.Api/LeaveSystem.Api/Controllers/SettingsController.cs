@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Ardalis.GuardClauses;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
@@ -23,7 +23,7 @@ namespace LeaveSystem.Api.Controllers
         {
             this.crudService = crudService;
         }
-        
+
         [HttpGet]
         [EnableQuery]
         public IQueryable<Setting>? Get()

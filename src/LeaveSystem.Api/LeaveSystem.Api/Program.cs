@@ -96,16 +96,13 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+//app.UseEndpoints(endpoints => endpoints.MapControllers());
 
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 
-var azureScpes = app.Configuration[$"{azureConfigSection}:Scopes"];
+var azureScpes = app.Configuration[$"{azureConfigSection}:Scopes"] ?? throw new InvalidOperationException($"{azureConfigSection}:Scopes configuration is missing. Check the appsettings.json.");
 
 app
     .AddLeaveRequestEndpoints(azureScpes)

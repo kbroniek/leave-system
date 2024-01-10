@@ -1,17 +1,15 @@
 using System.Linq.Expressions;
-using LamarCodeGeneration.Util;
 using LeaveSystem.EventSourcing.WorkingHours;
 using LeaveSystem.Linq;
-using LeaveSystem.Periods;
 using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.Extensions;
 
 public static class QueryableExtensions
 {
-    public static IQueryable<T> WhereMatchAny<T, TValue>(this IQueryable<T> source, Expression<Func<T,TValue>> expression, TValue[]? values) where T : class where TValue : IComparable
+    public static IQueryable<T> WhereMatchAny<T, TValue>(this IQueryable<T> source, Expression<Func<T, TValue>> expression, TValue[]? values) where T : class where TValue : IComparable
     {
-        if (values is null or {Length: < 1})
+        if (values is null or { Length: < 1 })
         {
             return source;
         }
@@ -25,10 +23,10 @@ public static class QueryableExtensions
         });
         return source.Where(predicate);
     }
-    
-    public static IQueryable<WorkingHours> WhereMatchAnyStatus(this IQueryable<WorkingHours> source, WorkingHoursStatus[]? statuses, DateTimeOffset currentDate) 
+
+    public static IQueryable<WorkingHours> WhereMatchAnyStatus(this IQueryable<WorkingHours> source, WorkingHoursStatus[]? statuses, DateTimeOffset currentDate)
     {
-        if (statuses is null or {Length: < 1})
+        if (statuses is null or { Length: < 1 })
         {
             return source;
         }

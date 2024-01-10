@@ -1,6 +1,5 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Queries;
-using LeaveSystem.Db;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Queries;
 using LeaveSystem.Linq;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
@@ -38,6 +37,7 @@ public class GetLeaveRequests : IQuery<IPagedList<LeaveRequestShortInfo>>
 
     public static GetLeaveRequests Create(int? pageNumber, int? pageSize, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, Guid[]? leaveTypeIds, LeaveRequestStatus[]? statuses, string[]? createdByEmails, string[]? createdByUserIds, FederatedUser requestedBy)
     {
+        // TODO date provider
         var now = DateTimeOffset.UtcNow;
         const int defaultPageNumber = 1;
         var pageNumberOrDefault = pageNumber ?? defaultPageNumber;
@@ -69,13 +69,9 @@ internal class HandleGetLeaveRequests :
     IQueryHandler<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>
 {
     private readonly IDocumentSession querySession;
-    private readonly LeaveSystemDbContext dbContext;
 
-    public HandleGetLeaveRequests(IDocumentSession querySession, LeaveSystemDbContext dbContext)
-    {
+    public HandleGetLeaveRequests(IDocumentSession querySession) =>
         this.querySession = querySession;
-        this.dbContext = dbContext;
-    }
 
     public async Task<IPagedList<LeaveRequestShortInfo>> Handle(GetLeaveRequests request,
         CancellationToken cancellationToken)

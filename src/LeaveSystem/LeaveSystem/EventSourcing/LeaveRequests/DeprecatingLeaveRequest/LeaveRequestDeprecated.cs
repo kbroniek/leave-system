@@ -1,5 +1,4 @@
-using GoldenEye.Events;
-using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.Shared;
 using Newtonsoft.Json;
 
@@ -20,6 +19,6 @@ public class LeaveRequestDeprecated : IEvent
         LeaveRequestId = leaveRequestId;
     }
 
-    public static LeaveRequestDeprecated Create(Guid leaveRequestId, string? remarks, FederatedUser canceledBy) => 
+    public static LeaveRequestDeprecated Create(Guid leaveRequestId, string? remarks, FederatedUser canceledBy) =>
         new(leaveRequestId, remarks, canceledBy);
 }

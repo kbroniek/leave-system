@@ -1,5 +1,5 @@
 using FluentAssertions;
-using GoldenEye.Events;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -7,11 +7,6 @@ using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestDataGenerators;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using LeaveSystem.Shared.Date;
-using Moq;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
@@ -31,13 +26,10 @@ public class RejectLeaveRequestTest
         );
         actionBeforeReject(leaveRequest, "fake remarks", User);
         //When
-        var act = () =>
-        {
-            leaveRequest.Reject("fake remarks", User);
-        };
+        var act = () => leaveRequest.Reject("fake remarks", User);
         //Then
         act.Should().Throw<InvalidOperationException>();
-        leaveRequest.DequeueUncommittedEvents().Length.Should().Be(2);
+        leaveRequest.PendingEvents.Count.Should().Be(2);
     }
 
     public static IEnumerable<object[]>
@@ -70,7 +62,7 @@ public class RejectLeaveRequestTest
             Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers()
         );
-        leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
+        leaveRequest.PendingEvents.Should().BeEquivalentTo(
             new IEvent[] { @event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, User) }
         );
     }
@@ -116,8 +108,8 @@ public class RejectLeaveRequestTest
             Remarks = fakeRemarksCollection
         }, o => o.ExcludingMissingMembers()
         );
-        var dequeuedEvents = leaveRequest.DequeueUncommittedEvents();
-        dequeuedEvents.Length.Should().Be(fakeRemarksCollection.Count);
+        var dequeuedEvents = leaveRequest.PendingEvents;
+        dequeuedEvents.Count.Should().Be(fakeRemarksCollection.Count);
         dequeuedEvents.Last().Should().BeEquivalentTo(new
         {
             LeaveRequestId = leaveRequest.Id,
