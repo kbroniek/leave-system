@@ -78,7 +78,7 @@ else
             throw new InvalidOperationException($"Cannot find the leave request id: {LeaveRequestId}");
         }
         leaveType = await LeaveTypesService.GetLeaveType(leaveRequest.LeaveTypeId);
-        var userWorkingHours = await WorkingHoursService.GetUserWorkingHours(leaveRequest.CreatedBy.Id);
+        var userWorkingHours = await WorkingHoursService.GetUserWorkingHoursAsync(leaveRequest.CreatedBy.Id);
         workingHours = userWorkingHours.DurationOrZero();
     }
 

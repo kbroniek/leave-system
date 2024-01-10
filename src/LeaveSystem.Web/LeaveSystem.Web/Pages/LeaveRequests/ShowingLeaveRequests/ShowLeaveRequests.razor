@@ -118,7 +118,7 @@ else
                 .OrderBy(u => u.Name)
                 .ToArray();
             var workingHoursQuery = GetWorkingHoursQuery.GetDefault();
-            var workingHours = await WorkingHoursService.GetWorkingHours(workingHoursQuery);
+            var workingHours = await WorkingHoursService.GetWorkingHoursAsync(workingHoursQuery);
             await Timeline.CreateAsync(
                 "timeline-visualization",
                 employees,

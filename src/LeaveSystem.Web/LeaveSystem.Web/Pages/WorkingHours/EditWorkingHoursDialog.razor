@@ -121,7 +121,7 @@ else
         bool isTimeout = false;
         do
         {
-            var response = await workingHoursService.GetWorkingHours(query);
+            var response = await workingHoursService.GetWorkingHoursAsync(query);
             if (response is null)
             {
                 throw new InvalidOperationException("Something went wrong. Can't get working hours.");

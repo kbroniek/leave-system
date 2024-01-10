@@ -19,13 +19,13 @@ public class WorkingHoursService
 
     public WorkingHoursService(UniversalHttpService universalHttpService) => this.universalHttpService = universalHttpService;
 
-    public virtual Task<PagedListResponse<WorkingHoursDto>?> GetWorkingHours(GetWorkingHoursQuery query) =>
+    public virtual Task<PagedListResponse<WorkingHoursDto>?> GetWorkingHoursAsync(GetWorkingHoursQuery query) =>
         this.universalHttpService.GetAsync<PagedListResponse<WorkingHoursDto>>(
             query.CreateQueryString("api/workingHours"),
             "Error occured during getting working hours",
             JsonSerializerOptions);
 
-    public virtual Task<WorkingHoursDto?> GetUserWorkingHours(string userId) =>
+    public virtual Task<WorkingHoursDto?> GetUserWorkingHoursAsync(string userId) =>
         this.universalHttpService.GetAsync<WorkingHoursDto>(
             $"api/workingHours/{userId}",
             "Error occured during getting working hours",
