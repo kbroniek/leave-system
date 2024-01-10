@@ -38,8 +38,8 @@ public class WorkingHoursService
             "Edited working hours successfully",
             JsonSerializerOptions);
 
-    public virtual Task<WorkingHoursDto?> Add(AddWorkingHoursDto addWorkingHoursDto) =>
-        this.universalHttpService.AddAsync<AddWorkingHoursDto, WorkingHoursDto>(
+    public virtual Task<WorkingHoursDto?> AddAsync(AddWorkingHoursDto addWorkingHoursDto) =>
+        this.universalHttpService.PostAsync<AddWorkingHoursDto, WorkingHoursDto>(
             "api/workingHours",
             addWorkingHoursDto,
             "Added working hours successfully",

@@ -25,7 +25,7 @@ public class UniversalHttpService
         this.logger = logger;
     }
 
-    public virtual async Task<TResponse?> AddAsync<TContent, TResponse>(string uri, TContent entityToAdd,
+    public virtual async Task<TResponse?> PostAsync<TContent, TResponse>(string uri, TContent entityToAdd,
         string successMessage, JsonSerializerOptions options)
     {
         var jsonString = JsonSerializer.Serialize(entityToAdd, options);

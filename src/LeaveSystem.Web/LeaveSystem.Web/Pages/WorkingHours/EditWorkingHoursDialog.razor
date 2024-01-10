@@ -221,7 +221,7 @@ else
 
     async Task OnCreateRow(WorkingHoursDto workingHoursToAdd)
     {
-        var addedWorkingHours = await WorkingHoursService.Add(new AddWorkingHoursDto(workingHoursToAdd.UserId, workingHoursToAdd.DateFrom, workingHoursToAdd.DateTo, workingHoursToAdd.Duration));
+        var addedWorkingHours = await WorkingHoursService.AddAsync(new AddWorkingHoursDto(workingHoursToAdd.UserId, workingHoursToAdd.DateFrom, workingHoursToAdd.DateTo, workingHoursToAdd.Duration));
         if (addedWorkingHours is not null)
         {
             workingHoursToAdd.Id = addedWorkingHours.Id;

@@ -213,7 +213,7 @@ else
         var userId = await UsersService.Create(userForView.User);
         userForView.User.Id = userId;
         var firstDayOfYear = DateService.UtcNow().GetFirstDayOfYear();
-        var workingHours = await WorkingHoursService.Add(new AddWorkingHoursDto(userId, firstDayOfYear, null, userForView.WorkingHours.Duration));
+        var workingHours = await WorkingHoursService.AddAsync(new AddWorkingHoursDto(userId, firstDayOfYear, null, userForView.WorkingHours.Duration));
         if (workingHours is not null)
         {
             Logger.LogError($"{nameof(OnCreateRow)}: Cannot add working hours for user {userForView.User.Id} {userForView.User.Name}");

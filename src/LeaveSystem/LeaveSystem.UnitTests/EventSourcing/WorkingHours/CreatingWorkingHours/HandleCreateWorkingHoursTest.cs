@@ -100,7 +100,7 @@ public class HandleCreateWorkingHoursTest
             fakeWorkingHours
         );
         var martenQueryable = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
-            new LeaveSystem.EventSourcing.WorkingHours.WorkingHours[]
+            new[]
             {
                 LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours(WorkingHoursCreated.Create(
                     Guid.NewGuid(),
@@ -117,7 +117,7 @@ public class HandleCreateWorkingHoursTest
         //When
         var act = () => sut.Handle(command, CancellationToken.None);
         //Then
-        var exception = await act.Should().ThrowAsync<InvalidOperationException>();
+        var exception = await act.Should().ThrowAsync<ArgumentException>();
         exception.WithMessage("You cant add working hours in this period, because other overlap it");
     }
 
