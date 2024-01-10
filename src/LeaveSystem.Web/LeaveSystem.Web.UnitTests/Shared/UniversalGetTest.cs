@@ -12,6 +12,10 @@ using Moq;
 
 namespace LeaveSystem.Web.UnitTests.Shared;
 
+using LeaveSystem.Shared.Date;
+using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.UnitTests.Providers;
+
 public class UniversalGetTest
 {
     private readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web)
@@ -26,6 +30,12 @@ public class UniversalGetTest
             Data = FakeUserLeaveLimitsDtoProvider.GetAllLimits()
         };
         await this.WhenNoException_ThenReturnData_Helper(fakeLimitResponse);
+        var now = new DateService().UtcNowWithoutTime();
+        var fakeWorkingHoursResponse = FakeWorkingHoursProvider.GetAll(now).ToDto()
+            .ToPagedListResponse();
+        await this.WhenNoException_ThenReturnData_Helper(fakeWorkingHoursResponse);
+        var fakeUserWorkingHoursResponse = FakeWorkingHoursProvider.GetCurrentForBen(now).ToDto();
+        await this.WhenNoException_ThenReturnData_Helper(fakeUserWorkingHoursResponse);
     }
 
     private async Task WhenNoException_ThenReturnData_Helper<T>(T response)
@@ -41,7 +51,13 @@ public class UniversalGetTest
     }
 
     [Fact]
-    public async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt() => await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<ODataResponse<IEnumerable<LeaveLimitDto>>>();
+    public async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt()
+    {
+
+        await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<ODataResponse<IEnumerable<LeaveLimitDto>>>();
+        await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<PagedListResponse<WorkingHoursDto>>();
+        await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<WorkingHoursDto>();
+    }
 
     private async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<T>()
     {

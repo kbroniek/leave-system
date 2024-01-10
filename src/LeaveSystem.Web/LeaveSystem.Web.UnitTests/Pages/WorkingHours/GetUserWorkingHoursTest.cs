@@ -1,14 +1,9 @@
 namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
 
 using System.Text.Json;
-using LeaveSystem.Shared;
-using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.WorkingHours;
-using LeaveSystem.UnitTests.Providers;
 using Moq;
-using TestStuff.Extensions;
 using Web.Pages.WorkingHours;
-using Web.Pages.WorkingHours.ShowingWorkingHours;
 using Web.Shared;
 
 public class GetUserWorkingHoursTest
