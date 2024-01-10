@@ -3,9 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Blazored.Toast.Services;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Logger;
-using LeaveSystem.Shared.WorkingHours;
-using Microsoft.JSInterop;
 
 namespace LeaveSystem.Web.Shared;
 
@@ -42,7 +39,7 @@ public class UniversalHttpService
         catch (Exception e)
         {
             this.toastService.ShowError("Error occured while adding");
-            this.logger.LogException(e);
+            this.logger.LogError(e, "Error occured while adding resource of type {Type}", typeof(TContent));
         }
 
         return default;
@@ -74,7 +71,7 @@ public class UniversalHttpService
         catch (Exception e)
         {
             this.toastService.ShowError("Error occured while editing");
-            this.logger.LogException(e);
+            this.logger.LogError(e, "Error occured while editing resource of type {Type}", typeof(TContent));
         }
         return false;
     }
@@ -89,7 +86,7 @@ public class UniversalHttpService
         catch (HttpRequestException ex)
         {
             this.toastService.ShowError(errorMessage);
-            this.logger.LogException(ex);
+            this.logger.LogError(ex, "Error occured while getting resource of type {Type}", typeof(TResponse));
             return default;
         }
     }
@@ -109,7 +106,7 @@ public class UniversalHttpService
         catch (Exception e)
         {
             this.toastService.ShowError("Error occured while deleting");
-            this.logger.LogException(e);
+            this.logger.LogError(e, "Error occured while deleting resource");
         }
         return false;
     }

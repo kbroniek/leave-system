@@ -56,7 +56,7 @@ public class UniversalGetTest
         var result = await sut.GetAsync<T>(fakeUrl, fakeErrorMessage, this.jsonSerializerOptions);
         result.Should().Be(default);
         toastServiceMock.Verify(m => m.ShowError(fakeErrorMessage, null), Times.Once);
-        loggerMock.VerifyLogError(null, Times.Once);
+        loggerMock.VerifyLogError($"Error occured while getting resource of type {typeof(T)}", Times.Once);
         mockedHttpValues.RequestShouldBeMatched();
     }
 }
