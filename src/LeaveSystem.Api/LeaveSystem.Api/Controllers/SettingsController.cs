@@ -1,9 +1,4 @@
-﻿using System.Text.Json;
-using Ardalis.GuardClauses;
-using LeaveSystem.Db;
-using LeaveSystem.Db.Entities;
-using LeaveSystem.Shared;
-using LeaveSystem.Shared.Settings;
+﻿using LeaveSystem.Db.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
@@ -23,7 +18,7 @@ namespace LeaveSystem.Api.Controllers
         {
             this.crudService = crudService;
         }
-        
+
         [HttpGet]
         [EnableQuery]
         public IQueryable<Setting>? Get()
