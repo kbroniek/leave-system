@@ -1,5 +1,5 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Events;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.Shared;
 using Newtonsoft.Json;
 
@@ -19,7 +19,7 @@ public class LeaveRequestOnBehalfCreated : IEvent
         CreatedByOnBehalf = createdByOnBehalf;
     }
 
-    public static LeaveRequestOnBehalfCreated Create(Guid leaveRequestId,  FederatedUser createdByOnBehalf)
+    public static LeaveRequestOnBehalfCreated Create(Guid leaveRequestId, FederatedUser createdByOnBehalf)
     {
         Guard.Against.InvalidEmail(createdByOnBehalf.Email, $"{nameof(createdByOnBehalf)}.{nameof(createdByOnBehalf.Email)}");
         return new(leaveRequestId, createdByOnBehalf);

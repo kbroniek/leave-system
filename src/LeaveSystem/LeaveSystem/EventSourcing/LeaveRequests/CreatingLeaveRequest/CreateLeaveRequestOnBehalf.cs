@@ -1,6 +1,6 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Repositories;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.Shared;
 using MediatR;
 
@@ -25,9 +25,8 @@ public class CreateLeaveRequestOnBehalf : ICommand
         );
         CreatedByOnBehalf = createdByOnBehalf;
     }
-    public static CreateLeaveRequestOnBehalf Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy, FederatedUser? createdByOnBehalf)
-    {
-        return new(
+    public static CreateLeaveRequestOnBehalf Create(Guid? leaveRequestId, DateTimeOffset? dateFrom, DateTimeOffset? dateTo, TimeSpan? duration, Guid? leaveTypeId, string? remarks, FederatedUser? createdBy, FederatedUser? createdByOnBehalf) =>
+        new(
             Guard.Against.NillAndDefault(leaveRequestId),
             Guard.Against.NillAndDefault(dateFrom),
             Guard.Against.NillAndDefault(dateTo),
@@ -36,7 +35,6 @@ public class CreateLeaveRequestOnBehalf : ICommand
             remarks,
             Guard.Against.NillAndDefault(createdBy),
             Guard.Against.NillAndDefault(createdByOnBehalf));
-    }
 }
 
 internal class HandleCreateLeaveRequestOnBehalf :
@@ -55,8 +53,8 @@ internal class HandleCreateLeaveRequestOnBehalf :
     {
         var leaveRequest = await leaveRequestFactory.Create(command.CreateLeaveRequest, cancellationToken);
         leaveRequest.OnBehalf(command.CreatedByOnBehalf);
-        await repository.Add(leaveRequest, cancellationToken);
-        await repository.SaveChanges(cancellationToken);
+        await repository.AddAsync(leaveRequest, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }

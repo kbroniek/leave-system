@@ -1,14 +1,11 @@
 using FluentAssertions;
-using GoldenEye.Events;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestDataGenerators;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
@@ -35,7 +32,7 @@ public class AcceptLeaveRequestTest
         };
         //Then
         act.Should().Throw<InvalidOperationException>();
-        leaveRequest.DequeueUncommittedEvents().Length.Should().Be(2);
+        leaveRequest.PendingEvents.Count.Should().Be(2);
     }
 
     public static IEnumerable<object[]>
@@ -62,7 +59,7 @@ public class AcceptLeaveRequestTest
             LastModifiedBy = user,
             Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers());
-        leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
+        leaveRequest.PendingEvents.Should().BeEquivalentTo(
             new IEvent[] { @event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, user) }
         );
     }
@@ -87,8 +84,8 @@ public class AcceptLeaveRequestTest
                     new LeaveRequest.RemarksModel(fakeRejectRemarks, user)
                 }
         }, o => o.ExcludingMissingMembers());
-        var dequeuedEvents = leaveRequest.DequeueUncommittedEvents();
-        dequeuedEvents.Length.Should().Be(2);
+        var dequeuedEvents = leaveRequest.PendingEvents;
+        dequeuedEvents.Count.Should().Be(2);
         dequeuedEvents.Last().Should().BeEquivalentTo(new
         {
             LeaveRequestId = leaveRequest.Id,

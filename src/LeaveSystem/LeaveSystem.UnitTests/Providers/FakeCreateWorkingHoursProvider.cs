@@ -1,4 +1,3 @@
-using System;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Shared;
 

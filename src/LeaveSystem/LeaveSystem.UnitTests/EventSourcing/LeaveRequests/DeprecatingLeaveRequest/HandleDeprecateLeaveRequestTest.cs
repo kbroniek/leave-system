@@ -1,8 +1,5 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
-using GoldenEye.Repositories;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.DeprecatingLeaveRequest;
@@ -30,7 +27,7 @@ public class HandleDeprecateLeaveRequestTest
         var act = () =>
             handleDeprecateLeaveRequest.Handle(command, CancellationToken.None);
         //Then
-        await act.Should().ThrowAsync<GoldenEye.Exceptions.NotFoundException>();
+        await act.Should().ThrowAsync<GoldenEye.Backend.Core.Exceptions.NotFoundException>();
     }
 
     [Fact]
@@ -51,7 +48,7 @@ public class HandleDeprecateLeaveRequestTest
         );
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createdEvent);
         repositoryMock
-            .Setup(s => s.FindById(command.LeaveRequestId, It.IsAny<CancellationToken>()))
+            .Setup(s => s.FindByIdAsync(command.LeaveRequestId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest);
         var handleDeprecateLeaveRequest = new HandleDeprecateLeaveRequest(repositoryMock.Object);
         //When
@@ -68,7 +65,7 @@ public class HandleDeprecateLeaveRequestTest
             },
             Version = 2
         }, o => o.ExcludingMissingMembers());
-        repositoryMock.Verify(x => x.Update(leaveRequest, null, It.IsAny<CancellationToken>()), Times.Once);
-        repositoryMock.Verify(x => x.SaveChanges(It.IsAny<CancellationToken>()), Times.Once);
+        repositoryMock.Verify(x => x.UpdateAsync(leaveRequest, It.IsAny<CancellationToken>()), Times.Once);
+        repositoryMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

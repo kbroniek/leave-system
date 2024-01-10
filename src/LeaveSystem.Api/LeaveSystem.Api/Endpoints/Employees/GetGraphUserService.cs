@@ -1,8 +1,6 @@
-﻿using LeaveSystem.Api.GraphApi;
+using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Date;
 using Microsoft.Graph;
-using GraphClientFactory = LeaveSystem.Api.GraphApi.GraphClientFactory;
 
 namespace LeaveSystem.Api.Endpoints.Employees;
 
@@ -11,7 +9,7 @@ public class GetGraphUserService
     private readonly IGraphClientFactory graphClientFactory;
     private readonly string roleAttributeName;
 
-    public GetGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver, DateService dateService)
+    public GetGraphUserService(IGraphClientFactory graphClientFactory, RoleAttributeNameResolver roleAttributeNameResolver)
     {
         this.graphClientFactory = graphClientFactory;
         roleAttributeName = roleAttributeNameResolver.RoleAttributeName;

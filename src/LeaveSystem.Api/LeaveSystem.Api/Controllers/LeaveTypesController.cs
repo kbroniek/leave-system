@@ -22,7 +22,7 @@ namespace LeaveSystem.Api.Controllers
         {
             this.crudService = crudService;
         }
-        
+
         [HttpGet]
         [EnableQuery]
         public IQueryable<LeaveType>? Get()

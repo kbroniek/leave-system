@@ -1,5 +1,5 @@
-﻿using GoldenEye.Commands;
-using GoldenEye.Queries;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.DDD.Queries;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequestDetails;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
@@ -9,7 +9,6 @@ using LeaveSystem.Web.Pages.LeaveRequests.CancellingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.RejectingLeaveRequest;
 using Marten.Pagination;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
 namespace LeaveSystem.Api.Endpoints.LeaveRequests;
@@ -29,7 +28,7 @@ public static class LeaveRequestsEndpoints
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
-            var pagedList = await queryBus.Send<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(
+            var pagedList = await queryBus.SendAsync<GetLeaveRequests, IPagedList<LeaveRequestShortInfo>>(GetLeaveRequests.Create(
                 query.PageNumber,
                 query.PageSize,
                 query.DateFrom,
@@ -49,7 +48,7 @@ public static class LeaveRequestsEndpoints
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
             //TODO: Protect, only authorized users have access to all leave requests.
-            return queryBus.Send<GetLeaveRequestDetails, LeaveRequest>(GetLeaveRequestDetails.Create(id), cancellationToken);
+            return queryBus.SendAsync<GetLeaveRequestDetails, LeaveRequest>(GetLeaveRequestDetails.Create(id), cancellationToken);
         })
         .WithName(GetLeaveRequestDetailsPolicyName)
         .RequireAuthorization(GetLeaveRequestDetailsPolicyName);
@@ -68,7 +67,7 @@ public static class LeaveRequestsEndpoints
                 createLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            await commandBus.Send(command, cancellationToken);
+            await commandBus.SendAsync(command, cancellationToken);
             return Results.Created("api/LeaveRequests", leaveRequestId);
         })
         .WithName(CreateLeaveRequestPolicyName)
@@ -90,7 +89,7 @@ public static class LeaveRequestsEndpoints
                 createLeaveRequest.CreatedByOnBehalf,
                 httpContext.User.CreateModel()
             );
-            await commandBus.Send(command, cancellationToken);
+            await commandBus.SendAsync(command, cancellationToken);
             return Results.Created("api/LeaveRequests", leaveRequestId);
         })
         .WithName(CreateLeaveRequestOnBehalfPolicyName)
@@ -105,7 +104,7 @@ public static class LeaveRequestsEndpoints
                 acceptLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            await commandBus.Send(command, cancellationToken);
+            await commandBus.SendAsync(command, cancellationToken);
             return Results.NoContent();
         })
         .WithName(AcceptLeaveRequestPolicyName)
@@ -120,7 +119,7 @@ public static class LeaveRequestsEndpoints
                 rejectLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            await commandBus.Send(command, cancellationToken);
+            await commandBus.SendAsync(command, cancellationToken);
             return Results.NoContent();
         })
         .WithName(RejectLeaveRequestPolicyName)
@@ -135,7 +134,7 @@ public static class LeaveRequestsEndpoints
                 cancelLeaveRequest.Remarks,
                 httpContext.User.CreateModel()
             );
-            await commandBus.Send(command, cancellationToken);
+            await commandBus.SendAsync(command, cancellationToken);
             return Results.NoContent();
         })
         .WithName(CancelLeaveRequestPolicyName)
