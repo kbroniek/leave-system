@@ -15,7 +15,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using MockQueryable.Moq;
 using Moq;
-using NSubstitute;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
 

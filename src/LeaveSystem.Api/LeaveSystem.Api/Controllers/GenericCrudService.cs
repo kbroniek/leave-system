@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeaveSystem.Api.Controllers;
 
+using GoldenEye.Shared.Core.Objects.General;
+
 public class GenericCrudService<TEntity, TId>
     where TId : IComparable<TId>
     where TEntity : class, IHaveId<TId>

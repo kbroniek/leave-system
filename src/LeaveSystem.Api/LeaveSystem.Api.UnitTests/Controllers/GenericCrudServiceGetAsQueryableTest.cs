@@ -17,7 +17,7 @@ public class GenericCrudServiceGetAsQueryableTest
     private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId> =>
-        new(dbContext, deltaValidator, entityValidator);
+        new (dbContext, deltaValidator, entityValidator);
 
     [Fact]
     public async Task WhenGettingByKey_ReturnEntityWithKey()

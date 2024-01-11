@@ -7,7 +7,6 @@ using LeaveSystem.UnitTests.Providers;
 using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
-using NSubstitute.ExceptionExtensions;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
 

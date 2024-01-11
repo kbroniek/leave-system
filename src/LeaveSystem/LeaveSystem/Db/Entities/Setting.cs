@@ -1,8 +1,7 @@
 using System.Text.Json;
+using FluentValidation;
 using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Shared;
-using System.Text.Json;
-using FluentValidation;
 
 namespace LeaveSystem.Db.Entities;
 public class Setting : IHaveId<string>, IDisposable
