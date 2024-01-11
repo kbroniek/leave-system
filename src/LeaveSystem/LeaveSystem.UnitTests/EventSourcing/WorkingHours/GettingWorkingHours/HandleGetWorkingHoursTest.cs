@@ -1,8 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Baseline.ImTools;
 using FluentAssertions;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.Shared;

@@ -1,6 +1,5 @@
-﻿using GoldenEye.Registration;
+using GoldenEye.Backend.Core.DDD.Registration;
 using LeaveSystem.Api.GraphApi;
-using LeaveSystem.Shared.Date;
 using Microsoft.OpenApi.Models;
 
 namespace LeaveSystem.Api;
@@ -13,10 +12,9 @@ using Shared.LeaveRequests;
 
 public static class Config
 {
-    private const string azureReadUsersSection = "ManageAzureUsers";
-    public static IServiceCollection AddSwagger(this IServiceCollection services)
-    {
-        return services.AddSwaggerGen(c =>
+    private const string AzureReadUsersSection = "ManageAzureUsers";
+    public static IServiceCollection AddSwagger(this IServiceCollection services) =>
+        services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Leave System API", Version = "v1" });
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -31,27 +29,26 @@ public static class Config
             });
 
             c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-      {
-        {
-          new OpenApiSecurityScheme
-          {
-            Reference = new OpenApiReference
-              {
-                Type = ReferenceType.SecurityScheme,
-                Id = "Bearer"
-              },
-              Scheme = "oauth2",
-              Name = "Bearer",
-              In = ParameterLocation.Header,
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        },
+                        Scheme = "oauth2",
+                        Name = "Bearer",
+                        In = ParameterLocation.Header,
 
-            },
-            new List<string>()
-          }
+                    },
+                    new List<string>()
+                }
+            });
         });
-        });
-    }
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration) =>
-        services.AddGraphFactory(configuration.GetSection(azureReadUsersSection))
+        services.AddGraphFactory(configuration.GetSection(AzureReadUsersSection))
             .AddDDD()
             .AddLeaveSystemModule(configuration);
 

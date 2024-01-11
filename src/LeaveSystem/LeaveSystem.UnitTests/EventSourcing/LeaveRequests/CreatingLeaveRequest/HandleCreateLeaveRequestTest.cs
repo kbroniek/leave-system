@@ -1,7 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using GoldenEye.Repositories;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
@@ -24,7 +21,7 @@ public class HandleCreateLeaveRequestTest
         "fake remarks",
         FederatedUser.Create("fakeId", "fake@emial.com", "Philip")
     );
-    
+
     [Fact]
     public async Task WhenCreateLeaveRequestHandled_ThenCreate()
     {
@@ -47,12 +44,12 @@ public class HandleCreateLeaveRequestTest
         //When
         await handleAcceptLeaveRequest.Handle(command, CancellationToken.None);
         //Then
-        factoryMock.Verify(x => 
+        factoryMock.Verify(x =>
             x.Create(command, It.IsAny<CancellationToken>()), Times.Once);
-        repositoryMock.Verify(x => 
-            x.Add(leaveRequest, It.IsAny<CancellationToken>()));
-        repositoryMock.Verify(x => 
-            x.SaveChanges(It.IsAny<CancellationToken>()), Times.Once);
-        
+        repositoryMock.Verify(x =>
+            x.AddAsync(leaveRequest, It.IsAny<CancellationToken>()));
+        repositoryMock.Verify(x =>
+            x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+
     }
 }

@@ -1,6 +1,6 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Repositories;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Date;
 using MediatR;
@@ -42,14 +42,14 @@ internal class HandleCancelLeaveRequest :
 
     public async Task<Unit> Handle(CancelLeaveRequest command, CancellationToken cancellationToken)
     {
-        var leaveRequest = await repository.FindById(command.LeaveRequestId, cancellationToken)
-                             ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
+        var leaveRequest = await repository.FindByIdAsync(command.LeaveRequestId, cancellationToken)
+                             ?? throw GoldenEye.Backend.Core.Exceptions.NotFoundException.For<LeaveRequest>(command.LeaveRequestId);
 
         leaveRequest.Cancel(command.Remarks, command.CanceledBy, dateService.UtcNowWithoutTime());
 
-        await repository.Update(leaveRequest, cancellationToken);
+        await repository.UpdateAsync(leaveRequest, cancellationToken);
 
-        await repository.SaveChanges(cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
     }

@@ -1,8 +1,6 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using FluentAssertions.Equivalency;
 using FluentValidation;
-using GoldenEye.Objects.General;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.UnitTests.Providers;
 using LeaveSystem.Db;
@@ -16,11 +14,11 @@ namespace LeaveSystem.Api.UnitTests.Controllers;
 
 public class GenericCrudServiceGetAsQueryableTest
 {
-    private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator) 
+    private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId> =>
-        new (dbContext, deltaValidator, entityValidator);
-    
+        new(dbContext, deltaValidator, entityValidator);
+
     [Fact]
     public async Task WhenGettingByKey_ReturnEntityWithKey()
     {
@@ -32,7 +30,7 @@ public class GenericCrudServiceGetAsQueryableTest
         await WhenGettingByKey_ReturnEntityWithKey_Helper<Setting, string>(
             FakeSettingsProvider.GetSettings(),
             FakeSettingsProvider.AcceptedSettingId,
-            FakeSettingsProvider.GetAcceptedSetting(), 
+            FakeSettingsProvider.GetAcceptedSetting(),
             JsonDocumentCompareOptionsProvider.Get<Setting>("Value")
             );
         await WhenGettingByKey_ReturnEntityWithKey_Helper<LeaveType, Guid>(
@@ -40,12 +38,12 @@ public class GenericCrudServiceGetAsQueryableTest
             FakeLeaveTypeProvider.FakeOnDemandLeaveId,
             FakeLeaveTypeProvider.GetFakeOnDemandLeave());
     }
-    
+
     private async Task WhenGettingByKey_ReturnEntityWithKey_Helper<TEntity, TId>(
-        IEnumerable<TEntity> entities, 
-        TId key, 
+        IEnumerable<TEntity> entities,
+        TId key,
         TEntity expectedEntity,
-        Func<EquivalencyAssertionOptions<TEntity>,EquivalencyAssertionOptions<TEntity>>? config = null)
+        Func<EquivalencyAssertionOptions<TEntity>, EquivalencyAssertionOptions<TEntity>>? config = null)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId>
     {

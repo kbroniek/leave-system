@@ -1,5 +1,5 @@
-﻿using FluentValidation;
-using GoldenEye.Objects.General;
+using FluentValidation;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Db;
 using Microsoft.AspNetCore.OData.Deltas;
@@ -16,17 +16,17 @@ public class GenericCrudService<TEntity, TId>
     private readonly IValidator<TEntity> entityValidator;
     private const string NotFoundMessage = "Entity Not Found";
     public GenericCrudService(
-        LeaveSystemDbContext dbContext, 
-        DeltaValidator<TEntity> deltaValidator, 
+        LeaveSystemDbContext dbContext,
+        DeltaValidator<TEntity> deltaValidator,
         IValidator<TEntity> entityValidator)
     {
         this.dbContext = dbContext;
         this.deltaValidator = deltaValidator;
         this.entityValidator = entityValidator;
     }
-        
+
     public virtual IQueryable<TEntity>? Get() => dbContext.Set<TEntity>();
-        
+
     public virtual IQueryable<TEntity> GetSingleAsQueryable(TId key)
     {
         return GetSet().Where(p => p.Id.CompareTo(key) == 0);
@@ -86,7 +86,7 @@ public class GenericCrudService<TEntity, TId>
 
     private async Task<TEntity?> FindAsync(TId key, CancellationToken cancellationToken = default)
         => await GetSet().FindAsync(new object[] { key }, cancellationToken);
-        
+
     private Task<bool> ProductExists(TId key, CancellationToken cancellationToken)
     {
         return GetSet().AnyAsync(l => l.Id.CompareTo(key) == 0, cancellationToken);
@@ -117,7 +117,7 @@ public class DeltaValidator<TEntity> where TEntity : class
         var deltaWithoutProtectedProperties = new Delta<TEntity>();
         foreach (var propertyName in delta.GetChangedPropertyNames())
         {
-            if (!protectedPropertyNames.Contains(propertyName) 
+            if (!protectedPropertyNames.Contains(propertyName)
                 && delta.TryGetPropertyValue(propertyName, out var propertyValue))
             {
                 deltaWithoutProtectedProperties.TrySetPropertyValue(propertyName, propertyValue);

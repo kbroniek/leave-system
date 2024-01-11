@@ -1,6 +1,5 @@
 using FluentValidation;
-using FluentValidation.Internal;
-using GoldenEye.Objects.General;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
@@ -14,10 +13,10 @@ namespace LeaveSystem.Api.UnitTests.Controllers;
 
 public class GenericCrudServiceAddAsyncTest
 {
-    private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator) 
+    private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId> =>
-        new (dbContext, deltaValidator, entityValidator);
+        new(dbContext, deltaValidator, entityValidator);
 
     [Fact]
     public async Task WhenEntityValidatorThrowsException_ThenNotAddEntity()
@@ -36,7 +35,7 @@ public class GenericCrudServiceAddAsyncTest
         dbContextMock.Setup(m => m.Set<TEntity>()).Returns(setMock.Object);
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
-        entityValidatorMock.Setup(m => 
+        entityValidatorMock.Setup(m =>
             m.ValidateAsync(It.IsAny<IValidationContext>(), new CancellationToken()))
             .ThrowsAsync(new Exception());
         var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);

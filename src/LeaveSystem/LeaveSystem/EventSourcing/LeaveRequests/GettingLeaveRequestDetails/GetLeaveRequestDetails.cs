@@ -1,6 +1,6 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Queries;
-using GoldenEye.Repositories;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Queries;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.Shared;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequestDetails;
@@ -9,15 +9,11 @@ public class GetLeaveRequestDetails : IQuery<LeaveRequest>
 {
     public Guid LeaveRequestId { get; }
 
-    private GetLeaveRequestDetails(Guid leaveRequestId)
-    {
+    private GetLeaveRequestDetails(Guid leaveRequestId) =>
         LeaveRequestId = leaveRequestId;
-    }
 
-    public static GetLeaveRequestDetails Create(Guid? leaveRequestId)
-    {
-        return new(Guard.Against.Nill(leaveRequestId));
-    }
+    public static GetLeaveRequestDetails Create(Guid? leaveRequestId) =>
+        new(Guard.Against.Nill(leaveRequestId));
 }
 
 
@@ -26,16 +22,14 @@ internal class HandleGetLeaveRequestDetails :
 {
     private readonly IRepository<LeaveRequest> repository;
 
-    public HandleGetLeaveRequestDetails(IRepository<LeaveRequest> repository)
-    {
+    public HandleGetLeaveRequestDetails(IRepository<LeaveRequest> repository) =>
         this.repository = repository;
-    }
 
     public async Task<LeaveRequest> Handle(GetLeaveRequestDetails request,
         CancellationToken cancellationToken)
     {
-        LeaveRequest leaveRequest = await repository.FindById(request.LeaveRequestId, cancellationToken);
+        var leaveRequest = await repository.FindByIdAsync(request.LeaveRequestId, cancellationToken);
         return leaveRequest
-            ?? throw GoldenEye.Exceptions.NotFoundException.For<LeaveRequest>(request.LeaveRequestId);
+            ?? throw GoldenEye.Backend.Core.Exceptions.NotFoundException.For<LeaveRequest>(request.LeaveRequestId);
     }
 }

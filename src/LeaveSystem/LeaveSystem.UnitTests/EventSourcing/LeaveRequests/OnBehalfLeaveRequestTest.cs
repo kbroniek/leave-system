@@ -1,8 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using FluentAssertions;
-using GoldenEye.Events;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
@@ -15,10 +12,10 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
 public class OnBehalfLeaveRequestTest
 {
     private static readonly FederatedUser User = FakeUserProvider.GetUserWithNameFakeoslav();
-    
+
     [Theory]
     [MemberData(nameof(Get_WhenLeaveRequestStatusOtherThanPending_ThenThrowInvalidOperationException_TestData))]
-    public void WhenLeaveRequestStatusOtherThanPending_ThenThrowInvalidOperationException(Action<LeaveRequest,string, FederatedUser> actionBeforeAccept)
+    public void WhenLeaveRequestStatusOtherThanPending_ThenThrowInvalidOperationException(Action<LeaveRequest, string, FederatedUser> actionBeforeAccept)
     {
         //Given
         var createEvent = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
@@ -27,13 +24,10 @@ public class OnBehalfLeaveRequestTest
         );
         actionBeforeAccept(leaveRequest, "fake remarks", User);
         //When
-        var act = () =>
-        {
-            leaveRequest.OnBehalf(User);
-        };
+        var act = () => leaveRequest.OnBehalf(User);
         //Then
         act.Should().Throw<InvalidOperationException>();
-        leaveRequest.DequeueUncommittedEvents().Length.Should().Be(2);
+        leaveRequest.PendingEvents.Count.Should().Be(2);
     }
 
     [Fact]
@@ -48,13 +42,13 @@ public class OnBehalfLeaveRequestTest
         leaveRequest.OnBehalf(User);
         //Then
         leaveRequest.Should().BeEquivalentTo(new
-            {
-                CreatedByOnBehalf = User,
-                LastModifiedBy = User
-            }, o => o.ExcludingMissingMembers()
+        {
+            CreatedByOnBehalf = User,
+            LastModifiedBy = User
+        }, o => o.ExcludingMissingMembers()
         );
-        leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
-            new IEvent[] { createEvent, LeaveRequestOnBehalfCreated.Create(leaveRequest.Id, User)});
+        leaveRequest.PendingEvents.Should().BeEquivalentTo(
+            new IEvent[] { createEvent, LeaveRequestOnBehalfCreated.Create(leaveRequest.Id, User) });
     }
 
     public static IEnumerable<object[]>

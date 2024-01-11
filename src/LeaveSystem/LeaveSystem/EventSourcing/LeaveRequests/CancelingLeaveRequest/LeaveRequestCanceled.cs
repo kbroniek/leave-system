@@ -1,5 +1,4 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Events;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.Shared;
 using Newtonsoft.Json;
 

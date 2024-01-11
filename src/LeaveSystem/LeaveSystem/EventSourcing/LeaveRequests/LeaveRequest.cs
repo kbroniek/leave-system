@@ -1,4 +1,6 @@
-﻿using GoldenEye.Aggregates;
+using System.Runtime.Serialization;
+using GoldenEye.Backend.Core.DDD.Events;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -6,12 +8,12 @@ using LeaveSystem.EventSourcing.LeaveRequests.DeprecatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using LeaveSystem.Periods;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
+using Marten.Events.Aggregation;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
 
-public class LeaveRequest : Aggregate, INotNullablePeriod
+public class LeaveRequest : IEventSource, INotNullablePeriod
 {
     public DateTimeOffset DateFrom { get; private set; }
 
@@ -33,12 +35,22 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
 
     public TimeSpan WorkingHours { get; private set; }
 
+    public int Version { get; private set; }
+
+    [IgnoreDataMember]
+    //TODO: make it private
+    public Queue<IEvent> PendingEvents { get; } = new Queue<IEvent>();
+
+    public Guid Id { get; protected set; }
+
+    object IHaveId.Id => Id;
+
     //For serialization
     public LeaveRequest() { }
 
     private LeaveRequest(LeaveRequestCreated @event)
     {
-        Enqueue(@event);
+        Append(@event);
         Apply(@event);
     }
 
@@ -46,26 +58,26 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
 
     internal void Accept(string? remarks, FederatedUser acceptedBy)
     {
-        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Rejected)
+        if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Rejected)
         {
             throw new InvalidOperationException($"Accepting leave request in '{Status}' status is not allowed.");
         }
 
         var @event = LeaveRequestAccepted.Create(Id, remarks, acceptedBy);
 
-        Enqueue(@event);
+        Append(@event);
         Apply(@event);
     }
     internal void Reject(string? remarks, FederatedUser rejectedBy)
     {
-        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Accepted)
+        if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
         {
             throw new InvalidOperationException($"Rejecting leave request in '{Status}' status is not allowed.");
         }
 
         var @event = LeaveRequestRejected.Create(Id, remarks, rejectedBy);
 
-        Enqueue(@event);
+        Append(@event);
         Apply(@event);
     }
 
@@ -75,7 +87,7 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
         {
             throw new InvalidOperationException("Canceling a non-your leave request is not allowed.");
         }
-        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Accepted)
+        if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
         {
             throw new InvalidOperationException($"Canceling leave requests in '{Status}' status is not allowed.");
         }
@@ -86,7 +98,7 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
 
         var @event = LeaveRequestCanceled.Create(Id, remarks, canceledBy);
 
-        Enqueue(@event);
+        Append(@event);
         Apply(@event);
     }
 
@@ -98,18 +110,18 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
         }
         var @event = LeaveRequestOnBehalfCreated.Create(Id, createdByOnBehalf);
 
-        Enqueue(@event);
+        Append(@event);
         Apply(@event);
     }
 
     internal void Deprecate(string? remarks, FederatedUser deprecatedBy)
     {
-        if (Status != LeaveRequestStatus.Pending && Status != LeaveRequestStatus.Accepted)
+        if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
         {
             throw new InvalidOperationException($"Deprecating leave request in '{Status}' status is not allowed.");
         }
         var @event = LeaveRequestDeprecated.Create(Id, remarks, deprecatedBy);
-        Enqueue(@event);
+        Append(@event);
         Apply(@event);
     }
 
@@ -176,4 +188,21 @@ public class LeaveRequest : Aggregate, INotNullablePeriod
     }
 
     public record RemarksModel(string Remarks, FederatedUser CreatedBy);
+
+    private void Append(IEvent @event) => (this as IEventSource).PendingEvents.Enqueue(@event);
+    public class LeaveRequestProjection : SingleStreamProjection<LeaveRequest>
+    {
+        public LeaveRequestProjection()
+        {
+            ProjectEvent<LeaveRequestCreated>((item, @event) => item.Apply(@event));
+
+            ProjectEvent<LeaveRequestAccepted>((item, @event) => item.Apply(@event));
+
+            ProjectEvent<LeaveRequestRejected>((item, @event) => item.Apply(@event));
+
+            ProjectEvent<LeaveRequestCanceled>((item, @event) => item.Apply(@event));
+
+            ProjectEvent<LeaveRequestDeprecated>((item, @event) => item.Apply(@event));
+        }
+    }
 }

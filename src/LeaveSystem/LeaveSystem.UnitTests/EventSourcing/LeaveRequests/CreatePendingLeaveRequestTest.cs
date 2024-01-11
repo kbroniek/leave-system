@@ -32,7 +32,7 @@ public class CreatePendingLeaveRequestTest
             LastModifiedBy = @event.CreatedBy,
             Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) }
         }, o => o.ExcludingMissingMembers());
-        leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
+        leaveRequest.PendingEvents.Should().BeEquivalentTo(
             new[] { @event }
         );
     }
@@ -71,7 +71,7 @@ public class CreatePendingLeaveRequestTest
             Remarks = Enumerable.Empty<LeaveRequest.RemarksModel>()
         }, o => o.ExcludingMissingMembers()
         );
-        leaveRequest.DequeueUncommittedEvents().Should().BeEquivalentTo(
+        leaveRequest.PendingEvents.Should().BeEquivalentTo(
             new[] { @event }
         );
     }

@@ -1,5 +1,4 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Events;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.Shared;
 using Newtonsoft.Json;
 
@@ -23,8 +22,6 @@ public class LeaveRequestAccepted : IEvent
         LeaveRequestId = leaveRequestId;
     }
 
-    public static LeaveRequestAccepted Create(Guid leaveRequestId, string? remarks, FederatedUser acceptedBy)
-    {
-        return new(leaveRequestId, remarks, acceptedBy);
-    }
+    public static LeaveRequestAccepted Create(Guid leaveRequestId, string? remarks, FederatedUser acceptedBy) =>
+        new(leaveRequestId, remarks, acceptedBy);
 }

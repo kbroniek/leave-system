@@ -1,10 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
-using GoldenEye.Repositories;
+using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
-using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequestDetails;
 using LeaveSystem.UnitTests.Providers;
 using Moq;
@@ -18,31 +14,33 @@ public class HandleGetLeaveRequestDetailsTest
     public async Task WhenLeaveRequestNotExists_ThenThrowNotFoundException()
     {
         //Given
-        var repository = new InMemoryRepository<LeaveRequest>();
-        var request = GetLeaveRequestDetails.Create(Guid.NewGuid());
-        var sut = new HandleGetLeaveRequestDetails(repository);
+        var repositoryMock = new Mock<IRepository<LeaveRequest>>();
+        var request = GetLeaveRequestDetails.Create(Guid.Parse("c74e0e31-a3fb-4227-93e4-9cfea01e7eca"));
+        var sut = new HandleGetLeaveRequestDetails(repositoryMock.Object);
         //When
-        var act = async () =>
-        {
-            await sut.Handle(request, It.IsAny<CancellationToken>());
-        };
+        var act = async () => await sut.Handle(request, CancellationToken.None);
         //Then
-        await act.Should().ThrowAsync<GoldenEye.Exceptions.NotFoundException>();
+        await act.Should()
+            .ThrowAsync<GoldenEye.Backend.Core.Exceptions.NotFoundException>()
+            .WithMessage("LeaveRequest with id: c74e0e31-a3fb-4227-93e4-9cfea01e7eca was not found.");
+
     }
 
     [Fact]
     public async Task WhenLeaveRequestExists_ThenReturnIt()
     {
         //Given
-        var repository = new InMemoryRepository<LeaveRequest>();
+        var repositoryMock = new Mock<IRepository<LeaveRequest>>();
         var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(
             FakeLeaveRequestCreatedProvider.GetSickLeaveRequest()
         );
-        await repository.Add(leaveRequest, It.IsAny<CancellationToken>());
+        repositoryMock
+            .Setup(x => x.FindByIdAsync(leaveRequest.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(leaveRequest);
         var request = GetLeaveRequestDetails.Create(leaveRequest.Id);
-        var sut = new HandleGetLeaveRequestDetails(repository);
+        var sut = new HandleGetLeaveRequestDetails(repositoryMock.Object);
         //When
-        var result = await sut.Handle(request, It.IsAny<CancellationToken>());
+        var result = await sut.Handle(request, CancellationToken.None);
         //Then
         result.Should().BeEquivalentTo(leaveRequest);
     }

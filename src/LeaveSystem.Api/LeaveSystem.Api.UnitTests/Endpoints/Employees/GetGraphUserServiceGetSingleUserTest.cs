@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Api.UnitTests.Providers;
@@ -37,7 +37,7 @@ public class GetGraphUserServiceGetSingleUserTest
         graphClientMock.Users[fakeId].Returns(userRequestBuilderMock);
         graphClientFactoryMock.Create().Returns(graphClientMock);
         var resolver = new RoleAttributeNameResolver(TestData.FakeRoleAttributeName);
-        var sut = new GetGraphUserService(graphClientFactoryMock, resolver, FakeDateServiceProvider.GetDateService());
+        var sut = new GetGraphUserService(graphClientFactoryMock, resolver);
         //When
         var result = await sut.Get(fakeId, CancellationToken.None);
         //Then

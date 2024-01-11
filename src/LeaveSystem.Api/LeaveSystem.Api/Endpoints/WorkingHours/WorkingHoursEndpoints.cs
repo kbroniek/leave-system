@@ -1,6 +1,6 @@
-﻿using Ardalis.GuardClauses;
-using GoldenEye.Commands;
-using GoldenEye.Queries;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Commands;
+using GoldenEye.Backend.Core.DDD.Queries;
 using LeaveSystem.Api.Extensions;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
@@ -9,7 +9,7 @@ using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using Marten.Pagination;
 using Microsoft.Identity.Web.Resource;
-using NotFoundException = GoldenEye.Exceptions.NotFoundException;
+using NotFoundException = GoldenEye.Backend.Core.Exceptions.NotFoundException;
 
 namespace LeaveSystem.Api.Endpoints.WorkingHours;
 
@@ -29,7 +29,7 @@ public static class WorkingHoursEndpoints
                     httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
                     var workingHours =
-                        await queryBus.Send<GetWorkingHours, IPagedList<EventSourcing.WorkingHours.WorkingHours>>(
+                        await queryBus.SendAsync<GetWorkingHours, IPagedList<EventSourcing.WorkingHours.WorkingHours>>(
                             GetWorkingHours.Create(
                                 query.PageSize,
                                 query.PageNumber,
@@ -53,7 +53,7 @@ public static class WorkingHoursEndpoints
                 try
                 {
                     var workingHours =
-                        await queryBus.Send<GetCurrentWorkingHoursByUserId, EventSourcing.WorkingHours.WorkingHours>(
+                        await queryBus.SendAsync<GetCurrentWorkingHoursByUserId, EventSourcing.WorkingHours.WorkingHours>(
                             GetCurrentWorkingHoursByUserId.Create(userId), cancellationToken
                         );
                     return Results.Json(workingHours.ToDto());
@@ -81,7 +81,7 @@ public static class WorkingHoursEndpoints
                         addWorkingHoursDto.Duration,
                         user
                     );
-                    await commandBus.Send(command, cancellationToken);
+                    await commandBus.SendAsync(command, cancellationToken);
                     return Results.Created("api/workingHours", new WorkingHoursDto(
                         command.UserId,
                         command.DateFrom,
@@ -106,7 +106,7 @@ public static class WorkingHoursEndpoints
                         addWorkingHoursDto.Duration,
                         user
                     );
-                    await commandBus.Send(command, cancellationToken);
+                    await commandBus.SendAsync(command, cancellationToken);
                     return Results.NoContent();
                 })
             .WithName(ModifyUserWorkingHoursPolicyName)

@@ -1,5 +1,4 @@
-﻿using GoldenEye.Marten.Registration;
-using GoldenEye.Registration;
+using GoldenEye.Backend.Core.Marten.Registration.Cusom;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CancelingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -10,17 +9,21 @@ using LeaveSystem.EventSourcing.LeaveRequests.RejectingLeaveRequest;
 using Marten;
 using Marten.Pagination;
 using Microsoft.Extensions.DependencyInjection;
+using static LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests.LeaveRequestShortInfo;
+using static LeaveSystem.EventSourcing.LeaveRequests.LeaveRequest;
 
 namespace LeaveSystem.EventSourcing.LeaveRequests;
 internal static class LeaveRequestsConfig
 {
-    internal static IServiceCollection AddLeaveRequests(this IServiceCollection services) =>
-        services.AddMartenEventSourcedRepository<LeaveRequest>()
-            .AddLeaveRequestCommandHandlers()
+    internal static IServiceCollection AddLeaveRequests(this IServiceCollection services)
+    {
+        services.AddMartenEventSourcedRepository<LeaveRequest>();
+        return services.AddLeaveRequestCommandHandlers()
             .AddLeaveRequestQueryHandlers()
             .AddLeaveRequestValidators()
             .AddLeaveRequestServices()
             .AddLeaveRequestFactories();
+    }
 
     private static IServiceCollection AddLeaveRequestCommandHandlers(this IServiceCollection services) =>
         services
@@ -55,11 +58,9 @@ internal static class LeaveRequestsConfig
 
     internal static void ConfigureLeaveRequests(this StoreOptions options)
     {
-        // Snapshots
-        options.Projections.SelfAggregate<LeaveRequest>();
-
         // projections
-        options.Projections.Add<LeaveRequestShortInfoProjection>();
+        options.Projections.Add<LeaveRequestProjection>(Marten.Events.Projections.ProjectionLifecycle.Inline);
+        options.Projections.Add<LeaveRequestShortInfoProjection>(Marten.Events.Projections.ProjectionLifecycle.Inline);
     }
 }
 
