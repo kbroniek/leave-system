@@ -39,12 +39,12 @@ public class HrSummaryService
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000);
         var getLeaveRequestsTask = getLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = leaveTypesService.GetLeaveTypes();
-        var getLimitsTask = userLeaveLimitsService.GetLimits(firstDay, lastDay);
+        var getLimitsTask = userLeaveLimitsService.GetAsync(firstDay, lastDay);
         var getEmployeesTask = employeeService.Get();
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getEmployeesTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
         var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
-        var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.LeaveLimitDto>();
+        var limits = getLimitsTask.Result ?? Enumerable.Empty<LeaveLimitDto>();
         var employees = getEmployeesTask.Result
             .Union(leaveRequests.Select(lr =>
                 GetEmployeeDto.Create(lr.CreatedBy)
@@ -66,7 +66,7 @@ public class HrSummaryService
                         lt,
                         leaveTypes,
                         leaveRequests.Where(lr => lr.CreatedBy.Id == e.Id),
-                        limits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
+                        limits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitDto.Create(l)),
                         workingHours.DurationOrZero(e.Id))))),
         leaveTypes);
     }

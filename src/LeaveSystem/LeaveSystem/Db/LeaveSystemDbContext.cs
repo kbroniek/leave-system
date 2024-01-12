@@ -22,6 +22,7 @@ public class LeaveSystemDbContext : DbContext
 
     private static void OnSettingsCreating(ModelBuilder modelBuilder)
     {
+        var settingValueConverter = new TypeToJsonConverter<JsonDocument>();
         modelBuilder.Entity<Setting>()
              .HasKey(e => e.Id);
         modelBuilder.Entity<Setting>()
@@ -94,5 +95,12 @@ public class LeaveSystemDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<LeaveType>()
             .HasIndex(p => new { p.Name }).IsUnique();
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder
+            .Properties<DateTimeOffset>()
+            .HaveConversion<DateTimeOffsetConverter>();
     }
 }

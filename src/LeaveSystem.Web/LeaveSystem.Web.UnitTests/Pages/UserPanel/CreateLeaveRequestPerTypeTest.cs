@@ -16,7 +16,7 @@ public class CreateLeaveRequestPerTypeTest
         LeaveTypesService.LeaveTypeDto leaveType,
         IEnumerable<LeaveTypesService.LeaveTypeDto> allLeaveTypes,
         IEnumerable<LeaveRequestShortInfo> leaveRequests,
-        IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits,
+        IEnumerable<UserLeaveLimitDto> limits,
         TimeSpan workingHours,
         TimeSpan leaveRequestsUsed,
         TimeSpan limitsSum,
@@ -47,7 +47,7 @@ public class CreateLeaveRequestPerTypeTest
     {
         var now = DateTimeOffset.Now;
         var firstFakeLeaveRequests = FakeLeaveRequestShortInfoProvider.GetAll(now);
-        var firstFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAll(now.Year);
+        var firstFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAllUserLimits(now.Year);
         var firstFakeWorkingHours = TimeSpan.FromHours(8);
         yield return new object[]
         {
@@ -64,7 +64,7 @@ public class CreateLeaveRequestPerTypeTest
             firstFakeLeaveRequests.Select(lr => LeaveRequestPerType.ForView.CreateForView(lr, firstFakeLimits, firstFakeWorkingHours))
         };
         var secondFakeLeaveRequests = FakeLeaveRequestShortInfoProvider.GetAllV2(now);
-        var secondFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAll(now.Year);
+        var secondFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAllUserLimits(now.Year);
         var secondFakeWorkingHours = TimeSpan.FromHours(4);
         yield return new object[]
         {
@@ -91,7 +91,7 @@ public class CreateLeaveRequestPerTypeTest
             new LeaveTypesService.LeaveTypeProperties("fc", LeaveTypeCatalog.Holiday, null));
         var allLeaveTypes = FakeLeaveTypeDtoProvider.GetAll();
         var leaveRequests = FakeLeaveRequestShortInfoProvider.GetAll(now);
-        var limits = FakeUserLeaveLimitsDtoProvider.GetAll(now.Year);
+        var limits = FakeUserLeaveLimitsDtoProvider.GetAllUserLimits(now.Year);
         //When
         var result = LeaveRequestPerType.Create(leaveType, allLeaveTypes, leaveRequests, limits, TimeSpan.FromHours(8));
         //Then

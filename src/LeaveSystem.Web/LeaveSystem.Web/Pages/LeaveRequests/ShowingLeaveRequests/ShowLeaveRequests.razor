@@ -54,17 +54,17 @@ else
             </div>
             @if (advancedFilteringEnabled)
             {
-                <div class="col-md-6">
+                <div class="col-md-6 mb-3">
                     <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Choose leave types</RadzenText>
                     <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                             @bind-Value=@leaveRequestsQuery.LeaveTypeIds Multiple="true" Placeholder="Select..." Data=@leaveTypes TextProperty="Name" ValueProperty="Id"
                             Class="w-100" />
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 mb-3">
                     <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Choose leave statuses</RadzenText>
                     <RadzenDropDown AllowClear="true" AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                            @bind-Value=@leaveRequestsQuery.Statuses Multiple="true" Placeholder="Select..." Data=@leaveRequestStatuses
-                            TextProperty="Value" ValueProperty="Key" Class="w-100" />
+                                    @bind-Value=@leaveRequestsQuery.Statuses Multiple="true" Placeholder="Select..." Data=@leaveRequestStatuses
+                                    TextProperty="Value" ValueProperty="Key" Class="w-100" />
                 </div>
             }
             <RadzenButton  type="submit" Text="Filter"></RadzenButton>

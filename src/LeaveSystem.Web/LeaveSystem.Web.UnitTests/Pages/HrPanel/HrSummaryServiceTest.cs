@@ -1,5 +1,7 @@
 using Blazored.Toast.Services;
+using Castle.Core.Logging;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.HrPanel;
@@ -10,6 +12,7 @@ using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Pages.UserPanel;
 using LeaveSystem.Web.Pages.WorkingHours;
 using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
+using LeaveSystem.Web.Shared;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using Microsoft.Extensions.Logging;
@@ -45,9 +48,9 @@ public class HrSummaryServiceTest
         var leaveTypesServiceMock = Substitute.For<LeaveTypesService>(httpClientMock);
         var fakeLeaveTypes = FakeLeaveTypeDtoProvider.GetAll();
         leaveTypesServiceMock.GetLeaveTypes().Returns(fakeLeaveTypes);
-        var userLeaveLimitsServiceMock = Substitute.For<UserLeaveLimitsService>(httpClientMock);
+        var userLeaveLimitsServiceMock = Substitute.For<UserLeaveLimitsService>(Substitute.For<UniversalHttpService>(httpClientMock, Substitute.For<IToastService>(), Substitute.For<ILogger<UniversalHttpService>>()));
         var fakeLimits = FakeLeaveLimitsDtoProvider.GetAll(year);
-        userLeaveLimitsServiceMock.GetLimits(firstDay, lastDay).Returns(fakeLimits);
+        userLeaveLimitsServiceMock.GetAsync(firstDay, lastDay).Returns(fakeLimits);
         var employeeServiceMock = Substitute.For<EmployeeService>(httpClientMock);
         var employees = FakeGetEmployeesDtoProvider.GetAll().ToArray();
         employeeServiceMock.Get().Returns(employees);
@@ -64,7 +67,7 @@ public class HrSummaryServiceTest
         //Then
         await getLeaveRequestsServiceMock.Received().GetLeaveRequests(ArgExtensions.IsEquivalentTo<GetLeaveRequestsQuery>(query));
         await leaveTypesServiceMock.Received().GetLeaveTypes();
-        await userLeaveLimitsServiceMock.Received().GetLimits(firstDay, lastDay);
+        await userLeaveLimitsServiceMock.Received().GetAsync(firstDay, lastDay);
         await employeeServiceMock.Received().Get();
         await workingHoursServiceMock.Received().GetWorkingHours(ArgExtensions.IsEquivalentTo<GetWorkingHoursQuery>(getWorkingHoursQuery));
         var items = employees.Union(fakeLeaveRequests.Items!.Select(lr =>
@@ -73,8 +76,8 @@ public class HrSummaryServiceTest
             new HrSummaryService.UserLeaveRequestSummary(e, fakeLeaveTypes.Select(lt => LeaveRequestPerType.Create(
                 lt,
                 fakeLeaveTypes,
-                fakeLeaveRequests.Items!.Where(lr => lr.CreatedBy.Id == e.Id),
-                fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitsService.UserLeaveLimitDto.Create(l)),
+                fakeLeaveRequests.Items.Where(lr => lr.CreatedBy.Id == e.Id),
+                fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitDto.Create(l)),
                 fakeWorkingHours.Items.DurationOrZero(e.Id))))
         );
         result.Should().BeEquivalentTo(new

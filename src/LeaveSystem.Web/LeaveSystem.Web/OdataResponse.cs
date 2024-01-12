@@ -2,11 +2,14 @@
 
 namespace LeaveSystem.Web;
 
-public class ODataResponse<T>
+public class ODataResponse<T> : ODataResponse
+{
+    [JsonPropertyName(name: "value")]
+    public T? Data { get; set; }
+}
+
+public class ODataResponse
 {
     [JsonPropertyName(name: "@odata.context")]
     public string? ContextUrl { get; set; }
-
-    [JsonPropertyName(name: "value")]
-    public T? Data { get; set; }
 }

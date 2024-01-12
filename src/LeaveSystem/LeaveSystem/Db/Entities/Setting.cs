@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FluentValidation;
 using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Shared;
 
@@ -21,5 +22,14 @@ public class Setting : IHaveId<string>, IDisposable
         {
             Value?.Dispose();
         }
+    }
+}
+
+public class SettingValidator : AbstractValidator<Setting>
+{
+    public SettingValidator()
+    {
+        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.Value).NotEmpty();
     }
 }

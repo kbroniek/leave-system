@@ -6,11 +6,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
-@using LeaveSystem.Web.Extensions
-@using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours
-@using Microsoft.AspNetCore.Components.Authorization
-@using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService
-@attribute [Authorize(Policy=@PolicyName)]
+@attribute [Authorize(Policy = @PolicyName)]
 @inject LeaveTypesService LeaveTypesService
 @inject GetLeaveRequestsService GetLeaveRequestsService
 @inject UserLeaveLimitsService UserLeaveLimitsService
@@ -25,32 +21,48 @@
     <div class="row">
         <RadzenStack Orientation="Orientation.Horizontal" Gap="3rem" Class="rz-p-12">
             <RadzenText TextStyle="TextStyle.H5">Employee <strong>@userName</strong></RadzenText>
-            <RadzenNumeric TValue="int?" Value=@Year Change=@(args => YearChanged(args)) />
+            <RadzenNumeric TValue="int?" Value=@Year Change=@(args => YearChanged(args))/>
         </RadzenStack>
     </div>
     <div class="row">
-        <RadzenTabs RenderMode="TabRenderMode.Client" >
+        <RadzenTabs RenderMode="TabRenderMode.Client">
             <Tabs>
                 <RadzenTabsItem Text="Summary">
-                    <UserPanelSummary UserSummaryCollection=@userSummaryCollection LeaveRequestsForView=@leaveRequestsForView Year=@Year />
+                    <UserPanelSummary UserSummaryCollection=@userSummaryCollection LeaveRequestsForView=@leaveRequestsForView Year=@Year/>
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="By leave types">
-                    <UserPanelLeaveTypes UserSummaryCollection=@userSummaryCollection />
+                    <UserPanelLeaveTypes UserSummaryCollection=@userSummaryCollection/>
                 </RadzenTabsItem>
+                <AuthorizeView Policy="@LeaveLimitsPolicyName" Context="ShowUserPage">
+                    <RadzenTabsItem Text="Leave Limits">
+                        <UserPanelLeaveLimits @ref="limitsPanel"
+                                              UserId="@UserId"
+                                              Year="@Year"
+                                              LeaveTypesForView="@leaveTypesWithUserLimits"
+                                              WorkingHours="workingHoursDuration"
+                                              RefreshLimitsCallback="ResetLimit"/>
+                    </RadzenTabsItem>
+                </AuthorizeView>
+
             </Tabs>
         </RadzenTabs>
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public string? UserId { get; set; }
-    [Parameter]
-    public int? Year { get; set; }
+
+    [Parameter] public string? UserId { get; set; }
+
+    [Parameter] public int? Year { get; set; }
+
     public const string PolicyName = "ShowUserPanel";
+    public const string LeaveLimitsPolicyName = "ShowUserPanelLeaveLimits";
     private IEnumerable<LeaveRequestPerType>? userSummaryCollection;
     private IEnumerable<LeaveRequestForView>? leaveRequestsForView;
     private string? userName;
+    private List<LeaveTypeForLimitsView>? leaveTypesWithUserLimits;
+    TimeSpan workingHoursDuration;
+    UserPanelLeaveLimits? limitsPanel;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,23 +78,24 @@
             var userFromApi = await EmployeeService.Get(UserId);
             userName = userFromApi?.Name;
         }
+
         Year ??= DateTimeOffset.UtcNow.Year;
         var firstDay = DateTimeOffsetExtensions.GetFirstDayOfYear(Year.Value);
         var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(Year.Value);
         var query = new GetLeaveRequestsQuery(firstDay, lastDay, 1, 1000, Enum.GetValues<LeaveRequestStatus>())
         {
-                CreatedByUserIds = new string[] { UserId }
+            CreatedByUserIds = new[] { UserId }
         };
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
-        var getLimitsTask = UserLeaveLimitsService.GetLimits(user.Id, firstDay, lastDay);
-        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(user.Id);
+        var getLimitsTask = UserLeaveLimitsService.GetAsync(UserId, firstDay, lastDay);
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(UserId);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
-        var leaveTypes = getLeaveTypesTask.Result ?? Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
-        var limits = getLimitsTask.Result ?? Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
+        var leaveTypes = getLeaveTypesTask.Result.ToArray();
+        var limits = getLimitsTask.Result;
         var workingHours = getWorkingHoursTask.Result;
-        var workingHoursDuration = workingHours?.Duration ?? TimeSpan.Zero;
+        workingHoursDuration = workingHours?.Duration ?? TimeSpan.Zero;
         userSummaryCollection = leaveTypes.Select(lt => LeaveRequestPerType.Create(
             lt,
             leaveTypes,
@@ -92,12 +105,26 @@
         leaveRequestsForView = leaveRequests
             .OrderBy(lr => lr.DateFrom)
             .Select(lr => LeaveRequestForView.Create(lr, leaveTypes, workingHoursDuration));
+        leaveTypesWithUserLimits = leaveTypes.Select(lt =>
+            LeaveTypeForLimitsView.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration)).ToList();
     }
+
+    async Task ResetLimit(Guid limitId)
+    {
+        var limitToReset = await UserLeaveLimitsService.GetAsync(limitId);
+        if (limitToReset is not null)
+        {
+            limitsPanel?.UpdateLeaveLimit(limitToReset);
+        }
+    }
+
     private async Task<int?> YearChanged(int? year)
     {
         Year = year;
         NavManager.NavigateTo($"/user-panel/{UserId}/{year}");
         await OnInitializedAsync();
+        limitsPanel?.GetDate();
         return year;
     }
+
 }

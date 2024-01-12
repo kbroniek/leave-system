@@ -139,7 +139,7 @@
     private LeaveSummary? leaveSummary;
     private DateSummary? dateSummary;
     private IEnumerable<LeaveRequestShortInfo> submittedLeaveRequests = Enumerable.Empty<LeaveRequestShortInfo>();
-    private IEnumerable<UserLeaveLimitsService.UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitsService.UserLeaveLimitDto>();
+    private IEnumerable<UserLeaveLimitDto> limits = Enumerable.Empty<UserLeaveLimitDto>();
     private TimeSpan workingHours;
     private bool durationEnabled = true;
     private IEnumerable<GetEmployeeDto> employees = Enumerable.Empty<GetEmployeeDto>();
@@ -185,7 +185,7 @@
             {
                 CreatedByUserIds = new string[] { currentUser.Id }
             });
-            var getLimitsTask = UserLeaveLimitsService.GetLimits(currentUser.Id, firstDay, lastDay);
+            var getLimitsTask = UserLeaveLimitsService.GetAsync(currentUser.Id, firstDay, lastDay);
             var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(currentUser.Id);
             await Task.WhenAll(getLeaveRequestsTask, getLimitsTask, getUserWorkingHoursTask);
 
