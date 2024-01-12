@@ -1,8 +1,8 @@
-﻿using Ardalis.GuardClauses;
+using System.Text.Json;
+using Ardalis.GuardClauses;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
-using Microsoft.Graph;
-using System.Text.Json;
+using Microsoft.Graph.Models;
 
 namespace LeaveSystem.Api.Endpoints.Users;
 
@@ -36,7 +36,7 @@ public class SaveGraphUserService
             { roleAttributeName, JsonSerializer.Serialize(new RolesResult(roles)) }
         };
         var principalId = Guid.NewGuid();
-        var addedUser = await graphClient.Users.Request().AddAsync(new User
+        var addedUser = await graphClient.Users.PostAsync(new User
         {
             AdditionalData = extensionInstance,
             Mail = email,
@@ -48,9 +48,9 @@ public class SaveGraphUserService
                 Password = defaultPassword
             },
             MailNickname = email.Split('@').First(),
-            Identities = new ObjectIdentity[]
+            Identities = new List<ObjectIdentity>
             {
-                new ObjectIdentity
+                new()
                 {
                     Issuer = issuer,
                     IssuerAssignedId = email,
@@ -59,7 +59,7 @@ public class SaveGraphUserService
             },
             PasswordPolicies = "DisablePasswordExpiration, DisableStrongPassword",
             UserPrincipalName = $"{principalId}@{issuer}",
-        }, cancellationToken);
+        }, default, cancellationToken);
         return new FederatedUser(addedUser.Id, addedUser.Mail, addedUser.DisplayName,
             RoleAttributeNameResolver.MapRoles(addedUser.AdditionalData, roleAttributeName).Roles);
     }
@@ -72,23 +72,22 @@ public class SaveGraphUserService
             { roleAttributeName, JsonSerializer.Serialize(new RolesResult(roles)) }
         };
         await graphClient.Users[userId]
-            .Request()
-            .UpdateAsync(new User
+            .PatchAsync(new User
             {
                 AdditionalData = extensionInstance,
                 Mail = email,
                 DisplayName = name,
                 MailNickname = email.Split('@').First(),
-                Identities = new ObjectIdentity[]
+                Identities = new List<ObjectIdentity>
                 {
-                    new ObjectIdentity
+                    new ()
                     {
                         Issuer = issuer,
                         IssuerAssignedId = email,
                         SignInType = "emailAddress"
                     }
                 },
-            }, cancellationToken);
+            }, default, cancellationToken);
         return new FederatedUser(userId, email, name, roles);
     }
 }

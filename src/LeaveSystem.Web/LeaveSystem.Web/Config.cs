@@ -17,15 +17,15 @@ public static class Config
 {
     public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        const string AzureConfig = "AzureAdB2C";
-        var scopes = configuration.GetValue<string>($"{AzureConfig}:Scopes");
+        const string azureConfig = "AzureAdB2C";
+        var scopes = configuration.GetValue<string>($"{azureConfig}:Scopes")
+            ?? throw new InvalidOperationException($"Can't find configuration {azureConfig}:Scopes");
 
         services
-            .AddMsalAuthentication(configuration, AzureConfig, scopes)
+            .AddMsalAuthentication(configuration, azureConfig, scopes)
             .AddHttpClient(configuration, scopes);
     }
-    public static void AddAuthorization(this IServiceCollection services)
-    {
+    public static void AddAuthorization(this IServiceCollection services) =>
         services.AddAuthorizationCore(options =>
         {
             options.AddPolicy(CreateLeaveRequest.OnBehalfPolicyName, policy =>
@@ -44,12 +44,9 @@ public static class Config
                 policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin)));
             options.AddPolicy(LeaveRequestDetails.AcceptPolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.DecisionMaker)));
-        });
-        services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
-    }
-    public static IServiceCollection AddLeaveSystemModule(this IServiceCollection services)
-    {
-        return services
+        }).AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
+    public static IServiceCollection AddLeaveSystemModule(this IServiceCollection services) =>
+        services
             .AddTransient<TimelineComponent>()
             .AddTransient<LeaveTypesService>()
             .AddTransient<GetLeaveRequestsService>()
@@ -60,11 +57,11 @@ public static class Config
             .AddTransient<GetLeaveStatusSettingsService>()
             .AddTransient<UsersService>()
             .AddTransient<ChangeStatusService>();
-    }
     private static IServiceCollection AddHttpClient(this IServiceCollection services, IConfiguration configuration, string scopes)
     {
         const string apiName = "LeaveSystem.Api";
-        var apiAddress = configuration.GetValue<string>(apiName);
+        var apiAddress = configuration.GetValue<string>(apiName)
+            ?? throw new InvalidOperationException($"Can't find configuration api adress {apiName}");
         services.AddHttpClient(apiName, client => client.BaseAddress = new Uri(apiAddress))
             .AddHttpMessageHandler(sp => sp.GetRequiredService<AuthorizationMessageHandler>()
             .ConfigureHandler(

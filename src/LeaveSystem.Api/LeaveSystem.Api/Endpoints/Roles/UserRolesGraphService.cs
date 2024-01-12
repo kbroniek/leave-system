@@ -1,7 +1,9 @@
-﻿using System.Text.Json;
+using System.Text.Json;
+using GoldenEye.Backend.Core.Exceptions;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
+using Microsoft.Graph.Models;
 
 namespace LeaveSystem.Api.Endpoints.Roles;
 
@@ -21,11 +23,10 @@ public class UserRolesGraphService
         var graphClient = graphClientFactory.Create();
 
         var users = await graphClient.Users
-            .Request()
-            .Select($"id,{roleAttributeName}")
-            .GetAsync(cancellationToken);
+            .GetAsync(_ => _.QueryParameters.Select = new string[] { "id", roleAttributeName }, cancellationToken)
+            ?? throw NotFoundException.For<UserCollectionResponse>("Can't find users in graph api");
         var graphUsers = new List<GraphUserRole>();
-        var pageIterator = PageIterator<User>
+        var pageIterator = PageIterator<User, UserCollectionResponse>
             .CreatePageIterator(graphClient, users,
                 (user) =>
                 {
@@ -46,11 +47,10 @@ public class UserRolesGraphService
             { roleAttributeName, JsonSerializer.Serialize(new RolesResult(roles)) }
         };
         await graphClient.Users[userId]
-            .Request()
-            .UpdateAsync(new User
+            .PatchAsync(new User
             {
                 AdditionalData = extensionInstance
-            }, cancellationToken);
+            }, default, cancellationToken);
     }
 
     public record GraphUserRole(string Id, IEnumerable<string> Roles)

@@ -1,6 +1,8 @@
+using GoldenEye.Backend.Core.Exceptions;
 using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
+using Microsoft.Graph.Models;
 
 namespace LeaveSystem.Api.Endpoints.Employees;
 
@@ -19,23 +21,22 @@ public class GetGraphUserService
     {
         var graphClient = graphClientFactory.Create();
 
-        // Get all users
         var users = await graphClient.Users
-            .Request()
-            .Select($"id,mail,displayName,identities,{roleAttributeName}")
-            .GetAsync(cancellationToken);
+            .GetAsync(_ => _.QueryParameters.Select = new string[] { "id", "mail", "displayName", "identities", roleAttributeName }, cancellationToken)
+            ?? throw NotFoundException.For<UserCollectionResponse>("Can't find users in graph api");
         return await GetAll(graphClient, users, cancellationToken);
     }
     public virtual async Task<IEnumerable<FederatedUser>> Get(string[] ids, CancellationToken cancellationToken)
     {
         var graphClient = graphClientFactory.Create();
 
-        // Get all users
         var users = await graphClient.Users
-            .Request()
-            .Filter($"id in ({string.Join(",", ids.Select(id => $"'{id}'"))})")
-            .Select($"id,mail,displayName,identities,{roleAttributeName}")
-            .GetAsync(cancellationToken);
+            .GetAsync(_ =>
+            {
+                _.QueryParameters.Select = new string[] { "id", "mail", "displayName", "identities", roleAttributeName };
+                _.QueryParameters.Filter = $"id in ({string.Join(",", ids.Select(id => $"'{id}'"))})";
+            }, cancellationToken)
+            ?? throw NotFoundException.For<UserCollectionResponse>("Can't find users in graph api");
         return await GetAll(graphClient, users, cancellationToken);
     }
 
@@ -44,23 +45,22 @@ public class GetGraphUserService
         var graphClient = graphClientFactory.Create();
 
         var user = await graphClient.Users[id]
-            .Request()
-            .Select($"id,mail,displayName,identities,{roleAttributeName}")
-            .GetAsync(cancellationToken);
-
-        return new FederatedUser(user.Id, user.Mail, user.DisplayName,
-                        RoleAttributeNameResolver.MapRoles(user.AdditionalData, roleAttributeName).Roles);
+            .GetAsync(_ => _.QueryParameters.Select = new string[] { "id", "mail", "displayName", "identities", roleAttributeName }, cancellationToken)
+            ?? throw NotFoundException.For<UserCollectionResponse>(id);
+        return CreateFederatedUser(user);
     }
 
-    private async Task<List<FederatedUser>> GetAll(GraphServiceClient graphClient, IGraphServiceUsersCollectionPage users, CancellationToken cancellationToken)
+    private FederatedUser CreateFederatedUser(User user) =>
+            new FederatedUser(user.Id, user.Mail, user.DisplayName,
+                            RoleAttributeNameResolver.MapRoles(user.AdditionalData, roleAttributeName).Roles);
+    private async Task<List<FederatedUser>> GetAll(GraphServiceClient graphClient, UserCollectionResponse users, CancellationToken cancellationToken)
     {
         var graphUsers = new List<FederatedUser>();
-        var pageIterator = PageIterator<User>
+        var pageIterator = PageIterator<User, UserCollectionResponse>
             .CreatePageIterator(graphClient, users,
                 (user) =>
                 {
-                    graphUsers.Add(new FederatedUser(user.Id, user.Mail, user.DisplayName,
-                        RoleAttributeNameResolver.MapRoles(user.AdditionalData, roleAttributeName).Roles));
+                    graphUsers.Add(CreateFederatedUser(user));
                     return true;
                 }
             );
