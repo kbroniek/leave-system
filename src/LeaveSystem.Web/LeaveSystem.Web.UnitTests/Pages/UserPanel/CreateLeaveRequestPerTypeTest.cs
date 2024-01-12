@@ -104,4 +104,3 @@ public class CreateLeaveRequestPerTypeTest
         }, o => o.ExcludingMissingMembers());
     }
 }
-

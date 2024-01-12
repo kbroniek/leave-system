@@ -1,5 +1,6 @@
 using FluentAssertions.Equivalency;
 using FluentValidation;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.UnitTests.Providers;
 using LeaveSystem.Db;
@@ -10,8 +11,6 @@ using MockQueryable.Moq;
 using Moq;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
-
-using GoldenEye.Shared.Core.Objects.General;
 
 public class GenericCrudServiceGetAsQueryableTest
 {
@@ -44,7 +43,7 @@ public class GenericCrudServiceGetAsQueryableTest
         IEnumerable<TEntity> entities,
         TId key,
         TEntity expectedEntity,
-        Func<EquivalencyAssertionOptions<TEntity>,EquivalencyAssertionOptions<TEntity>>? config = null)
+        Func<EquivalencyAssertionOptions<TEntity>, EquivalencyAssertionOptions<TEntity>>? config = null)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId>
     {

@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 using System.Text.Json;
 using FluentAssertions.Equivalency;
 using FluentValidation;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.UnitTests.Providers;
@@ -17,14 +18,12 @@ using Moq;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
 
-using GoldenEye.Shared.Core.Objects.General;
-
 public class GenericCrudServicePatchTest
 {
     private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId> =>
-        new (dbContext, deltaValidator, entityValidator);
+        new(dbContext, deltaValidator, entityValidator);
 
     [Fact]
     public async Task WhenEntityNotExistsThrow_EntityNotFoundException()
@@ -44,7 +43,7 @@ public class GenericCrudServicePatchTest
         dbContextMock.Setup(x => x.Set<TEntity>()).Returns(setMock.Object);
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
-        var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
+        var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
         var act = async () =>
         {
             await sut.PatchAsync(key, new Delta<TEntity>());
@@ -79,7 +78,7 @@ public class GenericCrudServicePatchTest
         var delta = new Delta<TEntity>();
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         var setMock = dataSource.AsQueryable().BuildMockDbSet();
-        setMock.Setup(x => x.FindAsync(new object[] {key}, It.IsAny<CancellationToken>()))
+        setMock.Setup(x => x.FindAsync(new object[] { key }, It.IsAny<CancellationToken>()))
             .ReturnsAsync(dataSource.FirstOrDefault(x => x.Id.Equals(key)));
         dbContextMock.Setup(x => x.Set<TEntity>()).Returns(setMock.Object);
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
@@ -88,7 +87,7 @@ public class GenericCrudServicePatchTest
         entityValidatorMock.Setup(m =>
                 m.ValidateAsync(It.IsAny<IValidationContext>(), new CancellationToken()))
             .ThrowsAsync(new Exception());
-        var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
+        var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
         var act = async () =>
         {
             await sut.PatchAsync(key, new Delta<TEntity>());
@@ -105,7 +104,7 @@ public class GenericCrudServicePatchTest
     public async Task WhenExceptionWasThrownWhenSavingChangesAndEntityExists_ThenThrowDbUpdateConcurrencyException()
     {
         await WhenExceptionWasThrownWhenSavingChangesAndEntityExists_ThenThrowDbUpdateConcurrencyException_Helper<UserLeaveLimit, Guid>(
-            FakeUserLeaveLimitProvider.GetLimits(),  FakeUserLeaveLimitProvider.GetLimitForOnDemandLeave());
+            FakeUserLeaveLimitProvider.GetLimits(), FakeUserLeaveLimitProvider.GetLimitForOnDemandLeave());
         await WhenExceptionWasThrownWhenSavingChangesAndEntityExists_ThenThrowDbUpdateConcurrencyException_Helper<LeaveType, Guid>(
             FakeLeaveTypeProvider.GetLeaveTypes(), FakeLeaveTypeProvider.GetFakeSickLeave());
         await WhenExceptionWasThrownWhenSavingChangesAndEntityExists_ThenThrowDbUpdateConcurrencyException_Helper<Setting, string>(
@@ -121,7 +120,7 @@ public class GenericCrudServicePatchTest
         var delta = new Delta<TEntity>();
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         var setMock = dataSource.AsQueryable().BuildMockDbSet();
-        setMock.Setup(x => x.FindAsync(new object[] {entity.Id}, default))
+        setMock.Setup(x => x.FindAsync(new object[] { entity.Id }, default))
             .ReturnsAsync(entity);
         dbContextMock.Setup(x => x.Set<TEntity>()).Returns(setMock.Object);
         var entityEntryMock = new Mock<EntityEntry<TEntity>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
@@ -131,7 +130,7 @@ public class GenericCrudServicePatchTest
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         deltaValidatorMock.Setup(m => m.CreateDeltaWithoutProtectedProperties(delta)).Returns(delta);
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
-        var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
+        var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
         var act = async () =>
         {
             await sut.PatchAsync(entity.Id, delta);
@@ -139,7 +138,7 @@ public class GenericCrudServicePatchTest
         await act.Should().ThrowAsync<DbUpdateConcurrencyException>();
         setMock.Verify(m => m.FindAsync(It.IsAny<object?[]?>(), It.IsAny<CancellationToken>()), Times.Once);
         deltaValidatorMock.Verify(m => m.CreateDeltaWithoutProtectedProperties(It.IsAny<Delta<TEntity>>()), Times.Once);
-        entityValidatorMock.Verify(m => m.ValidateAsync(It.IsAny<IValidationContext>(), It.IsAny<CancellationToken>()),Times.Once);
+        entityValidatorMock.Verify(m => m.ValidateAsync(It.IsAny<IValidationContext>(), It.IsAny<CancellationToken>()), Times.Once);
         dbContextMock.Verify(m => m.Set<TEntity>(), Times.Exactly(2));
         dbContextMock.Verify(m => m.Entry(It.IsAny<TEntity>()), Times.Once);
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -154,7 +153,7 @@ public class GenericCrudServicePatchTest
             FakeUserLeaveLimitProvider.GetLimitForSickLeave()
         };
         await WhenExceptionWasThrownWhenSavingChangesAndEntityNotExists_ThenThrowEntityNotFoundException_Helper<UserLeaveLimit, Guid>(
-            fakeUserLimits,  FakeUserLeaveLimitProvider.GetLimitForOnDemandLeave());
+            fakeUserLimits, FakeUserLeaveLimitProvider.GetLimitForOnDemandLeave());
         var fakeLeaveTypes = new[]
         {
             FakeLeaveTypeProvider.GetFakeHolidayLeave(),
@@ -181,7 +180,7 @@ public class GenericCrudServicePatchTest
         var delta = new Delta<TEntity>();
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         var setMock = dataSource.AsQueryable().BuildMockDbSet();
-        setMock.Setup(x => x.FindAsync(new object[] {entity.Id}, default))
+        setMock.Setup(x => x.FindAsync(new object[] { entity.Id }, default))
             .ReturnsAsync(entity);
         dbContextMock.Setup(x => x.Set<TEntity>()).Returns(setMock.Object);
         var entityEntryMock = new Mock<EntityEntry<TEntity>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
@@ -191,7 +190,7 @@ public class GenericCrudServicePatchTest
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         deltaValidatorMock.Setup(m => m.CreateDeltaWithoutProtectedProperties(delta)).Returns(delta);
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
-        var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
+        var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
         var act = async () =>
         {
             await sut.PatchAsync(entity.Id, delta);
@@ -199,7 +198,7 @@ public class GenericCrudServicePatchTest
         await act.Should().ThrowAsync<EntityNotFoundException>();
         setMock.Verify(m => m.FindAsync(It.IsAny<object?[]?>(), It.IsAny<CancellationToken>()), Times.Once);
         deltaValidatorMock.Verify(m => m.CreateDeltaWithoutProtectedProperties(It.IsAny<Delta<TEntity>>()), Times.Once);
-        entityValidatorMock.Verify(m => m.ValidateAsync(It.IsAny<IValidationContext>(), It.IsAny<CancellationToken>()),Times.Once);
+        entityValidatorMock.Verify(m => m.ValidateAsync(It.IsAny<IValidationContext>(), It.IsAny<CancellationToken>()), Times.Once);
         dbContextMock.Verify(m => m.Set<TEntity>(), Times.Exactly(2));
         dbContextMock.Verify(m => m.Entry(It.IsAny<TEntity>()), Times.Once);
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -239,14 +238,14 @@ public class GenericCrudServicePatchTest
 
     private async Task WhenNoProblems_ThenReturnModifiedEntity_Helper<TEntity, TId>(
         IReadOnlyCollection<TEntity> dataSource, TEntity expectedResultEntity, Delta<TEntity> delta,
-        Func<EquivalencyAssertionOptions<TEntity>,EquivalencyAssertionOptions<TEntity>>? config = null)
+        Func<EquivalencyAssertionOptions<TEntity>, EquivalencyAssertionOptions<TEntity>>? config = null)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId>
     {
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         var setMock = dataSource.AsQueryable().BuildMockDbSet();
         var entity = dataSource.First(d => d.Id.Equals(expectedResultEntity.Id));
-        setMock.Setup(x => x.FindAsync(new object[] {entity.Id}, default))
+        setMock.Setup(x => x.FindAsync(new object[] { entity.Id }, default))
             .ReturnsAsync(entity);
         dbContextMock.Setup(x => x.Set<TEntity>()).Returns(setMock.Object);
         var entityEntryMock = new Mock<EntityEntry<TEntity>>(FormatterServices.GetUninitializedObject(typeof(InternalEntityEntry)));
@@ -254,14 +253,14 @@ public class GenericCrudServicePatchTest
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         deltaValidatorMock.Setup(m => m.CreateDeltaWithoutProtectedProperties(delta)).Returns(delta);
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
-        var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
+        var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
         var result = await sut.PatchAsync(entity.Id, delta);
         config ??= o => o;
         result.Should().BeEquivalentTo(expectedResultEntity, config);
         delta.GetInstance().Should().NotBe(result); //When patch, this values must be different
         setMock.Verify(m => m.FindAsync(It.IsAny<object?[]?>(), It.IsAny<CancellationToken>()), Times.Once);
         deltaValidatorMock.Verify(m => m.CreateDeltaWithoutProtectedProperties(It.IsAny<Delta<TEntity>>()), Times.Once);
-        entityValidatorMock.Verify(m => m.ValidateAsync(It.IsAny<IValidationContext>(), It.IsAny<CancellationToken>()),Times.Once);
+        entityValidatorMock.Verify(m => m.ValidateAsync(It.IsAny<IValidationContext>(), It.IsAny<CancellationToken>()), Times.Once);
         dbContextMock.Verify(m => m.Set<TEntity>(), Times.Once);
         dbContextMock.Verify(m => m.Entry(It.IsAny<TEntity>()), Times.Once);
         dbContextMock.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);

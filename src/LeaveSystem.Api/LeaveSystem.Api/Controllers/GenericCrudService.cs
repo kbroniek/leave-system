@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+using FluentValidation;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Db;
 using Microsoft.AspNetCore.OData.Deltas;
