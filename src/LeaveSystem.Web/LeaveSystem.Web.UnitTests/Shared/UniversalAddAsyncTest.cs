@@ -9,9 +9,9 @@ using LeaveSystem.Shared.Converters;
 using LeaveSystem.Shared.UserLeaveLimits;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Moq.Protected;
 using TestStuff.Extensions;
 using TestStuff.Factories;
-using TestStuff.Helpers;
 using Web.Pages.UserLeaveLimits;
 using Web.Shared;
 
@@ -25,34 +25,41 @@ public class UniversalAddAsyncTest
     [Fact]
     public async Task WhenResponseThrowsException_InformAboutError()
     {
-        await this.WhenResponseThrowsException_InformAboutError_Helper<AddUserLeaveLimitDto, LeaveLimitDto>(new AddUserLeaveLimitDto());
+        await this.WhenResponseThrowsException_InformAboutError_Helper<AddUserLeaveLimitDto, LeaveLimitDto>(
+            new AddUserLeaveLimitDto());
     }
 
     private async Task WhenResponseThrowsException_InformAboutError_Helper<TContent, TResponse>(TContent data)
     {
-        var fakeException = new FakeException("fake exception", "fakeStackTrace");
-        var httpClientMock = HttpClientMockFactory.CreateWithException("fake-add", fakeException, out var mockedHttpValues);
+        var fakeException = new InvalidOperationException("fake exception");
+        var httpClientMock = HttpClientMockFactory
+            .CreateWithException("fake-add", fakeException, out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
         var result = await sut.AddAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
         result.Should().Be(default);
         toastServiceMock.Verify(m => m.ShowError("Error occured while adding", null), Times.Once);
-        loggerMock.VerifyLogError($"Error occured while adding resource of type {typeof(TContent)}", fakeException, Times.Once);
+        loggerMock.VerifyLogError($"Error occured while adding resource of type {typeof(TContent)}", fakeException,
+            Times.Once);
         mockedHttpValues.RequestShouldBeMatched();
     }
 
     [Fact]
     public async Task WhenResponseNotSuccessful_InformAboutError()
     {
-        await this.WhenResponseNotSuccessful_InformAboutError_Helper<AddUserLeaveLimitDto, LeaveLimitDto>(new AddUserLeaveLimitDto());
+        await this.WhenResponseNotSuccessful_InformAboutError_Helper<AddUserLeaveLimitDto, LeaveLimitDto>(
+            new AddUserLeaveLimitDto());
     }
 
     private async Task WhenResponseNotSuccessful_InformAboutError_Helper<TContent, TResponse>(TContent data)
     {
-        var problem = JsonSerializer.Serialize(new ProblemDto("", "fake error", 400, "fake error occured", "", "", "1.0.0"), this.jsonSerializerOptions);
+        var problem =
+            JsonSerializer.Serialize(new ProblemDto("", "fake error", 400, "fake error occured", "", "", "1.0.0"),
+                this.jsonSerializerOptions);
         var fakeResponse = new StringContent(problem, Encoding.UTF8, "application/json");
-        var httpClientMock = HttpClientMockFactory.CreateWithJsonContent("fake-add", data, HttpStatusCode.BadRequest, fakeResponse, this.jsonSerializerOptions, out var mockedHttpValues);
+        var httpClientMock = HttpClientMockFactory.CreateWithJsonContent("fake-add", data, HttpStatusCode.BadRequest,
+            fakeResponse, this.jsonSerializerOptions, out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
@@ -66,7 +73,8 @@ public class UniversalAddAsyncTest
     [Fact]
     public async Task WhenResponseStatusSuccessful_ReturnCreatedDto()
     {
-        await this.WhenResponseStatusSuccessful_ReturnCreatedDto_Helper(new AddUserLeaveLimitDto(), new UserLeaveLimitsService.UserLeaveLimitDtoODataResponse()
+        await this.WhenResponseStatusSuccessful_ReturnCreatedDto_Helper(new AddUserLeaveLimitDto(),
+            new UserLeaveLimitsService.UserLeaveLimitDtoODataResponse()
             {
                 ContextUrl = "fakeCtx",
                 Id = Guid.Parse("760B54B0-E381-4679-8474-9C0D84FDAED2"),
@@ -79,11 +87,14 @@ public class UniversalAddAsyncTest
             });
     }
 
-    private async Task WhenResponseStatusSuccessful_ReturnCreatedDto_Helper<TContent, TResponse>(TContent data, TResponse response)
+    private async Task WhenResponseStatusSuccessful_ReturnCreatedDto_Helper<TContent, TResponse>(TContent data,
+        TResponse response)
     {
-        var fakeResponse = new StringContent(JsonSerializer.Serialize(response, this.jsonSerializerOptions), Encoding.UTF8, "application/json");
+        var fakeResponse = new StringContent(JsonSerializer.Serialize(response, this.jsonSerializerOptions),
+            Encoding.UTF8, "application/json");
         var httpClientMock = HttpClientMockFactory.CreateWithJsonContent(
-            "fake-add", data, HttpStatusCode.Created, fakeResponse, this.jsonSerializerOptions, out var mockedHttpValues);
+            "fake-add", data, HttpStatusCode.Created, fakeResponse, this.jsonSerializerOptions,
+            out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);

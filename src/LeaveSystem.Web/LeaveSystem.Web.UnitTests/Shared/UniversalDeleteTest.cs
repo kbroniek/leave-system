@@ -24,7 +24,7 @@ public class UniversalDeleteTest
     [Fact]
     public async Task WhenResponseThrowsException_InformAboutError()
     {
-        var fakeException = new FakeException("fake exception", "fakeStackTrace");
+        var fakeException = new InvalidOperationException("fake exception");
         var httpClientMock = HttpClientMockFactory.CreateWithException("fake-delete", fakeException, out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
