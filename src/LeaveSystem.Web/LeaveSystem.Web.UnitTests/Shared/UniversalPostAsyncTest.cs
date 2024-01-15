@@ -43,7 +43,7 @@ public class UniversalPostAsyncTest
         var result = await sut.PostAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
         result.Should().Be(default);
         toastServiceMock.Verify(m => m.ShowError("Error occured while adding", null), Times.Once);
-        loggerMock.VerifyLogError("fake exception\nfakeStackTrace", Times.Once);
+        loggerMock.VerifyLogError($"Error occured while adding resource of type {typeof(TContent)}", fakeException, Times.Once);
         mockedHttpValues.RequestShouldBeMatched();
     }
 

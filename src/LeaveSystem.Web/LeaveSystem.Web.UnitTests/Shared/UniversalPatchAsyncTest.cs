@@ -47,7 +47,7 @@ public class UniversalPatchAsyncTest
         var result = await sut.PatchAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
         result.Should().BeFalse();
         toastServiceMock.Verify(m => m.ShowError("Error occured while editing", null), Times.Once);
-        loggerMock.VerifyLogError("fake exception\nfakeStackTrace", Times.Once);
+        loggerMock.VerifyLogError($"Error occured while editing resource of type {typeof(TContent)}", fakeException, Times.Once);
         mockedHttpValues.RequestShouldBeMatched();
     }
 

@@ -15,7 +15,8 @@ public static class Config
         var martenConfig = config.GetSection("Marten").Get<MartenConfig>() ?? throw new InvalidOperationException("Marten configuration is missing. Check the appsettings.json.");
         return services
             .AddDbContext<LeaveSystemDbContext>(options => options.UseNpgsql(martenConfig.ConnectionString))
-            .AddEventSourcing(martenConfig);
+            .AddEventSourcing(martenConfig)
+            .AddValidators();
     }
 
     public static IServiceCollection AddValidators(this IServiceCollection services) =>

@@ -37,7 +37,7 @@ public class UniversalAddAsyncTest
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.AddAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PostAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
         result.Should().Be(default);
         toastServiceMock.Verify(m => m.ShowError("Error occured while adding", null), Times.Once);
         loggerMock.VerifyLogError($"Error occured while adding resource of type {typeof(TContent)}", fakeException,
@@ -63,7 +63,7 @@ public class UniversalAddAsyncTest
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.AddAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PostAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
         result.Should().Be(default);
         toastServiceMock.Verify(m => m.ShowError("fake error", null), Times.Once);
         loggerMock.VerifyLogError("fake error occured", Times.Once);
@@ -98,7 +98,7 @@ public class UniversalAddAsyncTest
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.AddAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PostAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
         result.Should().BeEquivalentTo(response);
         toastServiceMock.Verify(m => m.ShowSuccess("success", null), Times.Once);
         mockedHttpValues.RequestShouldBeMatched();
