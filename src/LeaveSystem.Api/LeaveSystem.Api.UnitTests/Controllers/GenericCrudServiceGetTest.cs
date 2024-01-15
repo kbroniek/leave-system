@@ -1,4 +1,5 @@
 using FluentValidation;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Api.Controllers;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
@@ -8,8 +9,6 @@ using MockQueryable.Moq;
 using Moq;
 
 namespace LeaveSystem.Api.UnitTests.Controllers;
-
-using GoldenEye.Shared.Core.Objects.General;
 
 public class GenericCrudServiceGetTest
 {

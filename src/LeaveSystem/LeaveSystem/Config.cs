@@ -1,5 +1,5 @@
-﻿using LeaveSystem.Db;
 using FluentValidation;
+using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing;
 using Microsoft.EntityFrameworkCore;

@@ -1,7 +1,7 @@
-using GoldenEye.Shared.Core.Objects.General;
 using System.Linq.Dynamic.Core;
 using System.Text.Json;
 using FluentValidation;
+using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +10,6 @@ using Microsoft.Extensions.Logging;
 namespace LeaveSystem.Db.Entities;
 public class UserLeaveLimit : IHaveId<Guid>
 {
-    private DateTimeOffset? validSince;
-    private DateTimeOffset? validUntil;
     object IHaveId.Id => this.Id;
     public Guid Id { get; set; }
     public TimeSpan? Limit { get; set; }
@@ -19,21 +17,9 @@ public class UserLeaveLimit : IHaveId<Guid>
     public string? AssignedToUserId { get; set; }
     public virtual LeaveType LeaveType { get; set; } = null!;
     public Guid LeaveTypeId { get; set; }
-
-    public DateTimeOffset? ValidSince
-    {
-        get => validSince;
-        set => validSince = value?.GetDayWithoutTime();
-    }
-
-    public DateTimeOffset? ValidUntil
-    {
-        get => validUntil;
-        set => validUntil = value?.GetDayWithoutTime();
-    }
-
+    public DateTimeOffset? ValidSince { get; set; }
+    public DateTimeOffset? ValidUntil { get; set; }
     public UserLeaveLimitProperties? Property { get; set; }
-
 
     public class UserLeaveLimitProperties
     {

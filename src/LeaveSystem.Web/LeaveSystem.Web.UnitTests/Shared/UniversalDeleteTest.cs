@@ -24,7 +24,7 @@ public class UniversalDeleteTest
     [Fact]
     public async Task WhenResponseThrowsException_InformAboutError()
     {
-        var fakeException = new FakeException("fake exception", "fakeStackTrace");
+        var fakeException = new InvalidOperationException("fake exception");
         var httpClientMock = HttpClientMockFactory.CreateWithException("fake-delete", fakeException, out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
@@ -32,7 +32,7 @@ public class UniversalDeleteTest
         var result = await sut.DeleteAsync("/fake-delete", "success", this.jsonSerializerOptions);
         result.Should().BeFalse();
         toastServiceMock.Verify(m => m.ShowError("Error occured while deleting", null), Times.Once);
-        loggerMock.VerifyLogError("fake exception\nfakeStackTrace", Times.Once);
+        loggerMock.VerifyLogError("Error occured while deleting resource", fakeException, Times.Once);
         mockedHttpValues.RequestShouldBeMatched();
     }
 

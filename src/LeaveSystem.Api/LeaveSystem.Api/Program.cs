@@ -1,7 +1,5 @@
-using LeaveSystem.Api;
-using LeaveSystem;
 using LeaveSystem.Api.Auth;
-using LeaveSystem.Api.Controllers;
+using LeaveSystem;
 using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Errors;
@@ -9,13 +7,8 @@ using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
 using LeaveSystem.Api.GraphApi;
-using LeaveSystem.Db.Entities;
-using LeaveSystem.Shared.Converters;
 using LeaveSystem.Shared.Date;
-using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.AspNetCore.OData;
-using Microsoft.OData.Edm;
-using Microsoft.OData.ModelBuilder;
 
 const string azureConfigSection = "AzureAdB2C";
 const string azureReadUsersSection = "ManageAzureUsers";
@@ -35,30 +28,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();
 builder.Services.AddCors();
 builder.Services.AddControllers()
-    .AddJsonOptions(o =>  o.JsonSerializerOptions.Converters.Add(new TimeSpanIso8601Converter()))
-    .AddOData(opt =>
-    opt.AddRouteComponents("odata", GetEdmModel())
-        .Select()
-        .Filter()
-        .Count()
-        .Expand()
-        .OrderBy());
-
-IEdmModel GetEdmModel()
-{
-    var modelBuilder = new ODataConventionModelBuilder();
-    modelBuilder.EntitySet<LeaveType>("LeaveTypes");
-    modelBuilder.EntitySet<UserLeaveLimit>("UserLeaveLimits");
-    modelBuilder.EntitySet<Setting>("Settings");
-    modelBuilder.ComplexType<AddLeaveTypeDto>();
-
-    return modelBuilder.GetEdmModel();
-}
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new TimeSpanIso8601Converter()))
+    .AddODataConfig();
 
 builder.Services.AddServices(builder.Configuration)
     .AddScoped<DateService>()
     .AddValidators()
     .AddODataControllersServices();
+builder.Services.AddValidators();
+builder.Services.AddODataControllersServices();
 
 var app = builder.Build();
 
@@ -69,9 +47,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseCors(builder => builder
-     .AllowAnyOrigin()
-     .AllowAnyMethod()
-     .AllowAnyHeader());
+        .AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader());
 
     // Send "~/$odata" to debug routing if enable the following middleware
     app.UseODataRouteDebug();

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using GoldenEye.Shared.Core.Objects.General;
 using LeaveSystem.Shared;
 using Microsoft.EntityFrameworkCore;

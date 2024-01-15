@@ -65,8 +65,8 @@ public class ErrorHandlerMiddleware
 
             var statusCode = error.ErrorCode switch
             {
-                FvErrorCodes.ArgumentOutOfRange => StatusCodes.Status416RequestedRangeNotSatisfiable,
-                FvErrorCodes.Argument => StatusCodes.Status400BadRequest,
+                ValidationErrorCodes.ArgumentOutOfRange => StatusCodes.Status416RequestedRangeNotSatisfiable,
+                ValidationErrorCodes.Argument => StatusCodes.Status400BadRequest,
                 _ => StatusCodes.Status400BadRequest
             };
             await HandleExceptionAsync(httpContext, statusCode, e, error.ErrorMessage);

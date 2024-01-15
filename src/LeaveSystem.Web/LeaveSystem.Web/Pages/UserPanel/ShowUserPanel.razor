@@ -38,9 +38,9 @@
                         <UserPanelLeaveLimits @ref="limitsPanel"
                                               UserId="@UserId"
                                               Year="@Year"
-                            LeaveTypesForView="@leaveTypesWithUserLimits" 
-                            WorkingHours="workingHoursDuration"
-                            RefreshLimitsCallback="ResetLimit"/>
+                                              LeaveTypesForView="@leaveTypesWithUserLimits"
+                                              WorkingHours="workingHoursDuration"
+                                              RefreshLimitsCallback="ResetLimit"/>
                     </RadzenTabsItem>
                 </AuthorizeView>
 
@@ -51,21 +51,19 @@
 
 @code {
 
-    [Parameter]
-    public string? UserId { get; set; }
+    [Parameter] public string? UserId { get; set; }
 
-    [Parameter]
-    public int? Year { get; set; }
+    [Parameter] public int? Year { get; set; }
 
-        public const string PolicyName = "ShowUserPanel";
-        public const string LeaveLimitsPolicyName = "ShowUserPanelLeaveLimits";
+    public const string PolicyName = "ShowUserPanel";
+    public const string LeaveLimitsPolicyName = "ShowUserPanelLeaveLimits";
     private IEnumerable<LeaveRequestPerType>? userSummaryCollection;
     private IEnumerable<LeaveRequestForView>? leaveRequestsForView;
     private string? userName;
-    private List<LeaveTypeForLimitsView>? leaveTypesWithUserLimits; 
+    private List<LeaveTypeForLimitsView>? leaveTypesWithUserLimits;
     TimeSpan workingHoursDuration;
     UserPanelLeaveLimits? limitsPanel;
-    
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -80,6 +78,7 @@
             var userFromApi = await EmployeeService.Get(UserId);
             userName = userFromApi?.Name;
         }
+
         Year ??= DateTimeOffset.UtcNow.Year;
         var firstDay = DateTimeOffsetExtensions.GetFirstDayOfYear(Year.Value);
         var lastDay = DateTimeOffsetExtensions.GetLastDayOfYear(Year.Value);
@@ -127,5 +126,7 @@
         limitsPanel?.GetDate();
         return year;
     }
+
+}
 
 }

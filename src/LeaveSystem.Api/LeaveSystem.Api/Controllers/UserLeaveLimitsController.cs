@@ -1,8 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Db.Entities;
-using LeaveSystem.Periods;
-using LeaveSystem.Shared;
 using LeaveSystem.Shared.UserLeaveLimits;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +9,6 @@ using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using ValidationException = System.ComponentModel.DataAnnotations.ValidationException;
 
 namespace LeaveSystem.Api.Controllers;
 
