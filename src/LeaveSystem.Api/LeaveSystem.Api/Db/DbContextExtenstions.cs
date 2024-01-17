@@ -44,8 +44,7 @@ public static class DbContextExtenstions
             new[] { RoleType.Employee.ToString() })
     };
 
-    private static Setting[] settings = new Setting[]
-    {
+    private static Setting[] settings = {
         new Setting
         {
             Id = LeaveRequestStatus.Canceled.ToString(), Category = SettingCategoryType.LeaveStatus,

@@ -124,7 +124,6 @@ else
                 .Select(u => u.First())
                 .OrderBy(u => u.Name)
                 .ToArray();
-            var now = DateService.UtcNowWithoutTime();
             var workingHoursQuery = new GetWorkingHoursQuery(
                 1,
                 1000,
