@@ -9,6 +9,8 @@ using MediatR;
 
 namespace LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 
+using System.ComponentModel.DataAnnotations;
+
 public class CreateWorkingHours : ICommand, IDateToNullablePeriod
 {
     public Guid WorkingHoursId { get; }
@@ -62,7 +64,7 @@ internal class HandleCreateWorkingHours : ICommandHandler<CreateWorkingHours>
             .Any(periodOverlapExp.And(x => x.UserId == request.UserId));
         if (workingHoursInThisPeriodExists)
         {
-            throw new ArgumentException("You cant add working hours in this period, because other overlap it");
+            throw new ValidationException("You cant add working hours in this period, because other overlap it");
         }
         var workingHours = factory.Create(request);
         await workingHoursRepository.AddAsync(workingHours, cancellationToken);
