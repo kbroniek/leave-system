@@ -38,7 +38,7 @@ public class UniversalPutAsyncTest
 
     private async Task WhenResponseThrowsException_InformAboutError_Helper<TContent>(TContent data)
     {
-        var fakeException = new FakeException("fake exception", "fakeStackTrace");
+        var fakeException = new InvalidOperationException("fake exception");
         var httpClientMock =
             HttpClientMockFactory.CreateWithException("fake-edit", fakeException, out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
