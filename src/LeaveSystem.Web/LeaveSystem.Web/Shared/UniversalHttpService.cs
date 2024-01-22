@@ -3,9 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Blazored.Toast.Services;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Logger;
-using LeaveSystem.Shared.WorkingHours;
-using Microsoft.JSInterop;
 
 namespace LeaveSystem.Web.Shared;
 
