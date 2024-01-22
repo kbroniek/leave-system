@@ -241,7 +241,7 @@ else
                 { "UserId", userForView.User.Id! }
             },
             new DialogOptions { Width = "800px", Resizable = true, Draggable = true, ShowClose = false});
-        var workingHoursFromDialog = (List<WorkingHoursDto>)result;
+        var workingHoursFromDialog = (IEnumerable<WorkingHoursDto>)result;
         var now = DateService.UtcNowWithoutTime();
         userForView.WorkingHours = workingHoursFromDialog.FirstOrDefault(h => h.DateFrom <= now && h.DateTo >= now);
     }
