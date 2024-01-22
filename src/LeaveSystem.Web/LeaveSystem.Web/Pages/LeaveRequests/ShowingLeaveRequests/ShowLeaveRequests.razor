@@ -124,6 +124,7 @@ else
                 .Select(u => u.First())
                 .OrderBy(u => u.Name)
                 .ToArray();
+            //TODO: working hours should be taken from leave request
             var workingHoursQuery = new GetWorkingHoursQuery(
                 1,
                 1000,

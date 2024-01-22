@@ -112,12 +112,11 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        Console.WriteLine("Test");
-
         var users = (await UsersService.Get()).ToList();
         var now = DateService.UtcNowWithoutTime();
         try
         {
+            //TODO: working hours should be taken from leave request
             var workingHours = await EditWorkingHoursDialog.GetWorkingHours(
                 users.Select(x => x.Id!),
                 new[] { WorkingHoursStatus.Current },
