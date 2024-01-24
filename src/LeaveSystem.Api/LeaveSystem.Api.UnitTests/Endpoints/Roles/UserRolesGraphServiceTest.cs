@@ -4,7 +4,6 @@ using LeaveSystem.Api.GraphApi;
 using LeaveSystem.Api.UnitTests.Providers;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
-using Microsoft.Kiota.Abstractions.Serialization;
 using Microsoft.Kiota.Abstractions;
 using Moq;
 
@@ -94,10 +93,7 @@ public class UserRolesGraphServiceTest
         var mockRequestAdapter = RequestAdapterMockProvider.Create();
         var graphClient = new GraphServiceClient(mockRequestAdapter.Object);
 
-        mockRequestAdapter.Setup(adapter => adapter.SendAsync<User>(
-            It.Is<RequestInformation>(info => info.HttpMethod == Method.PATCH),
-            User.CreateFromDiscriminatorValue,
-            It.IsAny<Dictionary<string, ParsableFactory<IParsable>>>(), It.IsAny<CancellationToken>()))
+        mockRequestAdapter.SetupUserResponse(Method.PATCH)
             .ReturnsAsync((User?)null)
             .Verifiable(Times.Once);
         graphClientFactoryMock.Setup(x => x.Create())

@@ -1,4 +1,4 @@
-﻿using Microsoft.Graph.Models;
+using Microsoft.Graph.Models;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Serialization;
 using Microsoft.Kiota.Abstractions.Store;
@@ -29,5 +29,10 @@ public static class RequestAdapterMockProvider
         mockRequestAdapter.Setup(adapter => adapter.SendAsync<UserCollectionResponse>(
             It.Is<RequestInformation>(info => info.HttpMethod == Method.GET),
             UserCollectionResponse.CreateFromDiscriminatorValue,
+            It.IsAny<Dictionary<string, ParsableFactory<IParsable>>>(), It.IsAny<CancellationToken>()));
+    public static ISetup<IRequestAdapter, Task<User?>> SetupUserResponse(this Mock<IRequestAdapter> mockRequestAdapter, Method method = Method.GET) =>
+        mockRequestAdapter.Setup(adapter => adapter.SendAsync<User>(
+            It.Is<RequestInformation>(info => info.HttpMethod == method),
+            User.CreateFromDiscriminatorValue,
             It.IsAny<Dictionary<string, ParsableFactory<IParsable>>>(), It.IsAny<CancellationToken>()));
 }

@@ -51,7 +51,7 @@ public class GetGraphUserService
     }
 
     private FederatedUser CreateFederatedUser(User user) =>
-            new FederatedUser(user.Id, user.Mail, user.DisplayName,
+            new(user.Id, user.Mail, user.DisplayName,
                             RoleAttributeNameResolver.MapRoles(user.AdditionalData, roleAttributeName).Roles);
     private async Task<List<FederatedUser>> GetAll(GraphServiceClient graphClient, UserCollectionResponse users, CancellationToken cancellationToken)
     {
