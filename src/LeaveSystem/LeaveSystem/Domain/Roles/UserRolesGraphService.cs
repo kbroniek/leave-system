@@ -1,6 +1,6 @@
 using System.Text.Json;
 using GoldenEye.Backend.Core.Exceptions;
-using LeaveSystem.Api.GraphApi;
+using LeaveSystem.GraphApi;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;

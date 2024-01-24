@@ -1,5 +1,6 @@
 using Ardalis.GuardClauses;
-using LeaveSystem.Api.Endpoints.Employees;
+using LeaveSystem.Domain.Employees;
+using LeaveSystem.Domain.Users;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.UsersManagement;
 using Microsoft.Identity.Web.Resource;

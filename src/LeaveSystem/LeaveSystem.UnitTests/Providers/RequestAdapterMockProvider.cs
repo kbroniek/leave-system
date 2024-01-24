@@ -6,7 +6,7 @@ using Microsoft.Kiota.Serialization.Json;
 using Moq;
 using Moq.Language.Flow;
 
-namespace LeaveSystem.Api.UnitTests.Providers;
+namespace LeaveSystem.UnitTests.Providers;
 
 public static class RequestAdapterMockProvider
 {

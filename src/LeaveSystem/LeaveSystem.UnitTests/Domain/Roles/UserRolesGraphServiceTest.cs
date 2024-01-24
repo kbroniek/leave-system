@@ -1,13 +1,14 @@
 using GoldenEye.Backend.Core.Exceptions;
 using LeaveSystem.Api.Endpoints.Roles;
-using LeaveSystem.Api.GraphApi;
-using LeaveSystem.Api.UnitTests.Providers;
+using LeaveSystem.GraphApi;
+using LeaveSystem.UnitTests.Providers;
+using LeaveSystem.UnitTests.TestDataGenerators;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Kiota.Abstractions;
 using Moq;
 
-namespace LeaveSystem.Api.UnitTests.Endpoints.Roles;
+namespace LeaveSystem.UnitTests.Domain.Roles;
 public class UserRolesGraphServiceTest
 {
     [Fact]

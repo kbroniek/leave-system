@@ -1,8 +1,9 @@
-﻿using LeaveSystem.Api.GraphApi;
-using LeaveSystem.Shared;
 using System.Text.Json;
+using LeaveSystem.GraphApi;
+using LeaveSystem.Shared;
+using LeaveSystem.UnitTests.TestDataGenerators;
 
-namespace LeaveSystem.Api.UnitTests.GraphApi;
+namespace LeaveSystem.UnitTests.GraphApi;
 
 public class RoleAttributeNameResolverMapRolesTest
 {

@@ -1,10 +1,10 @@
 using GoldenEye.Backend.Core.Exceptions;
-using LeaveSystem.Api.GraphApi;
+using LeaveSystem.GraphApi;
 using LeaveSystem.Shared;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 
-namespace LeaveSystem.Api.Endpoints.Employees;
+namespace LeaveSystem.Domain.Employees;
 
 public class GetGraphUserService
 {

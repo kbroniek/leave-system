@@ -1,13 +1,14 @@
 ﻿using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.UnitTests;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Tests;
+namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
 public class LeaveLimitsServiceTest
 {

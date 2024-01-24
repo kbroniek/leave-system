@@ -1,12 +1,13 @@
 ﻿using FluentAssertions;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.UnitTests;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Tests;
+namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
 public class ConnectedLeaveTypesServiceTest
 {
@@ -15,8 +16,8 @@ public class ConnectedLeaveTypesServiceTest
     {
         // Given
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        Guid nestedLeaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9330");
-        Guid leaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9331");
+        var nestedLeaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9330");
+        var leaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9331");
         await AddLeaveType(dbContext, nestedLeaveTypeId, leaveTypeId);
         var sut = new ConnectedLeaveTypesService(dbContext);
         // When
@@ -31,8 +32,8 @@ public class ConnectedLeaveTypesServiceTest
     {
         // Given
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        Guid nestedLeaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9332");
-        Guid leaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9333");
+        var nestedLeaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9332");
+        var leaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9333");
         await AddLeaveType(dbContext, nestedLeaveTypeId, leaveTypeId);
         var sut = new ConnectedLeaveTypesService(dbContext);
         // When
@@ -47,8 +48,8 @@ public class ConnectedLeaveTypesServiceTest
     {
         // Given
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        Guid nestedLeaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9335");
-        Guid leaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9336");
+        var nestedLeaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9335");
+        var leaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9336");
         await AddLeaveType(dbContext, nestedLeaveTypeId, leaveTypeId);
         var sut = new ConnectedLeaveTypesService(dbContext);
         // When
@@ -62,9 +63,9 @@ public class ConnectedLeaveTypesServiceTest
     {
         // Given
         await using var dbContext = await DbContextFactory.CreateDbContextAsync();
-        Guid nestedLeaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9337");
-        Guid leaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9338");
-        Guid baseLeaveType = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9339");
+        var nestedLeaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9337");
+        var leaveTypeId = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9338");
+        var baseLeaveType = Guid.Parse("3c503f12-60d9-4e7d-b950-28503b3d9339");
         var leaveType = new LeaveType
         {
             Id = leaveTypeId,

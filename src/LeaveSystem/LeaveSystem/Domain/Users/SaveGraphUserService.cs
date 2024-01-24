@@ -1,10 +1,10 @@
 using System.Text.Json;
 using Ardalis.GuardClauses;
-using LeaveSystem.Api.GraphApi;
+using LeaveSystem.GraphApi;
 using LeaveSystem.Shared;
 using Microsoft.Graph.Models;
 
-namespace LeaveSystem.Api.Endpoints.Users;
+namespace LeaveSystem.Domain.Users;
 
 public class SaveGraphUserService
 {

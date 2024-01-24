@@ -1,5 +1,5 @@
 using GoldenEye.Backend.Core.DDD.Registration;
-using LeaveSystem.Api.GraphApi;
+using LeaveSystem.GraphApi;
 using Microsoft.OpenApi.Models;
 
 namespace LeaveSystem.Api;

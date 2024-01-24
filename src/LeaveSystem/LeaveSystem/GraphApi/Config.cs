@@ -1,7 +1,9 @@
-using LeaveSystem.Api.Endpoints.Employees;
-using LeaveSystem.Api.Endpoints.Users;
+using LeaveSystem.Domain.Employees;
+using LeaveSystem.Domain.Users;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace LeaveSystem.Api.GraphApi;
+namespace LeaveSystem.GraphApi;
 
 public static class Config
 {

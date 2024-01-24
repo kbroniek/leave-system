@@ -1,4 +1,4 @@
-namespace LeaveSystem.Api.UnitTests;
+namespace LeaveSystem.UnitTests.TestDataGenerators;
 
 public static class TestData
 {

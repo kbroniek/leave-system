@@ -34,6 +34,7 @@
     <PackageVersion Include="Microsoft.Identity.Web" Version="2.16.0" />
     <PackageVersion Include="Microsoft.Identity.Web.UI" Version="2.16.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageVersion Include="Azure.Identity" Version="1.10.4" />
   </ItemGroup>
   <!-- Static analyzers -->
   <ItemGroup>
