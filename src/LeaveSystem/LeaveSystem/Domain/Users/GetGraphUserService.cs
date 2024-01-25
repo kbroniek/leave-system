@@ -4,7 +4,7 @@ using LeaveSystem.Shared;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 
-namespace LeaveSystem.Domain.Employees;
+namespace LeaveSystem.Domain.Users;
 
 public class GetGraphUserService
 {

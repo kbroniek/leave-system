@@ -1,4 +1,3 @@
-using LeaveSystem.Domain.Employees;
 using LeaveSystem.Domain.Users;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

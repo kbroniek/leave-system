@@ -3,7 +3,6 @@ using System.Text.Json;
 using Ardalis.GuardClauses;
 using GoldenEye.Backend.Core.DDD.Commands;
 using GoldenEye.Backend.Core.DDD.Queries;
-using LeaveSystem.Domain.Employees;
 using LeaveSystem.Domain.Users;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;

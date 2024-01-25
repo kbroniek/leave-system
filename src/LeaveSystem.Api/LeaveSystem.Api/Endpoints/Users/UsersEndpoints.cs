@@ -1,5 +1,4 @@
 using Ardalis.GuardClauses;
-using LeaveSystem.Domain.Employees;
 using LeaveSystem.Domain.Users;
 using LeaveSystem.Shared;
 using LeaveSystem.Web.Pages.UsersManagement;
