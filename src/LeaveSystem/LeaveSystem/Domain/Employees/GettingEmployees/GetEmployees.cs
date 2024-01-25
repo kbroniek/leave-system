@@ -16,6 +16,10 @@ internal class HandleGetEmployees :
     public HandleGetEmployees(GetGraphUserService graphUserService) => this.graphUserService = graphUserService;
     public async Task<IEnumerable<FederatedUser>> Handle(GetEmployees request, CancellationToken cancellationToken)
     {
+        if (!request.CalledBy.Roles.Any())
+        {
+            throw new UnauthorizedAccessException("You are not permitted to access this resource");
+        }
         var isPureEmployee = !IsInAllRolesExeptEmployee(request.CalledBy);
         var graphUsers = isPureEmployee ?
             await graphUserService.Get(new string[] { request.CalledBy.Id }, cancellationToken) :

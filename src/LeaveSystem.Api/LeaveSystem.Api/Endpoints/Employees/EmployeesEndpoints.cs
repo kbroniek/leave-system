@@ -2,6 +2,7 @@ using Ardalis.GuardClauses;
 using GoldenEye.Backend.Core.DDD.Queries;
 using LeaveSystem.Domain.Employees.GettingEmployees;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Auth;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using Microsoft.Identity.Web.Resource;
 
