@@ -14,7 +14,7 @@ public class GetEmployeesTest
     {
         //Given
         var fakeId = "12c8ef05-a4a5-4984-bfdc-c1c7116f4a0a";
-        var getGraphUserServiceMock = new Mock<GetGraphUserService>(MockBehavior.Strict, null, RoleAttributeNameResolver.Create("fake"));
+        var getGraphUserServiceMock = new Mock<GetGraphUserService>(MockBehavior.Strict, null!, RoleAttributeNameResolver.Create("fake"));
         var calledBy = new FederatedUser(fakeId, null, null, Enumerable.Empty<string>());
 
         var sut = new HandleGetEmployees(getGraphUserServiceMock.Object);
@@ -29,7 +29,7 @@ public class GetEmployeesTest
         //Given
         var fakeId = "12c8ef05-a4a5-4984-bfdc-c1c7116f4a0b";
         var expected = new FederatedUser(fakeId, "fakeEmail@test.com", "fakeName", new string[] { RoleType.Employee.ToString() });
-        var getGraphUserServiceMock = new Mock<GetGraphUserService>(MockBehavior.Strict, null, RoleAttributeNameResolver.Create("fake"));
+        var getGraphUserServiceMock = new Mock<GetGraphUserService>(MockBehavior.Strict, null!, RoleAttributeNameResolver.Create("fake"));
         getGraphUserServiceMock
             .Setup(x => x.Get(It.Is<string[]>(x => x.Contains(fakeId)), CancellationToken.None))
             .ReturnsAsync(new FederatedUser[]
@@ -54,7 +54,7 @@ public class GetEmployeesTest
         //Given
         var fakeId = "12c8ef05-a4a5-4984-bfdc-c1c7116f4a0c";
         var expected = new FederatedUser(fakeId, "fakeEmail@test.com", "fakeName", new string[] { RoleType.Employee.ToString() });
-        var getGraphUserServiceMock = new Mock<GetGraphUserService>(MockBehavior.Strict, null, RoleAttributeNameResolver.Create("fake"));
+        var getGraphUserServiceMock = new Mock<GetGraphUserService>(MockBehavior.Strict, null!, RoleAttributeNameResolver.Create("fake"));
         getGraphUserServiceMock
             .Setup(x => x.Get(CancellationToken.None))
             .ReturnsAsync(new FederatedUser[]
