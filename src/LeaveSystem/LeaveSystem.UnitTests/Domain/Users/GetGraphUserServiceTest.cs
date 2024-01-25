@@ -1,5 +1,5 @@
 using GoldenEye.Backend.Core.Exceptions;
-using LeaveSystem.Domain.Employees;
+using LeaveSystem.Domain.Users;
 using LeaveSystem.GraphApi;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestDataGenerators;
