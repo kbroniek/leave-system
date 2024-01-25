@@ -1,4 +1,6 @@
+using FluentValidation;
 using LeaveSystem.Db;
+using LeaveSystem.Db.Entities;
 using LeaveSystem.EventSourcing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,4 +17,9 @@ public static class Config
             .AddDbContext<LeaveSystemDbContext>(options => options.UseNpgsql(martenConfig.ConnectionString))
             .AddEventSourcing(martenConfig);
     }
+
+    public static IServiceCollection AddValidators(this IServiceCollection services) =>
+        services.AddScoped<IValidator<UserLeaveLimit>, UserLeaveLimitValidator>()
+            .AddScoped<IValidator<LeaveType>, LeaveTypeValidator>()
+            .AddScoped<IValidator<Setting>, SettingValidator>();
 }

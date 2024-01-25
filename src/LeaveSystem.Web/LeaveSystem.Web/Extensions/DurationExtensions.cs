@@ -34,5 +34,17 @@ public static class DurationExtensions
 		}
 		return result;
 	}
+
+	public static int GetDurationDays(this TimeSpan duration, TimeSpan workingHours)
+	{
+		return (int)(workingHours.TotalHours == 0 ?
+			duration.TotalHours :
+			duration.TotalHours / workingHours.TotalHours);
+	}
+
+	public static TimeSpan GetDurationFromDays(int days, TimeSpan workingHours)
+	{
+		return workingHours * days;
+	}
 }
 

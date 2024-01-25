@@ -36,7 +36,7 @@ public static class GuardClauseExtensions
     [return: NotNull]
     private static T AgainstNill<T>([NotNull][ValidatedNotNull] T? input, string? parameterName, string? message)
     {
-        if (input == null)
+        if (input is null)
         {
             if (string.IsNullOrEmpty(message))
             {

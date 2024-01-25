@@ -13,10 +13,10 @@ namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest
 public class LeaveLimitsServiceTest
 {
     [Theory]
-    [InlineData("2023-07-16", "2023-07-17")]
-    [InlineData("2023-01-01", "2023-01-02")]
-    [InlineData("2023-12-30", "2023-12-31")]
-    [InlineData("2023-01-01", "2023-12-31")]
+    [InlineData("2023-07-16 +0", "2023-07-17 +0")]
+    [InlineData("2023-01-01 +0", "2023-01-02 +0")]
+    [InlineData("2023-12-30 +0", "2023-12-31 +0")]
+    [InlineData("2023-01-01 +0", "2023-12-31 +0")]
     public async Task WhenValidDate_ThenReturnLimit(string dateFrom, string dateTo)
     {
         // Given
@@ -36,10 +36,10 @@ public class LeaveLimitsServiceTest
     }
 
     [Theory]
-    [InlineData("2022-07-12", "2022-07-13")]
-    [InlineData("2024-01-01", "2024-01-02")]
-    [InlineData("2022-12-30", "2022-12-31")]
-    [InlineData("2022-01-01", "2022-12-31")]
+    [InlineData("2022-07-12 +0", "2022-07-13 +0")]
+    [InlineData("2024-01-01 +0", "2024-01-02 +0")]
+    [InlineData("2022-12-30 +0", "2022-12-31 +0")]
+    [InlineData("2022-01-01 +0", "2022-12-31 +0")]
     public async Task WhenInvalidDate_ThenThrowValidationException(string dateFrom, string dateTo)
     {
         // Given
@@ -71,8 +71,8 @@ public class LeaveLimitsServiceTest
         var sut = new LeaveLimitsService(dbContext);
         // When
         var act = () => sut.GetLimit(
-            DateTimeOffset.Parse("2023-08-12"),
-            DateTimeOffset.Parse("2023-08-13"),
+            DateTimeOffset.Parse("2023-08-12 +0"),
+            DateTimeOffset.Parse("2023-08-13 +0"),
             leaveTypeId,
             "fakeAnotherId");
         // Then
@@ -92,8 +92,8 @@ public class LeaveLimitsServiceTest
         var sut = new LeaveLimitsService(dbContext);
         // When
         var act = () => sut.GetLimit(
-            DateTimeOffset.Parse("2023-08-12"),
-            DateTimeOffset.Parse("2023-08-13"),
+            DateTimeOffset.Parse("2023-08-12 +0"),
+            DateTimeOffset.Parse("2023-08-13 +0"),
             Guid.Parse("82b52b33-4cbc-40d9-9414-116e5c918d05"),
             userId);
         // Then
@@ -115,15 +115,15 @@ public class LeaveLimitsServiceTest
             LeaveTypeId = leaveTypeId,
             Limit = TimeSpan.FromHours(24),
             AssignedToUserId = userId,
-            ValidSince = DateTimeOffset.Parse("2023-05-01"),
-            ValidUntil = DateTimeOffset.Parse("2023-05-31"),
+            ValidSince = DateTimeOffset.Parse("2023-05-01 +0"),
+            ValidUntil = DateTimeOffset.Parse("2023-05-31 +0"),
         });
         await AddAndGetLimit(dbContext, leaveTypeId, userId);
         var sut = new LeaveLimitsService(dbContext);
         // When
         var act = () => sut.GetLimit(
-            DateTimeOffset.Parse("2023-05-12"),
-            DateTimeOffset.Parse("2023-05-13"),
+            DateTimeOffset.Parse("2023-05-12 +0"),
+            DateTimeOffset.Parse("2023-05-13 +0"),
             leaveTypeId,
             userId);
         // Then
@@ -140,8 +140,8 @@ public class LeaveLimitsServiceTest
             LeaveTypeId = leaveTypeId,
             Limit = TimeSpan.FromHours(24),
             AssignedToUserId = userId,
-            ValidSince = DateTimeOffset.Parse("2023-01-01"),
-            ValidUntil = DateTimeOffset.Parse("2023-12-31"),
+            ValidSince = DateTimeOffset.Parse("2023-01-01 +0"),
+            ValidUntil = DateTimeOffset.Parse("2023-12-31 +0"),
         };
         await dbContext.UserLeaveLimits.AddAsync(userLeaveLimit);
         await dbContext.SaveChangesAsync();

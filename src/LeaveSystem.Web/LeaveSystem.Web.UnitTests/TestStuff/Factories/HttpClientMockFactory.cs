@@ -5,70 +5,128 @@ using RichardSzalay.MockHttp;
 
 namespace LeaveSystem.Web.UnitTests.TestStuff.Factories;
 
+using Helpers;
+
 public static class HttpClientMockFactory
 {
-    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, string baseFakeUrl = "http://localhost:5047/") =>
-        CreateWithJsonResponse(url, response, JsonSerializerOptions.Default, baseFakeUrl);
+    private const string BaseFakeUrl = "http://localhost:5047/";
 
-    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, JsonSerializerOptions options, string baseFakeUrl = "http://localhost:5047/")
+    public static HttpClient CreateWithJsonResponse<T>(string url, T? response) =>
+        CreateWithJsonResponse(url, response, JsonSerializerOptions.Default);
+
+    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, JsonSerializerOptions options)
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();
-        mockHttpMessageHandler.When(baseFakeUrl + url).RespondWithJson(response, options);
+        mockHttpMessageHandler.When(BaseFakeUrl + url).RespondWithJson(response, options);
         var httpClient = new HttpClient(mockHttpMessageHandler);
-        httpClient.BaseAddress = new Uri(baseFakeUrl);
+        httpClient.BaseAddress = new Uri(BaseFakeUrl);
         return httpClient;
     }
 
-    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, JsonSerializerOptions options, out MockedHttpValues mockedHttpValues, string baseFakeUrl = "http://localhost:5047/")
+    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, JsonSerializerOptions options, out MockedHttpValues mockedHttpValues)
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();
-        var request = mockHttpMessageHandler.When(baseFakeUrl + url).RespondWithJson(response, options);
+        var request = mockHttpMessageHandler.When(BaseFakeUrl + url).RespondWithJson(response, options);
         mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
         var httpClient = new HttpClient(mockHttpMessageHandler)
         {
-            BaseAddress = new Uri(baseFakeUrl)
+            BaseAddress = new Uri(BaseFakeUrl)
         };
+        return httpClient;
+    }
+
+    public static HttpClient CreateWithJsonResponse<T>(string url, T? response, HttpStatusCode statusCode, JsonSerializerOptions options, out MockedHttpValues mockedHttpValues)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        var request = mockHttpMessageHandler.When(BaseFakeUrl + url).RespondWithJson(response, statusCode, options);
+        mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
+        var httpClient = new HttpClient(mockHttpMessageHandler)
+        {
+            BaseAddress = new Uri(BaseFakeUrl)
+        };
+        return httpClient;
+    }
+
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode)
+        => CreateWithJsonContent(url, content, httpStatusCode, JsonSerializerOptions.Default);
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, JsonSerializerOptions options)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        mockHttpMessageHandler.When(BaseFakeUrl + url).WithJsonContent(content, options).Respond(httpStatusCode);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(BaseFakeUrl);
         return httpClient;
     }
 
     public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode,
-        string baseFakeUrl = "http://localhost:5047/")
+        HttpContent responseContent)
+        => CreateWithJsonContent(url, content, httpStatusCode, responseContent, JsonSerializerOptions.Default);
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, HttpContent responseContent, JsonSerializerOptions options)
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();
-        mockHttpMessageHandler.When(baseFakeUrl + url).WithJsonContent(content).Respond(httpStatusCode);
+        mockHttpMessageHandler.When(BaseFakeUrl + url).WithJsonContent(content, options).Respond(httpStatusCode, responseContent);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(BaseFakeUrl);
+        return httpClient;
+    }
+
+    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, JsonSerializerOptions options, out MockedHttpValues mockedHttpValues)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        var request = mockHttpMessageHandler.When(BaseFakeUrl + url).WithJsonContent(content, options).Respond(httpStatusCode);
+        mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(BaseFakeUrl);
+        return httpClient;
+    }
+
+    public static HttpClient CreateWithJsonContent<T>(
+        string url, T? content, HttpStatusCode httpStatusCode, HttpContent responseContent, JsonSerializerOptions options, out MockedHttpValues mockedHttpValues)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        var request = mockHttpMessageHandler.When(BaseFakeUrl + url).WithJsonContent(content, options).Respond(httpStatusCode, responseContent);
+        mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(BaseFakeUrl);
+        return httpClient;
+    }
+
+    public static HttpClient Create(string url, HttpStatusCode httpStatusCode)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        mockHttpMessageHandler.When(BaseFakeUrl + url).Respond(httpStatusCode);
         var httpClient = new HttpClient(mockHttpMessageHandler)
         {
-            BaseAddress = new Uri(baseFakeUrl)
+            BaseAddress = new Uri(BaseFakeUrl)
         };
         return httpClient;
     }
 
-    public static HttpClient CreateWithJsonContent<T>(string url, T? content, HttpStatusCode httpStatusCode, HttpContent responseContent,
-        string baseFakeUrl = "http://localhost:5047/")
+    public static HttpClient Create(string url, HttpStatusCode httpStatusCode, out MockedHttpValues mockedHttpValues)
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();
-        mockHttpMessageHandler.When(baseFakeUrl + url).WithJsonContent(content).Respond(httpStatusCode, responseContent);
+        var request = mockHttpMessageHandler.When(BaseFakeUrl + url).Respond(httpStatusCode);
+        mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
         var httpClient = new HttpClient(mockHttpMessageHandler)
         {
-            BaseAddress = new Uri(baseFakeUrl)
+            BaseAddress = new Uri(BaseFakeUrl)
         };
         return httpClient;
     }
 
-    public static HttpClient Create(string url, HttpStatusCode httpStatusCode,
-        string baseFakeUrl = "http://localhost:5047/")
+    public static HttpClient CreateWithException(string url, Exception exception, out MockedHttpValues mockedHttpValues)
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();
-        mockHttpMessageHandler.When(baseFakeUrl + url).Respond(httpStatusCode);
-        var httpClient = new HttpClient(mockHttpMessageHandler)
-        {
-            BaseAddress = new Uri(baseFakeUrl)
-        };
+        var fakeResponseContent = new ExceptionThrowingContent(exception);
+        var request = mockHttpMessageHandler.When(BaseFakeUrl + url).Respond(fakeResponseContent);
+        mockedHttpValues = new MockedHttpValues(request, mockHttpMessageHandler);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(BaseFakeUrl);
         return httpClient;
     }
 
     public record MockedHttpValues(MockedRequest Request, MockHttpMessageHandler MockHttpMessageHandler)
     {
-        public void ShouldMatchCount(int count = 1) => MockHttpMessageHandler.GetMatchCount(Request).Should().Be(count);
+        public void RequestShouldBeMatched(int expectedMatchedCount = 1) => this.MockHttpMessageHandler.GetMatchCount(this.Request).Should().Be(expectedMatchedCount);
     }
 }

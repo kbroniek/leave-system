@@ -27,6 +27,6 @@ public class GetWorkingHoursTest
         var result = await sut.GetWorkingHours(query);
         //Then
         result.Should().BeEquivalentTo(expectedResponse);
-        mockedHttpValues.ShouldMatchCount();
+        mockedHttpValues.RequestShouldBeMatched();
     }
 }

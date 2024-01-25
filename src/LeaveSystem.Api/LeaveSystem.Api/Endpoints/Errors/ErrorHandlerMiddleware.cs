@@ -1,6 +1,14 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.Graph;
+using System.Net;
+using static LeaveSystem.Api.Endpoints.Errors.ErrorHandlerMiddleware;
 using System.Reflection;
 
 namespace LeaveSystem.Api.Endpoints.Errors;
+
+using Ardalis.GuardClauses;
+using FluentValidation;
+using Shared.FluentValidation;
 
 public class ErrorHandlerMiddleware
 {
@@ -29,6 +37,14 @@ public class ErrorHandlerMiddleware
         {
             await HandleExceptionAsync(httpContext, StatusCodes.Status404NotFound, e, "Resource not found");
         }
+        catch (NotFoundException e)
+        {
+            await HandleExceptionAsync(httpContext, StatusCodes.Status404NotFound, e, "Resource not found");
+        }
+        catch (EntityNotFoundException e)
+        {
+            await HandleExceptionAsync(httpContext, StatusCodes.Status404NotFound, e, e.Message);
+        }
         catch (ArgumentException e)
         {
             await HandleExceptionAsync(httpContext, StatusCodes.Status400BadRequest, e);
@@ -36,6 +52,28 @@ public class ErrorHandlerMiddleware
         catch (BadHttpRequestException e)
         {
             await HandleExceptionAsync(httpContext, e.StatusCode, e);
+        }
+        catch (ValidationException e)
+        {
+            var error = e.Errors.FirstOrDefault();
+            if (error is null)
+            {
+                await HandleExceptionAsync(httpContext, StatusCodes.Status500InternalServerError, e,
+                    "Error while handling ValidationException.");
+                return;
+            }
+
+            var statusCode = error.ErrorCode switch
+            {
+                ValidationErrorCodes.ArgumentOutOfRange => StatusCodes.Status416RequestedRangeNotSatisfiable,
+                ValidationErrorCodes.Argument => StatusCodes.Status400BadRequest,
+                _ => StatusCodes.Status400BadRequest
+            };
+            await HandleExceptionAsync(httpContext, statusCode, e, error.ErrorMessage);
+        }
+        catch (System.ComponentModel.DataAnnotations.ValidationException e)
+        {
+            await HandleExceptionAsync(httpContext, StatusCodes.Status400BadRequest, e, e.Message);
         }
         catch (Exception e)
         {
