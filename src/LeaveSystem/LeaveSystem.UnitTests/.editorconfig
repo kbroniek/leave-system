@@ -11,5 +11,3 @@ dotnet_diagnostic.CA1305.severity = none
 dotnet_diagnostic.CS8619.severity = none
 # CA1861: Prefer 'static readonly' fields over constant array arguments if the called method is called repeatedly and is not mutating the passed array
 dotnet_diagnostic.CA1861.severity = none
-# CA1305: The behavior of 'DateTimeOffset.Parse(string)' could vary based on the current user's locale settings.
-dotnet_diagnostic.CA1305.severity = none
