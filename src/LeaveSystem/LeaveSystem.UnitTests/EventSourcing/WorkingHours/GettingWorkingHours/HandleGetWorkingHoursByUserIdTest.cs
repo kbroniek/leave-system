@@ -1,11 +1,9 @@
-using FluentAssertions;
 using GoldenEye.Backend.Core.Exceptions;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
 using Marten;
 using NSubstitute;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.GettingWorkingHours;
 

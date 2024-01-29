@@ -1,4 +1,4 @@
-﻿using LeaveSystem.Shared.Date;
+using LeaveSystem.Shared.Date;
 using Moq;
 
 namespace LeaveSystem.Api.UnitTests.Providers;

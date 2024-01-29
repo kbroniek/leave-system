@@ -1,4 +1,3 @@
-using FluentAssertions;
 using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Extensions;
@@ -11,7 +10,6 @@ using Marten;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
 

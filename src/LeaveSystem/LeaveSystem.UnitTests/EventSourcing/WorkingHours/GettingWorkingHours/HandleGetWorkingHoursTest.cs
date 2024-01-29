@@ -1,4 +1,3 @@
-using FluentAssertions;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
@@ -6,7 +5,6 @@ using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
 using Marten;
 using NSubstitute;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.GettingWorkingHours;
 
