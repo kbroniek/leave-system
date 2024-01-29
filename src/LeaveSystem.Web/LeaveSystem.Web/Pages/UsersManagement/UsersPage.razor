@@ -123,8 +123,9 @@ else
                 TimeSpan.FromSeconds(15),
                 DateService,
                 WorkingHoursService);
-            usersForView = users.Select(x => new UserForView(x, workingHours.FirstOrDefault(
-                h => h.UserId == x.Id && h.DateFrom <= now && h.DateTo >= now)));
+            usersForView = users.Select(x => new UserForView(x, workingHours
+                .Where(h => h.UserId == x.Id)
+                .FirstOrDefault(CheckValidWorkingHours(now))));
         }
         catch (Exception ex)
         {
@@ -243,8 +244,9 @@ else
             new DialogOptions { Width = "800px", Resizable = true, Draggable = true, ShowClose = false});
         var workingHoursFromDialog = (IEnumerable<WorkingHoursDto>)result;
         var now = DateService.UtcNowWithoutTime();
-        userForView.WorkingHours = workingHoursFromDialog.FirstOrDefault(h =>
-            h.DateFrom <= now && (h.DateTo >= now || h.DateTo is null));
+        userForView.WorkingHours = workingHoursFromDialog.FirstOrDefault(CheckValidWorkingHours(now));
     }
 
+    private Func<WorkingHoursDto, bool> CheckValidWorkingHours(DateTimeOffset now) =>
+        h => h.DateFrom <= now && (h.DateTo >= now || h.DateTo == null);
 }
