@@ -1,4 +1,6 @@
-﻿using Ardalis.GuardClauses;
+using Ardalis.GuardClauses;
+using GoldenEye.Backend.Core.DDD.Queries;
+using LeaveSystem.Domain.Employees.GettingEmployees;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
@@ -12,24 +14,25 @@ public static class EmployeesEndpoints
     public const string GetEmployeePolicyName = "GetEmployee";
     public static IEndpointRouteBuilder AddEmployeesEndpoints(this IEndpointRouteBuilder endpoint, string azureScpes)
     {
-        endpoint.MapGet("api/employees", async (HttpContext httpContext, GetGraphUserService graphUserService, CancellationToken cancellationToken) =>
+        endpoint.MapGet("api/employees", async (HttpContext httpContext, IQueryBus queryBus, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
-            var graphUsers = await graphUserService.Get(cancellationToken);
-            return new GetEmployeesDto(graphUsers
-                .Where(graphUser => graphUser.Roles.Any(r => r == RoleType.Employee.ToString()))
-                .Select(graphUser => Map(graphUser)));
+            var federatedUser = httpContext.User.CreateModel();
+            var graphUsers = await queryBus.SendAsync<GetEmployees, IEnumerable<FederatedUser>>(new GetEmployees(federatedUser), cancellationToken);
+            return new GetEmployeesDto(graphUsers.Select(graphUser => Map(graphUser)));
         })
         .WithName(GetEmployeesPolicyName)
         .RequireAuthorization(GetEmployeesPolicyName);
 
-        endpoint.MapGet("api/employees/{id}", async (HttpContext httpContext, string? id, GetGraphUserService graphUserService, CancellationToken cancellationToken) =>
+        endpoint.MapGet("api/employees/{id}", async (HttpContext httpContext, string? id, IQueryBus queryBus, CancellationToken cancellationToken) =>
         {
             httpContext.VerifyUserHasAnyAcceptedScope(azureScpes);
 
             Guard.Against.NullOrEmpty(id);
-            var graphUser = await graphUserService.Get(id, cancellationToken);
+
+            var federatedUser = httpContext.User.CreateModel();
+            var graphUser = await queryBus.SendAsync<GetSingleEmployee, FederatedUser>(new GetSingleEmployee(federatedUser, id), cancellationToken);
             return Map(graphUser);
         })
         .WithName(GetEmployeePolicyName)
@@ -38,8 +41,6 @@ public static class EmployeesEndpoints
         return endpoint;
     }
 
-    private static GetEmployeeDto Map(FederatedUser graphUser)
-    {
-        return new GetEmployeeDto(graphUser.Id, graphUser.Name ?? graphUser.Email ?? $"{graphUser.Id} unnamed", graphUser.Email);
-    }
+    private static GetEmployeeDto Map(FederatedUser graphUser) =>
+        new(graphUser.Id, graphUser.Name ?? graphUser.Email ?? $"{graphUser.Id} unnamed", graphUser.Email);
 }

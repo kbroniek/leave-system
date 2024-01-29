@@ -1,6 +1,6 @@
-﻿using GraphClientFactory = LeaveSystem.Api.GraphApi.GraphClientFactory;
+﻿using GraphClientFactory = LeaveSystem.GraphApi.GraphClientFactory;
 
-namespace LeaveSystem.Api.UnitTests.GraphApi;
+namespace LeaveSystem.UnitTests.GraphApi;
 
 public class GraphClientFactoryCreateClientTest
 {

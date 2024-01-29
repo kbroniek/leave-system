@@ -1,21 +1,19 @@
-using FluentAssertions;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.Stubs;
 using Marten;
 using Moq;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.GettingLeaveRequests;
 
 public class HandleGetLeaveRequestsTest
 {
     private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
-    private static readonly DateTimeOffset Now = DateTimeOffset.Now;
+    private static readonly DateTimeOffset Now = FakeDateServiceProvider.GetDateService().UtcNow();
     private static readonly LeaveRequestShortInfo[] Data = FakeLeaveRequestShortInfoProvider.Get(Now);
 
-    private static async Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession) => new(documentSession);
+    private static Task<HandleGetLeaveRequests> GetSut(IDocumentSession documentSession) => Task.FromResult(new HandleGetLeaveRequests(documentSession));
 
     [Theory]
     [MemberData(nameof(Get_WhenMoreThenZeroStatuses_ThenReturnSameStatuses_TestData))]

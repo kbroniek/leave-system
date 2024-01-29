@@ -1,5 +1,5 @@
-﻿using System.Security.Claims;
-using System.Text.Json;
+using System.Security.Claims;
+using LeaveSystem.Shared.Auth;
 
 namespace LeaveSystem.Shared;
 public static class ClaimsPrincipalExtensions
@@ -16,4 +16,7 @@ public static class ClaimsPrincipalExtensions
         var rolesClaim = claimsPrincipal.FindFirst("extension_Role");
         return FederatedUser.Create(id?.Value, email?.Value, fullName, rolesClaim?.Value);
     }
+
+    public static bool IsInRoles(this IEnumerable<string> roles, params RoleType[] roleTypes) =>
+        roles.Any(r => roleTypes.Any(t => r.Equals(t.ToString(), StringComparison.Ordinal)));
 }

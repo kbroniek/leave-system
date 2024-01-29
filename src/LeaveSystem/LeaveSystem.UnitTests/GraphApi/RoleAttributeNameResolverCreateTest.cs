@@ -1,7 +1,6 @@
-using FluentAssertions;
-using LeaveSystem.Api.GraphApi;
+using LeaveSystem.GraphApi;
 
-namespace LeaveSystem.Api.UnitTests.GraphApi;
+namespace LeaveSystem.UnitTests.GraphApi;
 
 public class RoleAttributeNameResolverCreateTest
 {

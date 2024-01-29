@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LeaveSystem.Shared.Auth;
 
 public class RoleRequirement : IAuthorizationRequirement
 {
-    public static readonly RoleRequirement AuthorizeAll = new(Enum.GetValues<RoleType>());
+    public static readonly RoleType[] AllRoles = Enum.GetValues<RoleType>();
+    public static readonly RoleRequirement AuthorizeAll = new(AllRoles);
     public RoleRequirement(params RoleType[] roles) =>
         Roles = roles;
 

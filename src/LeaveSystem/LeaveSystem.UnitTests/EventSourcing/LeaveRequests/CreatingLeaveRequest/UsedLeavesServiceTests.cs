@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using LeaveSystem.EventSourcing.LeaveRequests;
+using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Extensions;
@@ -11,7 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Tests;
+namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 
 public class UsedLeavesServiceTests
 {
@@ -32,10 +34,10 @@ public class UsedLeavesServiceTests
     public async Task WhenValidDate_ThenGetUsedLeavesDuration(string dateFrom, string dateTo)
     {
         // Given
-        Guid leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139620");
-        Guid leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139621");
+        var leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139620");
+        var leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139621");
         const string userId = "fakeUserId";
-        LeaveRequestCreated fakeEvent = GetEvent(dateFrom, dateTo, leaveTypeId, leaveRequestId, userId);
+        var fakeEvent = GetEvent(dateFrom, dateTo, leaveTypeId, leaveRequestId, userId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
@@ -60,10 +62,10 @@ public class UsedLeavesServiceTests
     public async Task WhenInvalidDate_ThenGetZeroDuration(string dateFrom, string dateTo)
     {
         // Given
-        Guid leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139622");
-        Guid leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139623");
+        var leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139622");
+        var leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139623");
         const string userId = "fakeUserId";
-        LeaveRequestCreated fakeEvent = GetEvent(dateFrom, dateTo, leaveTypeId, leaveRequestId, userId);
+        var fakeEvent = GetEvent(dateFrom, dateTo, leaveTypeId, leaveRequestId, userId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
@@ -82,9 +84,9 @@ public class UsedLeavesServiceTests
     public async Task WhenUserIdIsDifferent_ThenGetZeroDuration()
     {
         // Given
-        Guid leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139624");
-        Guid leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139625");
-        LeaveRequestCreated fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, "fakeUserId");
+        var leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139624");
+        var leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139625");
+        var fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, "fakeUserId");
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
@@ -103,10 +105,10 @@ public class UsedLeavesServiceTests
     public async Task WhenLeaveTypeIdIsDifferent_ThenGetZeroDuration()
     {
         // Given
-        Guid leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139625");
-        Guid leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139626");
+        var leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139625");
+        var leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139626");
         const string userId = "fakeUserId";
-        LeaveRequestCreated fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, userId);
+        var fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, userId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
@@ -125,10 +127,10 @@ public class UsedLeavesServiceTests
     public async Task WhenLeaveRequestIsNull_ThenGetZeroDuration()
     {
         // Given
-        Guid leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139628");
-        Guid leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139629");
+        var leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139628");
+        var leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139629");
         const string userId = "fakeUserId";
-        LeaveRequestCreated fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, userId);
+        var fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, userId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         eventStoreMock
             .Setup_QueryRawEventDataOnly(new[] { fakeEvent })
@@ -147,10 +149,10 @@ public class UsedLeavesServiceTests
     public async Task WhenLeaveRequestIsInvalid_ThenGetZeroDuration()
     {
         // Given
-        Guid leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139628");
-        Guid leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139629");
+        var leaveTypeId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139628");
+        var leaveRequestId = Guid.Parse("2ce93c56-1c3b-49b9-b063-c9d14f139629");
         const string userId = "fakeUserId";
-        LeaveRequestCreated fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, userId);
+        var fakeEvent = GetEvent("2023-07-12", "2023-07-13", leaveTypeId, leaveRequestId, userId);
         var entity = LeaveRequest.CreatePendingLeaveRequest(fakeEvent);
         entity.Cancel("fake remarks", FederatedUser.Create(userId, "fakeUser@fake.com", "Fakeoslav"), DateTimeOffset.Parse("2023-07-10T00:00:00.0000000+00:00"));
         eventStoreMock

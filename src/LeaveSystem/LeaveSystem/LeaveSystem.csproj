@@ -9,6 +9,8 @@
     <PackageReference Include="Marten" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Microsoft.Graph" />
+    <PackageReference Include="Azure.Identity" />
     <PackageReference Include="System.Linq.Dynamic.Core" />
   </ItemGroup>
 
