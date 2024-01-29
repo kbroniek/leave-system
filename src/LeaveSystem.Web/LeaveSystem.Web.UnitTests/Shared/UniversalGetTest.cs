@@ -1,7 +1,12 @@
+namespace LeaveSystem.Web.UnitTests.Shared;
+
 using System.Net;
 using System.Text.Json;
 using Blazored.Toast.Services;
+using LeaveSystem.Api.UnitTests.Providers;
 using LeaveSystem.Shared.Converters;
+using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Shared;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
@@ -9,12 +14,6 @@ using LeaveSystem.Web.UnitTests.TestStuff.Factories;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using Microsoft.Extensions.Logging;
 using Moq;
-
-namespace LeaveSystem.Web.UnitTests.Shared;
-
-using LeaveSystem.Shared.Date;
-using LeaveSystem.Shared.WorkingHours;
-using LeaveSystem.UnitTests.Providers;
 
 public class UniversalGetTest
 {
@@ -30,7 +29,7 @@ public class UniversalGetTest
             Data = FakeUserLeaveLimitsDtoProvider.GetAllLimits()
         };
         await this.WhenNoException_ThenReturnData_Helper(fakeLimitResponse);
-        var now = new DateService().UtcNowWithoutTime();
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
         var fakeWorkingHoursResponse = FakeWorkingHoursProvider.GetAll(now).ToDto()
             .ToPagedListResponse();
         await this.WhenNoException_ThenReturnData_Helper(fakeWorkingHoursResponse);

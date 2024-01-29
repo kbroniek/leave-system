@@ -1,5 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
+      <Compile Remove="Endpoints\**" />
+      <EmbeddedResource Remove="Endpoints\**" />
+      <None Remove="Endpoints\**" />
+    </ItemGroup>
+    <ItemGroup>
         <PackageReference Include="EntityFramework" />
         <PackageReference Include="FluentAssertions.Json" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
@@ -26,10 +31,6 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Endpoints\" />
     </ItemGroup>
 
 </Project>
