@@ -1,3 +1,4 @@
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Marten.Linq;
 
@@ -5,17 +6,13 @@ namespace LeaveSystem.UnitTests.Stubs;
 
 internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>, IQueryProvider
 {
-    public MartenQueryableStub(IEnumerable<T> enumerable) : base(enumerable)
-    {
-    }
+    public MartenQueryableStub(IEnumerable<T> enumerable) : base(enumerable) { }
 
-    private MartenQueryableStub(Expression expression) : base(expression)
-    {
-    }
+    private MartenQueryableStub(Expression expression) : base(expression) { }
 
     public QueryStatistics Statistics => throw new NotImplementedException();
 
-    public Task<bool> AnyAsync(CancellationToken token) => throw new NotImplementedException();
+    public Task<bool> AnyAsync(CancellationToken token) => Task.FromResult(this.Any());
 
     public Task<double> AverageAsync(CancellationToken token) => throw new NotImplementedException();
 
