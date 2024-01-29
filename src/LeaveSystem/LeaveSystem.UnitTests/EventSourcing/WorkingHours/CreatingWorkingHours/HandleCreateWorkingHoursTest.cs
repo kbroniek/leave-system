@@ -113,7 +113,7 @@ public class HandleCreateWorkingHoursTest
         var act = () => sut.Handle(command, CancellationToken.None);
         //Then
         var exception = await act.Should().ThrowAsync<ArgumentException>();
-        exception.WithMessage("You cant add working hours in this period, because other overlap it");
+        exception.WithMessage("You can't add working hours in this period, because other overlap it");
     }
 
     public static IEnumerable<object[]> Get_WhenHandlingSuccessful_PassAllCreateWorkingHoursAndReturnUnitValue_TestData()
