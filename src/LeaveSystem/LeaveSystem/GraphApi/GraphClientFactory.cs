@@ -2,7 +2,7 @@
 using Azure.Identity;
 using Microsoft.Graph;
 
-namespace LeaveSystem.Api.GraphApi;
+namespace LeaveSystem.GraphApi;
 
 public class GraphClientFactory : IGraphClientFactory
 {
@@ -25,7 +25,7 @@ public class GraphClientFactory : IGraphClientFactory
         Guard.Against.NullOrWhiteSpace(clientId);
         Guard.Against.NullOrWhiteSpace(secret);
         Guard.Against.NullOrEmpty(scopes);
-        return new (tenantId, clientId, secret, scopes);
+        return new(tenantId, clientId, secret, scopes);
     }
 
     public GraphServiceClient Create()

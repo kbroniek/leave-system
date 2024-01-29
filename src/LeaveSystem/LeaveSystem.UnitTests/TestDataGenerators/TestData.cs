@@ -1,4 +1,4 @@
-namespace LeaveSystem.Api.UnitTests;
+namespace LeaveSystem.UnitTests.TestDataGenerators;
 
 public static class TestData
 {
@@ -29,4 +29,14 @@ public static class TestData
             ]
           }
           """;
+    public static readonly string[] FakeRoles = new string[]
+    {
+        "nulla",
+        "aliquip",
+        "amet",
+        "aliqua",
+        "magna",
+        "cillum",
+        "excepteur"
+    };
 }

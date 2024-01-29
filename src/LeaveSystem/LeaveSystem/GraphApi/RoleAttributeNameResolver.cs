@@ -1,7 +1,7 @@
 ﻿using Ardalis.GuardClauses;
 using LeaveSystem.Shared;
 
-namespace LeaveSystem.Api.GraphApi;
+namespace LeaveSystem.GraphApi;
 
 public record RoleAttributeNameResolver(string RoleAttributeName)
 {
@@ -9,7 +9,7 @@ public record RoleAttributeNameResolver(string RoleAttributeName)
     public static RoleAttributeNameResolver Create(string? b2cExtensionAppClientId)
     {
         Guard.Against.NullOrEmpty(b2cExtensionAppClientId);
-        string roleAttributeName = GetCompleteAttributeName(b2cExtensionAppClientId, ShortRoleAttributeName);
+        var roleAttributeName = GetCompleteAttributeName(b2cExtensionAppClientId, ShortRoleAttributeName);
         return new(roleAttributeName);
     }
 

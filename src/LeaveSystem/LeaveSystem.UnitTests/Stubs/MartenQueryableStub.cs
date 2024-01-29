@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentAssertions;
 using Marten.Linq;
 
 namespace LeaveSystem.UnitTests.Stubs;
@@ -30,10 +24,7 @@ internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>,
     public Task<long> CountLongAsync(CancellationToken token) => throw new NotImplementedException();
     IQueryable<TElement> IQueryProvider.CreateQuery<TElement>(Expression expression)
     {
-        if (expression == null)
-        {
-            throw new ArgumentNullException(nameof(expression));
-        }
+        ArgumentNullException.ThrowIfNull(expression);
 
         if (!typeof(IQueryable<TElement>).IsAssignableFrom(expression.Type))
         {

@@ -1,4 +1,4 @@
-﻿using LeaveSystem.Api.Endpoints.Employees;
+using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
@@ -11,11 +11,9 @@ namespace LeaveSystem.Api.Auth;
 
 public static class Config
 {
-    public static void AddB2CAuthentication(this IServiceCollection services, IConfigurationSection configuration)
-    {
+    public static void AddB2CAuthentication(this IServiceCollection services, IConfigurationSection configuration) =>
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApi(configuration);
-    }
     public static void AddRoleBasedAuthorization(this IServiceCollection services)
     {
         services
@@ -44,8 +42,8 @@ public static class Config
             .AddAuthorizationPolicy(WorkingHoursEndpoints.ModifyUserWorkingHoursPolicyName, RoleType.WorkingHoursAdmin);
     private static IServiceCollection AddEmployeesAuthorization(this IServiceCollection services) =>
         services
-            .AddAuthorizationPolicy(EmployeesEndpoints.GetEmployeesPolicyName, RoleType.DecisionMaker)
-            .AddAuthorizationPolicy(EmployeesEndpoints.GetEmployeePolicyName, RoleType.HumanResource);
+            .AddAuthorizationPolicy(EmployeesEndpoints.GetEmployeesPolicyName, RoleRequirement.AuthorizeAll)
+            .AddAuthorizationPolicy(EmployeesEndpoints.GetEmployeePolicyName, RoleType.Employee, RoleType.HumanResource);
     private static IServiceCollection AddUsersAuthorization(this IServiceCollection services) =>
         services
             .AddAuthorizationPolicy(UsersEndpoints.GetUsersPolicyName, RoleType.UserAdmin)

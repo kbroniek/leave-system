@@ -1,6 +1,6 @@
 using Microsoft.Graph;
 
-namespace LeaveSystem.Api.GraphApi;
+namespace LeaveSystem.GraphApi;
 
 public interface IGraphClientFactory
 {
