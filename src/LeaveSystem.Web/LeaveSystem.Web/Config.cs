@@ -1,4 +1,4 @@
-﻿using LeaveSystem.Shared.Auth;
+using LeaveSystem.Shared.Auth;
 using LeaveSystem.Web.Pages.HrPanel;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequestDetails;
@@ -41,7 +41,7 @@ public static class Config
             options.AddPolicy(ShowUserPanel.LeaveLimitsPolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.LeaveLimitAdmin)));
             options.AddPolicy(ShowHrPanel.PolicyName, policy =>
-                policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource, RoleType.DecisionMaker, RoleType.LeaveLimitAdmin)));
+                policy.Requirements.Add(new RoleRequirement(RoleType.HumanResource)));
             options.AddPolicy(UsersPage.PolicyName, policy =>
                 policy.Requirements.Add(new RoleRequirement(RoleType.UserAdmin)));
             options.AddPolicy(LeaveRequestDetails.AcceptPolicyName, policy =>
