@@ -22,6 +22,7 @@ public static class DbContextExtenstions
 {
     private static readonly TimeSpan WorkingHours = TimeSpan.FromHours(8);
     private const string DefaultUserEmail = "karolbr5@gmail.com";
+    private const string AzureReadUsersSection = "ManageAzureUsers";
 
     private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22",
         DefaultUserEmail, "Karol Volt", new[] { RoleType.GlobalAdmin.ToString() });
@@ -148,7 +149,7 @@ public static class DbContextExtenstions
             var cancellationToken = new CancellationToken();
             var serviceCollection = new ServiceCollection();
             var serviceProvider = serviceCollection
-                .AddServices(configuration)
+                .AddServices(configuration, AzureReadUsersSection)
                 .AddScoped<DateService>(_ => new CustomDateService(DateTimeOffset.Parse("2024-02-01 00:00:00 +00:00", CultureInfo.CurrentCulture)))
                 .BuildServiceProvider();
             var dbContext = serviceProvider.GetRequiredService<LeaveSystemDbContext>();

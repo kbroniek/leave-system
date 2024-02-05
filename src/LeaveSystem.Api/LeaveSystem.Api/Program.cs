@@ -34,7 +34,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new TimeSpanIso8601Converter()))
     .AddODataConfig();
 
-builder.Services.AddServices(builder.Configuration)
+builder.Services.AddServices(builder.Configuration, azureReadUsersSection)
     .AddScoped<DateService>()
     .AddValidators()
     .AddODataControllersServices();
