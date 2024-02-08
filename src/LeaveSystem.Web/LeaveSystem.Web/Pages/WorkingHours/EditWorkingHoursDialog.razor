@@ -18,7 +18,7 @@
 else
 {
     <RadzenStack Gap="1.5rem">
-        <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Working Hours" Click="@InsertRow" Disabled=@(workingHoursToInsert != null || workingHoursToUpdate != null) />
+        <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" class="mt-2 mb-4" Text="Add New Working Hours" Click="@InsertRow" Disabled=@(workingHoursToInsert != null || workingHoursToUpdate != null)/>
         <RadzenDataGrid @ref="workingHoursGrid" Data="workingHours" EditMode="DataGridEditMode.Single" TItem="WorkingHoursDto" AllowColumnResize="true" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow">
             <Columns>
                 <RadzenDataGridColumn TItem="WorkingHoursDto" Property="DateFrom" Title="Date From" Frozen="true">
@@ -42,7 +42,7 @@ else
                         @DayTimeToString(data.Duration)
                     </Template>
                     <EditTemplate Context="data">
-                        <InputText type="time" @bind-Value="data.DurationProxy" Style="width: 150px" />
+                        <InputText type="time" @bind-Value="data.DurationProxy" Style="width: 150px"/>
                     </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="WorkingHoursDto" Context="data" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Width="156px">
@@ -67,8 +67,7 @@ else
 
 @code {
 
-    [Parameter]
-    public string? UserId { get; set; }
+    [Parameter] public string? UserId { get; set; }
 
     List<WorkingHoursDto>? workingHours;
     RadzenDataGrid<WorkingHoursDto>? workingHoursGrid;
@@ -85,6 +84,7 @@ else
             DialogService.Close();
             return;
         }
+
         userIdNotNull = UserId;
         try
         {
@@ -120,17 +120,19 @@ else
         bool isTimeout = false;
         do
         {
-            var response = await workingHoursService.GetWorkingHours(query);
+            var response = await workingHoursService.GetWorkingHoursAsync(query);
             if (response is null)
             {
                 throw new InvalidOperationException("Something went wrong. Can't get working hours.");
             }
+
             workingHours = workingHours.Union(response.Items ?? Enumerable.Empty<WorkingHoursDto>());
 
             if (!response.HasNextPage)
             {
                 break;
             }
+
             isTimeout = (dateService.UtcNow() - now) > timeout;
         } while (!isTimeout);
 
@@ -138,6 +140,7 @@ else
         {
             throw new TimeoutException("Something went wrong. Can't get working hours.");
         }
+
         return workingHours;
     }
 
@@ -155,6 +158,7 @@ else
             Logger.LogError("workingHoursGrid is null");
             return;
         }
+
         workingHoursToUpdate = workingHours;
         await workingHoursGrid.EditRow(workingHours);
     }
@@ -162,7 +166,16 @@ else
     async Task OnUpdateRow(WorkingHoursDto workingHours)
     {
         Reset();
-        await WorkingHoursService.Edit(workingHours);
+        var editResult = await WorkingHoursService.EditAsync(workingHours);
+        if (!editResult)
+        {
+            this.workingHours = (await GetWorkingHours(
+                new[] { userIdNotNull },
+                new[] { WorkingHoursStatus.Current, WorkingHoursStatus.Deprecated, WorkingHoursStatus.Future },
+                TimeSpan.FromSeconds(15),
+                DateService,
+                WorkingHoursService)).ToList();
+        }
     }
 
     async Task SaveRow(WorkingHoursDto workingHours)
@@ -173,6 +186,7 @@ else
             Logger.LogError("workingHoursGrid is null");
             return;
         }
+
         await workingHoursGrid.UpdateRow(workingHours);
     }
 
@@ -185,7 +199,7 @@ else
     void Close()
     {
         Reset();
-        DialogService.Close();
+        DialogService.Close(workingHours);
     }
 
     async Task InsertRow()
@@ -200,16 +214,23 @@ else
             Logger.LogError("workingHoursGrid is null");
             return;
         }
+
         await workingHoursGrid.InsertRow(workingHoursToInsert);
     }
 
-    async Task OnCreateRow(WorkingHoursDto workingHours)
+    async Task OnCreateRow(WorkingHoursDto workingHoursToAdd)
     {
-        var addedWorkingHours = await WorkingHoursService.Add(new AddWorkingHoursDto(workingHours.UserId, workingHours.DateFrom, workingHours.DateTo, workingHours.Duration));
+        var addedWorkingHours = await WorkingHoursService.AddAsync(new AddWorkingHoursDto(workingHoursToAdd.UserId, workingHoursToAdd.DateFrom, workingHoursToAdd.DateTo, workingHoursToAdd.Duration));
         if (addedWorkingHours is not null)
         {
-            workingHours.Id = addedWorkingHours.Id;
+            workingHoursToAdd.Id = addedWorkingHours.Id;
+            workingHours?.Add(workingHoursToAdd);
         }
+        else
+        {
+            workingHoursGrid?.CancelEditRow(workingHoursToAdd);
+        }
+
         workingHoursToInsert = null;
     }
 

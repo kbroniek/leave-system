@@ -1,4 +1,4 @@
-﻿using LeaveSystem.Shared.Auth;
+using LeaveSystem.Shared.Auth;
 using LeaveSystem.Web.Pages.HrPanel;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequestDetails;

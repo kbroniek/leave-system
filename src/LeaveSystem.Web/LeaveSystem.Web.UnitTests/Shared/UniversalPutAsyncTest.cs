@@ -6,7 +6,7 @@ using System.Text.Json;
 using Blazored.Toast.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Converters;
-using LeaveSystem.Shared.UserLeaveLimits;
+using LeaveSystem.Shared.WorkingHours;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TestStuff.Extensions;
@@ -15,7 +15,7 @@ using TestStuff.Helpers;
 using Web.Pages.UserLeaveLimits;
 using Web.Shared;
 
-public class UniversalEditAsyncTest
+public class UniversalPutAsyncTest
 {
     private readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web)
     {
@@ -26,25 +26,25 @@ public class UniversalEditAsyncTest
     public async Task WhenResponseThrowsException_InformAboutError()
     {
         await this.WhenResponseThrowsException_InformAboutError_Helper(
-            new LeaveLimitDto(
-                Guid.Parse("e6a1dd62-c83c-4397-af49-45b400949ebe"),
-                TimeSpan.FromHours(24),
-                TimeSpan.Zero,
-                Guid.Parse("32fb893f-ddca-45a3-9da1-be0d46cfcb55"),
+            new WorkingHoursDto(
+                "a89488b9-9cae-402e-8f00-587a3dbe563d",
                 DateTimeOffset.Parse("2023-01-01"),
                 DateTimeOffset.Parse("2023-12-31"),
-                new UserLeaveLimitPropertyDto("desc"),
-                "a89488b9-9cae-402e-8f00-587a3dbe563d"));
+                TimeSpan.FromHours(8),
+                Guid.Parse("32fb893f-ddca-45a3-9da1-be0d46cfcb55")
+            )
+        );
     }
 
     private async Task WhenResponseThrowsException_InformAboutError_Helper<TContent>(TContent data)
     {
         var fakeException = new InvalidOperationException("fake exception");
-        var httpClientMock = HttpClientMockFactory.CreateWithException("fake-edit", fakeException, out var mockedHttpValues);
+        var httpClientMock =
+            HttpClientMockFactory.CreateWithException("fake-edit", fakeException, out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PutAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
         result.Should().BeFalse();
         toastServiceMock.Verify(m => m.ShowError("Error occured while editing", null), Times.Once);
         loggerMock.VerifyLogError($"Error occured while editing resource of type {typeof(TContent)}", fakeException, Times.Once);
@@ -55,15 +55,14 @@ public class UniversalEditAsyncTest
     public async Task WhenResponseNotSuccessful_InformAboutError()
     {
         await this.WhenResponseNotSuccessful_InformAboutError_Helper(
-            new LeaveLimitDto(
-                Guid.Parse("e6a1dd62-c83c-4397-af49-45b400949ebe"),
-                TimeSpan.FromHours(24),
-                TimeSpan.Zero,
-                Guid.Parse("32fb893f-ddca-45a3-9da1-be0d46cfcb55"),
+            new WorkingHoursDto(
+                "a89488b9-9cae-402e-8f00-587a3dbe563d",
                 DateTimeOffset.Parse("2023-01-01"),
                 DateTimeOffset.Parse("2023-12-31"),
-                new UserLeaveLimitPropertyDto("desc"),
-                "a89488b9-9cae-402e-8f00-587a3dbe563d"));
+                TimeSpan.FromHours(8),
+                Guid.Parse("32fb893f-ddca-45a3-9da1-be0d46cfcb55")
+            )
+        );
     }
 
     private async Task WhenResponseNotSuccessful_InformAboutError_Helper<TContent>(TContent data)
@@ -73,11 +72,12 @@ public class UniversalEditAsyncTest
                 this.jsonSerializerOptions);
         var fakeResponse = new StringContent(problem, Encoding.UTF8, "application/json");
         var httpClientMock = HttpClientMockFactory.CreateWithJsonContent(
-            "fake-edit", data, HttpStatusCode.BadRequest, fakeResponse, this.jsonSerializerOptions, out var mockedHttpValues);
+            "fake-edit", data, HttpStatusCode.BadRequest, fakeResponse, this.jsonSerializerOptions,
+            out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PutAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
         result.Should().BeFalse();
         toastServiceMock.Verify(m => m.ShowError("fake error", null), Times.Once);
         loggerMock.VerifyLogError("fake error occured", Times.Once);
@@ -88,15 +88,14 @@ public class UniversalEditAsyncTest
     public async Task WhenResponseStatusSuccessful_ReturnTrue()
     {
         await this.WhenResponseStatusSuccessful_ReturnTrue_Helper(
-            new LeaveLimitDto(
-                Guid.Parse("e6a1dd62-c83c-4397-af49-45b400949ebe"),
-                TimeSpan.FromHours(24),
-                TimeSpan.Zero,
-                Guid.Parse("32fb893f-ddca-45a3-9da1-be0d46cfcb55"),
+            new WorkingHoursDto(
+                "a89488b9-9cae-402e-8f00-587a3dbe563d",
                 DateTimeOffset.Parse("2023-01-01"),
                 DateTimeOffset.Parse("2023-12-31"),
-                new UserLeaveLimitPropertyDto("desc"),
-                "a89488b9-9cae-402e-8f00-587a3dbe563d"));
+                TimeSpan.FromHours(8),
+                Guid.Parse("32fb893f-ddca-45a3-9da1-be0d46cfcb55")
+            )
+        );
     }
 
     private async Task WhenResponseStatusSuccessful_ReturnTrue_Helper<TContent>(TContent data)
@@ -107,7 +106,7 @@ public class UniversalEditAsyncTest
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
-        var result = await sut.EditAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
+        var result = await sut.PutAsync("/fake-edit", data, "success", this.jsonSerializerOptions);
         result.Should().BeTrue();
         toastServiceMock.Verify(m => m.ShowSuccess("success", null), Times.Once);
         mockedHttpValues.RequestShouldBeMatched();

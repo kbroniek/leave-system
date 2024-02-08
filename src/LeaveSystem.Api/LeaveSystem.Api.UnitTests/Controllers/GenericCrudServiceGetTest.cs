@@ -16,7 +16,7 @@ public class GenericCrudServiceGetTest
     private GenericCrudService<TEntity, TId> GetSut<TEntity, TId>(LeaveSystemDbContext dbContext, DeltaValidator<TEntity> deltaValidator, IValidator<TEntity> entityValidator)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId> =>
-        new(dbContext, deltaValidator, entityValidator);
+        new (dbContext, deltaValidator, entityValidator);
 
     [Fact]
     public void WhenGetting_ThenReturnAllEntitiesFromSet()
@@ -36,7 +36,7 @@ public class GenericCrudServiceGetTest
         dbContextMock.Setup(x => x.Set<TEntity>()).Returns(setMock.Object);
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
-        var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
+        var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
         //When
         var result = sut.Get();
         //Then

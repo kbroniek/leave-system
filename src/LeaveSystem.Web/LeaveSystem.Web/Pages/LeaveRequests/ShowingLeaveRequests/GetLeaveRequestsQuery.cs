@@ -1,26 +1,32 @@
-﻿using LeaveSystem.Shared;
-using LeaveSystem.Shared.LeaveRequests;
+﻿namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 
-namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
+using LeaveSystem.Shared;
+using LeaveSystem.Shared.LeaveRequests;
 
 public class GetLeaveRequestsQuery
 {
-    private static readonly LeaveRequestStatus[] validStatuses = new[] { LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending };
+    private static readonly LeaveRequestStatus[] ValidStatuses =
+    {
+        LeaveRequestStatus.Accepted, LeaveRequestStatus.Pending
+    };
+
     public GetLeaveRequestsQuery(DateTimeOffset dateFrom, DateTimeOffset dateTo, int pageNumber, int pageSize)
     {
-        DateFrom = dateFrom;
-        DateTo = dateTo;
-        PageNumber = pageNumber;
-        PageSize = pageSize;
-        Statuses = validStatuses;
+        this.DateFrom = dateFrom;
+        this.DateTo = dateTo;
+        this.PageNumber = pageNumber;
+        this.PageSize = pageSize;
+        this.Statuses = ValidStatuses;
     }
-    public GetLeaveRequestsQuery(DateTimeOffset dateFrom, DateTimeOffset dateTo, int pageNumber, int pageSize, IEnumerable<LeaveRequestStatus> statuses)
+
+    public GetLeaveRequestsQuery(DateTimeOffset dateFrom, DateTimeOffset dateTo, int pageNumber, int pageSize,
+        IEnumerable<LeaveRequestStatus> statuses)
     {
-        DateFrom = dateFrom;
-        DateTo = dateTo;
-        PageNumber = pageNumber;
-        PageSize = pageSize;
-        Statuses = statuses;
+        this.DateFrom = dateFrom;
+        this.DateTo = dateTo;
+        this.PageNumber = pageNumber;
+        this.PageSize = pageSize;
+        this.Statuses = statuses;
     }
 
     public DateTimeOffset DateFrom { get; set; }
@@ -31,16 +37,17 @@ public class GetLeaveRequestsQuery
     public IEnumerable<LeaveRequestStatus> Statuses { get; set; }
     public string[]? CreatedByEmails { get; set; }
     public string[]? CreatedByUserIds { get; set; }
+
     public static GetLeaveRequestsQuery GetDefault()
     {
         var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
         return new GetLeaveRequestsQuery
         (
-            dateFrom: now.AddDays(-14),
-            dateTo: now.AddDays(14),
-            pageNumber: 1,
-            pageSize: 100,
-            statuses: validStatuses
+            now.AddDays(-14),
+            now.AddDays(14),
+            1,
+            100,
+            ValidStatuses
         );
     }
 }

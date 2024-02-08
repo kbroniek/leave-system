@@ -1,4 +1,4 @@
-using FluentAssertions;
+using System.ComponentModel.DataAnnotations;
 using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.Extensions;
@@ -11,7 +11,6 @@ using Marten;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
 
@@ -95,10 +94,10 @@ public class HandleCreateWorkingHoursTest
             fakeWorkingHours
         );
         var martenQueryable = new MartenQueryableStub<LeaveSystem.EventSourcing.WorkingHours.WorkingHours>(
-            new LeaveSystem.EventSourcing.WorkingHours.WorkingHours[]
+            new[]
             {
                 LeaveSystem.EventSourcing.WorkingHours.WorkingHours.CreateWorkingHours(WorkingHoursCreated.Create(
-                    Guid.NewGuid(),
+                    Guid.Parse("9935e0e4-51e7-4de8-9206-fde90647581e"),
                     command.UserId,
                     DateTimeOffsetExtensions.CreateFromDate(2023, 1, 1),
                     DateTimeOffsetExtensions.CreateFromDate(2023, 6, 16),
@@ -112,8 +111,9 @@ public class HandleCreateWorkingHoursTest
         //When
         var act = () => sut.Handle(command, CancellationToken.None);
         //Then
-        var exception = await act.Should().ThrowAsync<InvalidOperationException>();
-        exception.WithMessage("You cant add working hours in this period, because other overlap it");
+        await act.Should()
+            .ThrowAsync<ValidationException>()
+            .WithMessage("You can't add working hours in this period, because other overlap it");
     }
 
     public static IEnumerable<object[]> Get_WhenHandlingSuccessful_PassAllCreateWorkingHoursAndReturnUnitValue_TestData()

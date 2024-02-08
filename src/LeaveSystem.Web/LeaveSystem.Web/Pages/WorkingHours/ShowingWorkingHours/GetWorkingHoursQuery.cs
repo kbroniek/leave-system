@@ -1,65 +1,61 @@
+namespace LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
+
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
-
-namespace LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 
 public class GetWorkingHoursQuery
 {
     public static readonly WorkingHoursStatus[] ValidStatuses = { WorkingHoursStatus.Current };
+
+    public GetWorkingHoursQuery(int pageNumber, int pageSize, DateTimeOffset dateFrom, DateTimeOffset dateTo,
+        string[]? userIds, WorkingHoursStatus[]? statuses)
+    {
+        this.PageNumber = pageNumber;
+        this.PageSize = pageSize;
+        this.DateFrom = dateFrom;
+        this.DateTo = dateTo;
+        this.UserIds = userIds;
+        this.Statuses = statuses;
+    }
+
     public int PageNumber { get; set; }
-    public int PageSize { get; set;}
+    public int PageSize { get; set; }
     public DateTimeOffset DateFrom { get; set; }
     public DateTimeOffset DateTo { get; set; }
     public string[]? UserIds { get; set; }
     public WorkingHoursStatus[]? Statuses { get; set; }
 
-    public GetWorkingHoursQuery(int pageNumber, int pageSize, DateTimeOffset dateFrom, DateTimeOffset dateTo, string[]? userIds, WorkingHoursStatus[]? statuses)
-    {
-        PageNumber = pageNumber;
-        PageSize = pageSize;
-        DateFrom = dateFrom;
-        DateTo = dateTo;
-        UserIds = userIds;
-        Statuses = statuses;
-    }
-
-    public static GetWorkingHoursQuery GetCurrentForUsers(int pageNumber, int pageSize, DateTimeOffset dateFrom,
-        DateTimeOffset dateTo, string[]? userIds) =>
-        new(pageNumber, pageSize, dateFrom, dateTo, userIds, ValidStatuses);
-
-
     public static GetWorkingHoursQuery GetDefault()
     {
         var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
-        return new(
-            pageNumber: 1,
-            pageSize: 100,
-            dateFrom: now.AddDays(-14),
-            dateTo: now.AddDays(14),
-            userIds: null,
-            statuses: ValidStatuses);
+        return new GetWorkingHoursQuery(
+            1,
+            100,
+            now.AddDays(-14),
+            now.AddDays(14),
+            null,
+            ValidStatuses);
     }
 
     public static GetWorkingHoursQuery GetDefaultForUsers(string[] userIds)
     {
         var now = DateTimeOffset.UtcNow.GetDayWithoutTime();
-        return new(
-            pageNumber: 1,
-            pageSize: 100,
-            dateFrom: now.AddDays(-14),
-            dateTo: now.AddDays(14),
-            userIds: userIds,
-            statuses: ValidStatuses);
+        return new GetWorkingHoursQuery(
+            1,
+            100,
+            now.AddDays(-14),
+            now.AddDays(14),
+            userIds,
+            ValidStatuses);
     }
 
-    public static GetWorkingHoursQuery GetAllForUsers(string[] userIds, WorkingHoursStatus[] statuses, DateTimeOffset now)
-    {
-        return new(
-            pageNumber: 1,
-            pageSize: 100,
-            dateFrom: now.AddYears(-100), // TODO: provide null
-            dateTo: now.AddYears(100), // TODO: provide null
+    public static GetWorkingHoursQuery GetAllForUsers(string[] userIds, WorkingHoursStatus[] statuses,
+        DateTimeOffset now) =>
+        new(
+            1,
+            100,
+            now.AddYears(-100), // TODO: provide null
+            now.AddYears(100), // TODO: provide null
             userIds,
             statuses);
-    }
 }

@@ -43,7 +43,7 @@ public class GenericCrudServicePatchTest
         dbContextMock.Setup(x => x.Set<TEntity>()).Returns(setMock.Object);
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
         var entityValidatorMock = new Mock<IValidator<TEntity>>();
-        var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
+        var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
         var act = async () =>
         {
             await sut.PatchAsync(key, new Delta<TEntity>());
@@ -78,7 +78,7 @@ public class GenericCrudServicePatchTest
         var delta = new Delta<TEntity>();
         var dbContextMock = new Mock<LeaveSystemDbContext>(new DbContextOptions<LeaveSystemDbContext>());
         var setMock = dataSource.AsQueryable().BuildMockDbSet();
-        setMock.Setup(x => x.FindAsync(new object[] { key }, It.IsAny<CancellationToken>()))
+        setMock.Setup(x => x.FindAsync(new object[] {key}, It.IsAny<CancellationToken>()))
             .ReturnsAsync(dataSource.FirstOrDefault(x => x.Id.Equals(key)));
         dbContextMock.Setup(x => x.Set<TEntity>()).Returns(setMock.Object);
         var deltaValidatorMock = new Mock<DeltaValidator<TEntity>>();
@@ -87,7 +87,7 @@ public class GenericCrudServicePatchTest
         entityValidatorMock.Setup(m =>
                 m.ValidateAsync(It.IsAny<IValidationContext>(), new CancellationToken()))
             .ThrowsAsync(new Exception());
-        var sut = GetSut<TEntity, TId>(dbContextMock.Object, deltaValidatorMock.Object, entityValidatorMock.Object);
+        var sut = GetSut<TEntity, TId>(dbContextMock.Object,deltaValidatorMock.Object, entityValidatorMock.Object);
         var act = async () =>
         {
             await sut.PatchAsync(key, new Delta<TEntity>());
@@ -238,7 +238,7 @@ public class GenericCrudServicePatchTest
 
     private async Task WhenNoProblems_ThenReturnModifiedEntity_Helper<TEntity, TId>(
         IReadOnlyCollection<TEntity> dataSource, TEntity expectedResultEntity, Delta<TEntity> delta,
-        Func<EquivalencyAssertionOptions<TEntity>, EquivalencyAssertionOptions<TEntity>>? config = null)
+        Func<EquivalencyAssertionOptions<TEntity>,EquivalencyAssertionOptions<TEntity>>? config = null)
         where TId : IComparable<TId>
         where TEntity : class, IHaveId<TId>
     {

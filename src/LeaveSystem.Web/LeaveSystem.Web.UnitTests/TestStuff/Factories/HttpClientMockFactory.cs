@@ -114,6 +114,16 @@ public static class HttpClientMockFactory
         return httpClient;
     }
 
+    public static HttpClient CreateWithException(string url, Exception exception)
+    {
+        var mockHttpMessageHandler = new MockHttpMessageHandler();
+        var fakeResponseContent = new ExceptionThrowingContent(exception);
+        mockHttpMessageHandler.When(BaseFakeUrl + url).Respond(fakeResponseContent);
+        var httpClient = new HttpClient(mockHttpMessageHandler);
+        httpClient.BaseAddress = new Uri(BaseFakeUrl);
+        return httpClient;
+    }
+
     public static HttpClient CreateWithException(string url, Exception exception, out MockedHttpValues mockedHttpValues)
     {
         var mockHttpMessageHandler = new MockHttpMessageHandler();

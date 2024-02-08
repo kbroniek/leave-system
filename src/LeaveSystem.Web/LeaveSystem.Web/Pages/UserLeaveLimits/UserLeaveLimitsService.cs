@@ -46,13 +46,13 @@ public class UserLeaveLimitsService
     public async Task<UserLeaveLimitDto?> AddAsync(AddUserLeaveLimitDto entityToAdd)
     {
         var odataResponse =
-            await this.universalHttpService.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitDtoODataResponse>(
+            await this.universalHttpService.PostAsync<AddUserLeaveLimitDto, UserLeaveLimitDtoODataResponse>(
                 "odata/UserLeaveLimits", entityToAdd, "User leave limit added successfully", JsonSerializerOptions);
         return odataResponse?.ToUserLeaveLimitDto();
     }
 
     public Task<bool> EditAsync(UserLeaveLimitDto entityToEdit) =>
-        this.universalHttpService.EditAsync(
+        this.universalHttpService.PatchAsync(
             $"odata/UserLeaveLimits({entityToEdit.Id})", entityToEdit, "User leave limit edited successfully",
             JsonSerializerOptions);
 

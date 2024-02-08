@@ -9,6 +9,8 @@ using MediatR;
 
 namespace LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 
+using System.ComponentModel.DataAnnotations;
+
 public class CreateWorkingHours : ICommand, IDateToNullablePeriod
 {
     public Guid WorkingHoursId { get; }
@@ -58,15 +60,15 @@ internal class HandleCreateWorkingHours : ICommandHandler<CreateWorkingHours>
     public async Task<Unit> Handle(CreateWorkingHours request, CancellationToken cancellationToken)
     {
         var periodOverlapExp = PeriodExpressions.GetPeriodOverlapExp<WorkingHours>(request);
-        var workingHoursInThisPeriodExists = querySession.Query<WorkingHours>()
-            .Any(periodOverlapExp.And(x => x.UserId == request.UserId));
+        var workingHoursInThisPeriodExists = await this.querySession.Query<WorkingHours>()
+            .AnyAsync(periodOverlapExp.And(x => x.UserId == request.UserId), cancellationToken);
         if (workingHoursInThisPeriodExists)
         {
-            throw new InvalidOperationException("You cant add working hours in this period, because other overlap it");
+            throw new ValidationException("You can't add working hours in this period, because other overlap it");
         }
-        var workingHours = factory.Create(request);
-        await workingHoursRepository.AddAsync(workingHours, cancellationToken);
-        await workingHoursRepository.SaveChangesAsync(cancellationToken);
+        var workingHours = this.factory.Create(request);
+        await this.workingHoursRepository.AddAsync(workingHours, cancellationToken);
+        await this.workingHoursRepository.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }
 }

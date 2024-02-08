@@ -1,7 +1,12 @@
+namespace LeaveSystem.Web.UnitTests.Shared;
+
 using System.Net;
 using System.Text.Json;
 using Blazored.Toast.Services;
+using LeaveSystem.Api.UnitTests.Providers;
 using LeaveSystem.Shared.Converters;
+using LeaveSystem.Shared.WorkingHours;
+using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using LeaveSystem.Web.Shared;
 using LeaveSystem.Web.UnitTests.TestStuff.Extensions;
@@ -9,8 +14,6 @@ using LeaveSystem.Web.UnitTests.TestStuff.Factories;
 using LeaveSystem.Web.UnitTests.TestStuff.Providers;
 using Microsoft.Extensions.Logging;
 using Moq;
-
-namespace LeaveSystem.Web.UnitTests.Shared;
 
 public class UniversalGetTest
 {
@@ -26,6 +29,12 @@ public class UniversalGetTest
             Data = FakeUserLeaveLimitsDtoProvider.GetAllLimits()
         };
         await this.WhenNoException_ThenReturnData_Helper(fakeLimitResponse);
+        var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
+        var fakeWorkingHoursResponse = FakeWorkingHoursProvider.GetAll(now).ToDto()
+            .ToPagedListResponse();
+        await this.WhenNoException_ThenReturnData_Helper(fakeWorkingHoursResponse);
+        var fakeUserWorkingHoursResponse = FakeWorkingHoursProvider.GetCurrentForBen(now).ToDto();
+        await this.WhenNoException_ThenReturnData_Helper(fakeUserWorkingHoursResponse);
     }
 
     private async Task WhenNoException_ThenReturnData_Helper<T>(T response)
@@ -41,7 +50,13 @@ public class UniversalGetTest
     }
 
     [Fact]
-    public async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt() => await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<ODataResponse<IEnumerable<LeaveLimitDto>>>();
+    public async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt()
+    {
+
+        await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<ODataResponse<IEnumerable<LeaveLimitDto>>>();
+        await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<PagedListResponse<WorkingHoursDto>>();
+        await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<WorkingHoursDto>();
+    }
 
     private async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<T>()
     {

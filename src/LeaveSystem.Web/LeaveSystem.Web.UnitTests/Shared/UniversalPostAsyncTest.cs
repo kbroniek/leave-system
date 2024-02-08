@@ -7,15 +7,16 @@ using Blazored.Toast.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Converters;
 using LeaveSystem.Shared.UserLeaveLimits;
+using LeaveSystem.Shared.WorkingHours;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Moq.Protected;
 using TestStuff.Extensions;
 using TestStuff.Factories;
+using TestStuff.Helpers;
 using Web.Pages.UserLeaveLimits;
 using Web.Shared;
 
-public class UniversalAddAsyncTest
+public class UniversalPostAsyncTest
 {
     private readonly JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web)
     {
@@ -27,21 +28,22 @@ public class UniversalAddAsyncTest
     {
         await this.WhenResponseThrowsException_InformAboutError_Helper<AddUserLeaveLimitDto, LeaveLimitDto>(
             new AddUserLeaveLimitDto());
+        await this.WhenResponseThrowsException_InformAboutError_Helper<AddWorkingHoursDto, WorkingHoursDto>(
+            new AddWorkingHoursDto());
     }
 
     private async Task WhenResponseThrowsException_InformAboutError_Helper<TContent, TResponse>(TContent data)
     {
         var fakeException = new InvalidOperationException("fake exception");
-        var httpClientMock = HttpClientMockFactory
-            .CreateWithException("fake-add", fakeException, out var mockedHttpValues);
+        var httpClientMock =
+            HttpClientMockFactory.CreateWithException("fake-add", fakeException, out var mockedHttpValues);
         var toastServiceMock = new Mock<IToastService>();
         var loggerMock = new Mock<ILogger<UniversalHttpService>>();
         var sut = new UniversalHttpService(httpClientMock, toastServiceMock.Object, loggerMock.Object);
         var result = await sut.PostAsync<TContent, TResponse>("/fake-add", data, "success", this.jsonSerializerOptions);
         result.Should().Be(default);
         toastServiceMock.Verify(m => m.ShowError("Error occured while adding", null), Times.Once);
-        loggerMock.VerifyLogError($"Error occured while adding resource of type {typeof(TContent)}", fakeException,
-            Times.Once);
+        loggerMock.VerifyLogError($"Error occured while adding resource of type {typeof(TContent)}", fakeException, Times.Once);
         mockedHttpValues.RequestShouldBeMatched();
     }
 
@@ -50,6 +52,9 @@ public class UniversalAddAsyncTest
     {
         await this.WhenResponseNotSuccessful_InformAboutError_Helper<AddUserLeaveLimitDto, LeaveLimitDto>(
             new AddUserLeaveLimitDto());
+        await this.WhenResponseNotSuccessful_InformAboutError_Helper<AddWorkingHoursDto, WorkingHoursDto>(
+            new AddWorkingHoursDto());
+        ;
     }
 
     private async Task WhenResponseNotSuccessful_InformAboutError_Helper<TContent, TResponse>(TContent data)
@@ -85,6 +90,14 @@ public class UniversalAddAsyncTest
                 ValidUntil = DateTimeOffset.Parse("2023-12-31"),
                 Property = new UserLeaveLimitPropertyDto("desc")
             });
+
+        await this.WhenResponseStatusSuccessful_ReturnCreatedDto_Helper(new AddWorkingHoursDto(), new WorkingHoursDto(
+            "C34D56EE-C367-4894-838C-153C1ADEFE2F",
+            DateTimeOffset.Parse("2023-09-01"),
+            DateTimeOffset.Parse("2023-11-01"),
+            TimeSpan.FromHours(8),
+            Guid.Parse("77C53027-1CAB-4ADD-A5FC-26BD5664AFCC")
+        ));
     }
 
     private async Task WhenResponseStatusSuccessful_ReturnCreatedDto_Helper<TContent, TResponse>(TContent data,

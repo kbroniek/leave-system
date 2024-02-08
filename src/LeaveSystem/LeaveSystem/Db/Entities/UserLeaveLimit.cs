@@ -37,16 +37,16 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
         this.logger = logger;
         this.RuleFor(x => x.Limit)
             .GreaterThanOrEqualTo(TimeSpan.Zero)
-            .WithErrorCode(ValidationErrorCodes.Argument)
+            .WithErrorCode(FvErrorCodes.BadRequest)
             .WithMessage("Limit can not be negative");
         this.RuleFor(x => x.OverdueLimit)
             .GreaterThanOrEqualTo(TimeSpan.Zero)
-            .WithErrorCode(ValidationErrorCodes.Argument)
+            .WithErrorCode(FvErrorCodes.BadRequest)
             .WithMessage("Limit can not be negative");
         this.RuleFor(x => x.ValidSince)
             .LessThan(x => x.ValidUntil)
             .When(x => x.ValidUntil is not null || x.ValidSince is not null)
-            .WithErrorCode(ValidationErrorCodes.ArgumentOutOfRange)
+            .WithErrorCode(FvErrorCodes.ArgumentOutOfRange)
             .WithMessage("Start date of limit must be earlier than end date");
         this.RuleFor(x => x.ValidUntil)
             .Equal(x => x.ValidSince)
@@ -60,10 +60,10 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
         this.RuleFor(x => x)
             .MustAsync(async (limit, cancellation) =>
             {
-                var overlappingLimits = await GetAllLimitThatOverlapsPeriodAsync(
+                var overlappingLimits = await this.GetAllLimitThatOverlapsPeriodAsync(
                     limit.Id, limit.LeaveTypeId, limit.AssignedToUserId!, limit.ValidSince, limit.ValidUntil,
                     cancellation);
-                if (!overlappingLimits.Any())
+                if (overlappingLimits.Count == 0)
                 {
                     return true;
                 }
@@ -81,9 +81,8 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
         string userId,
         DateTimeOffset? dateFrom,
         DateTimeOffset? dateTo,
-        CancellationToken cancellationToken)
-    {
-        return dbContext.UserLeaveLimits.Where(
+        CancellationToken cancellationToken) =>
+        this.dbContext.UserLeaveLimits.Where(
             ull =>
                 ull.Id != id &&
                 ull.LeaveTypeId == leaveTypeId &&
@@ -102,5 +101,4 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
                     (!dateTo.HasValue && dateFrom >= ull.ValidSince && dateFrom >= ull.ValidUntil) ||
                     (ull.ValidSince <= dateTo && dateFrom <= ull.ValidUntil)
                 )).ToListAsync(cancellationToken);
-    }
 }

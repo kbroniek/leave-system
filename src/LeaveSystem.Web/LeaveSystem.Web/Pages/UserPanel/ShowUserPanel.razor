@@ -89,7 +89,7 @@
         var getLeaveRequestsTask = GetLeaveRequestsService.GetLeaveRequests(query);
         var getLeaveTypesTask = LeaveTypesService.GetLeaveTypes();
         var getLimitsTask = UserLeaveLimitsService.GetAsync(UserId, firstDay, lastDay);
-        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHours(UserId);
+        var getWorkingHoursTask = WorkingHoursService.GetUserWorkingHoursAsync(UserId);
         await Task.WhenAll(getLeaveRequestsTask, getLeaveTypesTask, getLimitsTask, getWorkingHoursTask);
         var leaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
         var leaveTypes = getLeaveTypesTask.Result.ToArray();
@@ -126,5 +126,7 @@
         limitsPanel?.GetDate();
         return year;
     }
+
+}
 
 }

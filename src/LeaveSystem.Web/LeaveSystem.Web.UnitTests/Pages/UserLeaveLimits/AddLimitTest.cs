@@ -26,7 +26,7 @@ public class AddLimitTest
             Property = new AddUserLeaveLimitPropertiesDto { Description = "fake description" }
         };
         universalHttpServiceMock.Setup(m =>
-                m.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
+                m.PostAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
                     "odata/UserLeaveLimits",
                     It.Is<AddUserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToAdd)),
                     It.IsAny<string>(),
@@ -37,7 +37,7 @@ public class AddLimitTest
         var result = await sut.AddAsync(fakeEntityToAdd);
         result.Should().BeNull();
         universalHttpServiceMock.Verify(
-            m => m.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
+            m => m.PostAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
                 "odata/UserLeaveLimits",
                 It.Is<AddUserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToAdd)),
                 "User leave limit added successfully",
@@ -69,7 +69,7 @@ public class AddLimitTest
             Property = new UserLeaveLimitPropertyDto { Description = "fake description" }
         };
         universalHttpServiceMock.Setup(m =>
-                m.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
+                m.PostAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
                     "odata/UserLeaveLimits",
                     It.Is<AddUserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToAdd)),
                     It.IsAny<string>(),
@@ -90,7 +90,7 @@ public class AddLimitTest
                 Property = new { Description = "fake description" }
             });
         universalHttpServiceMock.Verify(
-            m => m.AddAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
+            m => m.PostAsync<AddUserLeaveLimitDto, UserLeaveLimitsService.UserLeaveLimitDtoODataResponse>(
                 "odata/UserLeaveLimits",
                 It.Is<AddUserLeaveLimitDto>(d => IsDtoEquivalentTo(d, fakeEntityToAdd)),
                 "User leave limit added successfully",

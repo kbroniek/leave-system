@@ -72,10 +72,8 @@ internal class HandleGetWorkingHours : IQueryHandler<GetWorkingHours, IPagedList
     {
         var privilegedRoles = new[]
         {
-            RoleType.HumanResource.ToString(),
-            RoleType.LeaveLimitAdmin.ToString(),
-            RoleType.DecisionMaker.ToString(),
-            RoleType.GlobalAdmin.ToString()
+            RoleType.HumanResource.ToString(), RoleType.LeaveLimitAdmin.ToString(),
+            RoleType.DecisionMaker.ToString(), RoleType.GlobalAdmin.ToString()
         };
         if (!request.RequestedBy.Roles.Any(r => privilegedRoles.Contains(r)))
         {
@@ -95,10 +93,12 @@ internal class HandleGetWorkingHours : IQueryHandler<GetWorkingHours, IPagedList
     private async Task<IPagedList<WorkingHours>> Query(GetWorkingHours request, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.Now.GetDayWithoutTime();
-        var query = querySession.Query<WorkingHours>()
-            .Where(x => (x.DateFrom >= request.DateFrom && x.DateFrom <= request.DateTo) ||
-                        (x.DateTo >= request.DateFrom && x.DateTo <= request.DateTo) ||
-                        (request.DateFrom >= x.DateFrom && request.DateFrom <= x.DateTo));
+        var query = this.querySession.Query<WorkingHours>()
+            .Where(x =>
+                (!x.DateTo.HasValue && x.DateFrom <= request.DateTo) || // when DateTo is null, treat it like max value
+                (x.DateFrom >= request.DateFrom && x.DateFrom <= request.DateTo) ||
+                (x.DateTo >= request.DateFrom && x.DateTo <= request.DateTo) ||
+                (request.DateFrom >= x.DateFrom && request.DateFrom <= x.DateTo));
         query = query.WhereMatchAny(w => w.UserId, request.UserIds);
         query = query.WhereMatchAnyStatus(request.Statuses, now);
         return await query

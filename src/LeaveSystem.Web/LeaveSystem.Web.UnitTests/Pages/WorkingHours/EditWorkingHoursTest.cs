@@ -11,82 +11,50 @@ using RichardSzalay.MockHttp;
 
 namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
 
-public class EditWorkingHoursTest : IDisposable
+using LeaveSystem.Shared.Converters;
+using LeaveSystem.Shared.WorkingHours;
+using Moq;
+using Web.Pages.UserLeaveLimits;
+using Web.Shared;
+
+public class EditWorkingHoursTest
 {
-    private HttpClient httpClientMock = null!;
-    private readonly IToastService toastServiceMock = Substitute.For<IToastService>();
-    private readonly ILogger<WorkingHoursService> logger = Substitute.For<ILogger<WorkingHoursService>>();
-
-    private WorkingHoursService GetSut() => new(httpClientMock, toastServiceMock, logger);
-
-    [Fact]
-    public async Task WhenErrorOccuredDuringEditing_ShowErrorToastAndReturnFalse()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task WhenEntityUpdated_ThenReturnUpdatingResult(bool updateResult)
     {
-        //Given
-        var workingHoursToEdit = FakeWorkingHoursProvider.GetCurrentForBen(DateTimeOffset.Now).ToDto();
-        const string fakeContentText = "fake response content";
-        const string fakeDetailText = "fake error in 404 line";
-        var problemDto =
-            new ProblemDto(string.Empty, fakeContentText, 400, fakeDetailText, string.Empty, "dev", "1.0.0.0");
-        var serializedProblemDto = JsonSerializer.Serialize(problemDto);
-        var responseContent = new StringContent(serializedProblemDto, Encoding.UTF8, "application/json");
-        var mockHttpMessageHandler = new MockHttpMessageHandler();
-        const string baseUrl = "http://localhost:5047";
-        mockHttpMessageHandler
-            .When($"{baseUrl}/api/workingHours/{workingHoursToEdit.Id}/modify")
-            .WithJsonContent(workingHoursToEdit)
-            .Respond(HttpStatusCode.BadRequest, responseContent);
-        httpClientMock = new HttpClient(mockHttpMessageHandler)
-        {
-            BaseAddress = new Uri(baseUrl)
-        };
-        var sut = GetSut();
-        //When
-        var result = await sut.Edit(workingHoursToEdit);
-        //Then
-        toastServiceMock.Received(1).ShowError(fakeContentText);
-        toastServiceMock.DidNotReceiveWithAnyArgs().ShowSuccess(string.Empty);
-        logger.ReceivedWithAnyArgs(1).LogError("");
-        result.Should().BeFalse();
+        var universalHttpServiceMock = new Mock<UniversalHttpService>(null!, null!, null!);
+        var fakeEntityToEdit = new WorkingHoursDto(
+            "0ACAF979-236C-465B-BA45-BF3FDED9C9EC",
+            DateTimeOffset.Parse("2023-05-01"),
+            DateTimeOffset.Parse("2023-12-01"),
+            TimeSpan.FromHours(4),
+            Guid.Parse("96103DF6-3E23-44AB-8B57-5E25FAB06AA2")
+        );
+        universalHttpServiceMock.Setup(m =>
+                m.PutAsync(
+                    $"api/workingHours/{fakeEntityToEdit.Id}/modify",
+                    It.Is<WorkingHoursDto>(d => IsDtoEquivalentTo(d, fakeEntityToEdit)),
+                    It.IsAny<string>(),
+                    It.IsAny<JsonSerializerOptions>()))
+            .ReturnsAsync(updateResult);
+        var sut = new WorkingHoursService(universalHttpServiceMock.Object);
+
+        var result = await sut.EditAsync(fakeEntityToEdit);
+        result.Should().Be(updateResult);
+        universalHttpServiceMock.Verify(
+            m => m.PutAsync(
+                $"api/workingHours/{fakeEntityToEdit.Id}/modify",
+                It.Is<WorkingHoursDto>(d => IsDtoEquivalentTo(d, fakeEntityToEdit)),
+                "Edited working hours successfully",
+                It.IsAny<JsonSerializerOptions>()));
     }
 
-    [Fact]
-    public async Task WhenEditingPassedSuccessfully_ShowSuccessToastAndReturnTrue()
-    {
-        //Given
-        var workingHoursToEdit = FakeWorkingHoursProvider.GetCurrentForBen(DateTimeOffset.Now).ToDto();
-        var mockHttpMessageHandler = new MockHttpMessageHandler();
-        const string baseUrl = "http://localhost:5047";
-        mockHttpMessageHandler
-                .When($"{baseUrl}/api/workingHours/{workingHoursToEdit.Id}/modify")
-                .WithJsonContent(workingHoursToEdit)
-                .Respond(HttpStatusCode.NoContent);
-        httpClientMock = new HttpClient(mockHttpMessageHandler)
-        {
-            BaseAddress = new Uri(baseUrl)
-        };
-        var sut = GetSut();
-        //When
-        var result = await sut.Edit(workingHoursToEdit);
-        //Then
-        toastServiceMock.Received(1).ShowSuccess(Arg.Any<string>());
-        toastServiceMock.DidNotReceiveWithAnyArgs().ShowError(string.Empty);
-        logger.DidNotReceiveWithAnyArgs().LogError("");
-        result.Should().BeTrue();
-    }
-
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            httpClientMock?.Dispose();
-        }
-    }
+    private static bool IsDtoEquivalentTo(WorkingHoursDto firstDto, WorkingHoursDto secondDto) =>
+        firstDto.DateFrom == secondDto.DateFrom &&
+        firstDto.DateTo == secondDto.DateTo &&
+        firstDto.Duration == secondDto.Duration &&
+        firstDto.UserId == secondDto.UserId &&
+        firstDto.Id == secondDto.Id;
 }
