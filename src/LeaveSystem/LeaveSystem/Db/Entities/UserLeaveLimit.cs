@@ -2,7 +2,6 @@ using System.Linq.Dynamic.Core;
 using System.Text.Json;
 using FluentValidation;
 using GoldenEye.Shared.Core.Objects.General;
-using LeaveSystem.Shared;
 using LeaveSystem.Shared.FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -29,12 +28,11 @@ public class UserLeaveLimit : IHaveId<Guid>
 
 public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
 {
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new() { WriteIndented = true };
     private readonly LeaveSystemDbContext dbContext;
-    private readonly ILogger<UserLeaveLimitValidator> logger;
     public UserLeaveLimitValidator(LeaveSystemDbContext dbContext, ILogger<UserLeaveLimitValidator> logger)
     {
         this.dbContext = dbContext;
-        this.logger = logger;
         this.RuleFor(x => x.Limit)
             .GreaterThanOrEqualTo(TimeSpan.Zero)
             .WithErrorCode(FvErrorCodes.BadRequest)
@@ -51,7 +49,8 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
         this.RuleFor(x => x.ValidUntil)
             .Equal(x => x.ValidSince)
             .When(x => x.ValidUntil is null && x.ValidSince is null)
-            .WithMessage("Start date of limit must be earlier than end date");;
+            .WithMessage("Start date of limit must be earlier than end date");
+        ;
         this.RuleFor(x => x.LeaveTypeId)
             .MustAsync((leaveTypeId, cancellation) =>
                 this.dbContext.LeaveTypes.AnyAsync(ull => ull.Id == leaveTypeId, cancellation))
@@ -68,7 +67,7 @@ public class UserLeaveLimitValidator : AbstractValidator<UserLeaveLimit>
                     return true;
                 }
 
-                var overlappingLimitsJson = JsonSerializer.Serialize(overlappingLimits, new JsonSerializerOptions { WriteIndented = true });
+                var overlappingLimitsJson = JsonSerializer.Serialize(overlappingLimits, JsonSerializerOptions);
                 logger.LogError("Following Limits overlapping this limit:\n{OverlappingLimits}", overlappingLimitsJson);
                 return false;
             })

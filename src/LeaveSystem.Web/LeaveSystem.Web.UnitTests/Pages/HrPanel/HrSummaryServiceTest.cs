@@ -1,7 +1,5 @@
 using Blazored.Toast.Services;
-using Castle.Core.Logging;
 using LeaveSystem.Shared;
-using LeaveSystem.Shared.Extensions;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.HrPanel;
