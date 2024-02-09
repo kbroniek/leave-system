@@ -2,7 +2,6 @@ using LeaveSystem;
 using LeaveSystem.Api;
 using LeaveSystem.Api.Auth;
 using LeaveSystem.Api.Controllers;
-using LeaveSystem.Api.Db;
 using LeaveSystem.Api.Endpoints.Employees;
 using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
@@ -83,11 +82,5 @@ app
     .AddWorkingHoursEndpoints(azureScpes)
     .AddEmployeesEndpoints(azureScpes)
     .AddUsersEndpoints(azureScpes);
-
-await app.MigrateDb();
-if (app.Environment.IsDevelopment())
-{
-    _ = app.FillInDatabase(builder.Configuration);
-}
 
 await app.RunAsync();

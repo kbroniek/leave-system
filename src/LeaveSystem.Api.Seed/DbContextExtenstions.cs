@@ -1,11 +1,10 @@
-using System.Globalization;
 using System.Text.Json;
 using Ardalis.GuardClauses;
 using GoldenEye.Backend.Core.DDD.Commands;
 using GoldenEye.Backend.Core.DDD.Queries;
-using LeaveSystem.Domain.Users;
 using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.Domain.Users;
 using LeaveSystem.EventSourcing.LeaveRequests.GettingLeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours.GettingWorkingHours;
 using LeaveSystem.Shared;
@@ -14,9 +13,12 @@ using LeaveSystem.Shared.Date;
 using LeaveSystem.Shared.LeaveRequests;
 using Marten.Pagination;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using WorkingHours = LeaveSystem.EventSourcing.WorkingHours.WorkingHours;
 
-namespace LeaveSystem.Api.Db;
+namespace LeaveSystem.Api.Seed;
 
 public static class DbContextExtenstions
 {
@@ -24,7 +26,7 @@ public static class DbContextExtenstions
     private const string DefaultUserEmail = "karolbr5@gmail.com";
     private const string AzureReadUsersSection = "ManageAzureUsers";
 
-    private static readonly FederatedUser defaultUserMock = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22",
+    private static readonly FederatedUser DefaultUser = FederatedUser.Create("1c353785-c700-4a5d-bec5-a0f6f668bf22",
         DefaultUserEmail, "Karol Volt", new[] { RoleType.GlobalAdmin.ToString() });
 
     private static FederatedUser defaultUser;
@@ -44,30 +46,29 @@ public static class DbContextExtenstions
             new[] { RoleType.Employee.ToString() })
     };
 
-    private static Setting[] settings = {
-        new Setting
+    private static readonly Setting[] Settings = {
+        new()
         {
             Id = LeaveRequestStatus.Canceled.ToString(), Category = SettingCategoryType.LeaveStatus,
             Value = JsonDocument.Parse("{\"color\": \"#525252\"}")
         },
-        new Setting
+        new()
         {
             Id = LeaveRequestStatus.Rejected.ToString(), Category = SettingCategoryType.LeaveStatus,
             Value = JsonDocument.Parse("{\"color\": \"#850000\"}")
         },
-        new Setting
+        new()
         {
             Id = LeaveRequestStatus.Pending.ToString(), Category = SettingCategoryType.LeaveStatus,
             Value = JsonDocument.Parse("{\"color\": \"#CFFF98\"}")
         },
-        new Setting
-        {
+        new() {
             Id = LeaveRequestStatus.Accepted.ToString(), Category = SettingCategoryType.LeaveStatus,
             Value = JsonDocument.Parse("{\"color\": \"transparent\"}")
         }
     };
 
-    private static LeaveType holidayLeave = new LeaveType
+    private static LeaveType holidayLeave = new()
     {
         Id = Guid.NewGuid(),
         Name = "urlop wypoczynkowy",
@@ -81,7 +82,7 @@ public static class DbContextExtenstions
         }
     };
 
-    private static LeaveType onDemandLeave = new LeaveType
+    private static LeaveType onDemandLeave = new()
     {
         Id = Guid.NewGuid(),
         Name = "urlop na żądanie",
@@ -96,7 +97,7 @@ public static class DbContextExtenstions
         }
     };
 
-    private static LeaveType sickLeave = new LeaveType
+    private static LeaveType sickLeave = new()
     {
         Id = Guid.NewGuid(),
         Name = "niezdolność do pracy z powodu choroby",
@@ -109,7 +110,7 @@ public static class DbContextExtenstions
         }
     };
 
-    private static LeaveType saturdayLeave = new LeaveType
+    private static LeaveType saturdayLeave = new()
     {
         Id = Guid.NewGuid(),
         Name = "urlop za sobotę",
@@ -123,52 +124,52 @@ public static class DbContextExtenstions
         }
     };
 
-    public static async Task MigrateDb(this IApplicationBuilder app)
+    public static async Task FillInDatabase(this IConfiguration configuration, ILogger logger, DateTimeOffset currentDate)
     {
-        using (var scope = app.ApplicationServices.CreateScope())
-        {
-            var services = scope.ServiceProvider;
-
-            var dbContext = services.GetRequiredService<LeaveSystemDbContext>() ?? throw new InvalidOperationException("Cannot find DB context.");
-
-            try
-            {
-                await dbContext.Database.MigrateAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Cannot migrate the database.", ex);
-            }
-        }
-    }
-
-    public static async Task FillInDatabase(this WebApplication app, IConfiguration configuration)
-    {
+        logger.LogInformation("Seeding DB.");
         try
         {
             var cancellationToken = new CancellationToken();
             var serviceCollection = new ServiceCollection();
             var serviceProvider = serviceCollection
                 .AddServices(configuration, AzureReadUsersSection)
-                .AddScoped<DateService>(_ => new CustomDateService(DateTimeOffset.Parse("2024-02-01 00:00:00 +00:00", CultureInfo.CurrentCulture)))
+                .AddScoped<DateService>(_ => new CustomDateService(currentDate))
                 .BuildServiceProvider();
             var dbContext = serviceProvider.GetRequiredService<LeaveSystemDbContext>();
+            await dbContext.MigrateDb();
             var graphUserService = serviceProvider.GetRequiredService<GetGraphUserService>();
             var saveGraphUserService = serviceProvider.GetRequiredService<SaveGraphUserService>();
+            logger.LogInformation("Getting azure udsers.");
             var graphUsers = await graphUserService.Get(cancellationToken);
-            defaultUser = CreateFederatedUser(graphUsers, defaultUserMock.Id, defaultUserMock.Email,
-                defaultUserMock.Name, defaultUserMock.Roles);
+            defaultUser = CreateFederatedUser(graphUsers, DefaultUser.Id, DefaultUser.Email,
+                DefaultUser.Name, DefaultUser.Roles);
             testUsers = TestUserMock
                 .Select(t => CreateFederatedUser(graphUsers, t.Id, t.Email, t.Name, t.Roles))
                 .Union(new FederatedUser[] { defaultUser })
                 .ToArray();
-            await FillInGraphUsers(graphUsers, saveGraphUserService, app.Logger, cancellationToken);
+            logger.LogInformation("Seeding users.");
+            await FillInGraphUsers(graphUsers, saveGraphUserService, logger, cancellationToken);
+            logger.LogInformation("Seeding simple data.");
             await FillInSimpleData(dbContext, serviceProvider);
+            logger.LogInformation("Seeding leave requests and working hours.");
             await FillInEventSourcingData(serviceProvider);
         }
         catch (Exception ex)
         {
-            app.Logger.LogError(ex, "Something went wrong when fill in database.");
+            logger.LogError(ex, "Something went wrong when fill in database.");
+        }
+        logger.LogInformation("Finish seeding DB.");
+    }
+
+    private static async Task MigrateDb(this LeaveSystemDbContext dbContext)
+    {
+        try
+        {
+            await dbContext.Database.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Cannot migrate the database.", ex);
         }
     }
 
@@ -328,8 +329,8 @@ public static class DbContextExtenstions
         await SetupUser4(commandBus, defaultUser, defaultUser, dateService);
 
         var now = dateService.UtcNowWithoutTime();
-        int firstMonth = now.Month > 6 ? 1 : 9;
-        int secondMonth = now.Month > 6 ? 5 : 12;
+        var firstMonth = now.Month > 6 ? 1 : 9;
+        var secondMonth = now.Month > 6 ? 5 : 12;
         await AddSaturdayLeaveRequest(commandBus, testUsers[0], now, firstMonth);
         await AddSaturdayLeaveRequest(commandBus, testUsers[1], now, secondMonth);
         await AddSaturdayLeaveRequest(commandBus, defaultUser, now, firstMonth);
@@ -533,8 +534,8 @@ public static class DbContextExtenstions
             ValidUntil = now.GetLastDayOfYear(),
         });
         await dbContext.UserLeaveLimits.AddRangeAsync(onDemandLimits);
-        int firstMonth = now.Month > 6 ? 1 : 9;
-        int secondMonth = now.Month > 6 ? 5 : 12;
+        var firstMonth = now.Month > 6 ? 1 : 9;
+        var secondMonth = now.Month > 6 ? 5 : 12;
         var saturdayFirsLimits = GetSaturdayLimits(now, firstMonth);
         await dbContext.UserLeaveLimits.AddRangeAsync(saturdayFirsLimits);
         var saturdaySecondLimits = GetSaturdayLimits(now, secondMonth);
@@ -675,6 +676,6 @@ public static class DbContextExtenstions
             return;
         }
 
-        await dbContext.Settings.AddRangeAsync(settings);
+        await dbContext.Settings.AddRangeAsync(Settings);
     }
 }
