@@ -135,6 +135,7 @@ public class LeaveRequest : IEventSource, INotNullablePeriod
         Status = LeaveRequestStatus.Pending;
         CreatedBy = @event.CreatedBy;
         LastModifiedBy = @event.CreatedBy;
+        WorkingHours = @event.WorkingHours;
         Version++;
     }
 
