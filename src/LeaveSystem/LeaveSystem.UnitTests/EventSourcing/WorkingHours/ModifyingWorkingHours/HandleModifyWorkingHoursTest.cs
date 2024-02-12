@@ -1,4 +1,4 @@
-using FluentAssertions;
+using GoldenEye.Backend.Core.DDD.Events;
 using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
@@ -14,7 +14,6 @@ using LeaveSystem.UnitTests.Stubs;
 using Marten;
 using MediatR;
 using NSubstitute;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.ModifyingWorkingHours;
 
@@ -67,7 +66,7 @@ public class HandleModifyWorkingHoursTest
         await workingHoursRepositoryMock.Received(1).SaveChangesAsync();
         await leaveRequestRepositoryMock.Received(overlappingLeaveRequestsCount).UpdateAsync(Arg.Any<LeaveRequest>(), Arg.Any<CancellationToken>());
         await leaveRequestRepositoryMock.Received(overlappingLeaveRequestsCount).SaveChangesAsync();
-        fakeWorkingHours.PendingEvents.Last().Should().BeOfType<WorkingHoursModified>();
+        (fakeWorkingHours as IEventSource).PendingEvents.Last().Should().BeOfType<WorkingHoursModified>();
         result.Should().BeEquivalentTo(Unit.Value);
         leaveRequestsMartenQueryable.Any(overlapPeriodExp.And(x => x.CreatedBy.Id == command.UserId && x.Status.IsValid()))
             .Should().BeFalse();

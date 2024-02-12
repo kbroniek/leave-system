@@ -19,8 +19,7 @@ public class WorkingHours : IEventSource, IDateToNullablePeriod
     public int Version { get; private set; }
 
     [IgnoreDataMember]
-    //TODO: make it private
-    public Queue<IEvent> PendingEvents { get; } = new Queue<IEvent>();
+    Queue<IEvent> IEventSource.PendingEvents { get; } = new Queue<IEvent>();
 
     public Guid Id { get; private set; }
 
