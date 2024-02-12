@@ -21,15 +21,13 @@ public class RejectLeaveRequestTest
     {
         //Given
         var createEvent = FakeLeaveRequestCreatedProvider.GetLeaveRequestWithHolidayLeaveCreatedCalculatedFromCurrentDate();
-        var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(
-            createEvent
-        );
+        var leaveRequest = LeaveRequest.CreatePendingLeaveRequest(createEvent);
         actionBeforeReject(leaveRequest, "fake remarks", User);
         //When
         var act = () => leaveRequest.Reject("fake remarks", User);
         //Then
         act.Should().Throw<InvalidOperationException>();
-        leaveRequest.PendingEvents.Count.Should().Be(2);
+        (leaveRequest as IEventSource).PendingEvents.Count.Should().Be(2);
     }
 
     public static IEnumerable<object[]>
@@ -62,7 +60,7 @@ public class RejectLeaveRequestTest
             Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers()
         );
-        leaveRequest.PendingEvents.Should().BeEquivalentTo(
+        (leaveRequest as IEventSource).PendingEvents.Should().BeEquivalentTo(
             new IEvent[] { @event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, User) }
         );
     }
@@ -108,7 +106,7 @@ public class RejectLeaveRequestTest
             Remarks = fakeRemarksCollection
         }, o => o.ExcludingMissingMembers()
         );
-        var dequeuedEvents = leaveRequest.PendingEvents;
+        var dequeuedEvents = (leaveRequest as IEventSource).PendingEvents;
         dequeuedEvents.Count.Should().Be(fakeRemarksCollection.Count);
         dequeuedEvents.Last().Should().BeEquivalentTo(new
         {

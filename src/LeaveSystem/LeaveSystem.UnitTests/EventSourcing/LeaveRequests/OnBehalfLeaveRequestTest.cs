@@ -27,7 +27,7 @@ public class OnBehalfLeaveRequestTest
         var act = () => leaveRequest.OnBehalf(User);
         //Then
         act.Should().Throw<InvalidOperationException>();
-        leaveRequest.PendingEvents.Count.Should().Be(2);
+        (leaveRequest as IEventSource).PendingEvents.Count.Should().Be(2);
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class OnBehalfLeaveRequestTest
             LastModifiedBy = User
         }, o => o.ExcludingMissingMembers()
         );
-        leaveRequest.PendingEvents.Should().BeEquivalentTo(
+        (leaveRequest as IEventSource).PendingEvents.Should().BeEquivalentTo(
             new IEvent[] { createEvent, LeaveRequestOnBehalfCreated.Create(leaveRequest.Id, User) });
     }
 

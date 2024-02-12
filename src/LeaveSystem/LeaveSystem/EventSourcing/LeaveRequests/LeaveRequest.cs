@@ -38,8 +38,7 @@ public class LeaveRequest : IEventSource, INotNullablePeriod
     public int Version { get; private set; }
 
     [IgnoreDataMember]
-    //TODO: make it private
-    public Queue<IEvent> PendingEvents { get; } = new Queue<IEvent>();
+    Queue<IEvent> IEventSource.PendingEvents { get; } = new Queue<IEvent>();
 
     public Guid Id { get; protected set; }
 

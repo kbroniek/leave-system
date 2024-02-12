@@ -32,7 +32,7 @@ public class AcceptLeaveRequestTest
         };
         //Then
         act.Should().Throw<InvalidOperationException>();
-        leaveRequest.PendingEvents.Count.Should().Be(2);
+        (leaveRequest as IEventSource).PendingEvents.Count.Should().Be(2);
     }
 
     public static IEnumerable<object[]>
@@ -59,7 +59,7 @@ public class AcceptLeaveRequestTest
             LastModifiedBy = user,
             Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers());
-        leaveRequest.PendingEvents.Should().BeEquivalentTo(
+        (leaveRequest as IEventSource).PendingEvents.Should().BeEquivalentTo(
             new IEvent[] { @event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, user) }
         );
     }
@@ -84,7 +84,7 @@ public class AcceptLeaveRequestTest
                     new LeaveRequest.RemarksModel(fakeRejectRemarks, user)
                 }
         }, o => o.ExcludingMissingMembers());
-        var dequeuedEvents = leaveRequest.PendingEvents;
+        var dequeuedEvents = (leaveRequest as IEventSource).PendingEvents;
         dequeuedEvents.Count.Should().Be(2);
         dequeuedEvents.Last().Should().BeEquivalentTo(new
         {
