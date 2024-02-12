@@ -1,18 +1,15 @@
-using GoldenEye.Backend.Core.DDD.Registration;
-using LeaveSystem.GraphApi;
-using Microsoft.OpenApi.Models;
-
 namespace LeaveSystem.Api;
 
+using GoldenEye.Backend.Core.DDD.Registration;
 using LeaveSystem.Db.Entities;
+using LeaveSystem.GraphApi;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
-using Shared.LeaveRequests;
+using Microsoft.OpenApi.Models;
 
 public static class Config
 {
-    private const string AzureReadUsersSection = "ManageAzureUsers";
     public static IServiceCollection AddSwagger(this IServiceCollection services) =>
         services.AddSwaggerGen(c =>
         {
@@ -47,8 +44,8 @@ public static class Config
                 }
             });
         });
-    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration) =>
-        services.AddGraphFactory(configuration.GetSection(AzureReadUsersSection))
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration, string azureReadUsersSection) =>
+        services.AddGraphFactory(configuration.GetSection(azureReadUsersSection))
             .AddDDD()
             .AddLeaveSystemModule(configuration);
 

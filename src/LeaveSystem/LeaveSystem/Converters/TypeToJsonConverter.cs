@@ -5,9 +5,10 @@ namespace LeaveSystem.Converters;
 
 internal class TypeToJsonConverter<T> : ValueConverter<T, string>
 {
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new();
     public TypeToJsonConverter() : base(
-            v => JsonSerializer.Serialize(v, new JsonSerializerOptions()),
-            v => JsonSerializer.Deserialize<T>(v, new JsonSerializerOptions())!
+            v => JsonSerializer.Serialize(v, JsonSerializerOptions),
+            v => JsonSerializer.Deserialize<T>(v, JsonSerializerOptions)!
         )
     {
     }

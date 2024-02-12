@@ -1,6 +1,6 @@
 ﻿using LeaveSystem.Shared.Date;
 
-namespace LeaveSystem.Api.Db;
+namespace LeaveSystem.Api.Seed;
 
 public class CustomDateService : DateService
 {
