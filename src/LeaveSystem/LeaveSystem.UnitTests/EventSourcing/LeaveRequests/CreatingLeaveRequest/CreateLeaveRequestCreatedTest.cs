@@ -1,8 +1,5 @@
-using FluentAssertions;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared;
-using System;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 

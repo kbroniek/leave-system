@@ -1,4 +1,4 @@
-using FluentAssertions;
+using System.ComponentModel.DataAnnotations;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
@@ -9,10 +9,6 @@ using LeaveSystem.UnitTests.Stubs;
 using Marten;
 using Marten.Events;
 using Moq;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
 

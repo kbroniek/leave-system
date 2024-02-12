@@ -1,4 +1,4 @@
-﻿@page "/leave-requests"
+@page "/leave-requests"
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Shared
 @using LeaveSystem.Web.Extensions;
@@ -124,16 +124,6 @@ else
                 .Select(u => u.First())
                 .OrderBy(u => u.Name)
                 .ToArray();
-            //TODO: working hours should be taken from leave request
-            var workingHoursQuery = new GetWorkingHoursQuery(
-                1,
-                1000,
-                leaveRequestsQuery.DateFrom,
-                leaveRequestsQuery.DateTo,
-                null,
-                null
-            );
-            var workingHours = await WorkingHoursService.GetWorkingHoursAsync(workingHoursQuery);
             await Timeline.CreateAsync(
                 "timeline-visualization",
                 employees,
@@ -142,7 +132,7 @@ else
                     lr.DateFrom,
                     lr.DateTo,
                     lr.Duration,
-                    workingHours?.Items?.FirstOrDefault(wh => wh.UserId == lr.CreatedBy.Id)?.Duration ?? TimeSpan.Zero,
+                    lr.WorkingHours,
                     leaveTypes.FirstOrDefault(lt => lt.Id == lr.LeaveTypeId)?.Name ?? lr.LeaveTypeId.ToString(),
                     lr.LeaveTypeId,
                     lr.Status,

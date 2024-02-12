@@ -1,9 +1,8 @@
-﻿using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
 using static LeaveSystem.Web.Pages.LeaveTypes.LeaveTypesService;
-using static LeaveSystem.Web.Pages.UserLeaveLimits.UserLeaveLimitsService;
 
 namespace LeaveSystem.Web.Pages.UserPanel;
 public record LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestPerType.ForView> LeaveRequests, LeaveTypeProperties LeaveTypeProperties)

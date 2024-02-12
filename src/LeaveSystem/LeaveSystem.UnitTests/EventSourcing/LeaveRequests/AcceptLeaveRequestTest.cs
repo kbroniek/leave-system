@@ -1,4 +1,3 @@
-using FluentAssertions;
 using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
@@ -6,7 +5,6 @@ using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestDataGenerators;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
 

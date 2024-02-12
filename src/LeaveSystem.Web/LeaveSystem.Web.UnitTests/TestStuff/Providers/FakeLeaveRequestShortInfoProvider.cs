@@ -6,9 +6,7 @@ namespace LeaveSystem.Web.UnitTests.TestStuff.Providers;
 
 public class FakeLeaveRequestShortInfoProvider
 {
-    public static IEnumerable<LeaveRequestShortInfo> GetAll(DateTimeOffset baseDate)
-    {
-        return new[]
+    public static IEnumerable<LeaveRequestShortInfo> GetAll(DateTimeOffset baseDate) => new[]
         {
             new LeaveRequestShortInfo(
                 Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63490"),
@@ -17,7 +15,8 @@ public class FakeLeaveRequestShortInfoProvider
                 TimeSpan.FromHours(16),
                 FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 LeaveRequestStatus.Accepted,
-                FakeUserProvider.GetUserWithNameFakeoslav()),
+                FakeUserProvider.GetUserWithNameFakeoslav(),
+                TimeSpan.FromHours(8)),
             new LeaveRequestShortInfo(
                 Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63491"),
                 baseDate + TimeSpan.FromDays(7),
@@ -25,7 +24,8 @@ public class FakeLeaveRequestShortInfoProvider
                 TimeSpan.FromHours(8),
                 FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 LeaveRequestStatus.Accepted,
-                FakeUserProvider.GetUserWithNameFakeoslav()),
+                FakeUserProvider.GetUserWithNameFakeoslav(),
+                TimeSpan.FromHours(8)),
             new LeaveRequestShortInfo(
                 Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63492"),
                 baseDate + TimeSpan.FromDays(1),
@@ -33,13 +33,11 @@ public class FakeLeaveRequestShortInfoProvider
                 TimeSpan.FromHours(16),
                 FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
                 LeaveRequestStatus.Canceled,
-                FakeUserProvider.GetUserBen()),
+                FakeUserProvider.GetUserBen(),
+                TimeSpan.FromHours(8)),
         };
-    }
 
-    public static IEnumerable<LeaveRequestShortInfo> GetAllV2(DateTimeOffset baseDate)
-    {
-        return new[]
+    public static IEnumerable<LeaveRequestShortInfo> GetAllV2(DateTimeOffset baseDate) => new[]
         {
             new LeaveRequestShortInfo(
                 Guid.NewGuid(),
@@ -48,7 +46,8 @@ public class FakeLeaveRequestShortInfoProvider
                 TimeSpan.FromHours(16),
                 FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 LeaveRequestStatus.Pending,
-                FakeUserProvider.GetUserWithNameFakeoslav()),
+                FakeUserProvider.GetUserWithNameFakeoslav(),
+                TimeSpan.FromHours(8)),
             new LeaveRequestShortInfo(
                 Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(7),
@@ -56,7 +55,8 @@ public class FakeLeaveRequestShortInfoProvider
                 TimeSpan.FromHours(8),
                 FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 LeaveRequestStatus.Canceled,
-                FakeUserProvider.GetUserWithNameFakeoslav()),
+                FakeUserProvider.GetUserWithNameFakeoslav(),
+                TimeSpan.FromHours(8)),
             new LeaveRequestShortInfo(
                 Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(1),
@@ -64,7 +64,7 @@ public class FakeLeaveRequestShortInfoProvider
                 TimeSpan.FromHours(4),
                 FakeLeaveTypeProvider.FakeSickLeaveId,
                 LeaveRequestStatus.Accepted,
-                FakeUserProvider.GetUserBen()),
+                FakeUserProvider.GetUserBen(),
+                TimeSpan.FromHours(8)),
         };
-    }
 }

@@ -15,7 +15,7 @@ public class CreateForViewTest
     public void WhenCreatingForView_ThenCreateWithFirstMatchingLimit()
     {
         //Given
-        var exceptedLimit = new UserLeaveLimitDto(Guid.Parse("d2ca9535-8fd6-4e18-9465-4edf660e56b4"),TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
+        var exceptedLimit = new UserLeaveLimitDto(Guid.Parse("d2ca9535-8fd6-4e18-9465-4edf660e56b4"), TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
             DateTimeOffsetExtensions.CreateFromDate(2023, 5, 6),
             DateTimeOffsetExtensions.CreateFromDate(2023, 9, 3),
             new UserLeaveLimitPropertyDto("fake desc3"));
@@ -39,7 +39,8 @@ public class CreateForViewTest
             new LeaveRequestShortInfo(Guid.Parse("443dbfc1-154b-454a-9925-70c795d0fb7b"), DateTimeOffsetExtensions.CreateFromDate(2023, 6, 7),
                 DateTimeOffsetExtensions.CreateFromDate(2023, 9, 2), TimeSpan.FromHours(16),
                 FakeLeaveTypeDtoProvider.HolidayLeaveId,
-                LeaveRequestStatus.Accepted, FakeUserProvider.GetUserBen());
+                LeaveRequestStatus.Accepted, FakeUserProvider.GetUserBen(),
+                TimeSpan.FromHours(8));
         var workingHours = TimeSpan.FromHours(8);
         //When
         var result = LeaveRequestPerType.ForView.CreateForView(leaveRequest, limits, workingHours);
@@ -59,7 +60,7 @@ public class CreateForViewTest
     public void WhenNoLimitInLeaveRequestPeriod_ThenDescriptionIsNull()
     {
         //Given
-        var exceptedLimit = new UserLeaveLimitDto(Guid.Parse("12c4c87e-1f3d-4b3b-adde-803df439e08a"),TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
+        var exceptedLimit = new UserLeaveLimitDto(Guid.Parse("12c4c87e-1f3d-4b3b-adde-803df439e08a"), TimeSpan.FromHours(8), TimeSpan.FromHours(8), FakeLeaveTypeDtoProvider.HolidayLeaveId,
             DateTimeOffsetExtensions.CreateFromDate(2023, 5, 6),
             DateTimeOffsetExtensions.CreateFromDate(2023, 9, 3),
             new UserLeaveLimitPropertyDto("fake desc3"));
@@ -83,7 +84,8 @@ public class CreateForViewTest
             new LeaveRequestShortInfo(Guid.Parse("c7cc99a6-f431-4340-82b0-7cd69dec5807"), DateTimeOffsetExtensions.CreateFromDate(2023, 6, 7),
                 DateTimeOffsetExtensions.CreateFromDate(2024, 10, 2), TimeSpan.FromHours(16),
                 FakeLeaveTypeDtoProvider.HolidayLeaveId,
-                LeaveRequestStatus.Accepted, FakeUserProvider.GetUserBen());
+                LeaveRequestStatus.Accepted, FakeUserProvider.GetUserBen(),
+                TimeSpan.FromHours(8));
         var workingHours = TimeSpan.FromHours(8);
         //When
         var result = LeaveRequestPerType.ForView.CreateForView(leaveRequest, limits, workingHours);
