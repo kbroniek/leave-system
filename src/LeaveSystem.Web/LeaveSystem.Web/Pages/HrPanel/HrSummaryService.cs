@@ -1,6 +1,5 @@
-﻿using LeaveSystem.Shared;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.WorkingHours;
-using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.LeaveTypes;
@@ -66,8 +65,7 @@ public class HrSummaryService
                         lt,
                         leaveTypes,
                         leaveRequests.Where(lr => lr.CreatedBy.Id == e.Id),
-                        limits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitDto.Create(l)),
-                        workingHours.DurationOrZero(e.Id))))),
+                        limits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitDto.Create(l)))))),
         leaveTypes);
     }
 

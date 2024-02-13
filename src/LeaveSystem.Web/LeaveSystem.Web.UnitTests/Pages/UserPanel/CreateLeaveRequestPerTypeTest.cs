@@ -27,7 +27,7 @@ public class CreateLeaveRequestPerTypeTest
     {
         //Given
         //When
-        var result = LeaveRequestPerType.Create(leaveType, allLeaveTypes, leaveRequests, limits, workingHours);
+        var result = LeaveRequestPerType.Create(leaveType, allLeaveTypes, leaveRequests, limits);
         //Then
         result.Should().BeEquivalentTo(new
         {
@@ -46,9 +46,9 @@ public class CreateLeaveRequestPerTypeTest
     public static IEnumerable<object[]> Get_WhenProvidingArguments_ThenCreateCorrectLeaveRequestPerType_TestData()
     {
         var now = DateTimeOffset.Now;
-        var firstFakeLeaveRequests = FakeLeaveRequestShortInfoProvider.GetAll(now);
-        var firstFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAllUserLimits(now.Year);
         var firstFakeWorkingHours = TimeSpan.FromHours(8);
+        var firstFakeLeaveRequests = FakeLeaveRequestShortInfoProvider.GetAll(now, firstFakeWorkingHours);
+        var firstFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAllUserLimits(now.Year);
         yield return new object[]
         {
             FakeLeaveTypeDtoProvider.GetHolidayLeave(),
@@ -63,9 +63,9 @@ public class CreateLeaveRequestPerTypeTest
             TimeSpan.FromHours(0),
             firstFakeLeaveRequests.Select(lr => LeaveRequestPerType.ForView.CreateForView(lr, firstFakeLimits, firstFakeWorkingHours))
         };
-        var secondFakeLeaveRequests = FakeLeaveRequestShortInfoProvider.GetAllV2(now);
-        var secondFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAllUserLimits(now.Year);
         var secondFakeWorkingHours = TimeSpan.FromHours(4);
+        var secondFakeLeaveRequests = FakeLeaveRequestShortInfoProvider.GetAllV2(now, secondFakeWorkingHours);
+        var secondFakeLimits = FakeUserLeaveLimitsDtoProvider.GetAllUserLimits(now.Year);
         yield return new object[]
         {
             FakeLeaveTypeDtoProvider.GetOnDemandLeaveV2(),
@@ -93,7 +93,7 @@ public class CreateLeaveRequestPerTypeTest
         var leaveRequests = FakeLeaveRequestShortInfoProvider.GetAll(now);
         var limits = FakeUserLeaveLimitsDtoProvider.GetAllUserLimits(now.Year);
         //When
-        var result = LeaveRequestPerType.Create(leaveType, allLeaveTypes, leaveRequests, limits, TimeSpan.FromHours(8));
+        var result = LeaveRequestPerType.Create(leaveType, allLeaveTypes, leaveRequests, limits);
         //Then
         result.Should().BeEquivalentTo(new
         {

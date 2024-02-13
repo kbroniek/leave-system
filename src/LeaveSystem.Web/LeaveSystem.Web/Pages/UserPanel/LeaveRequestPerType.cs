@@ -1,4 +1,5 @@
 using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 using LeaveSystem.Web.Pages.UserLeaveLimits;
@@ -7,7 +8,7 @@ using static LeaveSystem.Web.Pages.LeaveTypes.LeaveTypesService;
 namespace LeaveSystem.Web.Pages.UserPanel;
 public record LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, string Used, string? Limit, string? OverdueLimit, string? SumLimit, string? Left, IEnumerable<LeaveRequestPerType.ForView> LeaveRequests, LeaveTypeProperties LeaveTypeProperties)
 {
-    public static LeaveRequestPerType Create(LeaveTypeDto leaveType, IEnumerable<LeaveTypeDto> allLeaveTypes, IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitDto> limits, TimeSpan workingHours)
+    public static LeaveRequestPerType Create(LeaveTypeDto leaveType, IEnumerable<LeaveTypeDto> allLeaveTypes, IEnumerable<LeaveRequestShortInfo> leaveRequests, IEnumerable<UserLeaveLimitDto> limits)
     {
         var connectedLeaveType = allLeaveTypes.FirstOrDefault(lt => lt.BaseLeaveTypeId == leaveType.Id);
         var leaveRequestsPerLeaveType = leaveRequests
@@ -18,12 +19,14 @@ public record LeaveRequestPerType(string LeaveTypeName, Guid LeaveTypeId, string
             .Where(l => l.LeaveTypeId == leaveType.Id);
 
         var leaveRequestsWithDescription = leaveRequestsPerLeaveType
-            .Select(lr => ForView.CreateForView(lr, limitsPerLeaveType, workingHours));
-        TimeSpan leaveRequestsUsed = CalculateUsed(validLeaveRequestsPerLeaveType);
+            .Select(lr => ForView.CreateForView(lr, limitsPerLeaveType, lr.WorkingHours));
+        var leaveRequestsUsed = CalculateUsed(validLeaveRequestsPerLeaveType);
         var limitsSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.Limit.Ticks));
         var overdueLimitSum = TimeSpan.FromTicks(limitsPerLeaveType.Sum(lr => lr.OverdueLimit.Ticks));
         var totalLimit = limitsSum + overdueLimitSum;
         var left = totalLimit - leaveRequestsUsed;
+        // TODO: Somehow solve the issue and calculate limits with various working hours.
+        var workingHours = validLeaveRequestsPerLeaveType.FirstOrDefault()?.WorkingHours ?? WorkingHoursUtils.DefaultWorkingHours;
         return new LeaveRequestPerType(
             leaveType.Name,
             leaveType.Id,

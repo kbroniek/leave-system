@@ -267,10 +267,6 @@ else
                 limit.ValidUntil = limitToSet.ValidUntil;
                 limit.Property = limitToSet.Property;
             }
-            Logger.LogInformation("{Result}", JsonSerializer.Serialize(limit));
-            // var limitToSet = LeaveTypesForView?.Find(lt => lt.Id == limit.LeaveTypeId)?.Limits
-            //     .Find(l => l.Id == limit.Id);
-            // limitToSet = await LimitsService.GetAsync(limit.Id);
         }
         limitToInsert = null;
         editingLimits = false;

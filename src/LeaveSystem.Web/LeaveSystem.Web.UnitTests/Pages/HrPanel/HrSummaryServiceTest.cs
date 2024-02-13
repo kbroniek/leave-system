@@ -1,7 +1,6 @@
 using Blazored.Toast.Services;
 using LeaveSystem.Shared;
 using LeaveSystem.UnitTests.Providers;
-using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.HrPanel;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
@@ -77,8 +76,7 @@ public class HrSummaryServiceTest
                 lt,
                 fakeLeaveTypes,
                 fakeLeaveRequests.Items.Where(lr => lr.CreatedBy.Id == e.Id),
-                fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitDto.Create(l)),
-                fakeWorkingHours.Items.DurationOrZero(e.Id))))
+                fakeLimits.Where(l => l.AssignedToUserId == e.Id).Select(l => UserLeaveLimitDto.Create(l)))))
         );
         result.Should().BeEquivalentTo(new
         {

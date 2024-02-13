@@ -6,7 +6,7 @@ namespace LeaveSystem.Web.UnitTests.TestStuff.Providers;
 
 public class FakeLeaveRequestShortInfoProvider
 {
-    public static IEnumerable<LeaveRequestShortInfo> GetAll(DateTimeOffset baseDate) => new[]
+    public static IEnumerable<LeaveRequestShortInfo> GetAll(DateTimeOffset baseDate, TimeSpan? workingHours = null) => new[]
         {
             new LeaveRequestShortInfo(
                 Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63490"),
@@ -16,7 +16,7 @@ public class FakeLeaveRequestShortInfoProvider
                 FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 LeaveRequestStatus.Accepted,
                 FakeUserProvider.GetUserWithNameFakeoslav(),
-                TimeSpan.FromHours(8)),
+                workingHours ?? TimeSpan.FromHours(8)),
             new LeaveRequestShortInfo(
                 Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63491"),
                 baseDate + TimeSpan.FromDays(7),
@@ -25,7 +25,7 @@ public class FakeLeaveRequestShortInfoProvider
                 FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 LeaveRequestStatus.Accepted,
                 FakeUserProvider.GetUserWithNameFakeoslav(),
-                TimeSpan.FromHours(8)),
+                workingHours ?? TimeSpan.FromHours(8)),
             new LeaveRequestShortInfo(
                 Guid.Parse("a2eba4b3-e665-4eaa-93ad-5405bef63492"),
                 baseDate + TimeSpan.FromDays(1),
@@ -34,10 +34,10 @@ public class FakeLeaveRequestShortInfoProvider
                 FakeLeaveTypeProvider.FakeHolidayLeaveGuid,
                 LeaveRequestStatus.Canceled,
                 FakeUserProvider.GetUserBen(),
-                TimeSpan.FromHours(8)),
+                workingHours ?? TimeSpan.FromHours(8)),
         };
 
-    public static IEnumerable<LeaveRequestShortInfo> GetAllV2(DateTimeOffset baseDate) => new[]
+    public static IEnumerable<LeaveRequestShortInfo> GetAllV2(DateTimeOffset baseDate, TimeSpan? workingHours = null) => new[]
         {
             new LeaveRequestShortInfo(
                 Guid.NewGuid(),
@@ -47,7 +47,7 @@ public class FakeLeaveRequestShortInfoProvider
                 FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 LeaveRequestStatus.Pending,
                 FakeUserProvider.GetUserWithNameFakeoslav(),
-                TimeSpan.FromHours(8)),
+                workingHours ?? TimeSpan.FromHours(8)),
             new LeaveRequestShortInfo(
                 Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(7),
@@ -56,7 +56,7 @@ public class FakeLeaveRequestShortInfoProvider
                 FakeLeaveTypeProvider.FakeOnDemandLeaveId,
                 LeaveRequestStatus.Canceled,
                 FakeUserProvider.GetUserWithNameFakeoslav(),
-                TimeSpan.FromHours(8)),
+                workingHours ?? TimeSpan.FromHours(8)),
             new LeaveRequestShortInfo(
                 Guid.NewGuid(),
                 baseDate + TimeSpan.FromDays(1),
@@ -65,6 +65,6 @@ public class FakeLeaveRequestShortInfoProvider
                 FakeLeaveTypeProvider.FakeSickLeaveId,
                 LeaveRequestStatus.Accepted,
                 FakeUserProvider.GetUserBen(),
-                TimeSpan.FromHours(8)),
+                workingHours ?? TimeSpan.FromHours(8)),
         };
 }
