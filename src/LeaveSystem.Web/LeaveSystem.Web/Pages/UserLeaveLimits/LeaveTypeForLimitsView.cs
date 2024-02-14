@@ -1,12 +1,11 @@
-using System.Linq.Expressions;
 using LeaveSystem.Web.Extensions;
 using LeaveSystem.Web.Pages.LeaveTypes;
-using LeaveSystem.Web.Pages.LeaveTypes.GettingLeaveTypes;
 
 namespace LeaveSystem.Web.Pages.UserLeaveLimits;
 
 public class LeaveTypeForLimitsView
 {
+    private readonly TimeSpan workingHours;
     public string Limit => GetReadableSumTimespanFromTicks(x => x.Limit.Ticks);
     public string OverdueLimit => GetReadableSumTimespanFromTicks(x => x.OverdueLimit.Ticks);
     public string TotalLimit => GetReadableSumTimespanFromTicks(x => x.TotalLimit.Ticks);
@@ -14,11 +13,10 @@ public class LeaveTypeForLimitsView
     public string Name { get; init; }
     public List<UserLeaveLimitDto> Limits { get; init; }
     public LeaveTypesService.LeaveTypeProperties Properties { get; init; }
-    private TimeSpan workingHours;
 
     public LeaveTypeForLimitsView(
         Guid id,
-        string name, 
+        string name,
         List<UserLeaveLimitDto> limits,
         LeaveTypesService.LeaveTypeProperties properties,
         TimeSpan workingHours)
@@ -41,7 +39,7 @@ public class LeaveTypeForLimitsView
         return new LeaveTypeForLimitsView(id, name, limitsForType, properties, workingHours);
     }
 
-    private string GetReadableSumTimespanFromTicks(Func<UserLeaveLimitDto, long> expression) 
+    private string GetReadableSumTimespanFromTicks(Func<UserLeaveLimitDto, long> expression)
         => TimeSpan.FromTicks(Limits.Sum(expression)).GetReadableTimeSpan(workingHours);
 }
 

@@ -1,4 +1,4 @@
-﻿@page "/user-panel/{userId?}/{year:int?}"
+@page "/user-panel/{userId?}/{year:int?}"
 @using LeaveSystem.Shared
 @using LeaveSystem.Shared.LeaveRequests
 @using LeaveSystem.Web.Pages.UserLeaveLimits
@@ -6,6 +6,8 @@
 @using Microsoft.AspNetCore.Authorization
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
+@using LeaveSystem.Shared.WorkingHours
+
 @attribute [Authorize(Policy = @PolicyName)]
 @inject LeaveTypesService LeaveTypesService
 @inject GetLeaveRequestsService GetLeaveRequestsService
@@ -95,16 +97,16 @@
         var leaveTypes = getLeaveTypesTask.Result.ToArray();
         var limits = getLimitsTask.Result;
         var workingHours = getWorkingHoursTask.Result;
-        workingHoursDuration = workingHours?.Duration ?? TimeSpan.Zero;
+        // TODO Check if user has no working hours
+        workingHoursDuration = workingHours?.Duration ?? WorkingHoursUtils.DefaultWorkingHours;
         userSummaryCollection = leaveTypes.Select(lt => LeaveRequestPerType.Create(
             lt,
             leaveTypes,
             leaveRequests,
-            limits,
-            workingHoursDuration));
+            limits));
         leaveRequestsForView = leaveRequests
             .OrderBy(lr => lr.DateFrom)
-            .Select(lr => LeaveRequestForView.Create(lr, leaveTypes, workingHoursDuration));
+            .Select(lr => LeaveRequestForView.Create(lr, leaveTypes));
         leaveTypesWithUserLimits = leaveTypes.Select(lt =>
             LeaveTypeForLimitsView.Create(lt.Id, lt.Name, limits, lt.Properties, workingHoursDuration)).ToList();
     }

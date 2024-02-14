@@ -1,4 +1,3 @@
-using FluentAssertions;
 using GoldenEye.Backend.Core.Repositories;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
@@ -6,7 +5,6 @@ using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using Moq;
-using Xunit;
 using LeaveRequest = LeaveSystem.EventSourcing.LeaveRequests.LeaveRequest;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests.AcceptingLeaveRequest;

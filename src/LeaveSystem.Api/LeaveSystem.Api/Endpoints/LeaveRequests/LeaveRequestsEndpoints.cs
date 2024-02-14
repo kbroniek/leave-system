@@ -42,7 +42,8 @@ public static class LeaveRequestsEndpoints
             return PagedListResponse.From(pagedList);
         })
         .WithName(GetLeaveRequestsPolicyName)
-        .RequireAuthorization(GetLeaveRequestsPolicyName);
+        .RequireAuthorization(GetLeaveRequestsPolicyName)
+        .Produces(StatusCodes.Status200OK);
 
         endpoint.MapGet("api/leaveRequests/{id}", (HttpContext httpContext, IQueryBus queryBus, Guid? id, CancellationToken cancellationToken) =>
         {
@@ -71,7 +72,8 @@ public static class LeaveRequestsEndpoints
             return Results.Created("api/LeaveRequests", leaveRequestId);
         })
         .WithName(CreateLeaveRequestPolicyName)
-        .RequireAuthorization(CreateLeaveRequestPolicyName);
+        .RequireAuthorization(CreateLeaveRequestPolicyName)
+        .Produces(StatusCodes.Status201Created);
 
 
         endpoint.MapPost("api/leaveRequests/onBehalf", async (HttpContext httpContext, ICommandBus commandBus, CreateLeaveRequestOnBehalfDto createLeaveRequest, CancellationToken cancellationToken) =>
@@ -108,7 +110,8 @@ public static class LeaveRequestsEndpoints
             return Results.NoContent();
         })
         .WithName(AcceptLeaveRequestPolicyName)
-        .RequireAuthorization(AcceptLeaveRequestPolicyName);
+        .RequireAuthorization(AcceptLeaveRequestPolicyName)
+        .Produces(StatusCodes.Status204NoContent);
 
         endpoint.MapPut("api/leaveRequests/{id}/reject", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, RejectLeaveRequestDto rejectLeaveRequest, CancellationToken cancellationToken) =>
         {
@@ -123,7 +126,8 @@ public static class LeaveRequestsEndpoints
             return Results.NoContent();
         })
         .WithName(RejectLeaveRequestPolicyName)
-        .RequireAuthorization(RejectLeaveRequestPolicyName);
+        .RequireAuthorization(RejectLeaveRequestPolicyName)
+        .Produces(StatusCodes.Status204NoContent);
 
         endpoint.MapPut("api/leaveRequests/{id}/cancel", async (HttpContext httpContext, ICommandBus commandBus, Guid? id, CancelLeaveRequestDto cancelLeaveRequest, CancellationToken cancellationToken) =>
         {
@@ -138,7 +142,8 @@ public static class LeaveRequestsEndpoints
             return Results.NoContent();
         })
         .WithName(CancelLeaveRequestPolicyName)
-        .RequireAuthorization(CancelLeaveRequestPolicyName);
+        .RequireAuthorization(CancelLeaveRequestPolicyName)
+        .Produces(StatusCodes.Status204NoContent);
 
         return endpoint;
     }

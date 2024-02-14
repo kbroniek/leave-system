@@ -42,7 +42,8 @@ public static class WorkingHoursEndpoints
                     return PagedListResponse.From(workingHours);
                 })
             .WithName(GetWorkingHoursEndpointsPolicyName)
-            .RequireAuthorization(GetWorkingHoursEndpointsPolicyName);
+            .RequireAuthorization(GetWorkingHoursEndpointsPolicyName)
+            .Produces(StatusCodes.Status200OK);
 
         endpoint.MapGet("api/workingHours/{userId}", async (HttpContext httpContext, IQueryBus queryBus, string? userId,
                 CancellationToken cancellationToken) =>
@@ -64,7 +65,9 @@ public static class WorkingHoursEndpoints
                 }
             })
             .WithName(GetUserWorkingHoursEndpointsPolicyName)
-            .RequireAuthorization(GetUserWorkingHoursEndpointsPolicyName);
+            .RequireAuthorization(GetUserWorkingHoursEndpointsPolicyName)
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         endpoint.MapPost("api/workingHours",
                 async (HttpContext httpContext, ICommandBus commandBus, AddWorkingHoursDto addWorkingHoursDto,
@@ -90,7 +93,8 @@ public static class WorkingHoursEndpoints
                         workingHoursId));
                 })
             .WithName(CreateWorkingHoursPolicyName)
-            .RequireAuthorization(CreateWorkingHoursPolicyName);
+            .RequireAuthorization(CreateWorkingHoursPolicyName)
+            .Produces(StatusCodes.Status200OK);
 
         endpoint.MapPut("api/workingHours/{id}/modify",
                 async (HttpContext httpContext, ICommandBus commandBus, ModifyWorkingHoursDto addWorkingHoursDto,
@@ -110,7 +114,8 @@ public static class WorkingHoursEndpoints
                     return Results.NoContent();
                 })
             .WithName(ModifyUserWorkingHoursPolicyName)
-            .RequireAuthorization(ModifyUserWorkingHoursPolicyName);
+            .RequireAuthorization(ModifyUserWorkingHoursPolicyName)
+            .Produces(StatusCodes.Status204NoContent);
 
         return endpoint;
     }

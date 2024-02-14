@@ -1,4 +1,3 @@
-using FluentAssertions;
 using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.AcceptingLeaveRequest;
@@ -8,7 +7,6 @@ using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
 using LeaveSystem.UnitTests.TestDataGenerators;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
 
@@ -103,7 +101,7 @@ public class CancelLeaveRequestTest
             LastModifiedBy = User,
             Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) },
         }, o => o.ExcludingMissingMembers());
-        leaveRequest.PendingEvents.Should().BeEquivalentTo(
+        (leaveRequest as IEventSource).PendingEvents.Should().BeEquivalentTo(
             new IEvent[] { @event, LeaveRequestAccepted.Create(leaveRequest.Id, remarks, User) }
         );
     }
@@ -132,7 +130,7 @@ public class CancelLeaveRequestTest
             Remarks = fakeRemarksCollection
         }, o => o.ExcludingMissingMembers()
         );
-        var dequeuedEvents = leaveRequest.PendingEvents;
+        var dequeuedEvents = (leaveRequest as IEventSource).PendingEvents;
         dequeuedEvents.Count.Should().Be(fakeRemarksCollection.Count);
         dequeuedEvents.Last().Should().BeEquivalentTo(new
         {

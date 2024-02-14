@@ -1,12 +1,9 @@
-using System;
-using System.Linq;
-using FluentAssertions;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.LeaveRequests;
 using LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.UnitTests.Providers;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.LeaveRequests;
 
@@ -32,7 +29,7 @@ public class CreatePendingLeaveRequestTest
             LastModifiedBy = @event.CreatedBy,
             Remarks = new[] { new LeaveRequest.RemarksModel(@event.Remarks!, @event.CreatedBy) }
         }, o => o.ExcludingMissingMembers());
-        leaveRequest.PendingEvents.Should().BeEquivalentTo(
+        (leaveRequest as IEventSource).PendingEvents.Should().BeEquivalentTo(
             new[] { @event }
         );
     }
@@ -41,7 +38,7 @@ public class CreatePendingLeaveRequestTest
     [InlineData("")]
     [InlineData("  ")]
     [InlineData(null)]
-    public void WhenCreatingWithNullOrWhitespaceRemarks_ThenCreateLeaveRequestWithoutRemarks(string remarks)
+    public void WhenCreatingWithNullOrWhitespaceRemarks_ThenCreateLeaveRequestWithoutRemarks(string? remarks)
     {
         //Given
         var now = DateTimeOffset.Now;
@@ -61,17 +58,17 @@ public class CreatePendingLeaveRequestTest
         leaveRequest.Should().BeEquivalentTo(new
         {
             Id = @event.LeaveRequestId,
-            DateFrom = @event.DateFrom,
-            DateTo = @event.DateTo,
-            Duration = @event.Duration,
-            LeaveTypeId = @event.LeaveTypeId,
+            @event.DateFrom,
+            @event.DateTo,
+            @event.Duration,
+            @event.LeaveTypeId,
             Status = LeaveRequestStatus.Pending,
-            CreatedBy = @event.CreatedBy,
+            @event.CreatedBy,
             LastModifiedBy = @event.CreatedBy,
             Remarks = Enumerable.Empty<LeaveRequest.RemarksModel>()
         }, o => o.ExcludingMissingMembers()
         );
-        leaveRequest.PendingEvents.Should().BeEquivalentTo(
+        (leaveRequest as IEventSource).PendingEvents.Should().BeEquivalentTo(
             new[] { @event }
         );
     }

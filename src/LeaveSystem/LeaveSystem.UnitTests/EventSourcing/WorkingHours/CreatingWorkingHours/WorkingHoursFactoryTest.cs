@@ -1,7 +1,6 @@
-using FluentAssertions;
+using GoldenEye.Backend.Core.DDD.Events;
 using LeaveSystem.EventSourcing.WorkingHours.CreatingWorkingHours;
 using LeaveSystem.UnitTests.Providers;
-using Xunit;
 
 namespace LeaveSystem.UnitTests.EventSourcing.WorkingHours.CreatingWorkingHours;
 
@@ -27,7 +26,7 @@ public class WorkingHoursFactoryTest
             command.DateTo,
             command.Duration
         });
-        result.PendingEvents.Should().BeEquivalentTo(new[]
+        (result as IEventSource).PendingEvents.Should().BeEquivalentTo(new[]
         {
             WorkingHoursCreated.Create(command.WorkingHoursId, command.UserId, command.DateFrom, command.DateTo, command.Duration, command.CreatedBy)
         });

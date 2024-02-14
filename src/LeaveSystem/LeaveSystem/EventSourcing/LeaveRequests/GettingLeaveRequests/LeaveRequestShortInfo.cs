@@ -25,6 +25,8 @@ public class LeaveRequestShortInfo
 
     public FederatedUser CreatedBy { get; private set; }
 
+    public TimeSpan WorkingHours { get; private set; }
+
     internal void Apply(LeaveRequestCreated @event)
     {
         Id = @event.LeaveRequestId;
@@ -34,6 +36,7 @@ public class LeaveRequestShortInfo
         LeaveTypeId = @event.LeaveTypeId;
         Status = LeaveRequestStatus.Pending;
         CreatedBy = @event.CreatedBy;
+        WorkingHours = @event.WorkingHours;
     }
 
     internal void Apply(LeaveRequestAccepted _) => Status = LeaveRequestStatus.Accepted;

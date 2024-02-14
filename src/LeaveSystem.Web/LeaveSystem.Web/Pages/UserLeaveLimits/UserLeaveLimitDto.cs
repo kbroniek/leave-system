@@ -13,7 +13,7 @@ public class UserLeaveLimitDto
         this.LeaveTypeId = leaveTypeId;
         this.ValidSince = validSince;
         this.ValidUntil = validUntil;
-        this.Property = property ?? new ();
+        this.Property = property ?? new();
         this.Id = id;
     }
 
