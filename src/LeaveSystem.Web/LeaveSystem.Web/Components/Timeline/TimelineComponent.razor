@@ -1,0 +1,213 @@
+@using LeaveSystem.Shared
+@using LeaveSystem.Shared.LeaveRequests
+@using LeaveSystem.Web.Extensions
+@using System.Globalization
+@using static LeaveSystem.Shared.DateCalculator
+
+<div class="col-md-12">
+	<div id="calendar-twig" class="calendar-twig-timeline">
+		<div class="table-responsive">
+			<table class="resourcestable">		
+				<thead class="table-nag">
+					<tr>
+						<th class="first-column user-label no-border left-top-calendar"></th>
+						<th class="top-table-calendar">
+							<table>
+								<tbody>
+									<tr>
+										@{
+											int month = 0;
+										}
+										@foreach (var dateModel in dateModels)
+										{
+											if (dateModel.Date.Month != month)
+											{
+												month = dateModel.Date.Month;
+												var daysOfMonth = DateTime.DaysInMonth(dateModel.Date.Year, month);
+												int colspan = daysOfMonth - dateModel.Date.Day + 1;
+												<th class="monthtitle elipsis"
+													colspan="@colspan">
+													@CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month)
+													-
+													@dateModel.Date.Year
+												</th>
+											}
+										}									
+									</tr>
+									<tr>
+										@{
+											var today = DateTimeOffset.UtcNow.GetDayWithoutTime();
+										}
+										@foreach (var dateModel in dateModels)
+										{
+											var dayKindCssClass = dateModel.Date == today ?
+												"current-Day-Color" :
+												GetDayKindCssClass(dateModel.DayKind);
+											<th class="day-text-calendar @dayKindCssClass">
+												<div class="th-div-container">
+													<p>@dateModel.Date.Day</p>
+												</div>
+											</th>
+										}
+									</tr>
+								</tbody>
+							</table>
+						</th>
+					</tr>
+					
+				</thead>
+
+				@foreach (var timelineModel in timelineModels)
+				{
+					<tbody>
+						<tr style="height: 30px;">
+							<td href="#" tabindex="0" data-toggle="popover"
+							data-trigger="focus"
+							data-popover-content="#employee-@timelineModel.User.UserId"
+							class="first-column user-label elipsis popoverOption employee-name"
+							data-id="1" style="height: 30px;">
+								<p class="user-label-name">@timelineModel.User.LastName @timelineModel.User.Name</p>
+								<div class="current-User hide"></div>
+							</td>
+							<td data-id="1">
+								<table class="user-body user-body-1" style="height: 30px;">
+									<tbody>
+										<tr>
+											@foreach (var dateModel in dateModels)
+											{
+												var dayKindCssClass = GetDayKindCssClass(dateModel.DayKind);
+
+												<td class="timeline-day @dayKindCssClass popoverOption">	
+													<div class="th-div-container">
+														@foreach (var leaveRequest in GetLevaeRequestForDate(timelineModel.LeaveRequests, today))
+														{
+															var leaveTypeAbbreviation = "test"; // TODO remove or handle it
+															<a href="javascript:void(0);">
+																@if(leaveRequest.DateFrom == dateModel.Date)
+																{
+																	<div class="class-border-start"></div>
+																}
+																@* <spring:eval
+																expression="@leaveRequestSecurityService.canSeeLeaveType(leaveRequest)"
+																var="canSeeLeaveType" />
+																<c:choose>
+																	<c:when test="${canSeeLeaveType}">
+																		<c:set var="leaveTypeAbbreviation" 
+																		value="${leaveRequest.leaveType.abbreviation}"/>
+																	</c:when>    
+																	<c:otherwise>
+																		<c:set var="leaveTypeAbbreviation" 
+																		value=""/>
+																	</c:otherwise>
+																</c:choose> *@
+																<div data-toggle="popover" data-trigger="focus" data-popover-content="#leaveType-@leaveTypeAbbreviation"
+																	class="timeline-cell timeline-@leaveTypeAbbreviation timeline-@leaveRequest.Status hover-red">@leaveRequest.DurationPerDay</div>
+																@if (leaveRequest.DateTo == dateModel.Date)
+																{
+																	<div class="class-border-end"></div>
+																}
+															</a>
+														}
+														@{
+
+															var dayKindCssClassForColumn = dateModel.Date == today ?
+																"current-Day current-Day-Color" :
+																"current-User hide";
+														}
+														<div class=@dayKindCssClassForColumn></div>
+													</div>
+												</td>
+											}
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				}
+			</table>
+		</div>
+	</div>
+</div>
+
+@code {
+
+	private IEnumerable<DateModel> dateModels = Enumerable.Empty<DateModel>();
+	private IEnumerable<TimelineModel> timelineModels = Enumerable.Empty<TimelineModel>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		dateModels = new DateModel[]
+		{
+			new DateModel(DateTimeOffset.Parse("2024-02-29").GetDayWithoutTime(), DayKind.WORKING)
+		};
+		timelineModels = new TimelineModel[]
+		{
+			new TimelineModel(new LeaveRequestSummary[]
+			{
+				LeaveRequestSummary.Create(Guid.NewGuid(), DateTimeOffset.Parse("2024-02-29").GetDayWithoutTime(), DateTimeOffset.Parse("2024-02-29").GetDayWithoutTime(), TimeSpan.FromHours(8), TimeSpan.FromHours(8), "Urlop wypoczynkowy", Guid.NewGuid(), LeaveRequestStatus.Pending, new FederatedUser())
+			}, new TimelineUser("test", "Karol", "Broniek"))
+		};
+	}
+
+    private static string GetDayKindCssClass(DayKind dayKind)
+    {
+        switch (dayKind)
+        {
+            case DayKind.HOLIDAY:
+                return "holiday";
+            case DayKind.WEEKEND:
+                return "weekend";
+            default:
+                return "";
+        }
+    }
+
+    private static IEnumerable<LeaveRequestSummary> GetLevaeRequestForDate(IEnumerable<LeaveRequestSummary> leaveRequests, DateTimeOffset date) =>
+		leaveRequests.Where(t => t.DateFrom >= date && t.DateTo <= date);
+
+    private sealed record TimelineModel(IEnumerable<LeaveRequestSummary> LeaveRequests, TimelineUser User);
+    private sealed record TimelineUser(string UserId, string Name, string LastName);
+
+	private sealed record DateModel(DateTimeOffset Date, DayKind DayKind);
+
+	public sealed record TimelineDetail(IEnumerable<FederatedUser> users,
+		IEnumerable<LeaveRequestSummary> leaveRequests,
+		DateTimeOffset minDate,
+		DateTimeOffset maxDate);
+
+
+	public sealed record LeaveRequestSummary(
+		Guid Id,
+		DateTimeOffset DateFrom,
+		DateTimeOffset DateTo,
+		string DurationPerDay,
+		string LeaveTypeName,
+		Guid LeaveTypeId,
+		string Status,
+		FederatedUser CreatedBy
+	)
+	{
+		public static LeaveRequestSummary Create(Guid id,
+			DateTimeOffset dateFrom,
+			DateTimeOffset dateTo,
+			TimeSpan duration,
+			TimeSpan workingHours,
+			string leaveTypeName,
+			Guid leaveTypeId,
+			LeaveRequestStatus status,
+			FederatedUser createdBy)
+		{
+
+			return new LeaveRequestSummary(
+				id,
+				dateFrom,
+				dateTo,
+				duration.GetReadableTimeSpan(workingHours), // TODO calculate per day
+				leaveTypeName,
+				leaveTypeId,
+				status.ToString(),
+				createdBy);
+		}
+	}
+}

@@ -76,8 +76,7 @@ else
     </EditForm>
 }
 
-<div id="timeline-visualization"></div>
-
+<LeaveSystem.Web.Components.Timeline.TimelineComponent />
 
 @code {
     public const string PolicyName = "ShowLeaveRequests";
@@ -124,7 +123,7 @@ else
                 .Select(u => u.First())
                 .OrderBy(u => u.Name)
                 .ToArray();
-            await Timeline.CreateAsync(
+/*             await Timeline.CreateAsync(
                 "timeline-visualization",
                 employees,
                 leaveRequests?.Items?.Select(lr => LeaveRequestSummary.Create(
@@ -138,7 +137,7 @@ else
                     lr.Status,
                     lr.CreatedBy)),
                 leaveRequestsQuery.DateFrom,
-                leaveRequestsQuery.DateTo.AddDays(1));
+                leaveRequestsQuery.DateTo.AddDays(1)); */
         }
         else
         {
@@ -166,6 +165,7 @@ else
         }
     }
 
+	//TODO: Remove
     public sealed record class LeaveRequestSummary(
         Guid Id,
         DateTimeOffset DateFrom,
