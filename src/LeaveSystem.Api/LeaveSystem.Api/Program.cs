@@ -84,6 +84,4 @@ app
     .AddEmployeesEndpoints(azureScpes)
     .AddUsersEndpoints(azureScpes);
 
-_ = DbContextExtenstions.Main();
-
 await app.RunAsync();
