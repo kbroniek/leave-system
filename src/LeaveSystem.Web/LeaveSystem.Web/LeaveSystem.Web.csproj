@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
-    <ProjectReference Include="..\..\LeaveSystem\LeaveSystem\LeaveSystem.csproj" />
   </ItemGroup>
 
   <ItemGroup>
