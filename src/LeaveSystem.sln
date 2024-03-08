@@ -39,15 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GoldenEye", "GoldenEye", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoldenEye", "GoldenEye\GoldenEye\GoldenEye.csproj", "{8BCFA91D-02B2-4EFD-9E8E-E19687EBF1EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Api.Seed", "LeaveSystem.Api\LeaveSystem.Api.Seed\LeaveSystem.Api.Seed.csproj", "{CB7AA0EA-6305-469B-B827-01276E65E6F2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem.Functions", "LeaveSystem.Functions", "{7CF85AF2-A600-4353-8D72-D8BA91333BE2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions", "LeaveSystem.Functions\LeaveSystem.Functions\LeaveSystem.Functions.csproj", "{D01C3193-C0E7-4B32-BF49-80A751C5123B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Web2", "LeaveSystem.Web\LeaveSystem.Web2\LeaveSystem.Web2.csproj", "{C4F21125-9FC8-4FB0-AEB3-F6BDFD404DBF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions.Roles", "LeaveSystem.Functions\LeaveSystem.Functions.Roles\LeaveSystem.Functions.Roles.csproj", "{C4FFAA20-6BAF-4371-AED6-F1C5A0E67E07}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Api.Seed", "LeaveSystem.Api\LeaveSystem.Api.Seed\LeaveSystem.Api.Seed.csproj", "{21760086-F7D1-4FA3-9CDA-CFE1AD1AB117}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
