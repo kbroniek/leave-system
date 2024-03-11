@@ -24,6 +24,8 @@ jobs:
 
     # - name: Publish app
     #   run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release
+    - name: Print directory structure
+      uses: FiorelaCiroku/XDTesting-Print-Directory-Structure@v1.0.2
 
     - name: Rewrite base href
       uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
