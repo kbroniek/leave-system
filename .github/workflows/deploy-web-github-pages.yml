@@ -28,7 +28,7 @@ jobs:
     - name: Rewrite base href
       uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
       with:
-        html_path: /home/runner/work/leave-system/leave-system${{ env.PUBLISH_DIR }}/index.html
+        html_path: /home/runner/work/leave-system/leave-system${{ env.PUBLISH_DIR }}/wwwroot/index.html
         base_href: /leave-system/
 
     - name: GitHub Pages
