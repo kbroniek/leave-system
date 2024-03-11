@@ -13,7 +13,7 @@ on:
     - feature/blazor-deploy-azure
 env:
   AZURE_STATIC_WEBAPP_NAME: swa-leave-system-web-north-europe-dev-01
-  APP_DIRECTORY: LeaveSystem
+  APP_DIRECTORY: src/LeaveSystem.Web/LeaveSystem.Web
   API_DIRECTORY: ''
   OUTPUT: wwwroot
   DEPLOYMENT_ENVIRONMENT: preview
