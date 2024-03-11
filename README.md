@@ -225,3 +225,16 @@ If you want to hot reload blazor app you have to run LeaveSystem.App and then ru
 ```
 dotnet watch run --project LeaveSystem.Web/LeaveSystem.Web
 ```
+
+## Troubleshooting
+
+### wasm-tools
+
+If you have following error, you need to install wasm-tools. Execute `dotnet workload install wasm-tools` in an administrative command shell.
+
+```
+C:\Program Files\dotnet\sdk\8.0.200\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.ImportWorkloads.targets(38,5): error NETSDK1147: To build this project, the following workloads must be installed: wasm-tools [C:\Use
+rs\Karol\source\repos\leave-system\src\LeaveSystem.Web\LeaveSystem.Web\LeaveSystem.Web.csproj]
+C:\Program Files\dotnet\sdk\8.0.200\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.ImportWorkloads.targets(38,5): error NETSDK1147: To install these workloads, run the following command: dotnet workload restore [C:\U
+sers\Karol\source\repos\leave-system\src\LeaveSystem.Web\LeaveSystem.Web\LeaveSystem.Web.csproj]
+```
