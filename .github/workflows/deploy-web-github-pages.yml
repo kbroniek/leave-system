@@ -19,16 +19,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install wasm-tools
-      run: dotnet workload install wasm-tools
+    # - name: Install wasm-tools
+    #   run: dotnet workload install wasm-tools
 
-    - name: Publish app
-      run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release -o ${{env.PUBLISH_DIR}}
+    # - name: Publish app
+    #   run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release -o ${{env.PUBLISH_DIR}}
 
     - name: Rewrite base href
       uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
       with:
-        html_path: ${{ env.PUBLISH_DIR }}/index.html
+        html_path: /home/runner/work/leave-system/leave-system${{ env.PUBLISH_DIR }}/index.html
         base_href: /leave-system/
 
     - name: GitHub Pages
