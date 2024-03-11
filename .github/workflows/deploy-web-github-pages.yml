@@ -28,6 +28,12 @@ jobs:
       - name: dotnet publish
         run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}/LeaveSystem
 
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: .net-blazor
+          path: ${{env.DOTNET_ROOT}}/LeaveSystem
+
       - name: Rewrite base href
         uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
         with:
