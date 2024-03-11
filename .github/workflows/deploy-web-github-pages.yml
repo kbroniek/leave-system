@@ -4,7 +4,7 @@
 name: Build and deploy Blazor .NET app to GitHub Pages
 
 env:
-  PUBLISH_DIR: bin/Release/net8/publish/wwwroot
+  PUBLISH_DIR: /home/runner/work/leave-system/leave-system/src/LeaveSystem.Web/LeaveSystem.Web/bin/Release/net8.0/publish/wwwroot
 
 # Controls when the action will run
 on:
@@ -19,11 +19,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install wasm-tools
-      run: dotnet workload install wasm-tools
+    # - name: Install wasm-tools
+    #   run: dotnet workload install wasm-tools
 
-    - name: Publish app
-      run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release
+    # - name: Publish app
+    #   run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release
 
     - name: Rewrite base href
       uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
