@@ -1,47 +1,51 @@
-name: Azure Static Web Apps CI/CD
-
+name: Build and deploy .NET Core application to Web App swa-leave-system-web-north-europe-dev-01
 on:
+  pull_request:
+    types:
+    - opened
+    - synchronize
+    - reopened
+    - closed
+    branches:
+    - feature/blazor-deploy-azure
   push:
     branches:
-      - develop
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - develop
-
+    - feature/blazor-deploy-azure
+env:
+  AZURE_STATIC_WEBAPP_NAME: swa-leave-system-web-north-europe-dev-01
+  APP_DIRECTORY: LeaveSystem
+  API_DIRECTORY: ''
+  OUTPUT: wwwroot
+  DEPLOYMENT_ENVIRONMENT: preview
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-    runs-on: ubuntu-latest
     name: Build and Deploy Job
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_CALM_ROCK_08D22B603 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
-          action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "src/LeaveSystem.Web/LeaveSystem.Web" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "wwwroot" # Built app content directory - optional
-          skip_api_build: true
-          ###### End of Repository/Build Configurations ######
-
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - id: builddeploy
+      name: Build And Deploy
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ secrets.swa_leave_system_web_north_europe_dev_01_SPN }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        action: upload
+        deployment_environment: ${{env.DEPLOYMENT_ENVIRONMENT}}
+        app_location: ${{ env.APP_DIRECTORY }}
+        api_location: ${{ env.API_DIRECTORY }}
+        output_location: ${{ env.OUTPUT }}
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
     name: Close Pull Request Job
+    runs-on: ubuntu-latest
     steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_CALM_ROCK_08D22B603 }}
-          action: "close"
+    - id: closepullrequest
+      name: Close Pull Request
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ secrets.swa_leave_system_web_north_europe_dev_01_SPN }}
+        action: close
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
