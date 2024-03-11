@@ -4,9 +4,10 @@
 name: Build and deploy ASP.Net Core app to Azure Web App - app-leave-system-web-north-europe-dev-01-api
 
 on:
-  push:
-    branches:
-      - develop
+  # Because of optimalization I deploy it manually
+  # push:
+  #   branches:
+  #     - develop
   workflow_dispatch:
 
 jobs:
@@ -21,9 +22,6 @@ jobs:
         with:
           dotnet-version: '8.x'
           include-prerelease: true
-
-      - name: Build with dotnet
-        run: dotnet build ./src/LeaveSystem.Raw.slnf --configuration Release
 
       - name: dotnet publish
         run: dotnet publish  ./src/LeaveSystem.Api/LeaveSystem.Api/LeaveSystem.Api.csproj -c Release -o ${{env.DOTNET_ROOT}}/LeaveSystem
