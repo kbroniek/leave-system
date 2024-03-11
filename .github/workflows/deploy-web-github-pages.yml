@@ -19,6 +19,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install wasm-tools
+      run: dotnet workload install wasm-tools
+
     - name: Publish app
       run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release -o ${{env.PUBLISH_DIR}}
 
