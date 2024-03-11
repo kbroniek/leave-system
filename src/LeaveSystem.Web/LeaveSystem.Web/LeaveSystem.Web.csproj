@@ -2,8 +2,6 @@
   <PropertyGroup>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
     <UserSecretsId>0990c43f-7f48-42c3-bdd0-f3fd47ab71c6</UserSecretsId>
-    <RunAOTCompilation>true</RunAOTCompilation>
-    <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
   </PropertyGroup>
 
   <ItemGroup>
