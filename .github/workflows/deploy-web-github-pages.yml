@@ -3,9 +3,6 @@
 
 name: Build and deploy Blazor .NET app to GitHub Pages
 
-env:
-  PUBLISH_DIR: /home/runner/work/leave-system/leave-system/src/LeaveSystem.Web/LeaveSystem.Web/bin/Release/net8.0/publish/wwwroot
-
 # Controls when the action will run
 on:
   push:
@@ -17,28 +14,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Install wasm-tools
-      run: dotnet workload install wasm-tools
+      - name: Install wasm-tools
+        run: dotnet workload install wasm-tools
 
-    - name: Publish app
-      run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release
+      - name: Publish app
+        run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}/LeaveSystemWeb
 
-    - name: Print directory structure
-      uses: FiorelaCiroku/XDTesting-Print-Directory-Structure@v1.0.2
+      - name: Rewrite base href
+        uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
+        with:
+          html_path: ${{env.DOTNET_ROOT}}/LeaveSystemWeb/bin/Release/net8.0/publish/wwwroot/index.html
+          base_href: /leave-system/
 
-    - name: Rewrite base href
-      uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
-      with:
-        html_path: ${{ env.PUBLISH_DIR }}/index.html
-        base_href: /leave-system/
-
-    - name: GitHub Pages
-      if: success()
-      uses: crazy-max/ghaction-github-pages@v1.5.1
-      with:
-        target_branch: gh-pages
-        build_dir: ${{ env.PUBLISH_DIR }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v1.5.1
+        with:
+          target_branch: gh-pages
+          build_dir: ${{env.DOTNET_ROOT}}/LeaveSystemWeb/bin/Release/net8.0/publish/wwwroot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
