@@ -58,6 +58,6 @@ jobs:
         uses: crazy-max/ghaction-github-pages@v1.5.1
         with:
           target_branch: gh-pages
-          build_dir: ${{env.DOTNET_ROOT}}/LeaveSystem/wwwroot
+          build_dir: wwwroot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
