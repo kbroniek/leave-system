@@ -1,4 +1,4 @@
-﻿@page "/create-leave-request"
+@page "/create-leave-request"
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
 @using LeaveSystem.Web.Pages.LeaveTypes
 @using LeaveSystem.Web.Pages.UserLeaveLimits
@@ -10,7 +10,6 @@
 @using Microsoft.AspNetCore.Components.Authorization;
 @using LeaveSystem.Shared.WorkingHours
 @using System.Text.Json
-@using LeaveSystem.EventSourcing.WorkingHours
 @attribute [Authorize(Policy = PolicyName)]
 @inject HttpClient Http
 @inject LeaveTypesService LeaveTypesService
