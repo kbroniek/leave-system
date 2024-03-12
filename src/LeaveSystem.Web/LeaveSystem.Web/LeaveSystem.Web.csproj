@@ -5,7 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <RootNamespace>LeaveSystem.Web</RootNamespace>
-    <UserSecretsId>0990c43f-7f48-42c3-bdd0-f3fd47ab71c6</UserSecretsId>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,62 +25,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
     <ProjectReference Include="..\..\LeaveSystem\LeaveSystem\LeaveSystem.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\components\timeline-wrapper.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\all.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\all.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\brands.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\brands.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\fontawesome.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\fontawesome.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\regular.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\regular.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\solid.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\solid.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\svg-with-js.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\svg-with-js.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\v4-font-face.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\v4-font-face.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\v4-shims.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\v4-shims.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\v5-font-face.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\css\v5-font-face.min.css" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\all.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\all.min.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\brands.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\brands.min.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\conflict-detection.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\conflict-detection.min.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\fontawesome.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\fontawesome.min.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\regular.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\regular.min.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\solid.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\solid.min.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\v4-shims.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\js\v4-shims.min.js" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\sprites\brands.svg" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\sprites\regular.svg" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\sprites\solid.svg" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\webfonts\fa-brands-400.ttf" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\webfonts\fa-brands-400.woff2" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\webfonts\fa-regular-400.ttf" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\webfonts\fa-regular-400.woff2" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\webfonts\fa-solid-900.ttf" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\webfonts\fa-solid-900.woff2" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\webfonts\fa-v4compatibility.ttf" />
-    <_ContentIncludedByDefault Remove="wwwroot\font-awesome\webfonts\fa-v4compatibility.woff2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="wwwroot\staticwebapp.config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>
