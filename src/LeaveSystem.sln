@@ -39,8 +39,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoldenEye", "GoldenEye\Gold
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Api.Seed", "LeaveSystem.Api\LeaveSystem.Api.Seed\LeaveSystem.Api.Seed.csproj", "{21760086-F7D1-4FA3-9CDA-CFE1AD1AB117}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "..\Client\Client.csproj", "{D85888CB-BC60-4329-9B00-E7BDA3524742}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,10 +81,6 @@ Global
 		{21760086-F7D1-4FA3-9CDA-CFE1AD1AB117}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21760086-F7D1-4FA3-9CDA-CFE1AD1AB117}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21760086-F7D1-4FA3-9CDA-CFE1AD1AB117}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D85888CB-BC60-4329-9B00-E7BDA3524742}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D85888CB-BC60-4329-9B00-E7BDA3524742}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D85888CB-BC60-4329-9B00-E7BDA3524742}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D85888CB-BC60-4329-9B00-E7BDA3524742}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
