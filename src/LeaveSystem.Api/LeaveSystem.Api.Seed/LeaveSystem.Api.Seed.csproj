@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LeaveSystem.Api\LeaveSystem.Api\LeaveSystem.Api.csproj" />
+    <ProjectReference Include="..\LeaveSystem.Api\LeaveSystem.Api.csproj" />
   </ItemGroup>
 
 </Project>

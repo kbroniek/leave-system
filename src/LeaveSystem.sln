@@ -37,7 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GoldenEye", "GoldenEye", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoldenEye", "GoldenEye\GoldenEye\GoldenEye.csproj", "{8BCFA91D-02B2-4EFD-9E8E-E19687EBF1EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Api.Seed", "LeaveSystem.Api.Seed\LeaveSystem.Api.Seed.csproj", "{21760086-F7D1-4FA3-9CDA-CFE1AD1AB117}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Api.Seed", "LeaveSystem.Api\LeaveSystem.Api.Seed\LeaveSystem.Api.Seed.csproj", "{21760086-F7D1-4FA3-9CDA-CFE1AD1AB117}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
