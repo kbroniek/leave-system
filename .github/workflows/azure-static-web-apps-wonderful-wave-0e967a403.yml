@@ -24,7 +24,7 @@ jobs:
         run: dotnet workload install wasm-tools
 
       - name: dotnet publish
-        run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}
+        run: dotnet publish ./src/LeaveSystem.Web/LeaveSystem.Web/LeaveSystem.Web.csproj -c Release -o ${{env.GITHUB_WORKSPACE}}
 
       - name: Deploy
         id: builddeploy
@@ -35,7 +35,7 @@ jobs:
           action: "upload"
           ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
           # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "${{env.DOTNET_ROOT}}" # App source code path
+          app_location: "${{env.GITHUB_WORKSPACE}}" # App source code path
           api_location: "" # Api source code path - optional
           output_location: "wwwroot" # Built app content directory - optional
           skip_api_build: true
