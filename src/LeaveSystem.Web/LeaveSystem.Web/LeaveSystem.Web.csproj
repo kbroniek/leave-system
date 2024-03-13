@@ -5,8 +5,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	  <RootNamespace>LeaveSystem.Web</RootNamespace>
-    <RunAOTCompilation>true</RunAOTCompilation>
-    <WasmStripILAfterAOT>true</WasmStripILAfterAOT>
   </PropertyGroup>
 
   <ItemGroup>
