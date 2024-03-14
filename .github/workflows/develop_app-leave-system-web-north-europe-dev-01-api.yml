@@ -23,7 +23,7 @@ jobs:
           include-prerelease: true
 
       - name: Build with dotnet
-        run: dotnet build ./src/LeaveSystem.Raw.slnf --configuration Release
+        run: dotnet build ./src/LeaveSystem.Api/LeaveSystem.Api/LeaveSystem.Api.csproj --configuration Release
 
       - name: dotnet publish
         run: dotnet publish  ./src/LeaveSystem.Api/LeaveSystem.Api/LeaveSystem.Api.csproj -c Release -o ${{env.DOTNET_ROOT}}/LeaveSystem
