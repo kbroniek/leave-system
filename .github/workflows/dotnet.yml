@@ -5,10 +5,10 @@ name: .NET
 
 on:
   # Disable because we don't need to run it again after PR was merged.
-  push:
-    branches: [ "master", "develop" ]
-  # pull_request:
+  # push:
   #   branches: [ "master", "develop" ]
+  pull_request:
+    branches: [ "master", "develop" ]
 
 jobs:
   build:
