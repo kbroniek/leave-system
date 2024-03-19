@@ -12,6 +12,8 @@ on:
     paths:
     - '**.cs'
     - '**.csproj'
+    - '**.props'
+    - '**.razor'
 
 jobs:
   build:
