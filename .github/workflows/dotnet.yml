@@ -9,21 +9,37 @@ on:
   #   branches: [ "master", "develop" ]
   pull_request:
     branches: [ "master", "develop" ]
+    paths:
+    - '**.cs'
+    - '**.csproj'
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-
+        cache: true
+        cache-dependency-path: |
+          src/GoldenEye/GoldenEye/packages.lock.json
+          src/LeaveSystem/LeaveSystem/packages.lock.json
+          src/LeaveSystem/LeaveSystem.UnitTests/packages.lock.json
+          src/LeaveSystem.Api/LeaveSystem.Api/packages.lock.json
+          src/LeaveSystem.Api/LeaveSystem.Api.Seed/packages.lock.json
+          src/LeaveSystem.Api/LeaveSystem.Api.UnitTests/packages.lock.json
+          src/LeaveSystem.Shared/packages.lock.json
+          src/LeaveSystem.Web/LeaveSystem.Web/packages.lock.json
+          src/LeaveSystem.Web/LeaveSystem.Web.UnitTests/packages.lock.json
     - name: LeaveSystem - Restore dependencies
-      run: dotnet restore ./src/LeaveSystem.Raw.slnf
+      run: dotnet restore --locked-mode ./src/LeaveSystem.Raw.slnf
     - name: LeaveSystem - Build
       run: dotnet build --no-restore ./src/LeaveSystem.Raw.slnf
     - name: LeaveSystem - Test
