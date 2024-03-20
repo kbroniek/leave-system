@@ -9,19 +9,26 @@ on:
   #   branches: [ "master", "develop" ]
   pull_request:
     branches: [ "master", "develop" ]
+    paths:
+    - '**.cs'
+    - '**.csproj'
+    - '**.props'
+    - '**.razor'
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-
     - name: LeaveSystem - Restore dependencies
       run: dotnet restore ./src/LeaveSystem.Raw.slnf
     - name: LeaveSystem - Build
