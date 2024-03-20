@@ -1,9 +1,12 @@
-name: PROD - Azure Static Web Apps CI/CD
+name: PROD - Web - deploy Azure
 
 on:
   push:
     branches:
       - master
+    paths:
+      - 'src/LeaveSystem.Web/LeaveSystem.Web/**'
+      - 'src/LeaveSystem.Shared/**'
   # pull_request:
   #   types: [opened, synchronize, reopened, closed]
   #   branches:
@@ -19,6 +22,8 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: copy appsettings.Production.json
+        run: cp ./src/LeaveSystem.Web/LeaveSystem.Web/wwwroot/appsettings.Production.json ./src/LeaveSystem.Web/LeaveSystem.Web/wwwroot/appsettings.json
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
