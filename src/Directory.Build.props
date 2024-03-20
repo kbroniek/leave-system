@@ -10,8 +10,6 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>11</LangVersion>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
