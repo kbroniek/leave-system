@@ -7,6 +7,11 @@ on:
   push:
     branches:
       - develop
+    paths:
+      - 'src/GoldenEye/**'
+      - 'src/LeaveSystem/LeaveSystem/**'
+      - 'src/LeaveSystem.Api/LeaveSystem.Api/**'
+      - 'src/LeaveSystem.Shared/**'
   workflow_dispatch:
 
 jobs:
