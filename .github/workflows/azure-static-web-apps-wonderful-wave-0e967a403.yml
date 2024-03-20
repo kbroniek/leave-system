@@ -1,4 +1,4 @@
-name: DEV - Web
+name: DEV - Web - deploy Azure
 
 on:
   push:

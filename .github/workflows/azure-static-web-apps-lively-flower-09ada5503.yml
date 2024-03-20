@@ -1,4 +1,4 @@
-name: PROD - Web
+name: PROD - Web - deploy Azure
 
 on:
   push:
