@@ -1,7 +1,8 @@
 {
   "dependencies": {
-    "appInsights1": {
-      "type": "appInsights"
+    "identityapp1": {
+      "type": "identityapp",
+      "connectionId": "AzureAD:ClientSecret"
     }
   }
 }

@@ -1,7 +1,10 @@
 {
   "dependencies": {
-    "appInsights1": {
-      "type": "appInsights.sdk"
+    "identityapp1": {
+      "connectionInfo": "App registration: idp-leave-system, Tenant: Karol Broniek Org (karolbroniekhotmail426.onmicrosoft.com - Microsoft Entra ID)",
+      "secretStore": "LocalSecretsFile",
+      "type": "identityapp.secretStore",
+      "connectionId": "AzureAD:ClientSecret"
     }
   }
 }
