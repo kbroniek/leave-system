@@ -1,9 +1,10 @@
-﻿@page "/"
+@page "/"
 @using LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests
 @using Microsoft.AspNetCore.Authorization;
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-@attribute [Authorize]
+@inject HttpClient HttpClient;
+@* @attribute [Authorize] *@
 
 <PageTitle>Index</PageTitle>
 
@@ -12,6 +13,17 @@
         <ShowLeaveRequests />
     </Authorized>
     <NotAuthorized>
+		@message
         <RadzenText TextStyle="TextStyle.DisplayH4" style="color: var(--rz-danger)">You are not authorized</RadzenText>
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+	private string message = "";
+	protected override async Task OnInitializedAsync()
+	{
+		Console.WriteLine("YOYOY");
+		var response = await HttpClient.GetAsync("api/GetLeaveType");
+		message = await response.Content.ReadAsStringAsync();
+	}
+}
