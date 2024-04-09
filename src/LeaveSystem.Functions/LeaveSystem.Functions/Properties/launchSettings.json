@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "api": {
+    "LeaveSystem.Functions": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7222",
+      "commandLineArgs": "--port 7179",
       "launchBrowser": false
     }
   }
