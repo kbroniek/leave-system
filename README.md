@@ -33,6 +33,16 @@ echo '\x \\ DROP DATABASE "leave-system"; CREATE DATABASE "leave-system";' | .\p
 1. Or if you have clear db: `docker-compose down --volumes; docker-compose up -d`
 1. Or with profile: `docker-compose -f docker-compose.yml -f docker-compose.bomed.yml up -d`
 
+#### Cosmos DB
+
+1. Run: `docker-compose down --remove-orphans; docker-compose -f docker-compose-cosmosdb.yaml up -d`
+
+##### Use CosmosDB data explorer
+
+1. Go to `https://localhost:8081/_explorer/index.html`
+1. If issues with certificate occurred check this [answer](https://stackoverflow.com/a/77825243/19835114). 
+1. To clear browser cache check this [answer](https://serverfault.com/a/1093284)
+
 #### Helpfull scripts
 
 1. Logs: `docker-compose -f docker-compose.yml -f docker-compose.bomed.yml logs -f`
