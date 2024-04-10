@@ -4,16 +4,16 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
-public class Function1
+public class GetLeaveType
 {
-    private readonly ILogger<Function1> logger;
+    private readonly ILogger<GetLeaveType> logger;
 
-    public Function1(ILogger<Function1> logger)
+    public GetLeaveType(ILogger<GetLeaveType> logger)
     {
         this.logger = logger;
     }
 
-    [Function("Function1")]
+    [Function("GetLeaveType")]
     public static HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestData req)
     {
 

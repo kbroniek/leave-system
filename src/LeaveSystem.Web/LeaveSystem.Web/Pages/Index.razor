@@ -8,12 +8,12 @@
 
 <PageTitle>Index</PageTitle>
 
+@message
 <AuthorizeView Policy="@ShowLeaveRequests.PolicyName" Context="ShowLeaveRequest">
     <Authorized>
         <ShowLeaveRequests />
     </Authorized>
     <NotAuthorized>
-		@message
         <RadzenText TextStyle="TextStyle.DisplayH4" style="color: var(--rz-danger)">You are not authorized</RadzenText>
     </NotAuthorized>
 </AuthorizeView>
