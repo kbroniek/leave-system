@@ -11,7 +11,7 @@ namespace LeaveSystem.Api.Auth;
 
 public static class Config
 {
-    public static void AddB2CAuthentication(this IServiceCollection services, IConfigurationSection configuration) =>
+    public static void AddOAthAuthentication(this IServiceCollection services, IConfigurationSection configuration) =>
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApi(configuration);
     public static void AddRoleBasedAuthorization(this IServiceCollection services)

@@ -18,7 +18,7 @@ const string azureReadUsersSection = "ManageAzureUsers";
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddConsole();
 
-builder.Services.AddB2CAuthentication(builder.Configuration.GetSection(azureConfigSection));
+builder.Services.AddOAthAuthentication(builder.Configuration.GetSection(azureConfigSection));
 builder.Services.AddRoleBasedAuthorization();
 builder.Services.AddGraphFactory(builder.Configuration.GetSection(azureReadUsersSection));
 
