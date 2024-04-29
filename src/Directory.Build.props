@@ -4,12 +4,12 @@
         <IsTestProject Condition="$(MSBuildProjectName.Contains('Test')) == 'true'">true</IsTestProject>
     </PropertyGroup>
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <SourceRoot>${MSBuildThisFileDirectory}</SourceRoot>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <LangVersion>11</LangVersion>
+      <TargetFramework>net8.0</TargetFramework>
+      <SourceRoot>${MSBuildThisFileDirectory}</SourceRoot>
+      <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+      <Nullable>enable</Nullable>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <LangVersion>12.0</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
