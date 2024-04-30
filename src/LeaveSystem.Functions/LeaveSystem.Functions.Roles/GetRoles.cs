@@ -11,32 +11,29 @@ namespace LeaveSystem.Functions
 {
     public class GetRoles
     {
-        private static readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
-        private static readonly CosmosLinqSerializerOptions linqSerializerOptions = new CosmosLinqSerializerOptions
+        private static readonly CosmosLinqSerializerOptions LinqSerializerOptions = new()
         {
             PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
         };
-        private readonly ILogger<GetRoles> _logger;
+        private readonly ILogger<GetRoles> logger;
 
-        public GetRoles(ILogger<GetRoles> logger)
-        {
-            _logger = logger;
-        }
+        public GetRoles(ILogger<GetRoles> logger) => this.logger = logger;
 
-        [Function("GetRoles")]
+        [Function(nameof(GetRoles))]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req,
             [CosmosDBInput(
                 databaseName: "LeaveSystem",
                 containerName: "Roles",
                 Connection = "CosmosDBConnection")] Container container)
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
+            logger.LogInformation("C# HTTP trigger function processed a request.");
             if (!ValidateToken(req.Headers.Authorization))
             {
-                _logger.LogWarning("Wrong RestApi credentials.");
+                logger.LogWarning("Wrong RestApi credentials.");
                 return new ObjectResult(new
                 {
                     version = "1.0",
@@ -48,9 +45,13 @@ namespace LeaveSystem.Functions
                 })
                 { StatusCode = 401 };
             }
-            var userId = await JsonSerializer.DeserializeAsync<UserId>(req.Body, jsonSerializerOptions);
-            _logger.LogInformation($"Deserialized user id {userId.Id}.");
-            var iterator = container.GetItemLinqQueryable<RolesModel>(linqSerializerOptions: linqSerializerOptions)
+            var userId = await JsonSerializer.DeserializeAsync<UserId>(req.Body, JsonSerializerOptions);
+            if (userId is null)
+            {
+                return new NotFoundObjectResult("userId");
+            }
+            logger.LogInformation($"Deserialized user id {userId.Id}.");
+            var iterator = container.GetItemLinqQueryable<RolesModel>(linqSerializerOptions: LinqSerializerOptions)
                 .Where(r => r.Id == userId.Id)
                 .ToFeedIterator();
             var roles = iterator.HasMoreResults ?
@@ -58,7 +59,7 @@ namespace LeaveSystem.Functions
                 null;
             return new OkObjectResult(new { roles = roles ?? Enumerable.Empty<string>() });
         }
-        private bool ValidateToken(string header)
+        private bool ValidateToken(string? header)
         {
             //Checking the header
             if (!string.IsNullOrEmpty(header) && header.StartsWith("Basic"))
@@ -72,15 +73,15 @@ namespace LeaveSystem.Functions
                 //Splitting Username:Password
                 int seperatorIndex = usernamePassword.IndexOf(':');
                 // Extracting the individual username and password
-                var username = usernamePassword.Substring(0, seperatorIndex);
-                var password = usernamePassword.Substring(seperatorIndex + 1);
+                var username = usernamePassword[..seperatorIndex];
+                var password = usernamePassword[(seperatorIndex + 1)..];
                 //Validating the credentials
                 return username == Environment.GetEnvironmentVariable("RestApiUsername") &&
                     password == Environment.GetEnvironmentVariable("RestApiPassword");
             }
             else
             {
-                _logger.LogWarning("Header is missing");
+                logger.LogWarning("Header is missing");
                 return false;
             }
         }
