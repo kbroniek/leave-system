@@ -1,86 +1,11 @@
 {
-  "routes": [
-    {
-      "route": "/login",
-      "allowedRoles": [ "anonymous" ],
-      "rewrite": "/.auth/login/b2c"
-    },
-    {
-      "route": "/logout",
-      "allowedRoles": [ "authenticated" ],
-      "rewrite": "/.auth/logout"
-    },
-    {
-      "route": "/.auth/login/aad",
-      "allowedRoles": [ "anonymous", "authenticated" ],
-      "statusCode": 404
-    },
-    {
-      "route": "/.auth/login/apple",
-      "allowedRoles": [ "anonymous", "authenticated" ],
-      "statusCode": 404
-    },
-    {
-      "route": "/.auth/login/b2c",
-      "allowedRoles": [ "anonymous" ]
-    },
-    {
-      "route": "/.auth/login/facebook",
-      "allowedRoles": [ "anonymous", "authenticated" ],
-      "statusCode": 404
-    },
-    {
-      "route": "/.auth/login/github",
-      "allowedRoles": [ "anonymous", "authenticated" ],
-      "statusCode": 404
-    },
-    {
-      "route": "/.auth/login/google",
-      "allowedRoles": [ "anonyous", "authenticated" ],
-      "statusCode": 404
-    },
-    {
-      "route": "/.auth/login/twitter",
-      "allowedRoles": [ "anonymous", "authenticated" ],
-      "statusCode": 404
-    },
-    {
-      "route": "/*",
-      "allowedRoles": [ "authenticated" ]
-    }
-  ],
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": [
-      "/css/*",
-      "/img/*",
-      "/js/*"
-    ]
-  },
-  "responseOverrides": {
-    "401": {
-      "statusCode": 302,
-      "redirect": "/login"
-    }
-  },
   "auth": {
     "identityProviders": {
-      "customOpenIdConnectProviders": {
-        "b2c": {
-          "registration": {
-            "clientIdSettingName": "B2C_CLIENT_ID",
-            "clientCredential": {
-              "clientSecretSettingName": "B2C_CLIENT_SECRET"
-            },
-            "openIdConnectConfiguration": {
-              "wellKnownOpenIdConfiguration": "https://leavesystem.b2clogin.com/leavesystem.onmicrosoft.com/b2c_1_signin/v2.0/.well-known/openid-configuration"
-            }
-          },
-          "login": {
-            "nameClaimType": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
-            "scopes": [],
-            "loginParameterNames": []
-          }
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://leavesystem.b2clogin.com/leavesystem.onmicrosoft.com/b2c_1_signin/v2.0",
+          "clientIdSettingName": "B2C_CLIENT_ID",
+          "clientSecretSettingName": "B2C_CLIENT_SECRET"
         }
       }
     }
