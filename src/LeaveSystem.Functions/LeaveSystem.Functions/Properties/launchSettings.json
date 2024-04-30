@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "LeaveSystem.Functions": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7211",
+      "launchBrowser": false
+    }
+  }
+}
