@@ -1,12 +1,4 @@
 {
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": [
-      "/css/*",
-      "/img/*",
-      "/js/*"
-    ]
-  },
   "auth": {
     "identityProviders": {
       "customOpenIdConnectProviders": {
