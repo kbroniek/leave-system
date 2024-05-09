@@ -43,9 +43,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Api.Seed", "Lea
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem.Functions", "LeaveSystem.Functions", "{7CF85AF2-A600-4353-8D72-D8BA91333BE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Functions", "LeaveSystem.Functions\LeaveSystem.Functions\LeaveSystem.Functions.csproj", "{D01C3193-C0E7-4B32-BF49-80A751C5123B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions", "LeaveSystem.Functions\LeaveSystem.Functions\LeaveSystem.Functions.csproj", "{D01C3193-C0E7-4B32-BF49-80A751C5123B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Web2", "LeaveSystem.Web\LeaveSystem.Web2\LeaveSystem.Web2.csproj", "{C4F21125-9FC8-4FB0-AEB3-F6BDFD404DBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Web2", "LeaveSystem.Web\LeaveSystem.Web2\LeaveSystem.Web2.csproj", "{C4F21125-9FC8-4FB0-AEB3-F6BDFD404DBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
