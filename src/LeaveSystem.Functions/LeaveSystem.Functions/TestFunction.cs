@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LeaveSystem.Functions
 {
-    [FunctionAuthorize(AuthenticationSchemes = "Bearer")]
+    [FunctionAuthorize]
     public class TestFunction
     {
         private readonly ILogger<TestFunction> _logger;
@@ -41,7 +41,12 @@ namespace LeaveSystem.Functions
             sb.AppendLine();
             sb.AppendLine($"User:");
             sb.AppendLine($"  Name  -> {req.HttpContext.User.Identity!.Name}");
-            sb.AppendLine($"  Email -> {req.HttpContext.User.FindFirst("email")?.Value}");
+            sb.AppendLine($"  Email -> {req.HttpContext.User.FindFirst("emails")?.Value}");
+            sb.AppendLine($"  Name  -> {req.HttpContext.User.IsInRole("{\"Roles\":[\"GlobalAdmin\"]}")}");
+
+
+            foreach (var claim in req.HttpContext.User.Claims)
+                sb.AppendLine($"  {claim.Type} -> {claim.Value}");
 
             return new OkObjectResult(sb.ToString());
         }
