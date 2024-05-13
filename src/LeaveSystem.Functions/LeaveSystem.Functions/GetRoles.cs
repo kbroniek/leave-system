@@ -18,7 +18,7 @@ namespace LeaveSystem.Functions
         public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
-            return new OkObjectResult(new string[] { "GlobalAdmin", "TestRole" });
+            return new OkObjectResult(new { roles = new string[] { "GlobalAdmin", "TestRole" } });
         }
     }
 }
