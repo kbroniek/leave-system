@@ -24,7 +24,7 @@ namespace LeaveSystem.Functions
         }
 
         [Function("GetRoles")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
             if (!ValidateToken(req.Headers.Authorization))
@@ -45,7 +45,6 @@ namespace LeaveSystem.Functions
         }
         private bool ValidateToken(string header)
         {
-            _logger.LogInformation($"Authorization {header}");
             //Checking the header
             if (!string.IsNullOrEmpty(header) && header.StartsWith("Basic"))
             {
