@@ -45,6 +45,7 @@ namespace LeaveSystem.Functions
         }
         private bool ValidateToken(string header)
         {
+            _logger.LogInformation($"Authorization {header}");
             //Checking the header
             if (!string.IsNullOrEmpty(header) && header.StartsWith("Basic"))
             {
@@ -65,7 +66,7 @@ namespace LeaveSystem.Functions
             }
             else
             {
-                _logger.LogInformation($"Header is missing");
+                _logger.LogWarning("Header is missing");
                 return false;
             }
         }
