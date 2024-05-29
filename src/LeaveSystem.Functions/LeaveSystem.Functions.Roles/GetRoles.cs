@@ -39,8 +39,11 @@ namespace LeaveSystem.Functions
                 { StatusCode = 401 };
             }
             Person person = await JsonSerializer.DeserializeAsync<Person>(req.Body, options);
+            req.Body.Position = 0;
             using StreamReader reader = new StreamReader(req.Body, Encoding.UTF8);
-            return new OkObjectResult(new { roles = new string[] { "GlobalAdmin", "TestRole", person.Email, person.Id, await reader.ReadToEndAsync() } });
+            var bodyStr = await reader.ReadToEndAsync();
+            _logger.LogInformation($"Body!! {bodyStr}");
+            return new OkObjectResult(new { roles = new string[] { "GlobalAdmin", "TestRole", person.Email, person.Id, bodyStr } });
         }
         private bool ValidateToken(string header)
         {
