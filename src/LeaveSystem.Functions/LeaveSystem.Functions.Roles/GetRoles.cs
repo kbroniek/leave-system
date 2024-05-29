@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
@@ -38,7 +39,8 @@ namespace LeaveSystem.Functions
                 { StatusCode = 401 };
             }
             Person person = await JsonSerializer.DeserializeAsync<Person>(req.Body, options);
-            return new OkObjectResult(new { roles = new string[] { "GlobalAdmin", "TestRole", person.Email, person.Id } });
+            using StreamReader reader = new StreamReader(req.Body, Encoding.UTF8);
+            return new OkObjectResult(new { roles = new string[] { "GlobalAdmin", "TestRole", person.Email, person.Id, await reader.ReadToEndAsync() } });
         }
         private bool ValidateToken(string header)
         {
