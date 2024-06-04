@@ -1,8 +1,9 @@
-using System.IO;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
@@ -10,9 +11,13 @@ namespace LeaveSystem.Functions
 {
     public class GetRoles
     {
-        JsonSerializerOptions options = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
+        };
+        private static readonly CosmosLinqSerializerOptions linqSerializerOptions = new CosmosLinqSerializerOptions
+        {
+            PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
         };
         private readonly ILogger<GetRoles> _logger;
 
@@ -22,28 +27,36 @@ namespace LeaveSystem.Functions
         }
 
         [Function("GetRoles")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req,
+            [CosmosDBInput(
+                databaseName: "LeaveSystem",
+                containerName: "Roles",
+                Connection = "CosmosDBConnection")] Container container)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
             if (!ValidateToken(req.Headers.Authorization))
             {
+                _logger.LogInformation("Wrong RestApi credentials.");
                 return new ObjectResult(new
                 {
                     version = "1.0",
                     status = 401,
                     code = "errorCode",
                     requestId = "requestId",
-                    userMessage = "Niepoprawne dane autoryzacyjne. Skonsultuj się z administratorem",
+                    userMessage = "Wrong RestApi credentials. Contact with administrators.",
                     developerMessage = $"The provided code auth {req.Headers.Authorization} does not match the expected login and password."
                 })
                 { StatusCode = 401 };
             }
-            _logger.LogInformation("Reading body");
-            using StreamReader reader = new StreamReader(req.Body);
-            var bodyStr = await reader.ReadToEndAsync();
-            //Person person = await JsonSerializer.DeserializeAsync<Person>(req.Body, options);
-            _logger.LogInformation($"Body!! {bodyStr}");
-            return new OkObjectResult(new { roles = new string[] { "GlobalAdmin", "TestRole" } });
+            var userId = await JsonSerializer.DeserializeAsync<UserId>(req.Body, jsonSerializerOptions);
+            _logger.LogInformation($"Deserialized user id {userId.Id}.");
+            var iterator = container.GetItemLinqQueryable<RolesModel>(linqSerializerOptions: linqSerializerOptions)
+                .Where(r => r.Id == userId.Id)
+                .ToFeedIterator();
+            var roles = iterator.HasMoreResults ?
+                (await iterator.ReadNextAsync()).FirstOrDefault()?.Roles :
+                null;
+            return new OkObjectResult(new { roles = roles ?? Enumerable.Empty<string>() });
         }
         private bool ValidateToken(string header)
         {
@@ -73,5 +86,6 @@ namespace LeaveSystem.Functions
         }
     }
 
-    public record Person(string Email, string Id);
+    public record UserId(Guid Id);
+    public record RolesModel(Guid Id, string[] Roles);
 }
