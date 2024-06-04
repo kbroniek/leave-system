@@ -6,7 +6,7 @@ name: DEV - get roles for B2C - func-leave-system-west-europe-dev-01
 on:
   push:
     branches:
-      - feature/azure-functions-get-roles
+      - develop
     paths:
       - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Roles/**'
   pull_request:
