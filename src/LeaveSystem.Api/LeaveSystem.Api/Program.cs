@@ -7,7 +7,6 @@ using LeaveSystem.Api.Endpoints.Errors;
 using LeaveSystem.Api.Endpoints.LeaveRequests;
 using LeaveSystem.Api.Endpoints.Users;
 using LeaveSystem.Api.Endpoints.WorkingHours;
-using LeaveSystem.Api.Seed;
 using LeaveSystem.GraphApi;
 using LeaveSystem.Shared.Converters;
 using LeaveSystem.Shared.Date;

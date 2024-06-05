@@ -24,16 +24,8 @@ public record struct FederatedUser(string Id, string? Email, string? Name, IEnum
         {
             return RolesResult.Empty.Roles;
         }
-        try
-        {
-            var roleAttribute = JsonSerializer.Deserialize<string[]>(rolesRaw) ?? Enumerable.Empty<string>();
-            return roleAttribute;
-        }
-        catch
-        {
-            var roleAttribute = JsonSerializer.Deserialize<RolesResult?>(rolesRaw) ?? RolesResult.Empty;
-            return roleAttribute.Roles;
-        }
+        var roleAttribute = JsonSerializer.Deserialize<RolesResult?>(rolesRaw) ?? RolesResult.Empty;
+        return roleAttribute.Roles;
     }
 }
 
