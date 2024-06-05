@@ -1,9 +1,9 @@
-name: Azure Static Web Apps CI/CD
+name: DEV - Azure Static Web Apps CI/CD
 
 on:
   push:
     branches:
-      - develop
+      - feature/azure-functinos
     paths:
       - 'src/LeaveSystem.Web/LeaveSystem.Web/**'
       - 'src/LeaveSystem.Shared/**'
