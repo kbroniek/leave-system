@@ -1,6 +1,6 @@
-using System.Globalization;
-using System.Security.Claims;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
+using LeaveSystem.Shared.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +11,72 @@ namespace LeaveSystem.Functions
 {
     public class GetLeaveTypes
     {
-        private readonly ILogger _logger;
+        private static GetLeaveTypeDto holidayLeave = new(
+            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
+            "urlop wypoczynkowy",
+            1,
+            new GetLeaveTypeDto.LeaveTypeDtoProperties(
+                DefaultLimitDays: 26,
+                IncludeFreeDays: false,
+                Color: "#0137C9",
+                Catalog: LeaveTypeCatalog.Holiday
+            )
+        );
 
-        public GetLeaveTypes(ILoggerFactory loggerFactory)
-        {
-            _logger = loggerFactory.CreateLogger<GetLeaveTypes>();
-        }
+        private static GetLeaveTypeDto onDemandLeave = new(
+            Id: Guid.Parse("6e1a75ca-07dc-45aa-9451-57e1cefd7ee6"),
+            Name: "urlop na żądanie",
+            BaseLeaveTypeId: holidayLeave.Id,
+            Order: 2,
+            Properties: new GetLeaveTypeDto.LeaveTypeDtoProperties(
+                DefaultLimitDays: 4,
+                IncludeFreeDays: false,
+                Color: "#B88E1E",
+                Catalog: LeaveTypeCatalog.OnDemand
+            )
+        );
+
+        private static GetLeaveTypeDto sickLeave = new(
+            Id: Guid.Parse("c91558cc-5d58-4a77-b46e-e6a69ac14cf4"),
+            Name: "niezdolność do pracy z powodu choroby",
+            Order: 3,
+            Properties: new GetLeaveTypeDto.LeaveTypeDtoProperties(
+                IncludeFreeDays: true,
+                Color: "#FF3333",
+                Catalog: LeaveTypeCatalog.Sick
+            )
+        );
+
+        private static GetLeaveTypeDto saturdayLeave = new(
+            Id: Guid.Parse("2dfb7d85-70d8-4acc-a565-62fde19b7cd1"),
+            Name: "urlop za sobotę",
+            Order: 14,
+            Properties: new GetLeaveTypeDto.LeaveTypeDtoProperties(
+                DefaultLimitDays: 1,
+                IncludeFreeDays: false,
+                Color: "#FFFF33",
+                Catalog: LeaveTypeCatalog.Saturday
+            )
+        );
+        private readonly ILogger logger;
+
+        public GetLeaveTypes(ILoggerFactory loggerFactory) => logger = loggerFactory.CreateLogger<GetLeaveTypes>();
 
         [Function("GetLeaveTypes")]
         [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},Test")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
+            logger.LogInformation("C# HTTP trigger function processed a request.");
 
-            return new OkObjectResult("Welcome to Azure Functions!");
+            var leaveTypes = new GetLeaveTypeDto[]
+            {
+                holidayLeave,
+                onDemandLeave,
+                sickLeave,
+                saturdayLeave
+            };
+
+            return new OkObjectResult(leaveTypes);
         }
     }
 }
