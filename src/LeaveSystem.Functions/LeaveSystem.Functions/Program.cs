@@ -1,7 +1,5 @@
 using System.Security.Claims;
-using LeaveSystem.Shared.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,4 +33,3 @@ var host = new HostBuilder()
     .Build();
 
 host.Run();
-
