@@ -1,8 +1,0 @@
-{
-  "routes": [
-    {
-      "route": "/api/getRoles",
-      "allowedRoles": [ "anonymous" ]
-    }
-  ]
-}
