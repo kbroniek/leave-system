@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using LeaveSystem.Functions.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(builder =>
     {
         builder.UseFunctionsAuthorization();
+        builder.UseMiddleware<ExceptionHandlingMiddleware>();
     })
     .ConfigureServices(services =>
     {

@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace LeaveSystem.Functions
+namespace LeaveSystem.Functions.LeaveTypes
 {
-    public class GetLeaveTypes
+    public class LeaveTypesFunction
     {
         private static GetLeaveTypeDto holidayLeave = new(
             Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
@@ -60,11 +60,11 @@ namespace LeaveSystem.Functions
         );
         private readonly ILogger logger;
 
-        public GetLeaveTypes(ILoggerFactory loggerFactory) => logger = loggerFactory.CreateLogger<GetLeaveTypes>();
+        public LeaveTypesFunction(ILoggerFactory loggerFactory) => logger = loggerFactory.CreateLogger<LeaveTypesFunction>();
 
-        [Function("GetLeaveTypes")]
-        [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},Test")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+        [Function(nameof(GetLeaveTypes))]
+        [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
+        public async Task<IActionResult> GetLeaveTypes([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
         {
             logger.LogInformation("C# HTTP trigger function processed a request.");
 
