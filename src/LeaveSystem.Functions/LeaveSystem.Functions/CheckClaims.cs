@@ -1,5 +1,4 @@
 using System.Text;
-using DarkLoop.Azure.Functions.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,17 +9,16 @@ using Microsoft.Extensions.Logging;
 
 namespace LeaveSystem.Functions
 {
-    [FunctionAuthorize]
-    public class TestFunction
+    public class CheckClaims
     {
-        private readonly ILogger<TestFunction> _logger;
+        private readonly ILogger<CheckClaims> _logger;
 
-        public TestFunction(ILogger<TestFunction> logger)
+        public CheckClaims(ILogger<CheckClaims> logger)
         {
             _logger = logger;
         }
 
-        [Function("TestFunction")]
+        [Function("CheckClaims")]
         [Authorize]
         public async Task<IActionResult> Run([HttpTrigger("get", "post")] HttpRequest req)
         {

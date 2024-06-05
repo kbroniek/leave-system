@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using LeaveSystem.Shared.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -15,29 +16,23 @@ var host = new HostBuilder()
     })
     .ConfigureServices(services =>
     {
+        services.AddApplicationInsightsTelemetryWorkerService();
+        services.ConfigureFunctionsApplicationInsights();
         services
             .AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            .AddJwtFunctionsBearer(options =>
             {
-                options.Authority = "https://leavesystem.b2clogin.com/tfp/leavesystem.onmicrosoft.com/b2c_1_signin/v2.0/";
-                options.Audience = "4f24b978-403f-47fe-9cae-52deea03661d";
+                options.Authority = "https://leavesystem.b2clogin.com/tfp/leavesystem.onmicrosoft.com/b2c_1a_signincustom_sspr/v2.0/";
+                options.Audience = "114ea83d-c494-46f4-9d7c-b582fed7b5b9";
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "name",
-                    RoleClaimType = "extension_Role"
+                    RoleClaimType = ClaimTypes.Role
                 };
 
             });
-
-        services.AddFunctionsAuthorization(options =>
-        {
-            options.AddPolicy("OnlyAdmins", policy =>
-                policy.Requirements.Add(new RoleRequirement(RoleType.GlobalAdmin)));
-        });
-        services.AddScoped<IAuthorizationHandler, RoleRequirementHandler>();
-
-        // Add other services
     })
     .Build();
 
 host.Run();
+

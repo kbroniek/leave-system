@@ -1,4 +1,6 @@
 using System.Net;
+using LeaveSystem.Shared.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
@@ -15,6 +17,7 @@ namespace LeaveSystem.Functions
         }
 
         [Function("GetLeaveTypes")]
+        [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},Test")]
         public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
