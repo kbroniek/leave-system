@@ -36,7 +36,7 @@ namespace LeaveSystem.Functions
             _logger.LogInformation("C# HTTP trigger function processed a request.");
             if (!ValidateToken(req.Headers.Authorization))
             {
-                _logger.LogInformation("Wrong RestApi credentials.");
+                _logger.LogWarning("Wrong RestApi credentials.");
                 return new ObjectResult(new
                 {
                     version = "1.0",

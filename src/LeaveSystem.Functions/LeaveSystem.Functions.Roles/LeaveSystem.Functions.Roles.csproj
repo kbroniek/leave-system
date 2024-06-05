@@ -15,6 +15,9 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
