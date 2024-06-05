@@ -1,5 +1,4 @@
 @page "/users"
-@using GoldenEye.Shared.Core.Extensions.Basic
 @using LeaveSystem.Shared.Auth;
 @using LeaveSystem.Shared.Date
 @using LeaveSystem.Shared.WorkingHours
@@ -230,7 +229,7 @@ else
 
     async Task ShowWorkingHoursDialog(UserForView userForView)
     {
-        if (userForView.User.Id.IsNullOrWhiteSpace())
+        if (string.IsNullOrWhiteSpace(userForView.User.Id))
         {
             ToastService.ShowError("Can not open the dialog");
             Logger.LogError($"{nameof(ShowWorkingHoursDialog)}: userId is null or white space");

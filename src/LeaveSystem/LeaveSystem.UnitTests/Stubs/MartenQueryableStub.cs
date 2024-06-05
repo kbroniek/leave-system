@@ -1,4 +1,3 @@
-using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Marten.Linq;
 
@@ -72,4 +71,9 @@ internal class MartenQueryableStub<T> : EnumerableQuery<T>, IMartenQueryable<T>,
 
     private IReadOnlyList<TResult> ToListReadOnlyList<TResult>() =>
         this.ToList().AsReadOnly().As<IReadOnlyList<TResult>>();
+    public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, Action<TInclude> callback, Expression<Func<TInclude, bool>> filter) where TInclude : notnull => throw new NotImplementedException();
+    public IMartenQueryable<T> Include<TInclude>(Expression<Func<T, object>> idSource, IList<TInclude> list, Expression<Func<TInclude, bool>> filter) where TInclude : notnull => throw new NotImplementedException();
+    public IMartenQueryable<T> Include<TInclude, TKey>(Expression<Func<T, object>> idSource, IDictionary<TKey, TInclude> dictionary, Expression<Func<TInclude, bool>> filter)
+        where TInclude : notnull
+        where TKey : notnull => throw new NotImplementedException();
 }
