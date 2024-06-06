@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -40,7 +41,7 @@ namespace LeaveSystem.Functions
             sb.AppendLine($"User:");
             sb.AppendLine($"  Name  -> {req.HttpContext.User.Identity!.Name}");
             sb.AppendLine($"  Email -> {req.HttpContext.User.FindFirst("emails")?.Value}");
-            sb.AppendLine($"  Name  -> {req.HttpContext.User.IsInRole("{\"Roles\":[\"GlobalAdmin\"]}")}");
+            sb.AppendLine($"  Id  -> {req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value}");
 
 
             foreach (var claim in req.HttpContext.User.Claims)
