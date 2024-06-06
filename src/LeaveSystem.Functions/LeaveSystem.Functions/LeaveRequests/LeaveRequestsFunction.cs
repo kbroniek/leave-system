@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using LeaveSystem.Shared.Auth;
+using LeaveSystem.Shared.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +19,29 @@ namespace LeaveSystem.Functions.LeaveRequests
         }
 
         [Function(nameof(SearchLeaveRequests))]
-        [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.HumanResource)}")]
+        [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.HumanResource)},{nameof(RoleType.DecisionMaker)}")]
         public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
+            var userId = Guid.Parse(req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var queryResult = SearchLeaveRequestsQuery.Bind(req.HttpContext);
-            return new OkObjectResult("Welcome to Azure Functions!");
+            var leaveRequests = Enumerable.Range(1, 1)
+                .Select(x => new SearchLeaveRequestDto(
+                    Guid.NewGuid(),
+                    queryResult.DateFrom ?? DateTimeOffset.UtcNow,
+                    queryResult.DateTo ?? DateTimeOffset.UtcNow,
+                    TimeSpan.FromHours(8),
+                    LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Accepted,
+                    userId,
+                    TimeSpan.FromHours(8),
+                    new SearchLeaveRequestDto.LeaveTypeDto(
+                        Guid.NewGuid(),
+                        "urlop wypoczynkowy",
+                        "#0137C9"
+                        )));
+            
+            return new OkObjectResult(leaveRequests);
         }
     }
 }
