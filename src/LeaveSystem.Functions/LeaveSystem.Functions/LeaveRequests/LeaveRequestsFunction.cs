@@ -40,7 +40,7 @@ namespace LeaveSystem.Functions.LeaveRequests
                         "urlop wypoczynkowy",
                         "#0137C9"
                         )));
-            
+
             return new OkObjectResult(leaveRequests);
         }
     }
