@@ -28,7 +28,7 @@ namespace LeaveSystem.Functions.LeaveRequests
             var queryResult = SearchLeaveRequestsQuery.Bind(req.HttpContext);
             var leaveRequests = Enumerable.Range(1, 1)
                 .Select(x => new SearchLeaveRequestDto(
-                    Guid.NewGuid(),
+                    Guid.Parse("55d4c226-206d-4449-bf5d-0c0065b80fff"),
                     queryResult.DateFrom ?? DateTimeOffset.UtcNow,
                     queryResult.DateTo ?? DateTimeOffset.UtcNow,
                     TimeSpan.FromHours(8),
@@ -36,7 +36,7 @@ namespace LeaveSystem.Functions.LeaveRequests
                     userId,
                     TimeSpan.FromHours(8),
                     new SearchLeaveRequestDto.LeaveTypeDto(
-                        Guid.NewGuid(),
+                        Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
                         "urlop wypoczynkowy",
                         "#0137C9"
                         )));
