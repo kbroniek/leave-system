@@ -1,6 +1,7 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Dto;
 
 namespace LeaveSystem.Web.Pages.LeaveRequests.ShowingLeaveRequests;
 

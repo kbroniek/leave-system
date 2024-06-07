@@ -1,4 +1,5 @@
 using LeaveSystem.EventSourcing.WorkingHours;
+using LeaveSystem.Shared.Dto;
 using LeaveSystem.Shared.WorkingHours;
 
 namespace LeaveSystem.Web.UnitTests.TestStuff.Extensions;
