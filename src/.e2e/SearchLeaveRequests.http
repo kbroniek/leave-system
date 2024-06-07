@@ -1,0 +1,2 @@
+GET http://localhost:7211/api/SearchLeaveRequests?PageNumber=1
+Authorization: Bearer test

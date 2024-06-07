@@ -1,0 +1,2 @@
+GET http://localhost:7211/api/GetLeaveTypes
+Authorization: Bearer test
