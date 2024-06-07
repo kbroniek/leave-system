@@ -2,6 +2,7 @@ namespace LeaveSystem.Web.Pages.WorkingHours;
 
 using System.Text.Json;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Dto;
 using LeaveSystem.Shared.WorkingHours;
 using LeaveSystem.Web.Pages.WorkingHours.ShowingWorkingHours;
 using Shared;
