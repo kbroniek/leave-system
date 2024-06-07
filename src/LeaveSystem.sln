@@ -41,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoldenEye", "GoldenEye\Gold
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Api.Seed", "LeaveSystem.Api\LeaveSystem.Api.Seed\LeaveSystem.Api.Seed.csproj", "{CB7AA0EA-6305-469B-B827-01276E65E6F2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem.Functions", "LeaveSystem.Functions", "{7CF85AF2-A600-4353-8D72-D8BA91333BE2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem", "LeaveSystem", "{7CF85AF2-A600-4353-8D72-D8BA91333BE2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions", "LeaveSystem.Functions\LeaveSystem.Functions\LeaveSystem.Functions.csproj", "{D01C3193-C0E7-4B32-BF49-80A751C5123B}"
 EndProject
