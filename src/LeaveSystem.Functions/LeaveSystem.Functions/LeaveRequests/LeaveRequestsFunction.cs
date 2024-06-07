@@ -24,22 +24,18 @@ namespace LeaveSystem.Functions.LeaveRequests
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-            var userId = Guid.Parse(req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userId = req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var queryResult = SearchLeaveRequestsQuery.Bind(req.HttpContext);
-            var leaveRequests = Enumerable.Range(1, 1)
+            var leaveRequests = new PagedListResponse<SearchLeaveRequestDto>(Enumerable.Range(1, 1)
                 .Select(x => new SearchLeaveRequestDto(
                     Guid.Parse("55d4c226-206d-4449-bf5d-0c0065b80fff"),
                     queryResult.DateFrom ?? DateTimeOffset.UtcNow,
                     queryResult.DateTo ?? DateTimeOffset.UtcNow,
                     TimeSpan.FromHours(8),
+                    Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
                     LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Accepted,
                     userId,
-                    TimeSpan.FromHours(8),
-                    new SearchLeaveRequestDto.LeaveTypeDto(
-                        Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-                        "urlop wypoczynkowy",
-                        "#0137C9"
-                        )));
+                    TimeSpan.FromHours(8))), 1, false);
 
             return new OkObjectResult(leaveRequests);
         }
