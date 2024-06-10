@@ -9,49 +9,28 @@ public readonly struct Result<TValue, TError>
 
     public Result(TError? error)
     {
-        _value = default;
-        _error = error;
-        IsOk = false;
+        Value = value;
+        Error = error;
+        _success = success;
     }
-    public Result(TValue? value)
+
+    public bool IsOk => _success;
+
+    public static Result<T, E> Ok(T v)
     {
-        _value = value;
-        _error = default;
-        IsOk = true;
+        return new(v, default(E), true);
     }
-    public bool IsOk { get; }
 
-    public static implicit operator Result<TValue, TError>(TValue v) => new(v);
-    public static implicit operator Result<TValue, TError>(TError e) => new(e);
-
-    public TResult Match<TResult>(
-            Func<TValue, TResult> success,
-            Func<TError, TResult> failure) =>
-        IsOk ? success(_value!) : failure(_error!);
-
-    public Task<TResult> MatchAsync<TResult>(Func<TValue, Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
-        IsOk ? success(_value!) : failure(_error!);
-}
-
-public readonly struct Result<TError>
-{
-    public bool IsOk { get; }
-
-    private readonly TError? _error;
-
-    public Result(TError? error)
+    public static Result<T, E> Err(E e)
     {
-        _error = error;
-        IsOk = false;
+        return new(default(T), e, false);
     }
 
-    public static implicit operator Result<TError>(TError e) => new(e);
+    public static implicit operator Result<T, E>(T v) => new(v, default(E), true);
+    public static implicit operator Result<T, E>(E e) => new(default(T), e, false);
 
-    public TResult Match<TResult>(
-            Func<TResult> success,
-            Func<TError, TResult> failure) =>
-    IsOk ? success() : failure(_error!);
-
-    public Task<TResult> MatchAsync<TResult>(Func<Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
-        IsOk ? success() : failure(_error!);
+    public R Match<R>(
+            Func<T, R> success,
+            Func<E, R> failure) =>
+        _success ? success(Value) : failure(Error);
 }
