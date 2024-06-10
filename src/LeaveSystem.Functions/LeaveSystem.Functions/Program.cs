@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using LeaveSystem.Functions;
 using LeaveSystem.Functions.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.Functions.Worker;
@@ -29,6 +30,7 @@ var host = new HostBuilder()
                 };
 
             });
+        services.AddLeaveSystemServcies();
     })
     .Build();
 
