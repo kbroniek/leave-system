@@ -1,33 +1,34 @@
-public readonly struct Result<T, E>
+namespace LeaveSystem.Shared;
+
+using System;
+
+public readonly struct Result<TValue, TError>
 {
-    private readonly bool _success;
-    public readonly T Value;
-    public readonly E Error;
+    private readonly TValue? _value;
+    private readonly TError? _error;
 
-    private Result(T value, E error, bool success)
+    public Result(TError? error)
     {
-        Value = value;
-        Error = error;
-        _success = success;
+        _value = default;
+        _error = error;
+        IsOk = false;
     }
-
-    public bool IsOk => _success;
-
-    public static Result<T, E> Ok(T v)
+    public Result(TValue? value)
     {
-        return new(v, default(E), true);
+        _value = value;
+        _error = default;
+        IsOk = true;
     }
+    public bool IsOk { get; }
 
-    public static Result<T, E> Err(E e)
-    {
-        return new(default(T), e, false);
-    }
+    public static implicit operator Result<TValue, TError>(TValue v) => new(v);
+    public static implicit operator Result<TValue, TError>(TError e) => new(e);
 
-    public static implicit operator Result<T, E>(T v) => new(v, default(E), true);
-    public static implicit operator Result<T, E>(E e) => new(default(T), e, false);
+    public TResult Match<TResult>(
+            Func<TValue, TResult> success,
+            Func<TError, TResult> failure) =>
+        IsOk ? success(_value!) : failure(_error!);
 
-    public R Match<R>(
-            Func<T, R> success,
-            Func<E, R> failure) =>
-        _success ? success(Value) : failure(Error);
+    public Task<TResult> MatchAsync<TResult>(Func<TValue, Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
+        IsOk ? success(_value!) : failure(_error!);
 }
