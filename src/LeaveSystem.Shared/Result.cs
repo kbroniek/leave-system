@@ -34,3 +34,26 @@ public readonly struct Result<TValue, TError>
             Func<E, R> failure) =>
         _success ? success(Value) : failure(Error);
 }
+
+public readonly struct Result<TError>
+{
+    public bool IsOk { get; }
+
+    private readonly TError? _error;
+
+    public Result(TError? error)
+    {
+        _error = error;
+        IsOk = false;
+    }
+
+    public static implicit operator Result<TError>(TError e) => new(e);
+
+    public TResult Match<TResult>(
+            Func<TResult> success,
+            Func<TError, TResult> failure) =>
+    IsOk ? success() : failure(_error!);
+
+    public Task<TResult> MatchAsync<TResult>(Func<Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
+        IsOk ? success() : failure(_error!);
+}
