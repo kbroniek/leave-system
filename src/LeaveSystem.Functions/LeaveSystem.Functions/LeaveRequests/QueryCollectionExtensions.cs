@@ -1,9 +1,8 @@
+namespace LeaveSystem.Functions.LeaveRequests;
 using System.Globalization;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;
 using Microsoft.AspNetCore.Http;
-
-namespace LeaveSystem.Functions.LeaveRequests;
 
 public static class QueryCollectionExtensions
 {

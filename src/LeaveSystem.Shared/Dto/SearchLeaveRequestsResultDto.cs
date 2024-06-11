@@ -2,7 +2,7 @@ namespace LeaveSystem.Shared.Dto;
 using System;
 using LeaveSystem.Shared.LeaveRequests;
 
-public record SearchLeaveRequestDto(Guid Id,
+public record SearchLeaveRequestsResultDto(Guid Id,
     DateOnly DateFrom,
     DateOnly DateTo,
     TimeSpan Duration,

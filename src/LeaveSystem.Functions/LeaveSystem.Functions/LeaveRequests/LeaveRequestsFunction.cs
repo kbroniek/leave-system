@@ -24,9 +24,9 @@ public class LeaveRequestsFunction
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var userId = req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var queryResult = SearchLeaveRequestsQuery.Bind(req.HttpContext);
-        var leaveRequests = new PagedListResponse<SearchLeaveRequestDto>(new[] {
-            new SearchLeaveRequestDto(
+        var queryResult = req.HttpContext.Bind();
+        var leaveRequests = new PagedListResponse<SearchLeaveRequestsResultDto>(new[] {
+            new SearchLeaveRequestsResultDto(
                 Guid.Parse("55d4c226-206d-4449-bf5d-0c0065b80fff"),
                 queryResult.DateFrom ?? DateOnly.FromDateTime(DateTime.UtcNow),
                 queryResult.DateTo ?? DateOnly.FromDateTime(DateTime.UtcNow),
@@ -35,7 +35,7 @@ public class LeaveRequestsFunction
                 LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Accepted,
                 userId,
                 TimeSpan.FromHours(8)),
-            new SearchLeaveRequestDto(
+            new SearchLeaveRequestsResultDto(
                 Guid.Parse("55d4c226-206d-4449-bf5d-0c0065b80ff1"),
                 queryResult.DateFrom ?? DateOnly.FromDateTime(DateTime.UtcNow),
                 queryResult.DateTo ?? DateOnly.FromDateTime(DateTime.UtcNow),
