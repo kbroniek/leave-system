@@ -90,21 +90,21 @@ public static class QueryCollectionExtensions
         }
     }
 
-    public static DateTimeOffset? TryParseDateTimeOffset(this IQueryCollection query, string paramName)
+    public static DateOnly? TryParseDateOnly(this IQueryCollection query, string paramName)
     {
         var paramValue = query[paramName];
         try
         {
-            return !string.IsNullOrEmpty(paramValue) ? DateTimeOffset.Parse(paramValue!, CultureInfo.CurrentCulture) : null;
+            return !string.IsNullOrEmpty(paramValue) ? DateOnly.Parse(paramValue!, CultureInfo.CurrentCulture) : null;
         }
         catch (Exception ex)
         {
             throw new BadHttpRequestException($"Cannot parse the {paramName} query parameter to DateTimeOffset type.", StatusCodes.Status400BadRequest, ex);
         }
     }
-    public static DateTimeOffset ParseDateTimeOffset(this IQueryCollection query, string paramName)
+    public static DateOnly ParseDateTimeOffset(this IQueryCollection query, string paramName)
     {
-        var result = query.TryParseDateTimeOffset(paramName);
+        var result = query.TryParseDateOnly(paramName);
         return result ?? throw new BadHttpRequestException($"The {paramName} query parameter cannot be null.", StatusCodes.Status400BadRequest);
     }
 

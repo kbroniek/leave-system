@@ -3,8 +3,8 @@ using System;
 using LeaveSystem.Shared.LeaveRequests;
 
 public record SearchLeaveRequestDto(Guid Id,
-    DateTimeOffset DateFrom,
-    DateTimeOffset DateTo,
+    DateOnly DateFrom,
+    DateOnly DateTo,
     TimeSpan Duration,
     Guid LeaveTypeId,
     LeaveRequestStatus Status,
