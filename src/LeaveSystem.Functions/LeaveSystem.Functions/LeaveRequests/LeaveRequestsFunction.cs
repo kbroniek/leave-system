@@ -19,7 +19,7 @@ public class LeaveRequestsFunction
     }
 
     [Function(nameof(SearchLeaveRequests))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.HumanResource)},{nameof(RoleType.DecisionMaker)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
@@ -48,5 +48,36 @@ public class LeaveRequestsFunction
             };
 
         return new OkObjectResult(leaveRequests.ToPagedListResponse());
+    }
+
+    [Function(nameof(GetLeaveRequest))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
+    public async Task<IActionResult> GetLeaveRequest([HttpTrigger(
+        AuthorizationLevel.Function,
+        "get",
+        Route = $"{nameof(GetLeaveRequest)}/{{leaveRequestId:guid}}")] HttpRequest req, Guid leaveRequestId)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request.");
+
+        var userId = req.HttpContext.GetUserId();
+
+        var leaveRequest = new GetLeaveRequestDto(
+            leaveRequestId,
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            TimeSpan.FromHours(8),
+            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
+            LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Accepted,
+            userId,
+            userId,
+            userId,
+            TimeSpan.FromHours(8),
+            DateTimeOffset.UtcNow.AddDays(-1),
+            DateTimeOffset.UtcNow,
+            new[]
+            {
+                new GetLeaveRequestDto.RemarksDto("Test remark", userId, DateTimeOffset.UtcNow.AddDays(-1))
+            });
+        return new OkObjectResult(leaveRequest);
     }
 }
