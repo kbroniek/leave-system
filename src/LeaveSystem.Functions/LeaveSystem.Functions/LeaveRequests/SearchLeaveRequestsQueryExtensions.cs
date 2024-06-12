@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 public static class SearchLeaveRequestsQueryExtensions
 {
-    public static SearchLeaveRequestsQueryDto Bind(this HttpContext context)
+    public static SearchLeaveRequestsQueryDto BindSearchLeaveRequests(this HttpContext context)
         => new(
             PageNumber: context.Request.Query.TryParseInt(nameof(SearchLeaveRequestsQueryDto.PageNumber)),
             PageSize: context.Request.Query.TryParseInt(nameof(SearchLeaveRequestsQueryDto.PageSize)),
