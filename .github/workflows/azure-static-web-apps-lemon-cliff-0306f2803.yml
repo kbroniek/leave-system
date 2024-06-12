@@ -3,7 +3,11 @@ name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
-      - feature/azure-functinos
+      - develop
+    paths:
+      - 'src/LeaveSystem.Web/LeaveSystem.Web/**'
+      - 'src/LeaveSystem.Shared/**'
+      - 'src/LeaveSystem.Functions/LeaveSystem.Functions/**'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
