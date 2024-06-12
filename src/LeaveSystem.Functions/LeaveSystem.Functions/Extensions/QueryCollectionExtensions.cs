@@ -1,4 +1,4 @@
-namespace LeaveSystem.Functions.LeaveRequests;
+namespace LeaveSystem.Functions.Extensions;
 using System.Globalization;
 using LeaveSystem.Shared.LeaveRequests;
 using LeaveSystem.Shared.WorkingHours;

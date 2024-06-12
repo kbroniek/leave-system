@@ -1,5 +1,6 @@
 namespace LeaveSystem.Functions.LeaveRequests;
 using System.Security.Claims;
+using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +24,7 @@ public class LeaveRequestsFunction
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var userId = req.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = req.HttpContext.GetUserId();
         var queryResult = req.HttpContext.Bind();
         var leaveRequests = new PagedListResponse<SearchLeaveRequestsResultDto>(new[] {
             new SearchLeaveRequestsResultDto(

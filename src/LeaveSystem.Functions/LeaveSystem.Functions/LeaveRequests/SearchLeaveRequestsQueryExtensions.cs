@@ -1,4 +1,6 @@
 namespace LeaveSystem.Functions.LeaveRequests;
+
+using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Dto;
 using Microsoft.AspNetCore.Http;
 
