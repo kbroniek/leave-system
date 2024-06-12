@@ -8,17 +8,13 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Worker" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.CosmosDB" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" />
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" />
-    <PackageReference Include="DarkLoop.Azure.Functions.Authorization.Isolated" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj" />
-    <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

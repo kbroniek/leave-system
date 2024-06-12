@@ -29,25 +29,17 @@ public class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
         {
             await next(context);
         }
-        catch (BadHttpRequestException ex)
-        {
-            logger.LogError(ex, "Global exception handler");
-            if (!await HandleHttpError(context, ex.StatusCode, ex))
-            {
-                throw;
-            }
-        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Global exception handler");
-            if (!await HandleHttpError(context, StatusCodes.Status500InternalServerError, ex))
+            if (!await HandleHttpError(context, HttpStatusCode.InternalServerError, ex))
             {
                 throw;
             }
         }
     }
 
-    private static async Task<bool> HandleHttpError(FunctionContext context, int status, Exception ex)
+    private static async Task<bool> HandleHttpError(FunctionContext context, HttpStatusCode status, Exception ex)
     {
         var httpContext = context.GetHttpContext();
         if (httpContext is null)
@@ -55,11 +47,11 @@ public class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
             return false;
         }
 
-        httpContext.Response.StatusCode = status;
+        httpContext.Response.StatusCode = (int)status;
         var problemDetails = new ProblemDetails
         {
             Detail = ex.Message,
-            Status = status,
+            Status = (int)status,
             Title = "Global exception handler"
         };
         httpContext.Response.Headers.ContentType = "application/problem+json; charset=utf-8";

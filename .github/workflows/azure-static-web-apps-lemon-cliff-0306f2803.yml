@@ -1,4 +1,4 @@
-name: DEV - Azure Static Web Apps CI/CD
+name: DEV - Web - deploy Azure
 
 on:
   push:
@@ -15,7 +15,10 @@ on:
     paths:
       - 'src/LeaveSystem.Web/LeaveSystem.Web/**'
       - 'src/LeaveSystem.Shared/**'
-      - 'src/LeaveSystem.Functions/LeaveSystem.Functions/**'
+  # pull_request:
+  #   types: [opened, synchronize, reopened, closed]
+  #   branches:
+  #     - develop
 
 jobs:
   build_and_deploy_job:
