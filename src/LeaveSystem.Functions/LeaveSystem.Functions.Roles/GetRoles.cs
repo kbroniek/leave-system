@@ -45,14 +45,16 @@ namespace LeaveSystem.Functions
                 })
                 { StatusCode = 401 };
             }
-            var userId = await JsonSerializer.DeserializeAsync<UserId>(req.Body, JsonSerializerOptions);
-            if (userId is null)
+            var userIdModel = await JsonSerializer.DeserializeAsync<UserId>(req.Body, JsonSerializerOptions);
+            if (userIdModel is null)
             {
                 return new NotFoundObjectResult("userId");
             }
-            logger.LogInformation($"Deserialized user id {userId.Id}.");
+
+            var userId = userIdModel.Id;
+            this.logger.LogInformation("Deserialized user id {UserId}.", userId);
             var iterator = container.GetItemLinqQueryable<RolesModel>(linqSerializerOptions: LinqSerializerOptions)
-                .Where(r => r.Id == userId.Id)
+                .Where(r => r.Id == userId)
                 .ToFeedIterator();
             var roles = iterator.HasMoreResults ?
                 (await iterator.ReadNextAsync()).FirstOrDefault()?.Roles :
@@ -62,16 +64,16 @@ namespace LeaveSystem.Functions
         private bool ValidateToken(string? header)
         {
             //Checking the header
-            if (!string.IsNullOrEmpty(header) && header.StartsWith("Basic"))
+            if (!string.IsNullOrEmpty(header) && header.StartsWith("Basic", StringComparison.Ordinal))
             {
                 //Extracting credentials
                 // Removing "Basic " Substring
-                string encodedUsernamePassword = header.Substring("Basic ".Length).Trim();
+                var encodedUsernamePassword = header["Basic ".Length..].Trim();
                 //Decoding Base64
-                Encoding encoding = Encoding.GetEncoding("iso-8859-1");
-                string usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
+                var encoding = Encoding.GetEncoding("iso-8859-1");
+                var usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
                 //Splitting Username:Password
-                int seperatorIndex = usernamePassword.IndexOf(':');
+                var seperatorIndex = usernamePassword.IndexOf(':');
                 // Extracting the individual username and password
                 var username = usernamePassword[..seperatorIndex];
                 var password = usernamePassword[(seperatorIndex + 1)..];
