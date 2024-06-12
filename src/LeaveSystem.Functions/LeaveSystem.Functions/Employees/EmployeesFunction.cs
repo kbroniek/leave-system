@@ -1,7 +1,9 @@
 namespace LeaveSystem.Functions.Employees;
 
 using LeaveSystem.Functions.Extensions;
+using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -17,6 +19,7 @@ public class EmployeesFunction
     }
 
     [Function("GetEmployee")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public IActionResult GetEmployee([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
@@ -32,6 +35,6 @@ public class EmployeesFunction
                 "current@test.pl"),
         };
 
-        return new OkObjectResult(employees.CreatePagedListResponse());
+        return new OkObjectResult(employees.ToPagedListResponse());
     }
 }

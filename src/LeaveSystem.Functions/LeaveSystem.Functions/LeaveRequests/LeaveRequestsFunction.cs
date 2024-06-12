@@ -47,6 +47,6 @@ public class LeaveRequestsFunction
                 TimeSpan.FromHours(8))
             };
 
-        return new OkObjectResult(leaveRequests.CreatePagedListResponse());
+        return new OkObjectResult(leaveRequests.ToPagedListResponse());
     }
 }

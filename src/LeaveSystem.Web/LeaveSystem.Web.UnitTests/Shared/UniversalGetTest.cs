@@ -25,14 +25,14 @@ public class UniversalGetTest
     [Fact]
     public async Task WhenNoException_ThenReturnData()
     {
-        var fakeLimitResponse = new ODataResponse<IEnumerable<LeaveLimitDto>>()
+        var fakeLimitResponse = new ODataResponse<IEnumerable<Web.Pages.UserLeaveLimits.LeaveLimitDto>>()
         {
             Data = FakeUserLeaveLimitsDtoProvider.GetAllLimits()
         };
         await this.WhenNoException_ThenReturnData_Helper(fakeLimitResponse);
         var now = FakeDateServiceProvider.GetDateService().UtcNowWithoutTime();
-        var fakeWorkingHoursResponse = FakeWorkingHoursProvider.GetAll(now).ToDto()
-            .ToPagedListResponse();
+        var fakeWorkingHoursResponse = EnumerableExtensions.ToPagedListResponse(FakeWorkingHoursProvider.GetAll(now).ToDto()
+);
         await this.WhenNoException_ThenReturnData_Helper(fakeWorkingHoursResponse);
         var fakeUserWorkingHoursResponse = FakeWorkingHoursProvider.GetCurrentForBen(now).ToDto();
         await this.WhenNoException_ThenReturnData_Helper(fakeUserWorkingHoursResponse);
@@ -54,7 +54,7 @@ public class UniversalGetTest
     public async Task WhenHttpRequestExceptionOccured_ThenInformAboutIt()
     {
 
-        await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<ODataResponse<IEnumerable<LeaveLimitDto>>>();
+        await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<ODataResponse<IEnumerable<Web.Pages.UserLeaveLimits.LeaveLimitDto>>>();
         await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<PagedListResponse<WorkingHoursDto>>();
         await this.WhenHttpRequestExceptionOccured_ThenInformAboutIt_Helper<WorkingHoursDto>();
     }

@@ -16,7 +16,7 @@ namespace LeaveSystem.Functions.LeaveTypes
         public GetLeaveStatusSettingsFunction(ILoggerFactory loggerFactory) => logger = loggerFactory.CreateLogger<GetLeaveStatusSettingsFunction>();
 
         [Function(nameof(GetLeaveStatusSettings))]
-        [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
+        [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)}")]
         public async Task<IActionResult> GetLeaveStatusSettings([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
         {
             logger.LogInformation("C# HTTP trigger function processed a request.");
