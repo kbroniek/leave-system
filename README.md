@@ -6,6 +6,14 @@
 
 [![DEV - Web - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-wonderful-wave-0e967a403.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-wonderful-wave-0e967a403.yml)
 
+[![DEV - Web - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-wonderful-wave-0e967a403.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-wonderful-wave-0e967a403.yml)
+
+[![DEV - Api - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/develop_app-leave-system-web-north-europe-dev-01-api.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/develop_app-leave-system-web-north-europe-dev-01-api.yml)
+
+[![PROD - Web - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-lively-flower-09ada5503.yml/badge.svg?branch=master)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-lively-flower-09ada5503.yml)
+
+[![PROD - Api - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/master_app-leave-system-api-north-europe-prod-01.yml/badge.svg?branch=master)](https://github.com/kbroniek/leave-system/actions/workflows/master_app-leave-system-api-north-europe-prod-01.yml)
+
 System to manage leaves.
 
 ## How to run a project
