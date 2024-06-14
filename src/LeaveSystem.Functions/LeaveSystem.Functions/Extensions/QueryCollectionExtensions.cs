@@ -101,7 +101,7 @@ public static class QueryCollectionExtensions
             throw new BadHttpRequestException($"Cannot parse the {paramName} query parameter to DateTimeOffset type.", StatusCodes.Status400BadRequest, ex);
         }
     }
-    public static DateOnly ParseDateTimeOffset(this IQueryCollection query, string paramName)
+    public static DateOnly ParseDateOnly(this IQueryCollection query, string paramName)
     {
         var result = query.TryParseDateOnly(paramName);
         return result ?? throw new BadHttpRequestException($"The {paramName} query parameter cannot be null.", StatusCodes.Status400BadRequest);

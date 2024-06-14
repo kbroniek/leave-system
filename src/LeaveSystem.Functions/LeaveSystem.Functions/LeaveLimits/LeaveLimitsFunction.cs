@@ -1,6 +1,7 @@
 namespace LeaveSystem.Functions.LeaveLimits;
 
 using LeaveSystem.Functions.Extensions;
+using LeaveSystem.Functions.LeaveRequests;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +24,15 @@ public class LeaveLimitsFunction
     public IActionResult GetUserLeaveLimits([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
+        return GetLeaveLimits(req);
+    }
+
+    [Function(nameof(GetLeaveLimits))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.LeaveLimitAdmin)}")]
+    public IActionResult GetLeaveLimits([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request.");
+        var getLeaveLimitQuery = req.HttpContext.BindGetLeaveLimitQuery();
         var userId = req.HttpContext.GetUserId();
         var limits = new[] {
             new LeaveLimitDto(
@@ -31,18 +41,10 @@ public class LeaveLimitsFunction
                 TimeSpan.FromHours(8) * 2,
                 TimeSpan.FromHours(8),
                 Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-                DateOnly.Parse("2024-01-01"),
-                DateOnly.Parse("2024-12-31"),
+                getLeaveLimitQuery.DateFrom ?? DateOnly.Parse("2024-01-01"),
+                getLeaveLimitQuery.DateFrom ?? DateOnly.Parse("2024-12-31"),
                 userId),
         };
         return new OkObjectResult(limits.ToPagedListResponse());
-    }
-
-    [Function(nameof(GetLeaveLimits))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult GetLeaveLimits([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
-    {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        return GetUserLeaveLimits(req);
     }
 }

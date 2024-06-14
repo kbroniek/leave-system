@@ -7,7 +7,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication(b => b.UseMiddleware<ExceptionHandlingMiddleware>())
+    .ConfigureFunctionsWebApplication(builder =>
+    {
+        builder.UseMiddleware<ExceptionHandlingMiddleware>();
+        builder.UseFunctionsAuthorization();
+    })
+
     .ConfigureServices(services =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
@@ -23,7 +28,6 @@ var host = new HostBuilder()
                     NameClaimType = "name",
                     RoleClaimType = ClaimTypes.Role
                 };
-
             });
     })
     .Build();

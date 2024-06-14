@@ -43,6 +43,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Api.Seed", "Lea
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem", "LeaveSystem", "{7CF85AF2-A600-4353-8D72-D8BA91333BE2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions", "LeaveSystem.Functions\LeaveSystem.Functions\LeaveSystem.Functions.csproj", "{D01C3193-C0E7-4B32-BF49-80A751C5123B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions.Roles", "LeaveSystem.Functions\LeaveSystem.Functions.Roles\LeaveSystem.Functions.Roles.csproj", "{C4FFAA20-6BAF-4371-AED6-F1C5A0E67E07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions.Shared", "LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj", "{CDC09825-6E4E-46C2-B186-22310B72FD37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
