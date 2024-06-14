@@ -1,6 +1,11 @@
 namespace LeaveSystem.Shared;
 
 using System;
+public static class Result
+{
+    public static Result<TValue, TError> Ok<TValue, TError>(TValue v) => new(v);
+    public static Result<TValue, TError> Err<TValue, TError>(TError e) => new(e);
+}
 
 public readonly struct Result<TValue, TError>
 {
@@ -45,6 +50,11 @@ public readonly struct Result<TError>
         IsOk = false;
     }
 
+    public Result()
+    {
+        IsOk = true;
+    }
+
     public static implicit operator Result<TError>(TError e) => new(e);
 
     public TResult Match<TResult>(
@@ -54,4 +64,12 @@ public readonly struct Result<TError>
 
     public Task<TResult> MatchAsync<TResult>(Func<Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
         IsOk ? success() : failure(_error!);
+    public void IfSuccess(Action success)
+    {
+        if (IsOk)
+        {
+            success();
+        }
+    }
+    public void IfFailed(Action<TError> failure) => failure(_error!);
 }
