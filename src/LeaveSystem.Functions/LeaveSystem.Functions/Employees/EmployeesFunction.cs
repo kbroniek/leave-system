@@ -20,7 +20,10 @@ public class EmployeesFunction
 
     [Function("GetEmployee")]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult GetEmployee([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
+    public IActionResult GetEmployees([HttpTrigger(
+        AuthorizationLevel.Anonymous,
+        "get",
+        Route = "employees")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
         var userId = req.HttpContext.GetUserId();

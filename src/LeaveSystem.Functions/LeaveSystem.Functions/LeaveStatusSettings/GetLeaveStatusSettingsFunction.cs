@@ -17,7 +17,10 @@ namespace LeaveSystem.Functions.LeaveTypes
 
         [Function(nameof(GetLeaveStatusSettings))]
         [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)}")]
-        public async Task<IActionResult> GetLeaveStatusSettings([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
+        public async Task<IActionResult> GetLeaveStatusSettings([HttpTrigger(
+            AuthorizationLevel.Anonymous,
+            "get",
+            Route = "settings/leavestatus")] HttpRequest req)
         {
             logger.LogInformation("C# HTTP trigger function processed a request.");
 
