@@ -1,5 +1,4 @@
 namespace LeaveSystem.Functions.LeaveRequests;
-using System.Security.Claims;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 public class LeaveRequestsFunction
 {
@@ -20,7 +20,10 @@ public class LeaveRequestsFunction
 
     [Function(nameof(SearchLeaveRequests))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
-    public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+    public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(
+        AuthorizationLevel.Function,
+        "get",
+        Route = "leaverequest")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -55,7 +58,7 @@ public class LeaveRequestsFunction
     public async Task<IActionResult> GetLeaveRequest([HttpTrigger(
         AuthorizationLevel.Function,
         "get",
-        Route = $"{nameof(GetLeaveRequest)}/{{leaveRequestId:guid}}")] HttpRequest req, Guid leaveRequestId)
+        Route = "leaverequest/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -79,5 +82,37 @@ public class LeaveRequestsFunction
                 new GetLeaveRequestDto.RemarksDto("Test remark", userId, DateTimeOffset.UtcNow.AddDays(-1))
             });
         return new OkObjectResult(leaveRequest);
+    }
+
+    [Function(nameof(CreateLeaveRequest))]
+    [Authorize(Roles = $"{nameof(RoleType.Employee)}")]
+    public async Task<IActionResult> CreateLeaveRequest([HttpTrigger(
+        AuthorizationLevel.Function,
+        "post",
+        Route = "leaverequest")] HttpRequest req, [FromBody] CreateLeaveRequestDto leaveRequest)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request.");
+
+        var userId = req.HttpContext.GetUserId();
+
+        var now = DateTimeOffset.UtcNow;
+        var leaveRequestCreated = new GetLeaveRequestDto(
+            leaveRequest.LeaveRequestId,
+            leaveRequest.DateFrom,
+            leaveRequest.DateTo,
+            leaveRequest.WorkingHours,
+            leaveRequest.LeaveTypeId,
+            LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Pending,
+            userId,
+            userId,
+            userId,
+            leaveRequest.WorkingHours,
+            now,
+            now,
+            new[]
+            {
+                new GetLeaveRequestDto.RemarksDto(leaveRequest.Remark, userId, now)
+            });
+        return new CreatedResult($"leaverequest/{leaveRequest.LeaveRequestId}", leaveRequestCreated);
     }
 }
