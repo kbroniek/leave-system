@@ -2,6 +2,7 @@ namespace LeaveSystem.Functions.LeaveRequests;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
+using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -117,7 +118,7 @@ public class LeaveRequestsFunction
     }
 
     [Function(nameof(CreateLeaveRequestOnBehalf))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.Employee)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> CreateLeaveRequestOnBehalf([HttpTrigger(
         AuthorizationLevel.Function,
         "post",
@@ -146,5 +147,38 @@ public class LeaveRequestsFunction
                 new GetLeaveRequestDto.RemarksDto(leaveRequest.Remark, userId, now)
             });
         return new CreatedResult($"leaverequest/{leaveRequest.LeaveRequestId}", leaveRequestCreated);
+    }
+
+    [Function(nameof(ChangeStatusLeaveRequest))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)}")]
+    public async Task<IActionResult> ChangeStatusLeaveRequest([HttpTrigger(
+        AuthorizationLevel.Function,
+        "put",
+        Route = "leaverequest/{leaveRequestId:guid}/{status}")] HttpRequest req, Guid leaveRequestId, LeaveRequestStatus status, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request.");
+
+        var userId = req.HttpContext.GetUserId();
+
+        var now = DateTimeOffset.UtcNow;
+        var leaveRequest = new GetLeaveRequestDto(
+            leaveRequestId,
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            TimeSpan.FromHours(8),
+            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
+            status,
+            userId,
+            userId,
+            userId,
+            TimeSpan.FromHours(8),
+            now.AddDays(-1),
+            now,
+            new[]
+            {
+                new GetLeaveRequestDto.RemarksDto("Test remark", userId, now.AddDays(-1)),
+                new GetLeaveRequestDto.RemarksDto(changeStatus.Remark, userId, now)
+            });
+        return new OkObjectResult(leaveRequest);
     }
 }
