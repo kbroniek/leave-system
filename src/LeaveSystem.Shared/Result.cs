@@ -3,30 +3,73 @@ namespace LeaveSystem.Shared;
 using System;
 public static class Result
 {
-    public static Result<TValue, TError> Ok<TValue, TError>(TValue v) => new(v, default, true);
-    public static Result<TValue, TError> Err<TValue, TError>(TError e) => new(default, e, false);
+    public static Result<TValue, TError> Ok<TValue, TError>(TValue v) => new(v);
+    public static Result<TValue, TError> Err<TValue, TError>(TError e) => new(e);
 }
 
 public readonly struct Result<TValue, TError>
 {
-    private readonly bool success;
-    public readonly TValue Value;
-    public readonly TError Error;
+    private readonly TValue? _value;
+    private readonly TError? _error;
 
-    internal Result(TValue v, TError e, bool success)
+    public Result(TError? error)
     {
-        Value = v;
-        Error = e;
-        this.success = success;
+        _value = default;
+        _error = error;
+        IsOk = false;
     }
+    public Result(TValue? value)
+    {
+        _value = value;
+        _error = default;
+        IsOk = true;
+    }
+    public bool IsOk { get; }
 
-    public bool IsOk => success;
-
-    public static implicit operator Result<TValue, TError>(TValue v) => new(v, default, true);
-    public static implicit operator Result<TValue, TError>(TError e) => new(default, e, false);
+    public static implicit operator Result<TValue, TError>(TValue v) => new(v);
+    public static implicit operator Result<TValue, TError>(TError e) => new(e);
 
     public TResult Match<TResult>(
             Func<TValue, TResult> success,
             Func<TError, TResult> failure) =>
-        this.success ? success(Value) : failure(Error);
+        IsOk ? success(_value!) : failure(_error!);
+
+    public Task<TResult> MatchAsync<TResult>(Func<TValue, Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
+        IsOk ? success(_value!) : failure(_error!);
+}
+
+public readonly struct Result<TError>
+{
+    public bool IsOk { get; }
+
+    private readonly TError? _error;
+
+    public Result(TError? error)
+    {
+        _error = error;
+        IsOk = false;
+    }
+
+    public Result()
+    {
+        IsOk = true;
+    }
+
+    public static implicit operator Result<TError>(TError e) => new(e);
+
+    public TResult Match<TResult>(
+            Func<TResult> success,
+            Func<TError, TResult> failure) =>
+    IsOk ? success() : failure(_error!);
+
+    public Task<TResult> MatchAsync<TResult>(Func<Task<TResult>> success, Func<TError, Task<TResult>> failure) =>
+        IsOk ? success() : failure(_error!);
+    public void IfSuccess(Action success)
+    {
+        if (IsOk)
+        {
+            success();
+        }
+    }
+    public void IfFailed(Action<TError> failure) => failure(_error!);
 }
