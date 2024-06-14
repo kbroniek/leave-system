@@ -1,7 +1,0 @@
-POST http://localhost:7203/api/GetRoles
-# POST https://func-leave-system-west-europe-dev-01.azurewebsites.net/api/GetRoles
-Authorization: Basic username password
-{
-    "email": "test@gmail.com",
-    "id": "c73ae584-beb1-4036-8f04-6879d3b1955f"
-}
