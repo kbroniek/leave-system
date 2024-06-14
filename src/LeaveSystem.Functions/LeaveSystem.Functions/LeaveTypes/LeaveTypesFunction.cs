@@ -78,5 +78,17 @@ namespace LeaveSystem.Functions.LeaveTypes
 
             return new OkObjectResult(leaveTypes);
         }
+
+        [Function(nameof(GetLeaveType))]
+        [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
+        public async Task<IActionResult> GetLeaveType([HttpTrigger(
+            AuthorizationLevel.Function,
+            "get",
+            Route = $"{nameof(GetLeaveType)}/{{leaveTypeId:guid}}")] HttpRequest req, Guid leaveTypeId)
+        {
+            logger.LogInformation("C# HTTP trigger function processed a request.");
+
+            return new OkObjectResult(holidayLeave);
+        }
     }
 }

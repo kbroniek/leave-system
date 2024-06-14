@@ -11,32 +11,29 @@ namespace LeaveSystem.Functions
 {
     public class GetRoles
     {
-        private static readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
-        private static readonly CosmosLinqSerializerOptions linqSerializerOptions = new CosmosLinqSerializerOptions
+        private static readonly CosmosLinqSerializerOptions LinqSerializerOptions = new()
         {
             PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
         };
-        private readonly ILogger<GetRoles> _logger;
+        private readonly ILogger<GetRoles> logger;
 
-        public GetRoles(ILogger<GetRoles> logger)
-        {
-            _logger = logger;
-        }
+        public GetRoles(ILogger<GetRoles> logger) => this.logger = logger;
 
-        [Function("GetRoles")]
+        [Function(nameof(GetRoles))]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req,
             [CosmosDBInput(
                 databaseName: "LeaveSystem",
                 containerName: "Roles",
                 Connection = "CosmosDBConnection")] Container container)
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
+            logger.LogInformation("C# HTTP trigger function processed a request.");
             if (!ValidateToken(req.Headers.Authorization))
             {
-                _logger.LogWarning("Wrong RestApi credentials.");
+                logger.LogWarning("Wrong RestApi credentials.");
                 return new ObjectResult(new
                 {
                     version = "1.0",
@@ -48,39 +45,45 @@ namespace LeaveSystem.Functions
                 })
                 { StatusCode = 401 };
             }
-            var userId = await JsonSerializer.DeserializeAsync<UserId>(req.Body, jsonSerializerOptions);
-            _logger.LogInformation($"Deserialized user id {userId.Id}.");
-            var iterator = container.GetItemLinqQueryable<RolesModel>(linqSerializerOptions: linqSerializerOptions)
-                .Where(r => r.Id == userId.Id)
+            var userIdModel = await JsonSerializer.DeserializeAsync<UserId>(req.Body, JsonSerializerOptions);
+            if (userIdModel is null)
+            {
+                return new NotFoundObjectResult("userId");
+            }
+
+            var userId = userIdModel.Id;
+            this.logger.LogInformation("Deserialized user id {UserId}.", userId);
+            var iterator = container.GetItemLinqQueryable<RolesModel>(linqSerializerOptions: LinqSerializerOptions)
+                .Where(r => r.Id == userId)
                 .ToFeedIterator();
             var roles = iterator.HasMoreResults ?
                 (await iterator.ReadNextAsync()).FirstOrDefault()?.Roles :
                 null;
             return new OkObjectResult(new { roles = roles ?? Enumerable.Empty<string>() });
         }
-        private bool ValidateToken(string header)
+        private bool ValidateToken(string? header)
         {
             //Checking the header
-            if (!string.IsNullOrEmpty(header) && header.StartsWith("Basic"))
+            if (!string.IsNullOrEmpty(header) && header.StartsWith("Basic", StringComparison.Ordinal))
             {
                 //Extracting credentials
                 // Removing "Basic " Substring
-                string encodedUsernamePassword = header.Substring("Basic ".Length).Trim();
+                var encodedUsernamePassword = header["Basic ".Length..].Trim();
                 //Decoding Base64
-                Encoding encoding = Encoding.GetEncoding("iso-8859-1");
-                string usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
+                var encoding = Encoding.GetEncoding("iso-8859-1");
+                var usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
                 //Splitting Username:Password
-                int seperatorIndex = usernamePassword.IndexOf(':');
+                var seperatorIndex = usernamePassword.IndexOf(':');
                 // Extracting the individual username and password
-                var username = usernamePassword.Substring(0, seperatorIndex);
-                var password = usernamePassword.Substring(seperatorIndex + 1);
+                var username = usernamePassword[..seperatorIndex];
+                var password = usernamePassword[(seperatorIndex + 1)..];
                 //Validating the credentials
                 return username == Environment.GetEnvironmentVariable("RestApiUsername") &&
                     password == Environment.GetEnvironmentVariable("RestApiPassword");
             }
             else
             {
-                _logger.LogWarning("Header is missing");
+                logger.LogWarning("Header is missing");
                 return false;
             }
         }

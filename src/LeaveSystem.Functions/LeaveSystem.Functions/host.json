@@ -1,6 +1,6 @@
 {
-  "version": "2.0",
-  "logging": {
+    "version": "2.0",
+    "logging": {
     "fileLoggingMode": "debugOnly",
     "logLevel": {
       "default": "Warning",
@@ -8,12 +8,12 @@
       "Host.Results": "Information",
       "Function": "Information"
     },
-    "applicationInsights": {
-      "samplingSettings": {
-        "isEnabled": true,
-        "excludedTypes": "Request"
-      },
-      "enableLiveMetricsFilters": true
+        "applicationInsights": {
+            "samplingSettings": {
+                "isEnabled": true,
+                "excludedTypes": "Request"
+            },
+            "enableLiveMetricsFilters": true
+        }
     }
-  }
 }

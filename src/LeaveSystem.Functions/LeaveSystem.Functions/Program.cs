@@ -7,11 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication(builder =>
-    {
-        builder.UseFunctionsAuthorization();
-        builder.UseMiddleware<ExceptionHandlingMiddleware>();
-    })
+    .ConfigureFunctionsWebApplication(b => b.UseMiddleware<ExceptionHandlingMiddleware>())
     .ConfigureServices(services =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
