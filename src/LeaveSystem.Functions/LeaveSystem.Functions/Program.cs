@@ -7,13 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("LeaveSystem.Functions.UnitTests")]
+
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication(builder =>
     {
         builder.UseFunctionsAuthorization();
         builder.UseMiddleware<ExceptionHandlingMiddleware>();
     })
-    .ConfigureServices(services =>
+    .ConfigureServices((builder, services) =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
@@ -30,7 +32,7 @@ var host = new HostBuilder()
                 };
 
             });
-        services.AddLeaveSystemServcies();
+        services.AddLeaveSystemServcies(builder.Configuration);
     })
     .Build();
 
