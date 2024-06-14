@@ -21,7 +21,7 @@ public class LeaveLimitsFunction
 
     [Function(nameof(GetUserLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
-    public IActionResult GetUserLeaveLimits([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+    public IActionResult GetUserLeaveLimits([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
         return GetLeaveLimits(req);
@@ -29,7 +29,7 @@ public class LeaveLimitsFunction
 
     [Function(nameof(GetLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult GetLeaveLimits([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+    public IActionResult GetLeaveLimits([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
         var getLeaveLimitQuery = req.HttpContext.BindGetLeaveLimitQuery();

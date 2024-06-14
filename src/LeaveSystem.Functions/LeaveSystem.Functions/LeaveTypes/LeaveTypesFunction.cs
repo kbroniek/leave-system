@@ -64,7 +64,7 @@ namespace LeaveSystem.Functions.LeaveTypes
 
         [Function(nameof(GetLeaveTypes))]
         [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
-        public async Task<IActionResult> GetLeaveTypes([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+        public async Task<IActionResult> GetLeaveTypes([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
         {
             logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -82,7 +82,7 @@ namespace LeaveSystem.Functions.LeaveTypes
         [Function(nameof(GetLeaveType))]
         [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
         public async Task<IActionResult> GetLeaveType([HttpTrigger(
-            AuthorizationLevel.Function,
+            AuthorizationLevel.Anonymous,
             "get",
             Route = $"{nameof(GetLeaveType)}/{{leaveTypeId:guid}}")] HttpRequest req, Guid leaveTypeId)
         {

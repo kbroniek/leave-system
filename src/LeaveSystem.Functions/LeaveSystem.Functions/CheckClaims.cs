@@ -19,9 +19,9 @@ namespace LeaveSystem.Functions
             _logger = logger;
         }
 
-        [Function("CheckClaims")]
+        [Function(nameof(CheckClaims))]
         [Authorize]
-        public async Task<IActionResult> Run([HttpTrigger("get", "post")] HttpRequest req)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
 

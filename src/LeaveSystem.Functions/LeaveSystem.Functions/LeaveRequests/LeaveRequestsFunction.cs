@@ -22,7 +22,7 @@ public class LeaveRequestsFunction
     [Function(nameof(SearchLeaveRequests))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(
-        AuthorizationLevel.Function,
+        AuthorizationLevel.Anonymous,
         "get",
         Route = "leaverequest")] HttpRequest req)
     {
@@ -57,7 +57,7 @@ public class LeaveRequestsFunction
     [Function(nameof(GetLeaveRequest))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> GetLeaveRequest([HttpTrigger(
-        AuthorizationLevel.Function,
+        AuthorizationLevel.Anonymous,
         "get",
         Route = "leaverequest/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId)
     {
@@ -88,7 +88,7 @@ public class LeaveRequestsFunction
     [Function(nameof(CreateLeaveRequest))]
     [Authorize(Roles = $"{nameof(RoleType.Employee)}")]
     public async Task<IActionResult> CreateLeaveRequest([HttpTrigger(
-        AuthorizationLevel.Function,
+        AuthorizationLevel.Anonymous,
         "post",
         Route = "leaverequest")] HttpRequest req, [FromBody] CreateLeaveRequestDto leaveRequest)
     {
@@ -120,7 +120,7 @@ public class LeaveRequestsFunction
     [Function(nameof(CreateLeaveRequestOnBehalf))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> CreateLeaveRequestOnBehalf([HttpTrigger(
-        AuthorizationLevel.Function,
+        AuthorizationLevel.Anonymous,
         "post",
         Route = "leaverequest/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequest)
     {
@@ -152,7 +152,7 @@ public class LeaveRequestsFunction
     [Function(nameof(ChangeStatusLeaveRequest))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> ChangeStatusLeaveRequest([HttpTrigger(
-        AuthorizationLevel.Function,
+        AuthorizationLevel.Anonymous,
         "put",
         Route = "leaverequest/{leaveRequestId:guid}/{status}")] HttpRequest req, Guid leaveRequestId, LeaveRequestStatus status, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
     {
