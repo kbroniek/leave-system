@@ -115,4 +115,36 @@ public class LeaveRequestsFunction
             });
         return new CreatedResult($"leaverequest/{leaveRequest.LeaveRequestId}", leaveRequestCreated);
     }
+
+    [Function(nameof(CreateLeaveRequestOnBehalf))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.Employee)}")]
+    public async Task<IActionResult> CreateLeaveRequestOnBehalf([HttpTrigger(
+        AuthorizationLevel.Function,
+        "post",
+        Route = "leaverequest/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequest)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request.");
+
+        var userId = req.HttpContext.GetUserId();
+
+        var now = DateTimeOffset.UtcNow;
+        var leaveRequestCreated = new GetLeaveRequestDto(
+            leaveRequest.LeaveRequestId,
+            leaveRequest.DateFrom,
+            leaveRequest.DateTo,
+            leaveRequest.WorkingHours,
+            leaveRequest.LeaveTypeId,
+            LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Pending,
+            leaveRequest.OwnerUserId,
+            userId,
+            userId,
+            leaveRequest.WorkingHours,
+            now,
+            now,
+            new[]
+            {
+                new GetLeaveRequestDto.RemarksDto(leaveRequest.Remark, userId, now)
+            });
+        return new CreatedResult($"leaverequest/{leaveRequest.LeaveRequestId}", leaveRequestCreated);
+    }
 }
