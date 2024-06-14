@@ -28,6 +28,35 @@ var host = new HostBuilder()
                     NameClaimType = "name",
                     RoleClaimType = ClaimTypes.Role
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    // ...
+                    OnMessageReceived = context =>
+                    {
+                        string authorization = context.Request.Headers["X-Authorization"];
+
+                        // If no authorization header found, nothing to process further
+                        if (string.IsNullOrEmpty(authorization))
+                        {
+                            context.NoResult();
+                            return Task.CompletedTask;
+                        }
+
+                        if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                        {
+                            context.Token = authorization["Bearer ".Length..].Trim();
+                        }
+
+                        // If no token found, no further work possible
+                        if (string.IsNullOrEmpty(context.Token))
+                        {
+                            context.NoResult();
+                            return Task.CompletedTask;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
     })
     .Build();
