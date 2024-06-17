@@ -33,6 +33,7 @@ var host = new HostBuilder()
                     // ...
                     OnMessageReceived = context =>
                     {
+                        // Cannot use Authorization header because of https://github.com/Azure/static-web-apps/issues/34
                         string authorization = context.Request.Headers["X-Authorization"];
 
                         // If no authorization header found, nothing to process further
