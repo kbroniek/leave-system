@@ -67,7 +67,7 @@ namespace LeaveSystem.Functions.LeaveTypes
         public async Task<IActionResult> GetLeaveTypes([HttpTrigger(
             AuthorizationLevel.Anonymous,
             "get",
-            Route = "leavetype")] HttpRequest req)
+            Route = "leavetypes")] HttpRequest req)
         {
             logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -87,7 +87,7 @@ namespace LeaveSystem.Functions.LeaveTypes
         public async Task<IActionResult> GetLeaveType([HttpTrigger(
             AuthorizationLevel.Anonymous,
             "get",
-            Route = "leavetype/{leaveTypeId:guid}")] HttpRequest req, Guid leaveTypeId)
+            Route = "leavetypes/{leaveTypeId:guid}")] HttpRequest req, Guid leaveTypeId)
         {
             logger.LogInformation("C# HTTP trigger function processed a request.");
 

@@ -49,7 +49,7 @@ public class LeaveLimitsFunction
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public IActionResult GetLeaveLimit([HttpTrigger(
         AuthorizationLevel.Anonymous,
-        "put",
+        "get",
         Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req, Guid leaveLimitId)
     {
         var userId = req.HttpContext.GetUserId();
@@ -85,7 +85,10 @@ public class LeaveLimitsFunction
 
     [Function(nameof(RemoveLeaveLimit))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
-    public IActionResult RemoveLeaveLimit([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req, Guid leaveLimitId)
+    public IActionResult RemoveLeaveLimit([HttpTrigger(
+        AuthorizationLevel.Anonymous,
+        "delete",
+        Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req, Guid leaveLimitId)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
         return new NoContentResult();
