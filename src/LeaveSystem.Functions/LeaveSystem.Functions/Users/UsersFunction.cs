@@ -34,7 +34,7 @@ public class UsersFunction
 
     [Function(nameof(EditUser))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
-    public IActionResult EditUser([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "users/{userId:alpha}")] HttpRequest req, string userId, [FromBody] EditUserDto user)
+    public IActionResult EditUser([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "users/{userId}")] HttpRequest req, string userId, [FromBody] EditUserDto user)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
         return new OkObjectResult(new UserDto(userId, user.Name, user.Email, user.Roles));
@@ -51,7 +51,7 @@ public class UsersFunction
 
     [Function(nameof(DisableUser))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
-    public IActionResult DisableUser([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "users/{userId:alpha}")] HttpRequest req, string userId)
+    public IActionResult DisableUser([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "users/{userId}")] HttpRequest req, string userId)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
         return new NoContentResult();
