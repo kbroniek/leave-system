@@ -33,7 +33,7 @@ namespace LeaveSystem.Functions.LeaveTypes
                 new GetLeaveStatusSettingsDto(LeaveRequestStatus.Rejected, "#1122FF")
             };
 
-            return new OkObjectResult(leaveTypes);
+            return new OkObjectResult(leaveTypes.ToPagedListResponse());
         }
     }
 }
