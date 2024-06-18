@@ -84,7 +84,7 @@ public class LeaveLimitsFunction
     }
 
     [Function(nameof(RemoveLeaveLimit))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public IActionResult RemoveLeaveLimit([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "delete",
