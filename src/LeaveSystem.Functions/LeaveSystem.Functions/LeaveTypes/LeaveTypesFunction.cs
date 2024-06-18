@@ -111,7 +111,7 @@ public class LeaveTypesFunction
     public IActionResult UpdateLeaveType([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leavetypes")] HttpRequest req)
+        Route = "leavetypes/{leaveTypeId:guid}")] HttpRequest req, Guid leaveTypeId)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
         return new OkObjectResult(holidayLeave);

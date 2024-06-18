@@ -75,7 +75,7 @@ public class LeaveLimitsFunction
     public IActionResult UpdateLeaveLimits([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leavelimits")] HttpRequest req)
+        Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req, Guid leaveLimitId)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
         var userId = req.HttpContext.GetUserId();
