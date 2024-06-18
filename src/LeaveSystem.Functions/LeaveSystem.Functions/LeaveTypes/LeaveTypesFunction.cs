@@ -80,7 +80,7 @@ public class LeaveTypesFunction
             saturdayLeave
         };
 
-        return new OkObjectResult(leaveTypes);
+        return new OkObjectResult(leaveTypes.ToPagedListResponse());
     }
 
     [Function(nameof(GetLeaveType))]
