@@ -1,7 +1,8 @@
 # @import ./secrets.http
 
 ###
-# @name Search Leave Requests
+# @name Get Users
 # @reject-unauthorized
-GET {{baseUrl}}/leaverequest?PageNumber=1
+GET {{baseUrl}}/settings/leavestatus
 X-Authorization: Bearer {{bearerToken}}
+?? status == 200

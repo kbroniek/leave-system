@@ -1,7 +1,0 @@
-# @import ./secrets.http
-
-###
-# @name Get Leave Types
-# @reject-unauthorized
-GET {{baseUrl}}/GetLeaveTypes
-X-Authorization: Bearer {{bearerToken}}

@@ -1,0 +1,33 @@
+# @import ./secrets.http
+
+###
+# @name Search Leave Requests
+# @reject-unauthorized
+GET {{baseUrl}}/leaverequest?PageNumber=1
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Request
+# @reject-unauthorized
+GET {{baseUrl}}/leaverequest/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Create Leave Request
+# @reject-unauthorized
+POST {{baseUrl}}/leaverequest
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{}
+
+###
+# @name Create Leave Request on behalf
+# @reject-unauthorized
+POST {{baseUrl}}/leaverequest/onbehalf
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{}

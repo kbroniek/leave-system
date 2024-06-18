@@ -1,0 +1,8 @@
+# @import ./secrets.http
+
+###
+# @name Get Users
+# @reject-unauthorized
+GET {{baseUrl}}/employees
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200

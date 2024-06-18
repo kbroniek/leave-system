@@ -1,0 +1,41 @@
+# @import ./secrets.http
+
+###
+# @name Get Users
+# @reject-unauthorized
+GET {{baseUrl}}/users
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Create User
+# @reject-unauthorized
+POST {{baseUrl}}/users
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "name": "fakeName",
+    "email": "fakeEmail@test.com",
+    "roles": ["Test"]
+}
+
+###
+# @name Update User
+# @reject-unauthorized
+PUT {{baseUrl}}/users/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{
+    "name": "fakeName",
+    "email": "fakeEmail@test.com",
+    "roles": ["Test"]
+}
+
+###
+# @name Delete User
+# @reject-unauthorized
+DELETE {{baseUrl}}/users/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+X-Authorization: Bearer {{bearerToken}}
+?? status == 204
