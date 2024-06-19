@@ -1,5 +1,7 @@
-﻿namespace LeaveSystem.Shared.LeaveRequests;
+namespace LeaveSystem.Shared.LeaveRequests;
+using System.Text.Json.Serialization;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LeaveRequestStatus
 {
     Pending = 1,
