@@ -135,7 +135,7 @@ public class LeaveRequestsFunction
             leaveRequest.DateTo,
             leaveRequest.WorkingHours,
             leaveRequest.LeaveTypeId,
-            LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Pending,
+            LeaveRequestStatus.Pending,
             leaveRequest.OwnerUserId,
             userId,
             userId,
@@ -149,12 +149,12 @@ public class LeaveRequestsFunction
         return new CreatedResult($"leaverequest/{leaveRequest.LeaveRequestId}", leaveRequestCreated);
     }
 
-    [Function(nameof(ChangeStatusLeaveRequest))]
+    [Function(nameof(AcceptStatusLeaveRequest))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)}")]
-    public async Task<IActionResult> ChangeStatusLeaveRequest([HttpTrigger(
+    public async Task<IActionResult> AcceptStatusLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leaverequest/{leaveRequestId:guid}/{status}")] HttpRequest req, Guid leaveRequestId, LeaveRequestStatus status, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+        Route = "leaverequest/{leaveRequestId:guid}/accept")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -167,7 +167,73 @@ public class LeaveRequestsFunction
             DateOnly.FromDateTime(DateTime.UtcNow),
             TimeSpan.FromHours(8),
             Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-            status,
+            LeaveRequestStatus.Accepted,
+            userId,
+            userId,
+            userId,
+            TimeSpan.FromHours(8),
+            now.AddDays(-1),
+            now,
+            new[]
+            {
+                new GetLeaveRequestDto.RemarksDto("Test remark", userId, now.AddDays(-1)),
+                new GetLeaveRequestDto.RemarksDto(changeStatus.Remark, userId, now)
+            });
+        return new OkObjectResult(leaveRequest);
+    }
+
+    [Function(nameof(RejectStatusLeaveRequest))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)}")]
+    public async Task<IActionResult> RejectStatusLeaveRequest([HttpTrigger(
+        AuthorizationLevel.Anonymous,
+        "put",
+        Route = "leaverequest/{leaveRequestId:guid}/reject")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request.");
+
+        var userId = req.HttpContext.GetUserId();
+
+        var now = DateTimeOffset.UtcNow;
+        var leaveRequest = new GetLeaveRequestDto(
+            leaveRequestId,
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            TimeSpan.FromHours(8),
+            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
+            LeaveRequestStatus.Rejected,
+            userId,
+            userId,
+            userId,
+            TimeSpan.FromHours(8),
+            now.AddDays(-1),
+            now,
+            new[]
+            {
+                new GetLeaveRequestDto.RemarksDto("Test remark", userId, now.AddDays(-1)),
+                new GetLeaveRequestDto.RemarksDto(changeStatus.Remark, userId, now)
+            });
+        return new OkObjectResult(leaveRequest);
+    }
+
+    [Function(nameof(CancelStatusLeaveRequest))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)}")]
+    public async Task<IActionResult> CancelStatusLeaveRequest([HttpTrigger(
+        AuthorizationLevel.Anonymous,
+        "put",
+        Route = "leaverequest/{leaveRequestId:guid}/cancel")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+    {
+        logger.LogInformation("C# HTTP trigger function processed a request.");
+
+        var userId = req.HttpContext.GetUserId();
+
+        var now = DateTimeOffset.UtcNow;
+        var leaveRequest = new GetLeaveRequestDto(
+            leaveRequestId,
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            DateOnly.FromDateTime(DateTime.UtcNow),
+            TimeSpan.FromHours(8),
+            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
+            LeaveRequestStatus.Canceled,
             userId,
             userId,
             userId,
