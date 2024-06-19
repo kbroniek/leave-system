@@ -24,7 +24,7 @@ public class LeaveRequestsFunction
     public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "leaverequest")] HttpRequest req)
+        Route = "leaverequests")] HttpRequest req)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -37,7 +37,7 @@ public class LeaveRequestsFunction
                 queryResult.DateTo ?? DateOnly.FromDateTime(DateTime.UtcNow),
                 TimeSpan.FromHours(8),
                 Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-                LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Accepted,
+                LeaveRequestStatus.Accepted,
                 userId,
                 TimeSpan.FromHours(8)),
             new SearchLeaveRequestsResultDto(
@@ -46,7 +46,7 @@ public class LeaveRequestsFunction
                 queryResult.DateTo ?? DateOnly.FromDateTime(DateTime.UtcNow),
                 TimeSpan.FromHours(8),
                 Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-                LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Rejected,
+                LeaveRequestStatus.Rejected,
                 userId,
                 TimeSpan.FromHours(8))
             };
@@ -59,7 +59,7 @@ public class LeaveRequestsFunction
     public async Task<IActionResult> GetLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "leaverequest/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId)
+        Route = "leaverequests/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -71,7 +71,7 @@ public class LeaveRequestsFunction
             DateOnly.FromDateTime(DateTime.UtcNow),
             TimeSpan.FromHours(8),
             Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-            LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Accepted,
+            LeaveRequestStatus.Accepted,
             userId,
             userId,
             userId,
@@ -90,7 +90,7 @@ public class LeaveRequestsFunction
     public async Task<IActionResult> CreateLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "post",
-        Route = "leaverequest")] HttpRequest req, [FromBody] CreateLeaveRequestDto leaveRequest)
+        Route = "leaverequests")] HttpRequest req, [FromBody] CreateLeaveRequestDto leaveRequest)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -103,7 +103,7 @@ public class LeaveRequestsFunction
             leaveRequest.DateTo,
             leaveRequest.WorkingHours,
             leaveRequest.LeaveTypeId,
-            LeaveSystem.Shared.LeaveRequests.LeaveRequestStatus.Pending,
+            LeaveRequestStatus.Pending,
             userId,
             userId,
             userId,
@@ -122,7 +122,7 @@ public class LeaveRequestsFunction
     public async Task<IActionResult> CreateLeaveRequestOnBehalf([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "post",
-        Route = "leaverequest/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequest)
+        Route = "leaverequests/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequest)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -154,7 +154,7 @@ public class LeaveRequestsFunction
     public async Task<IActionResult> AcceptStatusLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leaverequest/{leaveRequestId:guid}/accept")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+        Route = "leaverequests/{leaveRequestId:guid}/accept")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -187,7 +187,7 @@ public class LeaveRequestsFunction
     public async Task<IActionResult> RejectStatusLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leaverequest/{leaveRequestId:guid}/reject")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+        Route = "leaverequests/{leaveRequestId:guid}/reject")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -220,7 +220,7 @@ public class LeaveRequestsFunction
     public async Task<IActionResult> CancelStatusLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leaverequest/{leaveRequestId:guid}/cancel")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+        Route = "leaverequests/{leaveRequestId:guid}/cancel")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
