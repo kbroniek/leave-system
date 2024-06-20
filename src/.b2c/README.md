@@ -38,3 +38,4 @@ The configuration file is `appsettings.json`.
 - https://github.com/Azure-Samples/active-directory-b2c-custom-policy-starterpack
 - https://www.youtube.com/watch?v=eFcoRa79FqA
 - https://github.com/azure-ad-b2c/samples/tree/master/policies
+- ROPC https://learn.microsoft.com/en-us/azure/active-directory-b2c/add-ropc-policy?tabs=app-reg-ga&pivots=b2c-custom-policy
