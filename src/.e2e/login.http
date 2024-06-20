@@ -1,0 +1,21 @@
+# @import ./secrets.http
+
+###
+# @name Login
+POST {{b2cLoginUrl}}/oauth2/v2.0/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{b2cClientId}}
+&grant_type=password
+&username={{b2cUsername}}
+&password={{b2cPassword}}
+&scope=openid offline_access {{b2cClientId}}
+&response_type=token id_token
+?? status == 200
+{{
+    const assert = require('assert');
+    test("authentication is valid", () => {
+        assert.equal(typeof response.parsedBody.access_token, "string");
+        exports.bearerToken = response.parsedBody.access_token;
+    });
+}}

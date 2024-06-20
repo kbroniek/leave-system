@@ -1,40 +1,67 @@
-# @import ./secrets.http
+# @import ./login.http
 
 ###
-# @name Get Leave Types
+# @name Search Leave Requests
+# @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavetypes
+GET {{baseUrl}}/leaverequests?PageNumber=1
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
 ###
-# @name Get Leave Type
+# @name Get Leave Request
+# @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+GET {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
 ###
-# @name Create Leave Type
+# @name Create Leave Request
+# @ref Login
 # @reject-unauthorized
-POST {{baseUrl}}/leavetypes
+POST {{baseUrl}}/leaverequests
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
 {}
 
 ###
-# @name Update Leave Type
+# @name Create Leave Request on behalf
+# @ref Login
 # @reject-unauthorized
-PUT {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+POST {{baseUrl}}/leaverequests/onbehalf
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{}
+
+###
+# @name Accept Leave Request
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7/accept
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 {}
 
 ###
-# @name Delete Leave Type
+# @name Reject Leave Request
+# @ref Login
 # @reject-unauthorized
-DELETE {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+PUT {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7/reject
+Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
-?? status == 204
+?? status == 200
+{}
+
+###
+# @name Cancel Leave Request
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7/cancel
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{}
