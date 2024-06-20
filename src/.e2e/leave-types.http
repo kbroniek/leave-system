@@ -1,0 +1,40 @@
+# @import ./secrets.http
+
+###
+# @name Get Leave Types
+# @reject-unauthorized
+GET {{baseUrl}}/leavetypes
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Type
+# @reject-unauthorized
+GET {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Create Leave Type
+# @reject-unauthorized
+POST {{baseUrl}}/leavetypes
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{}
+
+###
+# @name Update Leave Type
+# @reject-unauthorized
+PUT {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{}
+
+###
+# @name Delete Leave Type
+# @reject-unauthorized
+DELETE {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+X-Authorization: Bearer {{bearerToken}}
+?? status == 204

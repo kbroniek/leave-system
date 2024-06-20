@@ -1,14 +1,11 @@
 # Leave system
 
-[![status](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml)
+[![.NET](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml)
 
-[![DEV - Web - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-wonderful-wave-0e967a403.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-wonderful-wave-0e967a403.yml)
+[![DEV - Get roles for B2C - func-leave-system-west-europe-dev-01](https://github.com/kbroniek/leave-system/actions/workflows/feature-azure-functinos_func-leave-system-west-europe-dev-01.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/feature-azure-functinos_func-leave-system-west-europe-dev-01.yml)
 
-[![DEV - Api - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/develop_app-leave-system-web-north-europe-dev-01-api.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/develop_app-leave-system-web-north-europe-dev-01-api.yml)
+[![DEV - Azure Static Web Apps CI/CD](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-lemon-cliff-0306f2803.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-lemon-cliff-0306f2803.yml)
 
-[![PROD - Web - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-lively-flower-09ada5503.yml/badge.svg?branch=master)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-lively-flower-09ada5503.yml)
-
-[![PROD - Api - deploy Azure](https://github.com/kbroniek/leave-system/actions/workflows/master_app-leave-system-api-north-europe-prod-01.yml/badge.svg?branch=master)](https://github.com/kbroniek/leave-system/actions/workflows/master_app-leave-system-api-north-europe-prod-01.yml)
 
 System to manage leaves.
 

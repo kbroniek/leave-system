@@ -1,0 +1,40 @@
+# @import ./secrets.http
+
+###
+# @name Get Leave Limits
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Limit
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Create Leave Limit
+# @reject-unauthorized
+POST {{baseUrl}}/leavelimits
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{}
+
+###
+# @name Update Leave Limit
+# @reject-unauthorized
+PUT {{baseUrl}}/leavelimits/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{}
+
+###
+# @name Delete Leave Limit
+# @reject-unauthorized
+DELETE {{baseUrl}}/leavelimits/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+X-Authorization: Bearer {{bearerToken}}
+?? status == 204
