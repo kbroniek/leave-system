@@ -369,8 +369,8 @@ dotnet_naming_rule.stylecop_instance_fields_must_be_private_rule.severity = erro
 dotnet_naming_symbols.stylecop_private_fields_group.applicable_accessibilities = private
 dotnet_naming_symbols.stylecop_private_fields_group.applicable_kinds           = field
 dotnet_naming_rule.stylecop_private_fields_must_be_camel_case_rule.symbols     = stylecop_private_fields_group
-dotnet_naming_rule.stylecop_private_fields_must_be_camel_case_rule.style = camel_case_style
-dotnet_naming_rule.stylecop_private_fields_must_be_camel_case_rule.severity = warning
+dotnet_naming_rule.stylecop_private_fields_must_be_camel_case_rule.style       = camel_case_style
+dotnet_naming_rule.stylecop_private_fields_must_be_camel_case_rule.severity    = warning
 
 # Local variables must be camelCase
 # https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1312.md
@@ -428,10 +428,8 @@ dotnet_naming_rule.type_parameter_rule.severity = warning
 # https://docs.microsoft.com/dotnet/standard/design-guidelines/naming-parameters
 dotnet_naming_symbols.parameters_group.applicable_kinds = parameter
 dotnet_naming_rule.parameters_rule.symbols              = parameters_group
-dotnet_naming_rule.parameters_rule.style = camel_case_style
-dotnet_naming_rule.parameters_rule.severity = warning
-tab_width = 4
-end_of_line = crlf
+dotnet_naming_rule.parameters_rule.style                = camel_case_style
+dotnet_naming_rule.parameters_rule.severity             = warning
 
 ##########################################
 # License
@@ -480,7 +478,7 @@ dotnet_diagnostic.CA1848.severity = none
 # IDE0065: 'using' directive placement
 dotnet_diagnostic.IDE0065.severity = none
 # IDE0009: this and Me preferences
-dotnet_diagnostic.IDE0009.severity = none
+# dotnet_diagnostic.IDE0009.severity = none
 # IDE0011: Add braces
 dotnet_diagnostic.IDE0011.severity = error
 # IDE0005: Remove unnecessary using directives

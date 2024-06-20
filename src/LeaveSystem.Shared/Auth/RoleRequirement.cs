@@ -42,6 +42,7 @@ public enum RoleType
 {
     Employee,
     LeaveLimitAdmin,
+    LeaveTypeAdmin,
     DecisionMaker,
     HumanResource,
     UserAdmin,

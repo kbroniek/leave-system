@@ -47,7 +47,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions", "Le
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions.Roles", "LeaveSystem.Functions\LeaveSystem.Functions.Roles\LeaveSystem.Functions.Roles.csproj", "{C4FFAA20-6BAF-4371-AED6-F1C5A0E67E07}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Functions.Shared", "LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj", "{CDC09825-6E4E-46C2-B186-22310B72FD37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeaveSystem.Functions.Shared", "LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj", "{CDC09825-6E4E-46C2-B186-22310B72FD37}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

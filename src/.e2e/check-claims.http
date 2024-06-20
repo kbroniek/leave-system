@@ -1,0 +1,7 @@
+# @import ./secrets.http
+
+###
+# @name Check Claims
+# @reject-unauthorized
+GET {{baseUrl}}/CheckClaims
+X-Authorization: Bearer {{bearerToken}}

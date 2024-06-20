@@ -1,0 +1,8 @@
+# @import ./secrets.http
+
+###
+# @name Get Users
+# @reject-unauthorized
+GET {{baseUrl}}/settings/leavestatus
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200

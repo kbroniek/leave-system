@@ -8,6 +8,7 @@ using FakeWorkingHoursProvider = LeaveSystem.UnitTests.Providers.FakeWorkingHour
 namespace LeaveSystem.Web.UnitTests.Pages.WorkingHours;
 
 using LeaveSystem.Shared.Date;
+using LeaveSystem.Shared.Dto;
 using LeaveSystem.Shared.WorkingHours;
 using Moq;
 using Web.Shared;
@@ -18,7 +19,7 @@ public class GetWorkingHoursTest
     {
         get
         {
-            yield return new object[] { FakeWorkingHoursProvider.GetAll(new DateService().UtcNowWithoutTime()).ToDto().ToPagedListResponse() };
+            yield return new object[] { EnumerableExtensions.ToPagedListResponse(FakeWorkingHoursProvider.GetAll(new DateService().UtcNowWithoutTime()).ToDto()) };
             yield return new object[] { null! };
         }
     }

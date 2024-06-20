@@ -130,8 +130,8 @@
 }
 
 @code {
-        public const string PolicyName = "CreateLeaveRequest";
-        public const string OnBehalfPolicyName = "CreateLeaveRequestOnBehalf";
+    public const string PolicyName = "CreateLeaveRequest";
+    public const string OnBehalfPolicyName = "CreateLeaveRequestOnBehalf";
     private CreateLeaveRequestOnBehalfDto leaveRequest = new();
     private EditContext? editContext;
     private IEnumerable<LeaveTypesService.LeaveTypeDto> leaveTypes = Enumerable.Empty<LeaveTypesService.LeaveTypeDto>();
@@ -185,7 +185,7 @@
                 CreatedByUserIds = new string[] { currentUser.Id }
             });
             var getLimitsTask = UserLeaveLimitsService.GetAsync(currentUser.Id, firstDay, lastDay);
-            var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHoursAsync(currentUser.Id);
+            var getUserWorkingHoursTask = WorkingHoursService.GetUserWorkingHoursAsync(currentUser.Id); // TODO: Remove. We moved working hours to limits.
             await Task.WhenAll(getLeaveRequestsTask, getLimitsTask, getUserWorkingHoursTask);
 
             submittedLeaveRequests = getLeaveRequestsTask.Result?.Items ?? Enumerable.Empty<LeaveRequestShortInfo>();
@@ -355,7 +355,7 @@
         var submittedLeaveRequestsDuration = TimeSpan.FromTicks(submittedLeaveRequests
             .Where(lr => lr.LeaveTypeId == leaveRequest.LeaveTypeId)
             .Sum(lr => lr.Duration.Ticks));
-        var limit = limits.FirstOrDefault(l => l.LeaveTypeId == leaveRequest.LeaveTypeId &&
+        var limit = limits.FirstOrDefault(l => l.LeaveTypeId == leaveRequest.LeaveTypeId && //TODO: Check userId when you create leaverequest on user's behalf
                                                (l.ValidSince == null || l.ValidSince <= leaveRequest.DateFrom) &&
                                                (l.ValidUntil == null || l.ValidUntil >= leaveRequest.DateFrom));
         var leaveType = leaveTypes.FirstOrDefault(lt => lt.Id == leaveRequest.LeaveTypeId);
