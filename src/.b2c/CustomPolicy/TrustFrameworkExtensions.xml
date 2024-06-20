@@ -4,12 +4,9 @@
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
   PolicySchemaVersion="0.3.0.0"
-  DeploymentMode="Development"
-    UserJourneyRecorderEndpoint="urn:journeyrecorder:applicationinsights"
   TenantId="{Settings:Tenant}.onmicrosoft.com"
   PolicyId="B2C_1A_TrustFrameworkExtensions"
   PublicPolicyUri="http://{Settings:Tenant}.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions">
-
   <BasePolicy>
     <TenantId>{Settings:Tenant}.onmicrosoft.com</TenantId>
     <PolicyId>B2C_1A_TrustFrameworkLocalization</PolicyId>
@@ -24,21 +21,23 @@
     <ClaimsProvider>
       <DisplayName>Local Account SignIn</DisplayName>
       <TechnicalProfiles>
-        <TechnicalProfile Id="login-NonInteractive">
+         <TechnicalProfile Id="login-NonInteractive">
           <Metadata>
             <Item Key="client_id">{Settings:ProxyIdentityExperienceFrameworkAppId}</Item>
             <Item Key="IdTokenAudience">{Settings:IdentityExperienceFrameworkAppId}</Item>
           </Metadata>
           <InputClaims>
-            <InputClaim ClaimTypeReferenceId="client_id"
-              DefaultValue="{Settings:ProxyIdentityExperienceFrameworkAppId}" />
-            <InputClaim ClaimTypeReferenceId="resource_id" PartnerClaimType="resource"
-              DefaultValue="{Settings:IdentityExperienceFrameworkAppId}" />
+            <InputClaim ClaimTypeReferenceId="client_id" DefaultValue="{Settings:ProxyIdentityExperienceFrameworkAppId}" />
+            <InputClaim ClaimTypeReferenceId="resource_id" PartnerClaimType="resource" DefaultValue="{Settings:IdentityExperienceFrameworkAppId}" />
           </InputClaims>
         </TechnicalProfile>
       </TechnicalProfiles>
     </ClaimsProvider>
 
   </ClaimsProviders>
+
+    <!--UserJourneys>
+	
+	</UserJourneys-->
 
 </TrustFrameworkPolicy>
