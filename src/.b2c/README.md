@@ -29,6 +29,7 @@ The configuration file is `appsettings.json`.
     4.  TrustFrameworkExtensions_SSPR.xml
     5.  TrustFrameworkExtensions_Roles.xml
     6.  SigninCustom_SSPR
+    6.  ROPC_Auth - only for 2e2 tests
 3. Add setting for endpoint provides roles:
    1. B2C_1A_RestApiUsername - technical username
    2. B2C_1A_RestApiPassword - technical password
