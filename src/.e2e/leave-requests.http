@@ -4,7 +4,7 @@
 # @name Search Leave Requests
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leaverequest?PageNumber=1
+GET {{baseUrl}}/leaverequests?PageNumber=1
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
