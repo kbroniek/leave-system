@@ -4,8 +4,7 @@
 # @name Get Roles
 # @reject-unauthorized
 POST {{baseUrlRoles}}/GetRoles
-Authorization: Basic {{username}} {{password}}
+Authorization: Basic {{technicalB2CUsername}} {{technicalB2CPassword}}
 {
-    "email": "test@gmail.com",
-    "id": "c73ae584-beb1-4036-8f04-6879d3b1955f"
+    "id": "{{userRoleB2C}}"
 }

@@ -1,7 +1,8 @@
-# @import ./secrets.http
+# @import ./login.http
 
 ###
 # @name Get Users
+# @ref Login
 # @reject-unauthorized
 GET {{baseUrl}}/users
 X-Authorization: Bearer {{bearerToken}}
@@ -9,6 +10,7 @@ X-Authorization: Bearer {{bearerToken}}
 
 ###
 # @name Create User
+# @ref Login
 # @reject-unauthorized
 POST {{baseUrl}}/users
 Content-Type: application/json
@@ -22,6 +24,7 @@ X-Authorization: Bearer {{bearerToken}}
 
 ###
 # @name Update User
+# @ref Login
 # @reject-unauthorized
 PUT {{baseUrl}}/users/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
 Content-Type: application/json
@@ -35,6 +38,7 @@ X-Authorization: Bearer {{bearerToken}}
 
 ###
 # @name Delete User
+# @ref Login
 # @reject-unauthorized
 DELETE {{baseUrl}}/users/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
 X-Authorization: Bearer {{bearerToken}}

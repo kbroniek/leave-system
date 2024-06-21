@@ -1,7 +1,8 @@
-# @import ./secrets.http
+# @import ./login.http
 
 ###
 # @name Get Users
+# @ref Login
 # @reject-unauthorized
 GET {{baseUrl}}/settings/leavestatus
 X-Authorization: Bearer {{bearerToken}}

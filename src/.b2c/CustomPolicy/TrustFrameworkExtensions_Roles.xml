@@ -2,12 +2,14 @@
 <TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" PolicySchemaVersion="0.3.0.0"
-    TenantId="yourtenant.onmicrosoft.com"
+    TenantId="{Settings:Tenant}.onmicrosoft.com"
     PolicyId="B2C_1A_TrustFrameworkExtensions_Roles"
-    PublicPolicyUri="http://yourtenant.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions_Roles">
+  DeploymentMode="Development"
+    UserJourneyRecorderEndpoint="urn:journeyrecorder:applicationinsights"
+    PublicPolicyUri="http://{Settings:Tenant}.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions_Roles">
 
     <BasePolicy>
-        <TenantId>yourtenant.onmicrosoft.com</TenantId>
+        <TenantId>{Settings:Tenant}.onmicrosoft.com</TenantId>
         <PolicyId>B2C_1A_TrustFrameworkExtensions_SSPR</PolicyId>
     </BasePolicy>
 
@@ -20,8 +22,7 @@
                     <Protocol Name="Proprietary"
                         Handler="Web.TPEngine.Providers.RestfulProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
                     <Metadata>
-                        <Item Key="ServiceUrl">
-                            https://func-leave-system-west-europe-dev-01.azurewebsites.net/api/GetRoles</Item>
+                        <Item Key="ServiceUrl">{Settings:RoleEndpointUrl}</Item>
                         <Item Key="SendClaimsIn">Body</Item>
                         <Item Key="AuthenticationType">Basic</Item>
                         <Item Key="AllowInsecureAuthInProduction">true</Item>
