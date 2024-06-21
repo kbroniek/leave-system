@@ -9,7 +9,7 @@ client_id={{b2cClientId}}
 &grant_type=password
 &username={{b2cUsername}}
 &password={{b2cPassword}}
-&scope=openid offline_access {{b2cClientId}}
+&scope=openid offline_access {{b2cClientScope}}
 &response_type=token id_token
 ?? status == 200
 {{
