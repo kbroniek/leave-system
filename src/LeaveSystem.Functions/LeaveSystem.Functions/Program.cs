@@ -22,7 +22,7 @@ var host = new HostBuilder()
             .AddJwtFunctionsBearer(options =>
             {
                 options.Authority = "https://leavesystem.b2clogin.com/tfp/leavesystem.onmicrosoft.com/b2c_1a_signincustom_sspr/v2.0/";
-                options.Audience = "114ea83d-c494-46f4-9d7c-b582fed7b5b9";
+                options.Audience = "4f24b978-403f-47fe-9cae-52deea03661d";
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "name",
