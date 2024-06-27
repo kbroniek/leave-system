@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 var host = new HostBuilder()
@@ -13,11 +14,17 @@ var host = new HostBuilder()
         builder.UseMiddleware<ExceptionHandlingMiddleware>();
         builder.UseFunctionsAuthorization();
     })
+
     .ConfigureServices(services =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
         services.AddOpenTelemetry().UseAzureMonitor();
+        services.AddLogging(builder =>
+        {
+            // Only Application Insights is registered as a logger provider
+            builder.AddApplicationInsights();
+        });
         services
             .AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtFunctionsBearer(options =>
