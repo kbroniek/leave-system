@@ -1,3 +1,5 @@
+namespace LeaveSystem.Web;
+using System.Security.Claims;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Web.Pages.HrPanel;
 using LeaveSystem.Web.Pages.LeaveRequests.CreatingLeaveRequest;
@@ -11,21 +13,19 @@ using LeaveSystem.Web.Pages.WorkingHours;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 
-namespace LeaveSystem.Web;
-
 public static class Config
 {
-    public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         const string azureConfig = "AzureAdB2C";
         var scopes = configuration.GetValue<string>($"{azureConfig}:Scopes")
             ?? throw new InvalidOperationException($"Can't find configuration {azureConfig}:Scopes");
 
-        services
+        return services
             .AddMsalAuthentication(configuration, azureConfig, scopes)
             .AddHttpClient(configuration, scopes);
     }
-    public static void AddAuthorization(this IServiceCollection services) =>
+    public static IServiceCollection AddAuthorization(this IServiceCollection services) =>
         services.AddAuthorizationCore(options =>
         {
             options.AddPolicy(CreateLeaveRequest.OnBehalfPolicyName, policy =>
@@ -78,6 +78,8 @@ public static class Config
         {
             configuration.Bind(AzureConfig, options.ProviderOptions.Authentication);
             options.ProviderOptions.DefaultAccessTokenScopes.Add(scopes);
+            options.UserOptions.NameClaim = "name";
+            options.UserOptions.RoleClaim = "roles";
         });
         return services;
     }

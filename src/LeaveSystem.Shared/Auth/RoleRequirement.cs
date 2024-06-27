@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace LeaveSystem.Shared.Auth;
 
@@ -14,6 +16,12 @@ public class RoleRequirement : IAuthorizationRequirement
 
 public class RoleRequirementHandler : AuthorizationHandler<RoleRequirement>
 {
+    private readonly ILogger<RoleRequirementHandler> logger;
+
+    public RoleRequirementHandler(ILogger<RoleRequirementHandler> logger)
+    {
+        this.logger = logger;
+    }
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context, RoleRequirement requirement)
     {
@@ -22,18 +30,20 @@ public class RoleRequirementHandler : AuthorizationHandler<RoleRequirement>
             context.Fail(new AuthorizationFailureReason(this, $"The user is not authenticated."));
             return Task.CompletedTask;
         }
-        var userModel = context.User.CreateModel();
         var allRoles = requirement.Roles
             .Union(new RoleType[] { RoleType.GlobalAdmin })
-            .Select(r => r.ToString())
-            .ToArray();
+            .Select(r => r.ToString());
 
-        if (userModel.Roles.Any(r => allRoles.Contains(r)))
+        if (allRoles.Any(context.User.IsInRole))
         {
+            logger.LogWarning("Correct user");
             context.Succeed(requirement);
             return Task.CompletedTask;
         }
-        context.Fail(new AuthorizationFailureReason(this, $"The user {userModel.Email} doesn't have access to the endpoint. UserId: {userModel.Id}"));
+        logger.LogWarning($"unauthorized user {context.User.FindFirst(ClaimTypes.Role)?.Value}");
+        logger.LogWarning(string.Join(",", context.User.Claims.Select(c => $"{c.Type} - {c.Value}")));
+        logger.LogWarning($"The user {context.User.Identity.Name} doesn't have access to the endpoint. UserId: {context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value}");
+        context.Fail(new AuthorizationFailureReason(this, $"The user {context.User.Identity.Name} doesn't have access to the endpoint. UserId: {context.User.FindFirst("sub")?.Value}"));
         return Task.CompletedTask;
     }
 }
