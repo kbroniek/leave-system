@@ -17,9 +17,17 @@ var host = new HostBuilder()
 
     .ConfigureServices((context, services) =>
     {
-        services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();
-        services.AddOpenTelemetry().UseAzureMonitor();
+        if (!context.HostingEnvironment.IsDevelopment())
+        {
+            services.AddApplicationInsightsTelemetryWorkerService();
+            services.ConfigureFunctionsApplicationInsights();
+            services.AddOpenTelemetry().UseAzureMonitor();
+            services.AddLogging(builder =>
+            {
+                // Only Application Insights is registered as a logger provider
+                builder.AddApplicationInsights();
+            });
+        }
         services
             .AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtFunctionsBearer(options =>
