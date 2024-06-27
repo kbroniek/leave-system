@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using LeaveSystem.Functions.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.Functions.Worker;
@@ -12,11 +13,11 @@ var host = new HostBuilder()
         builder.UseMiddleware<ExceptionHandlingMiddleware>();
         builder.UseFunctionsAuthorization();
     })
-
     .ConfigureServices(services =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
+        services.AddOpenTelemetry().UseAzureMonitor();
         services
             .AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtFunctionsBearer(options =>
