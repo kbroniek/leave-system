@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Security.Claims;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using LeaveSystem.Functions.Shared;
+using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +16,6 @@ var host = new HostBuilder()
         builder.UseMiddleware<ExceptionHandlingMiddleware>();
         builder.UseFunctionsAuthorization();
     })
-
     .ConfigureServices((context, services) =>
     {
         if (!context.HostingEnvironment.IsDevelopment())
@@ -22,11 +23,6 @@ var host = new HostBuilder()
             services.AddApplicationInsightsTelemetryWorkerService();
             services.ConfigureFunctionsApplicationInsights();
             services.AddOpenTelemetry().UseAzureMonitor();
-            services.AddLogging(builder =>
-            {
-                // Only Application Insights is registered as a logger provider
-                builder.AddApplicationInsights();
-            });
         }
         services
             .AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
