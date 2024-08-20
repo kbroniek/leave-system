@@ -1,9 +1,12 @@
+using System.Diagnostics;
 using System.Security.Claims;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using LeaveSystem.Functions.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 var host = new HostBuilder()
@@ -12,29 +15,35 @@ var host = new HostBuilder()
         builder.UseMiddleware<ExceptionHandlingMiddleware>();
         builder.UseFunctionsAuthorization();
     })
-
-    .ConfigureServices(services =>
+    .ConfigureServices((context, services) =>
     {
-        services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();
+        Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+        Activity.ForceDefaultIdFormat = true;
+        if (!context.HostingEnvironment.IsDevelopment())
+        {
+            services.AddApplicationInsightsTelemetryWorkerService();
+            services.ConfigureFunctionsApplicationInsights();
+            services.AddOpenTelemetry().UseAzureMonitor();
+        }
         services
             .AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtFunctionsBearer(options =>
             {
-                options.Authority = "https://leavesystem.b2clogin.com/tfp/leavesystem.onmicrosoft.com/b2c_1a_signincustom_sspr/v2.0/";
-                options.Audience = "114ea83d-c494-46f4-9d7c-b582fed7b5b9";
+                options.Authority = Environment.GetEnvironmentVariable("JwtBearerOptions_Authority") ?? throw new InvalidOperationException("Cannot find JwtBearerOptions_Authority in the configuration.");
+                options.Audience = Environment.GetEnvironmentVariable("JwtBearerOptions_Audience") ?? throw new InvalidOperationException("Cannot find JwtBearerOptions_Audience in the configuration.");
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "name",
                     RoleClaimType = ClaimTypes.Role
                 };
+                var authorizationHeaderName = Environment.GetEnvironmentVariable("JwtBearerOptions_AuthorizationHeaderName") ?? throw new InvalidOperationException("Cannot find authorizationHeaderName in the configuration.");
                 options.Events = new JwtBearerEvents
                 {
                     // ...
                     OnMessageReceived = context =>
                     {
                         // Cannot use Authorization header because of https://github.com/Azure/static-web-apps/issues/34
-                        string authorization = context.Request.Headers["X-Authorization"];
+                        var authorization = context.Request.Headers[authorizationHeaderName];
 
                         // If no authorization header found, nothing to process further
                         if (string.IsNullOrEmpty(authorization))
@@ -42,10 +51,10 @@ var host = new HostBuilder()
                             context.NoResult();
                             return Task.CompletedTask;
                         }
-
-                        if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                        var authorizationStr = authorization.ToString();
+                        if (authorizationStr.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                         {
-                            context.Token = authorization["Bearer ".Length..].Trim();
+                            context.Token = authorizationStr["Bearer ".Length..].Trim();
                         }
 
                         // If no token found, no further work possible
