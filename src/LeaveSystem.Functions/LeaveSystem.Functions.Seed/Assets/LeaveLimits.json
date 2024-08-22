@@ -1,0 +1,34 @@
+{
+  "partitionKey": "assignedToUserId",
+  "items": [
+    {
+      "id": "3b8a8a97-992f-4965-abf8-fe5a9cf91862",
+      "limit": "8.16:00:00",
+      "overdueLimit": "16:00:00",
+      "workingHours": "08:00:00",
+      "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+      "validSince": "2024-01-01",
+      "validUntil": "2024-12-31",
+      "assignedToUserId": "dca20276-2a30-43b0-89ce-3b0d0bd8501a"
+    },
+    {
+      "id": "51835ffd-c603-4ef3-8672-c78d930b0b3e",
+      "limit": "8.16:00:00",
+      "workingHours": "08:00:00",
+      "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+      "validSince": "2024-01-01",
+      "validUntil": "2024-12-31",
+      "assignedToUserId": "c73ae584-beb1-4036-8f04-6879d3b1955f"
+    },
+    {
+      "id": "fcc899d0-48de-4d19-846a-4da0f2df222b",
+      "limit": "08:00:00",
+      "workingHours": "08:00:00",
+      "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+      "validSince": "2024-01-01",
+      "validUntil": "2024-01-31",
+      "assignedToUserId": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
+      "description": "2024-01-06"
+    }
+  ]
+}
