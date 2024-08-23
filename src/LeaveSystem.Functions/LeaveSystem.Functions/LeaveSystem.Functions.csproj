@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -21,8 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\LeaveSystem.Domain\LeaveSystem.Domain\LeaveSystem.Domain.csproj" />
-    <ProjectReference Include="..\..\LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj" />
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
+    <ProjectReference Include="..\LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

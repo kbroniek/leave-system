@@ -1,14 +1,23 @@
 namespace LeaveSystem.Functions.EventSourcing;
 
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using LeaveSystem.Domain.EventSourcing;
+using LeaveSystem.Domain.LeaveRequests;
+using LeaveSystem.Domain.LeaveRequests.Creating;
+using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Shared;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using static LeaveSystem.Domain.LeaveRequests.Creating.ICreateLeaveRequestRepository;
 using static LeaveSystem.Functions.Config;
 
 internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepository> logger, EventRepositorySettings settings)
+    : ICreateLeaveRequestRepository, IGetLeaveRequestRepository
 {
     public async Task<Result<Error>> AppendToStreamAsync<TEvent>(TEvent @event) where TEvent : notnull, IEvent
     {
@@ -19,7 +28,7 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
                 Id: Guid.NewGuid(),
                 StreamId: @event.StreamId,
                 Body: @event,
-                EventType: @event.GetType().FullName!
+                EventType: @event.GetType().AssemblyQualifiedName!
             ));
             return Result.Default;
         }
@@ -43,10 +52,13 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
     //            )
     //            .Where(e => e != null).Cast<TEvent>().ToArray()
     //        : [];
-    public async IAsyncEnumerable<TEvent> ReadStreamAsync<TEvent>(Guid streamId) where TEvent : notnull, IEvent
+    public async IAsyncEnumerable<object> ReadStreamAsync(Guid streamId)
     {
         var container = cosmosClient.GetContainer(settings.DatabaseName, settings.ContainerName);
-        var queryable = container.GetItemLinqQueryable<EventModel<TEvent>>();
+        //using var iterator = container.GetItemQueryIterator<JsonDocument>(
+        //    requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(streamId.ToString()) });
+
+        var queryable = container.GetItemLinqQueryable<EventModel<JToken>>();
 
         // Construct LINQ query
         var matches = queryable
@@ -61,14 +73,10 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
             var response = await linqFeed.ReadNextAsync();
 
             // Iterate query results
-            foreach (var item in response)
+            foreach (var @event in response)
             {
-                yield return item.Body;
+                yield return @event.Body.ToObject(Type.GetType(@event.EventType, true));
             }
         }
-    }
-
-    internal record Error(string? Message)
-    {
     }
 }

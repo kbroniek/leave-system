@@ -1,5 +1,9 @@
 namespace LeaveSystem.Functions.LeaveRequests;
+
+using LeaveSystem.Domain.LeaveRequests.Creating;
+using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Functions.Extensions;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
 using LeaveSystem.Shared.LeaveRequests;
@@ -10,15 +14,8 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-public class LeaveRequestsFunction
+public class LeaveRequestsFunction(CreateLeaveRequestService createLeaveRequestService, GetLeaveRequestService getLeaveRequestService, ILogger<LeaveRequestsFunction> logger)
 {
-    private readonly ILogger<LeaveRequestsFunction> logger;
-
-    public LeaveRequestsFunction(ILogger<LeaveRequestsFunction> logger)
-    {
-        this.logger = logger;
-    }
-
     [Function(nameof(SearchLeaveRequests))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(
@@ -63,6 +60,8 @@ public class LeaveRequestsFunction
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
+        await getLeaveRequestService.Get(leaveRequestId);
+
         var userId = req.HttpContext.GetUserId();
 
         var leaveRequest = new GetLeaveRequestDto(
@@ -86,7 +85,7 @@ public class LeaveRequestsFunction
     }
 
     [Function(nameof(CreateLeaveRequest))]
-    [Authorize(Roles = $"{nameof(RoleType.Employee)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> CreateLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "post",
@@ -95,6 +94,17 @@ public class LeaveRequestsFunction
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var userId = req.HttpContext.GetUserId();
+        var userModel = req.HttpContext.User.CreateModel();
+        await createLeaveRequestService.Create(Domain.LeaveRequests.LeaveRequestCreated.Create(
+            leaveRequest.LeaveRequestId,
+            leaveRequest.DateFrom,
+            leaveRequest.DateTo,
+            leaveRequest.WorkingHours,
+            leaveRequest.LeaveTypeId,
+            leaveRequest.Remark,
+            userModel,
+            leaveRequest.WorkingHours
+            ));
 
         var now = DateTimeOffset.UtcNow;
         var leaveRequestCreated = new GetLeaveRequestDto(

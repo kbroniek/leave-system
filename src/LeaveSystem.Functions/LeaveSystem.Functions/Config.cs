@@ -1,5 +1,7 @@
 namespace LeaveSystem.Functions;
 
+using LeaveSystem.Domain.LeaveRequests.Creating;
+using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Functions.EventSourcing;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
@@ -20,17 +22,21 @@ internal static class Config
         [ConfigurationKeyName("EventsContainerName")]
         public required string ContainerName { get; set; }
     }
-    public static IServiceCollection AddLeaveSystemServcies(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
     {
         var cosmosClientSettings = configuration.Get<CosmosClientSettings>() ?? throw new InvalidOperationException("CosmosDB AppSettings configuration is missing. Check the appsettings.json.");
         var eventRepositorySettings = configuration.Get<EventRepositorySettings>() ?? throw new InvalidOperationException("Event repository AppSettings configuration is missing. Check the appsettings.json.");
         return services
             .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection))
+            .AddScoped<CreateLeaveRequestService>()
+            .AddScoped<GetLeaveRequestService>()
             .AddScoped<EventRepository>(sp => new(
                 sp.GetRequiredService<CosmosClient>(),
                 sp.GetRequiredService<ILogger<EventRepository>>(),
                 eventRepositorySettings)
-            );
+            )
+            .AddScoped<ICreateLeaveRequestRepository>(sp => sp.GetRequiredService<EventRepository>())
+            .AddScoped<IGetLeaveRequestRepository>(sp => sp.GetRequiredService<EventRepository>());
     }
 
     private static CosmosClient BuildCosmosDbClient(string connectionString) =>
