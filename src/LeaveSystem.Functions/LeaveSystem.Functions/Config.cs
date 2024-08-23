@@ -2,6 +2,7 @@ namespace LeaveSystem.Functions;
 
 using LeaveSystem.Functions.EventSourcing;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,11 +25,16 @@ internal static class Config
         var cosmosClientSettings = configuration.Get<CosmosClientSettings>() ?? throw new InvalidOperationException("CosmosDB AppSettings configuration is missing. Check the appsettings.json.");
         var eventRepositorySettings = configuration.Get<EventRepositorySettings>() ?? throw new InvalidOperationException("Event repository AppSettings configuration is missing. Check the appsettings.json.");
         return services
-            .AddScoped<CosmosClient>(sp => new(cosmosClientSettings.CosmosDBConnection))
+            .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection))
             .AddScoped<EventRepository>(sp => new(
                 sp.GetRequiredService<CosmosClient>(),
                 sp.GetRequiredService<ILogger<EventRepository>>(),
                 eventRepositorySettings)
             );
     }
+
+    private static CosmosClient BuildCosmosDbClient(string connectionString) =>
+        new CosmosClientBuilder(connectionString)
+            .WithSerializerOptions(new CosmosSerializationOptions { PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase })
+            .Build();
 }
