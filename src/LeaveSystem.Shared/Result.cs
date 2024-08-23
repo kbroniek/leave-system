@@ -53,4 +53,9 @@ public readonly struct Result<TError>
 
     public static implicit operator Result<TError>(TError e) => new(e, false);
     public static implicit operator Result<TError>(Result.Empty _) => new(default, true);
+
+    public TResult Match<TResult>(
+            Func<TResult> success,
+            Func<TError, TResult> failure) =>
+        this.success ? success() : failure(Error);
 }

@@ -1,5 +1,7 @@
 namespace LeaveSystem.Functions.LeaveRequests;
 
+using System.Threading;
+using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Getting;
@@ -61,11 +63,11 @@ public class LeaveRequestsFunction(
     public async Task<IActionResult> GetLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "leaverequests/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId)
+        Route = "leaverequests/{leaveRequestId:guid}")] Guid leaveRequestId, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var leaveRequest = await getLeaveRequestService.Get(leaveRequestId);
+        var leaveRequest = await getLeaveRequestService.Get(leaveRequestId, cancellationToken);
 
         var leaveRequestDto = new GetLeaveRequestDto(
             leaveRequestId,
@@ -89,44 +91,26 @@ public class LeaveRequestsFunction(
     public async Task<IActionResult> CreateLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "post",
-        Route = "leaverequests")] HttpRequest req, [FromBody] CreateLeaveRequestDto leaveRequest)
+        Route = "leaverequests")] HttpRequest req, [FromBody] CreateLeaveRequestDto leaveRequestDto, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var userId = req.HttpContext.GetUserId();
         var userModel = req.HttpContext.User.CreateModel();
-        await createLeaveRequestService.Create(LeaveRequestCreated.Create(
-            leaveRequest.LeaveRequestId,
-            leaveRequest.DateFrom,
-            leaveRequest.DateTo,
-            leaveRequest.WorkingHours,
-            leaveRequest.LeaveTypeId,
-            leaveRequest.Remark,
+        var result = await createLeaveRequestService.CreateAsync(
+            leaveRequestDto.LeaveRequestId,
+            leaveRequestDto.DateFrom,
+            leaveRequestDto.DateTo,
+            leaveRequestDto.WorkingHours,
+            leaveRequestDto.LeaveTypeId,
+            leaveRequestDto.Remark,
             userModel,
             userModel,
-            leaveRequest.WorkingHours,
-            DateTimeOffset.UtcNow
-            ));
-
-        var now = DateTimeOffset.UtcNow;
-        var leaveRequestCreated = new GetLeaveRequestDto(
-            leaveRequest.LeaveRequestId,
-            leaveRequest.DateFrom,
-            leaveRequest.DateTo,
-            leaveRequest.WorkingHours,
-            leaveRequest.LeaveTypeId,
-            LeaveRequestStatus.Pending,
-            userModel,
-            userModel,
-            userModel,
-            leaveRequest.WorkingHours,
-            now,
-            now,
-            new[]
-            {
-                new GetLeaveRequestDto.RemarksDto(leaveRequest.Remark, userModel, now)
-            });
-        return new CreatedResult($"leaverequest/{leaveRequest.LeaveRequestId}", leaveRequestCreated);
+            leaveRequestDto.WorkingHours,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
+        return result.Match<IActionResult>(
+            leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
+            error => new BadRequestObjectResult(error.Message));
     }
 
     [Function(nameof(CreateLeaveRequestOnBehalf))]
@@ -134,30 +118,27 @@ public class LeaveRequestsFunction(
     public async Task<IActionResult> CreateLeaveRequestOnBehalf([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "post",
-        Route = "leaverequests/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequest)
+        Route = "leaverequests/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequestDto, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var user = req.HttpContext.User.CreateModel();
-
-        var now = DateTimeOffset.UtcNow;
-        var leaveRequestCreated = new GetLeaveRequestDto(
-            leaveRequest.LeaveRequestId,
-            leaveRequest.DateFrom,
-            leaveRequest.DateTo,
-            leaveRequest.WorkingHours,
-            leaveRequest.LeaveTypeId,
-            LeaveRequestStatus.Pending,
-            user, //leaveRequest.OwnerUserId,
-            user,
-            user,
-            leaveRequest.WorkingHours,
-            now,
-            now,
-            [
-                new GetLeaveRequestDto.RemarksDto(leaveRequest.Remark, user, now)
-            ]);
-        return new CreatedResult($"leaverequest/{leaveRequest.LeaveRequestId}", leaveRequestCreated);
+        var userModel = req.HttpContext.User.CreateModel();
+        var result = await createLeaveRequestService.CreateAsync(
+            leaveRequestDto.LeaveRequestId,
+            leaveRequestDto.DateFrom,
+            leaveRequestDto.DateTo,
+            leaveRequestDto.WorkingHours,
+            leaveRequestDto.LeaveTypeId,
+            leaveRequestDto.Remark,
+            userModel,
+            //TODO Check if user exists and active in graph API
+            new FederatedUser(leaveRequestDto.AssignedToId, null, null, []),
+            leaveRequestDto.WorkingHours,
+            DateTimeOffset.UtcNow,
+            cancellationToken);
+        return result.Match<IActionResult>(
+            leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
+            error => new BadRequestObjectResult(error.Message));
     }
 
     [Function(nameof(AcceptStatusLeaveRequest))]
@@ -165,37 +146,21 @@ public class LeaveRequestsFunction(
     public async Task<IActionResult> AcceptStatusLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leaverequests/{leaveRequestId:guid}/accept")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+        Route = "leaverequests/{leaveRequestId:guid}/accept")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var userModel = req.HttpContext.User.CreateModel();
-        await acceptLeaveRequestService.Create(LeaveRequestAccepted.Create(
+        var result = await acceptLeaveRequestService.AcceptAsync(
             leaveRequestId,
             changeStatus.Remark,
             userModel,
-            DateTimeOffset.UtcNow
-        ));
-
-        var now = DateTimeOffset.UtcNow;
-        var leaveRequest = new GetLeaveRequestDto(
-            leaveRequestId,
-            DateOnly.FromDateTime(DateTime.UtcNow),
-            DateOnly.FromDateTime(DateTime.UtcNow),
-            TimeSpan.FromHours(8),
-            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-            LeaveRequestStatus.Accepted,
-            userModel,
-            userModel,
-            userModel,
-            TimeSpan.FromHours(8),
-            now.AddDays(-1),
-            now,
-            [
-                new GetLeaveRequestDto.RemarksDto("Test remark", userModel, now.AddDays(-1)),
-                new GetLeaveRequestDto.RemarksDto(changeStatus.Remark, userModel, now)
-            ]);
-        return new OkObjectResult(leaveRequest);
+            DateTimeOffset.UtcNow,
+            cancellationToken
+        );
+        return result.Match<IActionResult>(
+            leaveRequest => new OkObjectResult(Map(leaveRequest)),
+            error => new BadRequestObjectResult(error.Message));
     }
 
     [Function(nameof(RejectStatusLeaveRequest))]
@@ -261,4 +226,20 @@ public class LeaveRequestsFunction(
             ]);
         return new OkObjectResult(leaveRequest);
     }
+
+    private GetLeaveRequestDto Map(LeaveRequest leaveRequest) =>
+        new GetLeaveRequestDto(
+            leaveRequest.Id,
+            leaveRequest.DateFrom,
+            leaveRequest.DateTo,
+            leaveRequest.Duration,
+            leaveRequest.LeaveTypeId,
+            leaveRequest.Status,
+            leaveRequest.AssignedTo,
+            leaveRequest.LastModifiedBy,
+            leaveRequest.CreatedBy,
+            leaveRequest.WorkingHours,
+            leaveRequest.CreatedDate,
+            leaveRequest.LastModifiedDate,
+            leaveRequest.Remarks.Select(r => new GetLeaveRequestDto.RemarksDto(r.Remarks, r.CreatedBy, r.CreatedDate)));
 }

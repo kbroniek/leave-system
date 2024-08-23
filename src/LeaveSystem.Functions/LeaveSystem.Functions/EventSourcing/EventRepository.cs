@@ -1,19 +1,19 @@
 namespace LeaveSystem.Functions.EventSourcing;
 
 using System.Net;
+using System.Runtime.CompilerServices;
+using LeaveSystem.Domain;
 using LeaveSystem.Domain.EventSourcing;
-using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Shared;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using static LeaveSystem.Domain.LeaveRequests.IAppendEventRepository;
 using static LeaveSystem.Functions.Config;
 
 internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepository> logger, EventRepositorySettings settings)
     : IAppendEventRepository, IReadEventsRepository
 {
-    public async Task<Result<Error>> AppendToStreamAsync<TEvent>(TEvent @event) where TEvent : notnull, IEvent
+    public async Task<Result<Error>> AppendToStreamAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : notnull, IEvent
     {
         try
         {
@@ -23,7 +23,7 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
                 StreamId: @event.StreamId,
                 Body: @event,
                 EventType: @event.GetType().AssemblyQualifiedName!
-            ));
+            ), new PartitionKey(@event.StreamId.ToString()), null, cancellationToken);
             return Result.Default;
         }
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
@@ -40,15 +40,15 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
         }
     }
 
-    public async IAsyncEnumerable<IEvent> ReadStreamAsync(Guid streamId)
+    public async IAsyncEnumerable<IEvent> ReadStreamAsync(Guid streamId, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var container = cosmosClient.GetContainer(settings.DatabaseName, settings.ContainerName);
-        var sqlQuery = "SELECT * FROM c ORDER BY c._ts ASC";
+        var sqlQuery = "SELECT * FROM c ORDER BY c.body.creadedDate ASC";
         var iterator = container.GetItemQueryIterator<EventModel<JToken>>(sqlQuery, requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(streamId.ToString()) });
 
         while (iterator.HasMoreResults)
         {
-            var response = await iterator.ReadNextAsync();
+            var response = await iterator.ReadNextAsync(cancellationToken);
 
             foreach (var @event in response)
             {

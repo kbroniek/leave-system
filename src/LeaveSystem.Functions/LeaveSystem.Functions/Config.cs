@@ -1,6 +1,6 @@
 namespace LeaveSystem.Functions;
 
-using LeaveSystem.Domain.LeaveRequests;
+using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Getting;
