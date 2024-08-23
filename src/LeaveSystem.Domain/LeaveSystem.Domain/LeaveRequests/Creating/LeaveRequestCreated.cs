@@ -1,4 +1,4 @@
-namespace LeaveSystem.Domain.LeaveRequests;
+namespace LeaveSystem.Domain.LeaveRequests.Creating;
 
 using Ardalis.GuardClauses;
 using LeaveSystem.Domain.EventSourcing;
@@ -12,16 +12,18 @@ public record LeaveRequestCreated(
     Guid LeaveTypeId,
     string? Remarks,
     FederatedUser CreatedBy,
-    TimeSpan WorkingHours
+    FederatedUser AssignedTo,
+    TimeSpan WorkingHours,
+    DateTimeOffset CreatedDate
 ) : IEvent
 {
     public Guid StreamId => LeaveRequestId;
 
-    public static LeaveRequestCreated Create(Guid leaveRequestId, DateOnly dateFrom, DateOnly dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, TimeSpan workingHours)
+    public static LeaveRequestCreated Create(Guid leaveRequestId, DateOnly dateFrom, DateOnly dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, FederatedUser assignedTo, TimeSpan workingHours, DateTimeOffset createdDate)
     {
         const int hoursInDayCount = 24;
         const int minHoursInDayCount = 1;
         Guard.Against.OutOfRange(workingHours, nameof(workingHours), TimeSpan.FromHours(minHoursInDayCount), TimeSpan.FromHours(hoursInDayCount));
-        return new(leaveRequestId, dateFrom, dateTo, duration, leaveTypeId, remarks, createdBy, workingHours);
+        return new(leaveRequestId, dateFrom, dateTo, duration, leaveTypeId, remarks, createdBy, assignedTo, workingHours, createdDate);
     }
 }

@@ -12,7 +12,7 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Get Leave Request
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leaverequests/032132cc-6b72-48ba-ad35-87a861cd5709
+GET {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
@@ -25,7 +25,7 @@ Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
 {
-    "leaveRequestId": "032132cc-6b72-48ba-ad35-87a861cd5709",
+    "leaveRequestId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
     "dateFrom": "2024-08-23",
     "dateTo": "2024-08-23",
     "workingHours": "08:00:00",

@@ -1,11 +1,14 @@
 namespace LeaveSystem.Domain.LeaveRequests;
 
+using LeaveSystem.Domain.EventSourcing;
+using LeaveSystem.Domain.LeaveRequests.Accepting;
+using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.LeaveRequests;
 
 public class LeaveRequest
 {
-    private List<RemarksModel> remarks = [];
+    private readonly List<RemarksModel> remarks = [];
 
     public Guid Id { get; private set; }
 
@@ -25,38 +28,51 @@ public class LeaveRequest
 
     public FederatedUser LastModifiedBy { get; private set; }
 
-    public FederatedUser? CreatedByOnBehalf { get; private set; }
+    public FederatedUser AssignedTo { get; private set; }
 
     public TimeSpan WorkingHours { get; private set; }
 
     public int Version { get; private set; }
+    public DateTimeOffset CreatedDate { get; set; }
+    public DateTimeOffset LastModifiedDate { get; set; }
 
     //[IgnoreDataMember]
     //queue<ievent> ieventsource.pendingevents { get; } = new queue<ievent>();
 
 
-    //For serialization
-    //public LeaveRequest() { }
+    private LeaveRequest() { }
 
-    private LeaveRequest(LeaveRequestCreated @event)
-    {
-        //Append(@event);
-        Apply(@event);
-    }
+    public static LeaveRequest Default() =>
+        new();
 
-    public static LeaveRequest CreatePendingLeaveRequest(LeaveRequestCreated @event) => new(@event);
+    public static LeaveRequest Evolve(LeaveRequest leaveRequest, IEvent @event) =>
+        @event switch
+        {
+            LeaveRequestCreated createdEvent =>
+                leaveRequest.Pending(createdEvent),
+            LeaveRequestAccepted(var leaveRequestId, var acceptedRemarks, var acceptedBy, var createdDate) =>
+                leaveRequest.Accept(leaveRequestId, acceptedRemarks, acceptedBy, createdDate),
+            _ => leaveRequest
+        };
 
-    internal void Accept(string? remarks, FederatedUser acceptedBy)
+    internal LeaveRequest Pending(LeaveRequestCreated @event) => Apply(@event);
+
+    internal LeaveRequest Accept(Guid leaveReuestId, string? remarks, FederatedUser acceptedBy, DateTimeOffset createdDate)
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Rejected)
         {
             throw new InvalidOperationException($"Accepting leave request in '{Status}' status is not allowed.");
         }
+        if (leaveReuestId != Id)
+        {
+            throw new InvalidOperationException($"Accepting leave request in different id is not allowed.");
+        }
 
-        var @event = LeaveRequestAccepted.Create(Id, remarks, acceptedBy);
+        var @event = LeaveRequestAccepted.Create(Id, remarks, acceptedBy, createdDate);
 
         //Append(@event);
         Apply(@event);
+        return this;
     }
     //internal void Reject(string? remarks, FederatedUser rejectedBy)
     //{
@@ -115,25 +131,26 @@ public class LeaveRequest
     //    Apply(@event);
     //}
 
-    private void Apply(LeaveRequestCreated @event)
+    private LeaveRequest Apply(LeaveRequestCreated @event)
     {
         Id = @event.LeaveRequestId;
         DateFrom = @event.DateFrom;
         DateTo = @event.DateTo;
         Duration = @event.Duration;
         LeaveTypeId = @event.LeaveTypeId;
-        AddRemarks(@event.Remarks, @event.CreatedBy);
+        AddRemarks(@event.Remarks, @event.CreatedBy, @event.CreatedDate);
         Status = LeaveRequestStatus.Pending;
         CreatedBy = @event.CreatedBy;
         LastModifiedBy = @event.CreatedBy;
         WorkingHours = @event.WorkingHours;
         Version++;
+        return this;
     }
 
     private void Apply(LeaveRequestAccepted @event)
     {
         Status = LeaveRequestStatus.Accepted;
-        AddRemarks(@event.Remarks, @event.AcceptedBy);
+        AddRemarks(@event.Remarks, @event.AcceptedBy, @event.CreatedDate);
         LastModifiedBy = @event.AcceptedBy;
         Version++;
     }
@@ -169,16 +186,16 @@ public class LeaveRequest
     //    Version++;
     //}
 
-    private void AddRemarks(string? remarks, FederatedUser createdBy)
+    private void AddRemarks(string? remarks, FederatedUser createdBy, DateTimeOffset createdDate)
     {
         if (string.IsNullOrWhiteSpace(remarks))
         {
             return;
         }
-        this.remarks.Add(new RemarksModel(remarks, createdBy));
+        this.remarks.Add(new RemarksModel(remarks, createdBy, createdDate));
     }
 
-    public record RemarksModel(string Remarks, FederatedUser CreatedBy);
+    public record RemarksModel(string Remarks, FederatedUser CreatedBy, DateTimeOffset CreatedDate);
 
     //private void Append(IEvent @event) { } //(this as IEventSource).PendingEvents.Enqueue(@event);
 }

@@ -5,19 +5,17 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests;
-using LeaveSystem.Domain.LeaveRequests.Creating;
-using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Shared;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static LeaveSystem.Domain.LeaveRequests.Creating.ICreateLeaveRequestRepository;
+using static LeaveSystem.Domain.LeaveRequests.IAppendEventRepository;
 using static LeaveSystem.Functions.Config;
 
 internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepository> logger, EventRepositorySettings settings)
-    : ICreateLeaveRequestRepository, IGetLeaveRequestRepository
+    : IAppendEventRepository, IReadEventsRepository
 {
     public async Task<Result<Error>> AppendToStreamAsync<TEvent>(TEvent @event) where TEvent : notnull, IEvent
     {
@@ -52,30 +50,20 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
     //            )
     //            .Where(e => e != null).Cast<TEvent>().ToArray()
     //        : [];
-    public async IAsyncEnumerable<object> ReadStreamAsync(Guid streamId)
+    public async IAsyncEnumerable<IEvent> ReadStreamAsync(Guid streamId)
     {
         var container = cosmosClient.GetContainer(settings.DatabaseName, settings.ContainerName);
-        //using var iterator = container.GetItemQueryIterator<JsonDocument>(
-        //    requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(streamId.ToString()) });
+        var sqlQuery = "SELECT * FROM c ORDER BY c._ts ASC";
+        var iterator = container.GetItemQueryIterator<EventModel<JToken>>(sqlQuery, requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(streamId.ToString()) });
 
-        var queryable = container.GetItemLinqQueryable<EventModel<JToken>>();
-
-        // Construct LINQ query
-        var matches = queryable
-            .Where(p => p.StreamId == streamId);
-
-        // Convert to feed iterator
-        using var linqFeed = matches.ToFeedIterator();
-
-        // Iterate query result pages
-        while (linqFeed.HasMoreResults)
+        while (iterator.HasMoreResults)
         {
-            var response = await linqFeed.ReadNextAsync();
+            var response = await iterator.ReadNextAsync();
 
-            // Iterate query results
             foreach (var @event in response)
             {
-                yield return @event.Body.ToObject(Type.GetType(@event.EventType, true));
+                //TODO: Error handling
+                yield return (IEvent)@event.Body.ToObject(Type.GetType(@event.EventType, true));
             }
         }
     }

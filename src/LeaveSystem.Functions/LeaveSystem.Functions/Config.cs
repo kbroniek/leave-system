@@ -1,5 +1,7 @@
 namespace LeaveSystem.Functions;
 
+using LeaveSystem.Domain.LeaveRequests;
+using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Functions.EventSourcing;
@@ -30,13 +32,14 @@ internal static class Config
             .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection))
             .AddScoped<CreateLeaveRequestService>()
             .AddScoped<GetLeaveRequestService>()
+            .AddScoped<AcceptLeaveRequestService>()
             .AddScoped<EventRepository>(sp => new(
                 sp.GetRequiredService<CosmosClient>(),
                 sp.GetRequiredService<ILogger<EventRepository>>(),
                 eventRepositorySettings)
             )
-            .AddScoped<ICreateLeaveRequestRepository>(sp => sp.GetRequiredService<EventRepository>())
-            .AddScoped<IGetLeaveRequestRepository>(sp => sp.GetRequiredService<EventRepository>());
+            .AddScoped<IAppendEventRepository>(sp => sp.GetRequiredService<EventRepository>())
+            .AddScoped<IReadEventsRepository>(sp => sp.GetRequiredService<EventRepository>());
     }
 
     private static CosmosClient BuildCosmosDbClient(string connectionString) =>

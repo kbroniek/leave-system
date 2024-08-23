@@ -1,9 +1,9 @@
-namespace LeaveSystem.Domain.LeaveRequests.Creating;
+namespace LeaveSystem.Domain.LeaveRequests;
 using System.Threading.Tasks;
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Shared;
 
-public interface ICreateLeaveRequestRepository
+public interface IAppendEventRepository
 {
     Task<Result<Error>> AppendToStreamAsync<TEvent>(TEvent @event) where TEvent : notnull, IEvent;
 
