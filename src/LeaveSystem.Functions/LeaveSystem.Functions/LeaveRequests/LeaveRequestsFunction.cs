@@ -13,6 +13,7 @@ using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
@@ -63,27 +64,23 @@ public class LeaveRequestsFunction(
     public async Task<IActionResult> GetLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "leaverequests/{leaveRequestId:guid}")] Guid leaveRequestId, CancellationToken cancellationToken)
+        Route = "leaverequests/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var leaveRequest = await getLeaveRequestService.Get(leaveRequestId, cancellationToken);
+        var result = await getLeaveRequestService.Get(leaveRequestId, cancellationToken);
 
-        var leaveRequestDto = new GetLeaveRequestDto(
-            leaveRequestId,
-            leaveRequest.DateFrom,
-            leaveRequest.DateTo,
-            leaveRequest.Duration,
-            leaveRequest.LeaveTypeId,
-            leaveRequest.Status,
-            leaveRequest.AssignedTo,
-            leaveRequest.LastModifiedBy,
-            leaveRequest.CreatedBy,
-            leaveRequest.WorkingHours,
-            leaveRequest.CreatedDate,
-            leaveRequest.LastModifiedDate,
-            leaveRequest.Remarks.Select(r => new GetLeaveRequestDto.RemarksDto(r.Remarks, r.CreatedBy, r.CreatedDate)));
-        return new OkObjectResult(leaveRequestDto);
+        return result.Match<IActionResult>(
+            leaveRequest => new OkObjectResult(Map(leaveRequest)),
+            error => new ObjectResult(new ProblemDetails
+            {
+                Title = "Error occured while getting a leave request details",
+                Detail = error.Message,
+                Status = (int)error.HttpStatusCode
+            })
+            {
+                StatusCode = (int)error.HttpStatusCode
+            });
     }
 
     [Function(nameof(CreateLeaveRequest))]
@@ -106,7 +103,7 @@ public class LeaveRequestsFunction(
             userModel,
             userModel,
             leaveRequestDto.WorkingHours,
-            DateTimeOffset.UtcNow,
+            DateTimeOffset.Now,
             cancellationToken);
         return result.Match<IActionResult>(
             leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
@@ -134,7 +131,7 @@ public class LeaveRequestsFunction(
             //TODO Check if user exists and active in graph API
             new FederatedUser(leaveRequestDto.AssignedToId, null, null, []),
             leaveRequestDto.WorkingHours,
-            DateTimeOffset.UtcNow,
+            DateTimeOffset.Now,
             cancellationToken);
         return result.Match<IActionResult>(
             leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
@@ -155,7 +152,7 @@ public class LeaveRequestsFunction(
             leaveRequestId,
             changeStatus.Remark,
             userModel,
-            DateTimeOffset.UtcNow,
+            DateTimeOffset.Now,
             cancellationToken
         );
         return result.Match<IActionResult>(

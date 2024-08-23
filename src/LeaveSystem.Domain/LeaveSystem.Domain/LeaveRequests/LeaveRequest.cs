@@ -1,5 +1,6 @@
 namespace LeaveSystem.Domain.LeaveRequests;
 
+using System.Net;
 using System.Runtime.Serialization;
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
@@ -84,11 +85,11 @@ public class LeaveRequest : IEventSource
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Rejected)
         {
-            return new Error($"Accepting leave request in '{Status}' status is not allowed.");
+            return new Error($"Accepting leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
         }
         if (leaveReuestId != Id)
         {
-            return new Error($"Accepting leave request in different id is not allowed.");
+            return new Error($"Accepting leave request in different id is not allowed.", HttpStatusCode.UnprocessableEntity);
         }
 
         var @event = LeaveRequestAccepted.Create(Id, remarks, acceptedBy, createdDate);
@@ -165,6 +166,9 @@ public class LeaveRequest : IEventSource
         CreatedBy = @event.CreatedBy;
         LastModifiedBy = @event.CreatedBy;
         WorkingHours = @event.WorkingHours;
+        AssignedTo = @event.AssignedTo;
+        CreatedDate = @event.CreatedDate;
+        LastModifiedDate = @event.CreatedDate;
         Version++;
         return this;
     }
@@ -174,6 +178,7 @@ public class LeaveRequest : IEventSource
         Status = LeaveRequestStatus.Accepted;
         AddRemarks(@event.Remarks, @event.AcceptedBy, @event.CreatedDate);
         LastModifiedBy = @event.AcceptedBy;
+        LastModifiedDate = @event.CreatedDate;
         Version++;
         return this;
     }

@@ -32,9 +32,10 @@ public class CreateLeaveRequestService(WriteRepository repository)
             assignedTo,
             workingHours,
             createdDate);
-        return await result.Match(
-            lr => repository.Write(leaveRequest, cancellationToken),
-            err => Task.FromResult(Result.Error<LeaveRequest, Error>(err)));
-
+        if (!result.IsOk)
+        {
+            return result;
+        }
+        return await repository.Write(result.Value, cancellationToken);
     }
 }

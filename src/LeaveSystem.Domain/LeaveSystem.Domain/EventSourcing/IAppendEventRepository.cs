@@ -5,5 +5,5 @@ using LeaveSystem.Shared;
 
 public interface IAppendEventRepository
 {
-    Task<Result<Error>> AppendToStreamAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : notnull, IEvent;
+    Task<Result<Error>> AppendToStreamAsync(IEvent @event, CancellationToken cancellationToken);
 }

@@ -6,15 +6,15 @@ public class WriteRepository(IAppendEventRepository appendEventRepository)
 {
     internal async Task<Result<TEventSource, Error>> Write<TEventSource>(TEventSource eventSource, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
     {
-        foreach (var @event in eventSource.PendingEvents)
+        while (eventSource.PendingEvents.Count > 0)
         {
+            var @event = eventSource.PendingEvents.Dequeue();
             var result = await appendEventRepository.AppendToStreamAsync(@event, cancellationToken);
             if (!result.IsOk)
             {
                 return result.Error;
             }
         }
-        eventSource.PendingEvents.Clear();
         return eventSource;
     }
 }

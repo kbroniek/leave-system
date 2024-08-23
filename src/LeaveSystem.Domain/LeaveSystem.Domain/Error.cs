@@ -1,3 +1,5 @@
-﻿namespace LeaveSystem.Domain;
+namespace LeaveSystem.Domain;
 
-public record Error(string? Message);
+using System.Net;
+
+public record Error(string Message, HttpStatusCode HttpStatusCode);

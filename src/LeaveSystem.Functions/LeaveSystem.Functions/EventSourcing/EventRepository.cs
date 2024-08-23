@@ -13,12 +13,12 @@ using static LeaveSystem.Functions.Config;
 internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepository> logger, EventRepositorySettings settings)
     : IAppendEventRepository, IReadEventsRepository
 {
-    public async Task<Result<Error>> AppendToStreamAsync<TEvent>(TEvent @event, CancellationToken cancellationToken) where TEvent : notnull, IEvent
+    public async Task<Result<Error>> AppendToStreamAsync(IEvent @event, CancellationToken cancellationToken)
     {
         try
         {
             var container = cosmosClient.GetContainer(settings.DatabaseName, settings.ContainerName);
-            await container.CreateItemAsync(new EventModel<TEvent>(
+            await container.CreateItemAsync(new EventModel<object>(
                 Id: Guid.NewGuid(),
                 StreamId: @event.StreamId,
                 Body: @event,
@@ -30,20 +30,20 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
         {
             var errorMessage = "This event already exists";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage);
+            return new Error(errorMessage, HttpStatusCode.Conflict);
         }
         catch (Exception ex)
         {
             var errorMessage = "Unexpected error occurred while insert data to DB";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage);
+            return new Error(errorMessage, HttpStatusCode.InternalServerError);
         }
     }
 
     public async IAsyncEnumerable<IEvent> ReadStreamAsync(Guid streamId, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var container = cosmosClient.GetContainer(settings.DatabaseName, settings.ContainerName);
-        var sqlQuery = "SELECT * FROM c ORDER BY c.body.creadedDate ASC";
+        var sqlQuery = "SELECT * FROM c ORDER BY c._ts ASC";
         var iterator = container.GetItemQueryIterator<EventModel<JToken>>(sqlQuery, requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(streamId.ToString()) });
 
         while (iterator.HasMoreResults)

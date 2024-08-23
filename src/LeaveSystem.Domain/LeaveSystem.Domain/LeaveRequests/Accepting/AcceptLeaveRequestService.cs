@@ -9,10 +9,16 @@ public class AcceptLeaveRequestService(ReadRepository readRepository, WriteRepos
 {
     public async Task<Result<LeaveRequest, Error>> AcceptAsync(Guid leaveRequestId, string? remarks, FederatedUser acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
-        var leaveRequest = await readRepository.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
-        var result = leaveRequest.Accept(leaveRequestId, remarks, acceptedBy, createdDate);
-        return await result.Match(
-            lr => writeRepository.Write(leaveRequest, cancellationToken),
-            err => Task.FromResult(Result.Error<LeaveRequest, Error>(err)));
+        var resultFindById = await readRepository.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
+        if (!resultFindById.IsOk)
+        {
+            return resultFindById;
+        }
+        var resultAccept = resultFindById.Value.Accept(leaveRequestId, remarks, acceptedBy, createdDate);
+        if (!resultAccept.IsOk)
+        {
+            return resultAccept;
+        }
+        return await writeRepository.Write(resultAccept.Value, cancellationToken);
     }
 }
