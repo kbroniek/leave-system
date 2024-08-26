@@ -55,7 +55,7 @@ public class LeaveRequest : IEventSource
         _ => this
     };
 
-    internal Result<LeaveRequest, Error> Pending(
+    internal virtual Result<LeaveRequest, Error> Pending(
         Guid leaveRequestId,
         DateOnly dateFrom,
         DateOnly dateTo,
