@@ -1,4 +1,4 @@
-﻿using LeaveSystem.Db;
+using LeaveSystem.Db;
 using LeaveSystem.Db.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
