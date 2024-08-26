@@ -27,7 +27,7 @@ public readonly struct Result<TValue, TError>
         this.success = success;
     }
 
-    public bool IsOk => success;
+    public bool IsSuccess => success;
 
     public static implicit operator Result<TValue, TError>(TValue v) => new(v, default, true);
     public static implicit operator Result<TValue, TError>(TError e) => new(default, e, false);
@@ -49,7 +49,7 @@ public readonly struct Result<TError>
         this.success = success;
     }
 
-    public bool IsOk => success;
+    public bool IsSuccess => success;
 
     public static implicit operator Result<TError>(TError e) => new(e, false);
     public static implicit operator Result<TError>(Result.Empty _) => new(default, true);

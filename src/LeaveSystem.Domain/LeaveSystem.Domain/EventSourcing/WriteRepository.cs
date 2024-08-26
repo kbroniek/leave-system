@@ -10,7 +10,7 @@ public class WriteRepository(IAppendEventRepository appendEventRepository)
         {
             var @event = eventSource.PendingEvents.Dequeue();
             var result = await appendEventRepository.AppendToStreamAsync(@event, cancellationToken);
-            if (!result.IsOk)
+            if (!result.IsSuccess)
             {
                 return result.Error;
             }

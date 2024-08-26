@@ -10,7 +10,9 @@ public class ReadRepository(IReadEventsRepository readEventsRepository, ILogger<
     {
         var leaveRequest = new TEventSource();
         var i = 0;
-        await foreach (var item in readEventsRepository.ReadStreamAsync(id, cancellationToken).WithCancellation(cancellationToken))
+        await foreach (var item in readEventsRepository
+            .ReadStreamAsync(id, cancellationToken)
+            .WithCancellation(cancellationToken))
         {
             leaveRequest.Evolve(item);
             ++i;

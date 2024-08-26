@@ -33,7 +33,7 @@ public class CreateLeaveRequestService(WriteRepository repository)
             assignedTo,
             workingHours,
             createdDate);
-        if (!result.IsOk)
+        if (!result.IsSuccess)
         {
             return result;
         }

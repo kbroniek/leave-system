@@ -1,4 +1,4 @@
-namespace LeaveSystem.Functions.UnitTests.testHelpers;
+namespace LeaveSystem.Functions.UnitTests.TestHelpers;
 
 using Microsoft.Azure.Cosmos;
 
