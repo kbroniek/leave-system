@@ -5,26 +5,6 @@ using LeaveSystem.Domain.EventSourcing;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-internal record FakeEvent() : IEvent
-{
-    public Guid StreamId { get; set; }
-
-    public DateTimeOffset CreatedDate { get; set; }
-};
-
-internal class FakeEventSource : IEventSource
-{
-    public Queue<IEvent> PendingEvents => throw new NotImplementedException();
-
-    public int Version { get; private set; }
-
-    public IEventSource Evolve(IEvent @event)
-    {
-        ++Version;
-        return this;
-    }
-}
-
 public class ReadRepositoryTests
 {
     private readonly Mock<IReadEventsRepository> mockReadEventsRepository = new();
