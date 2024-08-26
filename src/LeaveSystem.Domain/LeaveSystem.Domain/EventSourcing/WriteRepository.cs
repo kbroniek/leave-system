@@ -4,7 +4,7 @@ using LeaveSystem.Shared;
 
 public class WriteRepository(IAppendEventRepository appendEventRepository)
 {
-    internal async Task<Result<TEventSource, Error>> Write<TEventSource>(TEventSource eventSource, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
+    internal virtual async Task<Result<TEventSource, Error>> Write<TEventSource>(TEventSource eventSource, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
     {
         while (eventSource.PendingEvents.Count > 0)
         {

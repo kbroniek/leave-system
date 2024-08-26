@@ -1,6 +1,5 @@
-using LeaveSystem.Domain.EventSourcing;
-
 namespace LeaveSystem.Domain.LeaveRequests.Accepting;
+using LeaveSystem.Domain.EventSourcing;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
 using LeaveSystem.Shared;

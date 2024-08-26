@@ -82,7 +82,7 @@ public class LeaveRequest : IEventSource
         return Apply(@event);
     }
 
-    internal Result<LeaveRequest, Error> Accept(Guid leaveReuestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate)
+    internal virtual Result<LeaveRequest, Error> Accept(Guid leaveReuestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate)
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Rejected)
         {

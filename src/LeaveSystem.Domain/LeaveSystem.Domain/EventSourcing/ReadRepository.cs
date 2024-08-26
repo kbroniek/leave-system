@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 public class ReadRepository(IReadEventsRepository readEventsRepository, ILogger<ReadRepository> logger)
 {
-    internal async Task<Result<TEventSource, Error>> FindByIdAsync<TEventSource>(Guid id, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
+    internal virtual async Task<Result<TEventSource, Error>> FindByIdAsync<TEventSource>(Guid id, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
     {
         var leaveRequest = new TEventSource();
         var i = 0;
