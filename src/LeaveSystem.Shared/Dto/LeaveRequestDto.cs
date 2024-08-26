@@ -2,9 +2,11 @@ namespace LeaveSystem.Shared.Dto;
 using System;
 using LeaveSystem.Shared.LeaveRequests;
 
-public record GetLeaveRequestDto(Guid LeaveRequestId, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration, Guid LeaveTypeId, LeaveRequestStatus Status, FederatedUser AssignedTo, FederatedUser LastModifiedBy, FederatedUser CreatedBy, TimeSpan WorkingHours, DateTimeOffset CreatedDate, DateTimeOffset LastModifiedDate, IEnumerable<GetLeaveRequestDto.RemarksDto> Remarks)
+public record LeaveRequestUserDto(string UserId, string? Name);
+
+public record GetLeaveRequestDto(Guid LeaveRequestId, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration, Guid LeaveTypeId, LeaveRequestStatus Status, LeaveRequestUserDto AssignedTo, LeaveRequestUserDto LastModifiedBy, LeaveRequestUserDto CreatedBy, TimeSpan WorkingHours, DateTimeOffset CreatedDate, DateTimeOffset LastModifiedDate, IEnumerable<GetLeaveRequestDto.RemarksDto> Remarks)
 {
-    public record RemarksDto(string Remarks, FederatedUser CreatedBy, DateTimeOffset CreatedDate);
+    public record RemarksDto(string Remarks, LeaveRequestUserDto CreatedBy, DateTimeOffset CreatedDate);
 }
 
 public record CreateLeaveRequestDto(Guid LeaveRequestId, DateOnly DateFrom, DateOnly DateTo, Guid LeaveTypeId, TimeSpan WorkingHours, string? Remark);

@@ -13,7 +13,6 @@ using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
@@ -92,7 +91,7 @@ public class LeaveRequestsFunction(
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var userModel = req.HttpContext.User.CreateModel();
+        var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await createLeaveRequestService.CreateAsync(
             leaveRequestDto.LeaveRequestId,
             leaveRequestDto.DateFrom,
@@ -119,7 +118,7 @@ public class LeaveRequestsFunction(
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var userModel = req.HttpContext.User.CreateModel();
+        var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await createLeaveRequestService.CreateAsync(
             leaveRequestDto.LeaveRequestId,
             leaveRequestDto.DateFrom,
@@ -129,7 +128,7 @@ public class LeaveRequestsFunction(
             leaveRequestDto.Remark,
             userModel,
             //TODO Check if user exists and active in graph API
-            new FederatedUser(leaveRequestDto.AssignedToId, null, null, []),
+            new LeaveRequestUserDto(leaveRequestDto.AssignedToId, null),
             leaveRequestDto.WorkingHours,
             DateTimeOffset.Now,
             cancellationToken);
@@ -147,7 +146,7 @@ public class LeaveRequestsFunction(
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var userModel = req.HttpContext.User.CreateModel();
+        var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await acceptLeaveRequestService.AcceptAsync(
             leaveRequestId,
             changeStatus.Remark,
@@ -169,7 +168,7 @@ public class LeaveRequestsFunction(
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var userModel = req.HttpContext.User.CreateModel();
+        var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
 
         var now = DateTimeOffset.UtcNow;
         var leaveRequest = new GetLeaveRequestDto(
@@ -201,7 +200,7 @@ public class LeaveRequestsFunction(
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var userModel = req.HttpContext.User.CreateModel();
+        var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
 
         var now = DateTimeOffset.UtcNow;
         var leaveRequest = new GetLeaveRequestDto(

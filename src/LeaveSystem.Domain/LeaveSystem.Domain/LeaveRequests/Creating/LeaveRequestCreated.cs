@@ -2,7 +2,7 @@ namespace LeaveSystem.Domain.LeaveRequests.Creating;
 
 using Ardalis.GuardClauses;
 using LeaveSystem.Domain.EventSourcing;
-using LeaveSystem.Shared;
+using LeaveSystem.Shared.Dto;
 
 public record LeaveRequestCreated(
     Guid LeaveRequestId,
@@ -11,15 +11,15 @@ public record LeaveRequestCreated(
     TimeSpan Duration,
     Guid LeaveTypeId,
     string? Remarks,
-    FederatedUser CreatedBy,
-    FederatedUser AssignedTo,
+    LeaveRequestUserDto CreatedBy,
+    LeaveRequestUserDto AssignedTo,
     TimeSpan WorkingHours,
     DateTimeOffset CreatedDate
 ) : IEvent
 {
     public Guid StreamId => LeaveRequestId;
 
-    public static LeaveRequestCreated Create(Guid leaveRequestId, DateOnly dateFrom, DateOnly dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, FederatedUser createdBy, FederatedUser assignedTo, TimeSpan workingHours, DateTimeOffset createdDate)
+    public static LeaveRequestCreated Create(Guid leaveRequestId, DateOnly dateFrom, DateOnly dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, LeaveRequestUserDto createdBy, LeaveRequestUserDto assignedTo, TimeSpan workingHours, DateTimeOffset createdDate)
     {
         const int hoursInDayCount = 24;
         const int minHoursInDayCount = 1;

@@ -4,6 +4,7 @@ namespace LeaveSystem.Domain.LeaveRequests.Creating;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Dto;
 
 public class CreateLeaveRequestService(WriteRepository repository)
 {
@@ -14,8 +15,8 @@ public class CreateLeaveRequestService(WriteRepository repository)
         TimeSpan duration,
         Guid leaveTypeId,
         string? remarks,
-        FederatedUser createdBy,
-        FederatedUser assignedTo,
+        LeaveRequestUserDto createdBy,
+        LeaveRequestUserDto assignedTo,
         TimeSpan workingHours,
         DateTimeOffset createdDate,
         CancellationToken cancellationToken)

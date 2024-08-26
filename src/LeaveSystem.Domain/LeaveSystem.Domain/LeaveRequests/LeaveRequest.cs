@@ -6,6 +6,7 @@ using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
+using LeaveSystem.Shared.Dto;
 using LeaveSystem.Shared.LeaveRequests;
 
 public class LeaveRequest : IEventSource
@@ -26,11 +27,11 @@ public class LeaveRequest : IEventSource
 
     public LeaveRequestStatus Status { get; private set; }
 
-    public FederatedUser CreatedBy { get; private set; }
+    public LeaveRequestUserDto CreatedBy { get; private set; }
 
-    public FederatedUser LastModifiedBy { get; private set; }
+    public LeaveRequestUserDto LastModifiedBy { get; private set; }
 
-    public FederatedUser AssignedTo { get; private set; }
+    public LeaveRequestUserDto AssignedTo { get; private set; }
 
     public TimeSpan WorkingHours { get; private set; }
 
@@ -61,8 +62,8 @@ public class LeaveRequest : IEventSource
         TimeSpan duration,
         Guid leaveTypeId,
         string? remarks,
-        FederatedUser createdBy,
-        FederatedUser assignedTo,
+        LeaveRequestUserDto createdBy,
+        LeaveRequestUserDto assignedTo,
         TimeSpan workingHours,
         DateTimeOffset createdDate)
     {
@@ -81,7 +82,7 @@ public class LeaveRequest : IEventSource
         return Apply(@event);
     }
 
-    internal Result<LeaveRequest, Error> Accept(Guid leaveReuestId, string? remarks, FederatedUser acceptedBy, DateTimeOffset createdDate)
+    internal Result<LeaveRequest, Error> Accept(Guid leaveReuestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate)
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Rejected)
         {
@@ -97,7 +98,7 @@ public class LeaveRequest : IEventSource
         Append(@event);
         return Apply(@event);
     }
-    //internal void Reject(string? remarks, FederatedUser rejectedBy)
+    //internal void Reject(string? remarks, LeaveRequestUser rejectedBy)
     //{
     //    if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
     //    {
@@ -110,7 +111,7 @@ public class LeaveRequest : IEventSource
     //    Apply(@event);
     //}
 
-    //internal void Cancel(string? remarks, FederatedUser canceledBy, DateTimeOffset now)
+    //internal void Cancel(string? remarks, LeaveRequestUser canceledBy, DateTimeOffset now)
     //{
     //    if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
     //    {
@@ -131,7 +132,7 @@ public class LeaveRequest : IEventSource
     //    Apply(@event);
     //}
 
-    //internal void OnBehalf(FederatedUser createdByOnBehalf)
+    //internal void OnBehalf(LeaveRequestUser createdByOnBehalf)
     //{
     //    if (Status != LeaveRequestStatus.Pending)
     //    {
@@ -143,7 +144,7 @@ public class LeaveRequest : IEventSource
     //    Apply(@event);
     //}
 
-    //internal void Deprecate(string? remarks, FederatedUser deprecatedBy)
+    //internal void Deprecate(string? remarks, LeaveRequestUser deprecatedBy)
     //{
     //    if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
     //    {
@@ -214,7 +215,7 @@ public class LeaveRequest : IEventSource
     //    Version++;
     //}
 
-    private void AddRemarks(string? remarks, FederatedUser createdBy, DateTimeOffset createdDate)
+    private void AddRemarks(string? remarks, LeaveRequestUserDto createdBy, DateTimeOffset createdDate)
     {
         if (string.IsNullOrWhiteSpace(remarks))
         {
@@ -223,7 +224,7 @@ public class LeaveRequest : IEventSource
         this.remarks.Add(new RemarksModel(remarks, createdBy, createdDate));
     }
 
-    public record RemarksModel(string Remarks, FederatedUser CreatedBy, DateTimeOffset CreatedDate);
+    public record RemarksModel(string Remarks, LeaveRequestUserDto CreatedBy, DateTimeOffset CreatedDate);
 
     private void Append(IEvent @event) => (this as IEventSource).PendingEvents.Enqueue(@event);
 }
