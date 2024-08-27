@@ -1,11 +1,9 @@
 using System.Diagnostics;
 using System.Security.Claims;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
-using LeaveSystem.Functions;
 using LeaveSystem.Functions.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -19,9 +17,6 @@ var host = new HostBuilder()
     })
     .ConfigureServices((context, services) =>
     {
-        IConfiguration configuration = new ConfigurationBuilder()
-            .AddEnvironmentVariables()
-            .Build();
         Activity.DefaultIdFormat = ActivityIdFormat.W3C;
         Activity.ForceDefaultIdFormat = true;
         if (!context.HostingEnvironment.IsDevelopment())
@@ -34,14 +29,14 @@ var host = new HostBuilder()
             .AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtFunctionsBearer(options =>
             {
-                options.Authority = configuration.GetValue<string>("JwtBearerOptions_Authority") ?? throw new InvalidOperationException("Cannot find JwtBearerOptions_Authority in the configuration.");
-                options.Audience = configuration.GetValue<string>("JwtBearerOptions_Audience") ?? throw new InvalidOperationException("Cannot find JwtBearerOptions_Audience in the configuration.");
+                options.Authority = Environment.GetEnvironmentVariable("JwtBearerOptions_Authority") ?? throw new InvalidOperationException("Cannot find JwtBearerOptions_Authority in the configuration.");
+                options.Audience = Environment.GetEnvironmentVariable("JwtBearerOptions_Audience") ?? throw new InvalidOperationException("Cannot find JwtBearerOptions_Audience in the configuration.");
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     NameClaimType = "name",
                     RoleClaimType = ClaimTypes.Role
                 };
-                var authorizationHeaderName = configuration.GetValue<string>("JwtBearerOptions_AuthorizationHeaderName") ?? throw new InvalidOperationException("Cannot find authorizationHeaderName in the configuration.");
+                var authorizationHeaderName = Environment.GetEnvironmentVariable("JwtBearerOptions_AuthorizationHeaderName") ?? throw new InvalidOperationException("Cannot find authorizationHeaderName in the configuration.");
                 options.Events = new JwtBearerEvents
                 {
                     // ...
@@ -73,7 +68,6 @@ var host = new HostBuilder()
                     }
                 };
             });
-        services.AddLeaveSystemServices(configuration);
     })
     .Build();
 

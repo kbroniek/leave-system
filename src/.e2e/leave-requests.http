@@ -24,14 +24,7 @@ POST {{baseUrl}}/leaverequests
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
-{
-    "leaveRequestId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
-    "dateFrom": "2024-08-23",
-    "dateTo": "2024-08-23",
-    "workingHours": "08:00:00",
-    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
-    "remark": "yoyo"
-}
+{}
 
 ###
 # @name Create Leave Request on behalf
@@ -51,9 +44,7 @@ PUT {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7/accept
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
-{
-    "remark": "accepted by me"
-}
+{}
 
 ###
 # @name Reject Leave Request
