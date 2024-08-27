@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="FluentValidation" />
     <PackageReference Include="GoldenEye.Backend.Core.Marten" />
@@ -15,6 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\GoldenEye\GoldenEye\GoldenEye.csproj" />
-    <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
+    <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
   </ItemGroup>
 </Project>
