@@ -15,21 +15,21 @@ internal static class Config
 {
     private class CosmosClientSettings
     {
-        public required string CosmosDBConnection { get; set; }
+        public string? CosmosDBConnection { get; set; }
     }
 
     internal class EventRepositorySettings
     {
-        public required string DatabaseName { get; set; }
+        public string? DatabaseName { get; set; }
         [ConfigurationKeyName("EventsContainerName")]
-        public required string ContainerName { get; set; }
+        public string? ContainerName { get; set; }
     }
     public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
     {
         var cosmosClientSettings = configuration.Get<CosmosClientSettings>() ?? throw new InvalidOperationException("CosmosDB AppSettings configuration is missing. Check the appsettings.json.");
         var eventRepositorySettings = configuration.Get<EventRepositorySettings>() ?? throw new InvalidOperationException("Event repository AppSettings configuration is missing. Check the appsettings.json.");
         return services
-            .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection))
+            .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection ?? throw new InvalidOperationException("CosmosDBConnection AppSettings configuration is missing. Check the appsettings.json.")))
             .AddScoped<CreateLeaveRequestService>()
             .AddScoped<GetLeaveRequestService>()
             .AddScoped<AcceptLeaveRequestService>()
