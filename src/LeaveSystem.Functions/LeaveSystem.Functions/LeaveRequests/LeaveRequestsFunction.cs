@@ -73,7 +73,7 @@ public class LeaveRequestsFunction(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
             error => new ObjectResult(new ProblemDetails
             {
-                Title = "Error occured while getting a leave request details",
+                Title = "Error occurred while getting a leave request details",
                 Detail = error.Message,
                 Status = (int)error.HttpStatusCode
             })
