@@ -17,8 +17,8 @@
     <PackageReference Include="DarkLoop.Azure.Functions.Authorization.Isolated" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj" />
-    <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
+    <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
+    <ProjectReference Include="..\LeaveSystem.Functions.Shared\LeaveSystem.Functions.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
