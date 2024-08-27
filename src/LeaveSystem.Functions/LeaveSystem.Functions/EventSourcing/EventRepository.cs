@@ -17,7 +17,9 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
     {
         try
         {
-            var container = cosmosClient.GetContainer(settings.DatabaseName, settings.ContainerName);
+            var container = cosmosClient.GetContainer(
+                settings.DatabaseName ?? throw new InvalidOperationException("Event repository AppSettings DatabaseName configuration is missing. Check the appsettings.json."),
+                settings.ContainerName ?? throw new InvalidOperationException("Event repository AppSettings ContainerName configuration is missing. Check the appsettings.json."));
             await container.CreateItemAsync(new EventModel<object>(
                 Id: Guid.NewGuid(),
                 StreamId: @event.StreamId,
