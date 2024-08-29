@@ -1,4 +1,4 @@
-namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
+namespace LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using System.Net;
 using Ardalis.GuardClauses;
 using LeaveSystem.Domain;
@@ -7,7 +7,7 @@ using LeaveSystem.Shared;
 
 public class BasicValidator(TimeProvider timeProvider)
 {
-    public virtual void DataRangeValidate(LeaveRequestCreated @event)
+    public virtual Result<Error> DataRangeValidate(LeaveRequestCreated @event)
     {
         var now = timeProvider.GetUtcNow();
         var firstDay = DateOnly.FromDateTime(now.GetFirstDayOfYear().Date);
@@ -16,9 +16,9 @@ public class BasicValidator(TimeProvider timeProvider)
         Guard.Against.OutOfRange(@event.DateTo, nameof(@event.DateTo), firstDay, lastDay);
         if (@event.DateFrom > @event.DateTo)
         {
-            throw new ArgumentOutOfRangeException(nameof(@event),
-                "Date from has to be less than date to.");
+            return new Error("Date from has to be less than date to.", HttpStatusCode.BadRequest);
         }
+        return Result.Default;
     }
     public virtual Result<Error> Validate(LeaveRequestCreated @event, TimeSpan minDuration,
         TimeSpan maxDuration, bool? includeFreeDays)
@@ -39,6 +39,6 @@ public class BasicValidator(TimeProvider timeProvider)
         {
             return new Error("The date to is off work.", HttpStatusCode.BadRequest);
         }
-        return Result.Ok<Error>();
+        return Result.Default;
     }
 }

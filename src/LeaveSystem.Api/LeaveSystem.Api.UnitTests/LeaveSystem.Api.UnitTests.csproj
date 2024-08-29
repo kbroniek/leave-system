@@ -19,6 +19,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\LeaveSystem\LeaveSystem.UnitTests\LeaveSystem.UnitTests.csproj" />
         <ProjectReference Include="..\LeaveSystem.Api\LeaveSystem.Api.csproj" />
+        <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>

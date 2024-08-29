@@ -1,34 +1,43 @@
-using System.ComponentModel.DataAnnotations;
+namespace LeaveSystem.Domain.LeaveRequests.Creating.Validators;
+
+using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests.Creating;
-using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
+using LeaveSystem.Shared;
 
-namespace LeaveSystem.EventSourcing.LeaveRequests.CreatingLeaveRequest.Validators;
-
-internal class LimitValidator(ILimitValidatorRepository leaveLimitsService, UsedLeavesService usedLeavesService, ConnectedLeaveTypesService connectedLeaveTypesService)
+public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUsedLeavesRepository usedLeavesRepository, IConnectedLeaveTypesRepository connectedLeaveTypesRepository)
 {
-    public virtual async Task Validate(LeaveRequestCreated creatingLeaveRequest)
+    public virtual async Task<Result<Error>> Validate(LeaveRequestCreated creatingLeaveRequest)
     {
-        var connectedLeaveTypeIds = await connectedLeaveTypesService.GetConnectedLeaveTypeIds(creatingLeaveRequest.LeaveTypeId);
-        await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
+        var connectedLeaveTypeIds = await connectedLeaveTypesRepository.GetConnectedLeaveTypeIds(creatingLeaveRequest.LeaveTypeId);
+        var checkLimitResult = await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
             creatingLeaveRequest.DateTo,
             creatingLeaveRequest.CreatedBy.Id,
             creatingLeaveRequest.LeaveTypeId,
             creatingLeaveRequest.Duration,
             connectedLeaveTypeIds.nestedLeaveTypeIds);
+        if (!checkLimitResult.IsSuccess)
+        {
+            return checkLimitResult;
+        }
 
         if (connectedLeaveTypeIds.baseLeaveTypeId != null)
         {
             var baseLeaveTypeId = connectedLeaveTypeIds.baseLeaveTypeId.Value;
-            await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
+            var baseCheckLimitResult = await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
                 creatingLeaveRequest.DateTo,
                 creatingLeaveRequest.CreatedBy.Id,
                 baseLeaveTypeId,
                 creatingLeaveRequest.Duration,
-                Enumerable.Empty<Guid>());
+                []);
+            if (!baseCheckLimitResult.IsSuccess)
+            {
+                return baseCheckLimitResult;
+            }
         }
+        return Result.Default;
     }
 
-    private async Task CheckLimitForBaseLeave(
+    private async Task<Result<Error>> CheckLimitForBaseLeave(
         DateOnly dateFrom,
         DateOnly dateTo,
         string userId,
@@ -36,32 +45,39 @@ internal class LimitValidator(ILimitValidatorRepository leaveLimitsService, Used
         TimeSpan duration,
         IEnumerable<Guid> nestedLeaveTypeIds)
     {
-        var leaveLimit = await leaveLimitsService.GetLimit(dateFrom,
+        var (limit, overdueLimit) = await leaveLimitsRepository.GetLimit(dateFrom,
             dateTo,
             leaveTypeId,
             userId);
-        var totalUsed = await usedLeavesService.GetUsedLeavesDuration(
+        var totalUsed = await usedLeavesRepository.GetUsedLeavesDuration(
             dateFrom,
             dateFrom,
             userId,
             leaveTypeId,
             nestedLeaveTypeIds);
-        if (leaveLimit.Limit != null &&
-            CalculateRemaningLimit(leaveLimit.Limit.Value, leaveLimit.OverdueLimit, totalUsed + duration) < TimeSpan.Zero)
+        if (limit != null &&
+            CalculateRemaningLimit(limit.Value, overdueLimit, totalUsed + duration) < TimeSpan.Zero)
         {
-            throw new ValidationException("You don't have enough free days for this type of leave");
+            return new Error("You don't have enough free days for this type of leave", System.Net.HttpStatusCode.BadRequest);
         }
+        return Result.Default;
     }
 
     private static TimeSpan CalculateRemaningLimit(TimeSpan limit, TimeSpan? overdueLimit, TimeSpan usedLimits) =>
         limit + (overdueLimit ?? TimeSpan.Zero) - usedLimits;
 }
 
-internal class ConnectedLeaveTypesService
+public interface IConnectedLeaveTypesRepository
 {
-    internal async Task<IEnumerable<Guid>> GetConnectedLeaveTypeIds(Guid leaveTypeId) => throw new NotImplementedException();
+    ValueTask<(IEnumerable<Guid> nestedLeaveTypeIds, Guid? baseLeaveTypeId)> GetConnectedLeaveTypeIds(Guid leaveTypeId);
 }
 
-internal class UsedLeavesService
+public interface IUsedLeavesRepository
 {
+    ValueTask<TimeSpan> GetUsedLeavesDuration(DateOnly dateFrom1, DateOnly dateFrom2, string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds);
+}
+
+public interface ILimitValidatorRepository
+{
+    Task<(TimeSpan? limit, TimeSpan? overdueLimit)> GetLimit(DateOnly dateFrom, DateOnly dateTo, Guid leaveTypeId, string userId);
 }
