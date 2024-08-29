@@ -78,6 +78,7 @@ public class LeaveRequest : IEventSource
             assignedTo,
             workingHours,
             createdDate);
+
         Append(@event);
         return Apply(@event);
     }

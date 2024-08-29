@@ -1,7 +1,8 @@
-﻿using System.Globalization;
+using System.Globalization;
 
 namespace LeaveSystem.Shared;
 
+[Obsolete($"Use {nameof(DateOnlyCalculator)}")]
 public static class DateCalculator
 {
     public const uint MaxCalculatedDays = 366;
