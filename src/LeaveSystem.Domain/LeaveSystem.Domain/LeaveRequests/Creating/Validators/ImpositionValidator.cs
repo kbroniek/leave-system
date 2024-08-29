@@ -1,14 +1,17 @@
 namespace LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 
 using LeaveSystem.Domain;
-using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
 
 public class ImpositionValidator(IImpositionValidatorRepository impositionValidatorRepository)
 {
-    public virtual async Task<Result<Error>> Validate(LeaveRequestCreated creatingLeaveRequest)
+    public virtual async Task<Result<Error>> Validate(
+        DateOnly dateFrom,
+        DateOnly dateTo,
+        string userId,
+        CancellationToken cancellationToken)
     {
-        if (await impositionValidatorRepository.ExistValid(creatingLeaveRequest.CreatedBy.Id, creatingLeaveRequest.DateFrom, creatingLeaveRequest.DateTo))
+        if (await impositionValidatorRepository.ExistValid(userId, dateFrom, dateTo))
         {
             return new Error("Cannot create a new leave request in this time. The other leave is overlapping with this date", System.Net.HttpStatusCode.BadRequest);
         }

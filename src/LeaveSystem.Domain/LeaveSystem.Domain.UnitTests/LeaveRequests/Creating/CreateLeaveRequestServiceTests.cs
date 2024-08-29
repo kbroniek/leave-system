@@ -4,18 +4,21 @@ using System.Threading.Tasks;
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Creating;
+using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
 using Moq;
 
 public class CreateLeaveRequestServiceTests
 {
     private readonly Mock<WriteService> mockWriteService = new(null);
+    private readonly Mock<CreateLeaveRequestValidator> mockCreateLeaveRequestValidator = new(null, null, null);
     private readonly CreateLeaveRequestService createLeaveRequestService;
     private readonly CancellationToken cancellationToken = CancellationToken.None;
     private readonly LeaveRequestUserDto user = new("fakeUserId", "fakeUserName");
 
     public CreateLeaveRequestServiceTests() =>
-        createLeaveRequestService = new CreateLeaveRequestService(mockWriteService.Object);
+        createLeaveRequestService = new CreateLeaveRequestService(mockCreateLeaveRequestValidator.Object, mockWriteService.Object);
 
     [Fact(Skip = "Remove Guard.Against.OutOfRange and use Result")]
     public async Task CreateAsync_ShouldReturnError_WhenLeaveRequestPendingFails()
@@ -42,6 +45,12 @@ public class CreateLeaveRequestServiceTests
                                               It.IsAny<LeaveRequestUserDto>(), It.IsAny<LeaveRequestUserDto>(),
                                               It.IsAny<TimeSpan>(), It.IsAny<DateTimeOffset>()))
                     .Returns(leaveRequest.Object);
+        mockCreateLeaveRequestValidator.Setup(v => v.Validate(
+                It.IsAny<DateOnly>(), It.IsAny<DateOnly>(),
+                It.IsAny<TimeSpan>(), It.IsAny<Guid>(),
+                It.IsAny<TimeSpan>(), It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok<Error>());
 
         mockWriteService
             .Setup(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()))

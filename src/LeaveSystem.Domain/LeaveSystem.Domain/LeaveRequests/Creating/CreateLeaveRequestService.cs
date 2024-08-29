@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using LeaveSystem.Domain;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
+using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 
-public class CreateLeaveRequestService(WriteService writeService)
+public class CreateLeaveRequestService(CreateLeaveRequestValidator createLeaveRequestValidator, WriteService writeService)
 {
     public async Task<Result<LeaveRequest, Error>> CreateAsync(
         Guid leaveRequestId,
@@ -20,6 +21,18 @@ public class CreateLeaveRequestService(WriteService writeService)
         DateTimeOffset createdDate,
         CancellationToken cancellationToken)
     {
+        var validateResult = await createLeaveRequestValidator.Validate(
+            dateFrom,
+            dateTo,
+            duration,
+            leaveTypeId,
+            workingHours,
+            assignedTo.Id,
+            cancellationToken);
+        if (!validateResult.IsSuccess)
+        {
+            return validateResult.Error;
+        }
         var leaveRequest = new LeaveRequest();
         var result = leaveRequest.Pending(
             leaveRequestId,

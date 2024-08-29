@@ -1,19 +1,25 @@
 namespace LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 
 using LeaveSystem.Domain;
-using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
 
 public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUsedLeavesRepository usedLeavesRepository, IConnectedLeaveTypesRepository connectedLeaveTypesRepository)
 {
-    public virtual async Task<Result<Error>> Validate(LeaveRequestCreated creatingLeaveRequest)
+    public virtual async Task<Result<Error>> Validate(
+        DateOnly dateFrom,
+        DateOnly dateTo,
+        TimeSpan duration,
+        Guid leaveTypeId,
+        TimeSpan workingHours,
+        string userId,
+        CancellationToken cancellationToken)
     {
-        var connectedLeaveTypeIds = await connectedLeaveTypesRepository.GetConnectedLeaveTypeIds(creatingLeaveRequest.LeaveTypeId);
-        var checkLimitResult = await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
-            creatingLeaveRequest.DateTo,
-            creatingLeaveRequest.CreatedBy.Id,
-            creatingLeaveRequest.LeaveTypeId,
-            creatingLeaveRequest.Duration,
+        var connectedLeaveTypeIds = await connectedLeaveTypesRepository.GetConnectedLeaveTypeIds(leaveTypeId);
+        var checkLimitResult = await CheckLimitForBaseLeave(dateFrom,
+            dateTo,
+            userId,
+            leaveTypeId,
+            duration,
             connectedLeaveTypeIds.nestedLeaveTypeIds);
         if (!checkLimitResult.IsSuccess)
         {
@@ -23,11 +29,11 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
         if (connectedLeaveTypeIds.baseLeaveTypeId != null)
         {
             var baseLeaveTypeId = connectedLeaveTypeIds.baseLeaveTypeId.Value;
-            var baseCheckLimitResult = await CheckLimitForBaseLeave(creatingLeaveRequest.DateFrom,
-                creatingLeaveRequest.DateTo,
-                creatingLeaveRequest.CreatedBy.Id,
+            var baseCheckLimitResult = await CheckLimitForBaseLeave(dateFrom,
+                dateTo,
+                userId,
                 baseLeaveTypeId,
-                creatingLeaveRequest.Duration,
+                duration,
                 []);
             if (!baseCheckLimitResult.IsSuccess)
             {
