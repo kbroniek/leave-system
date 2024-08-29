@@ -2,7 +2,7 @@ namespace LeaveSystem.Domain.EventSourcing;
 using System.Threading.Tasks;
 using LeaveSystem.Shared;
 
-public class WriteRepository(IAppendEventRepository appendEventRepository)
+public class WriteService(IAppendEventRepository appendEventRepository)
 {
     internal virtual async Task<Result<TEventSource, Error>> Write<TEventSource>(TEventSource eventSource, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
     {

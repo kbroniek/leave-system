@@ -5,7 +5,7 @@ using LeaveSystem.Domain;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
 
-public class CreateLeaveRequestService(WriteRepository repository)
+public class CreateLeaveRequestService(WriteService writeService)
 {
     public async Task<Result<LeaveRequest, Error>> CreateAsync(
         Guid leaveRequestId,
@@ -36,6 +36,6 @@ public class CreateLeaveRequestService(WriteRepository repository)
         {
             return result;
         }
-        return await repository.Write(result.Value, cancellationToken);
+        return await writeService.Write(result.Value, cancellationToken);
     }
 }

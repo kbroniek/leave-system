@@ -33,8 +33,8 @@ internal static class Config
             .AddScoped<CreateLeaveRequestService>()
             .AddScoped<GetLeaveRequestService>()
             .AddScoped<AcceptLeaveRequestService>()
-            .AddScoped<ReadRepository>()
-            .AddScoped<WriteRepository>()
+            .AddScoped<ReadService>()
+            .AddScoped<WriteService>()
             .AddScoped<EventRepository>(sp => new(
                 sp.GetRequiredService<CosmosClient>(),
                 sp.GetRequiredService<ILogger<EventRepository>>(),

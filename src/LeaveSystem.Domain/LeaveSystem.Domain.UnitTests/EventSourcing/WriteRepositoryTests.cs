@@ -10,12 +10,12 @@ using Moq;
 public class WriteRepositoryTests
 {
     private readonly Mock<IAppendEventRepository> mockAppendEventRepository = new();
-    private readonly WriteRepository writeRepository;
+    private readonly WriteService writeService;
     private readonly CancellationToken cancellationToken = CancellationToken.None;
     private readonly Guid id = Guid.NewGuid();
 
     public WriteRepositoryTests() =>
-        writeRepository = new WriteRepository(mockAppendEventRepository.Object);
+        writeService = new WriteService(mockAppendEventRepository.Object);
 
     [Fact]
     public async Task Write_ShouldReturnEventSource_WhenAllEventsAppendedSuccessfully()
@@ -30,7 +30,7 @@ public class WriteRepositoryTests
             .ReturnsAsync(Result.Default); // Simulate successful append
 
         // Act
-        var result = await writeRepository.Write(eventSource, cancellationToken);
+        var result = await writeService.Write(eventSource, cancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -51,7 +51,7 @@ public class WriteRepositoryTests
             .ReturnsAsync(expectedError);  // Simulate failed append
 
         // Act
-        var result = await writeRepository.Write(eventSource, cancellationToken);
+        var result = await writeService.Write(eventSource, cancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -66,7 +66,7 @@ public class WriteRepositoryTests
         var eventSource = new FakeEventSource();  // No pending events
 
         // Act
-        var result = await writeRepository.Write(eventSource, cancellationToken);
+        var result = await writeService.Write(eventSource, cancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

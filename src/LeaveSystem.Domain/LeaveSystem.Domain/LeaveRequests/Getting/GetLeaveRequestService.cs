@@ -5,10 +5,8 @@ using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Shared;
 
-public class GetLeaveRequestService(ReadRepository repository)
+public class GetLeaveRequestService(ReadService readService)
 {
-    public async Task<Result<LeaveRequest, Error>> Get(Guid streamId, CancellationToken cancellationToken)
-    {
-        return await repository.FindByIdAsync<LeaveRequest>(streamId, cancellationToken);
-    }
+    public async Task<Result<LeaveRequest, Error>> Get(Guid streamId, CancellationToken cancellationToken) =>
+        await readService.FindByIdAsync<LeaveRequest>(streamId, cancellationToken);
 }

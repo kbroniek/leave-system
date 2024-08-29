@@ -5,11 +5,11 @@ using LeaveSystem.Domain;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
 
-public class AcceptLeaveRequestService(ReadRepository readRepository, WriteRepository writeRepository)
+public class AcceptLeaveRequestService(ReadService readService, WriteService writeService)
 {
     public async Task<Result<LeaveRequest, Error>> AcceptAsync(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
-        var resultFindById = await readRepository.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
+        var resultFindById = await readService.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
         if (!resultFindById.IsSuccess)
         {
             return resultFindById;
@@ -19,6 +19,6 @@ public class AcceptLeaveRequestService(ReadRepository readRepository, WriteRepos
         {
             return resultAccept;
         }
-        return await writeRepository.Write(resultAccept.Value, cancellationToken);
+        return await writeService.Write(resultAccept.Value, cancellationToken);
     }
 }

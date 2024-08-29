@@ -9,13 +9,13 @@ using Moq;
 
 public class CreateLeaveRequestServiceTests
 {
-    private readonly Mock<WriteRepository> mockWriteRepository = new(null);
+    private readonly Mock<WriteService> mockWriteService = new(null);
     private readonly CreateLeaveRequestService createLeaveRequestService;
     private readonly CancellationToken cancellationToken = CancellationToken.None;
     private readonly LeaveRequestUserDto user = new("fakeUserId", "fakeUserName");
 
     public CreateLeaveRequestServiceTests() =>
-        createLeaveRequestService = new CreateLeaveRequestService(mockWriteRepository.Object);
+        createLeaveRequestService = new CreateLeaveRequestService(mockWriteService.Object);
 
     [Fact(Skip = "Remove Guard.Against.OutOfRange and use Result")]
     public async Task CreateAsync_ShouldReturnError_WhenLeaveRequestPendingFails()
@@ -29,7 +29,7 @@ public class CreateLeaveRequestServiceTests
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal("Pending failed", result.Error.Message);
-        mockWriteRepository.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockWriteService.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class CreateLeaveRequestServiceTests
                                               It.IsAny<TimeSpan>(), It.IsAny<DateTimeOffset>()))
                     .Returns(leaveRequest.Object);
 
-        mockWriteRepository
+        mockWriteService
             .Setup(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest.Object);
 
@@ -56,6 +56,6 @@ public class CreateLeaveRequestServiceTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(leaveRequest.Object, result.Value);
-        mockWriteRepository.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockWriteService.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }
