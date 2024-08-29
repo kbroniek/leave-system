@@ -71,15 +71,7 @@ public class LeaveRequestsFunction(
 
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
-            error => new ObjectResult(new ProblemDetails
-            {
-                Title = "Error occurred while getting a leave request details",
-                Detail = error.Message,
-                Status = (int)error.HttpStatusCode
-            })
-            {
-                StatusCode = (int)error.HttpStatusCode
-            });
+            error => error.ToObjectResult("Error occurred while getting a leave request details. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
     }
 
     [Function(nameof(CreateLeaveRequest))]
@@ -106,7 +98,7 @@ public class LeaveRequestsFunction(
             cancellationToken);
         return result.Match<IActionResult>(
             leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
-            error => new BadRequestObjectResult(error.Message));
+            error => error.ToObjectResult("Error occurred while creating a leave request. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
     }
 
     [Function(nameof(CreateLeaveRequestOnBehalf))]
@@ -134,7 +126,7 @@ public class LeaveRequestsFunction(
             cancellationToken);
         return result.Match<IActionResult>(
             leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
-            error => new BadRequestObjectResult(error.Message));
+            error => error.ToObjectResult($"Error occurred while creating a leave request on behalf of another user. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
     }
 
     [Function(nameof(AcceptStatusLeaveRequest))]
@@ -156,7 +148,7 @@ public class LeaveRequestsFunction(
         );
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
-            error => new BadRequestObjectResult(error.Message));
+            error => error.ToObjectResult("Error occurred while accepting a leave request. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
     }
 
     [Function(nameof(RejectStatusLeaveRequest))]
