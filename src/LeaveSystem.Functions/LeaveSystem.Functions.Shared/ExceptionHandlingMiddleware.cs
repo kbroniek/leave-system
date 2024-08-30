@@ -56,11 +56,18 @@ public class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
         }
 
         httpContext.Response.StatusCode = status;
+        var isDevelopment = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") == "Development";
+        var extensions = isDevelopment ? new Dictionary<string, object?>
+            {
+                {"exception", ex.ToString() }
+            } :
+            [];
         var problemDetails = new ProblemDetails
         {
             Detail = ex.Message,
             Status = status,
-            Title = "Global exception handler"
+            Title = "Global exception handler",
+            Extensions = extensions
         };
         httpContext.Response.Headers.ContentType = "application/problem+json; charset=utf-8";
 
