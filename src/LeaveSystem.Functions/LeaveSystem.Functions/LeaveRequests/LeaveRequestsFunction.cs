@@ -75,7 +75,7 @@ public class LeaveRequestsFunction(
     }
 
     [Function(nameof(CreateLeaveRequest))]
-    [Authorize(Roles = $"{nameof(RoleType.Employee)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
     public async Task<IActionResult> CreateLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "post",
