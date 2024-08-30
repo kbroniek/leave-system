@@ -66,11 +66,11 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
         {
             return result.Error;
         }
-        var (limit, overdueLimit) = result.Value;
+        var (limit, overdueLimit, validSince, validUntil) = result.Value;
         if (limit is not null)
         {
             var totalUsed = await usedLeavesRepository.GetUsedLeavesDuration(
-                dateFrom, dateTo,
+                validSince, validUntil,
                 userId, leaveTypeId,
                 nestedLeaveTypeIds,
                 cancellationToken);
@@ -93,10 +93,10 @@ public interface IConnectedLeaveTypesRepository
 
 public interface IUsedLeavesRepository
 {
-    ValueTask<TimeSpan> GetUsedLeavesDuration(DateOnly dateFrom, DateOnly dateTo, string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds, CancellationToken cancellationToken);
+    ValueTask<TimeSpan> GetUsedLeavesDuration(DateOnly? limitValidSince, DateOnly? limitValidUntil, string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds, CancellationToken cancellationToken);
 }
 
 public interface ILimitValidatorRepository
 {
-    ValueTask<Result<(TimeSpan? limit, TimeSpan? overdueLimit), Error>> GetLimit(DateOnly dateFrom, DateOnly dateTo, Guid leaveTypeId, string userId, CancellationToken cancellationToken);
+    ValueTask<Result<(TimeSpan? limit, TimeSpan? overdueLimit, DateOnly? validSince, DateOnly? validUntil), Error>> GetLimit(DateOnly dateFrom, DateOnly dateTo, Guid leaveTypeId, string userId, CancellationToken cancellationToken);
 }

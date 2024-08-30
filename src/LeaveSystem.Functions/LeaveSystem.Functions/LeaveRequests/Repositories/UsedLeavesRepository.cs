@@ -7,11 +7,10 @@ using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.Extensions;
-using LeaveSystem.Shared;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 
-internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseName, string containerId, TimeProvider timeProvider) : IUsedLeavesRepository
+internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseName, string containerId) : IUsedLeavesRepository
 {
     //TODO: Fill in when you add new events
     private readonly IReadOnlyCollection<string> cancelledEventTypes = [
@@ -19,10 +18,15 @@ internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseNa
         //typeof(LeaveRequestRejected).AssemblyQualifiedName!
         //typeof(LeaveRequestDeprecated).AssemblyQualifiedName!
         ];
-    public async ValueTask<TimeSpan> GetUsedLeavesDuration(DateOnly dateFrom, DateOnly dateTo, string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds, CancellationToken cancellationToken)
+    public async ValueTask<TimeSpan> GetUsedLeavesDuration(
+        DateOnly? limitValidSince, DateOnly? limitValidUntil,
+        string userId, Guid leaveTypeId,
+        IEnumerable<Guid> nestedLeaveTypeIds,
+        CancellationToken cancellationToken)
     {
         var container = cosmosClient.GetContainer(databaseName, containerId);
-        var pendingEvents = await GetPendingEvents(userId, leaveTypeId, nestedLeaveTypeIds, container, cancellationToken);
+        var pendingEvents = await GetPendingEvents(limitValidSince, limitValidUntil,
+            userId, leaveTypeId, nestedLeaveTypeIds, container, cancellationToken);
         if (pendingEvents.Count == 0)
         {
             return TimeSpan.Zero;
@@ -45,17 +49,18 @@ internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseNa
         return cancelledEvents.Select(x => x.StreamId).ToList();
     }
 
-    private async Task<IReadOnlyList<EventModel<PendingEventEntity>>> GetPendingEvents(string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds, Container container, CancellationToken cancellationToken)
+    private async Task<IReadOnlyList<EventModel<PendingEventEntity>>> GetPendingEvents(
+        DateOnly? limitValidSince, DateOnly? limitValidUntil,
+        string userId, Guid leaveTypeId,
+        IEnumerable<Guid> nestedLeaveTypeIds,
+        Container container,
+        CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow();
-        var dateOnlyNow = DateOnly.FromDateTime(now.Date);
-        var firstDayOfYear = dateOnlyNow.GetFirstDayOfYear();
-        var lastDayOfYear = dateOnlyNow.GetLastDayOfYear();
         var iterator = container.GetItemLinqQueryable<EventModel<PendingEventEntity>>()
             .Where(x => (x.Body.LeaveTypeId == leaveTypeId || nestedLeaveTypeIds.Contains(x.Body.LeaveTypeId)) &&
                 x.Body.AssignedTo.UserId == userId &&
-                x.Body.DateFrom >= firstDayOfYear &&
-                x.Body.DateTo <= lastDayOfYear &&
+                (limitValidSince == null || x.Body.DateFrom >= limitValidSince) &&
+                (limitValidUntil == null || x.Body.DateTo <= limitValidUntil) &&
                 x.EventType == typeof(LeaveRequestCreated).AssemblyQualifiedName!)
             .ToFeedIterator();
 

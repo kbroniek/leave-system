@@ -90,8 +90,7 @@ internal static class Config
             .AddScoped<IUsedLeavesRepository>(sp => new UsedLeavesRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
-                    eventsContainerName,
-                    sp.GetRequiredService<TimeProvider>()
+                    eventsContainerName
                 ));
 
 

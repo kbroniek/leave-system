@@ -10,7 +10,7 @@ using Microsoft.Azure.Cosmos.Linq;
 
 internal class LimitValidatorRepository(CosmosClient cosmosClient, string databaseName, string containerId) : ILimitValidatorRepository
 {
-    public async ValueTask<Result<(TimeSpan? limit, TimeSpan? overdueLimit), Error>> GetLimit(
+    public async ValueTask<Result<(TimeSpan? limit, TimeSpan? overdueLimit, DateOnly? validSince, DateOnly? validUntil), Error>> GetLimit(
         DateOnly dateFrom, DateOnly dateTo, Guid leaveTypeId, string userId, CancellationToken cancellationToken)
     {
         var container = cosmosClient.GetContainer(databaseName, containerId);
@@ -32,7 +32,7 @@ internal class LimitValidatorRepository(CosmosClient cosmosClient, string databa
             return new Error($"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userId}.", System.Net.HttpStatusCode.UnprocessableEntity);
         }
         var limit = limits[0];
-        return (limit.Limit, limit.OverdueLimit);
+        return (limit.Limit, limit.OverdueLimit, limit.ValidSince, limit.ValidUntil);
     }
     private sealed record Entity(Guid LeaveTypeId, string? AssignedToUserId, DateOnly? ValidSince, DateOnly? ValidUntil, TimeSpan Limit, TimeSpan OverdueLimit);
 }
