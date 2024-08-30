@@ -11,14 +11,14 @@ public class ImpositionValidator(IImpositionValidatorRepository impositionValida
         string userId,
         CancellationToken cancellationToken)
     {
-        if (await impositionValidatorRepository.ExistValid(userId, dateFrom, dateTo))
+        if (await impositionValidatorRepository.IsExistValid(userId, dateFrom, dateTo, cancellationToken))
         {
             return new Error("Cannot create a new leave request in this time. The other leave is overlapping with this date", System.Net.HttpStatusCode.BadRequest);
         }
-        return Result.Ok<Error>();
+        return Result.Default;
     }
 }
 public interface IImpositionValidatorRepository
 {
-    ValueTask<bool> ExistValid(string createdById, DateOnly dateFrom, DateOnly dateTo);
+    ValueTask<bool> IsExistValid(string createdById, DateOnly dateFrom, DateOnly dateTo, CancellationToken cancellationToken);
 }

@@ -71,12 +71,22 @@ internal static class Config
         string leaveLimitsContainerName,
         string eventsContainerName) =>
         services
+            .AddScoped(sp => new CancelledEventsRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    eventsContainerName
+                ))
             .AddScoped<IConnectedLeaveTypesRepository>(sp => new ConnectedLeaveTypesRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
                     leaveTypesContainerName
                 ))
-            .AddScoped<IImpositionValidatorRepository, ImpositionValidatorRepository>()
+            .AddScoped<IImpositionValidatorRepository>(sp => new ImpositionValidatorRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    eventsContainerName,
+                    sp.GetRequiredService<CancelledEventsRepository>()
+                ))
             .AddScoped<ILimitValidatorRepository>(sp => new LimitValidatorRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
@@ -90,7 +100,8 @@ internal static class Config
             .AddScoped<IUsedLeavesRepository>(sp => new UsedLeavesRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
-                    eventsContainerName
+                    eventsContainerName,
+                    sp.GetRequiredService<CancelledEventsRepository>()
                 ));
 
 

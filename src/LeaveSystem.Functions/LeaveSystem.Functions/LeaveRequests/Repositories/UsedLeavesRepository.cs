@@ -10,14 +10,8 @@ using LeaveSystem.Functions.Extensions;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 
-internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseName, string containerId) : IUsedLeavesRepository
+internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseName, string containerId, CancelledEventsRepository cancelledEventsRepository) : IUsedLeavesRepository
 {
-    //TODO: Fill in when you add new events
-    private readonly IReadOnlyCollection<string> cancelledEventTypes = [
-        //typeof(LeaveRequestCancelled).AssemblyQualifiedName!
-        //typeof(LeaveRequestRejected).AssemblyQualifiedName!
-        //typeof(LeaveRequestDeprecated).AssemblyQualifiedName!
-        ];
     public async ValueTask<TimeSpan> GetUsedLeavesDuration(
         DateOnly? limitValidSince, DateOnly? limitValidUntil,
         string userId, Guid leaveTypeId,
@@ -33,23 +27,13 @@ internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseNa
         }
         var pendingEventStreamIds = pendingEvents.Select(x => x.StreamId).ToList();
         //TODO: Check if it works correctly.
-        var cancelledEventsStreamIds = await GetCancelledStreamIds(container, pendingEventStreamIds, cancellationToken);
+        var cancelledEventsStreamIds = await cancelledEventsRepository.GetCancelledStreamIds(pendingEventStreamIds, cancellationToken);
 
         var countableEvents = pendingEvents.Where(x => !cancelledEventsStreamIds.Contains(x.StreamId));
         return TimeSpan.FromTicks(countableEvents.Sum(x => x.Body.Duration.Ticks));
     }
 
-    private async Task<IReadOnlyCollection<Guid>> GetCancelledStreamIds(Container container, List<Guid> pendingEventStreamIds, CancellationToken cancellationToken)
-    {
-        var cancelledIterator = container.GetItemLinqQueryable<EventModel<object>>()
-                    .Where(x => cancelledEventTypes.Contains(x.EventType) &&
-                        pendingEventStreamIds.Contains(x.StreamId))
-                    .ToFeedIterator();
-        var cancelledEvents = await cancelledIterator.ExecuteQuery(cancellationToken);
-        return cancelledEvents.Select(x => x.StreamId).ToList();
-    }
-
-    private async Task<IReadOnlyList<EventModel<PendingEventEntity>>> GetPendingEvents(
+    private static async Task<IReadOnlyList<EventModel<PendingEventEntity>>> GetPendingEvents(
         DateOnly? limitValidSince, DateOnly? limitValidUntil,
         string userId, Guid leaveTypeId,
         IEnumerable<Guid> nestedLeaveTypeIds,
