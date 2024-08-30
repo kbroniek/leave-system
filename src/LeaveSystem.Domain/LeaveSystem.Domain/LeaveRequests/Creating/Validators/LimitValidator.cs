@@ -25,7 +25,8 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
             userId,
             leaveTypeId,
             duration,
-            nestedLeaveTypeIds);
+            nestedLeaveTypeIds,
+            cancellationToken);
         if (checkLimitResult.IsFailure)
         {
             return checkLimitResult;
@@ -38,7 +39,8 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
                 userId,
                 baseLeaveTypeId.Value,
                 duration,
-                []);
+                [],
+                cancellationToken);
             if (baseCheckLimitResult.IsFailure)
             {
                 return baseCheckLimitResult;
@@ -53,17 +55,21 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
         string userId,
         Guid leaveTypeId,
         TimeSpan duration,
-        IEnumerable<Guid> nestedLeaveTypeIds)
+        IEnumerable<Guid> nestedLeaveTypeIds,
+        CancellationToken cancellationToken)
     {
-        var (limit, overdueLimit) = await leaveLimitsRepository.GetLimit(dateFrom,
-            dateTo,
-            leaveTypeId,
-            userId);
+        var result = await leaveLimitsRepository.GetLimit(
+            dateFrom, dateTo,
+            leaveTypeId, userId,
+            cancellationToken);
+        if (result.IsFailure)
+        {
+            return result.Error;
+        }
+        var (limit, overdueLimit) = result.Value;
         var totalUsed = await usedLeavesRepository.GetUsedLeavesDuration(
-            dateFrom,
-            dateFrom,
-            userId,
-            leaveTypeId,
+            dateFrom, dateTo,
+            userId, leaveTypeId,
             nestedLeaveTypeIds);
         if (limit != null &&
             CalculateRemaningLimit(limit.Value, overdueLimit, totalUsed + duration) < TimeSpan.Zero)
@@ -89,5 +95,5 @@ public interface IUsedLeavesRepository
 
 public interface ILimitValidatorRepository
 {
-    ValueTask<Result<(TimeSpan? limit, TimeSpan? overdueLimit), Error>> GetLimit(DateOnly dateFrom, DateOnly dateTo, Guid leaveTypeId, string userId);
+    ValueTask<Result<(TimeSpan? limit, TimeSpan? overdueLimit), Error>> GetLimit(DateOnly dateFrom, DateOnly dateTo, Guid leaveTypeId, string userId, CancellationToken cancellationToken);
 }

@@ -5,7 +5,7 @@ using Microsoft.Azure.Cosmos;
 
 internal static class CosmosExtensions
 {
-    internal static async Task<IReadOnlyCollection<T>> ExecuteQuery<T>(this FeedIterator<T> iterator, CancellationToken cancellationToken)
+    internal static async Task<IReadOnlyList<T>> ExecuteQuery<T>(this FeedIterator<T> iterator, CancellationToken cancellationToken)
     {
         using (iterator)
         {

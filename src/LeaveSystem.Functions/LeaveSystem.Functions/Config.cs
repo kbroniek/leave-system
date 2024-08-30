@@ -21,6 +21,7 @@ internal static class Config
         public string? DatabaseName { get; set; }
         public string? EventsContainerName { get; set; }
         public string? LeaveTypesContainerName { get; set; }
+        public string? LeaveLimitsContainerName { get; set; }
     }
 
     public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
@@ -31,7 +32,8 @@ internal static class Config
             .AddLeaveRequestServices()
             .AddLeaveRequestRepositories(
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
-                cosmosClientSettings.LeaveTypesContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)))
+                cosmosClientSettings.LeaveTypesContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)),
+                cosmosClientSettings.LeaveLimitsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)))
             .AddLeaveRequestValidators()
             .AddEventSourcing(
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
@@ -64,7 +66,8 @@ internal static class Config
     private static IServiceCollection AddLeaveRequestRepositories(
         this IServiceCollection services,
         string databaseName,
-        string leaveTypesContainerName) =>
+        string leaveTypesContainerName,
+        string leaveLimitsContainerName) =>
         services
             .AddScoped<IConnectedLeaveTypesRepository>(sp => new ConnectedLeaveTypesRepository(
                     sp.GetRequiredService<CosmosClient>(),
@@ -72,7 +75,11 @@ internal static class Config
                     leaveTypesContainerName
                 ))
             .AddScoped<IImpositionValidatorRepository, ImpositionValidatorRepository>()
-            .AddScoped<ILimitValidatorRepository, LimitValidatorRepository>()
+            .AddScoped<ILimitValidatorRepository>(sp => new LimitValidatorRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    leaveLimitsContainerName
+                ))
             .AddScoped<ILeaveTypeFreeDaysRepository>(sp => new LeaveTypeFreeDaysRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
