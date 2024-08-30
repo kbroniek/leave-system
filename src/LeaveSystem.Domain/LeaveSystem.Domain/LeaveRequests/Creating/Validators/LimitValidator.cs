@@ -67,14 +67,17 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
             return result.Error;
         }
         var (limit, overdueLimit) = result.Value;
-        var totalUsed = await usedLeavesRepository.GetUsedLeavesDuration(
-            dateFrom, dateTo,
-            userId, leaveTypeId,
-            nestedLeaveTypeIds);
-        if (limit != null &&
-            CalculateRemaningLimit(limit.Value, overdueLimit, totalUsed + duration) < TimeSpan.Zero)
+        if (limit is not null)
         {
-            return new Error("You don't have enough free days for this type of leave", System.Net.HttpStatusCode.BadRequest);
+            var totalUsed = await usedLeavesRepository.GetUsedLeavesDuration(
+                dateFrom, dateTo,
+                userId, leaveTypeId,
+                nestedLeaveTypeIds,
+                cancellationToken);
+            if (CalculateRemaningLimit(limit.Value, overdueLimit, totalUsed + duration) < TimeSpan.Zero)
+            {
+                return new Error($"You don't have enough free days for this type of leave. LeaveTypeId={leaveTypeId}", System.Net.HttpStatusCode.UnprocessableEntity);
+            }
         }
         return Result.Default;
     }
@@ -90,7 +93,7 @@ public interface IConnectedLeaveTypesRepository
 
 public interface IUsedLeavesRepository
 {
-    ValueTask<TimeSpan> GetUsedLeavesDuration(DateOnly dateFrom1, DateOnly dateFrom2, string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds);
+    ValueTask<TimeSpan> GetUsedLeavesDuration(DateOnly dateFrom, DateOnly dateTo, string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds, CancellationToken cancellationToken);
 }
 
 public interface ILimitValidatorRepository

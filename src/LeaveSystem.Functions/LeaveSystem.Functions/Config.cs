@@ -33,7 +33,8 @@ internal static class Config
             .AddLeaveRequestRepositories(
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
                 cosmosClientSettings.LeaveTypesContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)),
-                cosmosClientSettings.LeaveLimitsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)))
+                cosmosClientSettings.LeaveLimitsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)),
+                cosmosClientSettings.EventsContainerName ?? throw CreateError(nameof(cosmosClientSettings.EventsContainerName)))
             .AddLeaveRequestValidators()
             .AddEventSourcing(
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
@@ -67,7 +68,8 @@ internal static class Config
         this IServiceCollection services,
         string databaseName,
         string leaveTypesContainerName,
-        string leaveLimitsContainerName) =>
+        string leaveLimitsContainerName,
+        string eventsContainerName) =>
         services
             .AddScoped<IConnectedLeaveTypesRepository>(sp => new ConnectedLeaveTypesRepository(
                     sp.GetRequiredService<CosmosClient>(),
@@ -85,7 +87,12 @@ internal static class Config
                     databaseName,
                     leaveTypesContainerName
                 ))
-            .AddScoped<IUsedLeavesRepository, UsedLeavesRepository>();
+            .AddScoped<IUsedLeavesRepository>(sp => new UsedLeavesRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    eventsContainerName,
+                    sp.GetRequiredService<TimeProvider>()
+                ));
 
 
     private static IServiceCollection AddLeaveRequestValidators(this IServiceCollection services) =>
