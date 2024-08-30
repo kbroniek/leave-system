@@ -50,6 +50,7 @@ public readonly struct Result<TError>
     }
 
     public bool IsSuccess => success;
+    public bool IsFailure => !success;
 
     public static implicit operator Result<TError>(TError e) => new(e, false);
     public static implicit operator Result<TError>(Result.Empty _) => new(default, true);

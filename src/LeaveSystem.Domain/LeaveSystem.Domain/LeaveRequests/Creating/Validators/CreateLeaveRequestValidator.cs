@@ -15,17 +15,17 @@ public class CreateLeaveRequestValidator(BasicValidator basicValidator, Impositi
         CancellationToken cancellationToken)
     {
         var basicResult = await basicValidator.Validate(dateFrom, dateTo, duration, leaveTypeId, workingHours, cancellationToken);
-        if (!basicResult.IsSuccess)
+        if (basicResult.IsFailure)
         {
             return basicResult;
         }
         var limitResult = await limitValidator.Validate(dateFrom, dateTo, duration, leaveTypeId, workingHours, userId, cancellationToken);
-        if (!limitResult.IsSuccess)
+        if (limitResult.IsFailure)
         {
             return limitResult;
         }
         var impositionResult = await impositionValidator.Validate(dateFrom, dateTo, userId, cancellationToken);
-        if (!impositionResult.IsSuccess)
+        if (impositionResult.IsFailure)
         {
             return impositionResult;
         }

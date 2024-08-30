@@ -15,37 +15,42 @@ using Microsoft.Extensions.Logging;
 
 internal static class Config
 {
-    private class CosmosClientSettings
+    private class CosmosSettings
     {
         public string? CosmosDBConnection { get; set; }
+        public string? DatabaseName { get; set; }
+        public string? EventsContainerName { get; set; }
+        public string? LeaveTypesContainerName { get; set; }
     }
 
-    internal class EventRepositorySettings
-    {
-        public string? DatabaseName { get; set; }
-        [ConfigurationKeyName("EventsContainerName")]
-        public string? ContainerName { get; set; }
-    }
     public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var cosmosClientSettings = configuration.Get<CosmosClientSettings>() ?? throw new InvalidOperationException("CosmosDB AppSettings configuration is missing. Check the appsettings.json.");
-        var eventRepositorySettings = configuration.Get<EventRepositorySettings>() ?? throw new InvalidOperationException("Event repository AppSettings configuration is missing. Check the appsettings.json.");
+        var cosmosClientSettings = configuration.Get<CosmosSettings>() ?? throw CreateError(nameof(CosmosSettings));
         return services
-            .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection ?? throw new InvalidOperationException("CosmosDBConnection AppSettings configuration is missing. Check the appsettings.json.")))
+            .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection ?? throw CreateError(nameof(cosmosClientSettings.CosmosDBConnection))))
             .AddLeaveRequestServices()
-            .AddLeaveRequestRepositories()
+            .AddLeaveRequestRepositories(
+                cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
+                cosmosClientSettings.LeaveTypesContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)))
             .AddLeaveRequestValidators()
-            .AddEventSourcing(eventRepositorySettings);
+            .AddEventSourcing(
+                cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
+                cosmosClientSettings.EventsContainerName ?? throw CreateError(nameof(cosmosClientSettings.EventsContainerName)));
     }
 
-    private static IServiceCollection AddEventSourcing(this IServiceCollection services, EventRepositorySettings eventRepositorySettings) =>
+    private static InvalidOperationException CreateError(string propName) => new($"{propName} AppSettings configuration is missing. Check the appsettings.json.");
+    private static IServiceCollection AddEventSourcing(
+        this IServiceCollection services,
+        string databaseName,
+        string eventsContainerName) =>
         services
             .AddScoped<ReadService>()
             .AddScoped<WriteService>()
             .AddScoped<EventRepository>(sp => new(
                 sp.GetRequiredService<CosmosClient>(),
                 sp.GetRequiredService<ILogger<EventRepository>>(),
-                eventRepositorySettings)
+                databaseName,
+                eventsContainerName)
             )
             .AddScoped((Func<IServiceProvider, IAppendEventRepository>)(sp => sp.GetRequiredService<EventRepository>()))
             .AddScoped((Func<IServiceProvider, IReadEventsRepository>)(sp => sp.GetRequiredService<EventRepository>()));
@@ -56,12 +61,19 @@ internal static class Config
             .AddScoped<GetLeaveRequestService>()
             .AddScoped<AcceptLeaveRequestService>();
 
-    private static IServiceCollection AddLeaveRequestRepositories(this IServiceCollection services) =>
+    private static IServiceCollection AddLeaveRequestRepositories(
+        this IServiceCollection services,
+        string databaseName,
+        string leaveTypesContainerName) =>
         services
             .AddScoped<IConnectedLeaveTypesRepository, ConnectedLeaveTypesRepository>()
             .AddScoped<IImpositionValidatorRepository, ImpositionValidatorRepository>()
-            .AddScoped<IImpositionValidatorRepository, ImpositionValidatorRepository>()
-            .AddScoped<ILeaveTypeFreeDaysRepository, LeaveTypeFreeDaysRepository>()
+            .AddScoped<ILimitValidatorRepository, LimitValidatorRepository>()
+            .AddScoped<ILeaveTypeFreeDaysRepository>(sp => new LeaveTypeFreeDaysRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    leaveTypesContainerName
+                ))
             .AddScoped<IUsedLeavesRepository, UsedLeavesRepository>();
 
 
