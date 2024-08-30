@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace LeaveSystem.Functions.LeaveTypes
+namespace LeaveSystem.Functions.LeaveStatusSettings
 {
     public class GetLeaveStatusSettingsFunction
     {
