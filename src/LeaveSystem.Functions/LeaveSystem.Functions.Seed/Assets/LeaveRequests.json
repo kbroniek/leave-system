@@ -1,4 +1,47 @@
 {
-  "partitionKey": "year",
-  "items": []
+  "partitionKey": "/streamId",
+  "uniqueKeys": [
+    "/streamId,/eventType"
+  ],
+  "items": [
+    {
+      "id": "a9b32f81-2354-4594-8858-455500ee323c",
+      "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+      "body": {
+        "leaveRequestId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+        "dateFrom": "2024-08-23",
+        "dateTo": "2024-08-23",
+        "duration": "08:00:00",
+        "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+        "remarks": "yoyo",
+        "createdBy": {
+          "userId": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
+          "name": "Volt Karol"
+        },
+        "assignedTo": {
+          "userId": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
+          "name": "Volt Karol"
+        },
+        "workingHours": "08:00:00",
+        "createdDate": "2024-08-27T07:40:37.5491579+00:00",
+        "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Creating.LeaveRequestCreated, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    },
+    {
+      "id": "3ae53b2c-44ce-4e41-a988-4ac3ce8178fd",
+      "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+      "body": {
+        "leaveRequestId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+        "remarks": "accepted by me",
+        "acceptedBy": {
+          "userId": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
+          "name": "Volt Karol"
+        },
+        "createdDate": "2024-08-27T07:41:00.1442402+00:00",
+        "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Accepting.LeaveRequestAccepted, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    }
+  ]
 }

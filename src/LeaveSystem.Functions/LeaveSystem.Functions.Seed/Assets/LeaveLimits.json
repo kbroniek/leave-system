@@ -1,5 +1,8 @@
 {
-  "partitionKey": "assignedToUserId",
+  "partitionKey": "/assignedToUserId",
+  "uniqueKeys": [
+    "/assignedToUserId,/leaveTypeId,/validSince,/validUntil"
+  ],
   "items": [
     {
       "id": "3b8a8a97-992f-4965-abf8-fe5a9cf91862",
