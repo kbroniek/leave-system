@@ -28,26 +28,25 @@ public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysReposit
         {
             return includeFreeDaysResult.Error;
         }
+        if (includeFreeDaysResult.Value == false)
+        {
+            var dateFromDayKind = DateOnlyCalculator.GetDayKind(dateFrom);
+            if (dateFromDayKind != DateOnlyCalculator.DayKind.WORKING)
+            {
+                return new Error("The date from is off work.", HttpStatusCode.BadRequest);
+            }
+
+            var dateToDayKind = DateOnlyCalculator.GetDayKind(dateTo);
+            if (dateToDayKind != DateOnlyCalculator.DayKind.WORKING)
+            {
+                return new Error("The date to is off work.", HttpStatusCode.BadRequest);
+            }
+        }
         var maxDuration = DateOnlyCalculator.CalculateDuration(dateFrom, dateTo, workingHours,
             includeFreeDaysResult.Value);
         var minDuration = maxDuration - workingHours + TimeSpan.FromHours(1);
         var durationDefault = duration ?? maxDuration;
         Guard.Against.OutOfRange(durationDefault, nameof(duration), minDuration, maxDuration);
-        if (includeFreeDaysResult.Value != false)
-        {
-            return Result.Default;
-        }
-        var dateFromDayKind = DateOnlyCalculator.GetDayKind(dateFrom);
-        if (dateFromDayKind != DateOnlyCalculator.DayKind.WORKING)
-        {
-            return new Error("The date from is off work.", HttpStatusCode.BadRequest);
-        }
-
-        var dateToDayKind = DateOnlyCalculator.GetDayKind(dateTo);
-        if (dateToDayKind != DateOnlyCalculator.DayKind.WORKING)
-        {
-            return new Error("The date to is off work.", HttpStatusCode.BadRequest);
-        }
         return Result.Default;
     }
 }
