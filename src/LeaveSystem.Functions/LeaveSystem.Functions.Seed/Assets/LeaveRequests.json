@@ -15,11 +15,11 @@
         "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
         "remarks": "yoyo",
         "createdBy": {
-          "userId": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
+          "id": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
           "name": "Volt Karol"
         },
         "assignedTo": {
-          "userId": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
+          "id": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
           "name": "Volt Karol"
         },
         "workingHours": "08:00:00",
@@ -35,7 +35,7 @@
         "leaveRequestId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
         "remarks": "accepted by me",
         "acceptedBy": {
-          "userId": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
+          "id": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
           "name": "Volt Karol"
         },
         "createdDate": "2024-08-27T07:41:00.1442402+00:00",

@@ -13,7 +13,7 @@ public class ImpositionValidator(IImpositionValidatorRepository impositionValida
     {
         if (await impositionValidatorRepository.IsExistValid(userId, dateFrom, dateTo, cancellationToken))
         {
-            return new Error("Cannot create a new leave request in this time. The other leave is overlapping with this date", System.Net.HttpStatusCode.BadRequest);
+            return new Error("Cannot create a new leave request in this time. The other leave is overlapping with this date", System.Net.HttpStatusCode.Conflict);
         }
         return Result.Default;
     }

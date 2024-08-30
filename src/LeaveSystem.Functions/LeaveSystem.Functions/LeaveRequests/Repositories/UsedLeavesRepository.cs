@@ -42,7 +42,7 @@ internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseNa
     {
         var iterator = container.GetItemLinqQueryable<EventModel<PendingEventEntity>>()
             .Where(x => (x.Body.LeaveTypeId == leaveTypeId || nestedLeaveTypeIds.Contains(x.Body.LeaveTypeId)) &&
-                x.Body.AssignedTo.UserId == userId &&
+                x.Body.AssignedTo.Id == userId &&
                 (limitValidSince == null || x.Body.DateFrom >= limitValidSince) &&
                 (limitValidUntil == null || x.Body.DateTo <= limitValidUntil) &&
                 x.EventType == typeof(LeaveRequestCreated).AssemblyQualifiedName!)
@@ -53,5 +53,5 @@ internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseNa
     }
 
     private sealed record PendingEventEntity(Guid LeaveTypeId, EventUserEntity AssignedTo, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration);
-    private sealed record EventUserEntity(string UserId);
+    private sealed record EventUserEntity(string Id);
 }
