@@ -67,6 +67,10 @@ public class LeaveRequest : IEventSource
         TimeSpan workingHours,
         DateTimeOffset createdDate)
     {
+        if (Status is not LeaveRequestStatus.Init)
+        {
+            return new Error($"Creating leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
+        }
         var @event = LeaveRequestCreated.Create(
             leaveRequestId,
             dateFrom,
