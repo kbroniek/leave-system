@@ -1,4 +1,4 @@
-namespace LeaveSystem.Functions.LeaveRequests;
+namespace LeaveSystem.Functions.LeaveLimits;
 
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Dto;

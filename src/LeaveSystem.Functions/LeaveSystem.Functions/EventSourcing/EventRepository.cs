@@ -8,9 +8,12 @@ using LeaveSystem.Shared;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using static LeaveSystem.Functions.Config;
 
-internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepository> logger, EventRepositorySettings settings)
+internal class EventRepository(
+    CosmosClient cosmosClient,
+    ILogger<EventRepository> logger,
+    string databaseName,
+    string eventsContainerId)
     : IAppendEventRepository, IReadEventsRepository
 {
     public async Task<Result<Error>> AppendToStreamAsync(IEvent @event, CancellationToken cancellationToken)
@@ -18,8 +21,8 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
         try
         {
             var container = cosmosClient.GetContainer(
-                settings.DatabaseName ?? throw new InvalidOperationException("Event repository AppSettings DatabaseName configuration is missing. Check the appsettings.json."),
-                settings.ContainerName ?? throw new InvalidOperationException("Event repository AppSettings ContainerName configuration is missing. Check the appsettings.json."));
+                databaseName ?? throw new InvalidOperationException("Event repository AppSettings DatabaseName configuration is missing. Check the appsettings.json."),
+                eventsContainerId ?? throw new InvalidOperationException("Event repository AppSettings ContainerName configuration is missing. Check the appsettings.json."));
             await container.CreateItemAsync(new EventModel<object>(
                 Id: Guid.NewGuid(),
                 StreamId: @event.StreamId,
@@ -44,7 +47,7 @@ internal class EventRepository(CosmosClient cosmosClient, ILogger<EventRepositor
 
     public async IAsyncEnumerable<IEvent> ReadStreamAsync(Guid streamId, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var container = cosmosClient.GetContainer(settings.DatabaseName, settings.ContainerName);
+        var container = cosmosClient.GetContainer(databaseName, eventsContainerId);
         var sqlQuery = "SELECT * FROM c ORDER BY c._ts ASC";
         var iterator = container.GetItemQueryIterator<EventModel<JToken>>(sqlQuery, requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(streamId.ToString()) });
 

@@ -10,21 +10,21 @@ using Moq;
 
 public class AcceptLeaveRequestServiceTests
 {
-    private readonly Mock<ReadRepository> mockReadRepository = new(null, null);
-    private readonly Mock<WriteRepository> mockWriteRepository = new(null);
+    private readonly Mock<ReadService> mockReadService = new(null, null);
+    private readonly Mock<WriteService> mockWriteService = new(null);
     private readonly AcceptLeaveRequestService acceptLeaveRequestService;
     private readonly CancellationToken cancellationToken = CancellationToken.None;
     private readonly LeaveRequestUserDto user = new("fakeUserId", "fakeUserName");
 
     public AcceptLeaveRequestServiceTests() =>
-        acceptLeaveRequestService = new AcceptLeaveRequestService(mockReadRepository.Object, mockWriteRepository.Object);
+        acceptLeaveRequestService = new AcceptLeaveRequestService(mockReadService.Object, mockWriteService.Object);
 
     [Fact]
     public async Task AcceptAsync_ShouldReturnError_WhenLeaveRequestNotFound()
     {
         // Arrange
         var leaveRequestId = Guid.NewGuid();
-        mockReadRepository
+        mockReadService
             .Setup(repo => repo.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound));
 
@@ -38,7 +38,7 @@ public class AcceptLeaveRequestServiceTests
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal("Not Found", result.Error.Message);
-        mockWriteRepository.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockWriteService.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class AcceptLeaveRequestServiceTests
         leaveRequest.Setup(lr => lr.Accept(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<LeaveRequestUserDto>(), It.IsAny<DateTimeOffset>()))
                     .Returns(new Error("Accept failed", HttpStatusCode.BadRequest));
 
-        mockReadRepository
+        mockReadService
             .Setup(repo => repo.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(leaveRequest.Object);
 
@@ -60,7 +60,7 @@ public class AcceptLeaveRequestServiceTests
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal("Accept failed", result.Error.Message);
-        mockWriteRepository.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockWriteService.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -73,11 +73,11 @@ public class AcceptLeaveRequestServiceTests
         leaveRequest.Setup(lr => lr.Accept(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<LeaveRequestUserDto>(), It.IsAny<DateTimeOffset>()))
                     .Returns(leaveRequest.Object);
 
-        mockReadRepository
+        mockReadService
             .Setup(repo => repo.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(leaveRequest.Object);
 
-        mockWriteRepository
+        mockWriteService
             .Setup(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(leaveRequest.Object);
 
@@ -87,6 +87,6 @@ public class AcceptLeaveRequestServiceTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(leaveRequest.Object, result.Value);
-        mockWriteRepository.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockWriteService.Verify(repo => repo.Write(It.IsAny<LeaveRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

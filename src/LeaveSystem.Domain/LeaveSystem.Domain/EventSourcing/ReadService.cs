@@ -4,7 +4,7 @@ using System.Net;
 using LeaveSystem.Shared;
 using Microsoft.Extensions.Logging;
 
-public class ReadRepository(IReadEventsRepository readEventsRepository, ILogger<ReadRepository> logger)
+public class ReadService(IReadEventsRepository readEventsRepository, ILogger<ReadService> logger)
 {
     internal virtual async Task<Result<TEventSource, Error>> FindByIdAsync<TEventSource>(Guid id, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
     {

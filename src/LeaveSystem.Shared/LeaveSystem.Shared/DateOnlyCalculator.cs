@@ -2,8 +2,7 @@ using System.Globalization;
 
 namespace LeaveSystem.Shared;
 
-[Obsolete($"Use {nameof(DateOnlyCalculator)}")]
-public static class DateCalculator
+public static class DateOnlyCalculator
 {
     public const uint MaxCalculatedDays = 366;
     public enum DayKind
@@ -12,13 +11,12 @@ public static class DateCalculator
         WEEKEND,
         HOLIDAY
     }
-    public static TimeSpan CalculateDuration(DateTimeOffset dateFrom, DateTimeOffset dateTo, TimeSpan workingHours, bool? includeFreeDays)
+    public static TimeSpan CalculateDuration(DateOnly dateFrom, DateOnly dateTo, TimeSpan workingHours, bool? includeFreeDays)
     {
-        var dateToPlusOne = dateTo.AddDays(1).GetDayWithoutTime();
-        dateFrom = dateFrom.GetDayWithoutTime();
+        var dateToPlusOne = dateTo.AddDays(1);
         if (includeFreeDays == true)
         {
-            return (dateToPlusOne - dateFrom).Days * workingHours;
+            return (dateToPlusOne.DayNumber - dateFrom.DayNumber) * workingHours;
         }
         var currentDate = dateFrom;
         long daysBetween = 0;
@@ -37,12 +35,12 @@ public static class DateCalculator
         return daysBetween * workingHours;
     }
 
-    public static int CalculateDurationIncludeFreeDays(DateTimeOffset dateFrom, DateTimeOffset dateTo)
+    public static int CalculateDurationIncludeFreeDays(DateOnly dateFrom, DateOnly dateTo)
     {
         var dateToPlusOne = dateTo.AddDays(1);
-        var daysBetween = (dateToPlusOne - dateFrom).Days;
+        var daysBetween = dateToPlusOne.DayNumber - dateFrom.DayNumber;
         var currentDate = dateToPlusOne;
-        while(GetDayKind(currentDate) != DayKind.WORKING)
+        while (GetDayKind(currentDate) != DayKind.WORKING)
         {
             ++daysBetween;
             currentDate = currentDate.AddDays(1);
@@ -56,9 +54,9 @@ public static class DateCalculator
         return daysBetween;
     }
 
-    public static DateTimeOffset GetNextWorkingDay(DateTimeOffset date)
+    public static DateOnly GetNextWorkingDay(DateOnly date)
     {
-        while(GetDayKind(date) != DayKind.WORKING)
+        while (GetDayKind(date) != DayKind.WORKING)
         {
             date = date.AddDays(1);
         }
@@ -66,14 +64,14 @@ public static class DateCalculator
         return date;
     }
 
-    public static DayKind GetDayKind(DateTimeOffset date)
+    public static DayKind GetDayKind(DateOnly date)
     {
         if (isPolishHoliday(date))
         {
             return DayKind.HOLIDAY;
         }
 
-        if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+        if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
         {
             return DayKind.WEEKEND;
         }
@@ -81,50 +79,50 @@ public static class DateCalculator
         return DayKind.WORKING;
     }
 
-    private static bool isPolishHoliday(DateTimeOffset date)
+    private static bool isPolishHoliday(DateOnly date)
     {
         switch (date.Month)
         {
             case 1: //JANUARY
+            {
+                if (date.Day is 1 or 6)
                 {
-                    if (date.Day == 1 || date.Day == 6)
-                    {
-                        return true;
-                    }
-                    break;
+                    return true;
                 }
+                break;
+            }
             case 5: //MAY
+            {
+                if (date.Day is 1 or 3)
                 {
-                    if (date.Day == 1 || date.Day == 3)
-                    {
-                        return true;
-                    }
-                    break;
+                    return true;
                 }
+                break;
+            }
             case 8: //AUGUST
+            {
+                if (date.Day == 15)
                 {
-                    if (date.Day == 15)
-                    {
-                        return true;
-                    }
-                    break;
+                    return true;
                 }
+                break;
+            }
             case 11: //NOVEMBER
+            {
+                if (date.Day is 1 or 11)
                 {
-                    if (date.Day == 1 || date.Day == 11)
-                    {
-                        return true;
-                    }
-                    break;
+                    return true;
                 }
+                break;
+            }
             case 12: //DECEMBER
+            {
+                if (date.Day is 25 or 26)
                 {
-                    if (date.Day == 25 || date.Day == 26)
-                    {
-                        return true;
-                    }
-                    break;
+                    return true;
                 }
+                break;
+            }
         }
 
         if (date.Month >= 3 && date.Month <= 6)
@@ -146,9 +144,9 @@ public static class DateCalculator
             var day = p + 1;
             var month = (int)Math.Floor((double)((h + l - 7 * m + 114) / 31));
 
-            DateTimeOffset easter = new DateTimeOffset(new DateTime(date.Year, month, day), TimeSpan.Zero);
+            var easter = new DateOnly(date.Year, month, day);
 
-            var dateWithoutTime = date.GetDayWithoutTime();
+            var dateWithoutTime = date;
 
             const int easterMonday = 1;
             const int pentecost = 49;

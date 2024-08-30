@@ -8,13 +8,13 @@ using Moq;
 public class ReadRepositoryTests
 {
     private readonly Mock<IReadEventsRepository> mockReadEventsRepository = new();
-    private readonly Mock<ILogger<ReadRepository>> mockLogger = new();
+    private readonly Mock<ILogger<ReadService>> mockLogger = new();
     private readonly CancellationToken cancellationToken = CancellationToken.None;
     private readonly Guid id = Guid.NewGuid();
-    private readonly ReadRepository readRepository;
+    private readonly ReadService readService;
 
     public ReadRepositoryTests() =>
-        readRepository = new ReadRepository(mockReadEventsRepository.Object, mockLogger.Object);
+        readService = new ReadService(mockReadEventsRepository.Object, mockLogger.Object);
 
     [Fact]
     public async Task FindByIdAsync_ShouldReturnError_WhenNoEventsFound()
@@ -25,7 +25,7 @@ public class ReadRepositoryTests
             .Returns(GetAsyncEnumerable(Enumerable.Empty<FakeEvent>()));
 
         // Act
-        var result = await readRepository.FindByIdAsync<FakeEventSource>(id, cancellationToken);
+        var result = await readService.FindByIdAsync<FakeEventSource>(id, cancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -48,7 +48,7 @@ public class ReadRepositoryTests
             .Returns(GetAsyncEnumerable(events));
 
         // Act
-        var result = await readRepository.FindByIdAsync<FakeEventSource>(id, cancellationToken);
+        var result = await readService.FindByIdAsync<FakeEventSource>(id, cancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

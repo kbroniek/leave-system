@@ -16,10 +16,10 @@ public class EventRepositoryTests
     private readonly Mock<CosmosClient> mockCosmosClient = new();
     private readonly Mock<Container> mockContainer = new();
     private readonly Mock<ILogger<EventRepository>> mockLogger = new();
-    private readonly EventRepositorySettings settings = new()
+    private readonly torySettings settings = new()
     {
         DatabaseName = "TestDatabase",
-        ContainerName = "TestContainer"
+        EventsContainerName = "TestContainer"
     };
     private readonly EventRepository eventRepository;
     private readonly CancellationToken cancellationToken = CancellationToken.None;
@@ -28,7 +28,7 @@ public class EventRepositoryTests
     {
         eventRepository = new EventRepository(mockCosmosClient.Object, mockLogger.Object, settings);
         mockCosmosClient
-            .Setup(client => client.GetContainer(settings.DatabaseName, settings.ContainerName))
+            .Setup(client => client.GetContainer(settings.DatabaseName, settings.EventsContainerName))
             .Returns(mockContainer.Object);
     }
 
