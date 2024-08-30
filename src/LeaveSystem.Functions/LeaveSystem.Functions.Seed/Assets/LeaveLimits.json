@@ -64,6 +64,11 @@
     {
       "id": "faf4ce07-c90e-49ab-9b05-c903d331b60b",
       "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4"
+    },
+    {
+      "id": "848042b5-d425-4d2a-960c-6a2dfc0c7c03",
+      "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
+      "assignedToUserId": null
     }
   ]
 }
