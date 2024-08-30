@@ -14,28 +14,32 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
         string userId,
         CancellationToken cancellationToken)
     {
-        var connectedLeaveTypeIds = await connectedLeaveTypesRepository.GetConnectedLeaveTypeIds(leaveTypeId);
+        var connectedLeaveTypeIdsResult = await connectedLeaveTypesRepository.GetConnectedLeaveTypeIds(leaveTypeId, cancellationToken);
+        if (connectedLeaveTypeIdsResult.IsFailure)
+        {
+            return connectedLeaveTypeIdsResult.Error;
+        }
+        (var nestedLeaveTypeIds, var baseLeaveTypeId) = connectedLeaveTypeIdsResult.Value;
         var checkLimitResult = await CheckLimitForBaseLeave(dateFrom,
             dateTo,
             userId,
             leaveTypeId,
             duration,
-            connectedLeaveTypeIds.nestedLeaveTypeIds);
-        if (!checkLimitResult.IsSuccess)
+            nestedLeaveTypeIds);
+        if (checkLimitResult.IsFailure)
         {
             return checkLimitResult;
         }
 
-        if (connectedLeaveTypeIds.baseLeaveTypeId != null)
+        if (baseLeaveTypeId != null)
         {
-            var baseLeaveTypeId = connectedLeaveTypeIds.baseLeaveTypeId.Value;
             var baseCheckLimitResult = await CheckLimitForBaseLeave(dateFrom,
                 dateTo,
                 userId,
-                baseLeaveTypeId,
+                baseLeaveTypeId.Value,
                 duration,
                 []);
-            if (!baseCheckLimitResult.IsSuccess)
+            if (baseCheckLimitResult.IsFailure)
             {
                 return baseCheckLimitResult;
             }
@@ -75,7 +79,7 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
 
 public interface IConnectedLeaveTypesRepository
 {
-    ValueTask<(IEnumerable<Guid> nestedLeaveTypeIds, Guid? baseLeaveTypeId)> GetConnectedLeaveTypeIds(Guid leaveTypeId);
+    ValueTask<Result<(IEnumerable<Guid> nestedLeaveTypeIds, Guid? baseLeaveTypeId), Error>> GetConnectedLeaveTypeIds(Guid leaveTypeId, CancellationToken cancellationToken);
 }
 
 public interface IUsedLeavesRepository
@@ -85,5 +89,5 @@ public interface IUsedLeavesRepository
 
 public interface ILimitValidatorRepository
 {
-    Task<(TimeSpan? limit, TimeSpan? overdueLimit)> GetLimit(DateOnly dateFrom, DateOnly dateTo, Guid leaveTypeId, string userId);
+    ValueTask<Result<(TimeSpan? limit, TimeSpan? overdueLimit), Error>> GetLimit(DateOnly dateFrom, DateOnly dateTo, Guid leaveTypeId, string userId);
 }

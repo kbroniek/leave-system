@@ -66,7 +66,11 @@ internal static class Config
         string databaseName,
         string leaveTypesContainerName) =>
         services
-            .AddScoped<IConnectedLeaveTypesRepository, ConnectedLeaveTypesRepository>()
+            .AddScoped<IConnectedLeaveTypesRepository>(sp => new ConnectedLeaveTypesRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    leaveTypesContainerName
+                ))
             .AddScoped<IImpositionValidatorRepository, ImpositionValidatorRepository>()
             .AddScoped<ILimitValidatorRepository, LimitValidatorRepository>()
             .AddScoped<ILeaveTypeFreeDaysRepository>(sp => new LeaveTypeFreeDaysRepository(
