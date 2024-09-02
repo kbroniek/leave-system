@@ -4,13 +4,14 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 var assets = Directory.GetFiles("Assets", "*.json");
-IConfiguration configuration = new ConfigurationBuilder()
+var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
     .AddUserSecrets("59d4d40d-b685-4560-a190-90b91aa17863")
     .Build();
-CosmosClient client = new CosmosClient(configuration.GetConnectionString("CosmosDBConnection"));
+var client = new CosmosClient(configuration.GetConnectionString("CosmosDBConnection"));
 Database database = await client.CreateDatabaseIfNotExistsAsync("LeaveSystem");
 
 foreach (var asset in assets)
@@ -21,7 +22,31 @@ foreach (var asset in assets)
     var stream = await File.ReadAllTextAsync(asset);
     var converter = new ExpandoObjectConverter();
     dynamic contents = JsonConvert.DeserializeObject(stream, new JsonSerializerSettings { Converters = { converter } });
-    Container container = await database.CreateContainerIfNotExistsAsync(fileName, $"/{contents.partitionKey}");
+    //await client.GetDatabase("database").DefineContainer(name: "container", partitionKeyPath: "/myPartitionKey")
+    //.WithUniqueKey()
+    //    .Path("/firstName")
+    //    .Path("/lastName")
+    //    .Path("/emailAddress")
+    //.Attach()
+    //.WithUniqueKey()
+    //    .Path("/address/zipCode")
+    //.Attach()
+    //.CreateIfNotExistsAsync();
+    var containerBuilder = database.DefineContainer(name: fileName, partitionKeyPath: contents.partitionKey.ToString());
+    if (contents.uniqueKeys is IEnumerable uniqueKeysCollection)
+    {
+        foreach (JValue uniqueKeysCombined in uniqueKeysCollection)
+        {
+            var uniqueKeysSplit = uniqueKeysCombined.ToString().Split(',');
+            var uniqueKeyDefinition = containerBuilder.WithUniqueKey();
+            foreach (var uniqueKey in uniqueKeysSplit)
+            {
+                uniqueKeyDefinition.Path(uniqueKey);
+            }
+            uniqueKeyDefinition.Attach();
+        }
+    }
+    Container container = await containerBuilder.CreateIfNotExistsAsync();
     if (contents.items is not IEnumerable items)
     {
         Console.WriteLine($"The file {asset} is not enumerable.");

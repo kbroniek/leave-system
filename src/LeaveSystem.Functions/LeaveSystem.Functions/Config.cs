@@ -19,10 +19,11 @@ internal static class Config
     {
         public string? CosmosDBConnection { get; set; }
         public string? DatabaseName { get; set; }
-        public string? EventsContainerName { get; set; }
+        public string? LeaveRequestsContainerName { get; set; }
         public string? LeaveTypesContainerName { get; set; }
         public string? LeaveLimitsContainerName { get; set; }
     }
+
 
     public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -34,18 +35,18 @@ internal static class Config
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
                 cosmosClientSettings.LeaveTypesContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)),
                 cosmosClientSettings.LeaveLimitsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)),
-                cosmosClientSettings.EventsContainerName ?? throw CreateError(nameof(cosmosClientSettings.EventsContainerName)))
+                cosmosClientSettings.LeaveRequestsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveRequestsContainerName)))
             .AddLeaveRequestValidators()
             .AddEventSourcing(
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
-                cosmosClientSettings.EventsContainerName ?? throw CreateError(nameof(cosmosClientSettings.EventsContainerName)));
+                cosmosClientSettings.LeaveRequestsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveRequestsContainerName)));
     }
 
     private static InvalidOperationException CreateError(string propName) => new($"{propName} AppSettings configuration is missing. Check the appsettings.json.");
     private static IServiceCollection AddEventSourcing(
         this IServiceCollection services,
         string databaseName,
-        string eventsContainerName) =>
+        string leaveRequestsContainerName) =>
         services
             .AddScoped<ReadService>()
             .AddScoped<WriteService>()
@@ -53,7 +54,7 @@ internal static class Config
                 sp.GetRequiredService<CosmosClient>(),
                 sp.GetRequiredService<ILogger<EventRepository>>(),
                 databaseName,
-                eventsContainerName)
+                leaveRequestsContainerName)
             )
             .AddScoped((Func<IServiceProvider, IAppendEventRepository>)(sp => sp.GetRequiredService<EventRepository>()))
             .AddScoped((Func<IServiceProvider, IReadEventsRepository>)(sp => sp.GetRequiredService<EventRepository>()));
@@ -69,12 +70,12 @@ internal static class Config
         string databaseName,
         string leaveTypesContainerName,
         string leaveLimitsContainerName,
-        string eventsContainerName) =>
+        string leaveRequestsContainerName) =>
         services
             .AddScoped(sp => new CancelledEventsRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
-                    eventsContainerName
+                    leaveRequestsContainerName
                 ))
             .AddScoped<IConnectedLeaveTypesRepository>(sp => new ConnectedLeaveTypesRepository(
                     sp.GetRequiredService<CosmosClient>(),
@@ -84,7 +85,7 @@ internal static class Config
             .AddScoped<IImpositionValidatorRepository>(sp => new ImpositionValidatorRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
-                    eventsContainerName,
+                    leaveRequestsContainerName,
                     sp.GetRequiredService<CancelledEventsRepository>()
                 ))
             .AddScoped<ILimitValidatorRepository>(sp => new LimitValidatorRepository(
@@ -100,7 +101,7 @@ internal static class Config
             .AddScoped<IUsedLeavesRepository>(sp => new UsedLeavesRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
-                    eventsContainerName,
+                    leaveRequestsContainerName,
                     sp.GetRequiredService<CancelledEventsRepository>()
                 ));
 

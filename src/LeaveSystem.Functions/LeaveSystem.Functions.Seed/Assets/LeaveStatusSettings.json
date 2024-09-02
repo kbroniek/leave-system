@@ -1,5 +1,8 @@
 {
-  "partitionKey": "leaveRequestStatus",
+  "partitionKey": "/leaveRequestStatus",
+  "uniqueKeys": [
+    "/leaveRequestStatus"
+  ],
   "items": [
     {
       "id": "2719cbba-6542-41ca-83a2-5854736ea3ba",

@@ -1,0 +1,13 @@
+{
+  "partitionKey": "/id",
+  "items": [
+    {
+      "id": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
+      "roles": [ "GlobalAdmin" ]
+    },
+    {
+      "id": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+      "roles": [ "Employee" ]
+    }
+  ]
+}
