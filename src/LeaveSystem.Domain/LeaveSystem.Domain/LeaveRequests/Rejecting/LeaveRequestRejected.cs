@@ -12,6 +12,6 @@ public record LeaveRequestRejected(
 {
     public Guid StreamId => LeaveRequestId;
 
-    public static LeaveRequestRejected Create(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate) =>
-        new(leaveRequestId, remarks, acceptedBy, createdDate);
+    public static LeaveRequestRejected Create(Guid leaveRequestId, string? remarks, LeaveRequestUserDto rejectedBy, DateTimeOffset createdDate) =>
+        new(leaveRequestId, remarks, rejectedBy, createdDate);
 }

@@ -25,7 +25,6 @@ internal static class Config
         public string? LeaveLimitsContainerName { get; set; }
     }
 
-
     public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
     {
         var cosmosClientSettings = configuration.Get<CosmosSettings>() ?? throw CreateError(nameof(CosmosSettings));
@@ -65,7 +64,8 @@ internal static class Config
             .AddScoped<CreateLeaveRequestService>()
             .AddScoped<GetLeaveRequestService>()
             .AddScoped<AcceptLeaveRequestService>()
-            .AddScoped<RejectLeaveRequestService>();
+            .AddScoped<RejectLeaveRequestService>()
+            .AddScoped<CancelLeaveRequestService>();
 
     private static IServiceCollection AddLeaveRequestRepositories(
         this IServiceCollection services,

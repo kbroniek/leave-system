@@ -12,7 +12,7 @@ internal class CancelledEventsRepository(CosmosClient cosmosClient, string datab
 {
     //TODO: Fill in when you add new events
     private readonly IReadOnlyCollection<string> cancelledEventTypes = [
-        //typeof(LeaveRequestCancelled).AssemblyQualifiedName!
+        //typeof(LeaveRequestCanceled).AssemblyQualifiedName!
         //typeof(LeaveRequestRejected).AssemblyQualifiedName!
         //typeof(LeaveRequestDeprecated).AssemblyQualifiedName!
         ];
