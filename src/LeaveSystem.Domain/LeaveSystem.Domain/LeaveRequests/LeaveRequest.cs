@@ -53,6 +53,8 @@ public class LeaveRequest : IEventSource
             Apply(createdEvent),
         LeaveRequestAccepted accepted =>
             Apply(accepted),
+        LeaveRequestRejected rejected =>
+            Apply(rejected),
         _ => this
     };
 

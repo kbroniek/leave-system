@@ -12,12 +12,12 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Get Leave Request
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+GET {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
 ###
-# @name Create Leave Request
+# @name Create Leave Request (holiday)
 # @ref Login
 # @reject-unauthorized
 POST {{baseUrl}}/leaverequests
@@ -25,11 +25,45 @@ Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
 {
-    "leaveRequestId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
     "dateFrom": "2024-08-23",
     "dateTo": "2024-08-23",
     "workingHours": "08:00:00",
     "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "remark": "yoyo"
+}
+
+###
+# @name Create Leave Request (sick)
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leaverequests
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+    "dateFrom": "2024-08-22",
+    "dateTo": "2024-08-22",
+    "workingHours": "08:00:00",
+    "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
+    "remark": "yoyo"
+}
+
+###
+# @name Create Leave Request (occasional)
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leaverequests
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+    "dateFrom": "2024-08-23",
+    "dateTo": "2024-08-23",
+    "workingHours": "08:00:00",
+    "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
     "remark": "yoyo"
 }
 
@@ -41,13 +75,20 @@ POST {{baseUrl}}/leaverequests/onbehalf
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
-{}
+{
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+    "dateFrom": "2024-08-23",
+    "dateTo": "2024-08-23",
+    "workingHours": "08:00:00",
+    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "remark": "yoyo"
+}
 
 ###
 # @name Accept Leave Request
 # @ref Login
 # @reject-unauthorized
-PUT {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7/accept
+PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71/accept
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
@@ -59,17 +100,19 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Reject Leave Request
 # @ref Login
 # @reject-unauthorized
-PUT {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7/reject
+PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71/reject
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
-{}
+{
+    "remark": "rejected by me"
+}
 
 ###
 # @name Cancel Leave Request
 # @ref Login
 # @reject-unauthorized
-PUT {{baseUrl}}/leaverequests/ae6cdc66-dbc4-4307-b09b-e0be50f955b7/cancel
+PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71/cancel
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200

@@ -172,7 +172,7 @@ public class LeaveRequestsFunction(
         );
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
-            error => error.ToObjectResult($"Error occurred while accepting a leave request. LeaveRequestId = {leaveRequestId}."));
+            error => error.ToObjectResult($"Error occurred while rejecting a leave request. LeaveRequestId = {leaveRequestId}."));
     }
 
     [Function(nameof(CancelStatusLeaveRequest))]

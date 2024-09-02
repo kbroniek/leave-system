@@ -13,8 +13,8 @@ internal class ImpositionValidatorRepository(CosmosClient cosmosClient, string d
     public async ValueTask<bool> IsExistValid(string createdById, DateOnly dateFrom, DateOnly dateTo, CancellationToken cancellationToken)
     {
         var container = cosmosClient.GetContainer(databaseName, containerId);
-        var iterator = container.GetItemLinqQueryable<EventModel<PendingEventEntity>>()
-            .Where(x => x.Body.AssignedTo.UserId == createdById && (
+        var pendingEvents = await container.GetItemLinqQueryable<EventModel<PendingEventEntity>>()
+            .Where(x => x.Body.AssignedTo.Id == createdById && (
                 (x.Body.DateFrom >= dateTo &&
                 x.Body.DateTo <= dateTo)
              ||
@@ -27,8 +27,8 @@ internal class ImpositionValidatorRepository(CosmosClient cosmosClient, string d
                 (x.Body.DateFrom <= dateFrom &&
                 x.Body.DateTo >= dateTo)
             ))
-            .ToFeedIterator();
-        var pendingEvents = await iterator.ExecuteQuery(cancellationToken);
+            .ToFeedIterator()
+            .ExecuteQuery(cancellationToken);
         if (pendingEvents.Count == 0)
         {
             return false;
@@ -39,5 +39,5 @@ internal class ImpositionValidatorRepository(CosmosClient cosmosClient, string d
         return cancelledEventsStreamIds.Count == 0;
     }
     private sealed record PendingEventEntity(Guid LeaveTypeId, EventUserEntity AssignedTo, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration);
-    private sealed record EventUserEntity(string UserId);
+    private sealed record EventUserEntity(string Id);
 }

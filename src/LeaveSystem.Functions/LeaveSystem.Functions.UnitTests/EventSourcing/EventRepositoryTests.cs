@@ -9,26 +9,22 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json.Linq;
-using static LeaveSystem.Functions.Config;
 
 public class EventRepositoryTests
 {
     private readonly Mock<CosmosClient> mockCosmosClient = new();
     private readonly Mock<Container> mockContainer = new();
     private readonly Mock<ILogger<EventRepository>> mockLogger = new();
-    private readonly torySettings settings = new()
-    {
-        DatabaseName = "TestDatabase",
-        EventsContainerName = "TestContainer"
-    };
+    private readonly string databaseName = "TestDatabase";
+    private readonly string eventsContainerName = "TestContainer";
     private readonly EventRepository eventRepository;
     private readonly CancellationToken cancellationToken = CancellationToken.None;
 
     public EventRepositoryTests()
     {
-        eventRepository = new EventRepository(mockCosmosClient.Object, mockLogger.Object, settings);
+        eventRepository = new EventRepository(mockCosmosClient.Object, mockLogger.Object, databaseName, eventsContainerName);
         mockCosmosClient
-            .Setup(client => client.GetContainer(settings.DatabaseName, settings.EventsContainerName))
+            .Setup(client => client.GetContainer(databaseName, eventsContainerName))
             .Returns(mockContainer.Object);
     }
 

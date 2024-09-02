@@ -1,5 +1,8 @@
 {
-  "partitionKey": "name",
+  "partitionKey": "/name",
+  "uniqueKeys": [
+    "/name"
+  ],
   "items": [
     {
       "id": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
