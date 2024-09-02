@@ -3,7 +3,6 @@ using System;
 using System.Net;
 using System.Threading.Tasks;
 using LeaveSystem.Domain.EventSourcing;
-using LeaveSystem.Functions.UnitTests.EventSourcing;
 using LeaveSystem.Shared;
 using Moq;
 

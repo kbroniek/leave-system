@@ -17,7 +17,7 @@ public class LeaveRequest : IEventSource
 
     public Guid Id { get; private set; }
 
-    public DateOnly DateFrom { get; private set; }
+    public virtual DateOnly DateFrom { get; private set; }
 
     public DateOnly DateTo { get; private set; }
 
@@ -39,9 +39,9 @@ public class LeaveRequest : IEventSource
 
     public int Version { get; private set; }
 
-    public DateTimeOffset CreatedDate { get; set; }
+    public DateTimeOffset CreatedDate { get; private set; }
 
-    public DateTimeOffset LastModifiedDate { get; set; }
+    public DateTimeOffset LastModifiedDate { get; private set; }
 
     [IgnoreDataMember]
     Queue<IEvent> IEventSource.PendingEvents { get; } = new Queue<IEvent>();
@@ -109,7 +109,7 @@ public class LeaveRequest : IEventSource
         Append(@event);
         return Apply(@event);
     }
-    internal Result<LeaveRequest, Error> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto rejectedBy, DateTimeOffset createdDate)
+    internal virtual Result<LeaveRequest, Error> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto rejectedBy, DateTimeOffset createdDate)
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
         {
@@ -126,7 +126,7 @@ public class LeaveRequest : IEventSource
         return Apply(@event);
     }
 
-    internal Result<LeaveRequest, Error> Cancel(Guid leaveRequestId, string? remarks, LeaveRequestUserDto canceledBy, DateTimeOffset createdDate)
+    internal virtual Result<LeaveRequest, Error> Cancel(Guid leaveRequestId, string? remarks, LeaveRequestUserDto canceledBy, DateTimeOffset createdDate)
     {
         if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
         {
