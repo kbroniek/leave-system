@@ -7,7 +7,7 @@ using LeaveSystem.Shared.Dto;
 
 public class AcceptLeaveRequestService(ReadService readService, WriteService writeService)
 {
-    public async Task<Result<LeaveRequest, Error>> AcceptAsync(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
+    public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
         var resultFindById = await readService.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
         if (!resultFindById.IsSuccess)

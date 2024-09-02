@@ -141,7 +141,7 @@ public class LeaveRequestsFunction(
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
-        var result = await acceptLeaveRequestService.AcceptAsync(
+        var result = await acceptLeaveRequestService.Accept(
             leaveRequestId,
             changeStatus.Remark,
             userModel,
