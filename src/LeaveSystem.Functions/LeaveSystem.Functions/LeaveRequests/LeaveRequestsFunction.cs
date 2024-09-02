@@ -5,6 +5,7 @@ using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Getting;
+using LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
@@ -21,6 +22,7 @@ public class LeaveRequestsFunction(
     CreateLeaveRequestService createLeaveRequestService,
     GetLeaveRequestService getLeaveRequestService,
     AcceptLeaveRequestService acceptLeaveRequestService,
+    RejectLeaveRequestService rejectLeaveRequestService,
     ILogger<LeaveRequestsFunction> logger)
 {
     [Function(nameof(SearchLeaveRequests))]
@@ -139,7 +141,7 @@ public class LeaveRequestsFunction(
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
-        var result = await acceptLeaveRequestService.AcceptAsync(
+        var result = await acceptLeaveRequestService.Accept(
             leaveRequestId,
             changeStatus.Remark,
             userModel,
@@ -148,7 +150,7 @@ public class LeaveRequestsFunction(
         );
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
-            error => error.ToObjectResult("Error occurred while accepting a leave request. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
+            error => error.ToObjectResult($"Error occurred while accepting a leave request. LeaveRequestId = {leaveRequestId}."));
     }
 
     [Function(nameof(RejectStatusLeaveRequest))]
@@ -156,31 +158,21 @@ public class LeaveRequestsFunction(
     public async Task<IActionResult> RejectStatusLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leaverequests/{leaveRequestId:guid}/reject")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+        Route = "leaverequests/{leaveRequestId:guid}/reject")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
-
-        var now = DateTimeOffset.UtcNow;
-        var leaveRequest = new GetLeaveRequestDto(
+        var result = await rejectLeaveRequestService.Reject(
             leaveRequestId,
-            DateOnly.FromDateTime(DateTime.UtcNow),
-            DateOnly.FromDateTime(DateTime.UtcNow),
-            TimeSpan.FromHours(8),
-            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-            LeaveRequestStatus.Rejected,
+            changeStatus.Remark,
             userModel,
-            userModel,
-            userModel,
-            TimeSpan.FromHours(8),
-            now.AddDays(-1),
-            now,
-            [
-                new GetLeaveRequestDto.RemarksDto("Test remark", userModel, now.AddDays(-1)),
-                new GetLeaveRequestDto.RemarksDto(changeStatus.Remark, userModel, now)
-            ]);
-        return new OkObjectResult(leaveRequest);
+            DateTimeOffset.Now,
+            cancellationToken
+        );
+        return result.Match<IActionResult>(
+            leaveRequest => new OkObjectResult(Map(leaveRequest)),
+            error => error.ToObjectResult($"Error occurred while rejecting a leave request. LeaveRequestId = {leaveRequestId}."));
     }
 
     [Function(nameof(CancelStatusLeaveRequest))]

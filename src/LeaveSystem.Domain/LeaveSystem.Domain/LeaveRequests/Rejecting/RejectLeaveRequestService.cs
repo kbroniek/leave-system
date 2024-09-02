@@ -1,20 +1,20 @@
-namespace LeaveSystem.Domain.LeaveRequests.Accepting;
+namespace LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Domain.EventSourcing;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
 
-public class AcceptLeaveRequestService(ReadService readService, WriteService writeService)
+public class RejectLeaveRequestService(ReadService readService, WriteService writeService)
 {
-    public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
+    public async Task<Result<LeaveRequest, Error>> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
         var resultFindById = await readService.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
         if (!resultFindById.IsSuccess)
         {
             return resultFindById;
         }
-        var resultAccept = resultFindById.Value.Accept(leaveRequestId, remarks, acceptedBy, createdDate);
+        var resultAccept = resultFindById.Value.Reject(leaveRequestId, remarks, acceptedBy, createdDate);
         if (!resultAccept.IsSuccess)
         {
             return resultAccept;

@@ -12,7 +12,7 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Get Leave Request
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde70
+GET {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
@@ -43,8 +43,8 @@ X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
 {
     "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
-    "dateFrom": "2024-08-23",
-    "dateTo": "2024-08-23",
+    "dateFrom": "2024-08-22",
+    "dateTo": "2024-08-22",
     "workingHours": "08:00:00",
     "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
     "remark": "yoyo"
@@ -104,7 +104,9 @@ PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71/reject
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
-{}
+{
+    "remark": "rejected by me"
+}
 
 ###
 # @name Cancel Leave Request

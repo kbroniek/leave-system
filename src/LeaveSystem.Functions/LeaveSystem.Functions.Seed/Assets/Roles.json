@@ -7,7 +7,7 @@
     },
     {
       "id": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
-      "roles": [ "Employee" ]
+      "roles": [ "Employee", "DecisionMaker" ]
     }
   ]
 }

@@ -1,8 +1,5 @@
 {
   "partitionKey": "/streamId",
-  "uniqueKeys": [
-    "/streamId,/eventType"
-  ],
   "items": [
     {
       "id": "a9b32f81-2354-4594-8858-455500ee323c",
@@ -13,7 +10,7 @@
         "dateTo": "2024-08-23",
         "duration": "08:00:00",
         "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
-        "remarks": "yoyo",
+        "remarks": "I have an appointment",
         "createdBy": {
           "id": "dca20276-2a30-43b0-89ce-3b0d0bd8501a",
           "name": "Volt Karol"
@@ -40,6 +37,60 @@
         },
         "createdDate": "2024-08-27T07:41:00.1442402+00:00",
         "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Accepting.LeaveRequestAccepted, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    },
+    {
+      "id": "7a9da254-61dc-43b1-867e-05da94fa44ad",
+      "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+      "body": {
+        "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+        "dateFrom": "2024-08-22",
+        "dateTo": "2024-08-22",
+        "duration": "08:00:00",
+        "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
+        "remarks": "I need to leave",
+        "createdBy": {
+          "id": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+          "name": "Olgierd Urbanek"
+        },
+        "assignedTo": {
+          "id": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+          "name": "Olgierd Urbanek"
+        },
+        "workingHours": "08:00:00",
+        "createdDate": "2024-09-02T15:13:32.6939386+02:00",
+        "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Creating.LeaveRequestCreated, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    },
+    {
+      "id": "b98f8193-3e47-4fff-aea9-da7ef2e23390",
+      "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+      "body": {
+        "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+        "remarks": null,
+        "rejectedBy": {
+          "id": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+          "name": "Olgierd Urbanek"
+        },
+        "createdDate": "2024-09-02T15:13:52.08901+02:00",
+        "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Rejecting.LeaveRequestRejected, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    },
+    {
+      "id": "3c9381c0-7abf-465f-a56d-7d7aae049212",
+      "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+      "body": {
+        "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+        "remarks": "accepted by me",
+        "acceptedBy": {
+          "id": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+          "name": "Olgierd Urbanek"
+        },
+        "createdDate": "2024-09-02T15:16:17.9512307+02:00",
+        "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71"
       },
       "eventType": "LeaveSystem.Domain.LeaveRequests.Accepting.LeaveRequestAccepted, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
     }

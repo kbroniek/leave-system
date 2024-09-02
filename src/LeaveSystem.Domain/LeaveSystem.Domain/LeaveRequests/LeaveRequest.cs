@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Creating;
+using LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
 using LeaveSystem.Shared.LeaveRequests;
@@ -52,6 +53,8 @@ public class LeaveRequest : IEventSource
             Apply(createdEvent),
         LeaveRequestAccepted accepted =>
             Apply(accepted),
+        LeaveRequestRejected rejected =>
+            Apply(rejected),
         _ => this
     };
 
@@ -103,18 +106,18 @@ public class LeaveRequest : IEventSource
         Append(@event);
         return Apply(@event);
     }
-    //internal void Reject(string? remarks, LeaveRequestUser rejectedBy)
-    //{
-    //    if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
-    //    {
-    //        throw new InvalidOperationException($"Rejecting leave request in '{Status}' status is not allowed.");
-    //    }
+    internal Result<LeaveRequest, Error> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto rejectedBy, DateTimeOffset createdDate)
+    {
+        if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
+        {
+            return new Error($"Rejecting leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
+        }
 
-    //    var @event = LeaveRequestRejected.Create(Id, remarks, rejectedBy);
+        var @event = LeaveRequestRejected.Create(Id, remarks, rejectedBy, createdDate);
 
-    //    Append(@event);
-    //    Apply(@event);
-    //}
+        Append(@event);
+        return Apply(@event);
+    }
 
     //internal void Cancel(string? remarks, LeaveRequestUser canceledBy, DateTimeOffset now)
     //{
@@ -189,13 +192,14 @@ public class LeaveRequest : IEventSource
         return this;
     }
 
-    //private void Apply(LeaveRequestRejected @event)
-    //{
-    //    Status = LeaveRequestStatus.Rejected;
-    //    AddRemarks(@event.Remarks, @event.RejectedBy);
-    //    LastModifiedBy = @event.RejectedBy;
-    //    Version++;
-    //}
+    private LeaveRequest Apply(LeaveRequestRejected @event)
+    {
+        Status = LeaveRequestStatus.Rejected;
+        AddRemarks(@event.Remarks, @event.RejectedBy, @event.CreatedDate);
+        LastModifiedBy = @event.RejectedBy;
+        Version++;
+        return this;
+    }
 
     //private void Apply(LeaveRequestCanceled @event)
     //{
