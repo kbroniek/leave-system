@@ -4,8 +4,10 @@ using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
+using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Functions.EventSourcing;
+using LeaveSystem.Functions.LeaveRequests.Repositories;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
@@ -16,6 +18,7 @@ using Microsoft.Extensions.Logging;
 internal static class Config
 {
     private class CosmosSettings
+    private class CosmosSettings
     {
         public string? CosmosDBConnection { get; set; }
         public string? DatabaseName { get; set; }
@@ -24,8 +27,10 @@ internal static class Config
         public string? LeaveLimitsContainerName { get; set; }
     }
 
+
     public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
     {
+        var cosmosClientSettings = configuration.Get<CosmosSettings>() ?? throw CreateError(nameof(CosmosSettings));
         var cosmosClientSettings = configuration.Get<CosmosSettings>() ?? throw CreateError(nameof(CosmosSettings));
         return services
             .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection ?? throw CreateError(nameof(cosmosClientSettings.CosmosDBConnection))))
