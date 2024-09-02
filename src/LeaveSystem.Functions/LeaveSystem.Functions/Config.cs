@@ -5,6 +5,7 @@ using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Domain.LeaveRequests.Getting;
+using LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
 using Microsoft.Azure.Cosmos;
@@ -62,7 +63,8 @@ internal static class Config
         services
             .AddScoped<CreateLeaveRequestService>()
             .AddScoped<GetLeaveRequestService>()
-            .AddScoped<AcceptLeaveRequestService>();
+            .AddScoped<AcceptLeaveRequestService>()
+            .AddScoped<RejectLeaveRequestService>();
 
     private static IServiceCollection AddLeaveRequestRepositories(
         this IServiceCollection services,
