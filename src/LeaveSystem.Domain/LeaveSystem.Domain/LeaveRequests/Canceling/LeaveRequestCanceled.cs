@@ -1,4 +1,4 @@
-namespace LeaveSystem.Domain.LeaveRequests.Rejecting;
+namespace LeaveSystem.Domain.LeaveRequests.Canceling;
 
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Shared.Dto;

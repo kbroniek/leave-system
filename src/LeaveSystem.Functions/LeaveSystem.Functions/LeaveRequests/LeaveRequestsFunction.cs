@@ -3,6 +3,7 @@ namespace LeaveSystem.Functions.LeaveRequests;
 using System.Threading;
 using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
+using LeaveSystem.Domain.LeaveRequests.Canceling;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Domain.LeaveRequests.Rejecting;

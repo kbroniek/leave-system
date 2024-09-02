@@ -2,6 +2,7 @@ namespace LeaveSystem.Functions;
 
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
+using LeaveSystem.Domain.LeaveRequests.Canceling;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Domain.LeaveRequests.Getting;
