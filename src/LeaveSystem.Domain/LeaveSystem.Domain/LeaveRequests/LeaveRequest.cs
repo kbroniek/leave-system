@@ -55,6 +55,8 @@ public class LeaveRequest : IEventSource
             Apply(accepted),
         LeaveRequestRejected rejected =>
             Apply(rejected),
+        LeaveRequestCanceled canceled =>
+            Apply(canceled),
         _ => this
     };
 
