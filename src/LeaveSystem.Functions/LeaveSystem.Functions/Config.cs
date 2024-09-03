@@ -2,6 +2,7 @@ namespace LeaveSystem.Functions;
 
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
+using LeaveSystem.Domain.LeaveRequests.Canceling;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Domain.LeaveRequests.Getting;
@@ -24,7 +25,6 @@ internal static class Config
         public string? LeaveTypesContainerName { get; set; }
         public string? LeaveLimitsContainerName { get; set; }
     }
-
 
     public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -65,7 +65,8 @@ internal static class Config
             .AddScoped<CreateLeaveRequestService>()
             .AddScoped<GetLeaveRequestService>()
             .AddScoped<AcceptLeaveRequestService>()
-            .AddScoped<RejectLeaveRequestService>();
+            .AddScoped<RejectLeaveRequestService>()
+            .AddScoped<CancelLeaveRequestService>();
 
     private static IServiceCollection AddLeaveRequestRepositories(
         this IServiceCollection services,

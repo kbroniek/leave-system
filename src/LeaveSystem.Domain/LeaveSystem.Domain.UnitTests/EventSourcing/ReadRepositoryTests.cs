@@ -1,4 +1,4 @@
-namespace LeaveSystem.Functions.UnitTests.EventSourcing;
+namespace LeaveSystem.Domain.UnitTests.EventSourcing;
 
 using System.Net;
 using LeaveSystem.Domain.EventSourcing;

@@ -3,6 +3,7 @@ namespace LeaveSystem.Functions.LeaveRequests;
 using System.Threading;
 using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
+using LeaveSystem.Domain.LeaveRequests.Canceling;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Domain.LeaveRequests.Rejecting;
@@ -23,6 +24,7 @@ public class LeaveRequestsFunction(
     GetLeaveRequestService getLeaveRequestService,
     AcceptLeaveRequestService acceptLeaveRequestService,
     RejectLeaveRequestService rejectLeaveRequestService,
+    CancelLeaveRequestService cancelLeaveRequestService,
     ILogger<LeaveRequestsFunction> logger)
 {
     [Function(nameof(SearchLeaveRequests))]
@@ -180,35 +182,25 @@ public class LeaveRequestsFunction(
     public async Task<IActionResult> CancelStatusLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
-        Route = "leaverequests/{leaveRequestId:guid}/cancel")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus)
+        Route = "leaverequests/{leaveRequestId:guid}/cancel")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
-
-        var now = DateTimeOffset.UtcNow;
-        var leaveRequest = new GetLeaveRequestDto(
+        var result = await cancelLeaveRequestService.Cancel(
             leaveRequestId,
-            DateOnly.FromDateTime(DateTime.UtcNow),
-            DateOnly.FromDateTime(DateTime.UtcNow),
-            TimeSpan.FromHours(8),
-            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-            LeaveRequestStatus.Canceled,
+            changeStatus.Remark,
             userModel,
-            userModel,
-            userModel,
-            TimeSpan.FromHours(8),
-            now.AddDays(-1),
-            now,
-            [
-                new GetLeaveRequestDto.RemarksDto("Test remark", userModel, now.AddDays(-1)),
-                new GetLeaveRequestDto.RemarksDto(changeStatus.Remark, userModel, now)
-            ]);
-        return new OkObjectResult(leaveRequest);
+            DateTimeOffset.Now,
+            cancellationToken
+        );
+        return result.Match<IActionResult>(
+            leaveRequest => new OkObjectResult(Map(leaveRequest)),
+            error => error.ToObjectResult($"Error occurred while canceling a leave request. LeaveRequestId = {leaveRequestId}."));
     }
 
     private GetLeaveRequestDto Map(LeaveRequest leaveRequest) =>
-        new GetLeaveRequestDto(
+        new(
             leaveRequest.Id,
             leaveRequest.DateFrom,
             leaveRequest.DateTo,

@@ -9,6 +9,7 @@ public class AcceptLeaveRequestService(ReadService readService, WriteService wri
 {
     public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
+        //TODO: We can't accept when it is leave request in the same time. It is probable when someone rejects the X, then creates a new one, and accepts the X.
         var resultFindById = await readService.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
         if (!resultFindById.IsSuccess)
         {

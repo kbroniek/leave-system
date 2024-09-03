@@ -27,7 +27,7 @@ internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseNa
         }
         var pendingEventStreamIds = pendingEvents.Select(x => x.StreamId).ToList();
         //TODO: Check if it works correctly.
-        var cancelledEventsStreamIds = await cancelledEventsRepository.GetCancelledStreamIds(pendingEventStreamIds, cancellationToken);
+        var cancelledEventsStreamIds = await cancelledEventsRepository.GetCanceledStreamIds(pendingEventStreamIds, cancellationToken);
 
         var countableEvents = pendingEvents.Where(x => !cancelledEventsStreamIds.Contains(x.StreamId));
         return TimeSpan.FromTicks(countableEvents.Sum(x => x.Body.Duration.Ticks));

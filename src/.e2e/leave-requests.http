@@ -116,4 +116,6 @@ PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71/cancel
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
-{}
+{
+    "remark": "canceled by me"
+}

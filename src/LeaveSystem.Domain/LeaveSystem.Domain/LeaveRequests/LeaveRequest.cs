@@ -4,6 +4,7 @@ using System.Net;
 using System.Runtime.Serialization;
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
+using LeaveSystem.Domain.LeaveRequests.Canceling;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Shared;
@@ -16,7 +17,7 @@ public class LeaveRequest : IEventSource
 
     public Guid Id { get; private set; }
 
-    public DateOnly DateFrom { get; private set; }
+    public virtual DateOnly DateFrom { get; private set; }
 
     public DateOnly DateTo { get; private set; }
 
@@ -38,9 +39,9 @@ public class LeaveRequest : IEventSource
 
     public int Version { get; private set; }
 
-    public DateTimeOffset CreatedDate { get; set; }
+    public DateTimeOffset CreatedDate { get; private set; }
 
-    public DateTimeOffset LastModifiedDate { get; set; }
+    public DateTimeOffset LastModifiedDate { get; private set; }
 
     [IgnoreDataMember]
     Queue<IEvent> IEventSource.PendingEvents { get; } = new Queue<IEvent>();
@@ -55,6 +56,8 @@ public class LeaveRequest : IEventSource
             Apply(accepted),
         LeaveRequestRejected rejected =>
             Apply(rejected),
+        LeaveRequestCanceled canceled =>
+            Apply(canceled),
         _ => this
     };
 
@@ -90,15 +93,15 @@ public class LeaveRequest : IEventSource
         return Apply(@event);
     }
 
-    internal virtual Result<LeaveRequest, Error> Accept(Guid leaveReuestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate)
+    internal virtual Result<LeaveRequest, Error> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate)
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Rejected)
         {
             return new Error($"Accepting leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
         }
-        if (leaveReuestId != Id)
+        if (leaveRequestId != Id)
         {
-            return new Error($"Accepting leave request in different id is not allowed.", HttpStatusCode.UnprocessableEntity);
+            return new Error($"Accepting leave request in different id is not allowed.", HttpStatusCode.Forbidden);
         }
 
         var @event = LeaveRequestAccepted.Create(Id, remarks, acceptedBy, createdDate);
@@ -106,11 +109,15 @@ public class LeaveRequest : IEventSource
         Append(@event);
         return Apply(@event);
     }
-    internal Result<LeaveRequest, Error> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto rejectedBy, DateTimeOffset createdDate)
+    internal virtual Result<LeaveRequest, Error> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto rejectedBy, DateTimeOffset createdDate)
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
         {
             return new Error($"Rejecting leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
+        }
+        if (leaveRequestId != Id)
+        {
+            return new Error($"Rejecting leave request in different id is not allowed.", HttpStatusCode.Forbidden);
         }
 
         var @event = LeaveRequestRejected.Create(Id, remarks, rejectedBy, createdDate);
@@ -119,38 +126,26 @@ public class LeaveRequest : IEventSource
         return Apply(@event);
     }
 
-    //internal void Cancel(string? remarks, LeaveRequestUser canceledBy, DateTimeOffset now)
-    //{
-    //    if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
-    //    {
-    //        throw new InvalidOperationException("Canceling a non-your leave request is not allowed.");
-    //    }
-    //    if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
-    //    {
-    //        throw new InvalidOperationException($"Canceling leave requests in '{Status}' status is not allowed.");
-    //    }
-    //    if (DateFrom < now)
-    //    {
-    //        throw new InvalidOperationException("Canceling of past leave requests is not allowed.");
-    //    }
+    internal virtual Result<LeaveRequest, Error> Cancel(Guid leaveRequestId, string? remarks, LeaveRequestUserDto canceledBy, DateTimeOffset createdDate)
+    {
+        if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
+        {
+            return new Error("Canceling a non-your leave request is not allowed.", HttpStatusCode.BadRequest);
+        }
+        if (leaveRequestId != Id)
+        {
+            return new Error($"Canceling leave request in different id is not allowed.", HttpStatusCode.Forbidden);
+        }
+        if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
+        {
+            return new Error($"Canceling leave requests in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
+        }
 
-    //    var @event = LeaveRequestCanceled.Create(Id, remarks, canceledBy);
+        var @event = LeaveRequestCanceled.Create(Id, remarks, canceledBy, createdDate);
 
-    //    Append(@event);
-    //    Apply(@event);
-    //}
-
-    //internal void OnBehalf(LeaveRequestUser createdByOnBehalf)
-    //{
-    //    if (Status != LeaveRequestStatus.Pending)
-    //    {
-    //        throw new InvalidOperationException($"Creating on behalf leave request in {Status} status is not allowed. Only {LeaveRequestStatus.Pending} is allowed.");
-    //    }
-    //    var @event = LeaveRequestOnBehalfCreated.Create(Id, createdByOnBehalf);
-
-    //    Append(@event);
-    //    Apply(@event);
-    //}
+        Append(@event);
+        return Apply(@event);
+    }
 
     //internal void Deprecate(string? remarks, LeaveRequestUser deprecatedBy)
     //{
@@ -201,20 +196,14 @@ public class LeaveRequest : IEventSource
         return this;
     }
 
-    //private void Apply(LeaveRequestCanceled @event)
-    //{
-    //    Status = LeaveRequestStatus.Canceled;
-    //    AddRemarks(@event.Remarks, @event.CanceledBy);
-    //    LastModifiedBy = @event.CanceledBy;
-    //    Version++;
-    //}
-
-    //private void Apply(LeaveRequestOnBehalfCreated @event)
-    //{
-    //    CreatedByOnBehalf = @event.CreatedByOnBehalf;
-    //    LastModifiedBy = @event.CreatedByOnBehalf;
-    //    Version++;
-    //}
+    private LeaveRequest Apply(LeaveRequestCanceled @event)
+    {
+        Status = LeaveRequestStatus.Canceled;
+        AddRemarks(@event.Remarks, @event.CanceledBy, @event.CreatedDate);
+        LastModifiedBy = @event.CanceledBy;
+        Version++;
+        return this;
+    }
 
     //private void Apply(LeaveRequestDeprecated @event)
     //{

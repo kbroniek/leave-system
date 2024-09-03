@@ -35,7 +35,8 @@ internal class ImpositionValidatorRepository(CosmosClient cosmosClient, string d
         }
         var pendingEventStreamIds = pendingEvents.Select(x => x.StreamId).ToList();
         //TODO: Check if it works correctly.
-        var cancelledEventsStreamIds = await cancelledEventsRepository.GetCancelledStreamIds(pendingEventStreamIds, cancellationToken);
+        var cancelledEventsStreamIds = await cancelledEventsRepository.GetCanceledStreamIds(pendingEventStreamIds, cancellationToken);
+        //TODO: Need to fix because we need to check if all streams are canceled.
         return cancelledEventsStreamIds.Count == 0;
     }
     private sealed record PendingEventEntity(Guid LeaveTypeId, EventUserEntity AssignedTo, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration);
