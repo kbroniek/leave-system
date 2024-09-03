@@ -26,7 +26,7 @@ public class CreateLeaveRequestService(IReadEventsRepository readEventsRepositor
             leaveRequestId, dateFrom, dateTo,
             duration, leaveTypeId, workingHours,
             assignedTo.Id, cancellationToken);
-        if (!validateResult.IsSuccess)
+        if (validateResult.IsFailure)
         {
             return validateResult.Error;
         }
@@ -36,7 +36,7 @@ public class CreateLeaveRequestService(IReadEventsRepository readEventsRepositor
             duration, leaveTypeId, remarks,
             createdBy, assignedTo, workingHours,
             createdDate);
-        if (!result.IsSuccess)
+        if (result.IsFailure)
         {
             return result;
         }
