@@ -25,7 +25,7 @@ public class AcceptLeaveRequestService(ReadService readService, WriteService wri
             return validateResult.Error;
         }
         var resultAccept = leaveRequest.Accept(leaveRequestId, remarks, acceptedBy, createdDate);
-        if (resultFindById.IsFailure)
+        if (resultAccept.IsFailure)
         {
             return resultAccept;
         }
