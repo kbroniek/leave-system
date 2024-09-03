@@ -30,7 +30,7 @@ X-Authorization: Bearer {{bearerToken}}
     "dateTo": "2024-08-23",
     "workingHours": "08:00:00",
     "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
-    "remark": "yoyo"
+    "remark": "My custom holiday leave"
 }
 
 ###
@@ -47,7 +47,7 @@ X-Authorization: Bearer {{bearerToken}}
     "dateTo": "2024-08-22",
     "workingHours": "08:00:00",
     "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
-    "remark": "yoyo"
+    "remark": "My custom sick leave"
 }
 
 ###
@@ -64,7 +64,7 @@ X-Authorization: Bearer {{bearerToken}}
     "dateTo": "2024-08-23",
     "workingHours": "08:00:00",
     "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
-    "remark": "yoyo"
+    "remark": "My custom occasional leave"
 }
 
 ###

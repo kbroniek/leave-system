@@ -6,6 +6,7 @@ using LeaveSystem.Shared;
 public class CreateLeaveRequestValidator(BasicValidator basicValidator, ImpositionValidator impositionValidator, LimitValidator limitValidator)
 {
     public virtual async Task<Result<Error>> Validate(
+        Guid leaveRequestId,
         DateOnly dateFrom,
         DateOnly dateTo,
         TimeSpan duration,
@@ -19,12 +20,12 @@ public class CreateLeaveRequestValidator(BasicValidator basicValidator, Impositi
         {
             return basicResult;
         }
-        var limitResult = await limitValidator.Validate(dateFrom, dateTo, duration, leaveTypeId, workingHours, userId, cancellationToken);
+        var limitResult = await limitValidator.Validate(leaveRequestId, dateFrom, dateTo, duration, leaveTypeId, workingHours, userId, cancellationToken);
         if (limitResult.IsFailure)
         {
             return limitResult;
         }
-        var impositionResult = await impositionValidator.Validate(dateFrom, dateTo, userId, cancellationToken);
+        var impositionResult = await impositionValidator.Validate(leaveRequestId, dateFrom, dateTo, userId, cancellationToken);
         if (impositionResult.IsFailure)
         {
             return impositionResult;

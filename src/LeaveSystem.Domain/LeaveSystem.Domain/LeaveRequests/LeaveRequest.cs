@@ -33,7 +33,7 @@ public class LeaveRequest : IEventSource
 
     public LeaveRequestUserDto LastModifiedBy { get; private set; }
 
-    public LeaveRequestUserDto AssignedTo { get; private set; }
+    public virtual LeaveRequestUserDto AssignedTo { get; private set; }
 
     public TimeSpan WorkingHours { get; private set; }
 

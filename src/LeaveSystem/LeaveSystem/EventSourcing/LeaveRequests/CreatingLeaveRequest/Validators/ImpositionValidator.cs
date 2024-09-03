@@ -1,4 +1,4 @@
-﻿using LeaveSystem.Shared.LeaveRequests;
+using LeaveSystem.Shared.LeaveRequests;
 using Marten;
 using System.ComponentModel.DataAnnotations;
 
