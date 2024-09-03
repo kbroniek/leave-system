@@ -23,11 +23,13 @@ public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysReposit
         {
             return new Error("Date from has to be less than date to.", HttpStatusCode.BadRequest);
         }
+
         var includeFreeDaysResult = await leaveTypeRepository.IsIncludeFreeDays(leaveTypeId, cancellationToken);
         if (!includeFreeDaysResult.IsSuccess)
         {
             return includeFreeDaysResult.Error;
         }
+
         if (includeFreeDaysResult.Value == false)
         {
             var dateFromDayKind = DateOnlyCalculator.GetDayKind(dateFrom);
@@ -42,8 +44,9 @@ public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysReposit
                 return new Error("The date to is off work.", HttpStatusCode.BadRequest);
             }
         }
-        var maxDuration = DateOnlyCalculator.CalculateDuration(dateFrom, dateTo, workingHours,
-            includeFreeDaysResult.Value);
+
+        var maxDuration = DateOnlyCalculator.CalculateDuration(
+            dateFrom, dateTo, workingHours, includeFreeDaysResult.Value);
         var minDuration = maxDuration - workingHours + TimeSpan.FromHours(1);
         var durationDefault = duration ?? maxDuration;
         Guard.Against.OutOfRange(durationDefault, nameof(duration), minDuration, maxDuration);
