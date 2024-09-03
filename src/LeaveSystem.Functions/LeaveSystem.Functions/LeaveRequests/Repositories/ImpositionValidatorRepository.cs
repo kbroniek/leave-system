@@ -20,8 +20,8 @@ internal class ImpositionValidatorRepository(
         var container = cosmosClient.GetContainer(databaseName, containerId);
         var pendingEvents = await container.GetItemLinqQueryable<EventModel<PendingEventEntity>>()
             .Where(x => x.StreamId != leaveRequestId && x.Body.AssignedTo.Id == createdById && (
-                (x.Body.DateFrom >= dateTo && x.Body.DateTo <= dateTo) ||
-                (x.Body.DateFrom >= dateFrom && x.Body.DateTo <= dateFrom) ||
+                (x.Body.DateFrom <= dateTo && x.Body.DateTo >= dateTo) ||
+                (x.Body.DateFrom <= dateFrom && x.Body.DateTo >= dateFrom) ||
                 (x.Body.DateFrom >= dateFrom && x.Body.DateTo <= dateTo) ||
                 (x.Body.DateFrom <= dateFrom && x.Body.DateTo >= dateTo)
             ))
@@ -35,7 +35,7 @@ internal class ImpositionValidatorRepository(
         //TODO: Check if it works correctly.
         var cancelledEventsStreamIds = await cancelledEventsRepository.GetCanceledStreamIds(pendingEventStreamIds, cancellationToken);
         //TODO: Need to fix because we need to check if all streams are canceled.
-        return cancelledEventsStreamIds.Count == 0;
+        return !pendingEventStreamIds.TrueForAll(cancelledEventsStreamIds.Contains);
     }
     private sealed record PendingEventEntity(Guid LeaveTypeId, EventUserEntity AssignedTo, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration);
     private sealed record EventUserEntity(string Id);
