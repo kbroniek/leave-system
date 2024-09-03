@@ -8,24 +8,22 @@ using LeaveSystem.Functions.Extensions;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 
-internal class ImpositionValidatorRepository(CosmosClient cosmosClient, string databaseName, string containerId, CancelledEventsRepository cancelledEventsRepository) : IImpositionValidatorRepository
+internal class ImpositionValidatorRepository(
+    CosmosClient cosmosClient, string databaseName, string containerId,
+    CancelledEventsRepository cancelledEventsRepository) : IImpositionValidatorRepository
 {
-    public async ValueTask<bool> IsExistValid(string createdById, DateOnly dateFrom, DateOnly dateTo, CancellationToken cancellationToken)
+    public async ValueTask<bool> IsExistValid(
+        Guid leaveRequestId, string createdById,
+        DateOnly dateFrom, DateOnly dateTo,
+        CancellationToken cancellationToken)
     {
         var container = cosmosClient.GetContainer(databaseName, containerId);
         var pendingEvents = await container.GetItemLinqQueryable<EventModel<PendingEventEntity>>()
-            .Where(x => x.Body.AssignedTo.Id == createdById && (
-                (x.Body.DateFrom >= dateTo &&
-                x.Body.DateTo <= dateTo)
-             ||
-                (x.Body.DateFrom >= dateFrom &&
-                x.Body.DateTo <= dateFrom)
-             ||
-                (x.Body.DateFrom >= dateFrom &&
-                x.Body.DateTo <= dateTo)
-             ||
-                (x.Body.DateFrom <= dateFrom &&
-                x.Body.DateTo >= dateTo)
+            .Where(x => x.StreamId != leaveRequestId && x.Body.AssignedTo.Id == createdById && (
+                (x.Body.DateFrom >= dateTo && x.Body.DateTo <= dateTo) ||
+                (x.Body.DateFrom >= dateFrom && x.Body.DateTo <= dateFrom) ||
+                (x.Body.DateFrom >= dateFrom && x.Body.DateTo <= dateTo) ||
+                (x.Body.DateFrom <= dateFrom && x.Body.DateTo >= dateTo)
             ))
             .ToFeedIterator()
             .ExecuteQuery(cancellationToken);

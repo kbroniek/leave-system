@@ -1,22 +1,31 @@
 namespace LeaveSystem.Domain.LeaveRequests.Accepting;
-using LeaveSystem.Domain.EventSourcing;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
+using LeaveSystem.Domain.EventSourcing;
+using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
 
-public class AcceptLeaveRequestService(ReadService readService, WriteService writeService)
+public class AcceptLeaveRequestService(ReadService readService, WriteService writeService, CreateLeaveRequestValidator validator)
 {
     public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
-        //TODO: We can't accept when it is leave request in the same time. It is probable when someone rejects the X, then creates a new one, and accepts the X.
         var resultFindById = await readService.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
-        if (!resultFindById.IsSuccess)
+        if (resultFindById.IsFailure)
         {
             return resultFindById;
         }
-        var resultAccept = resultFindById.Value.Accept(leaveRequestId, remarks, acceptedBy, createdDate);
-        if (!resultAccept.IsSuccess)
+        var leaveRequest = resultFindById.Value;
+        var validateResult = await validator.Validate(
+            leaveRequestId, leaveRequest.DateFrom, leaveRequest.DateTo,
+            leaveRequest.Duration, leaveRequest.LeaveTypeId, leaveRequest.WorkingHours,
+            leaveRequest.AssignedTo.Id, cancellationToken);
+        if (validateResult.IsFailure)
+        {
+            return validateResult.Error;
+        }
+        var resultAccept = leaveRequest.Accept(leaveRequestId, remarks, acceptedBy, createdDate);
+        if (resultFindById.IsFailure)
         {
             return resultAccept;
         }

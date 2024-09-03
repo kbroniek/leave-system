@@ -13,13 +13,11 @@ using Microsoft.Azure.Cosmos.Linq;
 internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseName, string containerId, CancelledEventsRepository cancelledEventsRepository) : IUsedLeavesRepository
 {
     public async ValueTask<TimeSpan> GetUsedLeavesDuration(
-        DateOnly? limitValidSince, DateOnly? limitValidUntil,
-        string userId, Guid leaveTypeId,
-        IEnumerable<Guid> nestedLeaveTypeIds,
-        CancellationToken cancellationToken)
+        Guid leaveRequestId, DateOnly? limitValidSince, DateOnly? limitValidUntil,
+        string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds, CancellationToken cancellationToken)
     {
         var container = cosmosClient.GetContainer(databaseName, containerId);
-        var pendingEvents = await GetPendingEvents(limitValidSince, limitValidUntil,
+        var pendingEvents = await GetPendingEvents(leaveRequestId, limitValidSince, limitValidUntil,
             userId, leaveTypeId, nestedLeaveTypeIds, container, cancellationToken);
         if (pendingEvents.Count == 0)
         {
@@ -34,14 +32,13 @@ internal class UsedLeavesRepository(CosmosClient cosmosClient, string databaseNa
     }
 
     private static async Task<IReadOnlyList<EventModel<PendingEventEntity>>> GetPendingEvents(
-        DateOnly? limitValidSince, DateOnly? limitValidUntil,
-        string userId, Guid leaveTypeId,
-        IEnumerable<Guid> nestedLeaveTypeIds,
-        Container container,
-        CancellationToken cancellationToken)
+        Guid leaveRequestId, DateOnly? limitValidSince, DateOnly? limitValidUntil,
+        string userId, Guid leaveTypeId, IEnumerable<Guid> nestedLeaveTypeIds,
+        Container container, CancellationToken cancellationToken)
     {
         var iterator = container.GetItemLinqQueryable<EventModel<PendingEventEntity>>()
-            .Where(x => (x.Body.LeaveTypeId == leaveTypeId || nestedLeaveTypeIds.Contains(x.Body.LeaveTypeId)) &&
+            .Where(x => x.StreamId != leaveRequestId &&
+                (x.Body.LeaveTypeId == leaveTypeId || nestedLeaveTypeIds.Contains(x.Body.LeaveTypeId)) &&
                 x.Body.AssignedTo.Id == userId &&
                 (limitValidSince == null || x.Body.DateFrom >= limitValidSince) &&
                 (limitValidUntil == null || x.Body.DateTo <= limitValidUntil) &&
