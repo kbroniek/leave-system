@@ -1,12 +1,12 @@
 namespace LeaveSystem.Domain.LeaveRequests.Creating;
-using LeaveSystem.Domain.EventSourcing;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
+using LeaveSystem.Domain.EventSourcing;
+using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
-using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 
-public class CreateLeaveRequestService(CreateLeaveRequestValidator createLeaveRequestValidator, WriteService writeService)
+public class CreateLeaveRequestService(IReadEventsRepository readEventsRepository, CreateLeaveRequestValidator createLeaveRequestValidator, WriteService writeService)
 {
     public async Task<Result<LeaveRequest, Error>> CreateAsync(
         Guid leaveRequestId, DateOnly dateFrom, DateOnly dateTo,
@@ -15,6 +15,13 @@ public class CreateLeaveRequestService(CreateLeaveRequestValidator createLeaveRe
         TimeSpan workingHours, DateTimeOffset createdDate,
         CancellationToken cancellationToken)
     {
+        var streamEnumerable = readEventsRepository.ReadStreamAsync(leaveRequestId, cancellationToken).WithCancellation(cancellationToken);
+        var enumerator = streamEnumerable.GetAsyncEnumerator();
+        // If MoveNextAsync() returns false, the enumerator is empty.
+        if (await enumerator.MoveNextAsync())
+        {
+            return new Error("The resource already exists.", System.Net.HttpStatusCode.Conflict);
+        }
         var validateResult = await createLeaveRequestValidator.Validate(
             leaveRequestId, dateFrom, dateTo,
             duration, leaveTypeId, workingHours,
