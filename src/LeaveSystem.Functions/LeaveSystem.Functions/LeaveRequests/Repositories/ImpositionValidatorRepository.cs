@@ -32,9 +32,7 @@ internal class ImpositionValidatorRepository(
             return false;
         }
         var pendingEventStreamIds = pendingEvents.Select(x => x.StreamId).ToList();
-        //TODO: Check if it works correctly.
         var cancelledEventsStreamIds = await cancelledEventsRepository.GetCanceledStreamIds(pendingEventStreamIds, cancellationToken);
-        //TODO: Need to fix because we need to check if all streams are canceled.
         return !pendingEventStreamIds.TrueForAll(cancelledEventsStreamIds.Contains);
     }
     private sealed record PendingEventEntity(Guid LeaveTypeId, EventUserEntity AssignedTo, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration);
