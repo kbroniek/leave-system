@@ -8,6 +8,7 @@ on:
       - 'src/LeaveSystem.Web/LeaveSystem.Web/**'
       - 'src/LeaveSystem.Shared/**'
       - 'src/LeaveSystem.Functions/LeaveSystem.Functions/**'
+      - 'src/LeaveSystem.Domain/LeaveSystem.Domain/**'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -16,6 +17,7 @@ on:
       - 'src/LeaveSystem.Web/LeaveSystem.Web/**'
       - 'src/LeaveSystem.Shared/**'
       - 'src/LeaveSystem.Functions/LeaveSystem.Functions/**'
+      - 'src/LeaveSystem.Domain/LeaveSystem.Domain/**'
 
 jobs:
   build_and_deploy_job:

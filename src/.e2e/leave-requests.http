@@ -28,6 +28,7 @@ X-Authorization: Bearer {{bearerToken}}
     "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
     "dateFrom": "2024-08-23",
     "dateTo": "2024-08-23",
+    "duration": "08:00:00",
     "workingHours": "08:00:00",
     "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
     "remark": "My custom holiday leave"
@@ -42,9 +43,10 @@ Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
 {
-    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
-    "dateFrom": "2024-08-22",
-    "dateTo": "2024-08-22",
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde75",
+    "dateFrom": "2024-08-23",
+    "dateTo": "2024-08-25",
+    "duration": "1.00:00:00",
     "workingHours": "08:00:00",
     "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
     "remark": "My custom sick leave"
@@ -59,9 +61,10 @@ Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
 {
-    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
-    "dateFrom": "2024-08-23",
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde74",
+    "dateFrom": "2024-08-21",
     "dateTo": "2024-08-23",
+    "duration": "1.00:00:00",
     "workingHours": "08:00:00",
     "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
     "remark": "My custom occasional leave"
@@ -100,7 +103,7 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Reject Leave Request
 # @ref Login
 # @reject-unauthorized
-PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71/reject
+PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde72/reject
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
@@ -112,7 +115,7 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Cancel Leave Request
 # @ref Login
 # @reject-unauthorized
-PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71/cancel
+PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde73/cancel
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200

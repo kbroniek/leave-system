@@ -7,14 +7,11 @@ public class ImpositionValidator(IImpositionValidatorRepository impositionValida
 {
     public virtual async Task<Result<Error>> Validate(
         Guid leaveRequestId, DateOnly dateFrom, DateOnly dateTo,
-        string userId, CancellationToken cancellationToken)
-    {
-        if (await impositionValidatorRepository.IsExistValid(leaveRequestId, userId, dateFrom, dateTo, cancellationToken))
-        {
-            return new Error("The other leave is overlapping with this date.", System.Net.HttpStatusCode.Conflict);
-        }
-        return Result.Default;
-    }
+        string userId, CancellationToken cancellationToken) =>
+
+        await impositionValidatorRepository.IsExistValid(leaveRequestId, userId, dateFrom, dateTo, cancellationToken) ?
+            new Error("The other leave is overlapping with this date.", System.Net.HttpStatusCode.Conflict) :
+            Result.Default;
 }
 public interface IImpositionValidatorRepository
 {

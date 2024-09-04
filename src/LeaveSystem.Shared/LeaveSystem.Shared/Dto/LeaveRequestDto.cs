@@ -9,6 +9,6 @@ public record GetLeaveRequestDto(Guid LeaveRequestId, DateOnly DateFrom, DateOnl
     public record RemarksDto(string Remarks, LeaveRequestUserDto CreatedBy, DateTimeOffset CreatedDate);
 }
 
-public record CreateLeaveRequestDto(Guid LeaveRequestId, DateOnly DateFrom, DateOnly DateTo, Guid LeaveTypeId, TimeSpan WorkingHours, string? Remark);
+public record CreateLeaveRequestDto(Guid LeaveRequestId, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration, Guid LeaveTypeId, TimeSpan WorkingHours, string? Remark);
 public record CreateLeaveRequestOnBehalfDto(Guid LeaveRequestId, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration, Guid LeaveTypeId, TimeSpan WorkingHours, string? Remark, string AssignedToId);
 public record ChangeStatusLeaveRequestDto(string? Remark);
