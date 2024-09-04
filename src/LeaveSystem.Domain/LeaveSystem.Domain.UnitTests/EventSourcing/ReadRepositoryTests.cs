@@ -25,7 +25,7 @@ public class ReadRepositoryTests
             .Returns(GetAsyncEnumerable(Enumerable.Empty<FakeEvent>()));
 
         // Act
-        var result = await readService.FindByIdAsync<FakeEventSource>(id, cancellationToken);
+        var result = await readService.FindById<FakeEventSource>(id, cancellationToken);
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -48,7 +48,7 @@ public class ReadRepositoryTests
             .Returns(GetAsyncEnumerable(events));
 
         // Act
-        var result = await readService.FindByIdAsync<FakeEventSource>(id, cancellationToken);
+        var result = await readService.FindById<FakeEventSource>(id, cancellationToken);
 
         // Assert
         Assert.True(result.IsSuccess);

@@ -6,6 +6,7 @@ using LeaveSystem.Domain;
 using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Shared;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
@@ -62,4 +63,30 @@ internal class EventRepository(
             }
         }
     }
+
+    public async IAsyncEnumerable<IEvent> ReadStreamAsync(Guid[] streamIds, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var container = cosmosClient.GetContainer(databaseName, eventsContainerId);
+        var iterator = container.GetItemLinqQueryable<EventModelTs<JToken>>()
+            .Where(x => streamIds.Contains(x.StreamId))
+            .OrderBy(x => x._ts)
+            .ToFeedIterator();
+
+        while (iterator.HasMoreResults)
+        {
+            var response = await iterator.ReadNextAsync(cancellationToken);
+
+            foreach (var @event in response)
+            {
+                //TODO: Error handling
+                yield return (IEvent)@event.Body.ToObject(Type.GetType(@event.EventType, true));
+            }
+        }
+    }
+
+    private record EventModelTs<TEvent>(int _ts,
+        Guid Id,
+        Guid StreamId,
+        TEvent Body,
+        string EventType);
 }

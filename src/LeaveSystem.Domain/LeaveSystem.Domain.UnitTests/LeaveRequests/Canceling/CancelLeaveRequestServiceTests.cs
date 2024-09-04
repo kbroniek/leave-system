@@ -37,7 +37,7 @@ public class CancelLeaveRequestServiceTests
                     .Returns(leaveRequest.Object);
 
         mockReadService
-            .Setup(rs => rs.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
+            .Setup(rs => rs.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(leaveRequest.Object);
 
 
@@ -60,7 +60,7 @@ public class CancelLeaveRequestServiceTests
         // Arrange
         var leaveRequestId = Guid.NewGuid();
         mockReadService
-            .Setup(rs => rs.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
+            .Setup(rs => rs.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound));
 
         // Act
@@ -81,7 +81,7 @@ public class CancelLeaveRequestServiceTests
         leaveRequest.Setup(lr => lr.DateFrom).Returns(DateOnly.FromDateTime(now.AddDays(-1).Date));  // Past date
 
         mockReadService
-            .Setup(rs => rs.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
+            .Setup(rs => rs.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(leaveRequest.Object);
 
         // Act
@@ -106,7 +106,7 @@ public class CancelLeaveRequestServiceTests
                     .Returns(new Error("Cancel failed", HttpStatusCode.BadRequest));
 
         mockReadService
-            .Setup(rs => rs.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
+            .Setup(rs => rs.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(leaveRequest.Object);
 
         mockTimeProvider

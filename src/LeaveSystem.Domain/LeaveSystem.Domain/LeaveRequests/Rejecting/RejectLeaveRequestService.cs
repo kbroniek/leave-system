@@ -9,7 +9,7 @@ public class RejectLeaveRequestService(ReadService readService, WriteService wri
 {
     public async Task<Result<LeaveRequest, Error>> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
-        var resultFindById = await readService.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
+        var resultFindById = await readService.FindById<LeaveRequest>(leaveRequestId, cancellationToken);
         if (!resultFindById.IsSuccess)
         {
             return resultFindById;

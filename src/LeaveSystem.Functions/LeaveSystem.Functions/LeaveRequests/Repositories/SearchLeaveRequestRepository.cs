@@ -8,16 +8,16 @@ using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Searching;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.Extensions;
-using LeaveSystem.Shared.Dto;
 using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
+using static LeaveSystem.Domain.LeaveRequests.Searching.ISearchLeaveRequestRepository;
 
 internal class SearchLeaveRequestRepository(CosmosClient cosmosClient, string databaseName, string containerId) : ISearchLeaveRequestRepository
 {
     private const int MaxSize = 25;
 
-    public async Task<(IEnumerable<SearchLeaveRequestsResultDto> results, string? continuationToken)> Search(
+    public async Task<(IEnumerable<PendingEventEntity> pendingEvents, string? continuationToken)> GetPendingEvents(
         string? continuationToken, DateOnly dateFrom, DateOnly dateTo,
         Guid[]? leaveTypeIds, LeaveRequestStatus[] statuses, string[]? assignedToUserIds, CancellationToken cancellationToken)
     {
@@ -32,10 +32,7 @@ internal class SearchLeaveRequestRepository(CosmosClient cosmosClient, string da
                 x.EventType == typeof(LeaveRequestCreated).AssemblyQualifiedName!)
             .ToFeedIterator();
 
-        var pendingEvents = await iterator.ExecuteQuery(MaxSize, cancellationToken);
-        //TODO: Get all streams and check statuses
-        return (null, pendingEvents.continuationToken);
+        (var pendingEvents, var continuationTokenResult) = await iterator.ExecuteQuery(MaxSize, cancellationToken);
+        return (pendingEvents.Select(x => x.Body), continuationTokenResult);
     }
-    private sealed record PendingEventEntity(Guid LeaveTypeId, EventUserEntity AssignedTo, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration);
-    private sealed record EventUserEntity(string Id);
 }

@@ -10,7 +10,7 @@ public class AcceptLeaveRequestService(ReadService readService, WriteService wri
 {
     public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
-        var resultFindById = await readService.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
+        var resultFindById = await readService.FindById<LeaveRequest>(leaveRequestId, cancellationToken);
         if (resultFindById.IsFailure)
         {
             return resultFindById;
