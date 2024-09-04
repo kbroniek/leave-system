@@ -16,6 +16,7 @@ public class AcceptLeaveRequestService(ReadService readService, WriteService wri
             return resultFindById;
         }
         var leaveRequest = resultFindById.Value;
+        // Cannot accept overlapping limit or when user doesn't have limits.
         var validateResult = await validator.Validate(
             leaveRequestId, leaveRequest.DateFrom, leaveRequest.DateTo,
             leaveRequest.Duration, leaveRequest.LeaveTypeId, leaveRequest.WorkingHours,

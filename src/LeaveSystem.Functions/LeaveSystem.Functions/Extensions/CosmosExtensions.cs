@@ -19,4 +19,23 @@ internal static class CosmosExtensions
             return results;
         }
     }
+
+    internal static async Task<(IReadOnlyList<T> results, string? continuationToken)> ExecuteQuery<T>(this FeedIterator<T> iterator, int maxSize, CancellationToken cancellationToken)
+    {
+        using (iterator)
+        {
+            List<T> results = [];
+            while (iterator.HasMoreResults)
+            {
+                var queryResult = await iterator.ReadNextAsync(cancellationToken);
+                results.AddRange(queryResult);
+                if (results.Count >= maxSize)
+                {
+                    return (results, queryResult.ContinuationToken);
+                }
+            }
+
+            return (results, null);
+        }
+    }
 }
