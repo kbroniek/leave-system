@@ -7,11 +7,11 @@ using LeaveSystem.Domain.LeaveRequests.Canceling;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Domain.LeaveRequests.Rejecting;
+using LeaveSystem.Domain.LeaveRequests.Searching;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
-using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 public class LeaveRequestsFunction(
+    SearchLeaveRequestService searchLeaveRequestService,
     CreateLeaveRequestService createLeaveRequestService,
     GetLeaveRequestService getLeaveRequestService,
     AcceptLeaveRequestService acceptLeaveRequestService,
@@ -32,34 +33,26 @@ public class LeaveRequestsFunction(
     public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "leaverequests")] HttpRequest req)
+        Route = "leaverequests")] HttpRequest req, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        var userId = req.HttpContext.GetUserId();
         var queryResult = req.HttpContext.BindSearchLeaveRequests();
-        var leaveRequests = new[] {
-            new SearchLeaveRequestsResultDto(
-                Guid.Parse("55d4c226-206d-4449-bf5d-0c0065b80fff"),
-                queryResult.DateFrom ?? DateOnly.FromDateTime(DateTime.UtcNow),
-                queryResult.DateTo ?? DateOnly.FromDateTime(DateTime.UtcNow),
-                TimeSpan.FromHours(8),
-                Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-                LeaveRequestStatus.Accepted,
-                userId,
-                TimeSpan.FromHours(8)),
-            new SearchLeaveRequestsResultDto(
-                Guid.Parse("55d4c226-206d-4449-bf5d-0c0065b80ff1"),
-                queryResult.DateFrom ?? DateOnly.FromDateTime(DateTime.UtcNow),
-                queryResult.DateTo ?? DateOnly.FromDateTime(DateTime.UtcNow),
-                TimeSpan.FromHours(8),
-                Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-                LeaveRequestStatus.Rejected,
-                userId,
-                TimeSpan.FromHours(8))
-            };
+        // If user has greater privilege then can read all data. Otherwise can read only his leave requests.
+        var isGlobalAdmin = req.HttpContext.User.IsInRole(nameof(RoleType.GlobalAdmin));
+        var isDecisionMaker = req.HttpContext.User.IsInRole(nameof(RoleType.DecisionMaker));
+        var limitToUserIds = isGlobalAdmin || isDecisionMaker ? queryResult.AssignedToUserIds : [req.HttpContext.GetUserId()];
 
-        return new OkObjectResult(leaveRequests.ToPagedListResponse());
+        (var leaveRequests, var search) = await searchLeaveRequestService.Search(
+            queryResult.ContinuationToken, queryResult.DateFrom, queryResult.DateTo,
+            queryResult.LeaveTypeIds, queryResult.Statuses, limitToUserIds, cancellationToken);
+
+        return new OkObjectResult(new
+        {
+            Items = leaveRequests,
+            search.ContinuationToken,
+            Search = search
+        });
     }
 
     [Function(nameof(GetLeaveRequest))]
@@ -70,7 +63,7 @@ public class LeaveRequestsFunction(
         Route = "leaverequests/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId, CancellationToken cancellationToken)
     {
         logger.LogInformation("C# HTTP trigger function processed a request.");
-
+        //TODO: Security. Only special roles can read all leave requests
         var result = await getLeaveRequestService.Get(leaveRequestId, cancellationToken);
 
         return result.Match<IActionResult>(

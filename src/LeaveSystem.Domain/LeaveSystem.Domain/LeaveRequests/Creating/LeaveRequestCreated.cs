@@ -19,7 +19,7 @@ public record LeaveRequestCreated(
 {
     public Guid StreamId => LeaveRequestId;
 
-    public static LeaveRequestCreated Create(Guid leaveRequestId, DateOnly dateFrom, DateOnly dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, LeaveRequestUserDto createdBy, LeaveRequestUserDto assignedTo, TimeSpan workingHours, DateTimeOffset createdDate)
+    internal static LeaveRequestCreated Create(Guid leaveRequestId, DateOnly dateFrom, DateOnly dateTo, TimeSpan duration, Guid leaveTypeId, string? remarks, LeaveRequestUserDto createdBy, LeaveRequestUserDto assignedTo, TimeSpan workingHours, DateTimeOffset createdDate)
     {
         const int hoursInDayCount = 24;
         const int minHoursInDayCount = 1;

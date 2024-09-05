@@ -10,12 +10,13 @@ public class AcceptLeaveRequestService(ReadService readService, WriteService wri
 {
     public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
-        var resultFindById = await readService.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken);
+        var resultFindById = await readService.FindById<LeaveRequest>(leaveRequestId, cancellationToken);
         if (resultFindById.IsFailure)
         {
             return resultFindById;
         }
         var leaveRequest = resultFindById.Value;
+        // Cannot accept overlapping limit or when user doesn't have limits.
         var validateResult = await validator.Validate(
             leaveRequestId, leaveRequest.DateFrom, leaveRequest.DateTo,
             leaveRequest.Duration, leaveRequest.LeaveTypeId, leaveRequest.WorkingHours,

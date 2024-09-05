@@ -25,7 +25,7 @@ public class RejectLeaveRequestServiceTests
         // Arrange
         var leaveRequestId = Guid.NewGuid();
         mockReadService
-            .Setup(repo => repo.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
+            .Setup(repo => repo.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound));
 
         // Act
@@ -51,7 +51,7 @@ public class RejectLeaveRequestServiceTests
                     .Returns(new Error("Reject failed", HttpStatusCode.BadRequest));
 
         mockReadService
-            .Setup(repo => repo.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
+            .Setup(repo => repo.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(leaveRequest.Object);
 
         // Act
@@ -74,7 +74,7 @@ public class RejectLeaveRequestServiceTests
                     .Returns(leaveRequest.Object);
 
         mockReadService
-            .Setup(repo => repo.FindByIdAsync<LeaveRequest>(leaveRequestId, cancellationToken))
+            .Setup(repo => repo.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(leaveRequest.Object);
 
         mockWriteService

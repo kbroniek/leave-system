@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 public class ReadService(IReadEventsRepository readEventsRepository, ILogger<ReadService> logger)
 {
-    internal virtual async Task<Result<TEventSource, Error>> FindByIdAsync<TEventSource>(Guid id, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
+    internal virtual async Task<Result<TEventSource, Error>> FindById<TEventSource>(Guid id, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
     {
         var leaveRequest = new TEventSource();
         var i = 0;
@@ -24,5 +24,31 @@ public class ReadService(IReadEventsRepository readEventsRepository, ILogger<Rea
             return new Error(errorMessage, HttpStatusCode.NotFound);
         }
         return leaveRequest;
+    }
+    internal virtual async Task<IEnumerable<TEventSource>> FindByIds<TEventSource>(Guid[] ids, CancellationToken cancellationToken) where TEventSource : IEventSource, new()
+    {
+        List<IEvent> events = [];
+        await foreach (var item in readEventsRepository
+            .ReadStreamAsync(ids, cancellationToken)
+            .WithCancellation(cancellationToken))
+        {
+            events.Add(item);
+        }
+
+        return CreateEventSource<TEventSource>(events);
+    }
+
+    private static IEnumerable<TEventSource> CreateEventSource<TEventSource>(List<IEvent> events) where TEventSource : IEventSource, new()
+    {
+        var groupByStreamId = events.GroupBy(x => x.StreamId);
+        foreach (var eventsByStream in groupByStreamId)
+        {
+            var leaveRequest = new TEventSource();
+            foreach (var @event in eventsByStream)
+            {
+                leaveRequest.Evolve(@event);
+            }
+            yield return leaveRequest;
+        }
     }
 }
