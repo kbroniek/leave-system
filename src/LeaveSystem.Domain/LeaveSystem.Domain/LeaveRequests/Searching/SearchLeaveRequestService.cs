@@ -14,10 +14,15 @@ public class SearchLeaveRequestService(ISearchLeaveRequestRepository searchLeave
         var statusesOrDefault = statuses ?? [LeaveRequestStatus.Pending, LeaveRequestStatus.Accepted];
         var dateFromOrDefault = dateFrom ?? GetMinDate(now);
         var dateToOrDefault = dateTo ?? GetMaxDate(now);
+
         (var pendingEvents, var continuationTokenResult) = await searchLeaveRequestRepository.GetPendingEvents(
             continuationToken, dateFromOrDefault, dateToOrDefault,
             leaveTypeIds ?? [], assignedToUserIds ?? [], cancellationToken);
-        var leaveRequests = await readService.FindByIds<LeaveRequest>(pendingEvents.Select(x => x.LeaveRequestId).ToArray(), cancellationToken);
+
+        var leaveRequests = await readService.FindByIds<LeaveRequest>(
+            pendingEvents.Select(x => x.LeaveRequestId).ToArray(),
+            cancellationToken);
+
         var searchedLeaveRequests = leaveRequests
             .Where(x => statusesOrDefault.Contains(x.Status))
             .Select(x => new SearchLeaveRequestsResultDto(x.Id, x.DateFrom, x.DateTo, x.Duration, x.LeaveTypeId, x.Status, x.CreatedBy.Name, x.WorkingHours))
