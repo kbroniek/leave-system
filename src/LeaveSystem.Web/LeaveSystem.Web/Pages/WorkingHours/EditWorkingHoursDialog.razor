@@ -128,7 +128,7 @@ else
 
             workingHours = workingHours.Union(response.Items ?? Enumerable.Empty<WorkingHoursDto>());
 
-			if (response.ContinuationToken is null)
+            if (response.ContinuationToken is null)
             {
                 break;
             }
