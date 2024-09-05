@@ -50,6 +50,7 @@ public class LeaveRequestsFunction(
         return new OkObjectResult(new
         {
             Items = leaveRequests,
+            search.ContinuationToken,
             Search = search
         });
     }
