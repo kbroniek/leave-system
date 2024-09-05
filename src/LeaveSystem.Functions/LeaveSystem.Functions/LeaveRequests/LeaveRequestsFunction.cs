@@ -12,6 +12,7 @@ using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
+using LeaveSystem.Shared.LeaveRequests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,16 +44,14 @@ public class LeaveRequestsFunction(
         var isDecisionMaker = req.HttpContext.User.IsInRole(nameof(RoleType.DecisionMaker));
         var limitToUserIds = isGlobalAdmin || isDecisionMaker ? queryResult.AssignedToUserIds : [req.HttpContext.GetUserId()];
 
-        (var leaveRequests, var continuationToken) = await searchLeaveRequestService.Search(
+        (var leaveRequests, var search) = await searchLeaveRequestService.Search(
             queryResult.ContinuationToken, queryResult.DateFrom, queryResult.DateTo,
             queryResult.LeaveTypeIds, queryResult.Statuses, limitToUserIds, cancellationToken);
 
-        var pagedListResponse = leaveRequests.ToPagedListResponse(continuationToken);
         return new OkObjectResult(new
         {
-            pagedListResponse.Items,
-            pagedListResponse.ContinuationToken,
-            Search = queryResult
+            Items = leaveRequests,
+            Search = search
         });
     }
 

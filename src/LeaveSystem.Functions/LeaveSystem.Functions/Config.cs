@@ -7,6 +7,7 @@ using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Domain.LeaveRequests.Rejecting;
+using LeaveSystem.Domain.LeaveRequests.Searching;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
 using Microsoft.Azure.Cosmos;
@@ -66,7 +67,8 @@ internal static class Config
             .AddScoped<GetLeaveRequestService>()
             .AddScoped<AcceptLeaveRequestService>()
             .AddScoped<RejectLeaveRequestService>()
-            .AddScoped<CancelLeaveRequestService>();
+            .AddScoped<CancelLeaveRequestService>()
+            .AddScoped<SearchLeaveRequestService>();
 
     private static IServiceCollection AddLeaveRequestRepositories(
         this IServiceCollection services,
@@ -106,6 +108,11 @@ internal static class Config
                     databaseName,
                     leaveRequestsContainerName,
                     sp.GetRequiredService<CancelledEventsRepository>()
+                ))
+            .AddScoped<ISearchLeaveRequestRepository>(sp => new SearchLeaveRequestRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    leaveRequestsContainerName
                 ));
 
 
