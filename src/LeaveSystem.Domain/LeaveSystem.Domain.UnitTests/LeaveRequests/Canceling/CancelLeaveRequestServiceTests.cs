@@ -109,10 +109,6 @@ public class CancelLeaveRequestServiceTests
             .Setup(rs => rs.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
             .ReturnsAsync(leaveRequest.Object);
 
-        mockTimeProvider
-            .Setup(tp => tp.GetUtcNow())
-            .Returns(DateTime.UtcNow);
-
         // Act
         var result = await cancelLeaveRequestService.Cancel(leaveRequestId, "Remarks", user, now, cancellationToken);
 
