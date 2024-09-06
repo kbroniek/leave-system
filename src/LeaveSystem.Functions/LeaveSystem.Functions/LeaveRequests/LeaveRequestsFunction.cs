@@ -74,20 +74,6 @@ public class LeaveRequestsFunction(
             error => error.ToObjectResult($"Error occurred while getting a leave request details. LeaveRequestId = {leaveRequestId}."));
     }
 
-    private static Result<Error> IfDifferentEmployeThenReturnError(ClaimsPrincipal user, Result<LeaveRequest, Error> result)
-    {
-        if (result.IsSuccess && user.IsInRole(nameof(RoleType.Employee)))
-        {
-            var userId = user.GetUserId();
-            //Employee can only see his own leave request.
-            if (userId != result.Value.AssignedTo.Id)
-            {
-                return new Error("Permission denied.", System.Net.HttpStatusCode.Forbidden);
-            }
-        }
-        return Result.Default;
-    }
-
     [Function(nameof(CreateLeaveRequest))]
     [Authorize(Roles = nameof(RoleType.Employee))]
     public async Task<IActionResult> CreateLeaveRequest([HttpTrigger(
@@ -204,6 +190,20 @@ public class LeaveRequestsFunction(
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
             error => error.ToObjectResult($"Error occurred while canceling a leave request. LeaveRequestId = {leaveRequestId}."));
+    }
+
+    private static Result<Error> IfDifferentEmployeThenReturnError(ClaimsPrincipal user, Result<LeaveRequest, Error> result)
+    {
+        if (result.IsSuccess && user.IsInRole(nameof(RoleType.Employee)))
+        {
+            var userId = user.GetUserId();
+            //Employee can only see his own leave request.
+            if (userId != result.Value.AssignedTo.Id)
+            {
+                return new Error("Permission denied.", System.Net.HttpStatusCode.Forbidden);
+            }
+        }
+        return Result.Default;
     }
 
     private GetLeaveRequestDto Map(LeaveRequest leaveRequest) =>
