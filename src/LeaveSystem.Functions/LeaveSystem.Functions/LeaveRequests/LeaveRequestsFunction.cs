@@ -1,6 +1,8 @@
 namespace LeaveSystem.Functions.LeaveRequests;
 
+using System.Security.Claims;
 using System.Threading;
+using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Accepting;
 using LeaveSystem.Domain.LeaveRequests.Canceling;
@@ -35,8 +37,6 @@ public class LeaveRequestsFunction(
         "get",
         Route = "leaverequests")] HttpRequest req, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-
         var queryResult = req.HttpContext.BindSearchLeaveRequests();
         // If user has greater privilege then can read all data. Otherwise can read only his leave requests.
         var isGlobalAdmin = req.HttpContext.User.IsInRole(nameof(RoleType.GlobalAdmin));
@@ -62,13 +62,16 @@ public class LeaveRequestsFunction(
         "get",
         Route = "leaverequests/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        //TODO: Security. Only special roles can read all leave requests
         var result = await getLeaveRequestService.Get(leaveRequestId, cancellationToken);
+        var resultPermission = IfDifferentEmployeThenReturnError(req.HttpContext.User, result);
+        if (resultPermission.IsFailure)
+        {
+            return resultPermission.Error.ToObjectResult($"Error occurred while getting a leave request details. LeaveRequestId = {leaveRequestId}.");
+        }
 
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
-            error => error.ToObjectResult("Error occurred while getting a leave request details. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
+            error => error.ToObjectResult($"Error occurred while getting a leave request details. LeaveRequestId = {leaveRequestId}."));
     }
 
     [Function(nameof(CreateLeaveRequest))]
@@ -78,8 +81,6 @@ public class LeaveRequestsFunction(
         "post",
         Route = "leaverequests")] HttpRequest req, [FromBody] CreateLeaveRequestDto leaveRequestDto, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await createLeaveRequestService.CreateAsync(
             leaveRequestDto.LeaveRequestId,
@@ -95,7 +96,7 @@ public class LeaveRequestsFunction(
             cancellationToken);
         return result.Match<IActionResult>(
             leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
-            error => error.ToObjectResult("Error occurred while creating a leave request. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
+            error => error.ToObjectResult($"Error occurred while creating a leave request. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
     }
 
     [Function(nameof(CreateLeaveRequestOnBehalf))]
@@ -105,8 +106,6 @@ public class LeaveRequestsFunction(
         "post",
         Route = "leaverequests/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequestDto, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await createLeaveRequestService.CreateAsync(
             leaveRequestDto.LeaveRequestId,
@@ -133,8 +132,6 @@ public class LeaveRequestsFunction(
         "put",
         Route = "leaverequests/{leaveRequestId:guid}/accept")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await acceptLeaveRequestService.Accept(
             leaveRequestId,
@@ -155,8 +152,6 @@ public class LeaveRequestsFunction(
         "put",
         Route = "leaverequests/{leaveRequestId:guid}/reject")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await rejectLeaveRequestService.Reject(
             leaveRequestId,
@@ -171,14 +166,19 @@ public class LeaveRequestsFunction(
     }
 
     [Function(nameof(CancelStatusLeaveRequest))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)}")]
+    [Authorize(Roles = $"{nameof(RoleType.Employee)}")]
     public async Task<IActionResult> CancelStatusLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "put",
         Route = "leaverequests/{leaveRequestId:guid}/cancel")] HttpRequest req, Guid leaveRequestId, [FromBody] ChangeStatusLeaveRequestDto changeStatus, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-
+        // TODO: Optimize performance
+        var resultGet = await getLeaveRequestService.Get(leaveRequestId, cancellationToken);
+        var resultPermission = IfDifferentEmployeThenReturnError(req.HttpContext.User, resultGet);
+        if (resultPermission.IsFailure)
+        {
+            return resultPermission.Error.ToObjectResult($"Error occurred while getting a leave request details. LeaveRequestId = {leaveRequestId}.");
+        }
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await cancelLeaveRequestService.Cancel(
             leaveRequestId,
@@ -190,6 +190,20 @@ public class LeaveRequestsFunction(
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
             error => error.ToObjectResult($"Error occurred while canceling a leave request. LeaveRequestId = {leaveRequestId}."));
+    }
+
+    private static Result<Error> IfDifferentEmployeThenReturnError(ClaimsPrincipal user, Result<LeaveRequest, Error> result)
+    {
+        if (result.IsSuccess && user.IsInRole(nameof(RoleType.Employee)))
+        {
+            var userId = user.GetUserId();
+            //Employee can only see his own leave request.
+            if (userId != result.Value.AssignedTo.Id)
+            {
+                return new Error("Permission denied.", System.Net.HttpStatusCode.Forbidden);
+            }
+        }
+        return Result.Default;
     }
 
     private GetLeaveRequestDto Map(LeaveRequest leaveRequest) =>

@@ -10,6 +10,7 @@ internal static class UserExtensions
     public static LeaveRequestUserDto MapToLeaveRequestUser(this FederatedUser user) =>
         new(user.Id, user.Name ?? user.Email);
 
-    public static string GetUserId(this HttpContext context) =>
-        context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new NotFoundException(nameof(HttpContent), ClaimTypes.NameIdentifier);
+    public static string GetUserId(this HttpContext context) => context.User.GetUserId();
+    public static string GetUserId(this ClaimsPrincipal user) =>
+        user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new NotFoundException(nameof(HttpContent), ClaimTypes.NameIdentifier);
 }
