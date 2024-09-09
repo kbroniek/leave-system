@@ -5,7 +5,7 @@ using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
 
-internal class GetGraphUserService(IGraphClientFactory graphClientFactory) : IGetUserRepository
+internal class GetUserRepository(IGraphClientFactory graphClientFactory) : IGetUserRepository
 {
     private static readonly string[] Select = ["id", "displayName"];
 

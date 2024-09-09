@@ -21,6 +21,6 @@ public static class Config
             .AddScoped<IGraphClientFactory, GraphClientFactory>(_ => GraphClientFactory.Create(
                 settings.TenantId, settings.ClientId,
                 settings.Secret, settings.Scopes))
-            .AddScoped<IGetUserRepository, GetGraphUserService>();
+            .AddScoped<IGetUserRepository, GetUserRepository>();
     }
 }

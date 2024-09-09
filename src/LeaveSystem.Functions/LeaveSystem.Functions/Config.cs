@@ -123,7 +123,8 @@ internal static class Config
             .AddScoped<IRolesRepository>(sp => new RolesRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
-                    rolesContainerName
+                    rolesContainerName,
+                    sp.GetRequiredService<ILogger<RolesRepository>>()
                 ));
 
 

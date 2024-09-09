@@ -1,27 +1,36 @@
 namespace LeaveSystem.Functions.LeaveRequests.Repositories;
+
+using System.Net;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Logging;
 
-internal class RolesRepository(CosmosClient cosmosClient, string databaseName, string containerId) : IRolesRepository
+internal class RolesRepository(CosmosClient cosmosClient, string databaseName, string containerId,
+    ILogger<RolesRepository> logger) : IRolesRepository
 {
     public async Task<Result<IRolesRepository.UserRoles, Error>> GetUserRoles(string id, CancellationToken cancellationToken)
     {
         var container = cosmosClient.GetContainer(databaseName, containerId);
         var results = await container.GetItemQueryIterator<RolesEntity>(requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(id) })
-            .ExecuteQuery(cancellationToken);
-        if (results.Count == 0)
+            .ExecuteQuery(logger, cancellationToken);
+        if (results.IsFailure)
         {
-            return new Error($"Cannot find roles. UserId={id}", System.Net.HttpStatusCode.NotFound);
+            return results.Error;
         }
-        if (results.Count > 1)
+        var roles = results.Value;
+        if (roles.Count == 0)
         {
-            return new Error($"More than one role for the user. UserId={id}", System.Net.HttpStatusCode.UnprocessableEntity);
+            return new Error($"Cannot find roles. UserId={id}", HttpStatusCode.NotFound);
         }
-        return results.Select(x => new IRolesRepository.UserRoles(x.Roles)).First();
+        if (roles.Count > 1)
+        {
+            return new Error($"More than one role for the user. UserId={id}", HttpStatusCode.UnprocessableEntity);
+        }
+        return roles.Select(x => new IRolesRepository.UserRoles(x.Roles)).First();
     }
     private sealed record RolesEntity(string[] Roles);
 }

@@ -38,9 +38,15 @@ internal class EventRepository(
             logger.LogError(ex, "{Message}", errorMessage);
             return new Error(errorMessage, HttpStatusCode.Conflict);
         }
+        catch (CosmosException ex)
+        {
+            var errorMessage = "Unexpected error occurred while inserting data to DB";
+            logger.LogError(ex, "{Message}", errorMessage);
+            return new Error(errorMessage, ex.StatusCode);
+        }
         catch (Exception ex)
         {
-            var errorMessage = "Unexpected error occurred while insert data to DB";
+            var errorMessage = "Unexpected error occurred while inserting data to DB";
             logger.LogError(ex, "{Message}", errorMessage);
             return new Error(errorMessage, HttpStatusCode.InternalServerError);
         }
