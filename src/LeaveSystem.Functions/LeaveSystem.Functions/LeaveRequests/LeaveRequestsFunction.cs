@@ -1,5 +1,6 @@
 namespace LeaveSystem.Functions.LeaveRequests;
 
+using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using LeaveSystem.Domain;
@@ -18,8 +19,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
-using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 public class LeaveRequestsFunction(
     SearchLeaveRequestService searchLeaveRequestService,
@@ -28,7 +27,7 @@ public class LeaveRequestsFunction(
     AcceptLeaveRequestService acceptLeaveRequestService,
     RejectLeaveRequestService rejectLeaveRequestService,
     CancelLeaveRequestService cancelLeaveRequestService,
-    ILogger<LeaveRequestsFunction> logger)
+    EmployeeService employeeService)
 {
     [Function(nameof(SearchLeaveRequests))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
@@ -106,6 +105,11 @@ public class LeaveRequestsFunction(
         "post",
         Route = "leaverequests/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequestDto, CancellationToken cancellationToken)
     {
+        var employeeResult = await employeeService.Get(leaveRequestDto.LeaveRequestId.ToString(), cancellationToken);
+        if (employeeResult.IsFailure)
+        {
+            return employeeResult.Error.ToObjectResult($"Error occurred while creating a leave request on behalf of another user. LeaveRequestId = {leaveRequestDto.LeaveRequestId}.");
+        }
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await createLeaveRequestService.CreateAsync(
             leaveRequestDto.LeaveRequestId,
@@ -116,7 +120,7 @@ public class LeaveRequestsFunction(
             leaveRequestDto.Remark,
             userModel,
             //TODO Check if user exists and active in graph API
-            new LeaveRequestUserDto(leaveRequestDto.AssignedToId, null),
+            new LeaveRequestUserDto(employeeResult.Value.Id, employeeResult.Value.Name),
             leaveRequestDto.WorkingHours,
             DateTimeOffset.Now,
             cancellationToken);

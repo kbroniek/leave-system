@@ -9,6 +9,7 @@ using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Domain.LeaveRequests.Searching;
 using LeaveSystem.Functions.EventSourcing;
+using LeaveSystem.Functions.GraphApi;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
@@ -25,10 +26,12 @@ internal static class Config
         public string? LeaveRequestsContainerName { get; set; }
         public string? LeaveTypesContainerName { get; set; }
         public string? LeaveLimitsContainerName { get; set; }
+        public string? RolesContainerName { get; set; }
     }
 
     public static IServiceCollection AddLeaveSystemServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddGraphFactory(configuration.GetSection("ManageAzureUsers"));
         var cosmosClientSettings = configuration.Get<CosmosSettings>() ?? throw CreateError(nameof(CosmosSettings));
         return services
             .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection ?? throw CreateError(nameof(cosmosClientSettings.CosmosDBConnection))))
@@ -37,7 +40,8 @@ internal static class Config
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
                 cosmosClientSettings.LeaveTypesContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)),
                 cosmosClientSettings.LeaveLimitsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveTypesContainerName)),
-                cosmosClientSettings.LeaveRequestsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveRequestsContainerName)))
+                cosmosClientSettings.LeaveRequestsContainerName ?? throw CreateError(nameof(cosmosClientSettings.LeaveRequestsContainerName)),
+                cosmosClientSettings.RolesContainerName ?? throw CreateError(nameof(cosmosClientSettings.RolesContainerName)))
             .AddLeaveRequestValidators()
             .AddEventSourcing(
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
@@ -68,14 +72,16 @@ internal static class Config
             .AddScoped<AcceptLeaveRequestService>()
             .AddScoped<RejectLeaveRequestService>()
             .AddScoped<CancelLeaveRequestService>()
-            .AddScoped<SearchLeaveRequestService>();
+            .AddScoped<SearchLeaveRequestService>()
+            .AddScoped<EmployeeService>();
 
     private static IServiceCollection AddLeaveRequestRepositories(
         this IServiceCollection services,
         string databaseName,
         string leaveTypesContainerName,
         string leaveLimitsContainerName,
-        string leaveRequestsContainerName) =>
+        string leaveRequestsContainerName,
+        string rolesContainerName) =>
         services
             .AddScoped(sp => new CancelledEventsRepository(
                     sp.GetRequiredService<CosmosClient>(),
@@ -113,6 +119,11 @@ internal static class Config
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
                     leaveRequestsContainerName
+                ))
+            .AddScoped<IRolesRepository>(sp => new RolesRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    rolesContainerName
                 ));
 
 
