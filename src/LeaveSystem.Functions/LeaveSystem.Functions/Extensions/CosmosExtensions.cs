@@ -57,18 +57,18 @@ internal static class CosmosExtensions
         catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             var errorMessage = "The resource is not found";
-            logger.LogError(ex, "{Message}", errorMessage);
+            logger.LogWarning(ex, "{Message}", errorMessage);
             return new Error(errorMessage, HttpStatusCode.NotFound);
         }
         catch (CosmosException ex)
         {
-            var errorMessage = "Unexpected error occurred while getting data to DB";
+            var errorMessage = "Unexpected error occurred while getting data from DB";
             logger.LogError(ex, "{Message}", errorMessage);
             return new Error(errorMessage, ex.StatusCode);
         }
         catch (Exception ex)
         {
-            var errorMessage = "Unexpected error occurred while getting data to DB";
+            var errorMessage = "Unexpected error occurred while getting data from DB";
             logger.LogError(ex, "{Message}", errorMessage);
             return new Error(errorMessage, HttpStatusCode.InternalServerError);
         }

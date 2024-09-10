@@ -19,6 +19,7 @@ internal class RolesRepository(CosmosClient cosmosClient, string databaseName, s
             .ExecuteQuery(logger, cancellationToken);
         if (results.IsFailure)
         {
+            logger.LogWarning("{Message}", $"Error occurred while getting user userId {id}");
             return results.Error;
         }
         var roles = results.Value;

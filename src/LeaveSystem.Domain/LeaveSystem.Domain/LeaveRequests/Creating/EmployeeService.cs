@@ -24,7 +24,7 @@ public class EmployeeService(IRolesRepository getRolesRepository, IGetUserReposi
         var userResult = await getUserTask;
         if (userResult.IsFailure)
         {
-            return rolesResult.Error;
+            return userResult.Error;
         }
         return new Employee(userResult.Value.Id, userResult.Value.Name);
     }
