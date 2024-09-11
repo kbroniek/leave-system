@@ -22,16 +22,6 @@ foreach (var asset in assets)
     var stream = await File.ReadAllTextAsync(asset);
     var converter = new ExpandoObjectConverter();
     dynamic contents = JsonConvert.DeserializeObject(stream, new JsonSerializerSettings { Converters = { converter } });
-    //await client.GetDatabase("database").DefineContainer(name: "container", partitionKeyPath: "/myPartitionKey")
-    //.WithUniqueKey()
-    //    .Path("/firstName")
-    //    .Path("/lastName")
-    //    .Path("/emailAddress")
-    //.Attach()
-    //.WithUniqueKey()
-    //    .Path("/address/zipCode")
-    //.Attach()
-    //.CreateIfNotExistsAsync();
     var containerBuilder = database.DefineContainer(name: fileName, partitionKeyPath: contents.partitionKey.ToString());
     if (contents.uniqueKeys is IEnumerable uniqueKeysCollection)
     {

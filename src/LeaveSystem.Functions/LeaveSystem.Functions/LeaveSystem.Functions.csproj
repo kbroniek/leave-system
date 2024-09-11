@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" />
     <PackageReference Include="DarkLoop.Azure.Functions.Authorization.Isolated" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" />
+    <PackageReference Include="Microsoft.Graph" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\LeaveSystem.Domain\LeaveSystem.Domain\LeaveSystem.Domain.csproj" />
