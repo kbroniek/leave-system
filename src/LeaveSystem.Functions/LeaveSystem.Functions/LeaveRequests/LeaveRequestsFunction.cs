@@ -105,10 +105,10 @@ public class LeaveRequestsFunction(
         "post",
         Route = "leaverequests/onbehalf")] HttpRequest req, [FromBody] CreateLeaveRequestOnBehalfDto leaveRequestDto, CancellationToken cancellationToken)
     {
-        var employeeResult = await employeeService.Get(leaveRequestDto.LeaveRequestId.ToString(), cancellationToken);
+        var employeeResult = await employeeService.Get(leaveRequestDto.AssignedToId, cancellationToken);
         if (employeeResult.IsFailure)
         {
-            return employeeResult.Error.ToObjectResult($"Error occurred while creating a leave request on behalf of another user. LeaveRequestId = {leaveRequestDto.LeaveRequestId}.");
+            return employeeResult.Error.ToObjectResult($"An error occurred while preparing to create a leave request on behalf of another user. LeaveRequestId = {leaveRequestDto.LeaveRequestId}.");
         }
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var result = await createLeaveRequestService.CreateAsync(
@@ -126,7 +126,7 @@ public class LeaveRequestsFunction(
             cancellationToken);
         return result.Match<IActionResult>(
             leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
-            error => error.ToObjectResult($"Error occurred while creating a leave request on behalf of another user. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
+            error => error.ToObjectResult($"An error occurred while creating a leave request on behalf of another user. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
     }
 
     [Function(nameof(AcceptStatusLeaveRequest))]

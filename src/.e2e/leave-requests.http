@@ -86,7 +86,7 @@ X-Authorization: Bearer {{bearerToken}}
     "workingHours": "08:00:00",
     "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
     "remark": "My custom occasional leave",
-    "assignedToId": "1769e6ea-a351-45bb-a518-a08f59fdde71"
+    "assignedToId": "c188430f-3abd-4885-80f5-75e1b44f7b2b"
 }
 
 ###
