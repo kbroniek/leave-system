@@ -4,11 +4,8 @@ using System;
 public record GetLeaveTypeDto(Guid Id,
                               string Name,
                               int Order,
-                              GetLeaveTypeDto.LeaveTypeDtoProperties? Properties = null,
-                              Guid? BaseLeaveTypeId = null)
+                              GetLeaveTypeDto.LeaveTypePropertiesDto? Properties = null)
 {
-    public record LeaveTypeDtoProperties(string? Color = null,
-                                         bool? IncludeFreeDays = null,
-                                         double? DefaultLimitDays = null,
+    public record LeaveTypePropertiesDto(string? Color = null,
                                          LeaveTypeCatalog? Catalog = null);
 }

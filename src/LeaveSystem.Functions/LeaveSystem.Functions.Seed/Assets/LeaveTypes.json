@@ -1,5 +1,5 @@
 {
-  "partitionKey": "/name",
+  "partitionKey": "/id",
   "uniqueKeys": [
     "/name"
   ],
