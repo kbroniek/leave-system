@@ -37,6 +37,23 @@ public class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
                 throw;
             }
         }
+        catch (FunctionInputConverterException ex)
+        {
+            logger.LogError(ex, "Global exception handler");
+            if (ex.Message.Contains("NotFound (404)"))
+            {
+                if (!await HandleHttpError(context, (int)HttpStatusCode.NotFound, ex, "The record is not found."))
+                {
+                    throw;
+                }
+                return;
+            }
+            if (!await HandleHttpError(context, (int)HttpStatusCode.InternalServerError, ex, "Error input binding."))
+            {
+                throw;
+            }
+
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Global exception handler");
@@ -47,7 +64,7 @@ public class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
         }
     }
 
-    private static async Task<bool> HandleHttpError(FunctionContext context, int status, Exception ex)
+    private static async Task<bool> HandleHttpError(FunctionContext context, int status, Exception ex, string? message = null)
     {
         var httpContext = context.GetHttpContext();
         if (httpContext is null)
@@ -64,7 +81,7 @@ public class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
             [];
         var problemDetails = new ProblemDetails
         {
-            Detail = ex.Message,
+            Detail = message ?? ex.Message,
             Status = status,
             Title = "Global exception handler",
             Extensions = extensions

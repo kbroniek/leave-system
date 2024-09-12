@@ -12,7 +12,7 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Get Leave Type
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+GET {{baseUrl}}/leavetypes/6e1a75ca-07dc-45aa-9451-57e1cefd7ee6
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
