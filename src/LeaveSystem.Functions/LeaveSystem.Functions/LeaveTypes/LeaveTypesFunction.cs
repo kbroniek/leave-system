@@ -1,24 +1,17 @@
 namespace LeaveSystem.Functions.LeaveTypes;
-using LeaveSystem.Shared;
+
+using LeaveSystem.Domain;
+using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 public class LeaveTypesFunction
 {
-    private static GetLeaveTypeDto holidayLeave = new(
-        Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-        "urlop wypoczynkowy",
-        1,
-        new GetLeaveTypeDto.LeaveTypePropertiesDto(
-            Color: "#0137C9",
-            Catalog: LeaveTypeCatalog.Holiday
-        )
-    );
-
     [Function(nameof(GetLeaveTypes))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
     public async Task<IActionResult> GetLeaveTypes([HttpTrigger(
@@ -28,7 +21,7 @@ public class LeaveTypesFunction
         [CosmosDBInput(
         databaseName: "%DatabaseName%",
         containerName: "%LeaveTypesContainerName%",
-        Connection  = "CosmosDBConnection")] IEnumerable<GetLeaveTypeDto> leaveTypes) => new OkObjectResult(leaveTypes.ToPagedListResponse());
+        Connection  = "CosmosDBConnection")] IEnumerable<LeaveTypeDto> leaveTypes) => new OkObjectResult(leaveTypes.ToPagedListResponse());
 
     [Function(nameof(GetLeaveType))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
@@ -41,16 +34,39 @@ public class LeaveTypesFunction
         containerName: "%LeaveTypesContainerName%",
         Connection  = "CosmosDBConnection",
         Id = "{leaveTypeId}",
-        PartitionKey = "{leaveTypeId}")] GetLeaveTypeDto leaveType) => new OkObjectResult(leaveType);
+        PartitionKey = "{leaveTypeId}")] LeaveTypeDto leaveType) => new OkObjectResult(leaveType);
 
     [Function(nameof(CreateLeaveType))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveTypeAdmin)}")]
-    public IActionResult CreateLeaveType([HttpTrigger(
+    public LeaveTypeOutputType CreateLeaveType([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "post",
-        Route = "leavetypes")] HttpRequest req)
+        Route = "leavetypes")] HttpRequest req, [FromBody] LeaveTypeDto leaveType)
     {
-        return new CreatedResult($"/leavetypes/{holidayLeave.Id}", holidayLeave);
+        if (leaveType.Properties?.DefaultLimitDays < 0)
+        {
+            return new()
+            {
+                Result = new Error($"{nameof(LeaveTypeDto.PropertiesDto.DefaultLimitDays)} cannot be less than 0.", System.Net.HttpStatusCode.BadRequest)
+                    .ToObjectResult($"Error occurred while creating a leave type. LeaveRequestId = {leaveType.Id}.")
+            };
+        }
+
+        return new()
+        {
+            Result = new CreatedResult($"/leavetypes/{leaveType.Id}", leaveType),
+            LeaveType = leaveType
+        };
+    }
+
+    public class LeaveTypeOutputType
+    {
+        [HttpResult]
+        public IActionResult Result { get; set; }
+
+        [CosmosDBOutput("%DatabaseName%", "%LeaveTypesContainerName%",
+            Connection = "CosmosDBConnection", CreateIfNotExists = true)]
+        public LeaveTypeDto? LeaveType { get; set; }
     }
 
     [Function(nameof(UpdateLeaveType))]
@@ -60,7 +76,7 @@ public class LeaveTypesFunction
         "put",
         Route = "leavetypes/{leaveTypeId:guid}")] HttpRequest req, Guid leaveTypeId)
     {
-        return new OkObjectResult(holidayLeave);
+        return new OkObjectResult("");
     }
 
     [Function(nameof(RemoveLeaveType))]
