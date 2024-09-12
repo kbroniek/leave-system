@@ -1,7 +1,7 @@
 {
   "partitionKey": "/id",
   "uniqueKeys": [
-    "/name"
+    "/name", "/order"
   ],
   "items": [
     {
