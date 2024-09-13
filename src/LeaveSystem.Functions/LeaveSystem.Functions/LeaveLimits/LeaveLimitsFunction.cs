@@ -9,8 +9,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-public class LeaveLimitsFunction(SearchLeaveLimitsRepository searchRepository, ILogger<LeaveLimitsFunction> logger)
+public class LeaveLimitsFunction(
+    SearchLeaveLimitsRepository searchRepository,
+    CreateLeaveLimitsValidator createValidator,
+    ILogger<LeaveLimitsFunction> logger)
 {
     [Function(nameof(SearchUserLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
@@ -23,7 +27,7 @@ public class LeaveLimitsFunction(SearchLeaveLimitsRepository searchRepository, I
         {
             return query.Error.ToObjectResult("Error occurred while getting a leave limits.");
         }
-        var result = await searchRepository.GetPendingEvents(query.Value.Year, [userId], query.Value.LeaveTypeIds, query.Value.PageSize, query.Value.ContinuationToken, cancellationToken);
+        var result = await searchRepository.GetLimits(query.Value.Year, [userId], query.Value.LeaveTypeIds, query.Value.PageSize, query.Value.ContinuationToken, cancellationToken);
 
         return result.Match<IActionResult>(
             leaveLimits => new OkObjectResult(leaveLimits.limits.ToPagedListResponse(leaveLimits.continuationToken)),
@@ -40,36 +44,33 @@ public class LeaveLimitsFunction(SearchLeaveLimitsRepository searchRepository, I
         {
             return query.Error.ToObjectResult("Error occurred while getting a leave limits.");
         }
-        var result = await searchRepository.GetPendingEvents(query.Value.Year, query.Value.UserIds, query.Value.LeaveTypeIds, query.Value.PageSize, query.Value.ContinuationToken, cancellationToken);
+        var result = await searchRepository.GetLimits(query.Value.Year, query.Value.UserIds, query.Value.LeaveTypeIds, query.Value.PageSize, query.Value.ContinuationToken, cancellationToken);
 
         return result.Match<IActionResult>(
             leaveLimits => new OkObjectResult(leaveLimits.limits.ToPagedListResponse(leaveLimits.continuationToken)),
             error => error.ToObjectResult("Error occurred while getting a leave limits."));
     }
 
-    [Function(nameof(GetLeaveLimit))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult GetLeaveLimit([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "get",
-        Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req, Guid leaveLimitId)
-    {
-        var userId = req.HttpContext.GetUserId();
-        var limit = CreateLimit(null, null, userId);
-        return new OkObjectResult(limit);
-    }
-
     [Function(nameof(CreateLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult CreateLeaveLimits([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "post",
-        Route = "leavelimits")] HttpRequest req)
+    public async Task<LeaveLimitOutput> CreateLeaveLimits(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "leavelimits")] HttpRequest req,
+        [FromBody] LeaveLimitDto leaveLimit)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        var userId = req.HttpContext.GetUserId();
-        var limit = CreateLimit(null, null, userId);
-        return new CreatedResult($"/leavelimits/{limit.Id}", limit);
+        var result = await createValidator.Validate(leaveLimit);
+        if (result.IsFailure)
+        {
+            return new()
+            {
+                Result = result.Error.ToObjectResult($"Error occurred while creating a leave type. LeaveLimitId = {leaveLimit.Id}.")
+            };
+        }
+
+        return new()
+        {
+            Result = new CreatedResult($"/leavetypes/{leaveLimit.Id}", leaveLimit),
+            LeaveLimit = leaveLimit
+        };
     }
 
     [Function(nameof(UpdateLeaveLimits))]
@@ -105,4 +106,15 @@ public class LeaveLimitsFunction(SearchLeaveLimitsRepository searchRepository, I
             dateFrom ?? DateOnly.Parse("2024-01-01"),
             dateTo ?? DateOnly.Parse("2024-12-31"),
             userId);
+
+
+    public class LeaveLimitOutput
+    {
+        [HttpResult]
+        public IActionResult Result { get; set; }
+
+        [CosmosDBOutput("%DatabaseName%", "%LeaveLimitsContainerName%",
+            Connection = "CosmosDBConnection", CreateIfNotExists = true)]
+        public LeaveLimitDto? LeaveLimit { get; set; }
+    }
 }

@@ -12,7 +12,7 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
 {
     private const int MaxPageSize = 25;
 
-    public async Task<Result<(IReadOnlyList<LeaveLimitDto> limits, string? continuationToken), Error>> GetPendingEvents(
+    public async Task<Result<(IReadOnlyList<LeaveLimitDto> limits, string? continuationToken), Error>> GetLimits(
         int year, string[] assignedToUserIds, Guid[] leaveTypeIds,
         int? pageSize, string? continuationToken, CancellationToken cancellationToken)
     {

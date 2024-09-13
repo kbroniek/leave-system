@@ -141,7 +141,8 @@ internal static class Config
             .AddScoped<BasicValidator>()
             .AddScoped<ImpositionValidator>()
             .AddScoped<LimitValidator>()
-            .AddScoped<CreateLeaveRequestValidator>();
+            .AddScoped<CreateLeaveRequestValidator>()
+            .AddScoped<CreateLeaveLimitsValidator>();
 
     private static CosmosClient BuildCosmosDbClient(string connectionString) =>
         new CosmosClientBuilder(connectionString)
