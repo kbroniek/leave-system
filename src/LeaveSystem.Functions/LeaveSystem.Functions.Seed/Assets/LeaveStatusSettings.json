@@ -1,5 +1,5 @@
 {
-  "partitionKey": "/leaveRequestStatus",
+  "partitionKey": "/id",
   "uniqueKeys": [
     "/leaveRequestStatus"
   ],

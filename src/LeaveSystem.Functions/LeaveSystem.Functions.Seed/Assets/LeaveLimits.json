@@ -1,5 +1,5 @@
 {
-  "partitionKey": "/assignedToUserId",
+  "partitionKey": "/id",
   "uniqueKeys": [
     "/assignedToUserId,/leaveTypeId,/validSince,/validUntil"
   ],
