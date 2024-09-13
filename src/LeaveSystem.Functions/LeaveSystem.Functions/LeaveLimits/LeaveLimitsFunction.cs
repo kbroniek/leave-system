@@ -60,30 +60,25 @@ public class LeaveLimitsFunction(
         var result = await createValidator.Validate(leaveLimit);
         if (result.IsFailure)
         {
-            return new()
-            {
-                Result = result.Error.ToObjectResult($"Error occurred while creating a leave type. LeaveLimitId = {leaveLimit.Id}.")
-            };
+            return new(result.Error.ToObjectResult($"Error occurred while creating a leave type. LeaveLimitId = {leaveLimit.Id}."));
         }
 
-        return new()
-        {
-            Result = new CreatedResult($"/leavetypes/{leaveLimit.Id}", leaveLimit),
-            LeaveLimit = leaveLimit
-        };
+        return new(new CreatedResult($"/leavetypes/{leaveLimit.Id}", leaveLimit), leaveLimit);
     }
 
     [Function(nameof(UpdateLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult UpdateLeaveLimits([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "put",
-        Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req, Guid leaveLimitId)
+    public async Task<LeaveLimitOutput> UpdateLeaveLimits(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req,
+        Guid leaveLimitId, [FromBody] LeaveLimitDto leaveLimit)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        var userId = req.HttpContext.GetUserId();
-        var limit = CreateLimit(null, null, userId);
-        return new OkObjectResult(limit);
+        var result = await createValidator.Validate(leaveLimit, leaveLimitId);
+        if (result.IsFailure)
+        {
+            return new(result.Error.ToObjectResult($"Error occurred while updating a leave type. LeaveLimitId = {leaveLimit.Id}."));
+        }
+
+        return new(new OkObjectResult(leaveLimit), leaveLimit);
     }
 
     [Function(nameof(RemoveLeaveLimit))]
@@ -108,13 +103,8 @@ public class LeaveLimitsFunction(
             userId);
 
 
-    public class LeaveLimitOutput
-    {
-        [HttpResult]
-        public IActionResult Result { get; set; }
-
-        [CosmosDBOutput("%DatabaseName%", "%LeaveLimitsContainerName%",
-            Connection = "CosmosDBConnection", CreateIfNotExists = true)]
-        public LeaveLimitDto? LeaveLimit { get; set; }
-    }
+    public record LeaveLimitOutput(
+        [property: HttpResult] IActionResult Result,
+        [property: CosmosDBOutput("%DatabaseName%", "%LeaveLimitsContainerName%",
+            Connection = "CosmosDBConnection", CreateIfNotExists = true)] LeaveLimitDto? LeaveLimit = null);
 }

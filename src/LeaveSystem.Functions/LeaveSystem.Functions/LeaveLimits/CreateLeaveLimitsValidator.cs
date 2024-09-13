@@ -5,7 +5,7 @@ using LeaveSystem.Shared;
 
 public class CreateLeaveLimitsValidator
 {
-    internal async Task<Result<Error>> Validate(LeaveSystem.Shared.Dto.LeaveLimitDto leaveLimit)
+    internal async Task<Result<Error>> Validate(LeaveSystem.Shared.Dto.LeaveLimitDto leaveLimit, Guid? leaveLimitId = null)
     {
         return Result.Default;
     }

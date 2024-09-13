@@ -1,6 +1,7 @@
 namespace LeaveSystem.Shared.Dto;
 using System;
 using System.Text.Json.Serialization;
+using static LeaveSystem.Shared.Dto.LeaveLimitDto;
 
 public record LeaveLimitDto(
     [property: JsonPropertyName("id")] Guid Id,
@@ -11,7 +12,16 @@ public record LeaveLimitDto(
     [property: JsonPropertyName("validSince")] DateOnly? ValidSince,
     [property: JsonPropertyName("validUntil")] DateOnly? ValidUntil,
     [property: JsonPropertyName("assignedToUserId")] string AssignedToUserId,
-    [property: JsonPropertyName("description")] string? Description = null);
+    [property: JsonPropertyName("state")] LeaveLimitState State,
+    [property: JsonPropertyName("description")] string? Description = null)
+{
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum LeaveLimitState
+    {
+        Active,
+        Inactive,
+    };
+}
 
 
 public record SearchLeaveLimitQuery(int Year, string[] UserIds, Guid[] LeaveTypeIds, int? PageSize, string? ContinuationToken);
