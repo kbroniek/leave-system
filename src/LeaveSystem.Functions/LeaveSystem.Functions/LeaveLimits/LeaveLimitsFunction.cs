@@ -9,15 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-public class LeaveLimitsFunction
+public class LeaveLimitsFunction(ILogger<LeaveLimitsFunction> logger)
 {
-    private readonly ILogger<LeaveLimitsFunction> logger;
-
-    public LeaveLimitsFunction(ILogger<LeaveLimitsFunction> logger)
-    {
-        this.logger = logger;
-    }
-
     [Function(nameof(GetUserLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
     public IActionResult GetUserLeaveLimits([HttpTrigger(
