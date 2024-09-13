@@ -11,6 +11,7 @@ using LeaveSystem.Domain.LeaveRequests.Searching;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.GraphApi;
 using LeaveSystem.Functions.LeaveLimits;
+using LeaveSystem.Functions.LeaveLimits.Repositories;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;

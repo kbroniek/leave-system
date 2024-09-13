@@ -1,4 +1,4 @@
-namespace LeaveSystem.Functions.LeaveLimits;
+namespace LeaveSystem.Functions.LeaveLimits.Repositories;
 
 using LeaveSystem.Domain;
 using LeaveSystem.Functions.Extensions;

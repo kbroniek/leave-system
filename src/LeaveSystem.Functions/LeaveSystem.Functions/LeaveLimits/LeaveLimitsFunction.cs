@@ -2,6 +2,7 @@ namespace LeaveSystem.Functions.LeaveLimits;
 
 using System.Threading;
 using LeaveSystem.Functions.Extensions;
+using LeaveSystem.Functions.LeaveLimits.Repositories;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
 using Microsoft.AspNetCore.Authorization;
