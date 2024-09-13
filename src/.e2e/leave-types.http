@@ -12,7 +12,7 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Get Leave Type
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavetypes/6e1a75ca-07dc-45aa-9451-57e1cefd7ee6
+GET {{baseUrl}}/leavetypes/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
@@ -33,23 +33,34 @@ X-Authorization: Bearer {{bearerToken}}
         "includeFreeDays": false,
         "defaultLimitDays": 100,
         "catalog": "Holiday"
-    }
+    },
+    "state": "Active"
 }
 
 ###
 # @name Update Leave Type
 # @ref Login
 # @reject-unauthorized
-PUT {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+PUT {{baseUrl}}/leavetypes/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
-{}
+{
+    "id": "d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5",
+    "name": "dummy leave type",
+    "order": 1,
+    "properties": {
+        "color": "#FF00FF",
+        "includeFreeDays": false,
+        "defaultLimitDays": 100,
+        "catalog": "Holiday"
+    }
+}
 
 ###
 # @name Delete Leave Type
 # @ref Login
 # @reject-unauthorized
-DELETE {{baseUrl}}/leavetypes/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+DELETE {{baseUrl}}/leavetypes/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 204
