@@ -15,6 +15,17 @@ using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribut
 
 public class LeaveStatusSettingsFunction(ILogger<LeaveStatusSettingsFunction> logger)
 {
+    [Function(nameof(SearchLeaveStatusesSettings))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
+    public async Task<IActionResult> SearchLeaveStatusesSettings(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "settings/leavestatus/search")] HttpRequest req,
+        [CosmosDBInput(
+            databaseName: "%DatabaseName%",
+            containerName: "%LeaveStatusSettingsContainerName%",
+            SqlQuery = "SELECT * FROM c WHERE (c.state = 'Active' OR NOT IS_DEFINED(c.state)) AND ({status} = '' OR c.leaveRequestStatus = {status})",
+            Connection  = "CosmosDBConnection")] IEnumerable<LeaveStatusSettingsDto> leaveStatuses) =>
+        new OkObjectResult(leaveStatuses.ToPagedListResponse());
+
     [Function(nameof(GetLeaveStatusesSettings))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
     public async Task<IActionResult> GetLeaveStatusesSettings(
@@ -22,9 +33,9 @@ public class LeaveStatusSettingsFunction(ILogger<LeaveStatusSettingsFunction> lo
         [CosmosDBInput(
             databaseName: "%DatabaseName%",
             containerName: "%LeaveStatusSettingsContainerName%",
-            SqlQuery = "SELECT * FROM c WHERE c.state = 'Active' OR NOT IS_DEFINED(c.state)",
-            Connection  = "CosmosDBConnection")] IEnumerable<LeaveStatusSettingsDto> leaveTypes) =>
-        new OkObjectResult(leaveTypes.ToPagedListResponse());
+            SqlQuery = "SELECT * FROM c WHERE (c.state = 'Active' OR NOT IS_DEFINED(c.state))",
+            Connection  = "CosmosDBConnection")] IEnumerable<LeaveStatusSettingsDto> leaveStatuses) =>
+        new OkObjectResult(leaveStatuses.ToPagedListResponse());
 
     [Function(nameof(GetLeaveStatusSettings))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
@@ -35,8 +46,8 @@ public class LeaveStatusSettingsFunction(ILogger<LeaveStatusSettingsFunction> lo
             containerName: "%LeaveStatusSettingsContainerName%",
             Connection  = "CosmosDBConnection",
             Id = "{leaveStatusSettingsId}",
-            PartitionKey = "{leaveStatusSettingsId}")] LeaveStatusSettingsDto leaveType) =>
-        new OkObjectResult(leaveType);
+            PartitionKey = "{leaveStatusSettingsId}")] LeaveStatusSettingsDto leaveStatus) =>
+        new OkObjectResult(leaveStatus);
 
     [Function(nameof(CreateLeaveStatusSettings))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveTypeAdmin)}")]
