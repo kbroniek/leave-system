@@ -1,0 +1,55 @@
+# @import ./login.http
+
+###
+# @name Get Leave Types
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/settings/leavestatus
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Type
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/settings/leavestatus/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Create Leave Type
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/settings/leavestatus
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "id": "d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5",
+    "leaveRequestStatus": "Init",
+    "color": "#FFFFFF",
+    "state": "Active"
+}
+
+###
+# @name Update Leave Type
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/settings/leavestatus/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{
+    "id": "d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5",
+    "leaveRequestStatus": "Init",
+    "color": "#FFFFFF",
+    "state": "Active"
+}
+
+###
+# @name Delete Leave Type
+# @ref Login
+# @reject-unauthorized
+DELETE {{baseUrl}}/settings/leavestatus/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
+X-Authorization: Bearer {{bearerToken}}
+?? status == 204
