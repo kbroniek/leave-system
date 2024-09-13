@@ -3,6 +3,7 @@
     <PackageReference Include="Ardalis.GuardClauses" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
 </Project>

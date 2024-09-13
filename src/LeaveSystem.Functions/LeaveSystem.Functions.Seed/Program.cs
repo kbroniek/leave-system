@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
+Console.WriteLine("Connecting to the DB.");
 var assets = Directory.GetFiles("Assets", "*.json");
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -13,11 +14,12 @@ var configuration = new ConfigurationBuilder()
     .Build();
 var client = new CosmosClient(configuration.GetConnectionString("CosmosDBConnection"));
 Database database = await client.CreateDatabaseIfNotExistsAsync("LeaveSystem");
+Console.WriteLine("Connected to the DB.");
 
 foreach (var asset in assets)
 {
     var fileName = Path.GetFileNameWithoutExtension(asset);
-    Console.WriteLine($"Write data to {fileName}");
+    Console.WriteLine($"Writing data to {fileName}");
 
     var stream = await File.ReadAllTextAsync(asset);
     var converter = new ExpandoObjectConverter();
