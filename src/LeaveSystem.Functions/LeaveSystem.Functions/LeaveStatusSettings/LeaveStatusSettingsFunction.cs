@@ -17,7 +17,7 @@ public class LeaveStatusSettingsFunction(ILogger<LeaveStatusSettingsFunction> lo
 {
     [Function(nameof(SearchLeaveStatusesSettings))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
-    public async Task<IActionResult> SearchLeaveStatusesSettings(
+    public IActionResult SearchLeaveStatusesSettings(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "settings/leavestatus/search")] HttpRequest req,
         [CosmosDBInput(
             databaseName: "%DatabaseName%",
@@ -28,7 +28,7 @@ public class LeaveStatusSettingsFunction(ILogger<LeaveStatusSettingsFunction> lo
 
     [Function(nameof(GetLeaveStatusesSettings))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
-    public async Task<IActionResult> GetLeaveStatusesSettings(
+    public IActionResult GetLeaveStatusesSettings(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "settings/leavestatus")] HttpRequest req,
         [CosmosDBInput(
             databaseName: "%DatabaseName%",
@@ -39,7 +39,7 @@ public class LeaveStatusSettingsFunction(ILogger<LeaveStatusSettingsFunction> lo
 
     [Function(nameof(GetLeaveStatusSettings))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
-    public async Task<IActionResult> GetLeaveStatusSettings(
+    public IActionResult GetLeaveStatusSettings(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "settings/leavestatus/{leaveStatusSettingsId:guid}")] HttpRequest req,
         [CosmosDBInput(
             databaseName: "%DatabaseName%",

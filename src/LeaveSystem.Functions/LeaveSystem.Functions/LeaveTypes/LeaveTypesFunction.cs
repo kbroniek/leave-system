@@ -14,7 +14,7 @@ public class LeaveTypesFunction
 {
     [Function(nameof(GetLeaveTypes))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
-    public async Task<IActionResult> GetLeaveTypes(
+    public IActionResult GetLeaveTypes(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavetypes")] HttpRequest req,
         [CosmosDBInput(
             databaseName: "%DatabaseName%",
@@ -25,7 +25,7 @@ public class LeaveTypesFunction
 
     [Function(nameof(GetLeaveType))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
-    public async Task<IActionResult> GetLeaveType(
+    public IActionResult GetLeaveType(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavetypes/{leaveTypeId:guid}")] HttpRequest req,
         [CosmosDBInput(
             databaseName: "%DatabaseName%",
