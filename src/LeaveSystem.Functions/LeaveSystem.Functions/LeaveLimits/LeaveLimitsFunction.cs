@@ -83,25 +83,18 @@ public class LeaveLimitsFunction(
 
     [Function(nameof(RemoveLeaveLimit))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult RemoveLeaveLimit([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "delete",
-        Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req, Guid leaveLimitId)
+    public async Task<LeaveLimitOutput> RemoveLeaveLimit(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req,
+        [CosmosDBInput(
+            databaseName: "%DatabaseName%",
+            containerName: "%LeaveLimitsContainerName%",
+            Connection  = "CosmosDBConnection",
+            Id = "{leaveLimitId}",
+            PartitionKey = "{leaveLimitId}")] LeaveLimitDto LeaveLimitFromDb)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        return new NoContentResult();
+        var deletedLeaveLimit = LeaveLimitFromDb with { State = LeaveLimitDto.LeaveLimitState.Inactive };
+        return new(new NoContentResult(), deletedLeaveLimit);
     }
-
-    private static LeaveLimitDto CreateLimit(DateOnly? dateFrom, DateOnly? dateTo, string userId) => new LeaveLimitDto(
-            Guid.Parse("3b8a8a97-992f-4965-abf8-fe5a9cf91862"),
-            TimeSpan.FromHours(8) * 26,
-            TimeSpan.FromHours(8) * 2,
-            TimeSpan.FromHours(8),
-            Guid.Parse("ae752d4b-0368-4d46-8efa-9ef2ee248fa9"),
-            dateFrom ?? DateOnly.Parse("2024-01-01"),
-            dateTo ?? DateOnly.Parse("2024-12-31"),
-            userId);
-
 
     public record LeaveLimitOutput(
         [property: HttpResult] IActionResult Result,
