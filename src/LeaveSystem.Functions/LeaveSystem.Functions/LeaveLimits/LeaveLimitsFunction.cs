@@ -1,5 +1,6 @@
 namespace LeaveSystem.Functions.LeaveLimits;
 
+using System.Threading;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
@@ -9,31 +10,41 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-public class LeaveLimitsFunction(ILogger<LeaveLimitsFunction> logger)
+public class LeaveLimitsFunction(SearchLeaveLimitsRepository searchRepository, ILogger<LeaveLimitsFunction> logger)
 {
-    [Function(nameof(GetUserLeaveLimits))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
-    public IActionResult GetUserLeaveLimits([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "get",
-        Route = "leavelimits/user")] HttpRequest req)
+    [Function(nameof(SearchUserLeaveLimits))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
+    public async Task<IActionResult> SearchUserLeaveLimits(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavelimits/user")] HttpRequest req, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        return GetLeaveLimits(req);
+        var userId = req.HttpContext.GetUserId();
+        var query = req.HttpContext.BindSearchUserLeaveLimitQuery();
+        if (query.IsFailure)
+        {
+            return query.Error.ToObjectResult("Error occurred while getting a leave limits.");
+        }
+        var result = await searchRepository.GetPendingEvents(query.Value.Year, [userId], query.Value.LeaveTypeIds, query.Value.PageSize, query.Value.ContinuationToken, cancellationToken);
+
+        return result.Match<IActionResult>(
+            leaveLimits => new OkObjectResult(leaveLimits.limits.ToPagedListResponse(leaveLimits.continuationToken)),
+            error => error.ToObjectResult("Error occurred while getting a leave limits."));
     }
 
-    [Function(nameof(GetLeaveLimits))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult GetLeaveLimits([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "get",
-        Route = "leavelimits")] HttpRequest req)
+    [Function(nameof(SearchLeaveLimits))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.LeaveLimitAdmin)}")]
+    public async Task<IActionResult> SearchLeaveLimits(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavelimits")] HttpRequest req, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        var getLeaveLimitQuery = req.HttpContext.BindGetLeaveLimitQuery();
-        var userId = req.HttpContext.GetUserId();
-        var limits = new[] { CreateLimit(getLeaveLimitQuery.DateFrom, getLeaveLimitQuery.DateFrom, userId) };
-        return new OkObjectResult(limits.ToPagedListResponse());
+        var query = req.HttpContext.BindSearchLeaveLimitQuery();
+        if (query.IsFailure)
+        {
+            return query.Error.ToObjectResult("Error occurred while getting a leave limits.");
+        }
+        var result = await searchRepository.GetPendingEvents(query.Value.Year, query.Value.UserIds, query.Value.LeaveTypeIds, query.Value.PageSize, query.Value.ContinuationToken, cancellationToken);
+
+        return result.Match<IActionResult>(
+            leaveLimits => new OkObjectResult(leaveLimits.limits.ToPagedListResponse(leaveLimits.continuationToken)),
+            error => error.ToObjectResult("Error occurred while getting a leave limits."));
     }
 
     [Function(nameof(GetLeaveLimit))]

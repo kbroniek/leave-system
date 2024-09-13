@@ -1,10 +1,18 @@
 # @import ./login.http
 
 ###
+# @name Get User Leave Limits
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits/user?year=2024
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
 # @name Get Leave Limits
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavelimits
+GET {{baseUrl}}/leavelimits?year=2024&pagesize=1
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
