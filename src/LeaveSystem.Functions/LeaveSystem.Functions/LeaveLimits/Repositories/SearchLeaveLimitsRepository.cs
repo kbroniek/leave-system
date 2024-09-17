@@ -23,10 +23,10 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
         var result = await container.GetItemLinqQueryable<LeaveLimitDto>(continuationToken: continuationToken, requestOptions: new QueryRequestOptions { MaxItemCount = pageSizeOrMax })
             .Where(x => (leaveTypeIds.Length == 0 || leaveTypeIds.Contains(x.LeaveTypeId)) &&
                 (assignedToUserIds.Length == 0 || assignedToUserIds.Contains(x.AssignedToUserId)) &&
-                x.ValidSince >= firstDay && x.ValidUntil <= lastDay &&
-                x.State == LeaveLimitDto.LeaveLimitState.Active)
+                x.ValidSince >= firstDay && x.ValidUntil <= lastDay)
             .ToFeedIterator()
             .ExecuteQuery(logger, pageSizeOrMax, cancellationToken);
         return result;
     }
+
 }
