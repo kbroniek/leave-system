@@ -134,6 +134,12 @@ internal static class Config
                     databaseName,
                     leaveLimitsContainerName,
                     sp.GetRequiredService<ILogger<SearchLeaveLimitsRepository>>()
+                ))
+            .AddScoped(sp => new ImpositionLimitRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    leaveLimitsContainerName,
+                    sp.GetRequiredService<ILogger<ImpositionLimitRepository>>()
                 ));
 
 

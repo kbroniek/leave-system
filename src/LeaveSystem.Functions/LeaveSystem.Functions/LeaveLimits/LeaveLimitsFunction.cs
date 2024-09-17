@@ -1,6 +1,7 @@
 namespace LeaveSystem.Functions.LeaveLimits;
 
 using System.Threading;
+using LeaveSystem.Domain;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Functions.LeaveLimits.Repositories;
 using LeaveSystem.Shared.Auth;
@@ -56,12 +57,13 @@ public class LeaveLimitsFunction(
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public async Task<LeaveLimitOutput> CreateLeaveLimits(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "leavelimits")] HttpRequest req,
-        [FromBody] LeaveLimitDto leaveLimit)
+        [FromBody] LeaveLimitDto leaveLimit, CancellationToken cancellationToken)
     {
-        var result = await createValidator.Validate(leaveLimit);
+        var result = await createValidator.Validate(
+            leaveLimit.ValidSince, leaveLimit.ValidUntil, leaveLimit.AssignedToUserId, leaveLimit.LeaveTypeId, leaveLimit.Id, cancellationToken);
         if (result.IsFailure)
         {
-            return new(result.Error.ToObjectResult($"Error occurred while creating a leave type. LeaveLimitId = {leaveLimit.Id}."));
+            return new(result.Error.ToObjectResult($"Error occurred while creating a leave limit. LeaveLimitId = {leaveLimit.Id}."));
         }
 
         return new(new CreatedResult($"/leavetypes/{leaveLimit.Id}", leaveLimit), leaveLimit);
@@ -71,12 +73,18 @@ public class LeaveLimitsFunction(
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public async Task<LeaveLimitOutput> UpdateLeaveLimits(
         [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "leavelimits/{leaveLimitId:guid}")] HttpRequest req,
-        Guid leaveLimitId, [FromBody] LeaveLimitDto leaveLimit)
+        Guid leaveLimitId, [FromBody] LeaveLimitDto leaveLimit, CancellationToken cancellationToken)
     {
-        var result = await createValidator.Validate(leaveLimit, leaveLimitId);
+        if (leaveLimitId != leaveLimit.Id)
+        {
+            return new(new Error($"{nameof(LeaveLimitDto.Id)} cannot be different than {nameof(leaveLimitId)}.", System.Net.HttpStatusCode.BadRequest)
+                    .ToObjectResult($"Error occurred while updating a leave type. LeaveLimit = {leaveLimit.Id}."));
+        }
+        var result = await createValidator.Validate(
+            leaveLimit.ValidSince, leaveLimit.ValidUntil, leaveLimit.AssignedToUserId, leaveLimit.LeaveTypeId, leaveLimit.Id, cancellationToken);
         if (result.IsFailure)
         {
-            return new(result.Error.ToObjectResult($"Error occurred while updating a leave type. LeaveLimitId = {leaveLimit.Id}."));
+            return new(result.Error.ToObjectResult($"Error occurred while updating a leave limit. LeaveLimitId = {leaveLimit.Id}."));
         }
 
         return new(new OkObjectResult(leaveLimit), leaveLimit);
