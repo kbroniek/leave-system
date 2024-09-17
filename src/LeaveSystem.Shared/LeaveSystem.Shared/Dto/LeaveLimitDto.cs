@@ -11,7 +11,7 @@ public record LeaveLimitDto(
     [property: JsonPropertyName("leaveTypeId")] Guid LeaveTypeId,
     [property: JsonPropertyName("validSince")] DateOnly? ValidSince,
     [property: JsonPropertyName("validUntil")] DateOnly? ValidUntil,
-    [property: JsonPropertyName("assignedToUserId")] string AssignedToUserId,
+    [property: JsonPropertyName("assignedToUserId")] string? AssignedToUserId,
     [property: JsonPropertyName("state")] LeaveLimitState State,
     [property: JsonPropertyName("description")] string? Description = null)
 {

@@ -10,13 +10,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 public class LeaveLimitsFunction(
     SearchLeaveLimitsRepository searchRepository,
-    CreateLeaveLimitsValidator createValidator,
-    ILogger<LeaveLimitsFunction> logger)
+    CreateLeaveLimitsValidator createValidator)
 {
     [Function(nameof(SearchUserLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
