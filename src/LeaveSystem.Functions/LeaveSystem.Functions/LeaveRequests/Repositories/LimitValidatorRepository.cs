@@ -27,11 +27,13 @@ internal class LimitValidatorRepository(CosmosClient cosmosClient, string databa
             return new Error($"Cannot find limits for the leave type id: {leaveTypeId}. Add limits for the user {userId}.", System.Net.HttpStatusCode.UnprocessableEntity);
         }
 
-        if (limits.Count > 1)
+        //Only assigned limits must be unique
+        if (limits.Count(x => x.AssignedToUserId != null) > 1)
         {
             return new Error($"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userId}.", System.Net.HttpStatusCode.UnprocessableEntity);
         }
-        var limit = limits[0];
+        //Assigned limits has higher priority
+        var limit = limits.OrderBy(x => x.AssignedToUserId).Last();
         return (limit.Limit, limit.OverdueLimit, limit.ValidSince, limit.ValidUntil);
     }
     private sealed record Entity(Guid LeaveTypeId, string? AssignedToUserId, DateOnly? ValidSince, DateOnly? ValidUntil, TimeSpan? Limit, TimeSpan? OverdueLimit);

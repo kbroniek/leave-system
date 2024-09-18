@@ -1,10 +1,18 @@
 # @import ./login.http
 
 ###
+# @name Get User Leave Limits
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits/user?year=2024
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
 # @name Get Leave Limits
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavelimits
+GET {{baseUrl}}/leavelimits?year=2024&pagesize=1
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
@@ -12,7 +20,7 @@ X-Authorization: Bearer {{bearerToken}}
 # @name Get Leave Limit
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavelimits/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+GET {{baseUrl}}/leavelimits/cd72ec1a-e461-4049-b9b9-db49f7bc58c0
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
@@ -24,22 +32,42 @@ POST {{baseUrl}}/leavelimits
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
-{}
+{
+    "id": "cd72ec1a-e461-4049-b9b9-db49f7bc58c0",
+    "limit": "8.16:00:00",
+    "overdueLimit": null,
+    "workingHours": "08:00:00",
+    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "validSince": "2025-01-01",
+    "validUntil": "2025-12-31",
+    "assignedToUserId": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+    "description": "Dummy limit"
+}
 
 ###
 # @name Update Leave Limit
 # @ref Login
 # @reject-unauthorized
-PUT {{baseUrl}}/leavelimits/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+PUT {{baseUrl}}/leavelimits/cd72ec1a-e461-4049-b9b9-db49f7bc58c0
 Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
-{}
+{
+    "id": "cd72ec1a-e461-4049-b9b9-db49f7bc58c0",
+    "limit": "8.16:00:00",
+    "overdueLimit": null,
+    "workingHours": "08:00:00",
+    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "validSince": "2026-01-01",
+    "validUntil": "2026-12-31",
+    "assignedToUserId": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+    "description": "Dummy limit"
+}
 
 ###
 # @name Delete Leave Limit
 # @ref Login
 # @reject-unauthorized
-DELETE {{baseUrl}}/leavelimits/ae6cdc66-dbc4-4307-b09b-e0be50f955b7
+DELETE {{baseUrl}}/leavelimits/cd72ec1a-e461-4049-b9b9-db49f7bc58c0
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 204

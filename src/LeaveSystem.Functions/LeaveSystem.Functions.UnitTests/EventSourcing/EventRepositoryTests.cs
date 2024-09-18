@@ -83,7 +83,7 @@ public class EventRepositoryTests
         // Assert
         Assert.False(result.IsSuccess);
         Assert.Equal(HttpStatusCode.InternalServerError, result.Error.HttpStatusCode);
-        Assert.Equal("Unexpected error occurred while insert data to DB", result.Error.Message);
+        Assert.Equal("Unexpected error occurred while inserting data to DB", result.Error.Message);
     }
 
     [Fact]

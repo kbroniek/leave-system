@@ -10,6 +10,8 @@ using LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Domain.LeaveRequests.Searching;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.GraphApi;
+using LeaveSystem.Functions.LeaveLimits;
+using LeaveSystem.Functions.LeaveLimits.Repositories;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
@@ -118,13 +120,26 @@ internal static class Config
             .AddScoped<ISearchLeaveRequestRepository>(sp => new SearchLeaveRequestRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
-                    leaveRequestsContainerName
+                    leaveRequestsContainerName,
+                    sp.GetRequiredService<ILogger<SearchLeaveRequestRepository>>()
                 ))
             .AddScoped<IRolesRepository>(sp => new RolesRepository(
                     sp.GetRequiredService<CosmosClient>(),
                     databaseName,
                     rolesContainerName,
                     sp.GetRequiredService<ILogger<RolesRepository>>()
+                ))
+            .AddScoped(sp => new SearchLeaveLimitsRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    leaveLimitsContainerName,
+                    sp.GetRequiredService<ILogger<SearchLeaveLimitsRepository>>()
+                ))
+            .AddScoped(sp => new ImpositionLimitRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    leaveLimitsContainerName,
+                    sp.GetRequiredService<ILogger<ImpositionLimitRepository>>()
                 ));
 
 
@@ -133,7 +148,8 @@ internal static class Config
             .AddScoped<BasicValidator>()
             .AddScoped<ImpositionValidator>()
             .AddScoped<LimitValidator>()
-            .AddScoped<CreateLeaveRequestValidator>();
+            .AddScoped<CreateLeaveRequestValidator>()
+            .AddScoped<CreateLeaveLimitsValidator>();
 
     private static CosmosClient BuildCosmosDbClient(string connectionString) =>
         new CosmosClientBuilder(connectionString)

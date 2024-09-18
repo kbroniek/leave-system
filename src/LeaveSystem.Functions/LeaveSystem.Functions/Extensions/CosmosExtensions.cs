@@ -29,7 +29,7 @@ internal static class CosmosExtensions
         await HanldeError(async () => await ExecuteQuery(iterator, cancellationToken), logger);
 
     [Obsolete("Use version with error handling")]
-    internal static async Task<(IReadOnlyList<T> results, string? continuationToken)> ExecuteQuery<T>(this FeedIterator<T> iterator, int maxSize, CancellationToken cancellationToken)
+    internal static async Task<(IReadOnlyList<T> results, string? continuationToken)> ExecuteQuery<T>(this FeedIterator<T> iterator, int pageSize, CancellationToken cancellationToken)
     {
         using (iterator)
         {
@@ -38,7 +38,7 @@ internal static class CosmosExtensions
             {
                 var queryResult = await iterator.ReadNextAsync(cancellationToken);
                 results.AddRange(queryResult);
-                if (results.Count >= maxSize)
+                if (results.Count >= pageSize)
                 {
                     return (results, queryResult.ContinuationToken);
                 }
@@ -47,6 +47,8 @@ internal static class CosmosExtensions
             return (results, null);
         }
     }
+    internal static async Task<Result<(IReadOnlyList<T> results, string? continuationToken), Error>> ExecuteQuery<T>(this FeedIterator<T> iterator, ILogger logger, int maxSize, CancellationToken cancellationToken) =>
+        await HanldeError(async () => await ExecuteQuery(iterator, maxSize, cancellationToken), logger);
 
     internal static async Task<Result<T, Error>> HanldeError<T>(Func<Task<T>> func, ILogger logger)
     {
