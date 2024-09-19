@@ -1,4 +1,4 @@
-import { LogLevel } from "@azure/msal-browser";
+import { Configuration, LogLevel } from "@azure/msal-browser";
 // Browser check variables
 // If you support IE, our recommendation is that you sign-in using Redirect APIs
 // If you as a developer are testing using Edge InPrivate mode, please add "isEdge" to the if check
@@ -23,17 +23,13 @@ export const b2cPolicies = {
     authorities: {
         signUpSignIn: {
             authority: "https://leavesystem.b2clogin.com/leavesystem.onmicrosoft.com/B2C_1A_SIGNINCUSTOM_SSPR"
-        },
-        editProfile: {
-            authority: "https://leavesystem.b2clogin.com/leavesystem.onmicrosoft.com/B2C_1_ProfileEditPolicy",
-            scopes: ['https://leavesystem.onmicrosoft.com/4f24b978-403f-47fe-9cae-52deea03661d/API.Access']
         }
     },
     authorityDomain: "leavesystem.b2clogin.com"
 }
 
 // Config object to be passed to Msal on creation
-export const msalConfig = {
+export const msalConfig: Configuration = {
     auth: {
         clientId: "114ea83d-c494-46f4-9d7c-b582fed7b5b9",
         authority: b2cPolicies.authorities.signUpSignIn.authority,
