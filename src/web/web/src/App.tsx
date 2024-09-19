@@ -1,35 +1,23 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, useNavigate } from "react-router-dom";
+import { MsalProvider } from "@azure/msal-react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import type { AppProps } from "./types";
+
+import { CustomNavigationClient } from "./NavigationClient";
+
+import { Home } from "./components/Home";
+
+export function App({ pca }: AppProps) {
+  // The next 3 lines are optional. This is how you configure MSAL to take advantage of the router's navigate functions when MSAL redirects between pages in your app
+  const navigate = useNavigate();
+  const navigationClient = new CustomNavigationClient(navigate);
+  pca.setNavigationClient(navigationClient);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR. Test
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <MsalProvider instance={pca}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </MsalProvider>
+  );
 }
-
-export default App

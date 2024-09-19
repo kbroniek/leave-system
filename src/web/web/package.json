@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "@azure/msal-browser": "^3.1.0",
+    "@azure/msal-react": "^2.0.3",
+    "react-router-dom": "^6.4.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
