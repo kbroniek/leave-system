@@ -20,7 +20,7 @@ export function Home(props: { status?: string }) {
         </Typography>
         <Stack direction="column" spacing={2}>
           <ButtonGroup orientation="vertical">
-            <Button component={RouterLink} to="/profile" variant="contained" color="primary" id="callApiButton">Call Hello API</Button>
+            <Button component={RouterLink} to="/data" variant="contained" color="primary" id="callApiButton">Call LeaveSystem API</Button>
           </ButtonGroup>
           <Typography variant="body1">Claims in your ID token are shown below: </Typography>
           <Paper>

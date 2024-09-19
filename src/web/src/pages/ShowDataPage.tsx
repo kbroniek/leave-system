@@ -6,7 +6,7 @@ import { InteractionStatus, InteractionType, InteractionRequiredAuthError, Accou
 import { loginRequest } from "../authConfig";
 
 // Sample app imports
-import { ProfileData } from "../ui-components/ProfileData";
+import { ShowData } from "../ui-components/ShowData";
 import { Loading } from "../ui-components/Loading";
 import { ErrorComponent } from "../ui-components/ErrorComponent";
 import { callApi } from "../utils/ApiCall";
@@ -14,7 +14,7 @@ import { callApi } from "../utils/ApiCall";
 // Material-ui imports
 import Paper from "@mui/material/Paper";
 
-const ProfileContent = () => {
+const DataContent = () => {
     const { instance, inProgress } = useMsal();
     const [apiData, setApiData] = useState(null);
 
@@ -33,12 +33,12 @@ const ProfileContent = () => {
 
     return (
         <Paper>
-            { apiData ? <ProfileData apiData={apiData} /> : null }
+            { apiData ? <ShowData apiData={apiData} /> : null }
         </Paper>
     );
 };
 
-export function Profile() {
+export function Data() {
     const authRequest = {
         ...loginRequest
     };
@@ -50,7 +50,7 @@ export function Profile() {
             errorComponent={ErrorComponent} 
             loadingComponent={Loading}
         >
-            <ProfileContent />
+            <DataContent />
         </MsalAuthenticationTemplate>
       )
 };
