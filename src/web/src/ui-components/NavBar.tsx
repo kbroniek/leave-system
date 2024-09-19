@@ -12,7 +12,7 @@ const NavBar = () => {
             <AppBar position="static">
                 <Toolbar>
                     <Typography sx={{ flexGrow: 1 }}>
-                        <Link component={RouterLink} to="/" color="inherit" variant="h6">Microsoft identity platform</Link>
+                        <Link component={RouterLink} to="/" color="inherit" variant="h6">Leave System</Link>
                     </Typography>
                     <WelcomeName />
                     <SignInSignOutButton />
