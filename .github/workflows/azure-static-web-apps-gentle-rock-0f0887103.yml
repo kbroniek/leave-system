@@ -5,7 +5,7 @@ on:
     branches:
       - develop
     paths:
-      - 'src/web/web/**'
+      - 'src/web/**'
       - 'src/LeaveSystem.Shared/**'
       - 'src/LeaveSystem.Functions/LeaveSystem.Functions/**'
       - 'src/LeaveSystem.Domain/LeaveSystem.Domain/**'
@@ -14,7 +14,7 @@ on:
     branches:
       - develop
     paths:
-      - 'src/web/web/**'
+      - 'src/web/**'
       - 'src/LeaveSystem.Shared/**'
       - 'src/LeaveSystem.Functions/LeaveSystem.Functions/**'
       - 'src/LeaveSystem.Domain/LeaveSystem.Domain/**'
