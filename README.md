@@ -2,7 +2,7 @@
 
 [![.NET](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml)
 
-[![DEV - Roles for B2C - func-leave-system-west-europe-dev-01](https://github.com/kbroniek/leave-system/actions/workflows/roles_func-leave-system-west-europe-dev-01.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/roles_func-leave-system-west-europe-dev-01.yml)
+[![DEV - Roles for B2C](https://github.com/kbroniek/leave-system/actions/workflows/roles_func-leave-system-west-europe-dev-01.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/roles_func-leave-system-west-europe-dev-01.yml)
 
 [![DEV - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml/badge.svg?branch=develop)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml)
 
