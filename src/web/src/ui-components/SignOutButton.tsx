@@ -58,11 +58,8 @@ export const SignOutButton = () => {
         <MenuItem onClick={() => handleAccountSelection()} key="switchAccount">
           Switch Account
         </MenuItem>
-        <MenuItem onClick={() => handleLogout("popup")} key="logoutPopup">
-          Logout using Popup
-        </MenuItem>
         <MenuItem onClick={() => handleLogout("redirect")} key="logoutRedirect">
-          Logout using Redirect
+          Logout
         </MenuItem>
       </Menu>
       <AccountPicker open={accountSelectorOpen} onClose={handleClose} />
