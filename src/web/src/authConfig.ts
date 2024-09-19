@@ -18,15 +18,15 @@ const isFirefox = firefox > 0; // Only needed if you need to support the redirec
  */
 export const b2cPolicies = {
     names: {
-        signUpSignIn: "B2C_1A_SIGNINCUSTOM_SSPR",
-        editProfile: "B2C_1_ProfileEditPolicy"
+        signUpSignIn: "B2C_1A_SIGNINCUSTOM_SSPR"
     },
     authorities: {
         signUpSignIn: {
             authority: "https://leavesystem.b2clogin.com/leavesystem.onmicrosoft.com/B2C_1A_SIGNINCUSTOM_SSPR"
         },
         editProfile: {
-            authority: "https://leavesystem.b2clogin.com/leavesystem.onmicrosoft.com/B2C_1_ProfileEditPolicy"
+            authority: "https://leavesystem.b2clogin.com/leavesystem.onmicrosoft.com/B2C_1_ProfileEditPolicy",
+            scopes: ['https://leavesystem.onmicrosoft.com/4f24b978-403f-47fe-9cae-52deea03661d/API.Access']
         }
     },
     authorityDomain: "leavesystem.b2clogin.com"

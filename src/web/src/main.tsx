@@ -3,6 +3,8 @@ import type { EventMessage, AuthenticationResult } from "@azure/msal-browser";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "@mui/material/styles";
+import { theme } from "./styles/theme";
 
 import { msalConfig } from "./authConfig";
 
@@ -12,11 +14,16 @@ import "./index.css";
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 await msalInstance.initialize();
-await msalInstance.loginPopup();
-// Account selection logic is app dependent. Adjust as needed for different use cases.
+
+// Optional - This will update account state if a user signs in from another tab or window
+msalInstance.enableAccountStorageEvents();
+
+// Default to using the first account if no account is active on page load
 const accounts = msalInstance.getAllAccounts();
+//TODO: Remove
 console.log({ accounts, msalInstance });
-if (accounts.length > 0) {
+if (!msalInstance.getActiveAccount() && accounts.length > 0) {
+  // Account selection logic is app dependent. Adjust as needed for different use cases.
   msalInstance.setActiveAccount(accounts[0]);
 }
 
@@ -31,7 +38,9 @@ msalInstance.addEventCallback((event: EventMessage) => {
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
     <BrowserRouter>
-      <App pca={msalInstance} />
+      <ThemeProvider theme={theme}>
+        <App pca={msalInstance} />
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>
 );
