@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import { EditProfileButton } from "../ui-components/EditProfileButton";
 import { TokenClaims } from "../ui-components/TokenClaims";
 
-export function Home(props: {status: string}) {
+export function Home(props: {status?: string}) {
   const { instance } = useMsal();
 
   return (

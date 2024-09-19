@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 // Msal imports
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
-import { InteractionStatus, InteractionType, InteractionRequiredAuthError } from "@azure/msal-browser";
+import { InteractionStatus, InteractionType, InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
 import { loginRequest } from "../authConfig";
 
 // Sample app imports
@@ -24,13 +24,13 @@ const ProfileContent = () => {
                 if (e instanceof InteractionRequiredAuthError) {
                     instance.acquireTokenRedirect({
                         ...loginRequest,
-                        account: instance.getActiveAccount()
+                        account: instance.getActiveAccount() as AccountInfo | undefined
                     });
                 }
             });
         }
     }, [inProgress, apiData, instance]);
-  
+
     return (
         <Paper>
             { apiData ? <ProfileData apiData={apiData} /> : null }

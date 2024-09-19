@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { BrowserUtils } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
 
