@@ -4,7 +4,6 @@ import { msalInstance } from "../main";
 export async function callApi(accessToken?: string) {
     if (!accessToken) {
         const account = msalInstance.getActiveAccount();
-        console.log("account !!!!!!!", account);
         if (!account) {
             throw Error("No active account! Verify a user has been signed in and setActiveAccount has been called.");
         }
@@ -15,7 +14,6 @@ export async function callApi(accessToken?: string) {
         });
         accessToken = response.accessToken;
     }
-    console.log("Access TOKEN!!!!!!!", accessToken);
 
     const headers = new Headers();
     const bearer = `Bearer ${accessToken}`;

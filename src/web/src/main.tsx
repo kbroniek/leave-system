@@ -20,8 +20,6 @@ msalInstance.enableAccountStorageEvents();
 
 // Default to using the first account if no account is active on page load
 const accounts = msalInstance.getAllAccounts();
-//TODO: Remove
-console.log({ accounts, msalInstance });
 if (!msalInstance.getActiveAccount() && accounts.length > 0) {
   // Account selection logic is app dependent. Adjust as needed for different use cases.
   msalInstance.setActiveAccount(accounts[0]);
