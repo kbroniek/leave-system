@@ -25,7 +25,7 @@ export async function callApi(accessToken?: string) {
         headers: headers
     };
 
-    return fetch(`${import.meta.env.REACT_APP_API_URL}/leaverequests?dateFrom=2024-08-21&dateTo=2024-12-23`, options)
+    return fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/leaverequests?dateFrom=2024-08-21&dateTo=2024-12-23`, options)
         .then(response => response.json())
         .catch(error => console.log(error));
 }

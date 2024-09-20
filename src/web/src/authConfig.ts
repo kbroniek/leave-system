@@ -18,20 +18,20 @@ const isFirefox = firefox > 0; // Only needed if you need to support the redirec
  */
 export const b2cPolicies = {
     names: {
-        signUpSignIn: import.meta.env.REACT_APP_B2C_POLICY_SIGNIN
+        signUpSignIn: import.meta.env.VITE_REACT_APP_B2C_POLICY_SIGNIN
     },
     authorities: {
         signUpSignIn: {
-            authority: import.meta.env.REACT_APP_AUTHORITY_SIGNIN
+            authority: import.meta.env.VITE_REACT_APP_AUTHORITY_SIGNIN
         }
     },
-    authorityDomain: import.meta.env.REACT_APP_AUTHORITY_DOMAIN
+    authorityDomain: import.meta.env.VITE_REACT_APP_AUTHORITY_DOMAIN
 }
 
 // Config object to be passed to Msal on creation
 export const msalConfig: Configuration = {
     auth: {
-        clientId: import.meta.env.REACT_APP_B2C_CLIENT_ID,
+        clientId: import.meta.env.VITE_REACT_APP_B2C_CLIENT_ID,
         authority: b2cPolicies.authorities.signUpSignIn.authority,
         knownAuthorities: [b2cPolicies.authorityDomain],
         redirectUri: "/",
@@ -71,7 +71,7 @@ export const msalConfig: Configuration = {
 
 // Scopes you add here will be prompted for consent during login
 export const loginRequest = {
-    scopes: [import.meta.env.REACT_APP_B2C_SCOPE_API]
+    scopes: [import.meta.env.VITE_REACT_APP_B2C_SCOPE_API]
 };
 
 /**
@@ -79,6 +79,6 @@ export const loginRequest = {
  * The current application coordinates were pre-registered in a B2C tenant.
  */
 export const apiConfig = {
-    scopes: [import.meta.env.REACT_APP_B2C_SCOPE_API],
-    uri: import.meta.env.REACT_APP_API_URL
+    scopes: [import.meta.env.VITE_REACT_APP_B2C_SCOPE_API],
+    uri: import.meta.env.VITE_REACT_APP_API_URL
 };
