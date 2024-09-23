@@ -1,7 +1,7 @@
 import { loginRequest } from "../authConfig";
 import { msalInstance } from "../main";
 
-export async function callApi(url: string) {
+export async function callApi<T>(url: string): Promise<T> {
     const account = msalInstance.getActiveAccount();
     if (!account) {
         throw Error("No active account! Verify a user has been signed in and setActiveAccount has been called.");
@@ -25,5 +25,6 @@ export async function callApi(url: string) {
 
     return fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${url}`, options)
         .then(response => response.json())
+        //TODO: Error handling
         .catch(error => console.log(error));
 }

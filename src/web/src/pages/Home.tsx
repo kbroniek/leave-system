@@ -2,7 +2,7 @@ import { AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-reac
 import Stack from '@mui/material/Stack';
 import Typography from "@mui/material/Typography";
 
-import { LeaveRequestTimeline } from "../ui-components/leave-request/LeaveRequestTimeline";
+import { LeaveRequestsTimeline } from "../ui-components/leave-request/LeaveRequestsTimeline";
 import { SignInButton } from "../ui-components/SignInButton";
 
 export function Home() {
@@ -10,7 +10,7 @@ export function Home() {
     <>
       <AuthenticatedTemplate>
         <Stack direction="column" spacing={2}>
-          <LeaveRequestTimeline />
+          <LeaveRequestsTimeline />
         </Stack>
       </AuthenticatedTemplate>
 
