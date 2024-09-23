@@ -5,56 +5,97 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { LeaveRequestsDto } from './LeaveRequestsDto';
+import { LeaveRequestDto, LeaveRequestsResponseDto } from './LeaveRequestsDto';
+import { DateTime, DateTimeMaybeValid } from 'luxon';
 
-function createData(
-  name: string,
-  calories: number,
-  fat: number,
-  carbs: number,
-  protein: number,
-) {
-  return { name, calories, fat, carbs, protein };
-}
 
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
-
-export default function ShowLeaveRequestsTimeline(apiData: LeaveRequestsDto) {
+export default function ShowLeaveRequestsTimeline(apiData: LeaveRequestsResponseDto) {
+   // TODO: Get from api
+  const employees: Employee[] = [...new Map(apiData.items.map(item =>
+    [item.createdBy.id, item.createdBy])).values()];
+  const transformedData = transformToTable(apiData, employees);
+  const dates = transformedData.find(() => true)?.table.map(x => x.date);
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell>Dessert (100g serving)</TableCell>
-            <TableCell align="right">Calories</TableCell>
-            <TableCell align="right">Fat&nbsp;(g)</TableCell>
-            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-            <TableCell align="right">Protein&nbsp;(g)</TableCell>
+            <TableCell>Name</TableCell>
+            {dates?.map(date => (
+              <TableCell align="right">{date.toISODate()}</TableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
+          {transformedData.map((row) => (
             <TableRow
-              key={row.name}
+              key={row.username}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                {row.name}
+                {row.username}
               </TableCell>
-              <TableCell align="right">{row.calories}</TableCell>
-              <TableCell align="right">{row.fat}</TableCell>
-              <TableCell align="right">{row.carbs}</TableCell>
-              <TableCell align="right">{row.protein}</TableCell>
+              {row.table.map(data => (
+                <TableCell align="right">{data.leaveRequests.find(() => true)?.duration}</TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </TableContainer>
   );
+}
+
+interface UserLeaveRequestTable {
+  username: string
+  table: LeaveRequestTable[]
+}
+interface LeaveRequestTable {
+  date: DateTime
+  leaveRequests: LeaveRequest[]
+}
+
+type LeaveRequest = LeaveRequestDto & {
+  dateFrom: DateTimeMaybeValid
+  dateTo: DateTimeMaybeValid
+}
+
+function buildDateTime(leaveRequests: LeaveRequestDto[]) : LeaveRequest[] {
+    return leaveRequests.map(x => ({
+      ...x,
+      dateFrom: DateTime.fromISO(x.dateFrom),
+      dateTo: DateTime.fromISO(x.dateTo)
+      //TODO parse duration
+    }) as LeaveRequest);
+}
+
+interface Employee {
+  name: string,
+  id: string
+}
+
+function transformToTable(leaveRequestsResponse: LeaveRequestsResponseDto, employees: Employee[]) : UserLeaveRequestTable[] {
+
+  const dateFrom = DateTime.fromISO(leaveRequestsResponse.search.dateFrom);
+  const dateTo = DateTime.fromISO(leaveRequestsResponse.search.dateTo);
+
+  const leaveRequests = buildDateTime(leaveRequestsResponse.items);
+  return employees.map(x => ({
+    username: x.name,
+    table: transformLeaveRequest(leaveRequests.filter(lr => lr.createdBy.id === x.id), dateFrom, dateTo)
+  }));
+}
+
+function transformLeaveRequest(leaveRequests: LeaveRequest[], dateFrom: DateTime, dateTo: DateTime): LeaveRequestTable[] {
+  const table: LeaveRequestTable[] = [];
+  let currentDate = dateFrom;
+  // Max one year
+  for(let i = 0; i < 365 && currentDate <= dateTo; ++i, currentDate = currentDate.plus({ days: 1 })) {
+    const filteredLeaveRequests = leaveRequests.filter(x => x.dateFrom <= currentDate && x.dateTo >= currentDate);
+    table.push({
+      date: currentDate,
+      leaveRequests: filteredLeaveRequests
+    });
+  }
+  return table;
 }

@@ -15,16 +15,15 @@ import { Loading } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
 import { callApi } from "../../utils/ApiCall";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
-import { ShowData } from "../ShowData";
-import { LeaveRequestsDto } from "./LeaveRequestsDto";
+import { LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
-  const [apiData, setApiData] = useState<LeaveRequestsDto | null>(null);
+  const [apiData, setApiData] = useState<LeaveRequestsResponseDto | null>(null);
 
   useEffect(() => {
     if (!apiData && inProgress === InteractionStatus.None) {
-      callApi<LeaveRequestsDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-12-23")
+      callApi<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-12-23")
         .then((response) => setApiData(response))
         .catch((e) => {
           if (e instanceof InteractionRequiredAuthError) {
@@ -41,14 +40,10 @@ const DataContent = () => {
 };
 
 export function LeaveRequestsTimeline() {
-  const authRequest = {
-    ...loginRequest,
-  };
-
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}
-      authenticationRequest={authRequest}
+      authenticationRequest={loginRequest}
       errorComponent={ErrorComponent}
       loadingComponent={Loading}
     >
