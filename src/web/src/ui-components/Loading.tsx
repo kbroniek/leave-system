@@ -1,5 +1,5 @@
-import Typography from "@mui/material/Typography";
+import { CircularProgress } from "@mui/material";
 
 export const Loading = () => {
-    return <Typography variant="h6">Authentication in progress...</Typography>
+    return <CircularProgress sx={{ m: 0.5 }} />
 }

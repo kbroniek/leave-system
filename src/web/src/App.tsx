@@ -8,7 +8,6 @@ import { CustomNavigationClient } from "./NavigationClient";
 
 import { PageLayout } from "./ui-components/PageLayout";
 import { Home } from "./pages/Home";
-import { Data } from "./pages/ShowDataPage";
 import { Logout } from "./pages/Logout";
 
 
@@ -32,7 +31,6 @@ export function App({ pca }: AppProps) {
 function Pages() {
   return (
       <Routes>
-          <Route path="/data" element={<Data />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/" element={<Home />} />
       </Routes>

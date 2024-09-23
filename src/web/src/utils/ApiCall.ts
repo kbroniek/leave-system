@@ -1,19 +1,17 @@
 import { loginRequest } from "../authConfig";
 import { msalInstance } from "../main";
 
-export async function callApi(accessToken?: string) {
-    if (!accessToken) {
-        const account = msalInstance.getActiveAccount();
-        if (!account) {
-            throw Error("No active account! Verify a user has been signed in and setActiveAccount has been called.");
-        }
-    
-        const response = await msalInstance.acquireTokenSilent({
-            ...loginRequest,
-            account: account
-        });
-        accessToken = response.accessToken;
+export async function callApi(url: string) {
+    const account = msalInstance.getActiveAccount();
+    if (!account) {
+        throw Error("No active account! Verify a user has been signed in and setActiveAccount has been called.");
     }
+
+    const response = await msalInstance.acquireTokenSilent({
+        ...loginRequest,
+        account: account
+    });
+    const accessToken = response.accessToken;
 
     const headers = new Headers();
     const bearer = `Bearer ${accessToken}`;
@@ -25,7 +23,7 @@ export async function callApi(accessToken?: string) {
         headers: headers
     };
 
-    return fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/leaverequests?dateFrom=2024-08-21&dateTo=2024-12-23`, options)
+    return fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${url}`, options)
         .then(response => response.json())
         .catch(error => console.log(error));
 }
