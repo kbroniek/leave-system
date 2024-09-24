@@ -2,7 +2,7 @@ import { AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-reac
 import Stack from '@mui/material/Stack';
 import Typography from "@mui/material/Typography";
 
-import { LeaveRequestsTimeline } from "../ui-components/leave-request/LeaveRequestsTimeline";
+import { LeaveRequestsTimeline } from "../ui-components/leave-requests/LeaveRequestsTimeline";
 import { SignInButton } from "../ui-components/SignInButton";
 
 export function Home() {

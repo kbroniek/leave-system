@@ -20,23 +20,23 @@ export default function ShowLeaveRequestsTimeline(apiData: LeaveRequestsResponse
       <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
+            <TableCell key="name">Name</TableCell>
             {dates?.map(date => (
-              <TableCell align="right">{date.toISODate()}</TableCell>
+              <TableCell key={date.toISODate()} align="right">{date.toFormat('MM-dd')}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
           {transformedData.map((row) => (
             <TableRow
-              key={row.username}
+              key={row.employee.id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                {row.username}
+                {row.employee.name}
               </TableCell>
               {row.table.map(data => (
-                <TableCell align="right">{data.leaveRequests.find(() => true)?.duration}</TableCell>
+                <TableCell key={`${row.employee.id}/${data.date.toISODate()}`} align="right">{data.leaveRequests.find(() => true)?.duration}</TableCell>
               ))}
             </TableRow>
           ))}
@@ -47,7 +47,10 @@ export default function ShowLeaveRequestsTimeline(apiData: LeaveRequestsResponse
 }
 
 interface UserLeaveRequestTable {
-  username: string
+  employee: {
+    name: string
+    id: string
+  }
   table: LeaveRequestTable[]
 }
 interface LeaveRequestTable {
@@ -81,7 +84,11 @@ function transformToTable(leaveRequestsResponse: LeaveRequestsResponseDto, emplo
 
   const leaveRequests = buildDateTime(leaveRequestsResponse.items);
   return employees.map(x => ({
-    username: x.name,
+    employee: 
+    {
+      id: x.id,
+      name: x.name,
+    },
     table: transformLeaveRequest(leaveRequests.filter(lr => lr.createdBy.id === x.id), dateFrom, dateTo)
   }));
 }
