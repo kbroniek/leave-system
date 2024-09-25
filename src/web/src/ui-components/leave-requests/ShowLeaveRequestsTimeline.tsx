@@ -20,9 +20,13 @@ export default function ShowLeaveRequestsTimeline(apiData: LeaveRequestsResponse
       <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell key="name">Name</TableCell>
+            <TableCell key="header-empty"></TableCell>
+            <TableCell key="header-month" colSpan={12}>Wrzesień</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell key="empty"></TableCell>
             {dates?.map(date => (
-              <TableCell key={date.toISODate()} align="right">{date.toFormat('MM-dd')}</TableCell>
+              <TableCell key={date.toISODate()} align="right">{date.toFormat('dd')}</TableCell>
             ))}
           </TableRow>
         </TableHead>
@@ -46,6 +50,58 @@ export default function ShowLeaveRequestsTimeline(apiData: LeaveRequestsResponse
   );
 }
 
+function buildDateTime(leaveRequests: LeaveRequestDto[]) : LeaveRequest[] {
+    return leaveRequests.map(x => ({
+      ...x,
+      dateFrom: DateTime.fromISO(x.dateFrom),
+      dateTo: DateTime.fromISO(x.dateTo)
+      //TODO parse duration
+    }) as LeaveRequest);
+}
+
+function transformToTable(leaveRequestsResponse: LeaveRequestsResponseDto, employees: Employee[]) : UserLeaveRequestTable[] {
+  const dateFrom = DateTime.fromISO(leaveRequestsResponse.search.dateFrom);
+  const dateTo = DateTime.fromISO(leaveRequestsResponse.search.dateTo);
+  // Ensure startDay is before endDay
+  if (dateFrom > dateTo) {
+    throw new Error("endDay must be after startDay");
+  }
+
+  const leaveRequests = buildDateTime(leaveRequestsResponse.items);
+  return employees.map(x => ({
+    employee:
+    {
+      id: x.id,
+      name: x.name,
+    },
+    table: transformLeaveRequest(leaveRequests.filter(lr => lr.createdBy.id === x.id), dateFrom, dateTo),
+    header: transformHeader(dateFrom, dateTo)
+  }));
+}
+
+function transformLeaveRequest(leaveRequests: LeaveRequest[], dateFrom: DateTime, dateTo: DateTime): LeaveRequestTable[] {
+  const table: LeaveRequestTable[] = [];
+  let currentDate = dateFrom;
+  // Max one year
+  for(let i = 0; i < 365 && currentDate <= dateTo; ++i, currentDate = currentDate.plus({ days: 1 })) {
+    const filteredLeaveRequests = leaveRequests.filter(x => x.dateFrom <= currentDate && x.dateTo >= currentDate);
+    table.push({
+      date: currentDate,
+      leaveRequests: filteredLeaveRequests
+    });
+  }
+  return table;
+}
+function transformHeader(dateFrom: DateTime, dateTo: DateTime): HeaderTable {
+  const daysLeft = getDaysInMonth(dateFrom.year, dateFrom.month) - dateFrom.day;
+  debugger;
+  return {daysLeft}
+}
+
+function getDaysInMonth(year: number, month: number): number {
+  return DateTime.fromObject({ year, month }).daysInMonth!;
+}
+
 interface UserLeaveRequestTable {
   employee: {
     name: string
@@ -63,46 +119,11 @@ type LeaveRequest = LeaveRequestDto & {
   dateTo: DateTimeMaybeValid
 }
 
-function buildDateTime(leaveRequests: LeaveRequestDto[]) : LeaveRequest[] {
-    return leaveRequests.map(x => ({
-      ...x,
-      dateFrom: DateTime.fromISO(x.dateFrom),
-      dateTo: DateTime.fromISO(x.dateTo)
-      //TODO parse duration
-    }) as LeaveRequest);
-}
-
 interface Employee {
   name: string,
   id: string
 }
 
-function transformToTable(leaveRequestsResponse: LeaveRequestsResponseDto, employees: Employee[]) : UserLeaveRequestTable[] {
-
-  const dateFrom = DateTime.fromISO(leaveRequestsResponse.search.dateFrom);
-  const dateTo = DateTime.fromISO(leaveRequestsResponse.search.dateTo);
-
-  const leaveRequests = buildDateTime(leaveRequestsResponse.items);
-  return employees.map(x => ({
-    employee: 
-    {
-      id: x.id,
-      name: x.name,
-    },
-    table: transformLeaveRequest(leaveRequests.filter(lr => lr.createdBy.id === x.id), dateFrom, dateTo)
-  }));
-}
-
-function transformLeaveRequest(leaveRequests: LeaveRequest[], dateFrom: DateTime, dateTo: DateTime): LeaveRequestTable[] {
-  const table: LeaveRequestTable[] = [];
-  let currentDate = dateFrom;
-  // Max one year
-  for(let i = 0; i < 365 && currentDate <= dateTo; ++i, currentDate = currentDate.plus({ days: 1 })) {
-    const filteredLeaveRequests = leaveRequests.filter(x => x.dateFrom <= currentDate && x.dateTo >= currentDate);
-    table.push({
-      date: currentDate,
-      leaveRequests: filteredLeaveRequests
-    });
-  }
-  return table;
+interface HeaderTable {
+  daysLeft: number
 }
