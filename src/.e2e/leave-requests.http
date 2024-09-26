@@ -4,7 +4,7 @@
 # @name Search Leave Requests
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leaverequests?dateFrom=2024-08-21&dateTo=2024-08-23
+GET {{baseUrl}}/leaverequests?dateFrom=2024-08-21&dateTo=2024-09-23
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
@@ -25,11 +25,11 @@ Content-Type: application/json
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
 {
-    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
-    "dateFrom": "2024-08-23",
-    "dateTo": "2024-08-23",
-    "duration": "08:00:00",
-    "workingHours": "08:00:00",
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde75",
+    "dateFrom": "2024-09-02",
+    "dateTo": "2024-09-04",
+    "duration": "P1D",
+    "workingHours": "PT8H",
     "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
     "remark": "My custom holiday leave"
 }
@@ -46,8 +46,8 @@ X-Authorization: Bearer {{bearerToken}}
     "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde75",
     "dateFrom": "2024-08-23",
     "dateTo": "2024-08-25",
-    "duration": "1.00:00:00",
-    "workingHours": "08:00:00",
+    "duration": "P1D",
+    "workingHours": "PT8H",
     "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
     "remark": "My custom sick leave"
 }
@@ -64,8 +64,8 @@ X-Authorization: Bearer {{bearerToken}}
     "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde74",
     "dateFrom": "2024-08-21",
     "dateTo": "2024-08-23",
-    "duration": "1.00:00:00",
-    "workingHours": "08:00:00",
+    "duration": "P1D",
+    "workingHours": "PT8H",
     "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
     "remark": "My custom occasional leave"
 }
@@ -82,8 +82,8 @@ X-Authorization: Bearer {{bearerToken}}
     "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
     "dateFrom": "2024-08-23",
     "dateTo": "2024-08-23",
-    "duration": "08:00:00",
-    "workingHours": "08:00:00",
+    "duration": "PT8H",
+    "workingHours": "PT8H",
     "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
     "remark": "My custom occasional leave",
     "assignedToId": "c188430f-3abd-4885-80f5-75e1b44f7b2b"
