@@ -34,9 +34,9 @@ X-Authorization: Bearer {{bearerToken}}
 ?? status == 201
 {
     "id": "cd72ec1a-e461-4049-b9b9-db49f7bc58c0",
-    "limit": "8.16:00:00",
+    "limit": "P8DT16H",
     "overdueLimit": null,
-    "workingHours": "08:00:00",
+    "workingHours": "PT8H",
     "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
     "validSince": "2025-01-01",
     "validUntil": "2025-12-31",
@@ -54,9 +54,9 @@ X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 {
     "id": "cd72ec1a-e461-4049-b9b9-db49f7bc58c0",
-    "limit": "8.16:00:00",
+    "limit": "P8DT16H",
     "overdueLimit": null,
-    "workingHours": "08:00:00",
+    "workingHours": "PT8H",
     "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
     "validSince": "2026-01-01",
     "validUntil": "2026-12-31",

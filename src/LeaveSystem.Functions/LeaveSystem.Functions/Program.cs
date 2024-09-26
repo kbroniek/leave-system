@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using LeaveSystem.Functions;
 using LeaveSystem.Functions.Shared;
@@ -30,6 +32,12 @@ var host = new HostBuilder()
             services.ConfigureFunctionsApplicationInsights();
             services.AddOpenTelemetry().UseAzureMonitor();
         }
+        services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+        {
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.JsonSerializerOptions.Converters.Add(new Iso8601DurationConverter());
+        });
         services
             .AddFunctionsAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtFunctionsBearer(options =>
