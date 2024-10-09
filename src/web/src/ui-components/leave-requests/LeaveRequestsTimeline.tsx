@@ -23,7 +23,7 @@ const DataContent = () => {
 
   useEffect(() => {
     if (!apiData && inProgress === InteractionStatus.None) {
-      callApi<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-09-01")
+      callApi<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-10-01")
         .then((response) => setApiData(response))
         .catch((e) => {
           if (e instanceof InteractionRequiredAuthError) {

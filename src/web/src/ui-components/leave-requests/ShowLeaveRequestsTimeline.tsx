@@ -1,35 +1,49 @@
-import { LeaveRequestDto, LeaveRequestsResponseDto } from './LeaveRequestsDto';
-import { DateTime } from 'luxon';
-import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid/DataGrid';
-import { GridColDef } from '@mui/x-data-grid/models';
+import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
+import { DateTime, Duration } from "luxon";
+import Box from "@mui/material/Box";
+import { DataGrid } from "@mui/x-data-grid/DataGrid";
+import { GridColDef } from "@mui/x-data-grid/models";
 
-export default function ShowLeaveRequestsTimeline(apiData: LeaveRequestsResponseDto) {
+export default function ShowLeaveRequestsTimeline(
+  apiData: LeaveRequestsResponseDto
+) {
   // TODO: Get employee from api
-  const employees: Employee[] = [...new Map(apiData.items.map(item =>
-    [item.createdBy.id, item.createdBy])).values()];
+  const employees: Employee[] = [
+    ...new Map(
+      apiData.items.map((item) => [item.createdBy.id, item.createdBy])
+    ).values(),
+  ];
   const transformedData = transformToTable(apiData, employees);
-  const dates = transformedData.items.find(() => true)?.table.map(x => x.date) ?? [];
-  const rows = transformedData.items.map(x => ({
+  const dates =
+    transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
+  const rows = transformedData.items.map((x) => ({
     //TODO: Show multiple leave requests (duration)
     ...x.employee,
-    ...x.table.reduce((a, v) => ({ ...a, [v.date.toISO()!]: v.leaveRequests.find(() => true)?.duration}), {})
+    ...x.table.reduce(
+      (a, v) => ({
+        ...a,
+        [v.date.toISO()!]: mapDuration(
+          v.leaveRequests.find(() => true)
+        ),
+      }),
+      {}
+    ),
   }));
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
     {
-
       field: "name",
-      headerName: ""
+      headerName: "",
     },
-    ...dates.map(x => ({
-    field: x.toISO()!,
-    headerName: x.toFormat('dd'),
-    width: 10,
-  }))];
+    ...dates.map((x) => ({
+      field: x.toISO()!,
+      headerName: x.toFormat("dd"),
+      width: 10,
+    })),
+  ];
 
   return (
-    <Box sx={{ height: 400, width: '100%' }}>
+    <Box sx={{maxWidth: '100%', overflow: 'auto'}}>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -40,21 +54,61 @@ export default function ShowLeaveRequestsTimeline(apiData: LeaveRequestsResponse
         disableColumnMenu
         disableColumnSorting
         disableColumnResize
+        disableColumnFilter
+        disableColumnSelector
+        disableAutosize
+        disableDensitySelector
+        disableEval
+        disableMultipleRowSelection
+        disableVirtualization
       />
     </Box>
-  )
+  );
+}
+
+function mapDuration(LeaveRequest?: LeaveRequestDto): string {
+  if (!LeaveRequest) {
+    return "";
+  }
+  const duration = Duration.fromISO(LeaveRequest.duration);
+  if (!duration.isValid) {
+    //TODO: log invalid date
+    return "";
+  }
+  const dateFrom = DateTime.fromISO(LeaveRequest.dateFrom);
+  const dateTo = DateTime.fromISO(LeaveRequest.dateTo);
+  const diff = dateTo.plus({day: 1}).diff(dateFrom, ["days"]);
+  // https://github.com/moment/luxon/issues/422
+  const durationPerDay = Duration.fromObject({ days: 0, hours: 0, seconds: 0, milliseconds: (duration.as('milliseconds') / diff.days)}).normalize();
+  const timeResult = [];
+  if (durationPerDay.days !== 0) {
+    timeResult.push(`${durationPerDay.days}d`);
+  }
+  if (durationPerDay.hours !== 0) {
+    timeResult.push(`${durationPerDay.hours}h`);
+  }
+  if (durationPerDay.minutes !== 0) {
+    timeResult.push(`${durationPerDay.minutes}m`);
+  }
+  return timeResult.join(" ");
 }
 
 function buildDateTime(leaveRequests: LeaveRequestDto[]): LeaveRequest[] {
-  return leaveRequests.map(x => ({
-    ...x,
-    dateFrom: DateTime.fromISO(x.dateFrom),
-    dateTo: DateTime.fromISO(x.dateTo)
-    //TODO parse duration
-  }) as LeaveRequest);
+  return leaveRequests.map(
+    (x) =>
+      ({
+        ...x,
+        dateFrom: DateTime.fromISO(x.dateFrom),
+        dateTo: DateTime.fromISO(x.dateTo),
+        //TODO parse duration
+      } as LeaveRequest)
+  );
 }
 
-function transformToTable(leaveRequestsResponse: LeaveRequestsResponseDto, employees: Employee[]): UserLeaveRequestTableCollection {
+function transformToTable(
+  leaveRequestsResponse: LeaveRequestsResponseDto,
+  employees: Employee[]
+): UserLeaveRequestTableCollection {
   const dateFrom = DateTime.fromISO(leaveRequestsResponse.search.dateFrom);
   const dateTo = DateTime.fromISO(leaveRequestsResponse.search.dateTo);
   // Ensure startDay is before endDay
@@ -64,84 +118,102 @@ function transformToTable(leaveRequestsResponse: LeaveRequestsResponseDto, emplo
 
   const leaveRequests = buildDateTime(leaveRequestsResponse.items);
   return {
-    items: employees.map(x => ({
-      employee:
-      {
+    items: employees.map((x) => ({
+      employee: {
         id: x.id,
         name: x.name,
       },
-      table: transformLeaveRequest(leaveRequests.filter(lr => lr.createdBy.id === x.id), dateFrom, dateTo),
+      table: transformLeaveRequest(
+        leaveRequests.filter((lr) => lr.createdBy.id === x.id),
+        dateFrom,
+        dateTo
+      ),
     })),
-    header: transformHeader(dateFrom, dateTo)
+    header: transformHeader(dateFrom, dateTo),
   };
 }
 
-function transformLeaveRequest(leaveRequests: LeaveRequest[], dateFrom: DateTime, dateTo: DateTime): LeaveRequestTable[] {
+function transformLeaveRequest(
+  leaveRequests: LeaveRequest[],
+  dateFrom: DateTime,
+  dateTo: DateTime
+): LeaveRequestTable[] {
   const table: LeaveRequestTable[] = [];
   let currentDate = dateFrom;
   // Max one year
-  for (let i = 0; i < 365 && currentDate <= dateTo; ++i, currentDate = currentDate.plus({ days: 1 })) {
-    const filteredLeaveRequests = leaveRequests.filter(x => x.dateFrom <= currentDate && x.dateTo >= currentDate);
+  for (
+    let i = 0;
+    i < 365 && currentDate <= dateTo;
+    ++i, currentDate = currentDate.plus({ days: 1 })
+  ) {
+    const filteredLeaveRequests = leaveRequests.filter(
+      (x) => x.dateFrom <= currentDate && x.dateTo >= currentDate
+    );
     table.push({
       date: currentDate,
-      leaveRequests: filteredLeaveRequests
+      leaveRequests: filteredLeaveRequests,
     });
   }
   return table;
 }
 function transformHeader(dateFrom: DateTime, dateTo: DateTime): HeaderTable[] {
   const headerTable: HeaderTable[] = [];
-  const daysLeftDateFrom = getDaysInMonth(dateFrom.year, dateFrom.month) - dateFrom.day + 1;
+  const daysLeftDateFrom =
+    getDaysInMonth(dateFrom.year, dateFrom.month) - dateFrom.day + 1;
   headerTable.push({
     date: dateFrom,
-    daysLeft: daysLeftDateFrom
+    daysLeft: daysLeftDateFrom,
   });
-  for (let currentDate = dateFrom.plus({ month: 1 }); currentDate.month < dateTo.month; currentDate = currentDate.plus({month: 1})) {
+  for (
+    let currentDate = dateFrom.plus({ month: 1 });
+    currentDate.month < dateTo.month;
+    currentDate = currentDate.plus({ month: 1 })
+  ) {
     const daysLeft = getDaysInMonth(currentDate.year, currentDate.month);
     headerTable.push({
       date: currentDate,
-      daysLeft
+      daysLeft,
     });
   }
   if (dateFrom.month != dateTo.month) {
     headerTable.push({
       date: dateTo,
-      daysLeft: dateTo.day
+      daysLeft: dateTo.day,
     });
   }
-  return headerTable
+  return headerTable;
 }
 
 function getDaysInMonth(year: number, month: number): number {
   return DateTime.fromObject({ year, month }).daysInMonth!;
 }
 interface UserLeaveRequestTableCollection {
-  items: UserLeaveRequestTable[]
-  header: HeaderTable[]
+  items: UserLeaveRequestTable[];
+  header: HeaderTable[];
 }
 interface UserLeaveRequestTable {
   employee: {
-    name: string
-    id: string
-  }
-  table: LeaveRequestTable[]
+    name: string;
+    id: string;
+  };
+  table: LeaveRequestTable[];
 }
 interface LeaveRequestTable {
-  date: DateTime
-  leaveRequests: LeaveRequest[]
+  date: DateTime;
+  leaveRequests: LeaveRequest[];
 }
 
 type LeaveRequest = LeaveRequestDto & {
-  dateFrom: DateTime
-  dateTo: DateTime
-}
+  dateFrom: DateTime;
+  dateTo: DateTime;
+};
 
 interface Employee {
-  name: string,
-  id: string
+  name: string;
+  id: string;
 }
 
 interface HeaderTable {
-  daysLeft: number,
-  date: DateTime
+  daysLeft: number;
+  date: DateTime;
 }

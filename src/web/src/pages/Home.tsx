@@ -9,9 +9,7 @@ export function Home() {
   return (
     <>
       <AuthenticatedTemplate>
-        <Stack direction="column" spacing={2}>
           <LeaveRequestsTimeline />
-        </Stack>
       </AuthenticatedTemplate>
 
       <UnauthenticatedTemplate>
