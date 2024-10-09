@@ -2,7 +2,7 @@ import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { DateTime, Duration } from "luxon";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
-import { GridColDef } from "@mui/x-data-grid/models";
+import { GridColDef, GridColumnGroupingModel } from "@mui/x-data-grid/models";
 
 export default function ShowLeaveRequestsTimeline(
   apiData: LeaveRequestsResponseDto
@@ -42,11 +42,28 @@ export default function ShowLeaveRequestsTimeline(
     })),
   ];
 
+  const groups: GridColumnGroupingModel = [
+    {
+      groupId: "name",
+      headerName: "",
+      children: [{ field: 'name' }],
+    },
+    ...transformedData.header.map(x => (
+      {
+        groupId: x.date.toFormat("LLLL"),
+        children: x.days.map(x => ({ field: x.toISO()! }))
+      }
+
+    ))
+  ];
+  console.log(groups);
+
   return (
     <Box sx={{maxWidth: '100%', overflow: 'auto'}}>
       <DataGrid
         rows={rows}
         columns={columns}
+        columnGroupingModel={groups}
         disableRowSelectionOnClick
         hideFooter={true}
         hideFooterPagination={true}
@@ -56,11 +73,6 @@ export default function ShowLeaveRequestsTimeline(
         disableColumnResize
         disableColumnFilter
         disableColumnSelector
-        disableAutosize
-        disableDensitySelector
-        disableEval
-        disableMultipleRowSelection
-        disableVirtualization
       />
     </Box>
   );
@@ -138,47 +150,51 @@ function transformLeaveRequest(
   dateFrom: DateTime,
   dateTo: DateTime
 ): LeaveRequestTable[] {
-  const table: LeaveRequestTable[] = [];
-  let currentDate = dateFrom;
-  // Max one year
-  for (
-    let i = 0;
-    i < 365 && currentDate <= dateTo;
-    ++i, currentDate = currentDate.plus({ days: 1 })
-  ) {
-    const filteredLeaveRequests = leaveRequests.filter(
-      (x) => x.dateFrom <= currentDate && x.dateTo >= currentDate
-    );
-    table.push({
-      date: currentDate,
-      leaveRequests: filteredLeaveRequests,
-    });
-  }
-  return table;
+  const dateSequence = createDatesSequence(dateFrom, dateTo);
+
+  return dateSequence.map(currentDate => ({
+    date: currentDate,
+    leaveRequests: leaveRequests.filter(
+      (lr) => lr.dateFrom <= currentDate && lr.dateTo >= currentDate
+    )
+  }));
+}
+function createDatesSequence(dateFrom: DateTime, dateTo: DateTime): DateTime[] {
+    let currentDate = dateFrom;
+    const sequence: DateTime[] = [];
+    // Max one year
+    for (
+      let i = 0;
+      i < 365 && currentDate <= dateTo;
+      ++i, currentDate = currentDate.plus({ days: 1 })
+    ) {
+      sequence.push(currentDate);
+    }
+    return sequence;
 }
 function transformHeader(dateFrom: DateTime, dateTo: DateTime): HeaderTable[] {
   const headerTable: HeaderTable[] = [];
   const daysLeftDateFrom =
-    getDaysInMonth(dateFrom.year, dateFrom.month) - dateFrom.day + 1;
+    getDaysInMonth(dateFrom.year, dateFrom.month) - dateFrom.day;
   headerTable.push({
     date: dateFrom,
-    daysLeft: daysLeftDateFrom,
+    days: createDatesSequence(dateFrom, dateFrom.plus({days: daysLeftDateFrom}))
   });
   for (
-    let currentDate = dateFrom.plus({ month: 1 });
+    let currentDate = DateTime.fromObject({year: dateFrom.year, month: dateFrom.month, day: 1}).plus({ month: 1 });
     currentDate.month < dateTo.month;
     currentDate = currentDate.plus({ month: 1 })
   ) {
-    const daysLeft = getDaysInMonth(currentDate.year, currentDate.month);
+    const daysLeft = getDaysInMonth(currentDate.year, currentDate.month) - 1;
     headerTable.push({
       date: currentDate,
-      daysLeft,
+      days: createDatesSequence(currentDate, currentDate.plus({days: daysLeft})),
     });
   }
   if (dateFrom.month != dateTo.month) {
     headerTable.push({
       date: dateTo,
-      daysLeft: dateTo.day,
+      days: createDatesSequence(DateTime.fromObject({year: dateTo.year, month: dateTo.month, day: 1}), dateTo),
     });
   }
   return headerTable;
@@ -214,6 +230,6 @@ interface Employee {
 }
 
 interface HeaderTable {
-  daysLeft: number;
+  days: DateTime[];
   date: DateTime;
 }
