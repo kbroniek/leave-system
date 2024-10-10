@@ -2,7 +2,7 @@ import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { DateTime, Duration } from "luxon";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
-import { GridColDef, GridColumnGroupingModel } from "@mui/x-data-grid/models";
+import { GridCellParams, GridColDef, GridColumnGroupingModel, GridRenderCellParams } from "@mui/x-data-grid/models";
 
 export default function ShowLeaveRequestsTimeline(
   apiData: LeaveRequestsResponseDto
@@ -17,14 +17,14 @@ export default function ShowLeaveRequestsTimeline(
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
   const rows = transformedData.items.map((x) => ({
-    //TODO: Show multiple leave requests (duration)
     ...x.employee,
     ...x.table.reduce(
       (a, v) => ({
         ...a,
-        [v.date.toISO()!]: mapDuration(
-          v.leaveRequests.find(() => true)
-        ),
+        [v.date.toISO()!]: {
+          date: v.date,
+          leaveRequests: v.leaveRequests
+        }
       }),
       {}
     ),
@@ -39,6 +39,19 @@ export default function ShowLeaveRequestsTimeline(
       field: x.toISO()!,
       headerName: x.toFormat("dd"),
       width: 10,
+      headerClassName: x.isWeekend ? 'timeline-day weekend' : 'timeline-day',
+      cellClassName: (params: GridCellParams<Employee, {date: DateTime}>) => {
+        if (params.value == null) {
+          return '';
+        }
+        return params.value.date.isWeekend ? 'timeline-day weekend' : 'timeline-day'
+      },
+      renderCell: (props: GridRenderCellParams<Employee, {leaveRequests: LeaveRequest[]}>) => {
+        //TODO: Show multiple leave requests (duration)
+        return mapDuration(
+          props.value?.leaveRequests.find(() => true)
+        )
+      },
     })),
   ];
 
@@ -46,7 +59,7 @@ export default function ShowLeaveRequestsTimeline(
     {
       groupId: "name",
       headerName: "",
-      children: [{ field: 'name' }],
+      children: [{ field: 'name' }]
     },
     ...transformedData.header.map(x => (
       {
@@ -59,7 +72,16 @@ export default function ShowLeaveRequestsTimeline(
   console.log(groups);
 
   return (
-    <Box sx={{maxWidth: '100%', overflow: 'auto'}}>
+    <Box sx={{
+      maxWidth: '100%',
+      overflow: 'auto',
+      '& .timeline-day.weekend': {
+        backgroundColor: '#e0e006;',
+      },
+      '& tbody:nth-child(odd) .timeline-weekend-theme': {
+        backgroundColor: '#e0e006;',
+      },
+    }}>
       <DataGrid
         rows={rows}
         columns={columns}
