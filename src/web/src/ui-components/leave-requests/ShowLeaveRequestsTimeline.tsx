@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import { gridClasses } from '@mui/x-data-grid';
 import { GridCellParams, GridColDef, GridColumnGroupingModel, GridRenderCellParams, GridValidRowModel } from "@mui/x-data-grid/models";
+import Grid from "@mui/material/Grid2";
 
 export default function ShowLeaveRequestsTimeline(
   apiData: LeaveRequestsResponseDto
@@ -32,45 +33,31 @@ export default function ShowLeaveRequestsTimeline(
     ),
   }));
 
-  const columns: GridColDef<GridValidRowModel[number]>[] = [
-    {
-      field: "name",
-      headerName: "",
-    },
-    ...dates.map((x) => ({
-      field: x.toISO()!,
-      headerName: x.toFormat("dd"),
-      width: 10,
-      headerClassName: x.isWeekend ? 'timeline-day weekend' : 'timeline-day',
-      cellClassName: (params: GridCellParams<Employee, {date: DateTime}>) => {
-        if (params.value == null) {
-          return '';
-        }
-        return params.value.date.isWeekend ? 'timeline-day weekend' : 'timeline-day'
-      },
-      renderCell: (props: GridRenderCellParams<Employee, {leaveRequests: LeaveRequest[]}>) => {
-        //TODO: Show multiple leave requests (duration)
-        return mapDuration(
-          props.value?.leaveRequests.find(() => true)
-        )
-      },
-    })),
-  ];
-
-  const groups: GridColumnGroupingModel = [
-    {
-      groupId: "name",
-      headerName: "",
-      children: [{ field: 'name' }]
-    },
-    ...transformedData.header.map(x => (
-      {
-        groupId: x.date.toFormat("LLLL"),
-        children: x.days.map(x => ({ field: x.toISO()! }))
+  const columns: GridColDef<GridValidRowModel[number]>[] = dates.map((x) => ({
+    field: x.toISO()!,
+    headerName: x.toFormat("dd"),
+    width: 10,
+    headerClassName: x.isWeekend ? 'timeline-day weekend' : 'timeline-day',
+    cellClassName: (params: GridCellParams<Employee, {date: DateTime}>) => {
+      if (params.value == null) {
+        return '';
       }
+      return params.value.date.isWeekend ? 'timeline-day weekend' : 'timeline-day'
+    },
+    renderCell: (props: GridRenderCellParams<Employee, {leaveRequests: LeaveRequest[]}>) => {
+      //TODO: Show multiple leave requests (duration)
+      return mapDuration(
+        props.value?.leaveRequests.find(() => true)
+      )
+    },
+  }));
 
-    ))
-  ];
+  const groups: GridColumnGroupingModel = transformedData.header.map(x => (
+    {
+      groupId: x.date.toFormat("LLLL"),
+      children: x.days.map(x => ({ field: x.toISO()! }))
+    }
+  ));
   const ODD_OPACITY = 0.2;
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     [`& .${gridClasses.row}.odd`]: {
@@ -114,24 +101,54 @@ export default function ShowLeaveRequestsTimeline(
   }));
 
   return (
-    <Box sx={{ maxWidth: '100%', overflow: 'auto' }}>
-      <StripedDataGrid
-        rows={rows}
-        columns={columns}
-        columnGroupingModel={groups}
-        disableRowSelectionOnClick
-        hideFooter={true}
-        hideFooterPagination={true}
-        hideFooterSelectedRowCount={true}
-        disableColumnMenu
-        disableColumnSorting
-        disableColumnResize
-        disableColumnFilter
-        disableColumnSelector
-        getRowClassName={(params) =>
-          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-        }
-      />
+    <Box sx={{ maxWidth: '100%', overflow: 'auto', flexGrow: 1 }}>
+      <Grid container spacing={0}>
+        <Grid size={2}>
+          <StripedDataGrid
+            rows={transformedData.items.map(x => x.employee)}
+            columns={[{
+              field: "name",
+              headerName: "",
+            }]}
+            columnGroupingModel={[{
+              groupId: "name",
+              headerName: "",
+              children: [{ field: 'name' }]
+            }]}
+            disableRowSelectionOnClick
+            hideFooter={true}
+            hideFooterPagination={true}
+            hideFooterSelectedRowCount={true}
+            disableColumnMenu
+            disableColumnSorting
+            disableColumnResize
+            disableColumnFilter
+            disableColumnSelector
+            getRowClassName={(params) =>
+              params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+            }
+          />
+        </Grid>
+        <Grid size={10}>
+          <StripedDataGrid
+            rows={rows}
+            columns={columns}
+            columnGroupingModel={groups}
+            disableRowSelectionOnClick
+            hideFooter={true}
+            hideFooterPagination={true}
+            hideFooterSelectedRowCount={true}
+            disableColumnMenu
+            disableColumnSorting
+            disableColumnResize
+            disableColumnFilter
+            disableColumnSelector
+            getRowClassName={(params) =>
+              params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+            }
+          />
+        </Grid>
+      </Grid>
     </Box>
   );
 }
