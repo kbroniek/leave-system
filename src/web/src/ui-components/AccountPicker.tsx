@@ -36,7 +36,7 @@ export const AccountPicker = (props: {onClose: (event: AccountInfo | null) => vo
           <List>
             {accounts.filter((account) => account.idTokenClaims?.['tfp'] !== b2cPolicies.names.signUpSignIn)
               .map((account) => (
-                <ListItem button onClick={() => handleListItemClick(account)} key={account.homeAccountId}>
+                <ListItem onClick={() => handleListItemClick(account)} key={account.homeAccountId}>
                   <ListItemAvatar>
                     <Avatar>
                       <PersonIcon />
@@ -46,7 +46,7 @@ export const AccountPicker = (props: {onClose: (event: AccountInfo | null) => vo
                 </ListItem>
             ))}
 
-            <ListItem autoFocus button onClick={() => handleListItemClick(null)}>
+            <ListItem autoFocus onClick={() => handleListItemClick(null)}>
               <ListItemAvatar>
                 <Avatar>
                   <AddIcon />
