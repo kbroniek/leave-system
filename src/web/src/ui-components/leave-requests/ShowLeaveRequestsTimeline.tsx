@@ -1,8 +1,10 @@
 import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { DateTime, Duration } from "luxon";
+import { alpha, styled } from '@mui/material/styles';
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
-import { GridCellParams, GridColDef, GridColumnGroupingModel, GridRenderCellParams } from "@mui/x-data-grid/models";
+import { gridClasses } from '@mui/x-data-grid';
+import { GridCellParams, GridColDef, GridColumnGroupingModel, GridRenderCellParams, GridValidRowModel } from "@mui/x-data-grid/models";
 
 export default function ShowLeaveRequestsTimeline(
   apiData: LeaveRequestsResponseDto
@@ -30,7 +32,7 @@ export default function ShowLeaveRequestsTimeline(
     ),
   }));
 
-  const columns: GridColDef<(typeof rows)[number]>[] = [
+  const columns: GridColDef<GridValidRowModel[number]>[] = [
     {
       field: "name",
       headerName: "",
@@ -69,20 +71,51 @@ export default function ShowLeaveRequestsTimeline(
 
     ))
   ];
-  console.log(groups);
-
-  return (
-    <Box sx={{
-      maxWidth: '100%',
-      overflow: 'auto',
+  const ODD_OPACITY = 0.2;
+  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [`& .${gridClasses.row}.odd`]: {
       '& .timeline-day.weekend': {
         backgroundColor: '#e0e006;',
       },
-      '& tbody:nth-child(odd) .timeline-weekend-theme': {
-        backgroundColor: '#e0e006;',
+    },
+    [`& .${gridClasses.row}.even`]: {
+      '& .timeline-day.weekend': {
+        backgroundColor: '#b8b82e;',
       },
-    }}>
-      <DataGrid
+      backgroundColor: theme.palette.grey[200],
+      '&:hover': {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        '@media (hover: none)': {
+          backgroundColor: 'transparent',
+        },
+      },
+      '&.Mui-selected': {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY + theme.palette.action.selectedOpacity,
+        ),
+        '&:hover': {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY +
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity,
+          ),
+          // Reset on touch devices, it doesn't add specificity
+          '@media (hover: none)': {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY + theme.palette.action.selectedOpacity,
+            ),
+          },
+        },
+      },
+    },
+  }));
+
+  return (
+    <Box sx={{ maxWidth: '100%', overflow: 'auto' }}>
+      <StripedDataGrid
         rows={rows}
         columns={columns}
         columnGroupingModel={groups}
@@ -95,6 +128,9 @@ export default function ShowLeaveRequestsTimeline(
         disableColumnResize
         disableColumnFilter
         disableColumnSelector
+        getRowClassName={(params) =>
+          params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+        }
       />
     </Box>
   );
