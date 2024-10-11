@@ -1,8 +1,19 @@
 import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
+import { alpha, styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
-import { GridColDef, GridColumnGroupingModel } from "@mui/x-data-grid/models";
+import { gridClasses } from "@mui/x-data-grid";
+import {
+  GridCellParams,
+  GridColDef,
+  GridColumnGroupingModel,
+  GridRenderCellParams,
+  GridValidRowModel,
+} from "@mui/x-data-grid/models";
+import Grid from "@mui/material/Grid2";
+import { LeaveRequest } from "./LeaveRequestModel";
+import { RenderLeaveRequests as renderLeaveRequests } from "./RenderLeaveRequests";
 
 export default function ShowLeaveRequestsTimeline(
   apiData: LeaveRequestsResponseDto
@@ -17,92 +28,166 @@ export default function ShowLeaveRequestsTimeline(
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
   const rows = transformedData.items.map((x) => ({
-    //TODO: Show multiple leave requests (duration)
     ...x.employee,
     ...x.table.reduce(
       (a, v) => ({
         ...a,
-        [v.date.toISO()!]: mapDuration(
-          v.leaveRequests.find(() => true)
-        ),
+        [v.date.toISO()!]: {
+          date: v.date,
+          leaveRequests: v.leaveRequests,
+        },
       }),
       {}
     ),
   }));
 
-  const columns: GridColDef<(typeof rows)[number]>[] = [
-    {
-      field: "name",
-      headerName: "",
-    },
-    ...dates.map((x) => ({
-      field: x.toISO()!,
-      headerName: x.toFormat("dd"),
-      width: 10,
-    })),
-  ];
-
-  const groups: GridColumnGroupingModel = [
-    {
-      groupId: "name",
-      headerName: "",
-      children: [{ field: 'name' }],
-    },
-    ...transformedData.header.map(x => (
-      {
-        groupId: x.date.toFormat("LLLL"),
-        children: x.days.map(x => ({ field: x.toISO()! }))
+  const columns: GridColDef<GridValidRowModel[number]>[] = dates.map((x) => ({
+    field: x.toISO()!,
+    headerName: x.toFormat("dd"),
+    width: 10,
+    headerClassName: x.isWeekend ? "timeline-day weekend" : "timeline-day",
+    cellClassName: (params: GridCellParams<Employee, { date: DateTime }>) => {
+      if (params.value == null) {
+        return "";
       }
+      return params.value.date.isWeekend
+        ? "timeline-day weekend"
+        : "timeline-day";
+    },
+    renderCell: (
+      props: GridRenderCellParams<Employee, { date: DateTime, leaveRequests: LeaveRequest[] }>
+    ) => {
+      return renderLeaveRequests(props)
+    },
+  }));
 
-    ))
-  ];
-  console.log(groups);
+  const groups: GridColumnGroupingModel = transformedData.header.map((x) => ({
+    groupId: x.date.toFormat("LLLL"),
+    children: x.days.map((x) => ({ field: x.toISO()! })),
+  }));
+  const ODD_OPACITY = 0.2;
+  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [".MuiDataGrid-cell"]: {
+      padding: 0
+    },
+    [`& .${gridClasses["row--borderBottom"]}`]: {
+      "& .timeline-day.weekend": {
+        backgroundColor: "#e0e006;",
+      },
+    },
+    [`& .${gridClasses.row}`]: {
+      "& .timeline-day.date-from": {
+        color: "#ff0000;",
+      },
+      "& .timeline-day.date-to": {
+        color: "#ff00ff;",
+      },
+    },
+    [`& .${gridClasses.row}.odd`]: {
+      "& .timeline-day.weekend": {
+        backgroundColor: "#e0e006;",
+      },
+    },
+    [`& .${gridClasses.row}.even`]: {
+      "& .timeline-day.weekend": {
+        backgroundColor: "#b8b82e;",
+      },
+      backgroundColor: theme.palette.grey[200],
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        "@media (hover: none)": {
+          backgroundColor: "transparent",
+        },
+      },
+      "&.Mui-selected": {
+        backgroundColor: alpha(
+          theme.palette.primary.main,
+          ODD_OPACITY + theme.palette.action.selectedOpacity
+        ),
+        "&:hover": {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY +
+              theme.palette.action.selectedOpacity +
+              theme.palette.action.hoverOpacity
+          ),
+          // Reset on touch devices, it doesn't add specificity
+          "@media (hover: none)": {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY + theme.palette.action.selectedOpacity
+            ),
+          },
+        },
+      },
+    },
+  }));
+
+  const EmployeeStripedDataGrid = styled(StripedDataGrid)(() => ({
+    "& .MuiDataGrid-columnSeparator": {
+      display: "none",
+    },
+    "& .MuiDataGrid-filler": {
+      display: "none",
+    },
+  }));
 
   return (
-    <Box sx={{maxWidth: '100%', overflow: 'auto'}}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        columnGroupingModel={groups}
-        disableRowSelectionOnClick
-        hideFooter={true}
-        hideFooterPagination={true}
-        hideFooterSelectedRowCount={true}
-        disableColumnMenu
-        disableColumnSorting
-        disableColumnResize
-        disableColumnFilter
-        disableColumnSelector
-      />
+    <Box sx={{ maxWidth: "100%", overflow: "auto", flexGrow: 1 }}>
+      <Grid container spacing={0}>
+        <Grid size={2}>
+          <EmployeeStripedDataGrid
+            rows={transformedData.items.map((x) => x.employee)}
+            columns={[
+              {
+                field: "name",
+                headerName: "",
+                flex: 1,
+              },
+            ]}
+            columnGroupingModel={[
+              {
+                groupId: "name",
+                headerName: "",
+                children: [{ field: "name" }],
+              },
+            ]}
+            disableRowSelectionOnClick
+            hideFooter={true}
+            hideFooterPagination={true}
+            hideFooterSelectedRowCount={true}
+            disableColumnMenu
+            disableColumnSorting
+            disableColumnResize
+            disableColumnFilter
+            disableColumnSelector
+            getRowClassName={(params) =>
+              params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+            }
+          />
+        </Grid>
+        <Grid size={10}>
+          <StripedDataGrid
+            rows={rows}
+            columns={columns}
+            columnGroupingModel={groups}
+            disableRowSelectionOnClick
+            hideFooter={true}
+            hideFooterPagination={true}
+            hideFooterSelectedRowCount={true}
+            disableColumnMenu
+            disableColumnSorting
+            disableColumnResize
+            disableColumnFilter
+            disableColumnSelector
+            getRowClassName={(params) =>
+              params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+            }
+          />
+        </Grid>
+      </Grid>
     </Box>
   );
-}
-
-function mapDuration(LeaveRequest?: LeaveRequestDto): string {
-  if (!LeaveRequest) {
-    return "";
-  }
-  const duration = Duration.fromISO(LeaveRequest.duration);
-  if (!duration.isValid) {
-    //TODO: log invalid date
-    return "";
-  }
-  const dateFrom = DateTime.fromISO(LeaveRequest.dateFrom);
-  const dateTo = DateTime.fromISO(LeaveRequest.dateTo);
-  const diff = dateTo.plus({day: 1}).diff(dateFrom, ["days"]);
-  // https://github.com/moment/luxon/issues/422
-  const durationPerDay = Duration.fromObject({ days: 0, hours: 0, seconds: 0, milliseconds: (duration.as('milliseconds') / diff.days)}).normalize();
-  const timeResult = [];
-  if (durationPerDay.days !== 0) {
-    timeResult.push(`${durationPerDay.days}d`);
-  }
-  if (durationPerDay.hours !== 0) {
-    timeResult.push(`${durationPerDay.hours}h`);
-  }
-  if (durationPerDay.minutes !== 0) {
-    timeResult.push(`${durationPerDay.minutes}m`);
-  }
-  return timeResult.join(" ");
 }
 
 function buildDateTime(leaveRequests: LeaveRequestDto[]): LeaveRequest[] {
@@ -152,25 +237,25 @@ function transformLeaveRequest(
 ): LeaveRequestTable[] {
   const dateSequence = createDatesSequence(dateFrom, dateTo);
 
-  return dateSequence.map(currentDate => ({
+  return dateSequence.map((currentDate) => ({
     date: currentDate,
     leaveRequests: leaveRequests.filter(
       (lr) => lr.dateFrom <= currentDate && lr.dateTo >= currentDate
-    )
+    ),
   }));
 }
 function createDatesSequence(dateFrom: DateTime, dateTo: DateTime): DateTime[] {
-    let currentDate = dateFrom;
-    const sequence: DateTime[] = [];
-    // Max one year
-    for (
-      let i = 0;
-      i < 365 && currentDate <= dateTo;
-      ++i, currentDate = currentDate.plus({ days: 1 })
-    ) {
-      sequence.push(currentDate);
-    }
-    return sequence;
+  let currentDate = dateFrom;
+  const sequence: DateTime[] = [];
+  // Max one year
+  for (
+    let i = 0;
+    i < 365 && currentDate <= dateTo;
+    ++i, currentDate = currentDate.plus({ days: 1 })
+  ) {
+    sequence.push(currentDate);
+  }
+  return sequence;
 }
 function transformHeader(dateFrom: DateTime, dateTo: DateTime): HeaderTable[] {
   const headerTable: HeaderTable[] = [];
@@ -178,23 +263,36 @@ function transformHeader(dateFrom: DateTime, dateTo: DateTime): HeaderTable[] {
     getDaysInMonth(dateFrom.year, dateFrom.month) - dateFrom.day;
   headerTable.push({
     date: dateFrom,
-    days: createDatesSequence(dateFrom, dateFrom.plus({days: daysLeftDateFrom}))
+    days: createDatesSequence(
+      dateFrom,
+      dateFrom.plus({ days: daysLeftDateFrom })
+    ),
   });
   for (
-    let currentDate = DateTime.fromObject({year: dateFrom.year, month: dateFrom.month, day: 1}).plus({ month: 1 });
+    let currentDate = DateTime.fromObject({
+      year: dateFrom.year,
+      month: dateFrom.month,
+      day: 1,
+    }).plus({ month: 1 });
     currentDate.month < dateTo.month;
     currentDate = currentDate.plus({ month: 1 })
   ) {
     const daysLeft = getDaysInMonth(currentDate.year, currentDate.month) - 1;
     headerTable.push({
       date: currentDate,
-      days: createDatesSequence(currentDate, currentDate.plus({days: daysLeft})),
+      days: createDatesSequence(
+        currentDate,
+        currentDate.plus({ days: daysLeft })
+      ),
     });
   }
   if (dateFrom.month != dateTo.month) {
     headerTable.push({
       date: dateTo,
-      days: createDatesSequence(DateTime.fromObject({year: dateTo.year, month: dateTo.month, day: 1}), dateTo),
+      days: createDatesSequence(
+        DateTime.fromObject({ year: dateTo.year, month: dateTo.month, day: 1 }),
+        dateTo
+      ),
     });
   }
   return headerTable;
@@ -218,11 +316,6 @@ interface LeaveRequestTable {
   date: DateTime;
   leaveRequests: LeaveRequest[];
 }
-
-type LeaveRequest = LeaveRequestDto & {
-  dateFrom: DateTime;
-  dateTo: DateTime;
-};
 
 interface Employee {
   name: string;
