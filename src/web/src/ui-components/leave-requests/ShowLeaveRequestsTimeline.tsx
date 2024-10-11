@@ -1,5 +1,5 @@
 import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
 import { alpha, styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
@@ -12,6 +12,8 @@ import {
   GridValidRowModel,
 } from "@mui/x-data-grid/models";
 import Grid from "@mui/material/Grid2";
+import { LeaveRequest } from "./LeaveRequestModel";
+import { RenderLeaveRequests as renderLeaveRequests } from "./RenderLeaveRequests";
 
 export default function ShowLeaveRequestsTimeline(
   apiData: LeaveRequestsResponseDto
@@ -53,10 +55,9 @@ export default function ShowLeaveRequestsTimeline(
         : "timeline-day";
     },
     renderCell: (
-      props: GridRenderCellParams<Employee, { leaveRequests: LeaveRequest[] }>
+      props: GridRenderCellParams<Employee, { date: DateTime, leaveRequests: LeaveRequest[] }>
     ) => {
-      //TODO: Show multiple leave requests (duration)
-      return mapDuration(props.value?.leaveRequests.find(() => true));
+      return renderLeaveRequests(props)
     },
   }));
 
@@ -69,6 +70,14 @@ export default function ShowLeaveRequestsTimeline(
     [`& .${gridClasses["row--borderBottom"]}`]: {
       "& .timeline-day.weekend": {
         backgroundColor: "#e0e006;",
+      },
+    },
+    [`& .${gridClasses.row}`]: {
+      "& .timeline-day.date-from": {
+        color: "#ff0000;",
+      },
+      "& .timeline-day.date-to": {
+        color: "#ff00ff;",
       },
     },
     [`& .${gridClasses.row}.odd`]: {
@@ -152,12 +161,6 @@ export default function ShowLeaveRequestsTimeline(
             getRowClassName={(params) =>
               params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
             }
-            sx={{
-              "& .MuiDataGrid-columnHeader:last-child .MuiDataGrid-columnSeparator":
-                {
-                  display: "none",
-                },
-            }}
           />
         </Grid>
         <Grid size={10}>
@@ -182,38 +185,6 @@ export default function ShowLeaveRequestsTimeline(
       </Grid>
     </Box>
   );
-}
-
-function mapDuration(LeaveRequest?: LeaveRequestDto): string {
-  if (!LeaveRequest) {
-    return "";
-  }
-  const duration = Duration.fromISO(LeaveRequest.duration);
-  if (!duration.isValid) {
-    //TODO: log invalid date
-    return "";
-  }
-  const dateFrom = DateTime.fromISO(LeaveRequest.dateFrom);
-  const dateTo = DateTime.fromISO(LeaveRequest.dateTo);
-  const diff = dateTo.plus({ day: 1 }).diff(dateFrom, ["days"]);
-  // https://github.com/moment/luxon/issues/422
-  const durationPerDay = Duration.fromObject({
-    days: 0,
-    hours: 0,
-    seconds: 0,
-    milliseconds: duration.as("milliseconds") / diff.days,
-  }).normalize();
-  const timeResult = [];
-  if (durationPerDay.days !== 0) {
-    timeResult.push(`${durationPerDay.days}d`);
-  }
-  if (durationPerDay.hours !== 0) {
-    timeResult.push(`${durationPerDay.hours}h`);
-  }
-  if (durationPerDay.minutes !== 0) {
-    timeResult.push(`${durationPerDay.minutes}m`);
-  }
-  return timeResult.join(" ");
 }
 
 function buildDateTime(leaveRequests: LeaveRequestDto[]): LeaveRequest[] {
@@ -342,11 +313,6 @@ interface LeaveRequestTable {
   date: DateTime;
   leaveRequests: LeaveRequest[];
 }
-
-type LeaveRequest = LeaveRequestDto & {
-  dateFrom: DateTime;
-  dateTo: DateTime;
-};
 
 interface Employee {
   name: string;
