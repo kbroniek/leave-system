@@ -67,6 +67,9 @@ export default function ShowLeaveRequestsTimeline(
   }));
   const ODD_OPACITY = 0.2;
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [".MuiDataGrid-cell"]: {
+      padding: 0
+    },
     [`& .${gridClasses["row--borderBottom"]}`]: {
       "& .timeline-day.weekend": {
         backgroundColor: "#e0e006;",

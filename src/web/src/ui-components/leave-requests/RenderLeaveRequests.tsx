@@ -12,16 +12,45 @@ export function RenderLeaveRequests(props: GridRenderCellParams<{id: string}, { 
       display: "flex",
       justifyContent: "center",
       paddingTop: 0,
-      paddingBottom: 0
+      paddingBottom: 0,
+      paddingLeft: 0,
+      paddingRight: 0
     },
+    ".leave-request-border-start": {
+      top: 0,
+      left: 0,
+      position: "absolute",
+      height: "94%",
+      marginLeft: "1px",
+      borderLeft: "solid 2px black",
+      borderTop: "solid 2px black",
+      borderBottom: "solid 2px black",
+      zIndex: 400,
+      width: "4px",
+    },
+    ".leave-request-border-end": {
+      top: 0,
+      right: 0,
+      position: "absolute",
+      height: "94%",
+      borderRight: "solid 2px black",
+      borderTop: "solid 2px black",
+      borderBottom: "solid 2px black",
+      zIndex: 400,
+      width: "4px",
+    }
   });
   return (
     <LeaveList disablePadding key={`${props.value?.date.toISO()}-leave-requests`}>
       {
         props.value?.leaveRequests.map(x => (
-            <ListItemButton component="a" href="#todo-leave-request-id">
+          <>
+            {props.value?.date.toMillis() === x.dateFrom.toMillis() ? (<div className="leave-request-border-start"></div>) : ""}
+            {props.value?.date.toMillis() === x.dateTo.toMillis() ? (<div className="leave-request-border-end"></div>) : ""}
+            <ListItemButton component="a" href="#todo-leave-request-id" disableGutters={true}>
               {mapDuration(x)}
             </ListItemButton>
+          </>
         ))
       }
     </LeaveList>
