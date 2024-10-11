@@ -9,14 +9,17 @@ import ListItemButton from "@mui/material/ListItemButton";
 export function RenderLeaveRequests(props: GridRenderCellParams<{id: string}, { date: DateTime, leaveRequests: LeaveRequest[] }>): JSX.Element {
   const LeaveList = styled(List)<{ component?: React.ElementType }>({
     '& .MuiListItemButton-root': {
-      padding: 0,
+      display: "flex",
+      justifyContent: "center",
+      paddingTop: 0,
+      paddingBottom: 0
     },
   });
   return (
-    <LeaveList key={`${props.value?.date.toISO()}-leave-requests`}>
+    <LeaveList disablePadding key={`${props.value?.date.toISO()}-leave-requests`}>
       {
         props.value?.leaveRequests.map(x => (
-            <ListItemButton component="a" href="#customized-list">
+            <ListItemButton component="a" href="#todo-leave-request-id">
               {mapDuration(x)}
             </ListItemButton>
         ))
