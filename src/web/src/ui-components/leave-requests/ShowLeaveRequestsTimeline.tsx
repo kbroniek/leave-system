@@ -66,6 +66,11 @@ export default function ShowLeaveRequestsTimeline(
   }));
   const ODD_OPACITY = 0.2;
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+    [`& .${gridClasses["row--borderBottom"]}`]: {
+      "& .timeline-day.weekend": {
+        backgroundColor: "#e0e006;",
+      },
+    },
     [`& .${gridClasses.row}.odd`]: {
       "& .timeline-day.weekend": {
         backgroundColor: "#e0e006;",
