@@ -70,7 +70,7 @@ export default function ShowLeaveRequestsTimeline(params: {
   }));
   const ODD_OPACITY = 0.2;
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-    [".MuiDataGrid-cell"]: {
+    ".MuiDataGrid-cell": {
       padding: 0
     },
     [`& .${gridClasses["row--borderBottom"]}`]: {
