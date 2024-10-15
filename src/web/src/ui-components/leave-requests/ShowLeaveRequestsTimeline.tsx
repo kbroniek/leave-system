@@ -46,19 +46,14 @@ export default function ShowLeaveRequestsTimeline(params: {
     ),
   }));
 
+  const transformedHolidays = params.holidays.items.map(x => DateTime.fromISO(x));
   const columns: GridColDef<GridValidRowModel[number]>[] = dates.map((x) => ({
     field: x.toISO()!,
     headerName: x.toFormat("dd"),
     width: 10,
-    headerClassName: x.isWeekend ? "timeline-day weekend" : "timeline-day",
-    cellClassName: (params: GridCellParams<Employee, { date: DateTime }>) => {
-      if (params.value == null) {
-        return "";
-      }
-      return params.value.date.isWeekend
-        ? "timeline-day weekend"
-        : "timeline-day";
-    },
+    headerClassName: getDayCssClass(x, transformedHolidays),
+    cellClassName: (params: GridCellParams<Employee, { date: DateTime }>) =>
+      !params.value ? "" : getDayCssClass(params.value.date, transformedHolidays),
     renderCell: (
       props: GridRenderCellParams<Employee, { date: DateTime, leaveRequests: LeaveRequest[] }>
     ) => {
@@ -79,6 +74,9 @@ export default function ShowLeaveRequestsTimeline(params: {
       "& .timeline-day.weekend": {
         backgroundColor: "#e0e006;",
       },
+      "& .timeline-day.holiday": {
+        backgroundColor: "#FFDD96;",
+      },
     },
     [`& .${gridClasses.row}`]: {
       "& .timeline-day.date-from": {
@@ -92,10 +90,16 @@ export default function ShowLeaveRequestsTimeline(params: {
       "& .timeline-day.weekend": {
         backgroundColor: "#e0e006;",
       },
+      "& .timeline-day.holiday": {
+        backgroundColor: "#FFDD96;",
+      },
     },
     [`& .${gridClasses.row}.even`]: {
       "& .timeline-day.weekend": {
         backgroundColor: "#b8b82e;",
+      },
+      "& .timeline-day.holiday": {
+        backgroundColor: "#d4b97c;",
       },
       backgroundColor: theme.palette.grey[200],
       "&:hover": {
@@ -197,6 +201,13 @@ export default function ShowLeaveRequestsTimeline(params: {
       </Grid>
     </Box>
   );
+}
+
+function getDayCssClass(date: DateTime, holidays: DateTime[]): string {
+  if(holidays.find(x => x.equals(date))) {
+    return "timeline-day holiday";
+  }
+  return date.isWeekend ? "timeline-day weekend" : "timeline-day"
 }
 
 function buildDateTime(leaveRequests: LeaveRequestDto[]): LeaveRequest[] {
