@@ -23,10 +23,10 @@ const DataContent = () => {
 
   useEffect(() => {
     if (!apiData && inProgress === InteractionStatus.None) {
-      callApi<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-01&dateTo=2024-10-01")
+      callApi<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-11-01")
         .then((response) => setApiData(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-        callApi<HolidaysDto>("/settings/holidays?dateFrom=2024-08-01&dateTo=2024-10-01")
+        callApi<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01")
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }

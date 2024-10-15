@@ -77,6 +77,9 @@ export default function ShowLeaveRequestsTimeline(params: {
       "& .timeline-day.holiday": {
         backgroundColor: "#FFDD96;",
       },
+      "& .timeline-day.today": {
+        backgroundColor: "#c0c0c0;",
+      },
     },
     [`& .${gridClasses.row}`]: {
       "& .timeline-day.date-from": {
@@ -85,6 +88,9 @@ export default function ShowLeaveRequestsTimeline(params: {
       "& .timeline-day.date-to": {
         color: "#ff00ff;",
       },
+    },
+    "& .timeline-day.today": {
+      backgroundColor: "#c0c0c0;",
     },
     [`& .${gridClasses.row}.odd`]: {
       "& .timeline-day.weekend": {
@@ -204,7 +210,10 @@ export default function ShowLeaveRequestsTimeline(params: {
 }
 
 function getDayCssClass(date: DateTime, holidays: DateTime[]): string {
-  if(holidays.find(x => x.equals(date))) {
+  if (DateTime.local().startOf('day').equals(date)) {
+    return "timeline-day today";
+  }
+  if (holidays.find(x => x.equals(date))) {
     return "timeline-day holiday";
   }
   return date.isWeekend ? "timeline-day weekend" : "timeline-day"
