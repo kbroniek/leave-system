@@ -1,13 +1,15 @@
 import { GridRenderCellParams } from "@mui/x-data-grid/models";
-import { LeaveRequest } from "./LeaveRequestModel";
 import { DateTime, Duration } from "luxon";
 import { LeaveRequestDto } from "./LeaveRequestsDto";
 import List from "@mui/material/List";
 import { styled } from "@mui/material/styles";
 import ListItemButton from "@mui/material/ListItemButton";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";
+import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 
-export function RenderLeaveRequests(props: GridRenderCellParams<{id: string}, { date: DateTime, leaveRequests: LeaveRequest[] }>): JSX.Element {
+export function RenderLeaveRequests(props: GridRenderCellParams<
+  { id: string },
+  RenderLeaveRequestModel>): JSX.Element {
   const LeaveList = styled(List)<{ component?: React.ElementType }>({
     '& .MuiListItemButton-root': {
       display: "flex",
