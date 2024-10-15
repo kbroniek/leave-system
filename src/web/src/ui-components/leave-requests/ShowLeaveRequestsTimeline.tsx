@@ -15,6 +15,8 @@ import Grid from "@mui/material/Grid2";
 import { LeaveRequest } from "./LeaveRequestModel";
 import { RenderLeaveRequests as renderLeaveRequests } from "./RenderLeaveRequests";
 
+export const rowHeight = 30;
+
 export default function ShowLeaveRequestsTimeline(
   apiData: LeaveRequestsResponseDto
 ) {
@@ -137,6 +139,8 @@ export default function ShowLeaveRequestsTimeline(
       <Grid container spacing={0}>
         <Grid size={2}>
           <EmployeeStripedDataGrid
+            rowHeight={rowHeight}
+            columnHeaderHeight={rowHeight}
             rows={transformedData.items.map((x) => x.employee)}
             columns={[
               {
@@ -168,6 +172,8 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={10}>
           <StripedDataGrid
+            rowHeight={rowHeight}
+            columnHeaderHeight={rowHeight}
             rows={rows}
             columns={columns}
             columnGroupingModel={groups}

@@ -5,6 +5,7 @@ import { LeaveRequestDto } from "./LeaveRequestsDto";
 import List from "@mui/material/List";
 import { styled } from "@mui/material/styles";
 import ListItemButton from "@mui/material/ListItemButton";
+import { rowHeight } from "./ShowLeaveRequestsTimeline";
 
 export function RenderLeaveRequests(props: GridRenderCellParams<{id: string}, { date: DateTime, leaveRequests: LeaveRequest[] }>): JSX.Element {
   const LeaveList = styled(List)<{ component?: React.ElementType }>({
@@ -20,7 +21,7 @@ export function RenderLeaveRequests(props: GridRenderCellParams<{id: string}, { 
       top: 0,
       left: 0,
       position: "absolute",
-      height: "94%",
+      height: rowHeight - 4,
       marginLeft: "1px",
       borderLeft: "solid 2px black",
       borderTop: "solid 2px black",
@@ -32,7 +33,7 @@ export function RenderLeaveRequests(props: GridRenderCellParams<{id: string}, { 
       top: 0,
       right: 0,
       position: "absolute",
-      height: "94%",
+      height: rowHeight - 4,
       borderRight: "solid 2px black",
       borderTop: "solid 2px black",
       borderBottom: "solid 2px black",
