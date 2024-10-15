@@ -10,6 +10,7 @@ using LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Domain.LeaveRequests.Searching;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.GraphApi;
+using LeaveSystem.Functions.Holidays;
 using LeaveSystem.Functions.LeaveLimits;
 using LeaveSystem.Functions.LeaveLimits.Repositories;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
@@ -75,7 +76,8 @@ internal static class Config
             .AddScoped<RejectLeaveRequestService>()
             .AddScoped<CancelLeaveRequestService>()
             .AddScoped<SearchLeaveRequestService>()
-            .AddScoped<EmployeeService>();
+            .AddScoped<EmployeeService>()
+            .AddScoped<HolidaysService>();
 
     private static IServiceCollection AddLeaveRequestRepositories(
         this IServiceCollection services,
