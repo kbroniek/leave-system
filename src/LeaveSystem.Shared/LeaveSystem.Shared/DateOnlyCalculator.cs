@@ -7,7 +7,7 @@ public static class DateOnlyCalculator
     public const uint MaxCalculatedDays = 366;
     public enum DayKind
     {
-        WORKING,
+        WORKDAY,
         WEEKEND,
         HOLIDAY
     }
@@ -22,7 +22,7 @@ public static class DateOnlyCalculator
         long daysBetween = 0;
         do
         {
-            if (GetDayKind(currentDate) == DayKind.WORKING)
+            if (GetDayKind(currentDate) == DayKind.WORKDAY)
             {
                 ++daysBetween;
                 if (daysBetween > MaxCalculatedDays)
@@ -40,13 +40,13 @@ public static class DateOnlyCalculator
         var dateToPlusOne = dateTo.AddDays(1);
         var daysBetween = dateToPlusOne.DayNumber - dateFrom.DayNumber;
         var currentDate = dateToPlusOne;
-        while (GetDayKind(currentDate) != DayKind.WORKING)
+        while (GetDayKind(currentDate) != DayKind.WORKDAY)
         {
             ++daysBetween;
             currentDate = currentDate.AddDays(1);
         }
         currentDate = dateFrom.AddDays(-1);
-        while (GetDayKind(currentDate) != DayKind.WORKING)
+        while (GetDayKind(currentDate) != DayKind.WORKDAY)
         {
             ++daysBetween;
             currentDate = currentDate.AddDays(-1);
@@ -56,7 +56,7 @@ public static class DateOnlyCalculator
 
     public static DateOnly GetNextWorkingDay(DateOnly date)
     {
-        while (GetDayKind(date) != DayKind.WORKING)
+        while (GetDayKind(date) != DayKind.WORKDAY)
         {
             date = date.AddDays(1);
         }
@@ -76,7 +76,7 @@ public static class DateOnlyCalculator
             return DayKind.WEEKEND;
         }
 
-        return DayKind.WORKING;
+        return DayKind.WORKDAY;
     }
 
     private static bool isPolishHoliday(DateOnly date)

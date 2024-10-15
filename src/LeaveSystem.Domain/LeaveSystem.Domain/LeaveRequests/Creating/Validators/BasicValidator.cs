@@ -33,13 +33,13 @@ public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysReposit
         if (includeFreeDaysResult.Value == false)
         {
             var dateFromDayKind = DateOnlyCalculator.GetDayKind(dateFrom);
-            if (dateFromDayKind != DateOnlyCalculator.DayKind.WORKING)
+            if (dateFromDayKind != DateOnlyCalculator.DayKind.WORKDAY)
             {
                 return new Error("The date from is off work.", HttpStatusCode.BadRequest);
             }
 
             var dateToDayKind = DateOnlyCalculator.GetDayKind(dateTo);
-            if (dateToDayKind != DateOnlyCalculator.DayKind.WORKING)
+            if (dateToDayKind != DateOnlyCalculator.DayKind.WORKDAY)
             {
                 return new Error("The date to is off work.", HttpStatusCode.BadRequest);
             }
