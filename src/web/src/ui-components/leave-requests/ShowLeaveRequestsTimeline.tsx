@@ -14,19 +14,22 @@ import {
 import Grid from "@mui/material/Grid2";
 import { LeaveRequest } from "./LeaveRequestModel";
 import { RenderLeaveRequests as renderLeaveRequests } from "./RenderLeaveRequests";
+import { HolidaysDto } from "./HolidaysDto";
 
 export const rowHeight = 30;
 
-export default function ShowLeaveRequestsTimeline(
-  apiData: LeaveRequestsResponseDto
+export default function ShowLeaveRequestsTimeline(params: {
+  leaveRequests: LeaveRequestsResponseDto,
+  holidays: HolidaysDto
+}
 ) {
   // TODO: Get employee from api
   const employees: Employee[] = [
     ...new Map(
-      apiData.items.map((item) => [item.createdBy.id, item.createdBy])
+      params.leaveRequests.items.map((item) => [item.createdBy.id, item.createdBy])
     ).values(),
   ];
-  const transformedData = transformToTable(apiData, employees);
+  const transformedData = transformToTable(params.leaveRequests, employees);
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
   const rows = transformedData.items.map((x) => ({

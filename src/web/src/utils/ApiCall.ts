@@ -1,3 +1,4 @@
+import { AccountInfo, InteractionRequiredAuthError, IPublicClientApplication } from "@azure/msal-browser";
 import { loginRequest } from "../authConfig";
 import { msalInstance } from "../main";
 
@@ -27,4 +28,13 @@ export async function callApi<T>(url: string): Promise<T> {
         .then(response => response.json())
         //TODO: Error handling
         .catch(error => console.log(error));
+}
+
+export async function ifErrorAcquireTokenRedirect(error: unknown, instance: IPublicClientApplication) {
+    if (error instanceof InteractionRequiredAuthError) {
+        instance.acquireTokenRedirect({
+          ...loginRequest,
+          account: instance.getActiveAccount() as AccountInfo | undefined,
+        });
+      }
 }
