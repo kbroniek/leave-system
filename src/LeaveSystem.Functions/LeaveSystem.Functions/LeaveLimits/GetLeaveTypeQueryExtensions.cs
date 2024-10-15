@@ -54,6 +54,6 @@ public static class GetLeaveTypeQueryExtensions
 
     private static Error CreateError(Result<object, Error>[] results) =>
         new(
-            string.Join(Environment.NewLine, results.Select(x => x.Error.Message).Where(x => x is not null)),
+            string.Join(Environment.NewLine, results.Where(x => x.IsFailure).Select(x => x.Error.Message).Where(x => x is not null)),
             System.Net.HttpStatusCode.BadRequest);
 }
