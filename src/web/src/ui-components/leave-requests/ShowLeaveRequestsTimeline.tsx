@@ -17,13 +17,15 @@ import { RenderLeaveRequests } from "./RenderLeaveRequests";
 import { HolidaysDto } from "./HolidaysDto";
 import { LeaveStatusesDto } from "./LeaveStatusDto";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
+import { LeaveTypesDto } from "./LeaveTypesDto";
 
 export const rowHeight = 30;
 
 export default function ShowLeaveRequestsTimeline(params: {
   leaveRequests: LeaveRequestsResponseDto,
   holidays: HolidaysDto,
-  leaveStatuses: LeaveStatusesDto
+  leaveStatuses: LeaveStatusesDto,
+  leaveTypes: LeaveTypesDto
 }
 ) {
   // TODO: Get employee from api
@@ -33,6 +35,7 @@ export default function ShowLeaveRequestsTimeline(params: {
     ).values(),
   ];
   const leaveStatusesActive = params.leaveStatuses.items.filter(x => x.state === "Active");
+  const leaveTypesActive = params.leaveTypes.items.filter(x => x.state === "Active");
   const transformedData = transformToTable(params.leaveRequests, employees);
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
@@ -44,7 +47,8 @@ export default function ShowLeaveRequestsTimeline(params: {
         [v.date.toISO()!]: {
           date: v.date,
           leaveRequests: v.leaveRequests,
-          statuses: leaveStatusesActive
+          statuses: leaveStatusesActive,
+          leaveTypes: leaveTypesActive
         } as RenderLeaveRequestModel,
       }),
       {}

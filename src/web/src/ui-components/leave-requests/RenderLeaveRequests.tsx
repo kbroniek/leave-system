@@ -49,6 +49,14 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
         backgroundImage: `-webkit-linear-gradient(-121.5deg, ${x.color}, ${x.color} 50.5%, transparent 50%, transparent 100%)`
       }}),
       {}
+    ),
+    ...props.value?.leaveTypes.reduce(
+      (a, x) => ({
+        ...a,
+      [`.leave-type-${x.id}`]: {
+        backgroundColor: x.properties.color
+      }}),
+      {}
     )
   });
   return (
@@ -58,7 +66,7 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
           <>
           {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
           {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
-          <ListItemButton component="a" href="#todo-leave-request-id" disableGutters={true} className={getCssClass(x.status)}>
+          <ListItemButton component="a" href="#todo-leave-request-id" disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
             {mapDuration(x)}
           </ListItemButton>
           </>
@@ -68,8 +76,8 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
   )
 }
 
-function getCssClass(status: string): string {
-  return `leave-request-${status}`;
+function getCssClass(status: string, leaveTypeId: string): string {
+  return `leave-request-${status} leave-type-${leaveTypeId}`;
 }
 
 function mapDuration(LeaveRequest?: LeaveRequestDto): string {
