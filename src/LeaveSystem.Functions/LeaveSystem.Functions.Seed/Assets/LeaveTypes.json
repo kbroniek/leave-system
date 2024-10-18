@@ -9,7 +9,7 @@
       "name": "urlop wypoczynkowy",
       "order": 1,
       "properties": {
-        "color": "#0137C9",
+        "color": "transparent",
         "includeFreeDays": false,
         "defaultLimitDays": 26,
         "catalog": "Holiday"
@@ -21,7 +21,7 @@
       "baseLeaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
       "order": 2,
       "properties": {
-        "color": "#B88E1E",
+        "color": "#FF8933",
         "includeFreeDays": false,
         "defaultLimitDays": 4,
         "catalog": "OnDemand"
@@ -54,7 +54,7 @@
       "name": "opieka nad dzieckiem do 14 lat - art. 188 KP",
       "order": 5,
       "properties": {
-        "color": "#FF3333",
+        "color": "#FF4DA6",
         "includeFreeDays": false
       }
     },
@@ -63,7 +63,7 @@
       "name": "urlop okolicznościowy",
       "order": 6,
       "properties": {
-        "color": "#FF3333",
+        "color": "#30D5C8",
         "includeFreeDays": false
       }
     },
@@ -72,7 +72,7 @@
       "name": "urlop szkoleniowy",
       "order": 7,
       "properties": {
-        "color": "#FF3333",
+        "color": "transparent",
         "includeFreeDays": true
       }
     },
@@ -81,7 +81,7 @@
       "name": "urlop wychowawczy",
       "order": 9,
       "properties": {
-        "color": "#FF3333",
+        "color": "#2EB82B",
         "includeFreeDays": true
       }
     },
@@ -90,7 +90,7 @@
       "name": "urlop macierzyński",
       "order": 10,
       "properties": {
-        "color": "#FF3333",
+        "color": "#FF99DD",
         "includeFreeDays": true
       }
     },
@@ -99,7 +99,7 @@
       "name": "urlop ojcowski",
       "order": 11,
       "properties": {
-        "color": "#FF3333",
+        "color": "#FF99DD",
         "includeFreeDays": true
       }
     },
@@ -108,7 +108,7 @@
       "name": "urlop tacierzyński",
       "order": 12,
       "properties": {
-        "color": "#FF3333",
+        "color": "#FF99DD",
         "includeFreeDays": true
       }
     },
@@ -126,7 +126,7 @@
       "name": "urlop od firmy",
       "order": 14,
       "properties": {
-        "color": "#FF3333",
+        "color": "transparent",
         "includeFreeDays": false
       }
     },
@@ -135,7 +135,7 @@
       "name": "urlop bezpłatny",
       "order": 15,
       "properties": {
-        "color": "#FF3333",
+        "color": "#0033CC",
         "includeFreeDays": true
       }
     },
@@ -153,7 +153,7 @@
       "name": "nieobecność nieusprawiedliwiona",
       "order": 17,
       "properties": {
-        "color": "#FF3333",
+        "color": "#0066FF",
         "includeFreeDays": true
       }
     }
