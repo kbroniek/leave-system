@@ -6,6 +6,7 @@ import { styled } from "@mui/material/styles";
 import ListItemButton from "@mui/material/ListItemButton";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
+import Tooltip from "@mui/material/Tooltip";
 
 export function RenderLeaveRequests(props: GridRenderCellParams<
   { id: string },
@@ -53,9 +54,13 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
     ...props.value?.leaveTypes.reduce(
       (a, x) => ({
         ...a,
-      [`.leave-type-${x.id}`]: {
-        backgroundColor: x.properties.color
-      }}),
+        [`.leave-type-${x.id}`]: {
+          backgroundColor: x.properties.color,
+          "&:hover": {
+            backgroundColor: x.properties.color,
+          }
+        },
+      }),
       {}
     )
   });
@@ -63,17 +68,20 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
     <LeaveList disablePadding key={`${props.value?.date.toISO()}-leave-requests`}>
       {
         props.value?.leaveRequests.map(x => (
-          <>
-          {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
-          {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
-          <ListItemButton component="a" href="#todo-leave-request-id" disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
-            {mapDuration(x)}
-          </ListItemButton>
-          </>
+          <Tooltip title={getTooltip( x.leaveTypeId)}>
+              <ListItemButton component="a" href="#todo-leave-request-id" disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
+                {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
+                {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
+                {mapDuration(x)}
+              </ListItemButton>
+          </Tooltip>
         ))
       }
     </LeaveList>
   )
+  function getTooltip(leaveTypeId: string): string | undefined {
+    return props.value?.leaveTypes.find(x => x.id === leaveTypeId)?.name;
+  }
 }
 
 function getCssClass(status: string, leaveTypeId: string): string {
