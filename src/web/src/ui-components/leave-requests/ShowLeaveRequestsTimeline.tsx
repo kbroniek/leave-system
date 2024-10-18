@@ -13,14 +13,19 @@ import {
 } from "@mui/x-data-grid/models";
 import Grid from "@mui/material/Grid2";
 import { LeaveRequest } from "./LeaveRequestModel";
-import { RenderLeaveRequests as renderLeaveRequests } from "./RenderLeaveRequests";
+import { RenderLeaveRequests } from "./RenderLeaveRequests";
 import { HolidaysDto } from "./HolidaysDto";
+import { LeaveStatusesDto } from "./LeaveStatusDto";
+import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
+import { LeaveTypesDto } from "./LeaveTypesDto";
 
 export const rowHeight = 30;
 
 export default function ShowLeaveRequestsTimeline(params: {
   leaveRequests: LeaveRequestsResponseDto,
-  holidays: HolidaysDto
+  holidays: HolidaysDto,
+  leaveStatuses: LeaveStatusesDto,
+  leaveTypes: LeaveTypesDto
 }
 ) {
   // TODO: Get employee from api
@@ -29,6 +34,8 @@ export default function ShowLeaveRequestsTimeline(params: {
       params.leaveRequests.items.map((item) => [item.createdBy.id, item.createdBy])
     ).values(),
   ];
+  const leaveStatusesActive = params.leaveStatuses.items.filter(x => x.state === "Active");
+  const leaveTypesActive = params.leaveTypes.items.filter(x => x.state === "Active");
   const transformedData = transformToTable(params.leaveRequests, employees);
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
@@ -40,7 +47,9 @@ export default function ShowLeaveRequestsTimeline(params: {
         [v.date.toISO()!]: {
           date: v.date,
           leaveRequests: v.leaveRequests,
-        },
+          statuses: leaveStatusesActive,
+          leaveTypes: leaveTypesActive
+        } as RenderLeaveRequestModel,
       }),
       {}
     ),
@@ -55,10 +64,8 @@ export default function ShowLeaveRequestsTimeline(params: {
     cellClassName: (params: GridCellParams<Employee, { date: DateTime }>) =>
       !params.value ? "" : getDayCssClass(params.value.date, transformedHolidays),
     renderCell: (
-      props: GridRenderCellParams<Employee, { date: DateTime, leaveRequests: LeaveRequest[] }>
-    ) => {
-      return renderLeaveRequests(props)
-    },
+      props: GridRenderCellParams<Employee, RenderLeaveRequestModel>
+    ) => RenderLeaveRequests(props),
   }));
 
   const groups: GridColumnGroupingModel = transformedData.header.map((x) => ({
@@ -67,7 +74,7 @@ export default function ShowLeaveRequestsTimeline(params: {
   }));
   const ODD_OPACITY = 0.2;
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-    [".MuiDataGrid-cell"]: {
+    ".MuiDataGrid-cell": {
       padding: 0
     },
     [`& .${gridClasses["row--borderBottom"]}`]: {

@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 
 // Msal imports
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
-import {
-  InteractionStatus,
-  InteractionType
-} from "@azure/msal-browser";
+import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
 
 // Sample app imports
@@ -15,24 +12,43 @@ import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
 import { LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { HolidaysDto } from "./HolidaysDto";
+import { LeaveStatusesDto } from "./LeaveStatusDto";
+import { LeaveTypesDto } from "./LeaveTypesDto";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
-  const [apiData, setApiData] = useState<LeaveRequestsResponseDto | null>(null);
+  const [apiLeaveRequests, setApiLeaveRequests] = useState<LeaveRequestsResponseDto | null>(null);
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
+  const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
+  const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(null);
 
   useEffect(() => {
-    if (!apiData && inProgress === InteractionStatus.None) {
+    if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
       callApi<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-11-01")
-        .then((response) => setApiData(response))
+        .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-        callApi<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01")
+      callApi<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01")
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      callApi<LeaveStatusesDto>("/settings/leavestatus")
+        .then((response) => setApiLeaveStatuses(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      callApi<LeaveTypesDto>("/leavetypes")
+        .then((response) => setApiLeaveTypes(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
-  }, [inProgress, apiData, instance]);
+  }, [inProgress, apiLeaveRequests, instance]);
 
-  return apiData && apiHolidays ? <ShowLeaveRequestsTimeline leaveRequests={apiData} holidays={apiHolidays} /> : <Loading />;
+  return apiLeaveRequests && apiHolidays && apiLeaveStatuses && apiLeaveTypes ? (
+    <ShowLeaveRequestsTimeline
+      leaveRequests={apiLeaveRequests}
+      holidays={apiHolidays}
+      leaveStatuses={apiLeaveStatuses}
+      leaveTypes={apiLeaveTypes}
+    />
+  ) : (
+    <Loading />
+  );
 };
 
 export function LeaveRequestsTimeline() {

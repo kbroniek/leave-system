@@ -1,13 +1,16 @@
 import { GridRenderCellParams } from "@mui/x-data-grid/models";
-import { LeaveRequest } from "./LeaveRequestModel";
 import { DateTime, Duration } from "luxon";
 import { LeaveRequestDto } from "./LeaveRequestsDto";
 import List from "@mui/material/List";
 import { styled } from "@mui/material/styles";
 import ListItemButton from "@mui/material/ListItemButton";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";
+import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
+import Tooltip from "@mui/material/Tooltip";
 
-export function RenderLeaveRequests(props: GridRenderCellParams<{id: string}, { date: DateTime, leaveRequests: LeaveRequest[] }>): JSX.Element {
+export function RenderLeaveRequests(props: GridRenderCellParams<
+  { id: string },
+  RenderLeaveRequestModel>): JSX.Element {
   const LeaveList = styled(List)<{ component?: React.ElementType }>({
     '& .MuiListItemButton-root': {
       display: "flex",
@@ -39,25 +42,52 @@ export function RenderLeaveRequests(props: GridRenderCellParams<{id: string}, { 
       borderBottom: "solid 2px black",
       zIndex: 400,
       width: "4px",
-    }
+    },
+    ...props.value?.statuses.reduce(
+      (a, x) => ({
+        ...a,
+      [`.leave-request-${x.leaveRequestStatus}`]: {
+        backgroundImage: `-webkit-linear-gradient(-121.5deg, ${x.color}, ${x.color} 50.5%, transparent 50%, transparent 100%)`
+      }}),
+      {}
+    ),
+    ...props.value?.leaveTypes.reduce(
+      (a, x) => ({
+        ...a,
+        [`.leave-type-${x.id}`]: {
+          backgroundColor: x.properties.color,
+          "&:hover": {
+            backgroundColor: x.properties.color,
+          }
+        },
+      }),
+      {}
+    )
   });
   return (
     <LeaveList disablePadding key={`${props.value?.date.toISO()}-leave-requests`}>
       {
         props.value?.leaveRequests.map(x => (
-          <>
-            {props.value?.date.toMillis() === x.dateFrom.toMillis() ? (<div className="leave-request-border-start"></div>) : ""}
-            {props.value?.date.toMillis() === x.dateTo.toMillis() ? (<div className="leave-request-border-end"></div>) : ""}
-            <ListItemButton component="a" href="#todo-leave-request-id" disableGutters={true}>
-              {mapDuration(x)}
-            </ListItemButton>
-          </>
+          <Tooltip title={getTooltip( x.leaveTypeId)}>
+              <ListItemButton component="a" href="#todo-leave-request-id" disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
+                {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
+                {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
+                {mapDuration(x)}
+              </ListItemButton>
+          </Tooltip>
         ))
       }
     </LeaveList>
   )
-  // return mapDuration(props.value?.leaveRequests.find(() => true));
+  function getTooltip(leaveTypeId: string): string | undefined {
+    return props.value?.leaveTypes.find(x => x.id === leaveTypeId)?.name;
+  }
 }
+
+function getCssClass(status: string, leaveTypeId: string): string {
+  return `leave-request-${status} leave-type-${leaveTypeId}`;
+}
+
 function mapDuration(LeaveRequest?: LeaveRequestDto): string {
   if (!LeaveRequest) {
     return "";
