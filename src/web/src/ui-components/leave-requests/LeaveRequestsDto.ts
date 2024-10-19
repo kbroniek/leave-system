@@ -1,3 +1,6 @@
+import { LeaveRequestStatus } from "../dtos/LeaveRequestStatusDto"
+import { UserDto } from "../dtos/UserDto"
+
 export interface LeaveRequestsResponseDto {
     items: LeaveRequestDto[],
     continuationToken: string | null,
@@ -16,10 +19,7 @@ export interface LeaveRequestDto {
     dateTo: string
     duration: string
     leaveTypeId: string
-    status: string
-    createdBy: {
-        id:string
-        name: string
-    }
+    status: LeaveRequestStatus
+    createdBy: UserDto
     workingHours: string
 }
