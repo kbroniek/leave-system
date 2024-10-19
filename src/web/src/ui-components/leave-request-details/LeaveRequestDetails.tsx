@@ -33,7 +33,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
   );
 };
 
-export function LeaveRequestDetails(leaveRequestId: string) {
+export function LeaveRequestDetails(props: {leaveRequestId: string}) {
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}
@@ -41,7 +41,7 @@ export function LeaveRequestDetails(leaveRequestId: string) {
       errorComponent={ErrorComponent}
       loadingComponent={Loading}
     >
-      <DataContent leaveRequestId={leaveRequestId}/>
+      <DataContent leaveRequestId={props.leaveRequestId}/>
     </MsalAuthenticationTemplate>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { GridRenderCellParams } from "@mui/x-data-grid/models";
 import { DateTime, Duration } from "luxon";
 import { LeaveRequestDto } from "./LeaveRequestsDto";
@@ -7,10 +8,19 @@ import ListItemButton from "@mui/material/ListItemButton";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import Tooltip from "@mui/material/Tooltip";
+import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
 
 export function RenderLeaveRequests(props: GridRenderCellParams<
   { id: string },
   RenderLeaveRequestModel>): JSX.Element {
+  const [openDialog, setOpenDialog] = useState(false);
+  const handleClickOpen = () => {
+    setOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setOpenDialog(false);
+  };
   const LeaveList = styled(List)<{ component?: React.ElementType }>({
     '& .MuiListItemButton-root': {
       display: "flex",
@@ -65,19 +75,28 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
     )
   });
   return (
-    <LeaveList disablePadding key={`${props.value?.date.toISO()}-leave-requests`}>
-      {
-        props.value?.leaveRequests.map(x => (
-          <Tooltip title={getTooltip( x.leaveTypeId)}>
-              <ListItemButton component="a" href="#todo-leave-request-id" disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
-                {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
-                {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
-                {mapDuration(x)}
-              </ListItemButton>
-          </Tooltip>
-        ))
-      }
-    </LeaveList>
+    <div>
+      <LeaveList disablePadding key={`${props.value?.date.toISO()}-leave-requests`}>
+        {
+          props.value?.leaveRequests.map(x => (
+            <Tooltip title={getTooltip( x.leaveTypeId)}>
+              <div>
+                <ListItemButton onClick={handleClickOpen} disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
+                  {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
+                  {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
+                  {mapDuration(x)}
+                </ListItemButton>
+                <LeaveRequestDetailsDialog
+                    open={openDialog}
+                    onClose={handleClose}
+                    leaveRequestId={x.id}
+                  />
+              </div>
+            </Tooltip>
+          ))
+        }
+      </LeaveList>
+    </div>
   )
   function getTooltip(leaveTypeId: string): string | undefined {
     return props.value?.leaveTypes.find(x => x.id === leaveTypeId)?.name;
