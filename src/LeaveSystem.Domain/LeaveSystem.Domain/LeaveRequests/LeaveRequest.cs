@@ -215,6 +215,7 @@ public class LeaveRequest : IEventSource
 
     private void AddRemarks(string? remarks, LeaveRequestUserDto createdBy, DateTimeOffset createdDate)
     {
+        //TODO: Add status to remarks
         if (string.IsNullOrWhiteSpace(remarks))
         {
             return;

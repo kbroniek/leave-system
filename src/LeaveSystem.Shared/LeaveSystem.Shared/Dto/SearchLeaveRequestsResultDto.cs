@@ -8,5 +8,6 @@ public record SearchLeaveRequestsResultDto(Guid Id,
     TimeSpan Duration,
     Guid LeaveTypeId,
     LeaveRequestStatus Status,
+    //TODO: Return assignedTo
     LeaveRequestUserDto CreatedBy,
     TimeSpan WorkingHours);
