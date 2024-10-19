@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { LeaveRequest } from "./LeaveRequestModel";
-import { LeaveStatusDto } from "./LeaveStatusDto";
-import { LeaveTypeDto } from "./LeaveTypesDto";
+import { LeaveStatusDto } from "../dtos/LeaveStatusDto";
+import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 
 export interface RenderLeaveRequestModel {
     date: DateTime,

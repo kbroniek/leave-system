@@ -15,9 +15,9 @@ import Grid from "@mui/material/Grid2";
 import { LeaveRequest } from "./LeaveRequestModel";
 import { RenderLeaveRequests } from "./RenderLeaveRequests";
 import { HolidaysDto } from "./HolidaysDto";
-import { LeaveStatusesDto } from "./LeaveStatusDto";
+import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
-import { LeaveTypesDto } from "./LeaveTypesDto";
+import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 
 export const rowHeight = 30;
 
@@ -26,8 +26,7 @@ export default function ShowLeaveRequestsTimeline(params: {
   holidays: HolidaysDto,
   leaveStatuses: LeaveStatusesDto,
   leaveTypes: LeaveTypesDto
-}
-) {
+}): JSX.Element {
   // TODO: Get employee from api
   const employees: Employee[] = [
     ...new Map(
