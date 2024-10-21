@@ -76,6 +76,12 @@ export default function ShowLeaveRequestsTimeline(params: {
     ".MuiDataGrid-cell": {
       padding: 0
     },
+    [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
+      outline: 'transparent',
+    },
+    [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]: {
+      outline: 'none',
+    },
     [`& .${gridClasses["row--borderBottom"]}`]: {
       "& .timeline-day.weekend": {
         backgroundColor: "#e0e006;",

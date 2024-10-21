@@ -3,7 +3,6 @@ import { GridRenderCellParams } from "@mui/x-data-grid/models";
 import { DateTime, Duration } from "luxon";
 import { LeaveRequestDto } from "./LeaveRequestsDto";
 import List from "@mui/material/List";
-import { styled } from "@mui/material/styles";
 import ListItemButton from "@mui/material/ListItemButton";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
@@ -21,7 +20,7 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
   const handleClose = () => {
     setOpenDialog(false);
   };
-  const LeaveList = styled(List)<{ component?: React.ElementType }>({
+  const style = {
     '& .MuiListItemButton-root': {
       display: "flex",
       justifyContent: "center",
@@ -73,10 +72,10 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
       }),
       {}
     )
-  });
+  }
   return (
     <div>
-      <LeaveList disablePadding key={`${props.value?.date.toISO()}-leave-requests`}>
+      <List disablePadding key={`${props.value?.date.toISO()}-leave-requests`} sx={style}>
         {
           props.value?.leaveRequests.map(x => (
             <Tooltip title={getTooltip( x.leaveTypeId)}>
@@ -95,7 +94,7 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
             </Tooltip>
           ))
         }
-      </LeaveList>
+      </List>
     </div>
   )
   function getTooltip(leaveTypeId: string): string | undefined {
