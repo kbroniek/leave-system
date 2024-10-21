@@ -1,5 +1,4 @@
 import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import { LeaveRequestDetails } from "./LeaveRequestDetails";
 
 export interface LeaveRequestDetailsDialogProps {
@@ -17,7 +16,6 @@ export function LeaveRequestDetailsDialog(props: LeaveRequestDetailsDialogProps)
 
     return (
         <Dialog onClose={handleClose} open={open}>
-            <DialogTitle>Set backup account</DialogTitle>
             <LeaveRequestDetails leaveRequestId={props.leaveRequestId} />
         </Dialog>
     );
