@@ -1,4 +1,4 @@
-import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
+import { LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { DateTime } from "luxon";
 import { alpha, styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -12,12 +12,13 @@ import {
   GridValidRowModel,
 } from "@mui/x-data-grid/models";
 import Grid from "@mui/material/Grid2";
-import { LeaveRequest } from "./LeaveRequestModel";
 import { RenderLeaveRequests } from "./RenderLeaveRequests";
 import { HolidaysDto } from "./HolidaysDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
+import { UserDto } from "../dtos/UserDto";
+import { LeaveRequestsTimelineTransformer } from "./LeaveRequestsTimelineTransformer";
 
 export const rowHeight = 30;
 
@@ -28,14 +29,15 @@ export default function ShowLeaveRequestsTimeline(params: {
   leaveTypes: LeaveTypesDto
 }): JSX.Element {
   // TODO: Get employee from api
-  const employees: Employee[] = [
+  const employees: UserDto[] = [
     ...new Map(
       params.leaveRequests.items.map((item) => [item.createdBy.id, item.createdBy])
     ).values(),
   ];
   const leaveStatusesActive = params.leaveStatuses.items.filter(x => x.state === "Active");
   const leaveTypesActive = params.leaveTypes.items.filter(x => x.state === "Active");
-  const transformedData = transformToTable(params.leaveRequests, employees);
+  const transformer = new LeaveRequestsTimelineTransformer(employees, params.leaveRequests);
+  const transformedData = transformer.transformToTable();
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
   const rows = transformedData.items.map((x) => ({
@@ -60,10 +62,10 @@ export default function ShowLeaveRequestsTimeline(params: {
     headerName: x.toFormat("dd"),
     width: 10,
     headerClassName: getDayCssClass(x, transformedHolidays),
-    cellClassName: (params: GridCellParams<Employee, { date: DateTime }>) =>
+    cellClassName: (params: GridCellParams<UserDto, { date: DateTime }>) =>
       !params.value ? "" : getDayCssClass(params.value.date, transformedHolidays),
     renderCell: (
-      props: GridRenderCellParams<Employee, RenderLeaveRequestModel>
+      props: GridRenderCellParams<UserDto, RenderLeaveRequestModel>
     ) => RenderLeaveRequests(props),
   }));
 
@@ -229,141 +231,4 @@ function getDayCssClass(date: DateTime, holidays: DateTime[]): string {
     return "timeline-day holiday";
   }
   return date.isWeekend ? "timeline-day weekend" : "timeline-day"
-}
-
-function buildDateTime(leaveRequests: LeaveRequestDto[]): LeaveRequest[] {
-  return leaveRequests.map(
-    (x) =>
-      ({
-        ...x,
-        dateFrom: DateTime.fromISO(x.dateFrom),
-        dateTo: DateTime.fromISO(x.dateTo),
-        //TODO parse duration
-      } as LeaveRequest)
-  );
-}
-
-function transformToTable(
-  leaveRequestsResponse: LeaveRequestsResponseDto,
-  employees: Employee[]
-): UserLeaveRequestTableCollection {
-  const dateFrom = DateTime.fromISO(leaveRequestsResponse.search.dateFrom);
-  const dateTo = DateTime.fromISO(leaveRequestsResponse.search.dateTo);
-  // Ensure startDay is before endDay
-  if (dateFrom > dateTo) {
-    throw new Error("endDay must be after startDay");
-  }
-
-  const leaveRequests = buildDateTime(leaveRequestsResponse.items);
-  return {
-    items: employees.map((x) => ({
-      employee: {
-        id: x.id,
-        name: x.name,
-      },
-      table: transformLeaveRequest(
-        leaveRequests.filter((lr) => lr.createdBy.id === x.id),
-        dateFrom,
-        dateTo
-      ),
-    })),
-    header: transformHeader(dateFrom, dateTo),
-  };
-}
-
-function transformLeaveRequest(
-  leaveRequests: LeaveRequest[],
-  dateFrom: DateTime,
-  dateTo: DateTime
-): LeaveRequestTable[] {
-  const dateSequence = createDatesSequence(dateFrom, dateTo);
-
-  return dateSequence.map((currentDate) => ({
-    date: currentDate,
-    leaveRequests: leaveRequests.filter(
-      (lr) => lr.dateFrom <= currentDate && lr.dateTo >= currentDate
-    ),
-  }));
-}
-function createDatesSequence(dateFrom: DateTime, dateTo: DateTime): DateTime[] {
-  let currentDate = dateFrom;
-  const sequence: DateTime[] = [];
-  // Max one year
-  for (
-    let i = 0;
-    i < 365 && currentDate <= dateTo;
-    ++i, currentDate = currentDate.plus({ days: 1 })
-  ) {
-    sequence.push(currentDate);
-  }
-  return sequence;
-}
-function transformHeader(dateFrom: DateTime, dateTo: DateTime): HeaderTable[] {
-  const headerTable: HeaderTable[] = [];
-  const daysLeftDateFrom =
-    getDaysInMonth(dateFrom.year, dateFrom.month) - dateFrom.day;
-  headerTable.push({
-    date: dateFrom,
-    days: createDatesSequence(
-      dateFrom,
-      dateFrom.plus({ days: daysLeftDateFrom })
-    ),
-  });
-  for (
-    let currentDate = DateTime.fromObject({
-      year: dateFrom.year,
-      month: dateFrom.month,
-      day: 1,
-    }).plus({ month: 1 });
-    currentDate.month < dateTo.month;
-    currentDate = currentDate.plus({ month: 1 })
-  ) {
-    const daysLeft = getDaysInMonth(currentDate.year, currentDate.month) - 1;
-    headerTable.push({
-      date: currentDate,
-      days: createDatesSequence(
-        currentDate,
-        currentDate.plus({ days: daysLeft })
-      ),
-    });
-  }
-  if (dateFrom.month != dateTo.month) {
-    headerTable.push({
-      date: dateTo,
-      days: createDatesSequence(
-        DateTime.fromObject({ year: dateTo.year, month: dateTo.month, day: 1 }),
-        dateTo
-      ),
-    });
-  }
-  return headerTable;
-}
-
-function getDaysInMonth(year: number, month: number): number {
-  return DateTime.fromObject({ year, month }).daysInMonth!;
-}
-interface UserLeaveRequestTableCollection {
-  items: UserLeaveRequestTable[];
-  header: HeaderTable[];
-}
-interface UserLeaveRequestTable {
-  employee: {
-    name: string;
-    id: string;
-  };
-  table: LeaveRequestTable[];
-}
-interface LeaveRequestTable {
-  date: DateTime;
-  leaveRequests: LeaveRequest[];
-}
-
-interface Employee {
-  name: string;
-  id: string;
-}
-
-interface HeaderTable {
-  days: DateTime[];
-  date: DateTime;
 }

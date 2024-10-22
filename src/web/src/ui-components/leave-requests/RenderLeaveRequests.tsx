@@ -8,9 +8,10 @@ import { rowHeight } from "./ShowLeaveRequestsTimeline";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import Tooltip from "@mui/material/Tooltip";
 import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
+import { UserDto } from "../dtos/UserDto";
 
 export function RenderLeaveRequests(props: GridRenderCellParams<
-  { id: string },
+  UserDto,
   RenderLeaveRequestModel>): JSX.Element {
   const [openDialog, setOpenDialog] = useState(false);
   const handleClickOpen = () => {
