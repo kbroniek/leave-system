@@ -4,19 +4,17 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Grid2 from "@mui/material/Grid2";
 import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
-import { LeaveStatusDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import Divider from "@mui/material/Divider";
 
 export default function ShowLeaveRequestsTimeline(params: {
   leaveRequest: LeaveRequestDetailsDto;
-  leaveStatuses: LeaveStatusDto[],
+  statusColor: string,
   leaveType: LeaveTypeDto
 }): JSX.Element {
-    const statusColor = params.leaveStatuses.find(x => x.leaveRequestStatus === params.leaveRequest.status)?.color ?? "transparent";
     const defaultStyle = { paddingTop: "1px" };
     const leaveTypeStyle = { ...defaultStyle, borderBottomColor: params.leaveType.properties.color, borderBottomStyle: "solid" };
-    const leaveStatusStyle = { ...defaultStyle, borderBottomColor: statusColor, borderBottomStyle: "solid" };
+    const leaveStatusStyle = { ...defaultStyle, borderBottomColor: params.statusColor, borderBottomStyle: "solid" };
   return (
     <Stack spacing={2} margin={2}>
       <Typography variant="h5">{params.leaveRequest.assignedTo.name}</Typography>

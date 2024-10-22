@@ -39,7 +39,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
   return apiLeaveRequestDetails && apiLeaveStatuses && apiLeaveType ? (
     <ShowLeaveRequestDetails
       leaveRequest={apiLeaveRequestDetails}
-      leaveStatuses={apiLeaveStatuses.items}
+      statusColor={apiLeaveStatuses.items.find(x => x.leaveRequestStatus === apiLeaveRequestDetails.status)?.color ?? "transparent"}
       leaveType={apiLeaveType}
     />
   ) : (
