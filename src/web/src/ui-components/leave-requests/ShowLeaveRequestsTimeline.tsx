@@ -22,12 +22,12 @@ import { LeaveRequestsTimelineTransformer } from "./LeaveRequestsTimelineTransfo
 
 export const rowHeight = 30;
 
-export default function ShowLeaveRequestsTimeline(params: {
+export default function ShowLeaveRequestsTimeline(params: Readonly<{
   leaveRequests: LeaveRequestsResponseDto,
   holidays: HolidaysDto,
   leaveStatuses: LeaveStatusesDto,
   leaveTypes: LeaveTypesDto
-}): JSX.Element {
+}>): JSX.Element {
   // TODO: Get employee from api
   const employees: UserDto[] = [
     ...new Map(
@@ -36,7 +36,7 @@ export default function ShowLeaveRequestsTimeline(params: {
   ];
   const leaveStatusesActive = params.leaveStatuses.items.filter(x => x.state === "Active");
   const leaveTypesActive = params.leaveTypes.items.filter(x => x.state === "Active");
-  const transformer = new LeaveRequestsTimelineTransformer(employees, params.leaveRequests);
+  const transformer = new LeaveRequestsTimelineTransformer(employees, params.leaveRequests, params.holidays, params.leaveTypes.items);
   const transformedData = transformer.transformToTable();
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];

@@ -2,11 +2,15 @@ import { DateTime } from "luxon";
 import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { LeaveRequest } from "./LeaveRequestModel";
 import { UserDto } from "../dtos/UserDto";
+import { HolidaysDto } from "./HolidaysDto";
+import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 
 export class LeaveRequestsTimelineTransformer {
   constructor(
-    private employees: UserDto[],
-    private leaveRequestsResponse: LeaveRequestsResponseDto
+    private readonly employees: UserDto[],
+    private readonly leaveRequestsResponse: LeaveRequestsResponseDto,
+    private readonly holidays: HolidaysDto,
+    private readonly leaveTypes: LeaveTypeDto[]
   ) {}
   public transformToTable(): UserLeaveRequestTableCollection {
     const dateFrom = DateTime.fromISO(
@@ -51,14 +55,28 @@ export class LeaveRequestsTimelineTransformer {
     dateTo: DateTime
   ): LeaveRequestTable[] {
     const dateSequence = this.createDatesSequence(dateFrom, dateTo);
+    const holidaysDateTime = this.holidays.items.map(x => DateTime.fromISO(x));
 
     return dateSequence.map((currentDate) => ({
       date: currentDate,
       leaveRequests: leaveRequests.filter(
-        (lr) => lr.dateFrom <= currentDate && lr.dateTo >= currentDate
+        (lr) => this.isLeaveRequestValid(lr, currentDate, holidaysDateTime)
       ),
     }));
   }
+
+  private isLeaveRequestValid(leaveRequest: LeaveRequest, currentDate: DateTime, holidays: DateTime[]): boolean {
+    const validFromTo = leaveRequest.dateFrom <= currentDate && leaveRequest.dateTo >= currentDate;
+    if (!validFromTo) {
+      return false;
+    }
+    const leaveType = this.leaveTypes.find(x => x.id === leaveRequest.leaveTypeId);
+    if (!leaveType?.properties?.includeFreeDays) {
+      return !currentDate.isWeekend && !holidays.find(x => x.equals(currentDate));
+    }
+    return validFromTo;
+  }
+
   private createDatesSequence(
     dateFrom: DateTime,
     dateTo: DateTime

@@ -10,9 +10,9 @@ import Tooltip from "@mui/material/Tooltip";
 import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
 import { UserDto } from "../dtos/UserDto";
 
-export function RenderLeaveRequests(props: GridRenderCellParams<
+export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
   UserDto,
-  RenderLeaveRequestModel>): JSX.Element {
+  RenderLeaveRequestModel>>): JSX.Element {
   const [openDialog, setOpenDialog] = useState(false);
   const handleClickOpen = () => {
     setOpenDialog(true);
@@ -65,9 +65,9 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
       (a, x) => ({
         ...a,
         [`.leave-type-${x.id}`]: {
-          backgroundColor: x.properties.color,
+          backgroundColor: x.properties?.color ?? "transparent",
           "&:hover": {
-            backgroundColor: x.properties.color,
+            backgroundColor: x.properties?.color ?? "transparent",
           }
         },
       }),
@@ -76,10 +76,10 @@ export function RenderLeaveRequests(props: GridRenderCellParams<
   }
   return (
     <div>
-      <List disablePadding key={`${props.value?.date.toISO()}-leave-requests`} sx={style}>
+      <List disablePadding key={`${props.value?.date.toISO()}-leave-request-details`} sx={style}>
         {
           props.value?.leaveRequests.map(x => (
-            <Tooltip title={getTooltip( x.leaveTypeId)}>
+            <Tooltip title={getTooltip( x.leaveTypeId)} key={`${x.id}-leave-request-detail`}>
               <div>
                 <ListItemButton onClick={handleClickOpen} disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
                   {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}

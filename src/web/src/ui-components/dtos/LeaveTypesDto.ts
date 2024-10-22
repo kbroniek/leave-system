@@ -4,8 +4,9 @@ export interface LeaveTypesDto {
 export interface LeaveTypeDto {
     id: string,
     name: string,
-    properties: {
+    properties?: {
         color: string
+        includeFreeDays: string
     },
     state: "Active" | "Inactive"
 }

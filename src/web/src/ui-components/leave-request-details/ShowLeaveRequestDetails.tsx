@@ -13,7 +13,7 @@ export default function ShowLeaveRequestsTimeline(params: {
   leaveType: LeaveTypeDto
 }): JSX.Element {
     const defaultStyle = { paddingTop: "1px" };
-    const leaveTypeStyle = { ...defaultStyle, borderBottomColor: params.leaveType.properties.color, borderBottomStyle: "solid" };
+    const leaveTypeStyle = { ...defaultStyle, borderBottomColor: params.leaveType.properties?.color, borderBottomStyle: "solid" };
     const leaveStatusStyle = { ...defaultStyle, borderBottomColor: params.statusColor, borderBottomStyle: "solid" };
   return (
     <Stack spacing={2} margin={2}>
