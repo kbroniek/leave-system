@@ -117,7 +117,6 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
     const dateTo = DateTime.fromISO(leaveRequest.dateTo);
     const daysCounter = DaysCounter.create(leaveRequest.leaveTypeId, props.value?.leaveTypes ?? [], holidays);
     const diffDays = daysCounter.days(dateFrom, dateTo);
-    console.log("Diff days", diffDays, dateFrom.toISO())
     // https://github.com/moment/luxon/issues/422
     const durationPerDay = Duration.fromObject({
       days: 0,

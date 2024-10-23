@@ -23,11 +23,11 @@ export class DaysCounter {
     return this.workingDays(dateFrom, dateTo);
   }
 
-  public static countAllDays(dateTo: DateTime<boolean>, dateFrom: DateTime<boolean>): number {
+  private static countAllDays(dateTo: DateTime<boolean>, dateFrom: DateTime<boolean>): number {
     return dateTo.plus({ day: 1 }).diff(dateFrom, ["days"]).days;
   }
 
-  public workingDays(dateFrom: DateTime<boolean>, dateTo: DateTime<boolean>) {
+  private workingDays(dateFrom: DateTime<boolean>, dateTo: DateTime<boolean>) {
     let currentDate = dateFrom;
     let numberOfDays = 1;
     // Max one year

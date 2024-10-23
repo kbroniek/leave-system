@@ -6,7 +6,7 @@ export interface LeaveTypeDto {
     name: string,
     properties?: {
         color: string
-        includeFreeDays: string
+        includeFreeDays: boolean
     },
     state: "Active" | "Inactive"
 }

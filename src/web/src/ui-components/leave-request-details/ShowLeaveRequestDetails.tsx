@@ -6,15 +6,23 @@ import Grid2 from "@mui/material/Grid2";
 import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import Divider from "@mui/material/Divider";
+import { DaysCounter } from "../utils/DaysCounter";
+import { HolidaysDto } from "../leave-requests/HolidaysDto";
+import { DateTime } from "luxon";
 
 export default function ShowLeaveRequestsTimeline(params: {
   leaveRequest: LeaveRequestDetailsDto;
   statusColor: string,
   leaveType: LeaveTypeDto
+  holidays: HolidaysDto
 }): JSX.Element {
     const defaultStyle = { paddingTop: "1px" };
-    const leaveTypeStyle = { ...defaultStyle, borderBottomColor: params.leaveType.properties?.color, borderBottomStyle: "solid" };
+    const leaveTypeStyle = { ...defaultStyle, borderBottomColor: params.leaveType.properties?.color ?? "transparent" , borderBottomStyle: "solid" };
     const leaveStatusStyle = { ...defaultStyle, borderBottomColor: params.statusColor, borderBottomStyle: "solid" };
+    const holidaysDateTime = params.holidays.items.map(x => DateTime.fromISO(x));
+    const daysCounter = new DaysCounter(params.leaveType.properties?.includeFreeDays ?? false, holidaysDateTime);
+    const dateFrom = DateTime.fromISO(params.leaveRequest.dateFrom);
+    const dateTo = DateTime.fromISO(params.leaveRequest.dateTo);
   return (
     <Stack spacing={2} margin={2}>
       <Typography variant="h5">{params.leaveRequest.assignedTo.name}</Typography>
@@ -53,7 +61,7 @@ export default function ShowLeaveRequestsTimeline(params: {
                 <Typography variant="body1" sx={{ color: "text.secondary" }}>
                     Days:
                 </Typography>
-                <Typography variant="body2" sx={defaultStyle}>TODO</Typography>
+                <Typography variant="body2" sx={defaultStyle}>{daysCounter.days(dateFrom, dateTo)}</Typography>
               </Stack>
               <Stack
                 direction="row"
