@@ -114,7 +114,7 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
     }
     catch (e) {
       //TODO: log invalid date
-      console.error(e);
+      console.warn(e);
       return "";
     }
   }

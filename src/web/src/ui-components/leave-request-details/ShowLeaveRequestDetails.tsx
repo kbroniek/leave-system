@@ -9,6 +9,7 @@ import Divider from "@mui/material/Divider";
 import { DaysCounter } from "../utils/DaysCounter";
 import { HolidaysDto } from "../leave-requests/HolidaysDto";
 import { DateTime } from "luxon";
+import { DurationFormatter } from "../utils/DurationFormatter";
 
 export default function ShowLeaveRequestsTimeline(params: {
   leaveRequest: LeaveRequestDetailsDto;
@@ -72,7 +73,7 @@ export default function ShowLeaveRequestsTimeline(params: {
                 <Typography variant="body1" sx={{ color: "text.secondary" }}>
                     Hours:
                 </Typography>
-                <Typography variant="body2" sx={defaultStyle}>{params.leaveRequest.duration}</Typography>
+                <Typography variant="body2" sx={defaultStyle}>{DurationFormatter.format(params.leaveRequest.duration)}</Typography>
               </Stack>
               <Stack
                 direction="row"

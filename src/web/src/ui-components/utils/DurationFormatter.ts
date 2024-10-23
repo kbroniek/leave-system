@@ -16,6 +16,12 @@ export class DurationFormatter {
         `Invalid duration for leave request ${leaveRequest.leaveTypeId}. Duration: ${leaveRequest.duration}`
       );
     }
+    const workingHours = Duration.fromISO(leaveRequest.workingHours);
+    if (!workingHours.isValid) {
+      throw Error(
+        `Invalid working hours for leave request ${leaveRequest.leaveTypeId}. Duration: ${leaveRequest.duration}`
+      );
+    }
     const diffDays = this.countDays(leaveRequest);
     // https://github.com/moment/luxon/issues/422
     const durationPerDay = Duration.fromObject({
@@ -24,7 +30,7 @@ export class DurationFormatter {
       seconds: 0,
       milliseconds: duration.as("milliseconds") / diffDays,
     }).normalize();
-    return this.createResult(durationPerDay);
+    return DurationFormatter.format(durationPerDay);
   }
 
   private countDays(leaveRequest: LeaveRequestDto) {
@@ -39,17 +45,28 @@ export class DurationFormatter {
     return diffDays;
   }
 
-  private createResult(durationPerDay: Duration) {
+  public static format(duration: Duration | string): string {
+    if(!DurationFormatter.isDuration(duration)) {
+      const buffer = Duration.fromISO(duration);
+      if (!buffer.isValid) {
+        console.warn(`Invalid duration: ${duration}`)
+        return "";
+      }
+      duration = Duration.fromObject({hours: buffer.as("hours")});
+    }
     const timeResult = [];
-    if (durationPerDay.days !== 0) {
-      timeResult.push(`${durationPerDay.days}d`);
+    if (duration.days !== 0) {
+      timeResult.push(`${duration.days}d`);
     }
-    if (durationPerDay.hours !== 0) {
-      timeResult.push(`${durationPerDay.hours}h`);
+    if (duration.hours !== 0) {
+      timeResult.push(`${duration.hours}h`);
     }
-    if (durationPerDay.minutes !== 0) {
-      timeResult.push(`${durationPerDay.minutes}m`);
+    if (duration.minutes !== 0) {
+      timeResult.push(`${duration.minutes}m`);
     }
     return timeResult.join(" ");
+  }
+  public static isDuration(duration: Duration | string): duration is Duration {
+    return (<Duration>duration).minus !== undefined;
   }
 }
