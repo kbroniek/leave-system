@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { GridRenderCellParams } from "@mui/x-data-grid/models";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
 import { LeaveRequestDto } from "./LeaveRequestsDto";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -9,7 +9,7 @@ import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import Tooltip from "@mui/material/Tooltip";
 import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
 import { UserDto } from "../dtos/UserDto";
-import { DaysCounter } from "../utils/DaysCounter";
+import { DurationFormatter } from "../utils/DurationFormatter";
 
 export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
   UserDto,
@@ -108,33 +108,15 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
     if (!leaveRequest) {
       return "";
     }
-    const duration = Duration.fromISO(leaveRequest.duration);
-    if (!duration.isValid) {
+    try {
+      const formatter = new DurationFormatter(holidays, props.value?.leaveTypes ?? []);
+      return formatter.formatPerDay(leaveRequest);
+    }
+    catch (e) {
       //TODO: log invalid date
+      console.error(e);
       return "";
     }
-    const dateFrom = DateTime.fromISO(leaveRequest.dateFrom);
-    const dateTo = DateTime.fromISO(leaveRequest.dateTo);
-    const daysCounter = DaysCounter.create(leaveRequest.leaveTypeId, props.value?.leaveTypes ?? [], holidays);
-    const diffDays = daysCounter.days(dateFrom, dateTo);
-    // https://github.com/moment/luxon/issues/422
-    const durationPerDay = Duration.fromObject({
-      days: 0,
-      hours: 0,
-      seconds: 0,
-      milliseconds: duration.as("milliseconds") / diffDays,
-    }).normalize();
-    const timeResult = [];
-    if (durationPerDay.days !== 0) {
-      timeResult.push(`${durationPerDay.days}d`);
-    }
-    if (durationPerDay.hours !== 0) {
-      timeResult.push(`${durationPerDay.hours}h`);
-    }
-    if (durationPerDay.minutes !== 0) {
-      timeResult.push(`${durationPerDay.minutes}m`);
-    }
-    return timeResult.join(" ");
   }
 }
 
