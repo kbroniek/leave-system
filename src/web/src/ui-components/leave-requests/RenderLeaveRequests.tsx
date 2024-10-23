@@ -9,6 +9,7 @@ import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import Tooltip from "@mui/material/Tooltip";
 import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
 import { UserDto } from "../dtos/UserDto";
+import { DaysCounter } from "../utils/DaysCounter";
 
 export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
   UserDto,
@@ -114,7 +115,8 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
     }
     const dateFrom = DateTime.fromISO(leaveRequest.dateFrom);
     const dateTo = DateTime.fromISO(leaveRequest.dateTo);
-    const diffDays = countDays(leaveRequest, dateFrom, dateTo, holidays);
+    const daysCounter = DaysCounter.create(leaveRequest.leaveTypeId, props.value?.leaveTypes ?? [], holidays);
+    const diffDays = daysCounter.days(dateFrom, dateTo);
     console.log("Diff days", diffDays, dateFrom.toISO())
     // https://github.com/moment/luxon/issues/422
     const durationPerDay = Duration.fromObject({
@@ -134,27 +136,6 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
       timeResult.push(`${durationPerDay.minutes}m`);
     }
     return timeResult.join(" ");
-  }
-
-  function countDays(leaveRequest: LeaveRequestDto, dateFrom: DateTime, dateTo: DateTime, holidays: DateTime[]): number {
-    const leaveType = props.value?.leaveTypes.find(x => x.id === leaveRequest.leaveTypeId)
-    if(leaveType?.properties?.includeFreeDays) {
-      return dateTo.plus({ day: 1 }).diff(dateFrom, ["days"]).days;
-    }
-
-    let currentDate = dateFrom;
-    let numberOfDays = 1
-    // Max one year
-    for (
-      let i = 0;
-      i < 365 && currentDate < dateTo;
-      ++i, currentDate = currentDate.plus({ days: 1 })
-    ) {
-      if(!currentDate.isWeekend && !holidays.find(x => x.equals(currentDate))) {
-        ++numberOfDays;
-      }
-    }
-    return numberOfDays;
   }
 }
 
