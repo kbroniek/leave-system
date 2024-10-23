@@ -21,6 +21,7 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
   const handleClose = () => {
     setOpenDialog(false);
   };
+  const holidaysDateTime = props.value?.holidays.items.map(x => DateTime.fromISO(x)) ?? [];
   const style = {
     '& .MuiListItemButton-root': {
       display: "flex",
@@ -84,7 +85,7 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
                 <ListItemButton onClick={handleClickOpen} disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
                   {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
                   {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
-                  {mapDuration(x)}
+                  {mapDuration(x, holidaysDateTime)}
                 </ListItemButton>
                 <LeaveRequestDetailsDialog
                     open={openDialog}
@@ -101,40 +102,63 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
   function getTooltip(leaveTypeId: string): string | undefined {
     return props.value?.leaveTypes.find(x => x.id === leaveTypeId)?.name;
   }
+
+  function mapDuration(leaveRequest: LeaveRequestDto | undefined, holidays: DateTime[]): string {
+    if (!leaveRequest) {
+      return "";
+    }
+    const duration = Duration.fromISO(leaveRequest.duration);
+    if (!duration.isValid) {
+      //TODO: log invalid date
+      return "";
+    }
+    const dateFrom = DateTime.fromISO(leaveRequest.dateFrom);
+    const dateTo = DateTime.fromISO(leaveRequest.dateTo);
+    const diffDays = countDays(leaveRequest, dateFrom, dateTo, holidays);
+    console.log("Diff days", diffDays, dateFrom.toISO())
+    // https://github.com/moment/luxon/issues/422
+    const durationPerDay = Duration.fromObject({
+      days: 0,
+      hours: 0,
+      seconds: 0,
+      milliseconds: duration.as("milliseconds") / diffDays,
+    }).normalize();
+    const timeResult = [];
+    if (durationPerDay.days !== 0) {
+      timeResult.push(`${durationPerDay.days}d`);
+    }
+    if (durationPerDay.hours !== 0) {
+      timeResult.push(`${durationPerDay.hours}h`);
+    }
+    if (durationPerDay.minutes !== 0) {
+      timeResult.push(`${durationPerDay.minutes}m`);
+    }
+    return timeResult.join(" ");
+  }
+
+  function countDays(leaveRequest: LeaveRequestDto, dateFrom: DateTime, dateTo: DateTime, holidays: DateTime[]): number {
+    const leaveType = props.value?.leaveTypes.find(x => x.id === leaveRequest.leaveTypeId)
+    if(leaveType?.properties?.includeFreeDays) {
+      return dateTo.plus({ day: 1 }).diff(dateFrom, ["days"]).days;
+    }
+
+    let currentDate = dateFrom;
+    let numberOfDays = 1
+    // Max one year
+    for (
+      let i = 0;
+      i < 365 && currentDate < dateTo;
+      ++i, currentDate = currentDate.plus({ days: 1 })
+    ) {
+      if(!currentDate.isWeekend && !holidays.find(x => x.equals(currentDate))) {
+        ++numberOfDays;
+      }
+    }
+    return numberOfDays;
+  }
 }
 
 function getCssClass(status: string, leaveTypeId: string): string {
   return `leave-request-${status} leave-type-${leaveTypeId}`;
 }
 
-function mapDuration(LeaveRequest?: LeaveRequestDto): string {
-  if (!LeaveRequest) {
-    return "";
-  }
-  const duration = Duration.fromISO(LeaveRequest.duration);
-  if (!duration.isValid) {
-    //TODO: log invalid date
-    return "";
-  }
-  const dateFrom = DateTime.fromISO(LeaveRequest.dateFrom);
-  const dateTo = DateTime.fromISO(LeaveRequest.dateTo);
-  const diff = dateTo.plus({ day: 1 }).diff(dateFrom, ["days"]);
-  // https://github.com/moment/luxon/issues/422
-  const durationPerDay = Duration.fromObject({
-    days: 0,
-    hours: 0,
-    seconds: 0,
-    milliseconds: duration.as("milliseconds") / diff.days,
-  }).normalize();
-  const timeResult = [];
-  if (durationPerDay.days !== 0) {
-    timeResult.push(`${durationPerDay.days}d`);
-  }
-  if (durationPerDay.hours !== 0) {
-    timeResult.push(`${durationPerDay.hours}h`);
-  }
-  if (durationPerDay.minutes !== 0) {
-    timeResult.push(`${durationPerDay.minutes}m`);
-  }
-  return timeResult.join(" ");
-}

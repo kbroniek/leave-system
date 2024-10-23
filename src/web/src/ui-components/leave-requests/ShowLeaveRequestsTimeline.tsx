@@ -49,7 +49,8 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
           date: v.date,
           leaveRequests: v.leaveRequests,
           statuses: leaveStatusesActive,
-          leaveTypes: leaveTypesActive
+          leaveTypes: leaveTypesActive,
+          holidays: params.holidays
         } as RenderLeaveRequestModel,
       }),
       {}
