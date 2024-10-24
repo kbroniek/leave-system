@@ -30,7 +30,8 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
       paddingTop: 0,
       paddingBottom: 0,
       paddingLeft: 0,
-      paddingRight: 0
+      paddingRight: 0,
+      cursor: "pointer"
     },
     ".leave-request-border-start": {
       top: 0,
