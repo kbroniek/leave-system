@@ -24,6 +24,7 @@ export default function ShowLeaveRequestsTimeline(params: {
     const daysCounter = new DaysCounter(params.leaveType.properties?.includeFreeDays ?? false, holidaysDateTime);
     const dateFrom = DateTime.fromISO(params.leaveRequest.dateFrom);
     const dateTo = DateTime.fromISO(params.leaveRequest.dateTo);
+    const createdDate = DateTime.fromISO(params.leaveRequest.createdDate);
   return (
     <Stack spacing={2} margin={2}>
       <Typography variant="h5">{params.leaveRequest.assignedTo.name}</Typography>
@@ -84,7 +85,7 @@ export default function ShowLeaveRequestsTimeline(params: {
                 <Typography variant="body1" sx={{ color: "text.secondary" }}>
                     Created date:
                 </Typography>
-                <Typography variant="body2" sx={defaultStyle}>{params.leaveRequest.createdDate}</Typography>
+                <Typography variant="body2" sx={defaultStyle}>{createdDate.toLocaleString({ weekday: 'short', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</Typography>
               </Stack>
               <Stack
                 direction="row"
