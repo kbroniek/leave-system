@@ -12,8 +12,8 @@ import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
 import { LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { HolidaysDto } from "./HolidaysDto";
-import { LeaveStatusesDto } from "./LeaveStatusDto";
-import { LeaveTypesDto } from "./LeaveTypesDto";
+import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
+import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
