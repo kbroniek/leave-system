@@ -13,13 +13,14 @@ import Menu from "@mui/material/Menu";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
+import { Authorized, RoleType } from "../components/Authorized";
 
 const pages = [
-  { title: "Submit request", link: "/submit-request" },
-  { title: "My leaves", link: "/leaves" },
-  { title: "HR Panel", link: "hr-panel" },
-  { title: "Users", link: "/users" },
-  { title: "Manage limits", link: "/limits" },
+  { title: "Submit request", link: "/submit-request", roles: ["GlobalAdmin", "Employee"] as RoleType[] },
+  { title: "My leaves", link: "/leaves", roles: ["GlobalAdmin"] as RoleType[] },
+  { title: "HR Panel", link: "hr-panel", roles: ["GlobalAdmin"] as RoleType[] },
+  { title: "Users", link: "/users", roles: ["GlobalAdmin"] as RoleType[] },
+  { title: "Manage limits", link: "/limits", roles: ["GlobalAdmin"] as RoleType[] },
 ];
 
 function NavBar() {
@@ -85,28 +86,36 @@ function NavBar() {
               sx={{ display: { xs: "block", md: "none" } }}
             >
               {pages.map((page) => (
-                <MenuItem
-                  key={page.title}
-                  onClick={handleCloseNavMenu}
-                  component={RouterLink}
-                  to={page.link}
-                >
-                  <Typography sx={{ textAlign: "center" }}>{page.title}</Typography>
-                </MenuItem>
+                <Authorized
+                  roles={page.roles}
+                  authorized={
+                    <MenuItem
+                      key={page.title}
+                      onClick={handleCloseNavMenu}
+                      component={RouterLink}
+                      to={page.link}
+                    >
+                      <Typography sx={{ textAlign: "center" }}>{page.title}</Typography>
+                    </MenuItem>}
+                />
               ))}
             </Menu>
           </Box>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
-              <Button
-                sx={{ my: 2, color: "white", display: "block" }}
-                key={page.title}
-                onClick={handleCloseNavMenu}
-                component={RouterLink}
-                to={page.link}
-              >
-                {page.title}
-              </Button>
+              <Authorized
+                roles={page.roles}
+                authorized={
+                <Button
+                  sx={{ my: 2, color: "white", display: "block" }}
+                  key={page.title}
+                  onClick={handleCloseNavMenu}
+                  component={RouterLink}
+                  to={page.link}
+                >
+                  {page.title}
+                </Button>}
+              />
             ))}
           </Box>
           <WelcomeName />

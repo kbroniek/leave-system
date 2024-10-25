@@ -1,14 +1,12 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
-import Grid from "@mui/material/Grid";
-
+import Grid from "@mui/material/Grid2";
 import type { AppProps } from "./types";
-
 import { CustomNavigationClient } from "./NavigationClient";
-
 import { PageLayout } from "./ui-components/PageLayout";
 import { Home } from "./pages/Home";
 import { Logout } from "./pages/Logout";
+import { Claims } from "./pages/Claims";
 
 
 export function App({ pca }: AppProps) {
@@ -33,6 +31,7 @@ function Pages() {
       <Routes>
           <Route path="/logout" element={<Logout />} />
           <Route path="/" element={<Home />} />
+          <Route path="/claims" element={<Claims />} />
       </Routes>
   );
 }
