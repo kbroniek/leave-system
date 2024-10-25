@@ -3,7 +3,7 @@ import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import Divider from "@mui/material/Divider";
 import { DaysCounter } from "../utils/DaysCounter";
-import { HolidaysDto } from "../leave-requests/HolidaysDto";
+import { HolidaysDto } from "../dtos/HolidaysDto";
 import { DateTime, DateTimeFormatOptions } from "luxon";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import Grid from '@mui/material/Grid2';

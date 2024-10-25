@@ -13,7 +13,7 @@ import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
 import ShowLeaveRequestDetails from "./ShowLeaveRequestDetails";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
-import { HolidaysDto } from "../leave-requests/HolidaysDto";
+import { HolidaysDto } from "../dtos/HolidaysDto";
 
 const DataContent = (props: {leaveRequestId: string}) => {
   const { instance, inProgress } = useMsal();

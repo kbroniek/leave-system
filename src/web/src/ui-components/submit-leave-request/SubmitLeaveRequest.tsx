@@ -9,49 +9,55 @@ import { loginRequest } from "../../authConfig";
 import { Loading } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
 import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
-import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
-import { LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
-import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
+import { LeaveRequestsResponseDto } from "../leave-requests/LeaveRequestsDto";
+import { SubmitLeaveRequestForm } from "./SubmitLeaveRequestForm";
+import { DateTime } from "luxon";
+import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
-  const [apiLeaveRequests, setApiLeaveRequests] = useState<LeaveRequestsResponseDto | null>(null);
+  const [apiLeaveRequests, setApiLeaveRequests] =
+    useState<LeaveRequestsResponseDto | null>(null);
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
-  const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(null);
+  const [apiLeaveLimits, setApiLeaveLimits] = useState<LeaveLimitsDto | null>(null);
 
   useEffect(() => {
     if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
-      callApi<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-11-01")
+      const userId = instance.getActiveAccount()?.idTokenClaims?.sub;
+      const now = DateTime.now();
+      const today = now.toFormat("yyyy-MM-dd");
+      const currentYear = now.toFormat("yyyy");
+      callApi<LeaveRequestsResponseDto>(`/leaverequests?dateFrom=${today}&dateTo=${today}&AssignedToUserIds=${userId}`)
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01")
+      callApi<HolidaysDto>(`/settings/holidays?dateFrom=${today}&dateTo=${today}`)
         .then((response) => setApiHolidays(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<LeaveStatusesDto>("/settings/leavestatus")
-        .then((response) => setApiLeaveStatuses(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       callApi<LeaveTypesDto>("/leavetypes")
         .then((response) => setApiLeaveTypes(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      callApi<LeaveLimitsDto>(`/leavelimits/user?year=${currentYear}`)
+        .then((response) => setApiLeaveLimits(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
   }, [inProgress, apiLeaveRequests, instance]);
 
-  return apiLeaveRequests && apiHolidays && apiLeaveStatuses && apiLeaveTypes ? (
-    <ShowLeaveRequestsTimeline
+  return apiLeaveRequests && apiHolidays && apiLeaveTypes && apiLeaveLimits ? (
+    <SubmitLeaveRequestForm
       leaveRequests={apiLeaveRequests}
       holidays={apiHolidays}
-      leaveStatuses={apiLeaveStatuses}
-      leaveTypes={apiLeaveTypes}
+      leaveTypes={apiLeaveTypes.items}
+      leaveLimits={apiLeaveLimits?.items}
     />
   ) : (
     <Loading />
   );
 };
 
-export function LeaveRequestsTimeline() {
+export function SubmitLeaveRequest() {
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}
