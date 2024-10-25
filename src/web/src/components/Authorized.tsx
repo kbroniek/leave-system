@@ -25,4 +25,11 @@ interface AuthorizedProps {
   roles: RoleType[];
 }
 
-export type RoleType = "GlobalAdmin" | "Employee" | "DecisionMaker";
+export type RoleType = "Employee" |
+"LeaveLimitAdmin" |
+"LeaveTypeAdmin" |
+"DecisionMaker" |
+"HumanResource" |
+"UserAdmin" |
+"GlobalAdmin" |
+"WorkingHoursAdmin";
