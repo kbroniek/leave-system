@@ -7,6 +7,9 @@ import { PageLayout } from "./ui-components/PageLayout";
 import { Home } from "./pages/Home";
 import { Logout } from "./pages/Logout";
 import { Claims } from "./pages/Claims";
+import { SubmitLeaveRequest } from "./ui-components/submit-leave-request/SubmitLeaveRequest";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 
 
 export function App({ pca }: AppProps) {
@@ -16,13 +19,16 @@ export function App({ pca }: AppProps) {
   pca.setNavigationClient(navigationClient);
 
   return (
-    <MsalProvider instance={pca}>
-      <PageLayout>
-          <Grid container justifyContent="center">
-              <Pages />
-          </Grid>
-      </PageLayout>
-    </MsalProvider>
+    
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <MsalProvider instance={pca}>
+        <PageLayout>
+            <Grid container justifyContent="center">
+                <Pages />
+            </Grid>
+        </PageLayout>
+      </MsalProvider>
+    </LocalizationProvider>
   );
 }
 
@@ -32,6 +38,7 @@ function Pages() {
           <Route path="/logout" element={<Logout />} />
           <Route path="/" element={<Home />} />
           <Route path="/claims" element={<Claims />} />
+          <Route path="/submit-request" element={<SubmitLeaveRequest />} />
       </Routes>
   );
 }

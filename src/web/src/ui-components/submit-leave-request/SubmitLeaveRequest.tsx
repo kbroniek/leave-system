@@ -15,6 +15,7 @@ import { LeaveRequestsResponseDto } from "../leave-requests/LeaveRequestsDto";
 import { SubmitLeaveRequestForm } from "./SubmitLeaveRequestForm";
 import { DateTime } from "luxon";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
+import { EmployeesDto } from "../dtos/EmployeesDto";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -23,6 +24,7 @@ const DataContent = () => {
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(null);
   const [apiLeaveLimits, setApiLeaveLimits] = useState<LeaveLimitsDto | null>(null);
+  const [apiEmployees, setApiEmployees] = useState<EmployeesDto | null>(null);
 
   useEffect(() => {
     if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
@@ -42,15 +44,19 @@ const DataContent = () => {
       callApi<LeaveLimitsDto>(`/leavelimits/user?year=${currentYear}`)
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      callApi<EmployeesDto>("/employees")
+        .then((response) => setApiEmployees(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
   }, [inProgress, apiLeaveRequests, instance]);
 
-  return apiLeaveRequests && apiHolidays && apiLeaveTypes && apiLeaveLimits ? (
+  return apiLeaveRequests && apiHolidays && apiLeaveTypes && apiLeaveLimits && apiEmployees ? (
     <SubmitLeaveRequestForm
       leaveRequests={apiLeaveRequests}
       holidays={apiHolidays}
       leaveTypes={apiLeaveTypes.items}
-      leaveLimits={apiLeaveLimits?.items}
+      leaveLimits={apiLeaveLimits.items}
+      employees={apiEmployees.items}
     />
   ) : (
     <Loading />
