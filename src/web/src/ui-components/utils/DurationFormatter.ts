@@ -33,7 +33,7 @@ export class DurationFormatter {
     return DurationFormatter.format(durationPerDay);
   }
 
-  private countDays(leaveRequest: LeaveRequestDto) {
+  private countDays(leaveRequest: LeaveRequestDto): number {
     const dateFrom = DateTime.fromISO(leaveRequest.dateFrom);
     const dateTo = DateTime.fromISO(leaveRequest.dateTo);
     const daysCounter = DaysCounter.create(

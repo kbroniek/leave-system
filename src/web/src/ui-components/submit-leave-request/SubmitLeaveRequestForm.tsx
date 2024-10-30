@@ -6,7 +6,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
-import { LeaveRequestsResponseDto } from "../leave-requests/LeaveRequestsDto";
+import { LeaveRequestDto } from "../leave-requests/LeaveRequestsDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
@@ -14,7 +14,7 @@ import { Authorized } from "../../components/Authorized";
 import { UserDto } from "../dtos/UserDto";
 import { useMsal } from "@azure/msal-react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import { Controller, useForm } from "react-hook-form";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
@@ -22,13 +22,14 @@ import Grid from "@mui/material/Grid2";
 import Button from "@mui/material/Button";
 import { DaysCounter } from "../utils/DaysCounter";
 import { Loading } from "../Loading";
+import { DurationFormatter } from "../utils/DurationFormatter";
 
 
 const titleStyle = { color: "text.secondary" };
 const defaultStyle = { paddingTop: "1px", width: "max-content" };
 
 export const SubmitLeaveRequestForm = (props: {
-  leaveRequests: LeaveRequestsResponseDto | undefined;
+  leaveRequests: LeaveRequestDto[] | undefined;
   holidays: HolidaysDto | undefined;
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
@@ -36,10 +37,15 @@ export const SubmitLeaveRequestForm = (props: {
 }) => {
   const { instance } = useMsal();
   const { control, handleSubmit, register } = useForm();
-  const now = DateTime.now();
+  const now = DateTime.now().startOf("day");
   const [dateFrom, setDateFrom] = useState(now);
   const [dateTo, setDateTo] = useState(now);
-  
+  const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
+
+  const getDefaultLeaveTypeId = () => {
+    return props.leaveTypes?.find(() => true)?.id;
+  }
+
   const onSubmit = (value: unknown) => {
     alert(JSON.stringify(value));
   };
@@ -149,10 +155,11 @@ export const SubmitLeaveRequestForm = (props: {
                       <Select
                         labelId="select-label-leave-type"
                         id="select-leave-type"
-                        defaultValue={props.leaveTypes.find(() => true)?.id}
+                        defaultValue={getDefaultLeaveTypeId()}
                         label="Leave type *"
                         required
                         {...register("leaveType")}
+                        onChange={(event) => {setLeaveTypeId(event.target.value)}}
                       >
                         {props.leaveTypes.map((x) => (
                           <MenuItem
@@ -203,7 +210,16 @@ export const SubmitLeaveRequestForm = (props: {
               <Typography variant="h6" gutterBottom>
                 Additional information
               </Typography>
-              {props.leaveLimits ? (<AdditionalInfo />) : (
+              {props.leaveLimits && props.leaveRequests && props.holidays && props.leaveTypes ? (
+                <AdditionalInfo 
+                  holidays={props.holidays} 
+                  leaveRequests={props.leaveRequests} 
+                  leaveLimits={props.leaveLimits} 
+                  leaveTypes={props.leaveTypes}
+                  leaveTypeId={leaveTypeId ?? getDefaultLeaveTypeId() ?? ""}
+                  dateFrom={dateFrom}
+                  dateTo={dateTo} />
+              ) : (
                 <Loading
                   linearProgress
                 />)
@@ -267,7 +283,36 @@ const Range = (props: {holidays: HolidaysDto, dateFrom: DateTime, dateTo: DateTi
     </Grid>);
 }
 
-const AdditionalInfo = () => {
+const AdditionalInfo = (props: {
+  holidays: HolidaysDto, 
+  leaveRequests: LeaveRequestDto[], 
+  leaveLimits: LeaveLimitDto[], 
+  leaveTypes: LeaveTypeDto[],
+  leaveTypeId: string,
+  dateFrom: DateTime, 
+  dateTo: DateTime}) => {
+  const currentLimit = props.leaveLimits.find(x => 
+    x.leaveTypeId === props.leaveTypeId && 
+    DateTime.fromISO(x.validSince) <= props.dateFrom &&
+    DateTime.fromISO(x.validUntil) >= props.dateFrom
+  );
+  const limit = currentLimit ? Duration.fromISO(currentLimit.limit) : undefined
+  const overdueLimit = currentLimit?.overdueLimit ? Duration.fromISO(currentLimit?.overdueLimit) : undefined
+  const limitSum = overdueLimit ? limit?.plus(overdueLimit) : limit;
+  const daysCounter = DaysCounter.create(
+    props.leaveTypeId,
+    props.leaveTypes,
+    props.holidays.items.map((x) => DateTime.fromISO(x))
+  );
+  //TODO Count duration
+  const daysUsed = props.leaveRequests
+    .map(x => Duration.fromISO(x.duration))
+    .reduce((accumulator, current) => accumulator.plus(current), Duration.fromMillis(0));
+  const availableDays = limitSum?.minus(daysUsed);
+  const currentRequestDays = daysCounter.days(
+    props.dateFrom,
+    props.dateTo);
+  const currentRequestDaysDuration = Duration.fromObject({day: currentRequestDays})
   return <Grid container spacing={3}>
   <Grid size={{ xs: 12, sm: 4 }}>
     <Typography variant="body1" sx={titleStyle}>
@@ -276,7 +321,7 @@ const AdditionalInfo = () => {
   </Grid>
   <Grid size={{ xs: 12, sm: 8 }}>
     <Typography variant="body2" sx={defaultStyle}>
-      TODO
+      {availableDays ? DurationFormatter.format(availableDays) : "There is no limit for this user, leave type or in that period"}
     </Typography>
   </Grid>
   <Grid size={{ xs: 12, sm: 4 }}>
@@ -286,17 +331,17 @@ const AdditionalInfo = () => {
   </Grid>
   <Grid size={{ xs: 12, sm: 8 }}>
     <Typography variant="body2" sx={defaultStyle}>
-      TODO
+      {availableDays ? DurationFormatter.format(availableDays.minus(currentRequestDaysDuration)) : "There is no limit for this user, leave type or in that period"}
     </Typography>
   </Grid>
   <Grid size={{ xs: 12, sm: 4 }}>
     <Typography variant="body1" sx={titleStyle}>
-      Free days:
+      Days used:
     </Typography>
   </Grid>
   <Grid size={{ xs: 12, sm: 8 }}>
     <Typography variant="body2" sx={defaultStyle}>
-      TODO
+      {DurationFormatter.format(daysUsed)}
     </Typography>
   </Grid>
 </Grid>

@@ -87,7 +87,7 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
                 <ListItemButton onClick={handleClickOpen} disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
                   {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
                   {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
-                  {mapDuration(x, holidaysDateTime)}
+                  {formatPerDay(x, holidaysDateTime)}
                 </ListItemButton>
                 <LeaveRequestDetailsDialog
                     open={openDialog}
@@ -105,7 +105,7 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
     return props.value?.leaveTypes.find(x => x.id === leaveTypeId)?.name;
   }
 
-  function mapDuration(leaveRequest: LeaveRequestDto | undefined, holidays: DateTime[]): string {
+  function formatPerDay(leaveRequest: LeaveRequestDto | undefined, holidays: DateTime[]): string {
     if (!leaveRequest) {
       return "";
     }

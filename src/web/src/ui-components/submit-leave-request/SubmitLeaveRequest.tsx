@@ -68,7 +68,7 @@ const DataContent = () => {
   return (
     <>
       <SubmitLeaveRequestForm
-        leaveRequests={apiLeaveRequests}
+        leaveRequests={apiLeaveRequests?.items}
         holidays={apiHolidays}
         leaveTypes={apiLeaveTypes?.items}
         leaveLimits={apiLeaveLimits?.items}
