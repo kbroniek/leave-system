@@ -111,6 +111,7 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
     }
     try {
       const formatter = new DurationFormatter(holidays, props.value?.leaveTypes ?? []);
+      //TODO: Format with current date i.e. 9h should split with 8h and 1h.
       return formatter.formatPerDay(leaveRequest);
     }
     catch (e) {

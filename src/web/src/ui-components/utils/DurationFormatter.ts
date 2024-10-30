@@ -45,24 +45,46 @@ export class DurationFormatter {
     return diffDays;
   }
 
-  public static format(duration: Duration | string): string {
+  public static format(duration: Duration | string, workingHours?: Duration | string): string {
     if(!DurationFormatter.isDuration(duration)) {
-      const buffer = Duration.fromISO(duration);
-      if (!buffer.isValid) {
+      const durationBuffer = Duration.fromISO(duration);
+      if (!durationBuffer.isValid) {
         console.warn(`Invalid duration: ${duration}`)
         return "";
       }
-      duration = Duration.fromObject({hours: buffer.as("hours")});
+      duration = Duration.fromObject({hours: durationBuffer.as("hours")});
     }
     const timeResult = [];
-    if (duration.days !== 0) {
-      timeResult.push(`${duration.days}d`);
+    if(workingHours) {
+      if(!DurationFormatter.isDuration(workingHours)) {
+        const workingHoursBuffer = Duration.fromISO(workingHours);
+        if (!workingHoursBuffer.isValid) {
+          console.warn(`Invalid workingHours: ${duration}`)
+          return "";
+        }
+        workingHours = Duration.fromObject({hours: workingHoursBuffer.as("hours")});
+      }
+      const days = Math.round(duration.as("hours") / workingHours.as("hours"));
+      const daysDuration = Duration.fromObject({ hours: workingHours.as("hours") * days});
+      const durationLeft = duration.minus(daysDuration).normalize();
+      timeResult.push(`${days}d`);
+      if (durationLeft.hours !== 0) {
+        timeResult.push(`${durationLeft.hours}h`);
+      }
+      if (durationLeft.minutes !== 0) {
+        timeResult.push(`${durationLeft.minutes}m`);
+      }
     }
-    if (duration.hours !== 0) {
-      timeResult.push(`${duration.hours}h`);
-    }
-    if (duration.minutes !== 0) {
-      timeResult.push(`${duration.minutes}m`);
+    else {
+      if (duration.days !== 0) {
+        timeResult.push(`${duration.days}d`);
+      }
+      if (duration.hours !== 0) {
+        timeResult.push(`${duration.hours}h`);
+      }
+      if (duration.minutes !== 0) {
+        timeResult.push(`${duration.minutes}m`);
+      }
     }
     return timeResult.join(" ");
   }

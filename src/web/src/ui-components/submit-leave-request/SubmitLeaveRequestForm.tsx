@@ -304,7 +304,6 @@ const AdditionalInfo = (props: {
     props.leaveTypes,
     props.holidays.items.map((x) => DateTime.fromISO(x))
   );
-  //TODO Count duration
   const daysUsed = props.leaveRequests
     .map(x => Duration.fromISO(x.duration))
     .reduce((accumulator, current) => accumulator.plus(current), Duration.fromMillis(0));
@@ -312,7 +311,8 @@ const AdditionalInfo = (props: {
   const currentRequestDays = daysCounter.days(
     props.dateFrom,
     props.dateTo);
-  const currentRequestDaysDuration = Duration.fromObject({day: currentRequestDays})
+  const workingHours = currentLimit ? Duration.fromISO(currentLimit.workingHours) : undefined;
+  const currentRequestDaysDuration = Duration.fromObject({hours: currentRequestDays * (workingHours?.as("hours") ?? 8) })
   return <Grid container spacing={3}>
   <Grid size={{ xs: 12, sm: 4 }}>
     <Typography variant="body1" sx={titleStyle}>
@@ -321,7 +321,7 @@ const AdditionalInfo = (props: {
   </Grid>
   <Grid size={{ xs: 12, sm: 8 }}>
     <Typography variant="body2" sx={defaultStyle}>
-      {availableDays ? DurationFormatter.format(availableDays) : "There is no limit for this user, leave type or in that period"}
+      {availableDays ? DurationFormatter.format(availableDays, currentLimit?.workingHours) : "There is no limit for this user, leave type or in that period"}
     </Typography>
   </Grid>
   <Grid size={{ xs: 12, sm: 4 }}>
@@ -331,7 +331,7 @@ const AdditionalInfo = (props: {
   </Grid>
   <Grid size={{ xs: 12, sm: 8 }}>
     <Typography variant="body2" sx={defaultStyle}>
-      {availableDays ? DurationFormatter.format(availableDays.minus(currentRequestDaysDuration)) : "There is no limit for this user, leave type or in that period"}
+      {availableDays ? DurationFormatter.format(availableDays.minus(currentRequestDaysDuration), currentLimit?.workingHours) : "There is no limit for this user, leave type or in that period"}
     </Typography>
   </Grid>
   <Grid size={{ xs: 12, sm: 4 }}>
@@ -341,7 +341,7 @@ const AdditionalInfo = (props: {
   </Grid>
   <Grid size={{ xs: 12, sm: 8 }}>
     <Typography variant="body2" sx={defaultStyle}>
-      {DurationFormatter.format(daysUsed)}
+      {DurationFormatter.format(daysUsed, currentLimit?.workingHours)}
     </Typography>
   </Grid>
 </Grid>
