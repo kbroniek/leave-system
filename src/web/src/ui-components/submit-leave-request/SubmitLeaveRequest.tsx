@@ -6,7 +6,7 @@ import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
 
 // Sample app imports
-import { Loading } from "../Loading";
+import { LoadingAuth } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
 import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { HolidaysDto } from "../dtos/HolidaysDto";
@@ -19,27 +19,42 @@ import { EmployeesDto } from "../dtos/EmployeesDto";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
-  const [apiLeaveRequests, setApiLeaveRequests] =
-    useState<LeaveRequestsResponseDto | null>(null);
-  const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
-  const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(null);
-  const [apiLeaveLimits, setApiLeaveLimits] = useState<LeaveLimitsDto | null>(null);
-  const [apiEmployees, setApiEmployees] = useState<EmployeesDto | null>(null);
+  const [apiLeaveRequests, setApiLeaveRequests] = useState<
+    LeaveRequestsResponseDto | undefined
+  >();
+  const [apiHolidays, setApiHolidays] = useState<HolidaysDto | undefined>();
+  const [apiLeaveTypes, setApiLeaveTypes] = useState<
+    LeaveTypesDto | undefined
+  >();
+  const [apiLeaveLimits, setApiLeaveLimits] = useState<
+    LeaveLimitsDto | undefined
+  >();
+  const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
 
   useEffect(() => {
     if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
       const userId = instance.getActiveAccount()?.idTokenClaims?.sub;
-      const now = DateTime.now();
-      const today = now.toFormat("yyyy-MM-dd");
+      const now = DateTime.local();
       const currentYear = now.toFormat("yyyy");
-      callApi<LeaveRequestsResponseDto>(`/leaverequests?dateFrom=${today}&dateTo=${today}&AssignedToUserIds=${userId}`)
+      const dateFromFormatted = now
+        .startOf("year")
+        .toFormat("yyyy-MM-dd");
+      const dateToFormatted = now
+        .endOf("year")
+        .toFormat("yyyy-MM-dd");
+      callApi<LeaveRequestsResponseDto>(
+        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&AssignedToUserIds=${userId}`
+      )
         .then((response) => setApiLeaveRequests(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<HolidaysDto>(`/settings/holidays?dateFrom=${today}&dateTo=${today}`)
-        .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       callApi<LeaveTypesDto>("/leavetypes")
         .then((response) => setApiLeaveTypes(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+
+      callApi<HolidaysDto>(
+        `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`
+      )
+        .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       callApi<LeaveLimitsDto>(`/leavelimits/user?year=${currentYear}`)
         .then((response) => setApiLeaveLimits(response))
@@ -50,16 +65,16 @@ const DataContent = () => {
     }
   }, [inProgress, apiLeaveRequests, instance]);
 
-  return apiLeaveRequests && apiHolidays && apiLeaveTypes && apiLeaveLimits && apiEmployees ? (
-    <SubmitLeaveRequestForm
-      leaveRequests={apiLeaveRequests}
-      holidays={apiHolidays}
-      leaveTypes={apiLeaveTypes.items}
-      leaveLimits={apiLeaveLimits.items}
-      employees={apiEmployees.items}
-    />
-  ) : (
-    <Loading />
+  return (
+    <>
+      <SubmitLeaveRequestForm
+        leaveRequests={apiLeaveRequests}
+        holidays={apiHolidays}
+        leaveTypes={apiLeaveTypes?.items}
+        leaveLimits={apiLeaveLimits?.items}
+        employees={apiEmployees?.items}
+      />
+    </>
   );
 };
 
@@ -69,7 +84,7 @@ export function SubmitLeaveRequest() {
       interactionType={InteractionType.Redirect}
       authenticationRequest={loginRequest}
       errorComponent={ErrorComponent}
-      loadingComponent={Loading}
+      loadingComponent={LoadingAuth}
     >
       <DataContent />
     </MsalAuthenticationTemplate>

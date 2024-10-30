@@ -6,7 +6,7 @@ import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
 
 // Sample app imports
-import { Loading } from "../Loading";
+import { Loading, LoadingAuth } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
 import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
@@ -57,7 +57,7 @@ export function LeaveRequestsTimeline() {
       interactionType={InteractionType.Redirect}
       authenticationRequest={loginRequest}
       errorComponent={ErrorComponent}
-      loadingComponent={Loading}
+      loadingComponent={LoadingAuth}
     >
       <DataContent />
     </MsalAuthenticationTemplate>
