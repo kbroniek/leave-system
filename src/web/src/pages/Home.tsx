@@ -1,15 +1,19 @@
-import { AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react";
+import { UnauthenticatedTemplate } from "@azure/msal-react";
 import Typography from "@mui/material/Typography";
 
 import { LeaveRequestsTimeline } from "../ui-components/leave-requests/LeaveRequestsTimeline";
 import { SignInButton } from "../ui-components/SignInButton";
+import { Authorized } from "../components/Authorized";
+import { Forbidden } from "../components/Forbidden";
 
 export function Home() {
   return (
     <>
-      <AuthenticatedTemplate>
-          <LeaveRequestsTimeline />
-      </AuthenticatedTemplate>
+      <Authorized
+        roles={["GlobalAdmin", "Employee", "DecisionMaker"]}
+        authorized={<LeaveRequestsTimeline />}
+        notAuthorized={<Forbidden />}
+      />
 
       <UnauthenticatedTemplate>
         <Typography variant="h6">
