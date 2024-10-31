@@ -3,7 +3,7 @@ export interface LeaveLimitsDto {
 }
 export interface LeaveLimitDto {
   id: string;
-  limit: string;
+  limit: string | null;
   overdueLimit: string | null;
   workingHours: string;
   leaveTypeId: string;

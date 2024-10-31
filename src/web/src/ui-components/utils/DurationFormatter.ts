@@ -86,7 +86,7 @@ export class DurationFormatter {
         timeResult.push(`${duration.minutes}m`);
       }
     }
-    return timeResult.join(" ");
+    return timeResult.length === 0 ? "0h" : timeResult.join(" ");
   }
   public static isDuration(duration: Duration | string): duration is Duration {
     return (<Duration>duration).minus !== undefined;
