@@ -19,7 +19,6 @@ export function App({ pca }: AppProps) {
   pca.setNavigationClient(navigationClient);
 
   return (
-    
     <LocalizationProvider dateAdapter={AdapterLuxon}>
       <MsalProvider instance={pca}>
         <PageLayout>
