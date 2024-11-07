@@ -23,7 +23,7 @@ import Button from "@mui/material/Button";
 import { DaysCounter } from "../utils/DaysCounter";
 import { Loading } from "../Loading";
 import { DurationFormatter } from "../utils/DurationFormatter";
-
+import FormHelperText from "@mui/material/FormHelperText";
 
 const titleStyle = { color: "text.secondary" };
 const defaultStyle = { paddingTop: "1px", width: "max-content" };
@@ -35,18 +35,26 @@ export const SubmitLeaveRequestForm = (props: {
   leaveLimits: LeaveLimitDto[] | undefined;
   employees: UserDto[] | undefined;
 }) => {
-  const { instance } = useMsal();
-  const { control, handleSubmit, register } = useForm();
   const now = DateTime.now().startOf("day");
-  const [dateFrom, setDateFrom] = useState(now);
-  const [dateTo, setDateTo] = useState(now);
-  const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
-
   const getDefaultLeaveTypeId = () => {
     return props.leaveTypes?.find(() => true)?.id;
   }
+  const { instance } = useMsal();
+  const { control, handleSubmit, register, formState: { errors } } = useForm({
+    defaultValues: {
+      dateFrom: now,
+      dateTo: now,
+      onBehalf: undefined,
+      leaveType: undefined,
+      remarks: ""
+    }
+  });
+  const [dateFrom, setDateFrom] = useState<DateTime | null>(now);
+  const [dateTo, setDateTo] = useState<DateTime | null>(now);
+  const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
 
   const onSubmit = (value: unknown) => {
+    console.log(errors)
     alert(JSON.stringify(value));
   };
 
@@ -56,6 +64,10 @@ export const SubmitLeaveRequestForm = (props: {
     const employee = activeUser ?? employees.find(() => true);
     return employee?.id;
   }
+
+  const { ref: onBehalfRef, ...onBehalfInputProps } = register("onBehalf", {
+    required: "This is required"
+  });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -85,13 +97,14 @@ export const SubmitLeaveRequestForm = (props: {
                             id="select-add-on-behalf"
                             defaultValue={currenUser(props.employees)}
                             label="Add on behalf of another user *"
-                            required
-                            {...register("onBehalf")}
+                            inputRef={onBehalfRef}
+                            {...onBehalfInputProps}
                           >
                             {props.employees.map((x) => (
                               <MenuItem value={x.id}>{x.name}</MenuItem>
                             ))}
                           </Select>
+                          <FormHelperText sx={{color: "red"}}>{errors?.onBehalf?.message}</FormHelperText>
                         </FormControl>
                       ) : (
                         <Loading
@@ -106,18 +119,22 @@ export const SubmitLeaveRequestForm = (props: {
                   <Controller
                     control={control}
                     name="dateFrom"
-                    rules={{ required: true }}
-                    defaultValue={dateFrom}
+                    rules={{ required: "This is required" }}
                     render={({ field }) => {
                       return (
                         <DatePicker
                           label="Date from *"
-                          defaultValue={dateFrom}
                           value={field.value}
                           inputRef={field.ref}
                           onChange={(date) => {
                             setDateFrom(date);
                             field.onChange(date);
+                          }}
+                          slotProps={{
+                            textField: {
+                              error: !!errors.dateFrom, // Bolean
+                              helperText: errors?.dateFrom?.message, // String
+                            },
                           }}
                         />
                       );
@@ -129,17 +146,21 @@ export const SubmitLeaveRequestForm = (props: {
                     control={control}
                     name="dateTo"
                     rules={{ required: true }}
-                    defaultValue={dateTo}
                     render={({ field }) => {
                       return (
                         <DatePicker
                           label="Date to *"
-                          defaultValue={dateTo}
                           value={field.value}
                           inputRef={field.ref}
                           onChange={(date) => {
                             setDateTo(date);
                             field.onChange(date);
+                          }}
+                          slotProps={{
+                            textField: {
+                              error: !!errors.dateTo, // Bolean
+                              helperText: errors?.dateTo?.message, // String
+                            },
                           }}
                         />
                       );
@@ -159,7 +180,7 @@ export const SubmitLeaveRequestForm = (props: {
                         label="Leave type *"
                         required
                         {...register("leaveType")}
-                        onChange={(event) => {setLeaveTypeId(event.target.value)}}
+                        onChange={(event) => {setLeaveTypeId(event.target.value as string)}}
                       >
                         {props.leaveTypes.map((x) => (
                           <MenuItem
@@ -189,7 +210,7 @@ export const SubmitLeaveRequestForm = (props: {
                     fullWidth
                     rows={2}
                     multiline
-                    {...register("cardName")}
+                    {...register("remarks")}
                   />
                 </Grid>
               </Grid>
@@ -199,7 +220,7 @@ export const SubmitLeaveRequestForm = (props: {
               <Typography variant="h6" gutterBottom>
                 Range
               </Typography>
-              {props.holidays ? (<Range holidays={props.holidays} dateFrom={dateFrom} dateTo={dateTo} />) : (
+              {props.holidays && dateFrom && dateTo ? (<Range holidays={props.holidays} dateFrom={dateFrom} dateTo={dateTo} />) : (
                 <Loading
                   linearProgress
                 />)
@@ -210,7 +231,7 @@ export const SubmitLeaveRequestForm = (props: {
               <Typography variant="h6" gutterBottom>
                 Additional information
               </Typography>
-              {props.leaveLimits && props.leaveRequests && props.holidays && props.leaveTypes ? (
+              {props.leaveLimits && props.leaveRequests && props.holidays && props.leaveTypes && dateFrom && dateTo ? (
                 <AdditionalInfo 
                   holidays={props.holidays} 
                   leaveRequests={props.leaveRequests} 
@@ -289,7 +310,7 @@ const AdditionalInfo = (props: {
   leaveLimits: LeaveLimitDto[], 
   leaveTypes: LeaveTypeDto[],
   leaveTypeId: string,
-  dateFrom: DateTime, 
+  dateFrom: DateTime,
   dateTo: DateTime}) => {
   const daysUsed = props.leaveRequests
     .filter(x => x.leaveTypeId === props.leaveTypeId)
