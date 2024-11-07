@@ -220,7 +220,7 @@ export const SubmitLeaveRequestForm = (props: {
               <Typography variant="h6" gutterBottom>
                 Range
               </Typography>
-              {props.holidays && dateFrom && dateTo ? (<Range holidays={props.holidays} dateFrom={dateFrom} dateTo={dateTo} />) : (
+              {props.holidays ? (<Range holidays={props.holidays} dateFrom={dateFrom} dateTo={dateTo} />) : (
                 <Loading
                   linearProgress
                 />)
@@ -231,7 +231,7 @@ export const SubmitLeaveRequestForm = (props: {
               <Typography variant="h6" gutterBottom>
                 Additional information
               </Typography>
-              {props.leaveLimits && props.leaveRequests && props.holidays && props.leaveTypes && dateFrom && dateTo ? (
+              {props.leaveLimits && props.leaveRequests && props.holidays && props.leaveTypes ? (
                 <AdditionalInfo 
                   holidays={props.holidays} 
                   leaveRequests={props.leaveRequests} 
@@ -263,12 +263,24 @@ export const SubmitLeaveRequestForm = (props: {
   );
 };
 
-const Range = (props: {holidays: HolidaysDto, dateFrom: DateTime, dateTo: DateTime}) => {
+const Range = (props: {holidays: HolidaysDto, dateFrom: DateTime | null, dateTo: DateTime | null}) => {
   const daysCounter = new DaysCounter(
     props.holidays.items.map((x) => DateTime.fromISO(x))
   );
-  const allDays = DaysCounter.countAllDays(props.dateFrom, props.dateTo);
-  const workingDays = daysCounter.workingDays(props.dateFrom, props.dateTo);
+  let allDays;
+  let workingDays;
+  let freeDays;
+  if(!props.dateFrom?.isValid) {
+    allDays = workingDays = freeDays = "Date from is invalid. Please check it.";
+  }
+  else if(!props.dateTo?.isValid) {
+    allDays = workingDays = freeDays = "Date to is invalid. Please check it.";
+  }
+  else {
+    allDays = DaysCounter.countAllDays(props.dateFrom, props.dateTo);
+    workingDays = daysCounter.workingDays(props.dateFrom, props.dateTo);
+    freeDays = allDays - workingDays;
+  }
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, sm: 4 }}>
@@ -298,7 +310,7 @@ const Range = (props: {holidays: HolidaysDto, dateFrom: DateTime, dateTo: DateTi
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
         <Typography variant="body2" sx={defaultStyle}>
-          {allDays - workingDays}
+          {freeDays}
         </Typography>
       </Grid>
     </Grid>);
@@ -310,37 +322,49 @@ const AdditionalInfo = (props: {
   leaveLimits: LeaveLimitDto[], 
   leaveTypes: LeaveTypeDto[],
   leaveTypeId: string,
-  dateFrom: DateTime,
-  dateTo: DateTime}) => {
+  dateFrom: DateTime | null,
+  dateTo: DateTime | null}) => {
   const daysUsed = props.leaveRequests
     .filter(x => x.leaveTypeId === props.leaveTypeId)
     .map(x => Duration.fromISO(x.duration))
     .reduce((accumulator, current) => accumulator.plus(current), Duration.fromMillis(0));
-  const currentLimit = props.leaveLimits.find(x =>
-    x.state === "Active" &&
-    x.leaveTypeId === props.leaveTypeId &&
-    DateTime.fromISO(x.validSince) <= props.dateFrom &&
-    DateTime.fromISO(x.validUntil) >= props.dateTo
-  );
-  let availableDaysStr = "There is no limit for this user, leave type or in that period";
-  let availableDaysAfterAcceptanceStr = "There is no limit for this user, leave type or in that period";
-  if(currentLimit) {
-    const limit = currentLimit.limit ? Duration.fromISO(currentLimit.limit) : undefined
-    const overdueLimit = currentLimit.overdueLimit ? Duration.fromISO(currentLimit?.overdueLimit) : undefined
-    const limitSum = overdueLimit ? limit?.plus(overdueLimit) : limit;
-    const daysCounter = DaysCounter.create(
-      props.leaveTypeId,
-      props.leaveTypes,
-      props.holidays.items.map((x) => DateTime.fromISO(x))
+
+  let availableDaysStr =  "There is no limit for this user, leave type or in that period";
+  let availableDaysAfterAcceptanceStr = availableDaysStr;
+  let currentLimit;
+  if(!props.dateFrom?.isValid) {
+    availableDaysStr = availableDaysAfterAcceptanceStr = "Date from is invalid. Please check it.";
+  }
+  else if(!props.dateTo?.isValid) {
+    availableDaysStr = availableDaysAfterAcceptanceStr = "Date to is invalid. Please check it.";
+  }
+  else {
+    const dateFrom = props.dateFrom;
+    const dateTo = props.dateTo;
+    currentLimit = props.leaveLimits.find(x =>
+      x.state === "Active" &&
+      x.leaveTypeId === props.leaveTypeId &&
+      DateTime.fromISO(x.validSince) <= dateFrom &&
+      DateTime.fromISO(x.validUntil) >= dateTo
     );
-    const availableDays = limitSum?.minus(daysUsed);
-    const currentRequestDays = daysCounter.days(
-      props.dateFrom,
-      props.dateTo);
-    const workingHours = currentLimit ? Duration.fromISO(currentLimit.workingHours) : undefined;
-    const currentRequestDaysDuration = Duration.fromObject({hours: currentRequestDays * (workingHours?.as("hours") ?? 8) })
-    availableDaysStr = availableDays ? DurationFormatter.format(availableDays, currentLimit.workingHours) : "There is no limit";
-    availableDaysAfterAcceptanceStr = availableDays ? DurationFormatter.format(availableDays.minus(currentRequestDaysDuration), currentLimit.workingHours) : "There is no limit for this user, leave type or in that period"
+    if(currentLimit) {
+      const limit = currentLimit.limit ? Duration.fromISO(currentLimit.limit) : undefined
+      const overdueLimit = currentLimit.overdueLimit ? Duration.fromISO(currentLimit?.overdueLimit) : undefined
+      const limitSum = overdueLimit ? limit?.plus(overdueLimit) : limit;
+      const daysCounter = DaysCounter.create(
+        props.leaveTypeId,
+        props.leaveTypes,
+        props.holidays.items.map((x) => DateTime.fromISO(x))
+      );
+      const availableDays = limitSum?.minus(daysUsed);
+      const currentRequestDays = daysCounter.days(
+        dateFrom,
+        dateTo);
+      const workingHours = currentLimit ? Duration.fromISO(currentLimit.workingHours) : undefined;
+      const currentRequestDaysDuration = Duration.fromObject({hours: currentRequestDays * (workingHours?.as("hours") ?? 8) })
+      availableDaysStr = availableDays ? DurationFormatter.format(availableDays, currentLimit.workingHours) : "There is no limit";
+      availableDaysAfterAcceptanceStr = availableDays ? DurationFormatter.format(availableDays.minus(currentRequestDaysDuration), currentLimit.workingHours) : "There is no limit for this user, leave type or in that period"
+    }
   }
   return <Grid container spacing={3}>
   <Grid size={{ xs: 12, sm: 4 }}>
