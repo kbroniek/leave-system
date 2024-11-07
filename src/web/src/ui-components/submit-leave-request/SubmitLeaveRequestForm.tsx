@@ -40,7 +40,7 @@ export const SubmitLeaveRequestForm = (props: {
     return props.leaveTypes?.find(() => true)?.id;
   }
   const { instance } = useMsal();
-  const { control, handleSubmit, register, formState: { errors } } = useForm({
+  const { control, handleSubmit, register, formState: { errors }, setValue } = useForm({
     defaultValues: {
       dateFrom: now,
       dateTo: now,
@@ -129,6 +129,10 @@ export const SubmitLeaveRequestForm = (props: {
                           onChange={(date) => {
                             setDateFrom(date);
                             field.onChange(date);
+                            if(date && dateTo && date > dateTo) {
+                              setValue("dateTo", date);
+                              setDateTo(date);
+                            }
                           }}
                           slotProps={{
                             textField: {
@@ -155,6 +159,10 @@ export const SubmitLeaveRequestForm = (props: {
                           onChange={(date) => {
                             setDateTo(date);
                             field.onChange(date);
+                            if(date && dateFrom && date < dateFrom) {
+                              setValue("dateFrom", date);
+                              setDateFrom(date);
+                            }
                           }}
                           slotProps={{
                             textField: {
