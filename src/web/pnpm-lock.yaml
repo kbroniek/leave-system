@@ -50,6 +50,9 @@ importers:
       react-router-dom:
         specifier: ^6.4.2
         version: 6.26.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      uuid:
+        specifier: ^11.0.2
+        version: 11.0.2
     devDependencies:
       '@eslint/js':
         specifier: ^9.9.0
@@ -1522,6 +1525,10 @@ packages:
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
 
+  uuid@11.0.2:
+    resolution: {integrity: sha512-14FfcOJmqdjbBPdDjFQyk/SdT4NySW4eM0zcG+HqbHP5jzuH56xO3J1DGhgs/cEMCfwYi3HQI1gnTO62iaG+tQ==}
+    hasBin: true
+
   vite@5.4.6:
     resolution: {integrity: sha512-IeL5f8OO5nylsgzd9tq4qD2QqI0k2CQLGrWD0rCN0EQJZpBK5vJAx0I+GDkMOXxQX/OfFHMuLIx6ddAxGX/k+Q==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -2924,6 +2931,8 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  uuid@11.0.2: {}
 
   vite@5.4.6:
     dependencies:

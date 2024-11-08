@@ -81,7 +81,7 @@ export const SubmitLeaveRequestForm = (props: {
   });
 
   const onSubmit = (value: LeaveRequestFormModel) => {
-    setSubmitInProgress(true);
+    // setSubmitInProgress(true);
     return props.onSubmit(value);
   };
 

@@ -8,14 +8,15 @@ import { loginRequest } from "../../authConfig";
 // Sample app imports
 import { LoadingAuth } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
-import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { callApi, callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { LeaveRequestsResponseDto } from "../leave-requests/LeaveRequestsDto";
 import { LeaveRequestFormModel, SubmitLeaveRequestForm } from "./SubmitLeaveRequestForm";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { EmployeesDto } from "../dtos/EmployeesDto";
+import { v4 as uuidv4 } from 'uuid';
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -65,7 +66,7 @@ const DataContent = () => {
     }
   }, [inProgress, apiLeaveRequests, instance]);
 
-  const onSubmit = (model: LeaveRequestFormModel) => {
+  const onSubmit = async (model: LeaveRequestFormModel) => {
     if(!model.dateFrom?.isValid) {
       //TODO: show notification
       alert("Date from is invalid");
@@ -96,6 +97,38 @@ const DataContent = () => {
       alert("Form is invalid. Can't read working hours.");
       return;
     }
+    if(!apiLeaveTypes) {
+      //TODO: show notification
+      alert("Form is invalid. Can't read leave types.");
+      return;
+    }
+    const calculateDuration = () : Duration => {
+      const leaveType = apiLeaveTypes.items.find(x => x.id === model.leaveType);
+      const duration = leaveType?.properties?.includeFreeDays ?? true ?
+      model.workingHours!.as("milliseconds") * model.allDays! :
+        model.workingHours!.as("milliseconds") * model.workingDays!;
+
+      return Duration.fromObject({
+        days: 0,
+        hours: 0,
+        seconds: 0,
+        milliseconds: duration}).normalize();
+    }
+    const isOnBehalf = !model.onBehalf || model.onBehalf === instance.getActiveAccount()?.localAccountId;
+    const url = isOnBehalf ? "/leaverequests" : "/leaverequests/onbehalf";
+    const body = {
+      leaveRequestId: uuidv4(),
+      dateFrom: model.dateFrom.toISO(),
+      dateTo: model.dateTo.toISO(),
+      duration: calculateDuration().toISO(),
+      workingHours: model.workingHours.toISO(),
+      leaveTypeId: model.leaveType,
+      remark: model.remarks,
+      assignedToId: isOnBehalf ? model.onBehalf : undefined
+    };
+    // alert(JSON.stringify(body));
+    const response = await callApi(url, "POST", body);
+    alert(response.status + response.statusText);
   };
 
   return (

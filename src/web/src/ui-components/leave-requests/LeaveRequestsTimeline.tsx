@@ -22,12 +22,15 @@ const DataContent = () => {
   const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(null);
 
+  const dateFrom = "2024-08-21";
+  const dateTo = "2024-11-30";
+
   useEffect(() => {
     if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
-      callApiGet<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-11-01")
+      callApiGet<LeaveRequestsResponseDto>(`/leaverequests?dateFrom=${dateFrom}&dateTo=${dateTo}`)
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01")
+      callApiGet<HolidaysDto>(`/settings/holidays?dateFrom=${dateFrom}&dateTo=${dateTo}`)
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       callApiGet<LeaveStatusesDto>("/settings/leavestatus")
