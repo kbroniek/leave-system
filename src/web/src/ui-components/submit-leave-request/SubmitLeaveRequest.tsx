@@ -12,7 +12,7 @@ import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { LeaveRequestsResponseDto } from "../leave-requests/LeaveRequestsDto";
-import { SubmitLeaveRequestForm } from "./SubmitLeaveRequestForm";
+import { LeaveRequestFormModel, SubmitLeaveRequestForm } from "./SubmitLeaveRequestForm";
 import { DateTime } from "luxon";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { EmployeesDto } from "../dtos/EmployeesDto";
@@ -65,6 +65,10 @@ const DataContent = () => {
     }
   }, [inProgress, apiLeaveRequests, instance]);
 
+  const onSubmit = (value: LeaveRequestFormModel) => {
+    alert(JSON.stringify(value));
+  };
+
   return (
     <>
       <SubmitLeaveRequestForm
@@ -73,6 +77,7 @@ const DataContent = () => {
         leaveTypes={apiLeaveTypes?.items}
         leaveLimits={apiLeaveLimits?.items}
         employees={apiEmployees?.items}
+        onSubmit={onSubmit}
       />
     </>
   );

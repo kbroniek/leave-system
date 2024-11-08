@@ -15,7 +15,7 @@ import { UserDto } from "../dtos/UserDto";
 import { useMsal } from "@azure/msal-react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTime, Duration } from "luxon";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm, UseFormSetValue } from "react-hook-form";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid2";
@@ -28,12 +28,24 @@ import FormHelperText from "@mui/material/FormHelperText";
 const titleStyle = { color: "text.secondary" };
 const defaultStyle = { paddingTop: "1px", width: "max-content" };
 
+export interface LeaveRequestFormModel {
+  dateFrom: DateTime,
+  dateTo: DateTime,
+  onBehalf: string | undefined,
+  leaveType: string | undefined,
+  remarks: string | undefined,
+  workingDays: number | undefined,
+  allDays: number | undefined,
+  workingHours: Duration | undefined
+}
+
 export const SubmitLeaveRequestForm = (props: {
   leaveRequests: LeaveRequestDto[] | undefined;
   holidays: HolidaysDto | undefined;
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
   employees: UserDto[] | undefined;
+  onSubmit: SubmitHandler<LeaveRequestFormModel>
 }) => {
   const now = DateTime.now().startOf("day");
   const getDefaultLeaveTypeId = () => {
@@ -46,23 +58,16 @@ export const SubmitLeaveRequestForm = (props: {
     register,
     formState: { errors },
     setValue,
-  } = useForm({
+  } = useForm<LeaveRequestFormModel>({
     defaultValues: {
       dateFrom: now,
       dateTo: now,
-      onBehalf: undefined,
-      leaveType: undefined,
       remarks: "",
     },
   });
   const [dateFrom, setDateFrom] = useState<DateTime | null>(now);
   const [dateTo, setDateTo] = useState<DateTime | null>(now);
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
-
-  const onSubmit = (value: unknown) => {
-    console.log(errors);
-    alert(JSON.stringify(value));
-  };
 
   function currenUser(employees: UserDto[]): string | undefined {
     const claims = instance.getActiveAccount()?.idTokenClaims;
@@ -76,7 +81,7 @@ export const SubmitLeaveRequestForm = (props: {
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(props.onSubmit)}>
       <React.Fragment>
         <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
           <Paper
@@ -246,6 +251,7 @@ export const SubmitLeaveRequestForm = (props: {
                   holidays={props.holidays}
                   dateFrom={dateFrom}
                   dateTo={dateTo}
+                  setValue={setValue}
                 />
               ) : (
                 <Loading linearProgress />
@@ -268,6 +274,7 @@ export const SubmitLeaveRequestForm = (props: {
                   leaveTypeId={leaveTypeId ?? getDefaultLeaveTypeId() ?? ""}
                   dateFrom={dateFrom}
                   dateTo={dateTo}
+                  setValue={setValue}
                 />
               ) : (
                 <Loading linearProgress />
@@ -286,6 +293,11 @@ export const SubmitLeaveRequestForm = (props: {
           </Paper>
         </Container>
       </React.Fragment>
+      <input
+        name="HiddenField2"
+        type="hidden"
+        value="fake"
+      />
     </form>
   );
 };
@@ -294,6 +306,7 @@ const Range = (props: {
   holidays: HolidaysDto;
   dateFrom: DateTime | null;
   dateTo: DateTime | null;
+  setValue: UseFormSetValue<LeaveRequestFormModel>;
 }) => {
   const daysCounter = new DaysCounter(
     props.holidays.items.map((x) => DateTime.fromISO(x))
@@ -309,6 +322,8 @@ const Range = (props: {
     allDays = DaysCounter.countAllDays(props.dateFrom, props.dateTo);
     workingDays = daysCounter.workingDays(props.dateFrom, props.dateTo);
     freeDays = allDays - workingDays;
+    props.setValue("workingDays", workingDays);
+    props.setValue("allDays", allDays);
   }
   return (
     <Grid container spacing={3}>
@@ -354,6 +369,7 @@ const AdditionalInfo = (props: {
   leaveTypeId: string;
   dateFrom: DateTime | null;
   dateTo: DateTime | null;
+  setValue: UseFormSetValue<LeaveRequestFormModel>;
 }) => {
   const daysUsed = props.leaveRequests
     .filter((x) => x.leaveTypeId === props.leaveTypeId)
@@ -400,7 +416,8 @@ const AdditionalInfo = (props: {
       const currentRequestDays = daysCounter.days(dateFrom, dateTo);
       const workingHours = currentLimit
         ? Duration.fromISO(currentLimit.workingHours)
-        : undefined;
+        : findWorkingHoursAndParseDuration();
+      props.setValue("workingHours", workingHours);
       const currentRequestDaysDuration = Duration.fromObject({
         hours: currentRequestDays * (workingHours?.as("hours") ?? 8),
       });
@@ -446,13 +463,25 @@ const AdditionalInfo = (props: {
         <Typography variant="body2" sx={defaultStyle}>
           {DurationFormatter.format(
             daysUsed,
-            currentLimit?.workingHours ??
-              props.leaveRequests.find(
-                (x) => x.leaveTypeId === props.leaveTypeId
-              )?.workingHours
+            currentLimit?.workingHours ?? findWorkingHours()
           )}
         </Typography>
       </Grid>
+      <input
+        name="HiddenField"
+        type="hidden"
+        value="fake"
+      />
     </Grid>
   );
+
+  function findWorkingHoursAndParseDuration() : Duration | undefined {
+    const workingHours = findWorkingHours();
+    return workingHours ? Duration.fromISO(workingHours) : undefined;
+  }
+  function findWorkingHours() : string | undefined {
+    return props.leaveRequests.find(
+      (x) => x.leaveTypeId === props.leaveTypeId
+    )?.workingHours;
+  }
 };
