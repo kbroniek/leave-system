@@ -136,8 +136,8 @@ export const SubmitLeaveRequestForm = (props: {
                           }}
                           slotProps={{
                             textField: {
-                              error: !!errors.dateFrom, // Bolean
-                              helperText: errors?.dateFrom?.message, // String
+                              error: !!errors.dateFrom || (errors.dateFrom as DateTime | undefined)?.isValid,
+                              helperText: errors?.dateFrom?.message,
                             },
                           }}
                         />
@@ -166,8 +166,8 @@ export const SubmitLeaveRequestForm = (props: {
                           }}
                           slotProps={{
                             textField: {
-                              error: !!errors.dateTo, // Bolean
-                              helperText: errors?.dateTo?.message, // String
+                              error: !!errors.dateTo || (errors.dateTo as DateTime | undefined)?.isValid,
+                              helperText: errors?.dateTo?.message,
                             },
                           }}
                         />
