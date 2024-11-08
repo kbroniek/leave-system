@@ -19,7 +19,7 @@ import { Controller, SubmitHandler, useForm, UseFormSetValue } from "react-hook-
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid2";
-import Button from "@mui/material/Button";
+import LoadingButton from '@mui/lab/LoadingButton';
 import { DaysCounter } from "../utils/DaysCounter";
 import { Loading } from "../Loading";
 import { DurationFormatter } from "../utils/DurationFormatter";
@@ -29,8 +29,8 @@ const titleStyle = { color: "text.secondary" };
 const defaultStyle = { paddingTop: "1px", width: "max-content" };
 
 export interface LeaveRequestFormModel {
-  dateFrom: DateTime,
-  dateTo: DateTime,
+  dateFrom: DateTime | undefined,
+  dateTo: DateTime | undefined,
   onBehalf: string | undefined,
   leaveType: string | undefined,
   remarks: string | undefined,
@@ -56,7 +56,7 @@ export const SubmitLeaveRequestForm = (props: {
     control,
     handleSubmit,
     register,
-    formState: { errors },
+    formState: { errors, isValid },
     setValue,
   } = useForm<LeaveRequestFormModel>({
     defaultValues: {
@@ -68,6 +68,7 @@ export const SubmitLeaveRequestForm = (props: {
   const [dateFrom, setDateFrom] = useState<DateTime | null>(now);
   const [dateTo, setDateTo] = useState<DateTime | null>(now);
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
+  const [submitInProgress, setSubmitInProgress] = useState(false);
 
   function currenUser(employees: UserDto[]): string | undefined {
     const claims = instance.getActiveAccount()?.idTokenClaims;
@@ -80,8 +81,21 @@ export const SubmitLeaveRequestForm = (props: {
     required: "This is required",
   });
 
+  const onSubmit = (value: LeaveRequestFormModel) => {
+    setSubmitInProgress(true);
+    return props.onSubmit(value);
+  };
+
+  const dateIsValid = (value: DateTime | null | undefined): boolean => {
+    return !!value && value.isValid;
+  }
+
+  const validateDate = (value: DateTime | undefined) => {
+    if (!dateIsValid(value)) return "This is required";
+  };
+
   return (
-    <form onSubmit={handleSubmit(props.onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <React.Fragment>
         <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
           <Paper
@@ -132,14 +146,14 @@ export const SubmitLeaveRequestForm = (props: {
                   <Controller
                     control={control}
                     name="dateFrom"
-                    rules={{ required: "This is required" }}
+                    rules={{ required: "This is required", validate: {required: validateDate}}}
                     render={({ field }) => {
                       return (
                         <DatePicker
                           label="Date from *"
                           value={field.value}
                           inputRef={field.ref}
-                          onChange={(date) => {
+                          onChange={(date: DateTime | null) => {
                             setDateFrom(date);
                             field.onChange(date);
                             if (date && dateTo && date > dateTo) {
@@ -149,10 +163,7 @@ export const SubmitLeaveRequestForm = (props: {
                           }}
                           slotProps={{
                             textField: {
-                              error:
-                                !!errors.dateFrom ||
-                                (errors.dateFrom as DateTime | undefined)
-                                  ?.isValid,
+                              error: !dateIsValid(dateFrom),
                               helperText: errors?.dateFrom?.message,
                             },
                           }}
@@ -165,14 +176,14 @@ export const SubmitLeaveRequestForm = (props: {
                   <Controller
                     control={control}
                     name="dateTo"
-                    rules={{ required: true }}
+                    rules={{ required: "This is required", validate: {required: validateDate}}}
                     render={({ field }) => {
                       return (
                         <DatePicker
                           label="Date to *"
                           value={field.value}
                           inputRef={field.ref}
-                          onChange={(date) => {
+                          onChange={(date: DateTime | null) => {
                             setDateTo(date);
                             field.onChange(date);
                             if (date && dateFrom && date < dateFrom) {
@@ -182,10 +193,7 @@ export const SubmitLeaveRequestForm = (props: {
                           }}
                           slotProps={{
                             textField: {
-                              error:
-                                !!errors.dateTo ||
-                                (errors.dateTo as DateTime | undefined)
-                                  ?.isValid,
+                              error: !dateIsValid(dateTo),
                               helperText: errors?.dateTo?.message,
                             },
                           }}
@@ -281,15 +289,16 @@ export const SubmitLeaveRequestForm = (props: {
               )}
             </Box>
 
-            <Button
+            <LoadingButton
               type="submit"
               variant="contained"
               sx={{ mt: 3, ml: 1 }}
               fullWidth
-              disabled={!props.employees || !props.leaveTypes}
+              disabled={!props.employees || !props.leaveTypes || !isValid}
+              loading={submitInProgress}
             >
               Submit
-            </Button>
+            </LoadingButton>
           </Paper>
         </Container>
       </React.Fragment>
