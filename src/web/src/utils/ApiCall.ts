@@ -2,7 +2,13 @@ import { AccountInfo, InteractionRequiredAuthError, IPublicClientApplication } f
 import { loginRequest } from "../authConfig";
 import { msalInstance } from "../main";
 
-export async function callApi<T>(url: string): Promise<T> {
+export async function callApiGet<T>(url: string): Promise<T> {
+    return callApi(url)
+    .then(response => response.json())
+    //TODO: Error handling
+    .catch(error => console.log(error));
+}
+export async function callApi(url: string, method: string = "GET", body?: unknown): Promise<Response> {
     const account = msalInstance.getActiveAccount();
     if (!account) {
         throw Error("No active account! Verify a user has been signed in and setActiveAccount has been called.");
@@ -20,14 +26,12 @@ export async function callApi<T>(url: string): Promise<T> {
     headers.append("X-Authorization", bearer);
 
     const options = {
-        method: "GET",
-        headers: headers
+        method: method,
+        headers: headers,
+        body: JSON.stringify(body)
     };
 
-    return fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${url}`, options)
-        .then(response => response.json())
-        //TODO: Error handling
-        .catch(error => console.log(error));
+    return fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${url}`, options);
 }
 
 export async function ifErrorAcquireTokenRedirect(error: unknown, instance: IPublicClientApplication) {

@@ -62,7 +62,6 @@ export const SubmitLeaveRequestForm = (props: {
     defaultValues: {
       dateFrom: now,
       dateTo: now,
-      remarks: "",
     },
   });
   const [dateFrom, setDateFrom] = useState<DateTime | null>(now);

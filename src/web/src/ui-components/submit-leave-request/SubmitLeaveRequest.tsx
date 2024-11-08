@@ -8,7 +8,7 @@ import { loginRequest } from "../../authConfig";
 // Sample app imports
 import { LoadingAuth } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
-import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { LeaveRequestsResponseDto } from "../leave-requests/LeaveRequestsDto";
@@ -42,31 +42,60 @@ const DataContent = () => {
       const dateToFormatted = now
         .endOf("year")
         .toFormat("yyyy-MM-dd");
-      callApi<LeaveRequestsResponseDto>(
+      callApiGet<LeaveRequestsResponseDto>(
         `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&AssignedToUserIds=${userId}`
       )
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<LeaveTypesDto>("/leavetypes")
+      callApiGet<LeaveTypesDto>("/leavetypes")
         .then((response) => setApiLeaveTypes(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
 
-      callApi<HolidaysDto>(
+      callApiGet<HolidaysDto>(
         `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`
       )
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<LeaveLimitsDto>(`/leavelimits/user?year=${currentYear}`)
+      callApiGet<LeaveLimitsDto>(`/leavelimits/user?year=${currentYear}`)
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<EmployeesDto>("/employees")
+      callApiGet<EmployeesDto>("/employees")
         .then((response) => setApiEmployees(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
   }, [inProgress, apiLeaveRequests, instance]);
 
-  const onSubmit = (value: LeaveRequestFormModel) => {
-    alert(JSON.stringify(value));
+  const onSubmit = (model: LeaveRequestFormModel) => {
+    if(!model.dateFrom?.isValid) {
+      //TODO: show notification
+      alert("Date from is invalid");
+      return;
+    }
+    if(!model.dateTo?.isValid) {
+      //TODO: show notification
+      alert("Date to is invalid");
+      return;
+    }
+    if(!model.leaveType) {
+      //TODO: show notification
+      alert("Leave type is invalid");
+      return;
+    }
+    if(!model.allDays) {
+      //TODO: show notification
+      alert("Form is invalid. Can't read all days.");
+      return;
+    }
+    if(!model.workingDays) {
+      //TODO: show notification
+      alert("Form is invalid. Can't read working days.");
+      return;
+    }
+    if(!model.workingHours) {
+      //TODO: show notification
+      alert("Form is invalid. Can't read working hours.");
+      return;
+    }
   };
 
   return (

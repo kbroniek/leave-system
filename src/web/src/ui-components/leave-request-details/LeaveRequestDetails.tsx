@@ -8,7 +8,7 @@ import { loginRequest } from "../../authConfig";
 // Sample app imports
 import { Loading, LoadingAuth } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
-import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
 import ShowLeaveRequestDetails from "./ShowLeaveRequestDetails";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
@@ -24,19 +24,19 @@ const DataContent = (props: {leaveRequestId: string}) => {
 
   useEffect(() => {
     if (!apiLeaveRequestDetails && inProgress === InteractionStatus.None) {
-      callApi<LeaveRequestDetailsDto>(`/leaverequests/${props.leaveRequestId}`)
+      callApiGet<LeaveRequestDetailsDto>(`/leaverequests/${props.leaveRequestId}`)
         .then((response) => {
-          callApi<LeaveTypeDto>(`/leavetypes/${response.leaveTypeId}`)
+          callApiGet<LeaveTypeDto>(`/leavetypes/${response.leaveTypeId}`)
             .then((response) => setApiLeaveType(response))
             .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
           
-          callApi<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01")
+          callApiGet<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01")
             .then((response) => setApiHolidays(response))
             .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
           setApiLeaveRequests(response)
         })
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<LeaveStatusesDto>("/settings/leavestatus")
+      callApiGet<LeaveStatusesDto>("/settings/leavestatus")
         .then((response) => setApiLeaveStatuses(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
