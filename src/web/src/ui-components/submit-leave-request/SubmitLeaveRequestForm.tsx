@@ -38,23 +38,29 @@ export const SubmitLeaveRequestForm = (props: {
   const now = DateTime.now().startOf("day");
   const getDefaultLeaveTypeId = () => {
     return props.leaveTypes?.find(() => true)?.id;
-  }
+  };
   const { instance } = useMsal();
-  const { control, handleSubmit, register, formState: { errors }, setValue } = useForm({
+  const {
+    control,
+    handleSubmit,
+    register,
+    formState: { errors },
+    setValue,
+  } = useForm({
     defaultValues: {
       dateFrom: now,
       dateTo: now,
       onBehalf: undefined,
       leaveType: undefined,
-      remarks: ""
-    }
+      remarks: "",
+    },
   });
   const [dateFrom, setDateFrom] = useState<DateTime | null>(now);
   const [dateTo, setDateTo] = useState<DateTime | null>(now);
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
 
   const onSubmit = (value: unknown) => {
-    console.log(errors)
+    console.log(errors);
     alert(JSON.stringify(value));
   };
 
@@ -66,7 +72,7 @@ export const SubmitLeaveRequestForm = (props: {
   }
 
   const { ref: onBehalfRef, ...onBehalfInputProps } = register("onBehalf", {
-    required: "This is required"
+    required: "This is required",
   });
 
   return (
@@ -104,7 +110,9 @@ export const SubmitLeaveRequestForm = (props: {
                               <MenuItem value={x.id}>{x.name}</MenuItem>
                             ))}
                           </Select>
-                          <FormHelperText sx={{color: "red"}}>{errors?.onBehalf?.message}</FormHelperText>
+                          <FormHelperText sx={{ color: "red" }}>
+                            {errors?.onBehalf?.message}
+                          </FormHelperText>
                         </FormControl>
                       ) : (
                         <Loading
@@ -129,14 +137,17 @@ export const SubmitLeaveRequestForm = (props: {
                           onChange={(date) => {
                             setDateFrom(date);
                             field.onChange(date);
-                            if(date && dateTo && date > dateTo) {
+                            if (date && dateTo && date > dateTo) {
                               setValue("dateTo", date);
                               setDateTo(date);
                             }
                           }}
                           slotProps={{
                             textField: {
-                              error: !!errors.dateFrom || (errors.dateFrom as DateTime | undefined)?.isValid,
+                              error:
+                                !!errors.dateFrom ||
+                                (errors.dateFrom as DateTime | undefined)
+                                  ?.isValid,
                               helperText: errors?.dateFrom?.message,
                             },
                           }}
@@ -159,14 +170,17 @@ export const SubmitLeaveRequestForm = (props: {
                           onChange={(date) => {
                             setDateTo(date);
                             field.onChange(date);
-                            if(date && dateFrom && date < dateFrom) {
+                            if (date && dateFrom && date < dateFrom) {
                               setValue("dateFrom", date);
                               setDateFrom(date);
                             }
                           }}
                           slotProps={{
                             textField: {
-                              error: !!errors.dateTo || (errors.dateTo as DateTime | undefined)?.isValid,
+                              error:
+                                !!errors.dateTo ||
+                                (errors.dateTo as DateTime | undefined)
+                                  ?.isValid,
                               helperText: errors?.dateTo?.message,
                             },
                           }}
@@ -188,7 +202,9 @@ export const SubmitLeaveRequestForm = (props: {
                         label="Leave type *"
                         required
                         {...register("leaveType")}
-                        onChange={(event) => {setLeaveTypeId(event.target.value as string)}}
+                        onChange={(event) => {
+                          setLeaveTypeId(event.target.value as string);
+                        }}
                       >
                         {props.leaveTypes.map((x) => (
                           <MenuItem
@@ -206,10 +222,7 @@ export const SubmitLeaveRequestForm = (props: {
                       </Select>
                     </FormControl>
                   ) : (
-                    <Loading
-                      linearProgress
-                      label="Leave type *"
-                    />
+                    <Loading linearProgress label="Leave type *" />
                   )}
                 </Grid>
                 <Grid size={{ xs: 12 }}>
@@ -228,31 +241,37 @@ export const SubmitLeaveRequestForm = (props: {
               <Typography variant="h6" gutterBottom>
                 Range
               </Typography>
-              {props.holidays ? (<Range holidays={props.holidays} dateFrom={dateFrom} dateTo={dateTo} />) : (
-                <Loading
-                  linearProgress
-                />)
-              }
+              {props.holidays ? (
+                <Range
+                  holidays={props.holidays}
+                  dateFrom={dateFrom}
+                  dateTo={dateTo}
+                />
+              ) : (
+                <Loading linearProgress />
+              )}
             </Box>
 
             <Box sx={{ my: 3 }}>
               <Typography variant="h6" gutterBottom>
                 Additional information
               </Typography>
-              {props.leaveLimits && props.leaveRequests && props.holidays && props.leaveTypes ? (
-                <AdditionalInfo 
-                  holidays={props.holidays} 
-                  leaveRequests={props.leaveRequests} 
-                  leaveLimits={props.leaveLimits} 
+              {props.leaveLimits &&
+              props.leaveRequests &&
+              props.holidays &&
+              props.leaveTypes ? (
+                <AdditionalInfo
+                  holidays={props.holidays}
+                  leaveRequests={props.leaveRequests}
+                  leaveLimits={props.leaveLimits}
                   leaveTypes={props.leaveTypes}
                   leaveTypeId={leaveTypeId ?? getDefaultLeaveTypeId() ?? ""}
                   dateFrom={dateFrom}
-                  dateTo={dateTo} />
+                  dateTo={dateTo}
+                />
               ) : (
-                <Loading
-                  linearProgress
-                />)
-              }
+                <Loading linearProgress />
+              )}
             </Box>
 
             <Button
@@ -271,20 +290,22 @@ export const SubmitLeaveRequestForm = (props: {
   );
 };
 
-const Range = (props: {holidays: HolidaysDto, dateFrom: DateTime | null, dateTo: DateTime | null}) => {
+const Range = (props: {
+  holidays: HolidaysDto;
+  dateFrom: DateTime | null;
+  dateTo: DateTime | null;
+}) => {
   const daysCounter = new DaysCounter(
     props.holidays.items.map((x) => DateTime.fromISO(x))
   );
   let allDays;
   let workingDays;
   let freeDays;
-  if(!props.dateFrom?.isValid) {
+  if (!props.dateFrom?.isValid) {
     allDays = workingDays = freeDays = "Date from is invalid. Please check it.";
-  }
-  else if(!props.dateTo?.isValid) {
+  } else if (!props.dateTo?.isValid) {
     allDays = workingDays = freeDays = "Date to is invalid. Please check it.";
-  }
-  else {
+  } else {
     allDays = DaysCounter.countAllDays(props.dateFrom, props.dateTo);
     workingDays = daysCounter.workingDays(props.dateFrom, props.dateTo);
     freeDays = allDays - workingDays;
@@ -321,43 +342,54 @@ const Range = (props: {holidays: HolidaysDto, dateFrom: DateTime | null, dateTo:
           {freeDays}
         </Typography>
       </Grid>
-    </Grid>);
-}
+    </Grid>
+  );
+};
 
 const AdditionalInfo = (props: {
-  holidays: HolidaysDto, 
-  leaveRequests: LeaveRequestDto[], 
-  leaveLimits: LeaveLimitDto[], 
-  leaveTypes: LeaveTypeDto[],
-  leaveTypeId: string,
-  dateFrom: DateTime | null,
-  dateTo: DateTime | null}) => {
+  holidays: HolidaysDto;
+  leaveRequests: LeaveRequestDto[];
+  leaveLimits: LeaveLimitDto[];
+  leaveTypes: LeaveTypeDto[];
+  leaveTypeId: string;
+  dateFrom: DateTime | null;
+  dateTo: DateTime | null;
+}) => {
   const daysUsed = props.leaveRequests
-    .filter(x => x.leaveTypeId === props.leaveTypeId)
-    .map(x => Duration.fromISO(x.duration))
-    .reduce((accumulator, current) => accumulator.plus(current), Duration.fromMillis(0));
+    .filter((x) => x.leaveTypeId === props.leaveTypeId)
+    .map((x) => Duration.fromISO(x.duration))
+    .reduce(
+      (accumulator, current) => accumulator.plus(current),
+      Duration.fromMillis(0)
+    );
 
-  let availableDaysStr =  "There is no limit for this user, leave type or in that period";
+  let availableDaysStr =
+    "There is no limit for this user, leave type or in that period";
   let availableDaysAfterAcceptanceStr = availableDaysStr;
   let currentLimit;
-  if(!props.dateFrom?.isValid) {
-    availableDaysStr = availableDaysAfterAcceptanceStr = "Date from is invalid. Please check it.";
-  }
-  else if(!props.dateTo?.isValid) {
-    availableDaysStr = availableDaysAfterAcceptanceStr = "Date to is invalid. Please check it.";
-  }
-  else {
+  if (!props.dateFrom?.isValid) {
+    availableDaysStr = availableDaysAfterAcceptanceStr =
+      "Date from is invalid. Please check it.";
+  } else if (!props.dateTo?.isValid) {
+    availableDaysStr = availableDaysAfterAcceptanceStr =
+      "Date to is invalid. Please check it.";
+  } else {
     const dateFrom = props.dateFrom;
     const dateTo = props.dateTo;
-    currentLimit = props.leaveLimits.find(x =>
-      x.state === "Active" &&
-      x.leaveTypeId === props.leaveTypeId &&
-      DateTime.fromISO(x.validSince) <= dateFrom &&
-      DateTime.fromISO(x.validUntil) >= dateTo
+    currentLimit = props.leaveLimits.find(
+      (x) =>
+        x.state === "Active" &&
+        x.leaveTypeId === props.leaveTypeId &&
+        DateTime.fromISO(x.validSince) <= dateFrom &&
+        DateTime.fromISO(x.validUntil) >= dateTo
     );
-    if(currentLimit) {
-      const limit = currentLimit.limit ? Duration.fromISO(currentLimit.limit) : undefined
-      const overdueLimit = currentLimit.overdueLimit ? Duration.fromISO(currentLimit?.overdueLimit) : undefined
+    if (currentLimit) {
+      const limit = currentLimit.limit
+        ? Duration.fromISO(currentLimit.limit)
+        : undefined;
+      const overdueLimit = currentLimit.overdueLimit
+        ? Duration.fromISO(currentLimit?.overdueLimit)
+        : undefined;
       const limitSum = overdueLimit ? limit?.plus(overdueLimit) : limit;
       const daysCounter = DaysCounter.create(
         props.leaveTypeId,
@@ -365,45 +397,62 @@ const AdditionalInfo = (props: {
         props.holidays.items.map((x) => DateTime.fromISO(x))
       );
       const availableDays = limitSum?.minus(daysUsed);
-      const currentRequestDays = daysCounter.days(
-        dateFrom,
-        dateTo);
-      const workingHours = currentLimit ? Duration.fromISO(currentLimit.workingHours) : undefined;
-      const currentRequestDaysDuration = Duration.fromObject({hours: currentRequestDays * (workingHours?.as("hours") ?? 8) })
-      availableDaysStr = availableDays ? DurationFormatter.format(availableDays, currentLimit.workingHours) : "There is no limit";
-      availableDaysAfterAcceptanceStr = availableDays ? DurationFormatter.format(availableDays.minus(currentRequestDaysDuration), currentLimit.workingHours) : "There is no limit for this user, leave type or in that period"
+      const currentRequestDays = daysCounter.days(dateFrom, dateTo);
+      const workingHours = currentLimit
+        ? Duration.fromISO(currentLimit.workingHours)
+        : undefined;
+      const currentRequestDaysDuration = Duration.fromObject({
+        hours: currentRequestDays * (workingHours?.as("hours") ?? 8),
+      });
+      availableDaysStr = availableDays
+        ? DurationFormatter.format(availableDays, currentLimit.workingHours)
+        : "There is no limit";
+      availableDaysAfterAcceptanceStr = availableDays
+        ? DurationFormatter.format(
+            availableDays.minus(currentRequestDaysDuration),
+            currentLimit.workingHours
+          )
+        : "There is no limit for this user, leave type or in that period";
     }
   }
-  return <Grid container spacing={3}>
-  <Grid size={{ xs: 12, sm: 4 }}>
-    <Typography variant="body1" sx={titleStyle}>
-      Available days:
-    </Typography>
-  </Grid>
-  <Grid size={{ xs: 12, sm: 8 }}>
-    <Typography variant="body2" sx={defaultStyle}>
-      {availableDaysStr}
-    </Typography>
-  </Grid>
-  <Grid size={{ xs: 12, sm: 4 }}>
-    <Typography variant="body1" sx={titleStyle}>
-      Days available after request acceptance:
-    </Typography>
-  </Grid>
-  <Grid size={{ xs: 12, sm: 8 }}>
-    <Typography variant="body2" sx={defaultStyle}>
-      {availableDaysAfterAcceptanceStr}
-    </Typography>
-  </Grid>
-  <Grid size={{ xs: 12, sm: 4 }}>
-    <Typography variant="body1" sx={titleStyle}>
-      Days used:
-    </Typography>
-  </Grid>
-  <Grid size={{ xs: 12, sm: 8 }}>
-    <Typography variant="body2" sx={defaultStyle}>
-      {DurationFormatter.format(daysUsed, currentLimit?.workingHours ?? props.leaveRequests.find(x => x.leaveTypeId === props.leaveTypeId)?.workingHours)}
-    </Typography>
-  </Grid>
-</Grid>
-}
+  return (
+    <Grid container spacing={3}>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <Typography variant="body1" sx={titleStyle}>
+          Available days:
+        </Typography>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 8 }}>
+        <Typography variant="body2" sx={defaultStyle}>
+          {availableDaysStr}
+        </Typography>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <Typography variant="body1" sx={titleStyle}>
+          Days available after request acceptance:
+        </Typography>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 8 }}>
+        <Typography variant="body2" sx={defaultStyle}>
+          {availableDaysAfterAcceptanceStr}
+        </Typography>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <Typography variant="body1" sx={titleStyle}>
+          Days used:
+        </Typography>
+      </Grid>
+      <Grid size={{ xs: 12, sm: 8 }}>
+        <Typography variant="body2" sx={defaultStyle}>
+          {DurationFormatter.format(
+            daysUsed,
+            currentLimit?.workingHours ??
+              props.leaveRequests.find(
+                (x) => x.leaveTypeId === props.leaveTypeId
+              )?.workingHours
+          )}
+        </Typography>
+      </Grid>
+    </Grid>
+  );
+};
