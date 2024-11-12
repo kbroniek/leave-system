@@ -25,7 +25,7 @@ import { DateTime, Duration } from "luxon";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { EmployeesDto } from "../dtos/EmployeesDto";
 import { v4 as uuidv4 } from "uuid";
-import { Authorized } from "../../components/Authorized";
+import { Authorized, isInRole } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 
 const DataContent = () => {
@@ -67,46 +67,61 @@ const DataContent = () => {
       callApiGet<LeaveLimitsDto>(`/leavelimits/user?year=${currentYear}`)
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<EmployeesDto>("/employees")
-        .then((response) => setApiEmployees(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      
+      if(isInRole(instance, ["DecisionMaker", "GlobalAdmin"]))
+      {
+        callApiGet<EmployeesDto>("/employees")
+          .then((response) => setApiEmployees(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      }
+      else {
+        const claims = instance.getActiveAccount()?.idTokenClaims;
+        if(claims?.sub) {
+          setApiEmployees({items: [
+            {
+              id: claims?.sub,
+              name: claims?.name ?? ""
+            }
+          ]})
+        }
+      }
     }
   }, [inProgress, apiLeaveRequests, instance]);
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
       //TODO: show notification
-      alert("Date from is invalid");
+      alert("Date from is invalid. Choose correct date.");
       return;
     }
     if (!model.dateTo?.isValid) {
       //TODO: show notification
-      alert("Date to is invalid");
+      alert("Date to is invalid. Choose correct date.");
       return;
     }
     if (!model.leaveType) {
       //TODO: show notification
-      alert("Leave type is invalid");
+      alert("Leave type is invalid. Choose correct item.");
       return;
     }
     if (!model.allDays) {
       //TODO: show notification
-      alert("Form is invalid. Can't read all days.");
+      alert("Form is invalid. Can't read all days. Contact with administrator.");
       return;
     }
     if (!model.workingDays) {
       //TODO: show notification
-      alert("Form is invalid. Can't read working days.");
+      alert("Form is invalid. Can't read working days. Contact with administrator.");
       return;
     }
     if (!model.workingHours) {
       //TODO: show notification
-      alert("Form is invalid. Can't read working hours.");
+      alert("Form is invalid. Can't read working hours. Check if you have added limits.");
       return;
     }
     if (!apiLeaveTypes) {
       //TODO: show notification
-      alert("Form is invalid. Can't read leave types.");
+      alert("Form is invalid. Can't read leave types. Contact with administrator."); // Email to the administrator and name
       return;
     }
     const calculateDuration = (): Duration => {

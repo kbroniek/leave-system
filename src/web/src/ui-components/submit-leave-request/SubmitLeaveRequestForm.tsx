@@ -17,6 +17,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTime, Duration } from "luxon";
 import {
   Controller,
+  FieldErrors,
   SubmitHandler,
   useForm,
   UseFormSetValue,
@@ -74,7 +75,7 @@ export const SubmitLeaveRequestForm = (props: {
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
   const [submitInProgress, setSubmitInProgress] = useState(false);
 
-  function currenUser(employees: UserDto[]): string | undefined {
+  const  currenUser = (employees: UserDto[]): string | undefined => {
     const claims = instance.getActiveAccount()?.idTokenClaims;
     const activeUser = employees.find((x) => x.id === claims?.sub);
     const employee = activeUser ?? employees.find(() => true);
@@ -84,7 +85,7 @@ export const SubmitLeaveRequestForm = (props: {
   const { ref: onBehalfRef, ...onBehalfInputProps } = register("onBehalf", {
     required: "This is required",
   });
-
+  setValue("onBehalf", currenUser(props.employees ?? []))
   const onSubmit = async (value: LeaveRequestFormModel, event?: React.BaseSyntheticEvent) => {
     if(!isValid) {
       return;
@@ -104,8 +105,13 @@ export const SubmitLeaveRequestForm = (props: {
     if (!dateIsValid(value)) return "This is required";
   };
 
+  const onInvalid = (errors: FieldErrors<LeaveRequestFormModel>) => {
+    // TODO: show notification
+    alert(JSON.stringify(errors));
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
       <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
         <Paper
           variant="outlined"
