@@ -24,11 +24,14 @@ export async function callApi(url: string, method: string = "GET", body?: unknow
     const bearer = `Bearer ${accessToken}`;
 
     headers.append("X-Authorization", bearer);
+    if(body) {
+        headers.append("Content-Type", "application/json",);
+    }
 
     const options = {
         method: method,
         headers: headers,
-        body: JSON.stringify(body)
+        body: body ? JSON.stringify(body) : undefined
     };
 
     return fetch(`${import.meta.env.VITE_REACT_APP_API_URL}${url}`, options);
