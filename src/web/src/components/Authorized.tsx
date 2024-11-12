@@ -16,12 +16,12 @@ export const Authorized = (props: AuthorizedProps) => {
     }
   }, [claimRoles, props.roles]);
 
-  return <>{isAuthorized ? props.authorized : props.notAuthorized}</>;
+  return <>{isAuthorized ? props.authorized : props.unauthorized}</>;
 };
 
 interface AuthorizedProps {
   authorized: ReactElement;
-  notAuthorized?: ReactElement;
+  unauthorized?: ReactElement;
   roles: RoleType[];
 }
 

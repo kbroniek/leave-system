@@ -25,6 +25,8 @@ import { DateTime, Duration } from "luxon";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { EmployeesDto } from "../dtos/EmployeesDto";
 import { v4 as uuidv4 } from "uuid";
+import { Authorized } from "../../components/Authorized";
+import { Forbidden } from "../../components/Forbidden";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -153,13 +155,19 @@ const DataContent = () => {
   };
 
   return (
-    <SubmitLeaveRequestForm
-      leaveRequests={apiLeaveRequests?.items}
-      holidays={apiHolidays}
-      leaveTypes={apiLeaveTypes?.items}
-      leaveLimits={apiLeaveLimits?.items}
-      employees={apiEmployees?.items}
-      onSubmit={onSubmit}
+    <Authorized
+      roles={["DecisionMaker", "GlobalAdmin", "Employee"]}
+      authorized={(
+        <SubmitLeaveRequestForm
+          leaveRequests={apiLeaveRequests?.items}
+          holidays={apiHolidays}
+          leaveTypes={apiLeaveTypes?.items}
+          leaveLimits={apiLeaveLimits?.items}
+          employees={apiEmployees?.items}
+          onSubmit={onSubmit}
+        />
+      )}
+      unauthorized={(<Forbidden />)}
     />
   );
 };
