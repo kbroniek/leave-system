@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Msal imports
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
@@ -38,6 +39,7 @@ const DataContent = () => {
     LeaveLimitsDto | undefined
   >();
   const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
@@ -135,9 +137,19 @@ const DataContent = () => {
       remark: model.remarks,
       assignedToId: isNotOnBehalf ? undefined : model.onBehalf,
     };
-    // alert(JSON.stringify(body));
     const response = await callApi(url, "POST", body);
-    alert(response.status + response.statusText);
+    if(response.status === 201) {
+      navigate("/")
+      return response.status;
+    }
+    else {
+      //TODO: show notification
+      const errorBody = await response.json();
+      alert(`Error: ${response.status}
+        ${errorBody.title}
+        ${errorBody.detail}
+        ${response.statusText}`);
+    }
   };
 
   return (

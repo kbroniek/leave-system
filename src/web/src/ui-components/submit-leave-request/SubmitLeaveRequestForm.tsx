@@ -15,11 +15,16 @@ import { UserDto } from "../dtos/UserDto";
 import { useMsal } from "@azure/msal-react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTime, Duration } from "luxon";
-import { Controller, SubmitHandler, useForm, UseFormSetValue } from "react-hook-form";
+import {
+  Controller,
+  SubmitHandler,
+  useForm,
+  UseFormSetValue,
+} from "react-hook-form";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid2";
-import LoadingButton from '@mui/lab/LoadingButton';
+import LoadingButton from "@mui/lab/LoadingButton";
 import { DaysCounter } from "../utils/DaysCounter";
 import { Loading } from "../Loading";
 import { DurationFormatter } from "../utils/DurationFormatter";
@@ -29,14 +34,14 @@ const titleStyle = { color: "text.secondary" };
 const defaultStyle = { paddingTop: "1px", width: "max-content" };
 
 export interface LeaveRequestFormModel {
-  dateFrom: DateTime | undefined,
-  dateTo: DateTime | undefined,
-  onBehalf: string | undefined,
-  leaveType: string | undefined,
-  remarks: string | undefined,
-  workingDays: number | undefined,
-  allDays: number | undefined,
-  workingHours: Duration | undefined
+  dateFrom: DateTime | undefined;
+  dateTo: DateTime | undefined;
+  onBehalf: string | undefined;
+  leaveType: string | undefined;
+  remarks: string | undefined;
+  workingDays: number | undefined;
+  allDays: number | undefined;
+  workingHours: Duration | undefined;
 }
 
 export const SubmitLeaveRequestForm = (props: {
@@ -45,7 +50,7 @@ export const SubmitLeaveRequestForm = (props: {
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
   employees: UserDto[] | undefined;
-  onSubmit: SubmitHandler<LeaveRequestFormModel>
+  onSubmit: SubmitHandler<LeaveRequestFormModel>;
 }) => {
   const now = DateTime.now().startOf("day");
   const getDefaultLeaveTypeId = () => {
@@ -80,14 +85,20 @@ export const SubmitLeaveRequestForm = (props: {
     required: "This is required",
   });
 
-  const onSubmit = (value: LeaveRequestFormModel) => {
-    // setSubmitInProgress(true);
-    return props.onSubmit(value);
+  const onSubmit = async (value: LeaveRequestFormModel, event?: React.BaseSyntheticEvent) => {
+    if(!isValid) {
+      return;
+    }
+    setSubmitInProgress(true);
+    // If it is an error disable in progress
+    if(!await props.onSubmit(value, event)) {
+      setSubmitInProgress(false);
+    }
   };
 
   const dateIsValid = (value: DateTime | null | undefined): boolean => {
     return !!value && value.isValid;
-  }
+  };
 
   const validateDate = (value: DateTime | undefined) => {
     if (!dateIsValid(value)) return "This is required";
@@ -95,217 +106,218 @@ export const SubmitLeaveRequestForm = (props: {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <React.Fragment>
-        <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
-          <Paper
-            variant="outlined"
-            sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}
-          >
-            <Typography component="h1" variant="h4" align="center">
-              Add leave request
-            </Typography>
+      <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
+        <Paper
+          variant="outlined"
+          sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}
+        >
+          <Typography component="h1" variant="h4" align="center">
+            Add leave request
+          </Typography>
 
-            <Box sx={{ my: 3 }}>
-              <Grid container spacing={3}>
-                <Grid size={{ xs: 12 }}>
-                  <Authorized
-                    roles={["DecisionMaker", "GlobalAdmin"]}
-                    authorized={
-                      props.employees ? (
-                        <FormControl fullWidth>
-                          <InputLabel id="select-label-add-on-behalf">
-                            Add on behalf of another user *
-                          </InputLabel>
-                          <Select
-                            labelId="select-label-add-on-behalf"
-                            id="select-add-on-behalf"
-                            defaultValue={currenUser(props.employees)}
-                            label="Add on behalf of another user *"
-                            inputRef={onBehalfRef}
-                            {...onBehalfInputProps}
-                          >
-                            {props.employees.map((x) => (
-                              <MenuItem value={x.id}>{x.name}</MenuItem>
-                            ))}
-                          </Select>
-                          <FormHelperText sx={{ color: "red" }}>
-                            {errors?.onBehalf?.message}
-                          </FormHelperText>
-                        </FormControl>
-                      ) : (
-                        <Loading
-                          linearProgress
+          <Box sx={{ my: 3 }}>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12 }}>
+                <Authorized
+                  roles={["DecisionMaker", "GlobalAdmin"]}
+                  authorized={
+                    props.employees ? (
+                      <FormControl fullWidth>
+                        <InputLabel id="select-label-add-on-behalf">
+                          Add on behalf of another user *
+                        </InputLabel>
+                        <Select
+                          labelId="select-label-add-on-behalf"
+                          id="select-add-on-behalf"
+                          defaultValue={currenUser(props.employees)}
                           label="Add on behalf of another user *"
-                        />
-                      )
-                    }
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Controller
-                    control={control}
-                    name="dateFrom"
-                    rules={{ required: "This is required", validate: {required: validateDate}}}
-                    render={({ field }) => {
-                      return (
-                        <DatePicker
-                          label="Date from *"
-                          value={field.value}
-                          inputRef={field.ref}
-                          onChange={(date: DateTime | null) => {
-                            setDateFrom(date);
-                            field.onChange(date);
-                            if (date && dateTo && date > dateTo) {
-                              setValue("dateTo", date);
-                              setDateTo(date);
-                            }
-                          }}
-                          slotProps={{
-                            textField: {
-                              error: !dateIsValid(dateFrom),
-                              helperText: errors?.dateFrom?.message,
-                            },
-                          }}
-                        />
-                      );
-                    }}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Controller
-                    control={control}
-                    name="dateTo"
-                    rules={{ required: "This is required", validate: {required: validateDate}}}
-                    render={({ field }) => {
-                      return (
-                        <DatePicker
-                          label="Date to *"
-                          value={field.value}
-                          inputRef={field.ref}
-                          onChange={(date: DateTime | null) => {
-                            setDateTo(date);
-                            field.onChange(date);
-                            if (date && dateFrom && date < dateFrom) {
-                              setValue("dateFrom", date);
-                              setDateFrom(date);
-                            }
-                          }}
-                          slotProps={{
-                            textField: {
-                              error: !dateIsValid(dateTo),
-                              helperText: errors?.dateTo?.message,
-                            },
-                          }}
-                        />
-                      );
-                    }}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  {props.leaveTypes ? (
-                    <FormControl fullWidth>
-                      <InputLabel id="select-label-leave-type">
-                        Leave type *
-                      </InputLabel>
-                      <Select
-                        labelId="select-label-leave-type"
-                        id="select-leave-type"
-                        defaultValue={getDefaultLeaveTypeId()}
-                        label="Leave type *"
-                        required
-                        {...register("leaveType")}
-                        onChange={(event) => {
-                          setLeaveTypeId(event.target.value as string);
-                        }}
-                      >
-                        {props.leaveTypes.map((x) => (
-                          <MenuItem
-                            value={x.id}
-                            style={{
-                              borderLeftColor:
-                                x.properties?.color ?? "transparent",
-                              borderLeftStyle: "solid",
-                              borderLeftWidth: "initial",
-                            }}
-                          >
-                            {x.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  ) : (
-                    <Loading linearProgress label="Leave type *" />
-                  )}
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <TextField
-                    label="Remarks"
-                    fullWidth
-                    rows={2}
-                    multiline
-                    {...register("remarks")}
-                  />
-                </Grid>
+                          inputRef={onBehalfRef}
+                          {...onBehalfInputProps}
+                        >
+                          {props.employees.map((x) => (
+                            <MenuItem key={`add-on-behalf-${x.id}`} value={x.id}>{x.name}</MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText sx={{ color: "red" }}>
+                          {errors?.onBehalf?.message}
+                        </FormHelperText>
+                      </FormControl>
+                    ) : (
+                      <Loading
+                        linearProgress
+                        label="Add on behalf of another user *"
+                      />
+                    )
+                  }
+                />
               </Grid>
-            </Box>
-
-            <Box sx={{ my: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Range
-              </Typography>
-              {props.holidays ? (
-                <Range
-                  holidays={props.holidays}
-                  dateFrom={dateFrom}
-                  dateTo={dateTo}
-                  setValue={setValue}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Controller
+                  control={control}
+                  name="dateFrom"
+                  rules={{
+                    required: "This is required",
+                    validate: { required: validateDate },
+                  }}
+                  render={({ field }) => {
+                    return (
+                      <DatePicker
+                        label="Date from *"
+                        value={field.value}
+                        inputRef={field.ref}
+                        onChange={(date: DateTime | null) => {
+                          setDateFrom(date);
+                          field.onChange(date);
+                          if (date && dateTo && date > dateTo) {
+                            setValue("dateTo", date);
+                            setDateTo(date);
+                          }
+                        }}
+                        slotProps={{
+                          textField: {
+                            error: !dateIsValid(dateFrom),
+                            helperText: errors?.dateFrom?.message,
+                          },
+                        }}
+                      />
+                    );
+                  }}
                 />
-              ) : (
-                <Loading linearProgress />
-              )}
-            </Box>
-
-            <Box sx={{ my: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Additional information
-              </Typography>
-              {props.leaveLimits &&
-              props.leaveRequests &&
-              props.holidays &&
-              props.leaveTypes ? (
-                <AdditionalInfo
-                  holidays={props.holidays}
-                  leaveRequests={props.leaveRequests}
-                  leaveLimits={props.leaveLimits}
-                  leaveTypes={props.leaveTypes}
-                  leaveTypeId={leaveTypeId ?? getDefaultLeaveTypeId() ?? ""}
-                  dateFrom={dateFrom}
-                  dateTo={dateTo}
-                  setValue={setValue}
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Controller
+                  control={control}
+                  name="dateTo"
+                  rules={{
+                    required: "This is required",
+                    validate: { required: validateDate },
+                  }}
+                  render={({ field }) => {
+                    return (
+                      <DatePicker
+                        label="Date to *"
+                        value={field.value}
+                        inputRef={field.ref}
+                        onChange={(date: DateTime | null) => {
+                          setDateTo(date);
+                          field.onChange(date);
+                          if (date && dateFrom && date < dateFrom) {
+                            setValue("dateFrom", date);
+                            setDateFrom(date);
+                          }
+                        }}
+                        slotProps={{
+                          textField: {
+                            error: !dateIsValid(dateTo),
+                            helperText: errors?.dateTo?.message,
+                          },
+                        }}
+                      />
+                    );
+                  }}
                 />
-              ) : (
-                <Loading linearProgress />
-              )}
-            </Box>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                {props.leaveTypes ? (
+                  <FormControl fullWidth>
+                    <InputLabel id="select-label-leave-type">
+                      Leave type *
+                    </InputLabel>
+                    <Select
+                      labelId="select-label-leave-type"
+                      id="select-leave-type"
+                      defaultValue={getDefaultLeaveTypeId()}
+                      label="Leave type *"
+                      required
+                      {...register("leaveType")}
+                      onChange={(event) => {
+                        setLeaveTypeId(event.target.value);
+                      }}
+                    >
+                      {props.leaveTypes.map((x) => (
+                        <MenuItem
+                          key={`leave-types-${x.id}`}
+                          value={x.id}
+                          style={{
+                            borderLeftColor:
+                              x.properties?.color ?? "transparent",
+                            borderLeftStyle: "solid",
+                            borderLeftWidth: "initial",
+                          }}
+                        >
+                          {x.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <Loading linearProgress label="Leave type *" />
+                )}
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  label="Remarks"
+                  fullWidth
+                  rows={2}
+                  multiline
+                  {...register("remarks")}
+                />
+              </Grid>
+            </Grid>
+          </Box>
 
-            <LoadingButton
-              type="submit"
-              variant="contained"
-              sx={{ mt: 3, ml: 1 }}
-              fullWidth
-              disabled={!props.employees || !props.leaveTypes || !isValid}
-              loading={submitInProgress}
-            >
-              Submit
-            </LoadingButton>
-          </Paper>
-        </Container>
-      </React.Fragment>
-      <input
-        name="HiddenField2"
-        type="hidden"
-        value="fake"
-      />
+          <Box sx={{ my: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Range
+            </Typography>
+            {props.holidays ? (
+              <Range
+                holidays={props.holidays}
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                setValue={setValue}
+              />
+            ) : (
+              <Loading linearProgress />
+            )}
+          </Box>
+
+          <Box sx={{ my: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Additional information
+            </Typography>
+            {props.leaveLimits &&
+            props.leaveRequests &&
+            props.holidays &&
+            props.leaveTypes ? (
+              <AdditionalInfo
+                holidays={props.holidays}
+                leaveRequests={props.leaveRequests}
+                leaveLimits={props.leaveLimits}
+                leaveTypes={props.leaveTypes}
+                leaveTypeId={leaveTypeId ?? getDefaultLeaveTypeId() ?? ""}
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                setValue={setValue}
+              />
+            ) : (
+              <Loading linearProgress />
+            )}
+          </Box>
+
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            sx={{ mt: 3, ml: 1 }}
+            fullWidth
+            disabled={!props.employees || !props.leaveTypes}
+            loading={submitInProgress}
+          >
+            Submit
+          </LoadingButton>
+        </Paper>
+      </Container>
+      <input name="HiddenField2" type="hidden" value="fake" />
     </form>
   );
 };
@@ -475,21 +487,15 @@ const AdditionalInfo = (props: {
           )}
         </Typography>
       </Grid>
-      <input
-        name="HiddenField"
-        type="hidden"
-        value="fake"
-      />
     </Grid>
   );
 
-  function findWorkingHoursAndParseDuration() : Duration | undefined {
+  function findWorkingHoursAndParseDuration(): Duration | undefined {
     const workingHours = findWorkingHours();
     return workingHours ? Duration.fromISO(workingHours) : undefined;
   }
-  function findWorkingHours() : string | undefined {
-    return props.leaveRequests.find(
-      (x) => x.leaveTypeId === props.leaveTypeId
-    )?.workingHours;
+  function findWorkingHours(): string | undefined {
+    return props.leaveRequests.find((x) => x.leaveTypeId === props.leaveTypeId)
+      ?.workingHours;
   }
 };
