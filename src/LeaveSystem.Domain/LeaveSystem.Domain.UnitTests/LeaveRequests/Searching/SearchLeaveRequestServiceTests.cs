@@ -59,9 +59,12 @@ public class SearchLeaveRequestServiceTests
             .Returns(now);
 
         // Act
-        var (results, search) = await searchLeaveRequestService.Search(null, null, null, null, null, null, cancellationToken);
+        var result = await searchLeaveRequestService.Search(null, null, null, null, null, null, cancellationToken);
+
 
         // Assert
+        Assert.True(result.IsSuccess, "Search return error");
+        var (results, _) = result.Value;
         Assert.NotEmpty(results);
         Assert.Equal(leaveRequestId, results.First().Id);
         mockSearchLeaveRequestRepository.VerifyAll();
@@ -90,7 +93,8 @@ public class SearchLeaveRequestServiceTests
         var result = await searchLeaveRequestService.Search(null, null, null, null, null, null, cancellationToken);
 
         // Assert
-        Assert.Empty(result.results);
+        Assert.True(result.IsSuccess, "Search return error");
+        Assert.Empty(result.Value.results);
     }
 
     [Fact]
@@ -111,8 +115,9 @@ public class SearchLeaveRequestServiceTests
         var result = await searchLeaveRequestService.Search(null, null, null, null, null, null, cancellationToken);
 
         // Assert
-        Assert.Contains(LeaveRequestStatus.Pending, result.search.Statuses);
-        Assert.Contains(LeaveRequestStatus.Accepted, result.search.Statuses);
+        Assert.True(result.IsSuccess, "Search return error");
+        Assert.Contains(LeaveRequestStatus.Pending, result.Value.search.Statuses);
+        Assert.Contains(LeaveRequestStatus.Accepted, result.Value.search.Statuses);
     }
 
     [Fact]
@@ -133,7 +138,8 @@ public class SearchLeaveRequestServiceTests
         var result = await searchLeaveRequestService.Search(null, null, null, null, null, null, cancellationToken);
 
         // Assert
-        Assert.Equal(DateOnly.FromDateTime(now.AddDays(-14).Date), result.search.DateFrom);
-        Assert.Equal(DateOnly.FromDateTime(now.AddDays(14).Date), result.search.DateTo);
+        Assert.True(result.IsSuccess, "Search return error");
+        Assert.Equal(DateOnly.FromDateTime(now.AddDays(-14).Date), result.Value.search.DateFrom);
+        Assert.Equal(DateOnly.FromDateTime(now.AddDays(14).Date), result.Value.search.DateTo);
     }
 }
