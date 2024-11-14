@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { GridRenderCellParams } from "@mui/x-data-grid/models";
 import { DateTime } from "luxon";
-import { LeaveRequestDto } from "./LeaveRequestsDto";
+import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";

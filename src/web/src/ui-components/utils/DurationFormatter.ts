@@ -1,5 +1,5 @@
 import { DateTime, Duration } from "luxon";
-import { LeaveRequestDto } from "../leave-requests/LeaveRequestsDto";
+import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import { DaysCounter } from "./DaysCounter";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 

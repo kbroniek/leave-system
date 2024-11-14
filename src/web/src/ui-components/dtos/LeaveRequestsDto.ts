@@ -1,5 +1,5 @@
-import { LeaveRequestStatus } from "../dtos/LeaveRequestStatusDto"
-import { UserDto } from "../dtos/UserDto"
+import { LeaveRequestStatus } from "./LeaveRequestStatusDto"
+import { UserDto } from "./UserDto"
 
 export interface LeaveRequestsResponseDto {
     items: LeaveRequestDto[],
@@ -20,6 +20,6 @@ export interface LeaveRequestDto {
     duration: string
     leaveTypeId: string
     status: LeaveRequestStatus
-    createdBy: UserDto
+    assignedTo: UserDto
     workingHours: string
 }
