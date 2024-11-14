@@ -6,12 +6,12 @@ import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
 
 // Sample app imports
-import { Loading } from "../Loading";
+import { Loading, LoadingAuth } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
-import { callApi, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
 import { LeaveRequestsResponseDto } from "./LeaveRequestsDto";
-import { HolidaysDto } from "./HolidaysDto";
+import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 
@@ -22,18 +22,21 @@ const DataContent = () => {
   const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(null);
 
+  const dateFrom = "2024-08-21";
+  const dateTo = "2024-11-30";
+
   useEffect(() => {
     if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
-      callApi<LeaveRequestsResponseDto>("/leaverequests?dateFrom=2024-08-21&dateTo=2024-11-01")
+      callApiGet<LeaveRequestsResponseDto>(`/leaverequests?dateFrom=${dateFrom}&dateTo=${dateTo}`)
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01")
+      callApiGet<HolidaysDto>(`/settings/holidays?dateFrom=${dateFrom}&dateTo=${dateTo}`)
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<LeaveStatusesDto>("/settings/leavestatus")
+      callApiGet<LeaveStatusesDto>("/settings/leavestatus")
         .then((response) => setApiLeaveStatuses(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApi<LeaveTypesDto>("/leavetypes")
+      callApiGet<LeaveTypesDto>("/leavetypes")
         .then((response) => setApiLeaveTypes(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
@@ -57,7 +60,7 @@ export function LeaveRequestsTimeline() {
       interactionType={InteractionType.Redirect}
       authenticationRequest={loginRequest}
       errorComponent={ErrorComponent}
-      loadingComponent={Loading}
+      loadingComponent={LoadingAuth}
     >
       <DataContent />
     </MsalAuthenticationTemplate>

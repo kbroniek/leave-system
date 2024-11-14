@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
 import { LeaveRequest } from "./LeaveRequestModel";
 import { UserDto } from "../dtos/UserDto";
-import { HolidaysDto } from "./HolidaysDto";
+import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 
 export class LeaveRequestsTimelineTransformer {

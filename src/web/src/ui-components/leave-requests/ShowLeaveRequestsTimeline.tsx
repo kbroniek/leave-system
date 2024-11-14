@@ -13,7 +13,7 @@ import {
 } from "@mui/x-data-grid/models";
 import Grid from "@mui/material/Grid2";
 import { RenderLeaveRequests } from "./RenderLeaveRequests";
-import { HolidaysDto } from "./HolidaysDto";
+import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";

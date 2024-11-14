@@ -6,7 +6,18 @@
 
 System to manage leaves.
 
-## How to run a project
+## Troubleshooting
+
+If you have the error when you deploy PR in to the Azure:
+
+```
+The content server has rejected the request with: BadRequest
+Reason: The number of static files was too large.
+```
+
+Probably you have an error in your code. Check logs and find errors.
+
+## How to run a project (deprecated)
 
 ### Manual
 

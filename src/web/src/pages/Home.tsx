@@ -12,7 +12,7 @@ export function Home() {
       <Authorized
         roles={["GlobalAdmin", "Employee", "DecisionMaker"]}
         authorized={<LeaveRequestsTimeline />}
-        notAuthorized={<Forbidden />}
+        unauthorized={<Forbidden />}
       />
 
       <UnauthenticatedTemplate>
