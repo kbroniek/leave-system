@@ -27,6 +27,7 @@ import { EmployeesDto } from "../dtos/EmployeesDto";
 import { v4 as uuidv4 } from "uuid";
 import { Authorized, isInRole } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
+import { useNotifications } from "@toolpad/core/useNotifications";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -42,6 +43,7 @@ const DataContent = () => {
   >();
   const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
   const navigate = useNavigate();
+  const notifications = useNotifications();
 
   useEffect(() => {
     if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
@@ -67,7 +69,7 @@ const DataContent = () => {
       callApiGet<LeaveLimitsDto>(`/leavelimits/user?year=${currentYear}`)
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      
+
       if(isInRole(instance, ["DecisionMaker", "GlobalAdmin"]))
       {
         callApiGet<EmployeesDto>("/employees")
@@ -90,38 +92,53 @@ const DataContent = () => {
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
-      //TODO: show notification
-      alert("Date from is invalid. Choose correct date.");
+      notifications.show("Date from is invalid. Choose correct date.", {
+        severity: "warning",
+        autoHideDuration: 3000,
+      });
       return;
     }
     if (!model.dateTo?.isValid) {
-      //TODO: show notification
-      alert("Date to is invalid. Choose correct date.");
+      notifications.show("Date to is invalid. Choose correct date.", {
+        severity: "warning",
+        autoHideDuration: 3000,
+      });
       return;
     }
     if (!model.leaveType) {
-      //TODO: show notification
-      alert("Leave type is invalid. Choose correct item.");
+      notifications.show("Leave type is invalid. Choose correct item.", {
+        severity: "warning",
+        autoHideDuration: 3000,
+      });
       return;
     }
     if (!model.allDays) {
-      //TODO: show notification
-      alert("Form is invalid. Can't read all days. Contact with administrator.");
+      notifications.show("Form is invalid. Can't read all days. Contact with administrator.", {
+        severity: "warning",
+        autoHideDuration: 3000,
+      });
       return;
     }
     if (!model.workingDays) {
-      //TODO: show notification
-      alert("Form is invalid. Can't read working days. Contact with administrator.");
+      notifications.show("Form is invalid. Can't read working days. Contact with administrator.", {
+        severity: "warning",
+        autoHideDuration: 3000,
+      });
       return;
     }
     if (!model.workingHours) {
-      //TODO: show notification
-      alert("Form is invalid. Can't read working hours. Check if you have added limits.");
+      notifications.show("Form is invalid. Can't read working hours. Check if you have added limits.", {
+        severity: "warning",
+        autoHideDuration: 3000,
+      });
       return;
     }
     if (!apiLeaveTypes) {
-      //TODO: show notification
-      alert("Form is invalid. Can't read leave types. Contact with administrator."); // Email to the administrator and name
+      notifications.show("Form is invalid. Can't read leave types. Contact with administrator.", {
+        severity: "warning",
+        autoHideDuration: 3000,
+      });
+      // TODO: Email to the administrator and admin name
       return;
     }
     const calculateDuration = (): Duration => {
@@ -154,18 +171,10 @@ const DataContent = () => {
       remark: model.remarks,
       assignedToId: isNotOnBehalf ? undefined : model.onBehalf,
     };
-    const response = await callApi(url, "POST", body);
+    const response = await callApi(url, "POST", body, notifications.show);
     if(response.status === 201) {
       navigate("/")
       return response.status;
-    }
-    else {
-      //TODO: show notification
-      const errorBody = await response.json();
-      alert(`Error: ${response.status}
-        ${errorBody.title}
-        ${errorBody.detail}
-        ${response.statusText}`);
     }
   };
 
