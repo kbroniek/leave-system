@@ -76,6 +76,12 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
           <Typography variant="body2" sx={leaveStatusStyle}>{params.leaveRequest.status}</Typography>
         </Grid>
         <Grid size={6}>
+          <Typography variant="body1" sx={titleStyle}>Assigned to:</Typography>
+        </Grid>
+        <Grid size={6}>
+          <Typography variant="body2" sx={defaultStyle}>{params.leaveRequest.assignedTo.name}</Typography>
+        </Grid>
+        <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>Last modified by:</Typography>
         </Grid>
         <Grid size={6}>

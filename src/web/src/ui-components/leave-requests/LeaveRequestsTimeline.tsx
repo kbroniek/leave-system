@@ -10,7 +10,7 @@ import { Loading, LoadingAuth } from "../Loading";
 import { ErrorComponent } from "../ErrorComponent";
 import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
-import { LeaveRequestsResponseDto } from "./LeaveRequestsDto";
+import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";

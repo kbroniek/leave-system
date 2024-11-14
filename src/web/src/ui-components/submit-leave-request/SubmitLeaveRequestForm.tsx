@@ -6,7 +6,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
-import { LeaveRequestDto } from "../leave-requests/LeaveRequestsDto";
+import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";

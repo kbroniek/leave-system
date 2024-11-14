@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Searching;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.Extensions;
+using LeaveSystem.Shared;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
@@ -17,7 +19,7 @@ internal class SearchLeaveRequestRepository(CosmosClient cosmosClient, string da
 {
     private const int PageSize = 25;
 
-    public async Task<(IEnumerable<PendingEventEntity> pendingEvents, string? continuationToken)> GetPendingEvents(
+    public async Task<Result<(IEnumerable<PendingEventEntity> pendingEvents, string? continuationToken), Error>> GetPendingEvents(
         string? continuationToken, DateOnly dateFrom, DateOnly dateTo,
         Guid[] leaveTypeIds, string[] assignedToUserIds, CancellationToken cancellationToken)
     {
@@ -32,7 +34,12 @@ internal class SearchLeaveRequestRepository(CosmosClient cosmosClient, string da
                 x.EventType == typeof(LeaveRequestCreated).AssemblyQualifiedName!)
             .ToFeedIterator();
 
-        (var pendingEvents, var continuationTokenResult) = await iterator.ExecuteQuery(PageSize, cancellationToken);
+        var result = await iterator.ExecuteQuery(logger, PageSize, cancellationToken);
+        if (result.IsFailure)
+        {
+            return result.Error;
+        }
+        (var pendingEvents, var continuationTokenResult) = result.Value;
         return (pendingEvents.Select(x => x.Body), continuationTokenResult);
     }
 }
