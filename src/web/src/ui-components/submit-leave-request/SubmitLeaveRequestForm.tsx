@@ -455,7 +455,7 @@ const AdditionalInfo = (props: {
             availableDays.minus(currentRequestDaysDuration),
             currentLimit.workingHours
           )
-        : "There is no limit for this user, leave type or in that period";
+        : "There is no limit";
     }
   }
   return (
