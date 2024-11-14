@@ -20,7 +20,7 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
   const leaveTypeStyle = { ...defaultStyle, borderBottomColor: params.leaveType.properties?.color ?? "transparent" , borderBottomStyle: "solid" };
   const leaveStatusStyle = { ...defaultStyle, borderBottomColor: params.statusColor, borderBottomStyle: "solid" };
   const holidaysDateTime = params.holidays.items.map(x => DateTime.fromISO(x));
-  const daysCounter = new DaysCounter(params.leaveType.properties?.includeFreeDays ?? false, holidaysDateTime);
+  const daysCounter = new DaysCounter(holidaysDateTime, params.leaveType.properties?.includeFreeDays ?? false);
   const dateFrom = DateTime.fromISO(params.leaveRequest.dateFrom);
   const dateTo = DateTime.fromISO(params.leaveRequest.dateTo);
   const createdDate = DateTime.fromISO(params.leaveRequest.createdDate);
