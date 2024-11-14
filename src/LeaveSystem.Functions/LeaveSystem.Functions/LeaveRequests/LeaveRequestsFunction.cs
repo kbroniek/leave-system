@@ -198,7 +198,7 @@ public class LeaveRequestsFunction(
 
     private static Result<Error> IfDifferentEmployeThenReturnError(ClaimsPrincipal user, Result<LeaveRequest, Error> result)
     {
-        if (result.IsSuccess && user.IsInRole(nameof(RoleType.Employee)))
+        if (result.IsSuccess && !user.IsInRole(nameof(RoleType.DecisionMaker)) && !user.IsInRole(nameof(RoleType.GlobalAdmin)))
         {
             var userId = user.GetUserId();
             //Employee can only see his own leave request.
