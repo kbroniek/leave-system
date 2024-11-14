@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { LeaveRequestDto, LeaveRequestsResponseDto } from "./LeaveRequestsDto";
+import { LeaveRequestDto, LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { LeaveRequest } from "./LeaveRequestModel";
 import { UserDto } from "../dtos/UserDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
@@ -30,7 +30,7 @@ export class LeaveRequestsTimelineTransformer {
           name: x.name,
         },
         table: this.transformLeaveRequest(
-          leaveRequests.filter((lr) => lr.createdBy.id === x.id),
+          leaveRequests.filter((lr) => lr.assignedTo.id === x.id),
           dateFrom,
           dateTo
         ),

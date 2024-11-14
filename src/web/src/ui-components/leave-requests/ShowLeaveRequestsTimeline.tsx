@@ -1,4 +1,4 @@
-import { LeaveRequestsResponseDto } from "./LeaveRequestsDto";
+import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { DateTime } from "luxon";
 import { alpha, styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -31,7 +31,7 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
   // TODO: Get employee from api
   const employees: UserDto[] = [
     ...new Map(
-      params.leaveRequests.items.map((item) => [item.createdBy.id, item.createdBy])
+      params.leaveRequests.items.map((item) => [item.assignedTo.id, item.assignedTo])
     ).values(),
   ];
   const leaveStatusesActive = params.leaveStatuses.items.filter(x => x.state === "Active");

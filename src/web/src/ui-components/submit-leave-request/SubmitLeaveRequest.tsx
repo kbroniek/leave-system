@@ -16,7 +16,7 @@ import {
 } from "../../utils/ApiCall";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
-import { LeaveRequestsResponseDto } from "../leave-requests/LeaveRequestsDto";
+import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import {
   LeaveRequestFormModel,
   SubmitLeaveRequestForm,
