@@ -9,18 +9,18 @@ import { ShowNotification } from "@toolpad/core/useNotifications";
 
 export function callApiGet<T>(
   url: string,
-  showNotification?: ShowNotification,
+  showNotification: ShowNotification,
 ): Promise<T> {
-  return callApi(url, undefined, showNotification).then((response) =>
+  return callApi(url, "GET", undefined, showNotification).then((response) =>
     response.json(),
   );
 }
 
 export async function callApi(
   url: string,
-  method: string = "GET",
-  body?: unknown,
-  showNotification?: ShowNotification,
+  method: "GET" | "POST" | "PUT",
+  body: unknown | undefined,
+  showNotification: ShowNotification,
 ): Promise<Response> {
   const account = msalInstance.getActiveAccount();
   if (!account) {

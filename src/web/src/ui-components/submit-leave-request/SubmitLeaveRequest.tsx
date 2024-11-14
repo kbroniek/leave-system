@@ -53,42 +53,47 @@ const DataContent = () => {
       const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
       const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
       callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&AssignedToUserIds=${userId}`
+        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&AssignedToUserIds=${userId}`,
+        notifications.show,
       )
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveTypesDto>("/leavetypes")
+      callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
         .then((response) => setApiLeaveTypes(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
 
       callApiGet<HolidaysDto>(
-        `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`
+        `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
+        notifications.show,
       )
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveLimitsDto>(`/leavelimits/user?year=${currentYear}`)
+      callApiGet<LeaveLimitsDto>(
+        `/leavelimits/user?year=${currentYear}`,
+        notifications.show,
+      )
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
 
-      if(isInRole(instance, ["DecisionMaker", "GlobalAdmin"]))
-      {
-        callApiGet<EmployeesDto>("/employees")
+      if (isInRole(instance, ["DecisionMaker", "GlobalAdmin"])) {
+        callApiGet<EmployeesDto>("/employees", notifications.show)
           .then((response) => setApiEmployees(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      }
-      else {
+      } else {
         const claims = instance.getActiveAccount()?.idTokenClaims;
-        if(claims?.sub) {
-          setApiEmployees({items: [
-            {
-              id: claims?.sub,
-              name: claims?.name ?? ""
-            }
-          ]})
+        if (claims?.sub) {
+          setApiEmployees({
+            items: [
+              {
+                id: claims?.sub,
+                name: claims?.name ?? "",
+              },
+            ],
+          });
         }
       }
     }
-  }, [inProgress, apiLeaveRequests, instance]);
+  }, [inProgress, apiLeaveRequests, instance, notifications.show]);
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
@@ -113,40 +118,52 @@ const DataContent = () => {
       return;
     }
     if (!model.allDays) {
-      notifications.show("Form is invalid. Can't read all days. Contact with administrator.", {
-        severity: "warning",
-        autoHideDuration: 3000,
-      });
+      notifications.show(
+        "Form is invalid. Can't read all days. Contact with administrator.",
+        {
+          severity: "warning",
+          autoHideDuration: 3000,
+        },
+      );
       return;
     }
     if (!model.workingDays) {
-      notifications.show("Form is invalid. Can't read working days. Contact with administrator.", {
-        severity: "warning",
-        autoHideDuration: 3000,
-      });
+      notifications.show(
+        "Form is invalid. Can't read working days. Contact with administrator.",
+        {
+          severity: "warning",
+          autoHideDuration: 3000,
+        },
+      );
       return;
     }
     if (!model.workingHours) {
-      notifications.show("Form is invalid. Can't read working hours. Check if you have added limits.", {
-        severity: "warning",
-        autoHideDuration: 3000,
-      });
+      notifications.show(
+        "Form is invalid. Can't read working hours. Check if you have added limits.",
+        {
+          severity: "warning",
+          autoHideDuration: 3000,
+        },
+      );
       return;
     }
     if (!apiLeaveTypes) {
-      notifications.show("Form is invalid. Can't read leave types. Contact with administrator.", {
-        severity: "warning",
-        autoHideDuration: 3000,
-      });
+      notifications.show(
+        "Form is invalid. Can't read leave types. Contact with administrator.",
+        {
+          severity: "warning",
+          autoHideDuration: 3000,
+        },
+      );
       // TODO: Email to the administrator and admin name
       return;
     }
     const calculateDuration = (): Duration => {
       const leaveType = apiLeaveTypes.items.find(
-        (x) => x.id === model.leaveType
+        (x) => x.id === model.leaveType,
       );
       const duration =
-        leaveType?.properties?.includeFreeDays ?? true
+        (leaveType?.properties?.includeFreeDays ?? true)
           ? model.workingHours!.as("milliseconds") * model.allDays!
           : model.workingHours!.as("milliseconds") * model.workingDays!;
 
@@ -172,8 +189,12 @@ const DataContent = () => {
       assignedToId: isNotOnBehalf ? undefined : model.onBehalf,
     };
     const response = await callApi(url, "POST", body, notifications.show);
-    if(response.status === 201) {
-      navigate("/")
+    if (response.status === 201) {
+      notifications.show("Leave Request is added successfully", {
+        severity: "success",
+        autoHideDuration: 3000,
+      });
+      navigate("/");
       return response.status;
     }
   };
@@ -181,7 +202,7 @@ const DataContent = () => {
   return (
     <Authorized
       roles={["DecisionMaker", "GlobalAdmin", "Employee"]}
-      authorized={(
+      authorized={
         <SubmitLeaveRequestForm
           leaveRequests={apiLeaveRequests?.items}
           holidays={apiHolidays}
@@ -190,8 +211,8 @@ const DataContent = () => {
           employees={apiEmployees?.items}
           onSubmit={onSubmit}
         />
-      )}
-      unauthorized={(<Forbidden />)}
+      }
+      unauthorized={<Forbidden />}
     />
   );
 };
