@@ -7,8 +7,8 @@ export interface LeaveLimitDto {
   overdueLimit: string | null;
   workingHours: string;
   leaveTypeId: string;
-  validSince: string;
-  validUntil: string;
+  validSince: string | null;
+  validUntil: string | null;
   assignedToUserId: string;
   state: "Active" | "Inactive";
   description: string | null;

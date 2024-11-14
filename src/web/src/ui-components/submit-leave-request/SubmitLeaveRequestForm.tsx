@@ -422,8 +422,8 @@ const AdditionalInfo = (props: {
       (x) =>
         x.state === "Active" &&
         x.leaveTypeId === props.leaveTypeId &&
-        DateTime.fromISO(x.validSince) <= dateFrom &&
-        DateTime.fromISO(x.validUntil) >= dateTo
+        (!x.validSince || DateTime.fromISO(x.validSince) <= dateFrom) &&
+        (!x.validUntil || DateTime.fromISO(x.validUntil) >= dateTo)
     );
     if (currentLimit) {
       const limit = currentLimit.limit
