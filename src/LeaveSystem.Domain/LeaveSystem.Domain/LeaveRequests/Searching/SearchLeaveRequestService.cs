@@ -31,7 +31,7 @@ public class SearchLeaveRequestService(ISearchLeaveRequestRepository searchLeave
 
         var searchedLeaveRequests = leaveRequests
             .Where(x => statusesOrDefault.Contains(x.Status))
-            .Select(x => new SearchLeaveRequestsResultDto(x.Id, x.DateFrom, x.DateTo, x.Duration, x.LeaveTypeId, x.Status, x.CreatedBy, x.WorkingHours))
+            .Select(x => new SearchLeaveRequestsResultDto(x.Id, x.DateFrom, x.DateTo, x.Duration, x.LeaveTypeId, x.Status, x.AssignedTo, x.WorkingHours))
             .ToList();
         var search = new SearchLeaveRequestsQueryDto(
             continuationTokenResult, dateFromOrDefault, dateToOrDefault,
