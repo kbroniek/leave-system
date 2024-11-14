@@ -8,7 +8,6 @@ import { DateTime, DateTimeFormatOptions } from "luxon";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
-import { useNotifications } from "@toolpad/core/useNotifications";
 
 export default function ShowLeaveRequestsTimeline(params: Readonly<{
   leaveRequest: LeaveRequestDetailsDto;
@@ -16,7 +15,6 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
   leaveType: LeaveTypeDto
   holidays: HolidaysDto
 }>): JSX.Element {
-  const notifications = useNotifications();
   const titleStyle = {color: "text.secondary", textAlign: "right"};
   const defaultStyle = { paddingTop: "1px", width: "max-content" };
   const leaveTypeStyle = { ...defaultStyle, borderBottomColor: params.leaveType.properties?.color ?? "transparent" , borderBottomStyle: "solid" };
@@ -28,10 +26,6 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
   const createdDate = DateTime.fromISO(params.leaveRequest.createdDate);
   const lastModifiedDate = DateTime.fromISO(params.leaveRequest.lastModifiedDate);
   const formatDate: DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-  notifications.show('Consider yourself notified!', {
-    severity: "success",
-    autoHideDuration: 3000,
-  });
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
       <Grid container spacing={2}>
