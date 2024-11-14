@@ -11,6 +11,7 @@ import { msalConfig } from "./authConfig";
 import { App } from "./App";
 
 import "./index.css";
+import { NotificationsProvider } from "@toolpad/core/useNotifications";
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
@@ -37,7 +38,9 @@ msalInstance.initialize().then(() => {
     <StrictMode>
       <BrowserRouter>
         <ThemeProvider theme={theme}>
-          <App pca={msalInstance} />
+          <NotificationsProvider>
+            <App pca={msalInstance} />
+          </NotificationsProvider>
         </ThemeProvider>
       </BrowserRouter>
     </StrictMode>

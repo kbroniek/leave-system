@@ -14,6 +14,7 @@ import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
+import { useNotifications } from "@toolpad/core/useNotifications";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -21,26 +22,27 @@ const DataContent = () => {
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
   const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(null);
+  const notifications = useNotifications();
 
   const dateFrom = "2024-08-21";
   const dateTo = "2024-11-30";
 
   useEffect(() => {
     if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
-      callApiGet<LeaveRequestsResponseDto>(`/leaverequests?dateFrom=${dateFrom}&dateTo=${dateTo}`)
+      callApiGet<LeaveRequestsResponseDto>(`/leaverequests?dateFrom=${dateFrom}&dateTo=${dateTo}`, notifications.show)
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<HolidaysDto>(`/settings/holidays?dateFrom=${dateFrom}&dateTo=${dateTo}`)
+      callApiGet<HolidaysDto>(`/settings/holidays?dateFrom=${dateFrom}&dateTo=${dateTo}`, notifications.show)
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveStatusesDto>("/settings/leavestatus")
+      callApiGet<LeaveStatusesDto>("/settings/leavestatus", notifications.show)
         .then((response) => setApiLeaveStatuses(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveTypesDto>("/leavetypes")
+      callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
         .then((response) => setApiLeaveTypes(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
-  }, [inProgress, apiLeaveRequests, instance]);
+  }, [inProgress, apiLeaveRequests, instance, notifications.show]);
 
   return apiLeaveRequests && apiHolidays && apiLeaveStatuses && apiLeaveTypes ? (
     <ShowLeaveRequestsTimeline
