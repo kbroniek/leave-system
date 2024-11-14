@@ -22,8 +22,9 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
         var pageSizeOrMax = pageSize < MaxPageSize ? pageSize ?? MaxPageSize : MaxPageSize;
         var result = await container.GetItemLinqQueryable<LeaveLimitDto>(continuationToken: continuationToken, requestOptions: new QueryRequestOptions { MaxItemCount = pageSizeOrMax })
             .Where(x => (leaveTypeIds.Length == 0 || leaveTypeIds.Contains(x.LeaveTypeId)) &&
-                (assignedToUserIds.Length == 0 || assignedToUserIds.Contains(x.AssignedToUserId)) &&
-                x.ValidSince >= firstDay && x.ValidUntil <= lastDay)
+                (!x.AssignedToUserId.IsDefined() || x.AssignedToUserId.IsNull() || assignedToUserIds.Length == 0 || assignedToUserIds.Contains(x.AssignedToUserId)) &&
+                (!x.ValidSince.IsDefined() || x.ValidSince.IsNull() || x.ValidSince >= firstDay) &&
+                (!x.ValidUntil.IsDefined() || x.ValidUntil.IsNull() || x.ValidUntil <= lastDay))
             .ToFeedIterator()
             .ExecuteQuery(logger, pageSizeOrMax, cancellationToken);
         return result;
