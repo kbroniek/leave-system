@@ -1,6 +1,7 @@
 namespace LeaveSystem.Functions.LeaveRequests;
 
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading;
 using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests;
@@ -42,16 +43,18 @@ public class LeaveRequestsFunction(
         var isDecisionMaker = req.HttpContext.User.IsInRole(nameof(RoleType.DecisionMaker));
         var limitToUserIds = isGlobalAdmin || isDecisionMaker ? queryResult.AssignedToUserIds : [req.HttpContext.GetUserId()];
 
-        (var leaveRequests, var search) = await searchLeaveRequestService.Search(
+        var result = await searchLeaveRequestService.Search(
             queryResult.ContinuationToken, queryResult.DateFrom, queryResult.DateTo,
             queryResult.LeaveTypeIds, queryResult.Statuses, limitToUserIds, cancellationToken);
 
-        return new OkObjectResult(new
-        {
-            Items = leaveRequests,
-            search.ContinuationToken,
-            Search = search
-        });
+        return result.Match<IActionResult>(
+            leaveRequest => new OkObjectResult(new
+            {
+                Items = result.Value.results,
+                result.Value.search.ContinuationToken,
+                Search = result.Value.search
+            }),
+            error => error.ToObjectResult($"Error occurred while searching leave requests. Query = {JsonSerializer.Serialize(queryResult)}."));
     }
 
     [Function(nameof(GetLeaveRequest))]

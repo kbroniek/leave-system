@@ -2,12 +2,13 @@ namespace LeaveSystem.Domain.LeaveRequests.Searching;
 using System;
 using System.Threading.Tasks;
 using LeaveSystem.Domain.EventSourcing;
+using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
 using LeaveSystem.Shared.LeaveRequests;
 
 public class SearchLeaveRequestService(ISearchLeaveRequestRepository searchLeaveRequestRepository, ReadService readService, TimeProvider timeProvider)
 {
-    public async Task<(IEnumerable<SearchLeaveRequestsResultDto> results, SearchLeaveRequestsQueryDto search)> Search(string? continuationToken, DateOnly? dateFrom, DateOnly? dateTo,
+    public async Task<Result<(IEnumerable<SearchLeaveRequestsResultDto> results, SearchLeaveRequestsQueryDto search), Error>> Search(string? continuationToken, DateOnly? dateFrom, DateOnly? dateTo,
         Guid[]? leaveTypeIds, LeaveRequestStatus[]? statuses, string[]? assignedToUserIds, CancellationToken cancellationToken)
     {
         var now = timeProvider.GetUtcNow();
@@ -15,10 +16,15 @@ public class SearchLeaveRequestService(ISearchLeaveRequestRepository searchLeave
         var dateFromOrDefault = dateFrom ?? GetMinDate(now);
         var dateToOrDefault = dateTo ?? GetMaxDate(now);
 
-        (var pendingEvents, var continuationTokenResult) = await searchLeaveRequestRepository.GetPendingEvents(
+        var result = await searchLeaveRequestRepository.GetPendingEvents(
             continuationToken, dateFromOrDefault, dateToOrDefault,
             leaveTypeIds ?? [], assignedToUserIds ?? [], cancellationToken);
 
+        if (result.IsFailure)
+        {
+            return result.Error;
+        }
+        (var pendingEvents, var continuationTokenResult) = result.Value;
         var leaveRequests = await readService.FindByIds<LeaveRequest>(
             pendingEvents.Select(x => x.LeaveRequestId).ToArray(),
             cancellationToken);
@@ -42,7 +48,7 @@ public class SearchLeaveRequestService(ISearchLeaveRequestRepository searchLeave
 
 public interface ISearchLeaveRequestRepository
 {
-    Task<(IEnumerable<PendingEventEntity> pendingEvents, string? continuationToken)> GetPendingEvents(
+    Task<Result<(IEnumerable<PendingEventEntity> pendingEvents, string? continuationToken), Error>> GetPendingEvents(
         string? continuationToken, DateOnly dateFrom, DateOnly dateTo,
         Guid[] leaveTypeIds, string[] assignedToUserIds, CancellationToken cancellationToken);
 
