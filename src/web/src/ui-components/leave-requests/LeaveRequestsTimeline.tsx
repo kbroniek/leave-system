@@ -15,6 +15,7 @@ import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { EmployeesDto } from "../dtos/EmployeesDto";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -22,6 +23,7 @@ const DataContent = () => {
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
   const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(null);
+  const [apiEmployees, setApiEmployees] = useState<EmployeesDto>({items: []});
   const notifications = useNotifications();
 
   const dateFrom = "2024-08-21";
@@ -41,6 +43,9 @@ const DataContent = () => {
       callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
         .then((response) => setApiLeaveTypes(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      callApiGet<EmployeesDto>("/employees", notifications.show)
+        .then((response) => setApiEmployees(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
   }, [inProgress, apiLeaveRequests, instance, notifications.show]);
 
@@ -50,6 +55,7 @@ const DataContent = () => {
       holidays={apiHolidays}
       leaveStatuses={apiLeaveStatuses}
       leaveTypes={apiLeaveTypes}
+      employees={apiEmployees.items}
     />
   ) : (
     <Loading />

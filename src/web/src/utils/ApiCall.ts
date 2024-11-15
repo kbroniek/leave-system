@@ -53,18 +53,14 @@ export async function callApi(
     `${import.meta.env.VITE_REACT_APP_API_URL}${url}`,
     options,
   ).catch((error) => {
-    if (!showNotification) {
-      console.log(error);
-    } else {
-      showNotification(`Error: ${JSON.stringify(error)}`, {
-        severity: "error",
-        autoHideDuration: 3000,
-      });
-    }
+    showNotification(`Error: ${JSON.stringify(error)}`, {
+      severity: "error",
+      autoHideDuration: 3000,
+    });
     return error;
   });
 
-  if (showNotification) {
+  if (response < 200 || response >= 300) {
     const errorBody = await response.json();
     showNotification(
       `Error: ${response.status}

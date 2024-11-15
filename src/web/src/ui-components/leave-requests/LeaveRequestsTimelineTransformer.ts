@@ -151,7 +151,7 @@ export interface UserLeaveRequestTableCollection {
 }
 export interface UserLeaveRequestTable {
   employee: {
-    name: string;
+    name?: string;
     id: string;
   };
   table: LeaveRequestTable[];

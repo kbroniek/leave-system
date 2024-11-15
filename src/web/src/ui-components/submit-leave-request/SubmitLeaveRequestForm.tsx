@@ -75,8 +75,16 @@ export const SubmitLeaveRequestForm = (props: {
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
   const [submitInProgress, setSubmitInProgress] = useState(false);
 
-  const  currenUser = (employees: UserDto[]): string | undefined => {
+  const employees = props.employees?.map(x => ({
+      ...x,
+      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? "undefined"
+    }))
+    .sort((a, b) => a.name?.localeCompare(b.name ?? "") ?? 0);
+  const  currenUser = (): string | undefined => {
     const claims = instance.getActiveAccount()?.idTokenClaims;
+    if(!employees) {
+      return claims?.sub;
+    }
     const activeUser = employees.find((x) => x.id === claims?.sub);
     const employee = activeUser ?? employees.find(() => true);
     return employee?.id;
@@ -85,7 +93,7 @@ export const SubmitLeaveRequestForm = (props: {
   const { ref: onBehalfRef, ...onBehalfInputProps } = register("onBehalf", {
     required: "This is required",
   });
-  setValue("onBehalf", currenUser(props.employees ?? []))
+  setValue("onBehalf", currenUser())
   const onSubmit = async (value: LeaveRequestFormModel, event?: React.BaseSyntheticEvent) => {
     if(!isValid) {
       return;
@@ -127,7 +135,7 @@ export const SubmitLeaveRequestForm = (props: {
                 <Authorized
                   roles={["DecisionMaker", "GlobalAdmin"]}
                   authorized={
-                    props.employees ? (
+                    employees ? (
                       <FormControl fullWidth>
                         <InputLabel id="select-label-add-on-behalf">
                           Add on behalf of another user *
@@ -135,12 +143,12 @@ export const SubmitLeaveRequestForm = (props: {
                         <Select
                           labelId="select-label-add-on-behalf"
                           id="select-add-on-behalf"
-                          defaultValue={currenUser(props.employees)}
+                          defaultValue={currenUser()}
                           label="Add on behalf of another user *"
                           inputRef={onBehalfRef}
                           {...onBehalfInputProps}
                         >
-                          {props.employees.map((x) => (
+                          {employees.map((x) => (
                             <MenuItem key={`add-on-behalf-${x.id}`} value={x.id}>{x.name}</MenuItem>
                           ))}
                         </Select>
@@ -316,7 +324,7 @@ export const SubmitLeaveRequestForm = (props: {
             variant="contained"
             sx={{ mt: 3, ml: 1 }}
             fullWidth
-            disabled={!props.employees || !props.leaveTypes}
+            disabled={!employees || !props.leaveTypes}
             loading={submitInProgress}
           >
             Submit
