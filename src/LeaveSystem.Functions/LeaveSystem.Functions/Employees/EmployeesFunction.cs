@@ -1,5 +1,6 @@
 namespace LeaveSystem.Functions.Employees;
 
+using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
@@ -9,35 +10,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-public class EmployeesFunction
+public class EmployeesFunction(ILogger<EmployeesFunction> logger, IGetUserRepository getUserRepository)
 {
-    private readonly ILogger<EmployeesFunction> logger;
-
-    public EmployeesFunction(ILogger<EmployeesFunction> logger)
-    {
-        this.logger = logger;
-    }
 
     [Function("GetEmployee")]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)},{nameof(RoleType.LeaveLimitAdmin)}")]
-    public IActionResult GetEmployees([HttpTrigger(
+    public async Task<IActionResult> GetEmployees([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "employees")] HttpRequest req)
+        Route = "employees")] HttpRequest req,
+        [CosmosDBInput(
+            databaseName: "%DatabaseName%",
+            containerName: "%RolesContainerName%",
+            SqlQuery = $"SELECT c.id FROM c JOIN r IN c. roles WHERE r = \"{nameof(RoleType.Employee)}\"",
+            Connection  = "CosmosDBConnection")] IEnumerable<RolesDto> roles, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        var userId = req.HttpContext.GetUserId();
-        var employees = new[] {
-            new GetEmployeeDto(
-                "55d4c226-206d-4449-bf5d-0c0065b80ff4",
-                "Jan Kowalski",
-                "jan@test.pl"),
-            new GetEmployeeDto(
-                userId,
-                req.HttpContext.User.Identity?.Name,
-                "current@test.pl"),
-        };
+        var result = await getUserRepository.GetUsers(roles.Select(x => x.Id).ToArray(), cancellationToken);
 
-        return new OkObjectResult(employees.ToPagedListResponse());
+        return result.Match(
+            (employees) => new OkObjectResult(employees.ToPagedListResponse()),
+            error => error.ToObjectResult("Error occurred while getting roles."));
     }
+    public record RolesDto(string Id);
 }
+

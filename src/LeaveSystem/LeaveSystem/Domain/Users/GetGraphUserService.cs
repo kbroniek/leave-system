@@ -22,7 +22,7 @@ public class GetGraphUserService
         var graphClient = graphClientFactory.Create();
 
         var users = await graphClient.Users
-            .GetAsync(_ => _.QueryParameters.Select = new string[] { "id", "mail", "displayName", "identities", roleAttributeName }, cancellationToken)
+            .GetAsync(_ => _.QueryParameters.Select = ["id", "mail", "displayName", "identities", roleAttributeName], cancellationToken)
             ?? throw NotFoundException.For<UserCollectionResponse>("Can't find users in graph api");
         return await GetAll(graphClient, users, cancellationToken);
     }

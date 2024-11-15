@@ -34,7 +34,8 @@ public class EmployeeService(IRolesRepository getRolesRepository, IGetUserReposi
 public interface IGetUserRepository
 {
     Task<Result<User, Error>> GetUser(string id, CancellationToken cancellationToken);
-    public record User(string Id, string? Name);
+    Task<Result<IReadOnlyCollection<User>, Error>> GetUsers(string[] ids, CancellationToken cancellationToken);
+    public record User(string Id, string? Name, string? FirstName = null, string? LastName = null);
 }
 
 public interface IRolesRepository
