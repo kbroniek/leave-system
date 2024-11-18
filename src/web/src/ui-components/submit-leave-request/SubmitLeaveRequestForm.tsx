@@ -93,7 +93,7 @@ export const SubmitLeaveRequestForm = (props: {
   const { ref: onBehalfRef, ...onBehalfInputProps } = register("onBehalf", {
     required: "This is required",
   });
-  setValue("onBehalf", currenUser())
+  setValue("onBehalf", currenUser());
   const onSubmit = async (value: LeaveRequestFormModel, event?: React.BaseSyntheticEvent) => {
     if(!isValid) {
       return;
