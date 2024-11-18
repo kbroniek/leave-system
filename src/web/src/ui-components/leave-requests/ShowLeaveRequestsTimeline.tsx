@@ -170,6 +170,9 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
     "& .MuiDataGrid-filler": {
       display: "none",
     },
+    "& .MuiDataGrid-cell": {
+      paddingLeft: "3px",
+    },
   }));
 
   return (

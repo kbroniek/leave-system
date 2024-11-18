@@ -4,7 +4,7 @@
 # @name Search Leave Requests
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leaverequests?dateFrom=2024-08-21&dateTo=2024-09-23
+GET {{baseUrl}}/leaverequests?dateFrom=2024-08-21&dateTo=2024-09-23&assignedToUserIds=4e67827b-f93a-40c3-96f1-9193bdfac06d&assignedToUserIds=c188430f-3abd-4885-80f5-75e1b44f7b2b
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
