@@ -42,11 +42,13 @@ const DataContent = () => {
     LeaveLimitsDto | undefined
   >();
   const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
+  const [isCallApi, setIsCallApi] = useState(true);
   const navigate = useNavigate();
   const notifications = useNotifications();
 
   useEffect(() => {
-    if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
+    if (isCallApi && inProgress === InteractionStatus.None) {
+      setIsCallApi(false);
       const userId = instance.getActiveAccount()?.idTokenClaims?.sub;
       const now = DateTime.local();
       const currentYear = now.toFormat("yyyy");
@@ -93,7 +95,7 @@ const DataContent = () => {
         }
       }
     }
-  }, [inProgress, apiLeaveRequests, instance, notifications.show]);
+  }, [inProgress, isCallApi, instance, notifications.show]);
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
