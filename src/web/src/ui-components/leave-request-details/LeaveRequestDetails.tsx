@@ -7,7 +7,7 @@ import { loginRequest } from "../../authConfig";
 
 // Sample app imports
 import { Loading, LoadingAuth } from "../Loading";
-import { ErrorComponent } from "../ErrorComponent";
+import { ErrorComponent } from "../../components/ErrorComponent";
 import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
 import ShowLeaveRequestDetails from "./ShowLeaveRequestDetails";

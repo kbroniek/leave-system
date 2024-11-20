@@ -8,7 +8,7 @@ import { loginRequest } from "../../authConfig";
 
 // Sample app imports
 import { LoadingAuth } from "../Loading";
-import { ErrorComponent } from "../ErrorComponent";
+import { ErrorComponent } from "../../components/ErrorComponent";
 import {
   callApi,
   callApiGet,
