@@ -6,7 +6,7 @@ import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
 
 // Sample app imports
-import { Loading, LoadingAuth } from "../Loading";
+import { Loading, LoadingAuth } from "../../components/Loading";
 import { ErrorComponent } from "../../components/ErrorComponent";
 import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";

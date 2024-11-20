@@ -2,7 +2,7 @@ import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
 import { useEffect, useState } from "react";
 import { ErrorComponent } from "../../components/ErrorComponent";
-import { LoadingAuth } from "../Loading";
+import { LoadingAuth } from "../../components/Loading";
 import { loginRequest } from "../../authConfig";
 import { DateTime } from "luxon";
 import { useNotifications } from "@toolpad/core/useNotifications";
@@ -13,6 +13,7 @@ import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { ShowMyLeaveRequests } from "./ShowMyLeaveRequests";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
+import TextField from "@mui/material/TextField";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -24,50 +25,64 @@ const DataContent = () => {
     null,
   );
   const [apiLeaveLimits, setApiLeaveLimits] = useState<
-    LeaveLimitsDto | undefined
+    LeaveLimitsDto | null
   >();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const notifications = useNotifications();
+  const queryYear = Number(searchParams.get("year"));
+  const [currentYear, setCurrentYear] = useState<number>(!queryYear ? DateTime.local().year : queryYear);
+  const [isCallApi, setIsCallApi] = useState(true);
 
   useEffect(() => {
-    if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
+    if (isCallApi && inProgress === InteractionStatus.None) {
+      setIsCallApi(false);
       const userId = instance.getActiveAccount()?.idTokenClaims?.sub;
-      const queryYear = Number(searchParams.get("year"));
-      const currentYear = !queryYear ? DateTime.local().year : queryYear;
       const now = DateTime.fromObject({ year: currentYear });
       const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
       const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
-      
+      const leaveRequestsStatuses = ["Init","Pending","Accepted","Canceled","Rejected","Deprecated"];
       callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&AssignedToUserIds=${userId}`,
+        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&assignedToUserIds=${userId}${leaveRequestsStatuses.map(x => `&statuses=${x}`).join("")}`,
         notifications.show,
       )
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      if(!apiLeaveTypes) {
-        callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
-          .then((response) => setApiLeaveTypes(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      }
-      if(!apiLeaveStatuses) {
-        callApiGet<LeaveStatusesDto>("/settings/leavestatus", notifications.show)
-          .then((response) => setApiLeaveStatuses(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      }
       callApiGet<LeaveLimitsDto>(
         `/leavelimits/user?year=${currentYear}`,
         notifications.show,
       )
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      if(!apiLeaveTypes) {
+        callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
+          .then((response) => setApiLeaveTypes(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      }
+      if(apiLeaveStatuses) {
+        callApiGet<LeaveStatusesDto>("/settings/leavestatus", notifications.show)
+          .then((response) => setApiLeaveStatuses(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      }
     }
-  }, [inProgress, apiLeaveRequests, instance, notifications.show, apiLeaveTypes, apiLeaveStatuses, searchParams]);
-  return <ShowMyLeaveRequests
+  }, [inProgress, instance, notifications.show, apiLeaveTypes, apiLeaveStatuses, currentYear, isCallApi]);
+  return <>
+  <TextField type="number" value={currentYear} onChange={v => {
+    const value = Number(v.target.value);
+    if(value !== currentYear) {
+      setCurrentYear(value);
+      setSearchParams({year: v.target.value});
+      setApiLeaveRequests(null);
+      setApiLeaveLimits(null);
+      setIsCallApi(true);
+    }
+  }} />
+  <ShowMyLeaveRequests
     leaveRequests={apiLeaveRequests?.items}
     leaveStatuses={apiLeaveStatuses?.items}
     leaveTypes={apiLeaveTypes?.items}
     leaveLimits={apiLeaveLimits?.items}
-  />;
+  />
+  </>;
 };
 
 export function MyLeaveRequests() {
