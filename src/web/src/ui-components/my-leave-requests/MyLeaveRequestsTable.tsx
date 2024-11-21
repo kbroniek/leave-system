@@ -12,6 +12,8 @@ import styled from "@mui/material/styles/styled";
 import { alpha } from "@mui/material/styles";
 import { GridValidRowModel } from "@mui/x-data-grid/models/gridRows";
 import { LeaveStatusDto } from "../dtos/LeaveStatusDto";
+import { useState } from "react";
+import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
 
 const ODD_OPACITY = 0.2;
 export const MyLeaveRequestsTable = (params: {
@@ -19,6 +21,15 @@ export const MyLeaveRequestsTable = (params: {
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveStatuses: LeaveStatusDto[] | undefined;
 }): JSX.Element => {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [showLeaveRequestId, setShowLeaveRequestId] = useState<string | undefined>(undefined);
+  const handleClickOpen = () => {
+    setOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setOpenDialog(false);
+  };
   const RenderDays = (
     props: Readonly<
       GridRenderCellParams<GridValidRowModel | LeaveRequestDto, LeaveRequestDto>
@@ -133,8 +144,14 @@ export const MyLeaveRequestsTable = (params: {
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
           }
+          onRowClick={(item) => {setShowLeaveRequestId(item.row.id); handleClickOpen()}}
         />
       )}
+      <LeaveRequestDetailsDialog
+        open={openDialog}
+        onClose={handleClose}
+        leaveRequestId={showLeaveRequestId}
+      />
     </Box>
   );
 };
