@@ -131,7 +131,7 @@ const DataContent = () => {
     }
     if (!model.workingDays) {
       notifications.show(
-        "Form is invalid. Can't read working days. Contact with administrator.",
+        "This leave type can not set in free day.Form is invalid. Can't read working days.",
         {
           severity: "warning",
           autoHideDuration: 3000,
