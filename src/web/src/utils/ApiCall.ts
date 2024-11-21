@@ -60,7 +60,7 @@ export async function callApi(
     return error;
   });
 
-  if (response < 200 || response >= 300) {
+  if (response.status < 200 || response.status >= 300) {
     const errorBody = await response.json();
     showNotification(
       `Error: ${response.status}
