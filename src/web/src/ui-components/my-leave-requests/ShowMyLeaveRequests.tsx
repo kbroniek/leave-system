@@ -12,8 +12,27 @@ export const ShowMyLeaveRequests = (params: {
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
 }) => {
-  return <Grid container spacing={2} sx={{width: "100%"}}>
-<Grid size={{ sm: 12, md: 6 }}><MyLeaveRequestsInfo /></Grid>
-<Grid size={{ sm: 12, md: 6 }}><MyLeaveRequestsTable /></Grid>
-  </Grid>;
+  return (
+    <Grid container spacing={2} sx={{ width: "100%" }}>
+      <Grid size={{ xs: 12, sm: 12, md: 6 }}>
+        <MyLeaveRequestsInfo
+          leaveRequests={params.leaveRequests?.filter(isValid)}
+          leaveTypes={params.leaveTypes}
+          leaveLimits={params.leaveLimits}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 12, md: 6 }}>
+        <MyLeaveRequestsTable
+          leaveRequests={params.leaveRequests}
+          leaveTypes={params.leaveTypes} />
+      </Grid>
+    </Grid>
+  );
 };
+
+
+function isValid(leaveRequest: LeaveRequestDto): boolean {
+    return (
+        leaveRequest.status === "Pending" || leaveRequest.status === "Accepted"
+    );
+}

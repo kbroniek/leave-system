@@ -208,7 +208,7 @@ const DataContent = () => {
         <SubmitLeaveRequestForm
           leaveRequests={apiLeaveRequests?.items}
           holidays={apiHolidays}
-          leaveTypes={apiLeaveTypes?.items}
+          leaveTypes={apiLeaveTypes?.items.filter(x => x.state === "Active")}
           leaveLimits={apiLeaveLimits?.items}
           employees={apiEmployees?.items}
           onSubmit={onSubmit}
