@@ -24,7 +24,9 @@ export const ShowMyLeaveRequests = (params: {
       <Grid size={{ xs: 12, sm: 12, md: 6 }}>
         <MyLeaveRequestsTable
           leaveRequests={params.leaveRequests}
-          leaveTypes={params.leaveTypes} />
+          leaveTypes={params.leaveTypes}
+          leaveStatuses={params.leaveStatuses}
+        />
       </Grid>
     </Grid>
   );

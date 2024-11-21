@@ -58,7 +58,7 @@ const DataContent = () => {
           .then((response) => setApiLeaveTypes(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       }
-      if(apiLeaveStatuses) {
+      if(!apiLeaveStatuses) {
         callApiGet<LeaveStatusesDto>("/settings/leavestatus", notifications.show)
           .then((response) => setApiLeaveStatuses(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
