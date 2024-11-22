@@ -10,11 +10,10 @@ import { Duration } from "luxon";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import { LeaveRequestsUsed } from "./LeaveRequestsUsed";
 import {
-  calculateLimits,
-  calculateTotalDuration,
   filterLeaveRequests,
 } from "./Utils";
 import React from "react";
+import { LimitsCalculator } from "../utils/LimitsCalculator";
 
 const defaultStyle = { paddingTop: "2px", textAlign: "right" };
 const titleStyle = { color: "text.secondary" };
@@ -30,12 +29,12 @@ export const MyLeaveRequestsInfo = (params: {
     holidayLeaveType?.id,
   );
   const holidayDuration = holidayLeaveRequests
-    ? calculateTotalDuration(holidayLeaveRequests.map((x) => x.duration))
+    ? LimitsCalculator.calculateTotalDuration(...holidayLeaveRequests.map((x) => x.duration))
     : undefined;
   const holidayLimits = params.leaveLimits?.filter(
     (x) => x.leaveTypeId === holidayLeaveType?.id,
-  );
-  const { limit, overdueLimit, totalLimit } = calculateLimits(holidayLimits);
+  ) ?? [];
+  const { limit, overdueLimit, totalLimit } = LimitsCalculator.calculateLimits(...holidayLimits);
   const leaveTypesLeft = params.leaveTypes?.filter(
     (x) =>
       x.properties?.catalog !== "Holiday" &&
@@ -70,7 +69,7 @@ export const MyLeaveRequestsInfo = (params: {
           <TotalDuration
             isLoading={!params.leaveTypes || !params.leaveLimits}
             duration={limit}
-            workingHours={holidayLimits?.find(() => true)?.workingHours}
+            workingHours={holidayLimits.find(() => true)?.workingHours}
           />
         </Grid>
         <Grid size={11}>
@@ -82,7 +81,7 @@ export const MyLeaveRequestsInfo = (params: {
           <TotalDuration
             isLoading={!params.leaveTypes || !params.leaveLimits}
             duration={overdueLimit}
-            workingHours={holidayLimits?.find(() => true)?.workingHours}
+            workingHours={holidayLimits.find(() => true)?.workingHours}
           />
         </Grid>
         <Grid size={11}>
@@ -98,7 +97,7 @@ export const MyLeaveRequestsInfo = (params: {
             duration={
               holidayDuration ? totalLimit?.minus(holidayDuration) : undefined
             }
-            workingHours={holidayLimits?.find(() => true)?.workingHours}
+            workingHours={holidayLimits.find(() => true)?.workingHours}
           />
         </Grid>
         <LeaveRequestsUsed
@@ -123,8 +122,8 @@ export const MyLeaveRequestsInfo = (params: {
             (lr) => lr.leaveTypeId === x.id,
           );
           const duration = leaveRequestPerLeaveType
-            ? calculateTotalDuration(
-                leaveRequestPerLeaveType.map((lr) => lr.duration),
+            ? LimitsCalculator.calculateTotalDuration(
+                ...leaveRequestPerLeaveType.map((lr) => lr.duration),
               )
             : undefined;
           return (

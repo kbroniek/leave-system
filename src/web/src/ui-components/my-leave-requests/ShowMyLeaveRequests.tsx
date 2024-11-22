@@ -11,7 +11,7 @@ export const ShowMyLeaveRequests = (params: {
   leaveStatuses: LeaveStatusDto[] | undefined;
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
-}) => {
+}): JSX.Element => {
   return (
     <Grid container spacing={2} sx={{ width: "100%" }}>
       <Grid size={{ xs: 12, sm: 12, md: 6 }}>

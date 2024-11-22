@@ -18,6 +18,7 @@ import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { UserDto } from "../dtos/UserDto";
 import { LeaveRequestsTimelineTransformer } from "./LeaveRequestsTimelineTransformer";
+import { EmployeesFinder } from "../utils/EmployeesFinder";
 
 export const rowHeight = 30;
 
@@ -28,21 +29,7 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
   leaveTypes: LeaveTypesDto,
   employees: UserDto[]
 }>): JSX.Element {
-  const allEmployees = params.employees
-    .map(x => ({
-      ...x,
-      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? "undefined"
-    }));
-  for (const e of params.leaveRequests.items) {
-    if(!allEmployees.find(x => x.id === e.assignedTo.id)) {
-      allEmployees.push({
-        ...e.assignedTo,
-        name: e.assignedTo.name ?? "undefined"
-      });
-    }
-  }
-  const employees = allEmployees
-    .sort((a, b) => a.name?.localeCompare(b.name ?? "") ?? 0)
+  const employees = EmployeesFinder.get(params.leaveRequests.items, params.employees);
   const leaveStatusesActive = params.leaveStatuses.items.filter(x => x.state === "Active");
   const leaveTypesActive = params.leaveTypes.items.filter(x => x.state === "Active");
   const transformer = new LeaveRequestsTimelineTransformer(employees, params.leaveRequests, params.holidays, params.leaveTypes.items);

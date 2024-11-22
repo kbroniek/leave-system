@@ -6,12 +6,10 @@ import { LeaveTypeCatalog, LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import CircularProgress from "@mui/material/CircularProgress";
 import { DateTime, Duration } from "luxon";
 import {
-  calculateLimits,
-  calculateTotalDuration,
   filterLeaveRequests,
-  isString,
 } from "./Utils";
 import React from "react";
+import { LimitsCalculator } from "../utils/LimitsCalculator";
 
 const defaultStyle = { paddingTop: "2px", textAlign: "right" };
 const titleStyle = { color: "text.secondary" };
@@ -133,7 +131,7 @@ function calculateLimitDays(
   if (!onDemandLimits) {
     return;
   }
-  const { totalLimit } = calculateLimits(onDemandLimits);
+  const { totalLimit } = LimitsCalculator.calculateLimits(...onDemandLimits);
   const workingHoursDuration = getDuration(
     onDemandLimits.find(() => true)?.workingHours,
   );
@@ -155,8 +153,8 @@ function calculateLeaveRequestDays(
   if (!leaveRequests) {
     return;
   }
-  const duration = calculateTotalDuration(
-    leaveRequests.map((x) => x.duration).filter(isString),
+  const duration = LimitsCalculator.calculateTotalDuration(
+    ...leaveRequests.map((x) => x.duration),
   );
   const workingHoursDuration = getDuration(
     leaveRequests.find(() => true)?.workingHours,
