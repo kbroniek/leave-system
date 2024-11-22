@@ -16,6 +16,9 @@ import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import TextField from "@mui/material/TextField";
 import { Authorized } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid2";
+import Typography from "@mui/material/Typography";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -87,26 +90,35 @@ const DataContent = () => {
   ]);
   return (
     <>
-      <TextField
-        type="number"
-        value={currentYear}
-        onChange={(v) => {
-          const value = Number(v.target.value);
-          if (value !== currentYear) {
-            setCurrentYear(value);
-            setSearchParams({ year: v.target.value });
-            setApiLeaveRequests(null);
-            setApiLeaveLimits(null);
-            setIsCallApi(true);
-          }
-        }}
-      />
-      <ShowMyLeaveRequests
-        leaveRequests={apiLeaveRequests?.items}
-        leaveStatuses={apiLeaveStatuses?.items}
-        leaveTypes={apiLeaveTypes?.items}
-        leaveLimits={apiLeaveLimits?.items}
-      />
+      <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
+        <Grid container spacing={0} sx={{ justifyContent: "center" }}>
+          <Typography sx={{ alignContent: "center", padding: 2 }}>
+            Year
+          </Typography>
+          <TextField
+            type="number"
+            value={currentYear}
+            onChange={(v) => {
+              const value = Number(v.target.value);
+              if (value !== currentYear) {
+                setCurrentYear(value);
+                setSearchParams({ year: v.target.value });
+                setApiLeaveRequests(null);
+                setApiLeaveLimits(null);
+                setIsCallApi(true);
+              }
+            }}
+          />
+        </Grid>
+      </Paper>
+      <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
+        <ShowMyLeaveRequests
+          leaveRequests={apiLeaveRequests?.items}
+          leaveStatuses={apiLeaveStatuses?.items}
+          leaveTypes={apiLeaveTypes?.items}
+          leaveLimits={apiLeaveLimits?.items}
+        />
+      </Paper>
     </>
   );
 };

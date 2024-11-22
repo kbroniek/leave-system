@@ -86,7 +86,7 @@ const DataContent = (): JSX.Element => {
   ]);
   return (
     <>
-    <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
+    <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
       <Grid container spacing={0} sx={{justifyContent: "center"}}>
         <Typography sx={{alignContent: "center", padding: 2}}>Year</Typography>
         <TextField
