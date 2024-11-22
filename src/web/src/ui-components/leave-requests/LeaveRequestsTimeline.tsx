@@ -16,7 +16,10 @@ import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { EmployeesDto } from "../dtos/EmployeesDto";
-import { LeaveRequestsSearch, SearchLeaveRequestModel } from "./LeaveRequestsSearch";
+import {
+  LeaveRequestsSearch,
+  SearchLeaveRequestModel,
+} from "./LeaveRequestsSearch";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { isInRole } from "../../components/Authorized";
@@ -34,12 +37,10 @@ const DataContent = () => {
   );
   const [apiEmployees, setApiEmployees] = useState<EmployeesDto | null>(null);
   const now = DateTime.now().startOf("day");
-  const [dateFrom, setDateFrom] = useState<DateTime>(
-    now.minus({ days: 14 }),
-  );
+  const [dateFrom, setDateFrom] = useState<DateTime>(now.minus({ days: 14 }));
   const [dateTo, setDateTo] = useState<DateTime>(now.plus({ days: 14 }));
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
-  const [employees, setEmployees] = useState<string[] | undefined>([]);
+  const [employeesSearch, setEmployees] = useState<string[] | undefined>([]);
   const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
 
@@ -64,13 +65,13 @@ const DataContent = () => {
     setLeaveTypes(model.leaveTypes);
     setEmployees(model.employees);
     setIsCallApi(true);
-  }
+  };
 
   useEffect(() => {
     if (isCallApi && inProgress === InteractionStatus.None) {
       setIsCallApi(false);
       callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employees?.map(x => `&assignedToUserIds=${x}`).join("")}${leaveTypes?.map(x => `&leaveTypeIds=${x}`).join("")}`,
+        `/leaverequests?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employeesSearch?.map((x) => `&assignedToUserIds=${x}`).join("")}${leaveTypes?.map((x) => `&leaveTypeIds=${x}`).join("")}`,
         notifications.show,
       )
         .then((response) => setApiLeaveRequests(response))
@@ -81,17 +82,20 @@ const DataContent = () => {
       )
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      if(!apiLeaveStatuses) {
-        callApiGet<LeaveStatusesDto>("/settings/leavestatus", notifications.show)
+      if (!apiLeaveStatuses) {
+        callApiGet<LeaveStatusesDto>(
+          "/settings/leavestatus",
+          notifications.show,
+        )
           .then((response) => setApiLeaveStatuses(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       }
-      if(!apiLeaveTypes)
-      callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
-        .then((response) => setApiLeaveTypes(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      if (!apiLeaveTypes)
+        callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
+          .then((response) => setApiLeaveTypes(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
 
-      if(!apiEmployees) {
+      if (!apiEmployees) {
         if (isInRole(instance, ["DecisionMaker", "GlobalAdmin"])) {
           callApiGet<EmployeesDto>("/employees", notifications.show)
             .then((response) => setApiEmployees(response))
@@ -111,9 +115,24 @@ const DataContent = () => {
         }
       }
     }
-  }, [inProgress, isCallApi, instance, notifications.show, dateFrom, dateTo, employees, leaveTypes, apiLeaveTypes, apiEmployees, apiLeaveStatuses]);
+  }, [
+    inProgress,
+    isCallApi,
+    instance,
+    notifications.show,
+    dateFrom,
+    dateTo,
+    employeesSearch,
+    leaveTypes,
+    apiLeaveTypes,
+    apiEmployees,
+    apiLeaveStatuses,
+  ]);
 
-  const employeeToRender = employees?.length && employees?.length >= 0 ? apiEmployees?.items.filter(x => employees.includes(x.id)) : apiEmployees?.items
+  const employeeToRender =
+    employeesSearch?.length && employeesSearch.filter(x => !!x).length > 0
+      ? apiEmployees?.items.filter((x) => employeesSearch.includes(x.id))
+      : apiEmployees?.items;
   return (
     <>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
@@ -138,7 +157,7 @@ const DataContent = () => {
             employees={employeeToRender ?? []}
           />
         ) : (
-          <Box sx={{ justifyContent: 'center', display: 'flex', }}>
+          <Box sx={{ justifyContent: "center", display: "flex" }}>
             <Loading />
           </Box>
         )}
