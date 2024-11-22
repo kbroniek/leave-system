@@ -27,7 +27,7 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid2";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { DaysCounter } from "../utils/DaysCounter";
-import { Loading } from "../Loading";
+import { Loading } from "../../components/Loading";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import FormHelperText from "@mui/material/FormHelperText";
 

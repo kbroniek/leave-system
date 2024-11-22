@@ -6,8 +6,8 @@ import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
 
 // Sample app imports
-import { Loading, LoadingAuth } from "../Loading";
-import { ErrorComponent } from "../ErrorComponent";
+import { Loading, LoadingAuth } from "../../components/Loading";
+import { ErrorComponent } from "../../components/ErrorComponent";
 import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
 import ShowLeaveRequestDetails from "./ShowLeaveRequestDetails";
@@ -22,16 +22,17 @@ const DataContent = (props: {leaveRequestId: string}) => {
   const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
   const [apiLeaveType, setApiLeaveType] = useState<LeaveTypeDto | null>(null);
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
+  const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
 
   useEffect(() => {
-    if (!apiLeaveRequestDetails && inProgress === InteractionStatus.None) {
+    if (isCallApi && inProgress === InteractionStatus.None) {
+      setIsCallApi(false);
       callApiGet<LeaveRequestDetailsDto>(`/leaverequests/${props.leaveRequestId}`, notifications.show)
         .then((response) => {
           callApiGet<LeaveTypeDto>(`/leavetypes/${response.leaveTypeId}`, notifications.show)
             .then((response) => setApiLeaveType(response))
             .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-          
           callApiGet<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01", notifications.show)
             .then((response) => setApiHolidays(response))
             .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -42,7 +43,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
         .then((response) => setApiLeaveStatuses(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
-  }, [inProgress, apiLeaveRequestDetails, instance, props.leaveRequestId, notifications.show]);
+  }, [inProgress, isCallApi, instance, props.leaveRequestId, notifications.show]);
 
   return apiLeaveRequestDetails && apiLeaveStatuses && apiLeaveType && apiHolidays ? (
     <ShowLeaveRequestDetails

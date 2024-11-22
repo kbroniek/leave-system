@@ -8,7 +8,6 @@ import {
   GridCellParams,
   GridColDef,
   GridColumnGroupingModel,
-  GridRenderCellParams,
   GridValidRowModel,
 } from "@mui/x-data-grid/models";
 import Grid from "@mui/material/Grid2";
@@ -75,9 +74,7 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
     headerClassName: getDayCssClass(x, transformedHolidays),
     cellClassName: (params: GridCellParams<UserDto, { date: DateTime }>) =>
       !params.value ? "" : getDayCssClass(params.value.date, transformedHolidays),
-    renderCell: (
-      props: GridRenderCellParams<UserDto, RenderLeaveRequestModel>
-    ) => RenderLeaveRequests(props),
+    renderCell: RenderLeaveRequests,
   }));
 
   const groups: GridColumnGroupingModel = transformedData.header.map((x) => ({

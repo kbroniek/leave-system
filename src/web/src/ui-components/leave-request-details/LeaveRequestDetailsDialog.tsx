@@ -3,7 +3,7 @@ import { LeaveRequestDetails } from "./LeaveRequestDetails";
 
 export interface LeaveRequestDetailsDialogProps {
     open: boolean;
-    leaveRequestId: string
+    leaveRequestId: string | undefined;
     onClose: () => void;
 }
 
@@ -16,7 +16,7 @@ export function LeaveRequestDetailsDialog(props: LeaveRequestDetailsDialogProps)
 
     return (
         <Dialog onClose={handleClose} open={open}>
-            <LeaveRequestDetails leaveRequestId={props.leaveRequestId} />
+            {props.leaveRequestId ? <LeaveRequestDetails leaveRequestId={props.leaveRequestId} /> : <></>}
         </Dialog>
     );
 }

@@ -10,9 +10,10 @@ import { Claims } from "./pages/Claims";
 import { SubmitLeaveRequest } from "./ui-components/submit-leave-request/SubmitLeaveRequest";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
+import { MyLeaveRequests } from "./ui-components/my-leave-requests/MyLeaveRequests";
 
 
-export function App({ pca }: AppProps) {
+export function App({ pca }: Readonly<AppProps>) {
   // The next 3 lines are optional. This is how you configure MSAL to take advantage of the router's navigate functions when MSAL redirects between pages in your app
   const navigate = useNavigate();
   const navigationClient = new CustomNavigationClient(navigate);
@@ -38,6 +39,7 @@ function Pages() {
           <Route path="/" element={<Home />} />
           <Route path="/claims" element={<Claims />} />
           <Route path="/submit-request" element={<SubmitLeaveRequest />} />
+          <Route path="/my-leaves" element={<MyLeaveRequests />} />
       </Routes>
   );
 }

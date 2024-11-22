@@ -6,8 +6,8 @@ import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
 
 // Sample app imports
-import { Loading, LoadingAuth } from "../Loading";
-import { ErrorComponent } from "../ErrorComponent";
+import { Loading, LoadingAuth } from "../../components/Loading";
+import { ErrorComponent } from "../../components/ErrorComponent";
 import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
 import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
@@ -40,6 +40,7 @@ const DataContent = () => {
   const [dateTo, setDateTo] = useState<DateTime>(now.plus({ days: 14 }));
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
   const [employees, setEmployees] = useState<string[] | undefined>([]);
+  const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
 
   const onSubmit = async (model: SearchLeaveRequestModel) => {
@@ -62,10 +63,12 @@ const DataContent = () => {
     setDateTo(model.dateTo);
     setLeaveTypes(model.leaveTypes);
     setEmployees(model.employees);
+    setIsCallApi(true);
   }
 
   useEffect(() => {
-    if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
+    if (isCallApi && inProgress === InteractionStatus.None) {
+      setIsCallApi(false);
       callApiGet<LeaveRequestsResponseDto>(
         `/leaverequests?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employees?.map(x => `&assignedToUserIds=${x}`).join("")}${leaveTypes?.map(x => `&leaveTypeIds=${x}`).join("")}`,
         notifications.show,
@@ -108,7 +111,7 @@ const DataContent = () => {
         }
       }
     }
-  }, [inProgress, apiLeaveRequests, instance, notifications.show, dateFrom, dateTo, employees, leaveTypes, apiLeaveTypes, apiEmployees, apiLeaveStatuses]);
+  }, [inProgress, isCallApi, instance, notifications.show, dateFrom, dateTo, employees, leaveTypes, apiLeaveTypes, apiEmployees, apiLeaveStatuses]);
 
   const employeeToRender = employees?.length && employees?.length >= 0 ? apiEmployees?.items.filter(x => employees.includes(x.id)) : apiEmployees?.items
   return (

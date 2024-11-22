@@ -7,8 +7,8 @@ import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
 
 // Sample app imports
-import { LoadingAuth } from "../Loading";
-import { ErrorComponent } from "../ErrorComponent";
+import { LoadingAuth } from "../../components/Loading";
+import { ErrorComponent } from "../../components/ErrorComponent";
 import {
   callApi,
   callApiGet,
@@ -42,11 +42,13 @@ const DataContent = () => {
     LeaveLimitsDto | undefined
   >();
   const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
+  const [isCallApi, setIsCallApi] = useState(true);
   const navigate = useNavigate();
   const notifications = useNotifications();
 
   useEffect(() => {
-    if (!apiLeaveRequests && inProgress === InteractionStatus.None) {
+    if (isCallApi && inProgress === InteractionStatus.None) {
+      setIsCallApi(false);
       const userId = instance.getActiveAccount()?.idTokenClaims?.sub;
       const now = DateTime.local();
       const currentYear = now.toFormat("yyyy");
@@ -93,7 +95,7 @@ const DataContent = () => {
         }
       }
     }
-  }, [inProgress, apiLeaveRequests, instance, notifications.show]);
+  }, [inProgress, isCallApi, instance, notifications.show]);
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
@@ -129,7 +131,7 @@ const DataContent = () => {
     }
     if (!model.workingDays) {
       notifications.show(
-        "Form is invalid. Can't read working days. Contact with administrator.",
+        "This leave type can not set in free day.Form is invalid. Can't read working days.",
         {
           severity: "warning",
           autoHideDuration: 3000,
@@ -206,7 +208,7 @@ const DataContent = () => {
         <SubmitLeaveRequestForm
           leaveRequests={apiLeaveRequests?.items}
           holidays={apiHolidays}
-          leaveTypes={apiLeaveTypes?.items}
+          leaveTypes={apiLeaveTypes?.items.filter(x => x.state === "Active")}
           leaveLimits={apiLeaveLimits?.items}
           employees={apiEmployees?.items}
           onSubmit={onSubmit}
