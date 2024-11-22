@@ -5,16 +5,21 @@ import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { UserDto } from "../dtos/UserDto";
 import { LimitsCalculator } from "../utils/LimitsCalculator";
 import { DurationFormatter } from "../utils/DurationFormatter";
-import { Duration } from "luxon";
+import { DateTime, Duration } from "luxon";
+import { DaysCounter } from "../utils/DaysCounter";
 
 export class HrTransformer {
+  private readonly holidaysConverted: DateTime[];
   constructor(
     private readonly employees: UserDto[],
     private readonly leaveRequests: LeaveRequestDto[] | undefined,
     private readonly holidays: string[] | undefined,
     private readonly leaveTypes: LeaveTypeDto[] | undefined,
     private readonly leaveLimits: LeaveLimitDto[] | undefined,
-  ) {}
+    private readonly selectedXDaysNumber: number,
+  ) {
+    this.holidaysConverted = this.holidays?.map((x) => DateTime.fromISO(x)) ?? [];
+  }
 
   public transform(): GridValidRowModel[] {
     const holidayLeaveType = this.leaveTypes?.find(
@@ -37,27 +42,75 @@ export class HrTransformer {
       );
       const leaveRequestsPerEmployee = this.leaveRequests?.filter(
         (x) =>
+          x.status === "Accepted" &&
           x.assignedTo.id === employee.id &&
           x.leaveTypeId === holidayLeaveType?.id,
       );
-      const approvedLeaveRequests =
-        HrTransformer.getCountApprovedLeaveRequests(
-          leaveRequestsPerEmployee,
-        );
-      const limitLeft = approvedLeaveRequests ? limits.totalLimit?.minus(approvedLeaveRequests) : undefined
+      const approvedLeaveRequests = HrTransformer.getCountApprovedLeaveRequests(
+        leaveRequestsPerEmployee,
+      );
+      const limitLeft = approvedLeaveRequests
+        ? limits.totalLimit?.minus(approvedLeaveRequests)
+        : undefined;
+      const selectedXDays = this.calculateSelectedXDays(
+        leaveRequestsPerEmployee,
+      );
       const row = {
         id: employee.id,
         totalLimit: formattedLimits.totalLimit,
         limit: formattedLimits.limit,
         overdueLimit: formattedLimits.overdueLimit,
         limitLeft: HrTransformer.formatDuration(limitLeft, workingHours),
-        leaveTaken: HrTransformer.formatDuration(approvedLeaveRequests, workingHours, "0d")
+        leaveTaken: HrTransformer.formatDuration(
+          approvedLeaveRequests,
+          workingHours,
+          "0d",
+        ),
+        selectedXDays: selectedXDays,
       };
       result.push(row);
     }
     return result;
   }
-  static getCountApprovedLeaveRequests(
+  private calculateSelectedXDays(
+    leaveRequests: LeaveRequestDto[] | undefined,
+  ): boolean {
+    if (!leaveRequests) {
+      return false;
+    }
+    for (const leaveRequest of leaveRequests) {
+      const dateFrom = DateTime.fromISO(leaveRequest.dateFrom);
+      const dateTo = DateTime.fromISO(leaveRequest.dateTo);
+      const numberOdDays = DaysCounter.countAllDays(dateFrom, dateTo);
+      if (numberOdDays >= this.selectedXDaysNumber) {
+        return true;
+      }
+      const freeDaysBefore = this.calculateFreeDays(dateFrom, -1);
+      if (numberOdDays + freeDaysBefore >= this.selectedXDaysNumber) {
+        return true;
+      }
+      const freeDaysAfter = this.calculateFreeDays(dateTo, 1);
+      if (
+        numberOdDays + freeDaysBefore + freeDaysAfter >=
+        this.selectedXDaysNumber
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+  private calculateFreeDays(date: DateTime, indicator: number): number {
+    let counter = 0;
+    for (
+      let currentDay = date.plus({ day: indicator });
+      (currentDay.isWeekend || this.holidaysConverted.find(x => x.equals(currentDay))) && counter <= this.selectedXDaysNumber;
+      currentDay = currentDay.plus({ day: indicator })
+    ) {
+      ++counter;
+    }
+    return counter;
+  }
+  private static getCountApprovedLeaveRequests(
     leaveRequests: LeaveRequestDto[] | undefined,
   ) {
     if (!leaveRequests) {
@@ -71,10 +124,14 @@ export class HrTransformer {
     return duration;
   }
 
-  private static formatDuration(duration: Duration | undefined, workingHours: string | undefined, defaultValue: string = "-") {
+  private static formatDuration(
+    duration: Duration | undefined,
+    workingHours: string | undefined,
+    defaultValue: string = "-",
+  ) {
     return duration
-        ? DurationFormatter.format(duration, workingHours)
-        : defaultValue;
+      ? DurationFormatter.format(duration, workingHours)
+      : defaultValue;
   }
   private static formatLimits(
     totalLimit: Duration | undefined,

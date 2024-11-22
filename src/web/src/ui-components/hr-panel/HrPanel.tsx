@@ -57,7 +57,7 @@ const DataContent = (): JSX.Element => {
       )
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-        
+
       callApiGet<HolidaysDto>(
         `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
         notifications.show,

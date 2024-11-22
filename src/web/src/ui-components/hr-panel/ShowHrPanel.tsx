@@ -11,6 +11,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid2";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
 import { HrTransformer } from "./HrTransformer";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { GridRenderCellParams } from "@mui/x-data-grid/models/params";
+import { GridValidRowModel } from "@mui/x-data-grid/models";
+import DoDisturbOnIcon from '@mui/icons-material/DoDisturbOn';
 
 const ODD_OPACITY = 0.2;
 const selectedXDaysNumber = 14;
@@ -38,6 +42,16 @@ export const ShowHrPanel = (
   const holidayLeaveType = params.leaveTypes?.find(
     (x) => x.properties?.catalog === "Holiday",
   );
+  const RenderSelectedXDays = (
+    props: Readonly<
+      GridRenderCellParams<GridValidRowModel>
+    >,
+  ): JSX.Element => {
+    if (!props.row) {
+      return <></>;
+    }
+    return props.row["selectedXDays"] ? <CheckCircleIcon sx={{ verticalAlign: "middle"}} color="success"/> : <DoDisturbOnIcon sx={{ verticalAlign: "middle"}}/>;
+  };
   const columns = [
     {
       field: "totalLimit",
@@ -62,6 +76,7 @@ export const ShowHrPanel = (
     {
       field: "selectedXDays",
       headerName: `${selectedXDaysNumber} days selected`,
+      renderCell: RenderSelectedXDays,
     },
   ].concat(
     params.leaveTypes
@@ -76,7 +91,8 @@ export const ShowHrPanel = (
     params.leaveRequests, 
     params.holidays,
     params.leaveTypes,
-    params.leaveLimits
+    params.leaveLimits,
+    selectedXDaysNumber
   );
   const hrPanelData = transformer.transform()
   return (
