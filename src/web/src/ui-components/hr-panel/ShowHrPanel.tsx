@@ -10,6 +10,7 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid2";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
+import { HrTransformer } from "./HrTransformer";
 
 const ODD_OPACITY = 0.2;
 const selectedXDaysNumber = 14;
@@ -70,6 +71,14 @@ export const ShowHrPanel = (
         headerName: x.name,
       })) ?? [],
   );
+  const transformer = new HrTransformer(
+    employees, 
+    params.leaveRequests, 
+    params.holidays,
+    params.leaveTypes,
+    params.leaveLimits
+  );
+  const hrPanelData = transformer.transform()
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
       {!params.leaveRequests ? (
@@ -111,7 +120,7 @@ export const ShowHrPanel = (
               columnHeaderHeight={100}
               rowHeight={40}
               columns={columns}
-              rows={employees}
+              rows={hrPanelData}
               disableRowSelectionOnClick
               hideFooter={true}
               hideFooterPagination={true}
