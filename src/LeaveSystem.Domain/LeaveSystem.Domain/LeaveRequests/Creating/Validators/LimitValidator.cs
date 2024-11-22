@@ -22,7 +22,7 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
         }
         (var nestedLeaveTypeIds, var baseLeaveTypeId) = connectedLeaveTypeIdsResult.Value;
         var checkLimitResult = await CheckLimitForBaseLeave(
-            leaveTypeId, dateFrom, dateTo,
+            leaveRequestId, dateFrom, dateTo,
             userId, leaveTypeId, duration,
             nestedLeaveTypeIds, cancellationToken);
         if (checkLimitResult.IsFailure)
@@ -33,7 +33,7 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
         if (baseLeaveTypeId != null)
         {
             var baseCheckLimitResult = await CheckLimitForBaseLeave(
-                leaveTypeId, dateFrom, dateTo,
+                leaveRequestId, dateFrom, dateTo,
                 userId, leaveTypeId, duration,
                 [], cancellationToken);
             if (baseCheckLimitResult.IsFailure)
@@ -61,7 +61,7 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
             var totalUsed = await usedLeavesRepository.GetUsedLeavesDuration(
                 leaveRequestId, validSince, validUntil,
                 userId, leaveTypeId, nestedLeaveTypeIds, cancellationToken);
-            if (CalculateRemaningLimit(limit.Value, overdueLimit, totalUsed + duration) < TimeSpan.Zero)
+            if (CalculateRemainingLimit(limit.Value, overdueLimit, totalUsed + duration) < TimeSpan.Zero)
             {
                 return new Error($"You don't have enough free days for this type of leave. LeaveTypeId={leaveTypeId}", System.Net.HttpStatusCode.UnprocessableEntity);
             }
@@ -69,7 +69,7 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
         return Result.Default;
     }
 
-    private static TimeSpan CalculateRemaningLimit(TimeSpan limit, TimeSpan? overdueLimit, TimeSpan usedLimits) =>
+    private static TimeSpan CalculateRemainingLimit(TimeSpan limit, TimeSpan? overdueLimit, TimeSpan usedLimits) =>
         limit + (overdueLimit ?? TimeSpan.Zero) - usedLimits;
 }
 
