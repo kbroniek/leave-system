@@ -25,6 +25,9 @@ export class HrTransformer {
     const holidayLeaveType = this.leaveTypes?.find(
       (x) => x.properties?.catalog === "Holiday",
     );
+    const leaveTypesLeft = this.leaveTypes?.filter(
+      (x) => x.properties?.catalog !== "Holiday",
+    ) ?? [];
     const result: GridValidRowModel[] = [];
     for (const employee of this.employees) {
       const limitPerEmployee = this.leaveLimits?.filter(
@@ -67,6 +70,13 @@ export class HrTransformer {
           "0d",
         ),
         selectedXDays: selectedXDays,
+        ...leaveTypesLeft.reduce(
+          (a, v) => ({
+            ...a,
+            [v.id]: this.calculateDaysTaken(v, employee.id),
+          }),
+          {}
+        ),
       };
       result.push(row);
     }
@@ -153,12 +163,25 @@ export class HrTransformer {
         overdueLimit: undefined,
       };
     }
-    const { limit, overdueLimit, totalLimit } =
-      LimitsCalculator.calculateLimits(...limitPerEmployee);
-    return {
-      totalLimit: totalLimit ? totalLimit : undefined,
-      limit: limit ? limit : undefined,
-      overdueLimit: overdueLimit ? overdueLimit : undefined,
-    };
+    return LimitsCalculator.calculateLimits(...limitPerEmployee);
+  }
+  private calculateDaysTaken(leaveType: LeaveTypeDto, employeeId: string): string {
+    if(!this.leaveLimits && !this.leaveRequests) {
+      return "";
+    }
+    const leaveRequests = this.leaveRequests?.filter(x => x.assignedTo.id === employeeId && x.leaveTypeId === leaveType.id) ?? [];
+    const leaveRequestsUsed = LimitsCalculator.calculateTotalDuration(
+      ...leaveRequests
+        .filter((x) => x.status === "Accepted")
+        .map((x) => x.duration),
+    );
+    const limits = this.leaveLimits?.filter(x => x.assignedToUserId === employeeId && x.leaveTypeId === leaveType.id);
+    if(limits && limits.length > 0) {
+      const calculatedLimits = LimitsCalculator.calculateLimits(...limits);
+      const workingHours = limits.find(() => true)?.workingHours;
+      return `${DurationFormatter.format(leaveRequestsUsed, workingHours)} / ${DurationFormatter.format(calculatedLimits.totalLimit!, workingHours)}`
+    }
+
+    return DurationFormatter.format(leaveRequestsUsed, leaveRequests.find(() => true)?.workingHours)
   }
 }
