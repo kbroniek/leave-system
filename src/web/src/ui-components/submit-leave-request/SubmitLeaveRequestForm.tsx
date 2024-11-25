@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
@@ -52,6 +52,8 @@ export const SubmitLeaveRequestForm = (props: {
   leaveLimits: LeaveLimitDto[] | undefined;
   employees: UserDto[] | undefined;
   onSubmit: SubmitHandler<LeaveRequestFormModel>;
+  onYearChanged: (year:number) => void;
+  onUserIdChanged: (userId:string) => void;
 }) => {
   const now = DateTime.now().startOf("day");
   const getDefaultLeaveTypeId = () => {
@@ -117,7 +119,13 @@ export const SubmitLeaveRequestForm = (props: {
     // TODO: show notification
     alert(JSON.stringify(errors));
   }
-
+  const currentUser = currenUser();
+  if(currentUser) {
+    props.onUserIdChanged(currentUser);
+  }
+  if(dateFrom) {
+    props.onYearChanged(Number(dateFrom.toFormat("yyyy")));
+  }
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
       <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
@@ -143,10 +151,14 @@ export const SubmitLeaveRequestForm = (props: {
                         <Select
                           labelId="select-label-add-on-behalf"
                           id="select-add-on-behalf"
-                          defaultValue={currenUser()}
+                          defaultValue={currentUser}
                           label="Add on behalf of another user *"
                           inputRef={onBehalfRef}
                           {...onBehalfInputProps}
+                          onChange={(event: SelectChangeEvent<string>) => {
+                            props.onUserIdChanged(event.target.value);
+                            return onBehalfInputProps.onChange(event);
+                          }}
                         >
                           {employees.map((x) => (
                             <MenuItem key={`add-on-behalf-${x.id}`} value={x.id}>{x.name}</MenuItem>

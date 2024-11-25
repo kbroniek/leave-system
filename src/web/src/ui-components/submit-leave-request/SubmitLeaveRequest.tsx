@@ -42,24 +42,22 @@ const DataContent = () => {
     LeaveLimitsDto | undefined
   >();
   const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
+  const [currentYear, setCurrentYear] = useState(
+    Number(DateTime.local().toFormat("yyyy")),
+  );
+  const [userId, setUserId] = useState<string | undefined>();
   const [isCallApi, setIsCallApi] = useState(true);
   const navigate = useNavigate();
   const notifications = useNotifications();
 
   useEffect(() => {
-    if (isCallApi && inProgress === InteractionStatus.None) {
-      setIsCallApi(false);
-      const userId = instance.getActiveAccount()?.idTokenClaims?.sub;
-      const now = DateTime.local();
-      const currentYear = now.toFormat("yyyy");
-      const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
-      const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
-      callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&AssignedToUserIds=${userId}`,
-        notifications.show,
-      )
-        .then((response) => setApiLeaveRequests(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+    if (inProgress === InteractionStatus.None) {
+      const claims = instance.getActiveAccount()?.idTokenClaims;
+      const currentDate = DateTime.fromObject({ year: currentYear });
+      const dateFromFormatted = currentDate
+        .startOf("year")
+        .toFormat("yyyy-MM-dd");
+      const dateToFormatted = currentDate.endOf("year").toFormat("yyyy-MM-dd");
       callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
         .then((response) => setApiLeaveTypes(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -70,19 +68,35 @@ const DataContent = () => {
       )
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits/user?year=${currentYear}`,
-        notifications.show,
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+
+      if (userId) {
+        callApiGet<LeaveRequestsResponseDto>(
+          `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&AssignedToUserIds=${userId}`,
+          notifications.show,
+        )
+          .then((response) => setApiLeaveRequests(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+        callApiGet<LeaveLimitsDto>(
+          `/leavelimits?year=${currentYear}&userIds=${userId}`,
+          notifications.show,
+        )
+          .then((response) => setApiLeaveLimits(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      }
 
       if (isInRole(instance, ["DecisionMaker", "GlobalAdmin"])) {
-        callApiGet<EmployeesDto>("/employees", notifications.show)
-          .then((response) => setApiEmployees(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+        if (!apiEmployees) {
+          callApiGet<EmployeesDto>("/employees", notifications.show)
+            .then((response) => setApiEmployees(response))
+            .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+        }
       } else {
-        const claims = instance.getActiveAccount()?.idTokenClaims;
+        callApiGet<LeaveLimitsDto>(
+          `/leavelimits/user?year=${currentYear}`,
+          notifications.show,
+        )
+          .then((response) => setApiLeaveLimits(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
         if (claims?.sub) {
           setApiEmployees({
             items: [
@@ -95,7 +109,15 @@ const DataContent = () => {
         }
       }
     }
-  }, [inProgress, isCallApi, instance, notifications.show]);
+  }, [
+    inProgress,
+    isCallApi,
+    instance,
+    notifications.show,
+    apiEmployees,
+    currentYear,
+    userId,
+  ]);
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
@@ -208,10 +230,12 @@ const DataContent = () => {
         <SubmitLeaveRequestForm
           leaveRequests={apiLeaveRequests?.items}
           holidays={apiHolidays}
-          leaveTypes={apiLeaveTypes?.items.filter(x => x.state === "Active")}
+          leaveTypes={apiLeaveTypes?.items.filter((x) => x.state === "Active")}
           leaveLimits={apiLeaveLimits?.items}
           employees={apiEmployees?.items}
           onSubmit={onSubmit}
+          onYearChanged={setCurrentYear}
+          onUserIdChanged={setUserId}
         />
       }
       unauthorized={<Forbidden />}
