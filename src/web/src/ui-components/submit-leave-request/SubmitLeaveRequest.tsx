@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Msal imports
@@ -42,47 +42,71 @@ const DataContent = () => {
     LeaveLimitsDto | undefined
   >();
   const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
-  const [isCallApi, setIsCallApi] = useState(true);
+  const [currentYear, setCurrentYear] = useState<string>(DateTime.local().toFormat("yyyy"));
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const navigate = useNavigate();
   const notifications = useNotifications();
 
+  const callHolidays = useCallback(async (dateFromFormatted: string, dateToFormatted: string) =>
+    callApiGet<HolidaysDto>(
+      `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
+      notifications.show
+    )
+      .then((response) => setApiHolidays(response))
+      .catch((e) => ifErrorAcquireTokenRedirect(e, instance))
+  , [notifications.show, instance])
+
+  const callLeaveRequests = useCallback((dateFromFormatted: string, dateToFormatted: string, userId: string) =>
+    callApiGet<LeaveRequestsResponseDto>(
+      `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}${userId ? `&AssignedToUserIds=${userId}` : ""}`,
+      notifications.show
+    )
+      .then((response) => setApiLeaveRequests(response))
+      .catch((e) => ifErrorAcquireTokenRedirect(e, instance))
+  , [notifications.show, instance])
+
+  const callLeaveLimits = (userId: string, year: string) =>
+    callApiGet<LeaveLimitsDto>(
+      `/leavelimits?year=${year}&userIds=${userId}`,
+      notifications.show
+    )
+      .then((response) => setApiLeaveLimits(response))
+      .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+
+
+  const callMyLimits = (year: string) => {
+    callApiGet<LeaveLimitsDto>(
+      `/leavelimits/user?year=${year}`,
+      notifications.show
+    )
+      .then((response) => setApiLeaveLimits(response))
+      .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+  }
+
+  const isDecisionMaker = useCallback(() => isInRole(instance, ["DecisionMaker", "GlobalAdmin"]), [instance]);
+
   useEffect(() => {
-    if (isCallApi && inProgress === InteractionStatus.None) {
-      setIsCallApi(false);
-      const userId = instance.getActiveAccount()?.idTokenClaims?.sub;
-      const now = DateTime.local();
-      const currentYear = now.toFormat("yyyy");
-      const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
-      const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
-      callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&AssignedToUserIds=${userId}`,
-        notifications.show,
-      )
-        .then((response) => setApiLeaveRequests(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+    if (inProgress === InteractionStatus.None) {
+      const claims = instance.getActiveAccount()?.idTokenClaims;
+      const currentDate = DateTime.local();
+      const dateFromFormatted = currentDate
+        .startOf("year")
+        .toFormat("yyyy-MM-dd");
+      const dateToFormatted = currentDate.endOf("year").toFormat("yyyy-MM-dd");
+
       callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
         .then((response) => setApiLeaveTypes(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
 
-      callApiGet<HolidaysDto>(
-        `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
-        notifications.show,
-      )
-        .then((response) => setApiHolidays(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits/user?year=${currentYear}`,
-        notifications.show,
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      callHolidays(dateFromFormatted, dateToFormatted);
 
-      if (isInRole(instance, ["DecisionMaker", "GlobalAdmin"])) {
+      if (isDecisionMaker()) {
         callApiGet<EmployeesDto>("/employees", notifications.show)
           .then((response) => setApiEmployees(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       } else {
-        const claims = instance.getActiveAccount()?.idTokenClaims;
+        // callLeaveRequests(dateFromFormatted, dateToFormatted, claims?.sub);
+        callMyLimits(currentYear);
         if (claims?.sub) {
           setApiEmployees({
             items: [
@@ -95,7 +119,7 @@ const DataContent = () => {
         }
       }
     }
-  }, [inProgress, isCallApi, instance, notifications.show]);
+  }, [inProgress]);
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
@@ -201,6 +225,20 @@ const DataContent = () => {
     }
   };
 
+  useEffect(() => {
+    if(!currentUserId) {
+      return;
+    }
+    setApiLeaveRequests(undefined);
+    setApiLeaveLimits(undefined);
+    const currentDate = DateTime.fromObject({year: Number(currentYear)});
+    const dateFromFormatted = currentDate
+    .startOf("year")
+    .toFormat("yyyy-MM-dd");
+  const dateToFormatted = currentDate.endOf("year").toFormat("yyyy-MM-dd");
+  Promise.all([callLeaveRequests(dateFromFormatted, dateToFormatted, currentUserId), isDecisionMaker() ? callLeaveLimits(currentUserId, currentYear) : callMyLimits(currentYear)]);
+  }, [currentUserId, currentYear]);
+
   return (
     <Authorized
       roles={["DecisionMaker", "GlobalAdmin", "Employee"]}
@@ -208,10 +246,12 @@ const DataContent = () => {
         <SubmitLeaveRequestForm
           leaveRequests={apiLeaveRequests?.items}
           holidays={apiHolidays}
-          leaveTypes={apiLeaveTypes?.items.filter(x => x.state === "Active")}
+          leaveTypes={apiLeaveTypes?.items.filter((x) => x.state === "Active")}
           leaveLimits={apiLeaveLimits?.items}
           employees={apiEmployees?.items}
           onSubmit={onSubmit}
+          onYearChanged={setCurrentYear}
+          onUserIdChanged={setCurrentUserId}
         />
       }
       unauthorized={<Forbidden />}
