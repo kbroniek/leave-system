@@ -3,7 +3,7 @@ import Typography from "@mui/material/Typography";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import InputLabel from "@mui/material/InputLabel";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
