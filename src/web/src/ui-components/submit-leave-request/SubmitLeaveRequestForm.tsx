@@ -52,7 +52,7 @@ export const SubmitLeaveRequestForm = (props: {
   leaveLimits: LeaveLimitDto[] | undefined;
   employees: UserDto[] | undefined;
   onSubmit: SubmitHandler<LeaveRequestFormModel>;
-  onYearChanged: (year:number) => void;
+  onYearChanged: (year:string) => void;
   onUserIdChanged: (userId:string) => void;
 }) => {
   const now = DateTime.now().startOf("day");
@@ -66,6 +66,7 @@ export const SubmitLeaveRequestForm = (props: {
     register,
     formState: { errors, isValid },
     setValue,
+    getValues,
   } = useForm<LeaveRequestFormModel>({
     defaultValues: {
       dateFrom: now,
@@ -82,20 +83,26 @@ export const SubmitLeaveRequestForm = (props: {
       name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? "undefined"
     }))
     .sort((a, b) => a.name?.localeCompare(b.name ?? "") ?? 0);
-  const  currenUser = (): string | undefined => {
+  const  getCurrenUser = (): string | undefined => {
     const claims = instance.getActiveAccount()?.idTokenClaims;
     if(!employees) {
-      return claims?.sub;
+      return;
     }
     const activeUser = employees.find((x) => x.id === claims?.sub);
     const employee = activeUser ?? employees.find(() => true);
     return employee?.id;
   }
 
+  const initUserId = getCurrenUser();
   const { ref: onBehalfRef, ...onBehalfInputProps } = register("onBehalf", {
     required: "This is required",
+    onChange: (e: {target: {value: string}}) => props.onUserIdChanged(e.target.value),
+    value: initUserId
   });
-  setValue("onBehalf", currenUser());
+  const currentUserId = getValues().onBehalf
+  if(currentUserId) {
+    props.onUserIdChanged(currentUserId)
+  }
   const onSubmit = async (value: LeaveRequestFormModel, event?: React.BaseSyntheticEvent) => {
     if(!isValid) {
       return;
@@ -119,12 +126,8 @@ export const SubmitLeaveRequestForm = (props: {
     // TODO: show notification
     alert(JSON.stringify(errors));
   }
-  const currentUser = currenUser();
-  if(currentUser) {
-    props.onUserIdChanged(currentUser);
-  }
   if(dateFrom) {
-    props.onYearChanged(Number(dateFrom.toFormat("yyyy")));
+    props.onYearChanged(dateFrom.toFormat("yyyy"));
   }
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
@@ -151,14 +154,10 @@ export const SubmitLeaveRequestForm = (props: {
                         <Select
                           labelId="select-label-add-on-behalf"
                           id="select-add-on-behalf"
-                          defaultValue={currentUser}
+                          defaultValue={initUserId}
                           label="Add on behalf of another user *"
                           inputRef={onBehalfRef}
                           {...onBehalfInputProps}
-                          onChange={(event: SelectChangeEvent<string>) => {
-                            props.onUserIdChanged(event.target.value);
-                            return onBehalfInputProps.onChange(event);
-                          }}
                         >
                           {employees.map((x) => (
                             <MenuItem key={`add-on-behalf-${x.id}`} value={x.id}>{x.name}</MenuItem>
