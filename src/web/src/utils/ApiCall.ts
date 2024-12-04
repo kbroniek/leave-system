@@ -81,7 +81,7 @@ export async function ifErrorAcquireTokenRedirect(
   instance: IPublicClientApplication,
 ) {
   if (error instanceof InteractionRequiredAuthError) {
-    instance.acquireTokenRedirect({
+    await instance.acquireTokenRedirect({
       ...loginRequest,
       account: instance.getActiveAccount() as AccountInfo | undefined,
     });

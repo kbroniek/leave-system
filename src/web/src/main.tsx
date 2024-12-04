@@ -32,6 +32,10 @@ msalInstance.initialize().then(() => {
       const account = payload.account;
       msalInstance.setActiveAccount(account);
     }
+    if(event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
+      console.error(event.eventType, event.error)
+      msalInstance.logoutRedirect({account: msalInstance.getActiveAccount()});
+    }
   });
 
   createRoot(document.getElementById("root") as HTMLElement).render(
