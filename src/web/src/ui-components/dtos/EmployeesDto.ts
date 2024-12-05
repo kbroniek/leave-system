@@ -1,5 +1,5 @@
-import { UserDto } from "./UserDto";
+import { EmployeeDto } from "./EmployeeDto";
 
 export interface EmployeesDto {
-    items: UserDto[]
+    items: EmployeeDto[]
 }

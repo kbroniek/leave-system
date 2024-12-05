@@ -1,5 +1,5 @@
 import { LeaveRequestStatus } from "./LeaveRequestStatusDto"
-import { UserDto } from "./UserDto"
+import { EmployeeDto } from "./EmployeeDto"
 
 export interface LeaveRequestsResponseDto {
     items: LeaveRequestDto[],
@@ -20,6 +20,6 @@ export interface LeaveRequestDto {
     duration: string
     leaveTypeId: string
     status: LeaveRequestStatus
-    assignedTo: UserDto
+    assignedTo: EmployeeDto
     workingHours: string
 }

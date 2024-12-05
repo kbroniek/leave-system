@@ -11,7 +11,7 @@ import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { Authorized } from "../../components/Authorized";
-import { UserDto } from "../dtos/UserDto";
+import { EmployeeDto } from "../dtos/EmployeeDto";
 import { useMsal } from "@azure/msal-react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTime, Duration } from "luxon";
@@ -50,7 +50,7 @@ export const SubmitLeaveRequestForm = (props: {
   holidays: HolidaysDto | undefined;
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
-  employees: UserDto[] | undefined;
+  employees: EmployeeDto[] | undefined;
   onSubmit: SubmitHandler<LeaveRequestFormModel>;
   onYearChanged: (year:string) => void;
   onUserIdChanged: (userId:string) => void;

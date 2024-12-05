@@ -16,7 +16,7 @@ import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
-import { UserDto } from "../dtos/UserDto";
+import { EmployeeDto } from "../dtos/EmployeeDto";
 import { LeaveRequestsTimelineTransformer } from "./LeaveRequestsTimelineTransformer";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
 
@@ -27,7 +27,7 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
   holidays: HolidaysDto,
   leaveStatuses: LeaveStatusesDto,
   leaveTypes: LeaveTypesDto,
-  employees: UserDto[]
+  employees: EmployeeDto[]
 }>): JSX.Element {
   const employees = EmployeesFinder.get(params.leaveRequests.items, params.employees);
   const leaveStatusesActive = params.leaveStatuses.items.filter(x => x.state === "Active");
@@ -59,7 +59,7 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
     headerName: x.toFormat("dd"),
     width: 10,
     headerClassName: getDayCssClass(x, transformedHolidays),
-    cellClassName: (params: GridCellParams<UserDto, { date: DateTime }>) =>
+    cellClassName: (params: GridCellParams<EmployeeDto, { date: DateTime }>) =>
       !params.value ? "" : getDayCssClass(params.value.date, transformedHolidays),
     renderCell: RenderLeaveRequests,
   }));

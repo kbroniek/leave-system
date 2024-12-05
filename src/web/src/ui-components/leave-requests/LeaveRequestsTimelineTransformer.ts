@@ -1,13 +1,13 @@
 import { DateTime } from "luxon";
 import { LeaveRequestDto, LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { LeaveRequest } from "./LeaveRequestModel";
-import { UserDto } from "../dtos/UserDto";
+import { EmployeeDto } from "../dtos/EmployeeDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 
 export class LeaveRequestsTimelineTransformer {
   constructor(
-    private readonly employees: UserDto[],
+    private readonly employees: EmployeeDto[],
     private readonly leaveRequestsResponse: LeaveRequestsResponseDto,
     private readonly holidays: HolidaysDto,
     private readonly leaveTypes: LeaveTypeDto[]

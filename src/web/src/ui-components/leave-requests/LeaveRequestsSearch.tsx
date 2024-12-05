@@ -11,7 +11,7 @@ import Chip from "@mui/material/Chip";
 import MenuItem from "@mui/material/MenuItem";
 import { Theme, useTheme } from "@mui/material/styles";
 import FormControl from "@mui/material/FormControl";
-import { UserDto } from "../dtos/UserDto";
+import { EmployeeDto } from "../dtos/EmployeeDto";
 import Button from "@mui/material/Button";
 
 const ITEM_HEIGHT = 48;
@@ -28,7 +28,7 @@ const MenuProps = {
 export const LeaveRequestsSearch = (
   params: Readonly<{
     leaveTypes: LeaveTypeDto[] | undefined;
-    employees: UserDto[];
+    employees: EmployeeDto[];
     onSubmit: SubmitHandler<SearchLeaveRequestModel>;
   }>,
 ) => {
