@@ -1,7 +1,5 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
@@ -12,33 +10,18 @@ import {
   GridRowModes,
   DataGrid,
   GridColDef,
-  GridToolbarContainer,
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-  GridSlotProps,
+  GridRenderEditCellParams,
+  useGridApiContext,
 } from '@mui/x-data-grid';
-import { v4 as uuidv4 } from "uuid";
-import { EmployeeDto } from '../dtos/EmployeeDto';
-import { RoleDto } from '../dtos/RolesDto';
 import { roleTypeNames } from '../../components/Authorized';
-
-// const roles = ['Market', 'Finance', 'Development'];
-// const randomRole = () => {
-//   return roles[0];
-// };
-
-// const initialRows: GridRowsProp = [
-//   {
-//     id: uuidv4(),
-//     name: "Test name",
-//     age: 25,
-//     joinDate: new Date(),
-//     role: randomRole(),
-//   },
-// ];
+import { UserDto } from '../dtos/UsersDto';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 declare module '@mui/x-data-grid' {
   interface ToolbarPropsOverrides {
@@ -49,32 +32,11 @@ declare module '@mui/x-data-grid' {
   }
 }
 
-function EditToolbar(props: GridSlotProps['toolbar']) {
-  const { setRows, setRowModesModel } = props;
-
-  const addNewRow = () => {
-    const id = uuidv4();
-    setRows((oldRows) => [
-      ...oldRows,
-      { id, name: '', age: '', role: '', isNew: true },
-    ]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
+export function ManageUsersTable(props: {users: UserDto[]}) {
+    const rowsTemp: GridRowsProp = props.users.map(x => ({
+        ...x,
+        name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name
     }));
-  };
-
-  return (
-    <GridToolbarContainer>
-      <Button color="primary" startIcon={<AddIcon />} onClick={addNewRow}>
-        Add record
-      </Button>
-    </GridToolbarContainer>
-  );
-}
-
-export function ManageUsersTable(props: {users: EmployeeDto[], roles: RoleDto[]}) {
-    const rowsTemp: GridRowsProp = props.users;
     const [rows, setRows] = React.useState(rowsTemp);
     const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
 
@@ -93,7 +55,14 @@ export function ManageUsersTable(props: {users: EmployeeDto[], roles: RoleDto[]}
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    setRows(rows.filter((row) => row.id !== id));
+    const item = rows.find((row) => row.id === id);
+    if(item) {
+        item.roles = [];
+        setRows([
+            ...rows.filter((row) => row.id !== id),
+            item
+        ]);
+    }
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -119,7 +88,7 @@ export function ManageUsersTable(props: {users: EmployeeDto[], roles: RoleDto[]}
   };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Name' },
+    { field: 'name', headerName: 'Name', width: 200 },
     {
       field: 'department',
       headerName: 'Department',
@@ -130,7 +99,9 @@ export function ManageUsersTable(props: {users: EmployeeDto[], roles: RoleDto[]}
       width: 220,
       editable: true,
       type: 'singleSelect',
-      valueOptions: roleTypeNames,
+      renderEditCell: CustomEditComponent,
+      sortable: false,
+      filterable: false,
     },
     {
       field: 'actions',
@@ -201,7 +172,6 @@ export function ManageUsersTable(props: {users: EmployeeDto[], roles: RoleDto[]}
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
-        slots={{ toolbar: EditToolbar }}
         slotProps={{
           toolbar: { setRows, setRowModesModel },
         }}
@@ -209,3 +179,36 @@ export function ManageUsersTable(props: {users: EmployeeDto[], roles: RoleDto[]}
     </Box>
   );
 }
+function CustomEditComponent(props: GridRenderEditCellParams) {
+    const { id, value, field } = props;
+    const apiRef = useGridApiContext();
+  
+    const handleChange = (event: SelectChangeEvent) => {
+      const eventValue = event.target.value; // The new value entered by the user
+      console.log({ eventValue });
+      const newValue =
+        typeof eventValue === "string" ? value.split(",") : eventValue;
+      apiRef.current.setEditCellValue({
+        id,
+        field,
+        value: newValue.filter((x: string) => x !== "")
+      });
+    };
+  
+    return (
+      <Select
+        labelId="demo-multiple-name-label"
+        id="demo-multiple-name"
+        multiple
+        value={value}
+        onChange={handleChange}
+        sx={{ width: "100%" }}
+      >
+        {roleTypeNames.map((option) => (
+          <MenuItem key={option} value={option}>
+            {option}
+          </MenuItem>
+        ))}
+      </Select>
+    );
+  }
