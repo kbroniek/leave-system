@@ -8,9 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 
-public class EmployeesFunction(ILogger<EmployeesFunction> logger, IGetUserRepository getUserRepository)
+public class EmployeesFunction(IGetUserRepository getUserRepository)
 {
 
     [Function("GetEmployee")]

@@ -1,5 +1,6 @@
 namespace LeaveSystem.Functions.Users;
 
+using System.Linq;
 using LeaveSystem.Domain;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Auth;
@@ -23,6 +24,15 @@ public class RolesFunction
             return new()
             {
                 Result = new Error($"{nameof(RoleDto.Id)} cannot be different than userId.", System.Net.HttpStatusCode.BadRequest)
+                    .ToObjectResult($"Error occurred while updating a role. userId = {role.Id}.")
+            };
+        }
+
+        if (!role.Roles.All(x => Enum.GetNames<RoleType>().Contains(x)))
+        {
+            return new()
+            {
+                Result = new Error($"{nameof(RoleDto.Roles)} is out of range.", System.Net.HttpStatusCode.BadRequest)
                     .ToObjectResult($"Error occurred while updating a role. userId = {role.Id}.")
             };
         }
