@@ -1,5 +1,6 @@
 namespace LeaveSystem.Functions.Users;
 
+using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared.Auth;
 using LeaveSystem.Shared.Dto;
@@ -7,65 +8,33 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
-using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
+using static LeaveSystem.Domain.LeaveRequests.Creating.IGetUserRepository;
 
-public class UsersFunction
+public class UsersFunction(IGetUserRepository getUserRepository)
 {
-    private readonly ILogger<UsersFunction> logger;
-
-    public UsersFunction(ILogger<UsersFunction> logger)
-    {
-        this.logger = logger;
-    }
 
     [Function(nameof(GetUsers))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
-    public IActionResult GetUsers([HttpTrigger(
+    public async Task<IActionResult> GetUsers([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
-        Route = "users")] HttpRequest req)
+        Route = "users")] HttpRequest req,
+        [CosmosDBInput(
+            databaseName: "%DatabaseName%",
+            containerName: "%RolesContainerName%",
+            SqlQuery = "SELECT c.id, c.roles FROM c JOIN r IN c. roles",
+            Connection  = "CosmosDBConnection")] IEnumerable<RolesDto> roles, CancellationToken cancellationToken)
     {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        var userId = req.HttpContext.GetUserId();
-        var users = new[]
-        {
-            new UserDto(userId, req.HttpContext.User.Identity?.Name, "test@email.com", new [] { nameof(RoleType.GlobalAdmin) })
-        };
-        return new OkObjectResult(users.ToPagedListResponse());
+        var result = await getUserRepository.GetUsers([], cancellationToken);
+        var rolesFreeze = roles.ToList();
+
+        return result.Match(
+            (employees) => new OkObjectResult(employees.Select(x => Map(x, rolesFreeze)).ToPagedListResponse()),
+            error => error.ToObjectResult("Error occurred while getting roles."));
     }
 
-    [Function(nameof(EditUser))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
-    public IActionResult EditUser([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "put",
-        Route = "users/{userId}")] HttpRequest req, string userId, [FromBody] EditUserDto user)
-    {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        return new OkObjectResult(new UserDto(userId, user.Name, user.Email, user.Roles));
-    }
+    private static UserDto Map(User user, IReadOnlyCollection<RolesDto> roles) =>
+        new(user.Id, user.Name, user.FirstName, user.LastName, roles.FirstOrDefault(x => x.Id == user.Id)?.Roles ?? [], user.JobTitle);
 
-    [Function(nameof(CreateUser))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
-    public IActionResult CreateUser([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "post",
-        Route = "users")] HttpRequest req, [FromBody] CreateUserDto user)
-    {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        var userId = Guid.NewGuid().ToString();
-        return new CreatedResult($"/users/{userId}", new UserDto(userId, user.Name, user.Email, user.Roles));
-    }
-
-    [Function(nameof(DisableUser))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
-    public IActionResult DisableUser([HttpTrigger(
-        AuthorizationLevel.Anonymous,
-        "delete",
-        Route = "users/{userId}")] HttpRequest req, string userId)
-    {
-        logger.LogInformation("C# HTTP trigger function processed a request.");
-        return new NoContentResult();
-    }
+    public record RolesDto(string Id, string[] Roles);
 }

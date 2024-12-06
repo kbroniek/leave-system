@@ -1,11 +1,11 @@
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
-import { UserDto } from "../dtos/UserDto";
+import { EmployeeDto } from "../dtos/EmployeeDto";
 
 export class EmployeesFinder {
   public static get(
     leaveRequests: Readonly<LeaveRequestDto[]> | undefined,
-    employees: Readonly<UserDto[]> | undefined,
-  ): UserDto[] {
+    employees: Readonly<EmployeeDto[]> | undefined,
+  ): EmployeeDto[] {
     const allEmployees = employees
       ? employees.map((x) => ({
           ...x,

@@ -2,7 +2,7 @@ import styled from "@mui/material/styles/styled";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
-import { UserDto } from "../dtos/UserDto";
+import { EmployeeDto } from "../dtos/EmployeeDto";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import { gridClasses } from "@mui/x-data-grid/constants";
 import { alpha } from "@mui/material/styles";
@@ -23,7 +23,7 @@ export const ShowHrPanel = (
     leaveRequests: LeaveRequestDto[] | undefined;
     leaveTypes: LeaveTypeDto[] | undefined;
     leaveLimits: LeaveLimitDto[] | undefined;
-    employees: UserDto[] | undefined;
+    employees: EmployeeDto[] | undefined;
     holidays: string[] | undefined;
   }>,
 ): JSX.Element => {

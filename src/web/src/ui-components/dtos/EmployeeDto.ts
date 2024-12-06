@@ -1,4 +1,4 @@
-export interface UserDto {
+export interface EmployeeDto {
     id: string;
     name?: string;
     firstName?: string;

@@ -16,10 +16,10 @@ import MenuItem from "@mui/material/MenuItem";
 import { Authorized, RoleType } from "../components/Authorized";
 
 const pages = [
-  { title: "Submit request", link: "/submit-request", roles: ["GlobalAdmin", "Employee"] as RoleType[] },
+  { title: "Submit request", link: "/submit-request", roles: ["DecisionMaker", "GlobalAdmin", "Employee"] as RoleType[] },
   { title: "My leaves", link: "/my-leaves", roles: ["Employee"] as RoleType[] },
   { title: "HR Panel", link: "hr-panel", roles: ["GlobalAdmin", "HumanResource"] as RoleType[] },
-  { title: "Users", link: "/users", roles: ["GlobalAdmin"] as RoleType[] },
+  { title: "Users", link: "/users", roles: ["UserAdmin", "GlobalAdmin"] as RoleType[] },
   { title: "Manage limits", link: "/limits", roles: ["GlobalAdmin"] as RoleType[] },
 ];
 

@@ -1,0 +1,27 @@
+# @import ./login.http
+
+###
+# @name Update User
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/roles/17cc8b30-e6e2-4bb3-9e1c-e87e6d6ecce4
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{
+    "id": "17cc8b30-e6e2-4bb3-9e1c-e87e6d6ecce4",
+    "roles": ["Employee"]
+}
+
+###
+# @name Update User - Failed
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/roles/17cc8b30-e6e2-4bb3-9e1c-e87e6d6ecce4
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 400
+{
+    "id": "17cc8b30-e6e2-4bb3-9e1c-e87e6d6ecce4",
+    "roles": ["Test"]
+}

@@ -1,5 +1,5 @@
 import { LeaveRequestStatus } from "../dtos/LeaveRequestStatusDto"
-import { UserDto } from "../dtos/UserDto"
+import { EmployeeDto } from "../dtos/EmployeeDto"
 
 export interface LeaveRequestDetailsDto {
     leaveRequestId: string
@@ -8,9 +8,9 @@ export interface LeaveRequestDetailsDto {
     duration: string
     leaveTypeId: string
     status: LeaveRequestStatus
-    createdBy: UserDto
-    assignedTo: UserDto
-    lastModifiedBy: UserDto
+    createdBy: EmployeeDto
+    assignedTo: EmployeeDto
+    lastModifiedBy: EmployeeDto
     workingHours: string
     createdDate: string
     lastModifiedDate: string
@@ -19,7 +19,7 @@ export interface LeaveRequestDetailsDto {
 
 export interface RemarksDto {
     remarks: string
-    createdBy: UserDto
+    createdBy: EmployeeDto
     createdDate: string
     status: LeaveRequestStatus
 }

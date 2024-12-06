@@ -12,6 +12,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 import { MyLeaveRequests } from "./ui-components/my-leave-requests/MyLeaveRequests";
 import { HrPanel } from "./ui-components/hr-panel/HrPanel";
+import { ManageUsers } from "./ui-components/manage-users/ManageUsers";
 
 
 export function App({ pca }: Readonly<AppProps>) {
@@ -42,6 +43,7 @@ function Pages() {
           <Route path="/submit-request" element={<SubmitLeaveRequest />} />
           <Route path="/my-leaves" element={<MyLeaveRequests />} />
           <Route path="/hr-panel" element={<HrPanel />} />
+          <Route path="/users" element={<ManageUsers />} />
       </Routes>
   );
 }

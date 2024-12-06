@@ -2,7 +2,7 @@ import { GridValidRowModel } from "@mui/x-data-grid/models";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
-import { UserDto } from "../dtos/UserDto";
+import { EmployeeDto } from "../dtos/EmployeeDto";
 import { LimitsCalculator } from "../utils/LimitsCalculator";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import { DateTime, Duration } from "luxon";
@@ -11,7 +11,7 @@ import { DaysCounter } from "../utils/DaysCounter";
 export class HrTransformer {
   private readonly holidaysConverted: DateTime[];
   constructor(
-    private readonly employees: UserDto[],
+    private readonly employees: EmployeeDto[],
     private readonly leaveRequests: LeaveRequestDto[] | undefined,
     private readonly holidays: string[] | undefined,
     private readonly leaveTypes: LeaveTypeDto[] | undefined,
