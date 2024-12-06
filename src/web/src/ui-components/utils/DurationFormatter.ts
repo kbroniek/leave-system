@@ -45,6 +45,27 @@ export class DurationFormatter {
     return diffDays;
   }
 
+  public static days(duration: Duration | string, workingHours: Duration | string) : number {
+    if(!DurationFormatter.isDuration(duration)) {
+      const durationBuffer = Duration.fromISO(duration);
+      if (!durationBuffer.isValid) {
+        console.warn(`Invalid duration: ${duration}`);
+        return 0;
+      }
+      duration = Duration.fromObject({hours: durationBuffer.as("hours")});
+    }
+    if(!DurationFormatter.isDuration(workingHours)) {
+      const workingHoursBuffer = Duration.fromISO(workingHours);
+      if (!workingHoursBuffer.isValid) {
+        console.warn(`Invalid workingHours: ${workingHours}`)
+        return 0;
+      }
+      workingHours = Duration.fromObject({hours: workingHoursBuffer.as("hours")});
+    }
+    const days = Math.round(duration.as("hours") / workingHours.as("hours"));
+    return days;
+  }
+
   public static format(duration: Duration | string, workingHours?: Duration | string): string {
     if(!DurationFormatter.isDuration(duration)) {
       const durationBuffer = Duration.fromISO(duration);
@@ -59,12 +80,13 @@ export class DurationFormatter {
       if(!DurationFormatter.isDuration(workingHours)) {
         const workingHoursBuffer = Duration.fromISO(workingHours);
         if (!workingHoursBuffer.isValid) {
-          console.warn(`Invalid workingHours: ${duration}`)
+          console.warn(`Invalid workingHours: ${workingHours}`)
           return "";
         }
         workingHours = Duration.fromObject({hours: workingHoursBuffer.as("hours")});
       }
       const days = Math.round(duration.as("hours") / workingHours.as("hours"));
+      //TODO: Could be potential issue.
       const daysDuration = Duration.fromObject({ hours: workingHours.as("hours") * days});
       const durationLeft = duration.minus(daysDuration).normalize();
       timeResult.push(`${days}d`);

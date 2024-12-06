@@ -20,6 +20,8 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { EmployeeDto } from "../dtos/EmployeeDto";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
+import { DurationFormatter } from "../utils/DurationFormatter";
+import { Duration } from "luxon";
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -34,9 +36,14 @@ export function ManageLimitsTable(props: {
   employees: EmployeeDto[];
   leaveTypes: LeaveTypeDto[];
   limits: LeaveLimitDto[];
-  limitOnChange: (user: LeaveLimitDto) => Promise<void>;
+  limitOnChange: (user: LeaveLimitCell) => Promise<void>;
 }) {
   const notifications = useNotifications();
+
+  const missingEmployees = props.limits.filter(x => !props.employees.find(e => e.id === x.assignedToUserId)).map(x => ({
+    id: x.assignedToUserId,
+    name: x.assignedToUserId
+  }))
   const employees = [
     {
       id: null,
@@ -44,11 +51,22 @@ export function ManageLimitsTable(props: {
     },
     ...props.employees.map((x) => ({
       id: x.id,
-      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name,
-    })),
+      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? x.id,
+    })).concat(missingEmployees)
+    .sort((l, r) => l.name?.localeCompare(r.name) ?? 0),
   ];
-  const rowsTransformed: GridRowsProp = props.limits;
-  const [rows, setRows] = React.useState(rowsTransformed);
+  const getName = (id: string): string | undefined => employees.find(x => x.id === id)?.name;
+
+  const rowsTransformed: LeaveLimitCell[] = props.limits.map(x => ({
+    ...x,
+    limit: x.limit ? DurationFormatter.days(x.limit, x.workingHours) : null,
+    overdueLimit: x.overdueLimit ? DurationFormatter.days(x.overdueLimit, x.workingHours) : null,
+    workingHours: x.workingHours ? Duration.fromISO(x.workingHours).as("hours") : null,
+    validSince: x.validSince ? new Date(Date.parse(x.validSince)) : null,
+    validUntil: x.validUntil ? new Date(Date.parse(x.validUntil)) : null
+  }))
+  .sort((l, r) => getName(l.assignedToUserId)?.localeCompare(getName(r.assignedToUserId) ?? "") ?? 0);
+  const [rows, setRows] = React.useState<GridRowsProp>(rowsTransformed);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {},
   );
@@ -83,7 +101,7 @@ export function ManageLimitsTable(props: {
 
   const processRowUpdate = async (updatedRow: GridRowModel) => {
     setRows(rows.map((row) => (row.id === updatedRow.id ? updatedRow : row)));
-    await props.limitOnChange(updatedRow as LeaveLimitDto);
+    await props.limitOnChange(updatedRow as LeaveLimitCell);
     return updatedRow;
   };
 
@@ -102,8 +120,8 @@ export function ManageLimitsTable(props: {
     {
       field: "assignedToUserId",
       headerName: "Employee",
-      width: 200,
       editable: true,
+      minWidth: 220,
       type: "singleSelect",
       valueOptions: employees.map((x) => ({
         value: x.id,
@@ -113,13 +131,49 @@ export function ManageLimitsTable(props: {
     {
       field: "leaveTypeId",
       headerName: "Leave type",
-      width: 220,
       editable: true,
+      minWidth: 200,
       type: "singleSelect",
       valueOptions: props.leaveTypes.map((x) => ({
         value: x.id,
         label: x.name,
       })),
+    },
+    {
+      field: "limit",
+      headerName: "Limit (d)",
+      editable: true,
+      type: "number",
+    },
+    {
+      field: "overdueLimit",
+      headerName: "Overdue limit (d)",
+      editable: true,
+      type: "number",
+    },
+    {
+      field: "workingHours",
+      headerName: "Working hours (h)",
+      editable: true,
+      type: "number",
+    },
+    {
+      field: "validSince",
+      headerName: "Valid since",
+      editable: true,
+      type: "date",
+    },
+    {
+      field: "validUntil",
+      headerName: "Valid until",
+      editable: true,
+      type: "date",
+    },
+    {
+      field: "description",
+      headerName: "Description",
+      editable: true,
+      type: "string",
     },
     {
       field: "actions",
@@ -197,4 +251,16 @@ export function ManageLimitsTable(props: {
       />
     </Box>
   );
+}
+
+export interface LeaveLimitCell {
+  id: string;
+  limit: number | null;
+  overdueLimit: number | null;
+  workingHours: number | null;
+  leaveTypeId: string;
+  validSince: Date | null;
+  validUntil: Date | null;
+  assignedToUserId: string;
+  description: string | null;
 }
