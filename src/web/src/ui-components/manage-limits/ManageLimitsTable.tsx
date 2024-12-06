@@ -41,7 +41,7 @@ export function ManageLimitsTable(props: {
   employees: EmployeeDto[];
   leaveTypes: LeaveTypeDto[];
   limits: LeaveLimitDto[];
-  limitOnChange: (user: LeaveLimitCell) => Promise<void>;
+  limitOnChange: (user: LeaveLimitCell) => Promise<boolean>;
 }) {
   const notifications = useNotifications();
 
@@ -137,7 +137,9 @@ export function ManageLimitsTable(props: {
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    await props.limitOnChange(newRow as LeaveLimitCell);
+    if(!await props.limitOnChange(newRow as LeaveLimitCell)){
+      setRows(rows.filter((row) => (row.id !== newRow.id)));
+    }
     return updatedRow;
   };
 

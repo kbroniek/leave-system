@@ -37,7 +37,7 @@ const DataContent = () => {
   >();
   const [currentYear, setCurrentYear] = useState<number>(DateTime.local().year);
 
-  const handleLimitChange = async (item: LeaveLimitItem): Promise<void> => {
+  const handleLimitChange = async (item: LeaveLimitItem): Promise<boolean> => {
     const workingHours = item.workingHours ?? 8;
     const dto: LeaveLimitDto = {
       id: item.id,
@@ -72,7 +72,9 @@ const DataContent = () => {
         severity: "success",
         autoHideDuration: 3000,
       });
+      return true;
     }
+    return false;
   };
 
   useEffect(() => {
@@ -123,10 +125,10 @@ const DataContent = () => {
         </Grid>
       </Paper>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
-        {apiEmployees && apiLeaveTypes && apiLeaveLimits ? (
-          <Authorized
-            roles={["LeaveLimitAdmin", "GlobalAdmin"]}
-            authorized={
+        <Authorized
+          roles={["LeaveLimitAdmin", "GlobalAdmin"]}
+          authorized={
+            apiEmployees && apiLeaveTypes && apiLeaveLimits ? (
               <ManageLimitsTable
                 employees={apiEmployees.items}
                 leaveTypes={apiLeaveTypes.items.filter(
@@ -137,12 +139,12 @@ const DataContent = () => {
                 )}
                 limitOnChange={handleLimitChange}
               />
-            }
-            unauthorized={<Forbidden />}
-          />
-        ) : (
-          <Loading />
-        )}
+            ) : (
+              <Loading />
+            )
+          }
+          unauthorized={<Forbidden />}
+        />
       </Paper>
     </>
   );
