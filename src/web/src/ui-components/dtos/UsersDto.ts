@@ -6,6 +6,6 @@ export interface UserDto {
     name: string;
     firstName?: string;
     lastName?: string;
-    department?: string;
+    jobTitle?: string;
     roles: string[]
 }

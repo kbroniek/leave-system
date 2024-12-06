@@ -6,7 +6,7 @@ import { ErrorComponent } from "../../components/ErrorComponent";
 import { Loading, LoadingAuth } from "../../components/Loading";
 import { ManageUsersTable } from "./ManageUsersTable";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { callApi, callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { Authorized } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import { UserDto, UsersDto } from "../dtos/UsersDto";
@@ -17,8 +17,16 @@ const DataContent = () => {
   const [apiUsers, setApiUsers] = useState<UsersDto | undefined>();
 
   const handleUserChange = async (user: UserDto): Promise<void> => {
-    //TODO: Save new value
-    console.log(user);
+    const response = await callApi(`/roles/${user.id}`, "PUT", {
+      id: user.id,
+      roles: user.roles
+    }, notifications.show);
+    if (response.status === 200) {
+      notifications.show("Roles is updated successfully", {
+        severity: "success",
+        autoHideDuration: 3000,
+      });
+    }
   };
 
   useEffect(() => {

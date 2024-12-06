@@ -22,6 +22,7 @@ import { roleTypeNames } from "../../components/Authorized";
 import { UserDto } from "../dtos/UsersDto";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import { useNotifications } from "@toolpad/core/useNotifications";
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -36,6 +37,7 @@ export function ManageUsersTable(props: {
   users: UserDto[];
   userOnChange: (user: UserDto) => Promise<void>;
 }) {
+  const notifications = useNotifications();
   const rowsTemp: GridRowsProp = props.users.map((x) => ({
     ...x,
     name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name,
@@ -90,14 +92,15 @@ export function ManageUsersTable(props: {
   };
 
   const processRowUpdateError = (e: unknown) => {
-    console.log("processRowUpdateError", e);
+    console.warn("processRowUpdateError", e);
+    notifications.show("Something went wrong when updating row.");
   };
 
   const columns: GridColDef[] = [
     { field: "name", headerName: "Name", width: 200 },
     {
-      field: "department",
-      headerName: "Department",
+      field: "jobTitle",
+      headerName: "Job title",
     },
     {
       field: "roles",
