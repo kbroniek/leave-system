@@ -4,7 +4,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
 import {
   GridRowsProp,
   GridRowModesModel,
@@ -45,33 +45,47 @@ export function ManageLimitsTable(props: {
 }) {
   const notifications = useNotifications();
 
-  const missingEmployees = props.limits.filter(x => !props.employees.find(e => e.id === x.assignedToUserId)).map(x => ({
-    id: x.assignedToUserId,
-    name: x.assignedToUserId
-  }))
+  const missingEmployees = props.limits
+    .filter((x) => !props.employees.find((e) => e.id === x.assignedToUserId))
+    .map((x) => ({
+      id: x.assignedToUserId,
+      name: x.assignedToUserId,
+    }));
   const employees = [
     {
       id: null,
       name: "<All>",
     },
-    ...props.employees.map((x) => ({
-      id: x.id,
-      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? x.id,
-    }))
-    .sort((l, r) => l.name?.localeCompare(r.name) ?? 0),
+    ...props.employees
+      .map((x) => ({
+        id: x.id,
+        name: x.lastName ? `${x.lastName} ${x.firstName}` : (x.name ?? x.id),
+      }))
+      .sort((l, r) => l.name?.localeCompare(r.name) ?? 0),
   ];
   const allEmployees = missingEmployees.concat(employees);
-  const getName = (id: string | null): string | null | undefined => allEmployees.find(x => x.id === id)?.name;
+  const getName = (id: string | null): string | null | undefined =>
+    allEmployees.find((x) => x.id === id)?.name;
 
-  const rowsTransformed: LeaveLimitCell[] = props.limits.map(x => ({
-    ...x,
-    limit: x.limit ? DurationFormatter.days(x.limit, x.workingHours) : null,
-    overdueLimit: x.overdueLimit ? DurationFormatter.days(x.overdueLimit, x.workingHours) : null,
-    workingHours: x.workingHours ? Duration.fromISO(x.workingHours).as("hours") : null,
-    validSince: x.validSince ? new Date(Date.parse(x.validSince)) : null,
-    validUntil: x.validUntil ? new Date(Date.parse(x.validUntil)) : null
-  }))
-  .sort((l, r) => getName(l.assignedToUserId)?.localeCompare(getName(r.assignedToUserId) ?? "") ?? 0);
+  const rowsTransformed: LeaveLimitCell[] = props.limits
+    .map((x) => ({
+      ...x,
+      limit: x.limit ? DurationFormatter.days(x.limit, x.workingHours) : null,
+      overdueLimit: x.overdueLimit
+        ? DurationFormatter.days(x.overdueLimit, x.workingHours)
+        : null,
+      workingHours: x.workingHours
+        ? Duration.fromISO(x.workingHours).as("hours")
+        : null,
+      validSince: x.validSince ? new Date(Date.parse(x.validSince)) : null,
+      validUntil: x.validUntil ? new Date(Date.parse(x.validUntil)) : null,
+    }))
+    .sort(
+      (l, r) =>
+        getName(l.assignedToUserId)?.localeCompare(
+          getName(r.assignedToUserId) ?? "",
+        ) ?? 0,
+    );
   const [rows, setRows] = React.useState<GridRowsProp>(rowsTransformed);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {},
@@ -95,14 +109,13 @@ export function ManageLimitsTable(props: {
   };
 
   const handleDeleteClick = (id: GridRowId) => async () => {
-    const deleteItem = rows.find((row) => (row.id === id))
-    setRows(rows.filter((row) => (row.id !== id)));
-    if(deleteItem) {
+    const deleteItem = rows.find((row) => row.id === id);
+    setRows(rows.filter((row) => row.id !== id));
+    if (deleteItem) {
       const row = deleteItem as LeaveLimitCell;
       row.state = "Inactive";
       await props.limitOnChange(row);
-    }
-    else {
+    } else {
       notifications.show("Something went wrong when deleting row.", {
         severity: "error",
       });
@@ -268,7 +281,12 @@ export function ManageLimitsTable(props: {
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
         onProcessRowUpdateError={processRowUpdateError}
-        slots={{ toolbar: EditToolbar(props.leaveTypes.find(x => x.properties?.catalog === "Holiday")?.id ?? "") }}
+        slots={{
+          toolbar: EditToolbar(
+            props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")
+              ?.id ?? "",
+          ),
+        }}
         slotProps={{
           toolbar: { setRows, setRowModesModel },
         }}
@@ -277,45 +295,43 @@ export function ManageLimitsTable(props: {
   );
 }
 
-function EditToolbar(defaultLeaveTypeId: string) {return (props: GridSlotProps['toolbar']) => {
-  const { setRows, setRowModesModel } = props;
+function EditToolbar(defaultLeaveTypeId: string) {
+  return (props: GridSlotProps["toolbar"]) => {
+    const { setRows, setRowModesModel } = props;
 
-  const handleClick = () => {
-    const id = uuidv4();
-    const now = DateTime.now();
-    const firstDay = now.startOf("year");
-    const lastDay = now.endOf("year");
-    const newRow: LeaveLimitCell & {isNew: boolean} = { 
-      id,
-      assignedToUserId: null,
-      description: null,
-      leaveTypeId: defaultLeaveTypeId,
-      limit: 26,
-      overdueLimit: null,
-      workingHours: 8,
-      state: "Active",
-      validSince: firstDay.toJSDate(),
-      validUntil: lastDay.toJSDate(),
-      isNew: true,
-    }
-    setRows((oldRows) => [
-      ...oldRows,
-      newRow,
-    ]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
-    }));
+    const handleClick = () => {
+      const id = uuidv4();
+      const now = DateTime.now();
+      const firstDay = now.startOf("year");
+      const lastDay = now.endOf("year");
+      const newRow: LeaveLimitCell & { isNew: boolean } = {
+        id,
+        assignedToUserId: null,
+        description: null,
+        leaveTypeId: defaultLeaveTypeId,
+        limit: 26,
+        overdueLimit: null,
+        workingHours: 8,
+        state: "Active",
+        validSince: firstDay.toJSDate(),
+        validUntil: lastDay.toJSDate(),
+        isNew: true,
+      };
+      setRows((oldRows) => [...oldRows, newRow]);
+      setRowModesModel((oldModel) => ({
+        ...oldModel,
+        [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      }));
+    };
+
+    return (
+      <GridToolbarContainer>
+        <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+          Add record
+        </Button>
+      </GridToolbarContainer>
+    );
   };
-
-  return (
-    <GridToolbarContainer>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-        Add record
-      </Button>
-    </GridToolbarContainer>
-  );
-}
 }
 
 export interface LeaveLimitCell {
