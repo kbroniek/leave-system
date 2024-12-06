@@ -35,7 +35,7 @@ public interface IGetUserRepository
 {
     Task<Result<User, Error>> GetUser(string id, CancellationToken cancellationToken);
     Task<Result<IReadOnlyCollection<User>, Error>> GetUsers(string[] ids, CancellationToken cancellationToken);
-    public record User(string Id, string? Name, string? FirstName = null, string? LastName = null);
+    public record User(string Id, string? Name, string? FirstName, string? LastName, string? JobTitle);
 }
 
 public interface IRolesRepository

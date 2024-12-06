@@ -24,7 +24,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             {
                 return new Error($"Cannot find the graph user. UserId={id}", System.Net.HttpStatusCode.NotFound);
             }
-            return new IGetUserRepository.User(user.Id ?? id, user.DisplayName);
+            return new IGetUserRepository.User(user.Id ?? id, user.DisplayName, null, null, null);
         }
         catch (ODataError ex) when (ex.ResponseStatusCode == 404)
         {
@@ -48,7 +48,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             var users = await graphClient.Users
                 .GetAsync(_ =>
                 {
-                    _.QueryParameters.Select = ["id", "displayName", "givenName", "surname"];
+                    _.QueryParameters.Select = ["id", "displayName", "givenName", "surname", "jobTitle"];
                     _.QueryParameters.Filter = ids.Length == 0 ? null : $"id in ({string.Join(",", ids.Select(id => $"'{id}'"))})";
                 }, cancellationToken);
             if (users is null)
@@ -87,5 +87,5 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
         return graphUsers;
     }
     private static IGetUserRepository.User CreateUserModel(User user) =>
-            new(user.Id, user.DisplayName, user.GivenName, user.Surname);
+            new(user.Id, user.DisplayName, user.GivenName, user.Surname, user.JobTitle);
 }
