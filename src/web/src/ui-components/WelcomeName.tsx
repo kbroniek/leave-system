@@ -4,14 +4,14 @@ import Typography from "@mui/material/Typography";
 
 const WelcomeName = () => {
     const { instance } = useMsal();
-    const [name, setName] = useState<string | null>(null);
+    const [name, setName] = useState<string | undefined>();
 
     const activeAccount = instance.getActiveAccount();
     useEffect(() => {
         if (activeAccount && activeAccount.name) {
             setName(activeAccount.name);
         } else {
-            setName(null);
+            setName(activeAccount?.idTokenClaims?.signInName as string | undefined);
         }
     }, [activeAccount]);
 

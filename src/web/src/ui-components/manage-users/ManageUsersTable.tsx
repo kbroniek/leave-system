@@ -93,7 +93,9 @@ export function ManageUsersTable(props: {
 
   const processRowUpdateError = (e: unknown) => {
     console.warn("processRowUpdateError", e);
-    notifications.show("Something went wrong when updating row.");
+    notifications.show("Something went wrong when updating row.", {
+      severity: "error"
+    });
   };
 
   const columns: GridColDef[] = [

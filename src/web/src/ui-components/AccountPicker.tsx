@@ -42,7 +42,7 @@ export const AccountPicker = (props: {onClose: (event: AccountInfo | null) => vo
                       <PersonIcon />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary={account.name} secondary={account.username} />
+                  <ListItemText primary={account.name ?? account.idTokenClaims?.signInName as string} secondary={account.username} />
                 </ListItem>
             ))}
 
