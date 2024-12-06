@@ -15,14 +15,11 @@ import {
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
-  GridRenderEditCellParams,
-  useGridApiContext,
 } from "@mui/x-data-grid";
-import { roleTypeNames } from "../../components/Authorized";
-import { UserDto } from "../dtos/UsersDto";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { EmployeeDto } from "../dtos/EmployeeDto";
+import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
+import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -33,16 +30,25 @@ declare module "@mui/x-data-grid" {
   }
 }
 
-export function ManageUsersTable(props: {
-  users: UserDto[];
-  userOnChange: (user: UserDto) => Promise<void>;
+export function ManageLimitsTable(props: {
+  employees: EmployeeDto[];
+  leaveTypes: LeaveTypeDto[];
+  limits: LeaveLimitDto[];
+  limitOnChange: (user: LeaveLimitDto) => Promise<void>;
 }) {
   const notifications = useNotifications();
-  const rowsTemp: GridRowsProp = props.users.map((x) => ({
-    ...x,
-    name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name,
-  }));
-  const [rows, setRows] = React.useState(rowsTemp);
+  const employees = [
+    {
+      id: null,
+      name: "<All>",
+    },
+    ...props.employees.map((x) => ({
+      id: x.id,
+      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name,
+    })),
+  ];
+  const rowsTransformed: GridRowsProp = props.limits;
+  const [rows, setRows] = React.useState(rowsTransformed);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {},
   );
@@ -65,13 +71,7 @@ export function ManageUsersTable(props: {
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    const item = rows.find((row) => row.id === id);
-    if (item) {
-      item.roles = [];
-      setRows(rows.map((row) => (row.id === id ? item : row)));
-    } else {
-      console.warn("Can't find user. (handleDeleteClick)");
-    }
+    //TODO: Handle
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -83,7 +83,7 @@ export function ManageUsersTable(props: {
 
   const processRowUpdate = async (updatedRow: GridRowModel) => {
     setRows(rows.map((row) => (row.id === updatedRow.id ? updatedRow : row)));
-    await props.userOnChange(updatedRow as UserDto);
+    await props.limitOnChange(updatedRow as LeaveLimitDto);
     return updatedRow;
   };
 
@@ -94,25 +94,32 @@ export function ManageUsersTable(props: {
   const processRowUpdateError = (e: unknown) => {
     console.warn("processRowUpdateError", e);
     notifications.show("Something went wrong when updating row.", {
-      severity: "error"
+      severity: "error",
     });
   };
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Name", width: 200 },
     {
-      field: "jobTitle",
-      headerName: "Job title",
+      field: "assignedToUserId",
+      headerName: "Employee",
+      width: 200,
+      editable: true,
+      type: "singleSelect",
+      valueOptions: employees.map((x) => ({
+        value: x.id,
+        label: x.name,
+      })),
     },
     {
-      field: "roles",
-      headerName: "Roles",
+      field: "leaveTypeId",
+      headerName: "Leave type",
       width: 220,
       editable: true,
       type: "singleSelect",
-      renderEditCell: CustomEditComponent,
-      sortable: false,
-      filterable: false,
+      valueOptions: props.leaveTypes.map((x) => ({
+        value: x.id,
+        label: x.name,
+      })),
     },
     {
       field: "actions",
@@ -189,37 +196,5 @@ export function ManageUsersTable(props: {
         }}
       />
     </Box>
-  );
-}
-function CustomEditComponent(props: GridRenderEditCellParams) {
-  const { id, value, field } = props;
-  const apiRef = useGridApiContext();
-
-  const handleChange = (event: SelectChangeEvent) => {
-    const eventValue = event.target.value;
-    const newValue =
-      typeof eventValue === "string" ? value.split(",") : eventValue;
-    apiRef.current.setEditCellValue({
-      id,
-      field,
-      value: newValue.filter((x: string) => x !== ""),
-    });
-  };
-
-  return (
-    <Select
-      labelId="demo-multiple-name-label"
-      id="demo-multiple-name"
-      multiple
-      value={value}
-      onChange={handleChange}
-      sx={{ width: "100%" }}
-    >
-      {roleTypeNames.map((option) => (
-        <MenuItem key={option} value={option}>
-          {option}
-        </MenuItem>
-      ))}
-    </Select>
   );
 }

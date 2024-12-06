@@ -13,6 +13,7 @@ import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon'
 import { MyLeaveRequests } from "./ui-components/my-leave-requests/MyLeaveRequests";
 import { HrPanel } from "./ui-components/hr-panel/HrPanel";
 import { ManageUsers } from "./ui-components/manage-users/ManageUsers";
+import { ManageLimits } from "./ui-components/manage-limits/ManageLimits";
 
 
 export function App({ pca }: Readonly<AppProps>) {
@@ -44,6 +45,7 @@ function Pages() {
           <Route path="/my-leaves" element={<MyLeaveRequests />} />
           <Route path="/hr-panel" element={<HrPanel />} />
           <Route path="/users" element={<ManageUsers />} />
+          <Route path="/limits" element={<ManageLimits />} />
       </Routes>
   );
 }
