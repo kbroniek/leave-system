@@ -4,7 +4,7 @@ import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
 import { ErrorComponent } from "../../components/ErrorComponent";
 import { Loading, LoadingAuth } from "../../components/Loading";
-import { LeaveLimitCell, ManageLimitsTable } from "./ManageLimitsTable";
+import { LeaveLimitCell as LeaveLimitItem, ManageLimitsTable } from "./ManageLimitsTable";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { callApi, callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { Authorized } from "../../components/Authorized";
@@ -26,19 +26,19 @@ const DataContent = () => {
   >();
   const [currentYear, setCurrentYear] = useState<number>(DateTime.local().year);
 
-  const handleLimitChange = async (cell: LeaveLimitCell): Promise<void> => {
-    const workingHours = cell.workingHours ?? 8;
+  const handleLimitChange = async (item: LeaveLimitItem): Promise<void> => {
+    const workingHours = item.workingHours ?? 8;
     const dto: LeaveLimitDto = {
-      id: cell.id,
-      assignedToUserId: cell.assignedToUserId,
-      description: cell.description,
-      leaveTypeId: cell.leaveTypeId,
-      limit: cell.limit ? Duration.fromObject({hours: cell.limit * workingHours}).toISO() : null,
-      overdueLimit: cell.overdueLimit ? Duration.fromObject({hours: cell.overdueLimit * workingHours}).toISO() : null,
+      id: item.id,
+      assignedToUserId: item.assignedToUserId,
+      description: item.description,
+      leaveTypeId: item.leaveTypeId,
+      limit: item.limit ? Duration.fromObject({hours: item.limit * workingHours}).toISO() : null,
+      overdueLimit: item.overdueLimit ? Duration.fromObject({hours: item.overdueLimit * workingHours}).toISO() : null,
       workingHours: Duration.fromObject({ hours: workingHours }).toISO(),
-      validSince: cell.validSince ? cell.validSince.toISOString().split('T')[0] : null,
-      validUntil: cell.validUntil ? cell.validUntil.toISOString().split('T')[0] : null,
-      state: "Active",
+      validSince: item.validSince ? item.validSince.toISOString().split('T')[0] : null,
+      validUntil: item.validUntil ? item.validUntil.toISOString().split('T')[0] : null,
+      state: item.state,
     }
     console.log(dto);
     const response = await callApi(`/leavelimits/${dto.id}`, "PUT", dto, notifications.show);

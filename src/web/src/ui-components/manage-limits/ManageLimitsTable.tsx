@@ -88,8 +88,19 @@ export function ManageLimitsTable(props: {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
-    //TODO: Handle
+  const handleDeleteClick = (id: GridRowId) => async () => {
+    const deleteItem = rows.find((row) => (row.id === id))
+    setRows(rows.filter((row) => (row.id !== id)));
+    if(deleteItem) {
+      const row = deleteItem as LeaveLimitCell;
+      row.state = "Inactive";
+      await props.limitOnChange(row);
+    }
+    else {
+      notifications.show("Something went wrong when deleting row.", {
+        severity: "error",
+      });
+    }
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -263,4 +274,5 @@ export interface LeaveLimitCell {
   validUntil: Date | null;
   assignedToUserId: string;
   description: string | null;
+  state: "Active" | "Inactive";
 }
