@@ -36,11 +36,10 @@ const DataContent = () => {
       limit: item.limit ? Duration.fromObject({hours: item.limit * workingHours}).toISO() : null,
       overdueLimit: item.overdueLimit ? Duration.fromObject({hours: item.overdueLimit * workingHours}).toISO() : null,
       workingHours: Duration.fromObject({ hours: workingHours }).toISO(),
-      validSince: item.validSince ? item.validSince.toISOString().split('T')[0] : null,
-      validUntil: item.validUntil ? item.validUntil.toISOString().split('T')[0] : null,
+      validSince: item.validSince ? DateTime.fromJSDate(item.validSince).toFormat("yyyy-MM-dd") : null,
+      validUntil: item.validUntil ? DateTime.fromJSDate(item.validUntil).toFormat("yyyy-MM-dd") : null,
       state: item.state,
     }
-    console.log(dto);
     const response = await callApi(`/leavelimits/${dto.id}`, "PUT", dto, notifications.show);
     if (response.status === 200) {
       notifications.show("Limit is updated successfully", {
@@ -94,26 +93,3 @@ export const ManageLimits = () => (
     <DataContent />
   </MsalAuthenticationTemplate>
 );
-
-
-
-// class DurationConverter {
-//   public static convert(value: string, workingHours: string): DurationMaybeValid {
-//     if(!value || value.trim() === "") {
-//       return Duration.invalid("Value is empty");
-//     }
-//     const workingHoursBuffer = Duration.fromISO(workingHours);
-//     if (!workingHoursBuffer.isValid) {
-//       Duration.invalid(`Invalid workingHours: ${workingHours}`);
-//     }
-//     const regexp = /((\d+)[d])/g;
-//     const match = regexp.exec(value);
-
-//     if(!match) {
-//       return Duration.invalid("Value is invalid. You can provide only days.");
-//     }
-    
-//     const days = Number(match[2]);
-//     return Duration.fromObject({hours: days / workingHoursBuffer.as("hours")});
-//   }
-// }

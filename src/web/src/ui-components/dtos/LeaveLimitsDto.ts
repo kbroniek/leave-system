@@ -9,7 +9,7 @@ export interface LeaveLimitDto {
   leaveTypeId: string;
   validSince: string | null;
   validUntil: string | null;
-  assignedToUserId: string;
+  assignedToUserId: string | null;
   state: "Active" | "Inactive";
   description: string | null;
 }
