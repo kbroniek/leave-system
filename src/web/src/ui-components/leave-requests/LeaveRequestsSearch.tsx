@@ -110,6 +110,7 @@ export const LeaveRequestsSearch = (
     }
     value.employees = typeof value.employees === "string" ? (value.employees as string).split(",") : value.employees;
     value.leaveTypes = typeof value.leaveTypes === "string" ? (value.leaveTypes as string).split(",") : value.leaveTypes;
+    value.statuses = typeof value.statuses === "string" ? (value.statuses as string).split(",") : value.statuses;
     await params.onSubmit(value, event)
   };
   return (
