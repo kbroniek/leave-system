@@ -2,8 +2,6 @@ import { useState } from "react";
 import { GridRenderCellParams } from "@mui/x-data-grid/models";
 import { DateTime } from "luxon";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import Tooltip from "@mui/material/Tooltip";
@@ -14,7 +12,6 @@ import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { LeaveRequest } from "./LeaveRequestModel";
 import Box from "@mui/material/Box";
 
 export function RenderLeaveRequests(
