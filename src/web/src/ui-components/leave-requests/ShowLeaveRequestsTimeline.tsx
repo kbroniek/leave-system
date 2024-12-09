@@ -13,9 +13,9 @@ import {
 import Grid from "@mui/material/Grid2";
 import { RenderLeaveRequests } from "./RenderLeaveRequests";
 import { HolidaysDto } from "../dtos/HolidaysDto";
-import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
+import { LeaveStatusDto } from "../dtos/LeaveStatusDto";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
-import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
+import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { EmployeeDto } from "../dtos/EmployeeDto";
 import { LeaveRequestsTimelineTransformer } from "./LeaveRequestsTimelineTransformer";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
@@ -25,14 +25,14 @@ export const rowHeight = 30;
 export default function ShowLeaveRequestsTimeline(params: Readonly<{
   leaveRequests: LeaveRequestsResponseDto,
   holidays: HolidaysDto,
-  leaveStatuses: LeaveStatusesDto,
-  leaveTypes: LeaveTypesDto,
+  leaveStatuses: LeaveStatusDto[],
+  leaveTypes: LeaveTypeDto[],
   employees: EmployeeDto[]
 }>): JSX.Element {
   const employees = EmployeesFinder.get(params.leaveRequests.items, params.employees);
-  const leaveStatusesActive = params.leaveStatuses.items.filter(x => x.state === "Active");
-  const leaveTypesActive = params.leaveTypes.items.filter(x => x.state === "Active");
-  const transformer = new LeaveRequestsTimelineTransformer(employees, params.leaveRequests, params.holidays, params.leaveTypes.items);
+  const leaveStatusesActive = params.leaveStatuses;
+  const leaveTypesActive = params.leaveTypes.filter(x => x.state === "Active");
+  const transformer = new LeaveRequestsTimelineTransformer(employees, params.leaveRequests, params.holidays, params.leaveTypes);
   const transformedData = transformer.transformToTable();
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];

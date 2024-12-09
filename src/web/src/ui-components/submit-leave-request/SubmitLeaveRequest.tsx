@@ -105,7 +105,6 @@ const DataContent = () => {
           .then((response) => setApiEmployees(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       } else {
-        // callLeaveRequests(dateFromFormatted, dateToFormatted, claims?.sub);
         callMyLimits(currentYear);
         if (claims?.sub) {
           setApiEmployees({
@@ -247,7 +246,7 @@ const DataContent = () => {
           leaveRequests={apiLeaveRequests?.items}
           holidays={apiHolidays}
           leaveTypes={apiLeaveTypes?.items.filter((x) => x.state === "Active")}
-          leaveLimits={apiLeaveLimits?.items}
+          leaveLimits={apiLeaveLimits?.items.filter(x => x.state === "Active")}
           employees={apiEmployees?.items}
           onSubmit={onSubmit}
           onYearChanged={setCurrentYear}
