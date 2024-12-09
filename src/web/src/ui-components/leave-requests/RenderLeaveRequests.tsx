@@ -78,6 +78,10 @@ export function RenderLeaveRequests(
       zIndex: 400,
       width: "4px",
     },
+    ".leave-request-border-menu": {
+      height: "85%",
+      top: "1px"
+    },
     ...props.value?.statuses.reduce(
       (a, x) => ({
         ...a,
@@ -121,13 +125,25 @@ export function RenderLeaveRequests(
             MenuListProps={{
               "aria-labelledby": "basic-button",
             }}
+            sx={style}
           >
             {props.value?.leaveRequests.map((x) => (
               <MenuItem
                 key={`${x.id}-render-leave-request-detail`}
                 onClick={() => handleDialogOpenMenuClose(x.id)}
                 className={getCssClass(x.status, x.leaveTypeId)}
+
               >
+                {props.value?.date.equals(x.dateFrom) ? (
+                    <div className="leave-request-border-start leave-request-border-menu"></div>
+                  ) : (
+                    ""
+                  )}
+                  {props.value?.date.equals(x.dateTo) ? (
+                    <div className="leave-request-border-end leave-request-border-menu"></div>
+                  ) : (
+                    ""
+                  )}
                 {formatPerDay(x, holidaysDateTime)}
               </MenuItem>
             ))}
