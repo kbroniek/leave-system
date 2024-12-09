@@ -8,22 +8,49 @@ import { loginRequest } from "../../authConfig";
 // Sample app imports
 import { Loading, LoadingAuth } from "../../components/Loading";
 import { ErrorComponent } from "../../components/ErrorComponent";
-import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { callApi, callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
 import ShowLeaveRequestDetails from "./ShowLeaveRequestDetails";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { useNavigate } from "react-router-dom";
 
 const DataContent = (props: {leaveRequestId: string}) => {
   const { instance, inProgress } = useMsal();
-  const [apiLeaveRequestDetails, setApiLeaveRequests] = useState<LeaveRequestDetailsDto | null>(null);
+  const [apiLeaveRequestDetails, setApiLeaveRequestDetails] = useState<LeaveRequestDetailsDto | null>(null);
   const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
   const [apiLeaveType, setApiLeaveType] = useState<LeaveTypeDto | null>(null);
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
   const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
+  const navigate = useNavigate();
+
+  async function handleActionLeaveRequest(id: string, remarks: string, action: "accept" | "reject" | "cancel", successMessage: string) {
+    const body = {
+      remark: remarks,
+    };
+    const response = await callApi(`/leaverequests/${id}/${action}`, "PUT", body, notifications.show);
+    if (response.status === 200) {
+      notifications.show(successMessage, {
+        severity: "success",
+        autoHideDuration: 3000,
+      });
+      navigate("/");
+      //TOD: Handle it better
+      window.location.reload();
+    }
+  }
+  const handleAccept = async (id: string, remarks: string) => {
+    await handleActionLeaveRequest(id, remarks, "accept", "Leave Request was accepted successfully");
+  }
+  const handleReject = async (id: string, remarks: string) => {
+    await handleActionLeaveRequest(id, remarks, "reject", "Leave Request was rejected successfully");
+  }
+  const handleCancel = async (id: string, remarks: string) => {
+    await handleActionLeaveRequest(id, remarks, "cancel", "Leave Request was cancelled successfully");
+  }
 
   useEffect(() => {
     if (isCallApi && inProgress === InteractionStatus.None) {
@@ -36,7 +63,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
           callApiGet<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01", notifications.show)
             .then((response) => setApiHolidays(response))
             .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-          setApiLeaveRequests(response)
+          setApiLeaveRequestDetails(response)
         })
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       callApiGet<LeaveStatusesDto>("/settings/leavestatus", notifications.show)
@@ -51,6 +78,9 @@ const DataContent = (props: {leaveRequestId: string}) => {
       statusColor={apiLeaveStatuses.items.find(x => x.leaveRequestStatus === apiLeaveRequestDetails.status)?.color ?? "transparent"}
       leaveType={apiLeaveType}
       holidays={apiHolidays}
+      onAccept={handleAccept}
+      onReject={handleReject}
+      onCancel={handleCancel}
     />
   ) : (
     <Loading />
