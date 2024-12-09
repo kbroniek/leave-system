@@ -71,7 +71,8 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
   const ODD_OPACITY = 0.2;
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     ".MuiDataGrid-cell": {
-      padding: 0
+      padding: 0,
+      lineHeight: "normal"
     },
     [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
       outline: 'transparent',
