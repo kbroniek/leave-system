@@ -87,7 +87,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
   );
 };
 
-export function LeaveRequestDetails(props: {leaveRequestId: string}) {
+export function LeaveRequestDetails(props: Readonly<{leaveRequestId: string}>) {
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}

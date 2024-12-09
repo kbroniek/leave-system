@@ -19,6 +19,7 @@ import { Forbidden } from "../../components/Forbidden";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
+import { leaveRequestsStatuses } from "../utils/Status";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -45,14 +46,6 @@ const DataContent = () => {
       const now = DateTime.fromObject({ year: currentYear });
       const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
       const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
-      const leaveRequestsStatuses = [
-        "Init",
-        "Pending",
-        "Accepted",
-        "Canceled",
-        "Rejected",
-        "Deprecated",
-      ];
       callApiGet<LeaveRequestsResponseDto>(
         `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&assignedToUserIds=${userId}${leaveRequestsStatuses.map((x) => `&statuses=${x}`).join("")}`,
         notifications.show,

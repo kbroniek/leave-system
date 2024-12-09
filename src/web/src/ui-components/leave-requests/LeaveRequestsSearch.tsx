@@ -13,6 +13,7 @@ import { Theme, useTheme } from "@mui/material/styles";
 import FormControl from "@mui/material/FormControl";
 import { EmployeeDto } from "../dtos/EmployeeDto";
 import Button from "@mui/material/Button";
+import { leaveRequestsStatuses } from "../utils/Status";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -52,6 +53,7 @@ export const LeaveRequestsSearch = (
   const [dateTo, setDateTo] = useState<DateTime | null>(now.plus({ days: 14 }));
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
   const [employees, setEmployees] = useState<string[] | undefined>([]);
+  const [statuses, setStatuses] = useState<string[] | undefined>([]);
   const dateIsValid = (value: DateTime | null | undefined): boolean => {
     return !!value && value.isValid;
   };
@@ -79,6 +81,17 @@ export const LeaveRequestsSearch = (
     const values = typeof value === "string" ? value.split(",") : value;
     setEmployees(values);
     setValue("employees", values ?? []);
+  };
+  const handleStatusesChange = (
+    event: SelectChangeEvent<typeof employees>,
+  ) => {
+    const {
+      target: { value },
+    } = event;
+    // On autofill we get a stringified value.
+    const values = typeof value === "string" ? value.split(",") : value;
+    setStatuses(values);
+    setValue("statuses", values ?? []);
   };
   function getStyles(
     name: string,
@@ -168,13 +181,13 @@ export const LeaveRequestsSearch = (
             }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 3, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <FormControl fullWidth>
-            <InputLabel id="demo-multiple-leave-types-label">
+            <InputLabel id="multiple-leave-types-label">
               Leave types
             </InputLabel>
             <Select
-              labelId="demo-multiple-leave-types-label"
+              labelId="multiple-leave-types-label"
               label="Leave types"
               id="multiple-leave-types"
               multiple
@@ -209,13 +222,13 @@ export const LeaveRequestsSearch = (
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={{ xs: 12, sm: 3, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 5, md: 2 }}>
           <FormControl fullWidth>
-            <InputLabel id="demo-multiple-employees-label">
+            <InputLabel id="multiple-employees-label">
               Employees
             </InputLabel>
             <Select
-              labelId="demo-multiple-employees-label"
+              labelId="multiple-employees-label"
               label="Employees"
               id="multiple-employees"
               multiple
@@ -242,7 +255,6 @@ export const LeaveRequestsSearch = (
                 <MenuItem
                   key={item.id}
                   value={item.id}
-                  style={getStyles(item.id, leaveTypes ?? [], theme)}
                 >
                   {item.name}
                 </MenuItem>
@@ -250,7 +262,47 @@ export const LeaveRequestsSearch = (
             </Select>
           </FormControl>
         </Grid>
-        <Grid size={{ xs: 12, sm: 12, md: 2 }}>
+        <Grid size={{ xs: 12, sm: 5, md: 2 }}>
+          <FormControl fullWidth>
+            <InputLabel id="multiple-statuses-label">
+              Statuses
+            </InputLabel>
+            <Select
+              labelId="multiple-statuses-label"
+              label="Statuses"
+              id="multiple-statuses"
+              multiple
+              sx={{ width: "100%" }}
+              value={statuses}
+              {...register("statuses")}
+              onChange={handleStatusesChange}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip
+                      key={value}
+                      label={
+                        params.employees.find((x) => x.id === value)?.name ??
+                        value
+                      }
+                    />
+                  ))}
+                </Box>
+              )}
+              MenuProps={MenuProps}
+            >
+              {leaveRequestsStatuses.map((item) => (
+                <MenuItem
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 2, md: 2 }}>
           <Button
             sx={{ height: "100%" }}
             type="submit"
@@ -270,4 +322,5 @@ export interface SearchLeaveRequestModel {
   dateTo: DateTime | undefined;
   employees: string[];
   leaveTypes: string[];
+  statuses: string[];
 }

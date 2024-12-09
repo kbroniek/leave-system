@@ -24,6 +24,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { isInRole } from "../../components/Authorized";
 import { DateTime } from "luxon";
+import { leaveRequestsStatuses } from "../utils/Status";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -41,6 +42,7 @@ const DataContent = () => {
   const [dateTo, setDateTo] = useState<DateTime>(now.plus({ days: 14 }));
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
   const [employeesSearch, setEmployeesSearch] = useState<string[]>([]);
+  const [statusesSearch, setStatusesSearch] = useState<string[]>(leaveRequestsStatuses.slice(0, 3));
   const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
 
@@ -64,6 +66,7 @@ const DataContent = () => {
     setDateTo(model.dateTo);
     setLeaveTypes(model.leaveTypes);
     setEmployeesSearch(model.employees);
+    setStatusesSearch(model.statuses)
     setIsCallApi(true);
   };
 
@@ -71,7 +74,7 @@ const DataContent = () => {
     if (isCallApi && inProgress === InteractionStatus.None) {
       setIsCallApi(false);
       callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employeesSearch.map((x) => `&assignedToUserIds=${x}`).join("")}${leaveTypes?.map((x) => `&leaveTypeIds=${x}`).join("")}`,
+        `/leaverequests?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employeesSearch.map((x) => `&assignedToUserIds=${x}`).join("")}${leaveTypes?.map((x) => `&leaveTypeIds=${x}`).join("")}${statusesSearch.map((x) => `&statuses=${x}`).join("")}`,
         notifications.show,
       )
         .then((response) => setApiLeaveRequests(response))
@@ -117,16 +120,7 @@ const DataContent = () => {
     }
   }, [
     inProgress,
-    isCallApi,
-    instance,
-    notifications.show,
-    dateFrom,
-    dateTo,
-    employeesSearch,
-    leaveTypes,
-    apiLeaveTypes,
-    apiEmployees,
-    apiLeaveStatuses,
+    isCallApi
   ]);
 
   const employeeToRender =
