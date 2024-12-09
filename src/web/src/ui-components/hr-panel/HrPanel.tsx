@@ -108,8 +108,8 @@ const DataContent = (): JSX.Element => {
     <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
       <ShowHrPanel
         leaveRequests={apiLeaveRequests?.items}
-        leaveTypes={apiLeaveTypes?.items}
-        leaveLimits={apiLeaveLimits?.items}
+        leaveTypes={apiLeaveTypes?.items.filter(x => x.state === "Active")}
+        leaveLimits={apiLeaveLimits?.items.filter(x => x.state === "Active")}
         employees={apiEmployees?.items}
         holidays={apiHolidays?.items}
 

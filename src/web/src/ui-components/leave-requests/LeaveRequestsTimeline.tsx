@@ -40,7 +40,7 @@ const DataContent = () => {
   const [dateFrom, setDateFrom] = useState<DateTime>(now.minus({ days: 14 }));
   const [dateTo, setDateTo] = useState<DateTime>(now.plus({ days: 14 }));
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
-  const [employeesSearch, setEmployees] = useState<string[] | undefined>([]);
+  const [employeesSearch, setEmployeesSearch] = useState<string[]>([]);
   const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
 
@@ -63,7 +63,7 @@ const DataContent = () => {
     setDateFrom(model.dateFrom);
     setDateTo(model.dateTo);
     setLeaveTypes(model.leaveTypes);
-    setEmployees(model.employees);
+    setEmployeesSearch(model.employees);
     setIsCallApi(true);
   };
 
@@ -71,7 +71,7 @@ const DataContent = () => {
     if (isCallApi && inProgress === InteractionStatus.None) {
       setIsCallApi(false);
       callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employeesSearch?.map((x) => `&assignedToUserIds=${x}`).join("")}${leaveTypes?.map((x) => `&leaveTypeIds=${x}`).join("")}`,
+        `/leaverequests?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employeesSearch.map((x) => `&assignedToUserIds=${x}`).join("")}${leaveTypes?.map((x) => `&leaveTypeIds=${x}`).join("")}`,
         notifications.show,
       )
         .then((response) => setApiLeaveRequests(response))
@@ -130,7 +130,7 @@ const DataContent = () => {
   ]);
 
   const employeeToRender =
-    employeesSearch?.length && employeesSearch.filter(x => !!x).length > 0
+    employeesSearch.length && employeesSearch.filter(x => !!x).length > 0
       ? apiEmployees?.items.filter((x) => employeesSearch.includes(x.id))
       : apiEmployees?.items;
   return (
@@ -152,8 +152,8 @@ const DataContent = () => {
           <ShowLeaveRequestsTimeline
             leaveRequests={apiLeaveRequests}
             holidays={apiHolidays}
-            leaveStatuses={apiLeaveStatuses}
-            leaveTypes={apiLeaveTypes}
+            leaveStatuses={apiLeaveStatuses.items.filter(x => x.state === "Active")}
+            leaveTypes={apiLeaveTypes.items}
             employees={employeeToRender ?? []}
           />
         ) : (
