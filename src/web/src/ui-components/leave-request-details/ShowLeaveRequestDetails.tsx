@@ -8,42 +8,70 @@ import { DateTime, DateTimeFormatOptions } from "luxon";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
+import ButtonGroup from "@mui/material/ButtonGroup";
+import LoadingButton from "@mui/lab/LoadingButton";
+import CancelIcon from '@mui/icons-material/Cancel';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import { useState } from "react";
+import TextField from "@mui/material/TextField";
 
-export default function ShowLeaveRequestsTimeline(params: Readonly<{
+export default function ShowLeaveRequestsTimeline(props: Readonly<{
   leaveRequest: LeaveRequestDetailsDto;
   statusColor: string,
   leaveType: LeaveTypeDto
-  holidays: HolidaysDto
+  holidays: HolidaysDto,
+  onAccept: (id: string, remarks: string) => Promise<void>,
+  onReject: (id: string, remarks: string) => Promise<void>,
+  onCancel: (id: string, remarks: string) => Promise<void>
 }>): JSX.Element {
   const titleStyle = {color: "text.secondary", textAlign: "right"};
   const defaultStyle = { paddingTop: "1px", width: "max-content" };
-  const leaveTypeStyle = { ...defaultStyle, borderBottomColor: params.leaveType.properties?.color ?? "transparent" , borderBottomStyle: "solid" };
-  const leaveStatusStyle = { ...defaultStyle, borderBottomColor: params.statusColor, borderBottomStyle: "solid" };
-  const holidaysDateTime = params.holidays.items.map(x => DateTime.fromISO(x));
-  const daysCounter = new DaysCounter(holidaysDateTime, params.leaveType.properties?.includeFreeDays ?? false);
-  const dateFrom = DateTime.fromISO(params.leaveRequest.dateFrom);
-  const dateTo = DateTime.fromISO(params.leaveRequest.dateTo);
-  const createdDate = DateTime.fromISO(params.leaveRequest.createdDate);
-  const lastModifiedDate = DateTime.fromISO(params.leaveRequest.lastModifiedDate);
+  const leaveTypeStyle = { ...defaultStyle, borderBottomColor: props.leaveType.properties?.color ?? "transparent" , borderBottomStyle: "solid" };
+  const leaveStatusStyle = { ...defaultStyle, borderBottomColor: props.statusColor, borderBottomStyle: "solid" };
+  const holidaysDateTime = props.holidays.items.map(x => DateTime.fromISO(x));
+  const daysCounter = new DaysCounter(holidaysDateTime, props.leaveType.properties?.includeFreeDays ?? false);
+  const dateFrom = DateTime.fromISO(props.leaveRequest.dateFrom);
+  const dateTo = DateTime.fromISO(props.leaveRequest.dateTo);
+  const createdDate = DateTime.fromISO(props.leaveRequest.createdDate);
+  const lastModifiedDate = DateTime.fromISO(props.leaveRequest.lastModifiedDate);
   const formatDate: DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+  const [actionProgress, setActionProgress] = useState(false);
+  const [remarksInput, setRemarksInput] = useState("");
+
+  const handleAccept = async () => {
+    setActionProgress(true);
+    await props.onAccept(props.leaveRequest.leaveRequestId, remarksInput);
+    setActionProgress(false);
+  }
+  const handleReject = async () => {
+    setActionProgress(true);
+    await props.onReject(props.leaveRequest.leaveRequestId, remarksInput);
+    setActionProgress(false);
+  }
+  const handleCancel = async () => {
+    setActionProgress(true);
+    await props.onCancel(props.leaveRequest.leaveRequestId, remarksInput);
+    setActionProgress(false);
+  }
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
       <Grid container spacing={2}>
         <Grid size={12}>
-          <Typography variant="h5">{params.leaveRequest.assignedTo.name}</Typography>
+          <Typography variant="h5">{props.leaveRequest.assignedTo.name}</Typography>
           <Divider />
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>Request type:</Typography>
         </Grid>
         <Grid size={6}>
-          <Typography variant="body2" sx={leaveTypeStyle}>{params.leaveType.name}</Typography>
+          <Typography variant="body2" sx={leaveTypeStyle}>{props.leaveType.name}</Typography>
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>Leave from - to:</Typography>
         </Grid>
         <Grid size={6}>
-          <Typography variant="body2" sx={defaultStyle}>{params.leaveRequest.dateFrom} - {params.leaveRequest.dateTo}</Typography>
+          <Typography variant="body2" sx={defaultStyle}>{props.leaveRequest.dateFrom} - {props.leaveRequest.dateTo}</Typography>
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>Days:</Typography>
@@ -55,7 +83,7 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
           <Typography variant="body1" sx={titleStyle}>Hours:</Typography>
         </Grid>
         <Grid size={6}>
-          <Typography variant="body2" sx={defaultStyle}>{DurationFormatter.format(params.leaveRequest.duration)}</Typography>
+          <Typography variant="body2" sx={defaultStyle}>{DurationFormatter.format(props.leaveRequest.duration)}</Typography>
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>Created date:</Typography>
@@ -67,19 +95,19 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
           <Typography variant="body1" sx={titleStyle}>Status:</Typography>
         </Grid>
         <Grid size={6}>
-          <Typography variant="body2" sx={leaveStatusStyle}>{params.leaveRequest.status}</Typography>
+          <Typography variant="body2" sx={leaveStatusStyle}>{props.leaveRequest.status}</Typography>
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>Assigned to:</Typography>
         </Grid>
         <Grid size={6}>
-          <Typography variant="body2" sx={defaultStyle}>{params.leaveRequest.assignedTo.name}</Typography>
+          <Typography variant="body2" sx={defaultStyle}>{props.leaveRequest.assignedTo.name}</Typography>
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>Last modified by:</Typography>
         </Grid>
         <Grid size={6}>
-          <Typography variant="body2" sx={defaultStyle}>{params.leaveRequest.lastModifiedBy.name}</Typography>
+          <Typography variant="body2" sx={defaultStyle}>{props.leaveRequest.lastModifiedBy.name}</Typography>
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>Last modified date:</Typography>
@@ -91,7 +119,32 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
           <Typography variant="body1" sx={titleStyle}>Remarks:</Typography>
         </Grid>
         <Grid size={6}>
-          <Typography variant="body2" sx={defaultStyle}>{params.leaveRequest.remarks.map(x => x.remarks).join(" | ")}</Typography>
+          <Typography variant="body2" sx={defaultStyle}>{props.leaveRequest.remarks.map(x => x.remarks).join(" | ")}</Typography>
+        </Grid>
+        <Grid size={12}
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            p: 1,
+            m: 1,
+          }}>
+          <ButtonGroup variant="contained" aria-label="Basic button group">
+            <LoadingButton loading={actionProgress} loadingPosition="start" startIcon={<ThumbUpIcon />} color="success" onClick={handleAccept}>Accept</LoadingButton>
+            <LoadingButton loading={actionProgress} loadingPosition="start" startIcon={<ThumbDownIcon />} color="error" onClick={handleReject}>Reject</LoadingButton>
+            <LoadingButton loading={actionProgress} loadingPosition="start" startIcon={<CancelIcon />} color="warning" onClick={handleCancel}>Cancel</LoadingButton>
+          </ButtonGroup>
+        </Grid>
+        <Grid size={12}>
+          <TextField
+            id="remarks-multiline-static"
+            label="Remarks"
+            multiline
+            rows={4}
+            variant="standard"
+            sx={{width:"100%"}}
+            value= {remarksInput}
+            onChange= {e => setRemarksInput(e.target.value)}
+          />
         </Grid>
       </Grid>
     </Box>

@@ -19,7 +19,7 @@ export function callApiGet<T>(
 export async function callApi(
   url: string,
   method: "GET" | "POST" | "PUT",
-  body: unknown | undefined,
+  body: unknown,
   showNotification: ShowNotification,
 ): Promise<Response> {
   const account = msalInstance.getActiveAccount();
@@ -61,17 +61,30 @@ export async function callApi(
   });
 
   if (response.status < 200 || response.status >= 300) {
-    const errorBody = await response.json();
-    showNotification(
-      `Error: ${response.status}
-        ${errorBody.title}
-        ${errorBody.detail}
-        ${response.statusText}`,
-      {
-        severity: "error",
-        autoHideDuration: 3000,
-      },
-    );
+    try
+    {
+      const errorBody = await response.json();
+      showNotification(
+        `Error: ${response.status}
+          ${errorBody.title}
+          ${errorBody.detail}
+          ${response.statusText}`,
+        {
+          severity: "error",
+          autoHideDuration: 3000,
+        },
+      );
+    }
+    catch(e) {
+      console.error(e);
+      showNotification(
+        `Error: ${response.status} Something goes wrong.`,
+        {
+          severity: "error",
+          autoHideDuration: 3000,
+        },
+      );
+    }
   }
   return response;
 }
