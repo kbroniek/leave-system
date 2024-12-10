@@ -416,8 +416,9 @@ const AdditionalInfo = (props: {
   dateTo: DateTime | null;
   setValue: UseFormSetValue<LeaveRequestFormModel>;
 }) => {
+  const connectedLeaveTypes = props.leaveTypes.filter(x => x.baseLeaveTypeId === props.leaveTypeId);
   const daysUsed = props.leaveRequests
-    .filter((x) => x.leaveTypeId === props.leaveTypeId)
+    .filter((x) => x.leaveTypeId === props.leaveTypeId || connectedLeaveTypes.find(c => c.id === x.leaveTypeId))
     .map((x) => Duration.fromISO(x.duration))
     .reduce(
       (accumulator, current) => accumulator.plus(current),
@@ -439,7 +440,6 @@ const AdditionalInfo = (props: {
     const dateTo = props.dateTo;
     currentLimit = props.leaveLimits.find(
       (x) =>
-        x.state === "Active" &&
         x.leaveTypeId === props.leaveTypeId &&
         (!x.validSince || DateTime.fromISO(x.validSince) <= dateFrom) &&
         (!x.validUntil || DateTime.fromISO(x.validUntil) >= dateTo)
