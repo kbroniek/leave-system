@@ -23,7 +23,6 @@ const DataContent = (props: {leaveRequestId: string}) => {
   const [apiLeaveStatuses, setApiLeaveStatuses] = useState<LeaveStatusesDto | null>(null);
   const [apiLeaveType, setApiLeaveType] = useState<LeaveTypeDto | null>(null);
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
-  const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
   const navigate = useNavigate();
 
@@ -53,8 +52,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
   }
 
   useEffect(() => {
-    if (isCallApi && inProgress === InteractionStatus.None) {
-      setIsCallApi(false);
+    if (inProgress === InteractionStatus.None) {
       callApiGet<LeaveRequestDetailsDto>(`/leaverequests/${props.leaveRequestId}`, notifications.show)
         .then((response) => {
           callApiGet<LeaveTypeDto>(`/leavetypes/${response.leaveTypeId}`, notifications.show)
@@ -70,7 +68,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
         .then((response) => setApiLeaveStatuses(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
-  }, [inProgress, isCallApi, instance, props.leaveRequestId, notifications.show]);
+  }, [inProgress]);
 
   return apiLeaveRequestDetails && apiLeaveStatuses && apiLeaveType && apiHolidays ? (
     <ShowLeaveRequestDetails
