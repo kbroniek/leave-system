@@ -2,40 +2,59 @@ import { useState } from "react";
 import { GridRenderCellParams } from "@mui/x-data-grid/models";
 import { DateTime } from "luxon";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";
 import { RenderLeaveRequestModel } from "./RenderLeaveRequestModel";
 import Tooltip from "@mui/material/Tooltip";
 import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
 import { EmployeeDto } from "../dtos/EmployeeDto";
 import { DurationFormatter } from "../utils/DurationFormatter";
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Box from "@mui/material/Box";
 
-export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
-  EmployeeDto,
-  RenderLeaveRequestModel>>): JSX.Element {
-  const [openDialog, setOpenDialog] = useState(false);
-  const handleClickOpen = () => {
-    setOpenDialog(true);
+export function RenderLeaveRequests(
+  props: Readonly<GridRenderCellParams<EmployeeDto, RenderLeaveRequestModel>>,
+): JSX.Element {
+  const [leaveRequestId, setLeaveRequestId] = useState<string | undefined>();
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  if (!props.value) {
+    return <></>;
+  }
+  const handleClickOpen = (id: string) => {
+    setLeaveRequestId(id);
   };
 
   const handleClose = () => {
-    setOpenDialog(false);
+    setLeaveRequestId(undefined);
   };
-  const holidaysDateTime = props.value?.holidays.items.map(x => DateTime.fromISO(x)) ?? [];
+  const open = Boolean(menuAnchorEl);
+  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+  const handleDialogOpenMenuClose = (id: string) => {
+    handleClickOpen(id);
+    handleMenuClose();
+  };
+  const holidaysDateTime =
+    props.value?.holidays.items.map((x) => DateTime.fromISO(x)) ?? [];
   const style = {
-    '& .MuiListItemButton-root': {
+    "& .MuiListItemButton-root": {
       display: "flex",
       justifyContent: "center",
       paddingTop: 0,
       paddingBottom: 0,
       paddingLeft: 0,
       paddingRight: 0,
-      cursor: "pointer"
+      cursor: "pointer",
     },
     ".leave-request-border-start": {
       top: 0,
-      left: 0,
+      left: -1,
       position: "absolute",
       height: rowHeight - 4,
       marginLeft: "1px",
@@ -56,13 +75,18 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
       zIndex: 400,
       width: "4px",
     },
+    ".leave-request-border-menu": {
+      height: "85%",
+      top: "1px"
+    },
     ...props.value?.statuses.reduce(
       (a, x) => ({
         ...a,
-      [`.leave-request-${x.leaveRequestStatus}`]: {
-        backgroundImage: `-webkit-linear-gradient(-121.5deg, ${x.color}, ${x.color} 50.5%, transparent 50%, transparent 100%)`
-      }}),
-      {}
+        [`.leave-request-${x.leaveRequestStatus}`]: {
+          backgroundImage: `-webkit-linear-gradient(-121.5deg, ${x.color}, ${x.color} 50.5%, transparent 50%, transparent 100%)`,
+        },
+      }),
+      {},
     ),
     ...props.value?.leaveTypes.reduce(
       (a, x) => ({
@@ -71,50 +95,119 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
           backgroundColor: x.properties?.color ?? "transparent",
           "&:hover": {
             backgroundColor: x.properties?.color ?? "transparent",
-          }
+          },
         },
       }),
-      {}
-    )
-  }
+      {},
+    ),
+  };
   return (
-    <div>
-      <List disablePadding key={`${props.value?.date.toISO()}-leave-request-details`} sx={style}>
-        {
-          props.value?.leaveRequests.map(x => (
-            <Tooltip title={getTooltip( x.leaveTypeId)} key={`${x.id}-leave-request-detail`}>
-              <div>
-                <ListItemButton onClick={handleClickOpen} disableGutters={true} className={getCssClass(x.status, x.leaveTypeId)}>
-                  {props.value?.date.equals(x.dateFrom) ? (<div className="leave-request-border-start"></div>) : ""}
-                  {props.value?.date.equals(x.dateTo) ? (<div className="leave-request-border-end"></div>) : ""}
+    <>
+      {props.value.leaveRequests.length > 1 ? (
+        <>
+          <Button
+            id="basic-button"
+            aria-controls={open ? "basic-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            onClick={handleMenuClick}
+          >
+            <ExpandMoreIcon />
+          </Button>
+          <Menu
+            id="basic-menu"
+            anchorEl={menuAnchorEl}
+            open={open}
+            onClose={handleMenuClose}
+            MenuListProps={{
+              "aria-labelledby": "basic-button",
+            }}
+            sx={style}
+          >
+            {props.value?.leaveRequests.map((x) => (
+              <MenuItem
+                key={`${x.id}-render-leave-request-detail`}
+                onClick={() => handleDialogOpenMenuClose(x.id)}
+                className={getCssClass(x.status, x.leaveTypeId)}
+
+              >
+                {props.value?.date.equals(x.dateFrom) ? (
+                    <div className="leave-request-border-start leave-request-border-menu"></div>
+                  ) : (
+                    ""
+                  )}
+                  {props.value?.date.equals(x.dateTo) ? (
+                    <div className="leave-request-border-end leave-request-border-menu"></div>
+                  ) : (
+                    ""
+                  )}
+                {formatPerDay(x, holidaysDateTime)}
+              </MenuItem>
+            ))}
+          </Menu>
+        </>
+      ) : (
+        <Box
+          key={`${props.value?.date.toISO()}-leave-request-details`}
+          sx={style}
+        >
+          {props.value?.leaveRequests.map((x) => (
+            <Tooltip
+              title={getTooltip(x.leaveTypeId)}
+              key={`${x.id}-leave-request-detail`}
+            >
+                <Button
+                  variant="text"
+                  onClick={() => handleClickOpen(x.id)}
+                  className={getCssClass(
+                    x.status,
+                    x.leaveTypeId,
+                  )}
+                  sx={{padding: 0, minWidth: "50px", height: "29px", color: "black"}}
+                >
+                  {props.value?.date.equals(x.dateFrom) ? (
+                    <div className="leave-request-border-start"></div>
+                  ) : (
+                    ""
+                  )}
+                  {props.value?.date.equals(x.dateTo) ? (
+                    <div className="leave-request-border-end"></div>
+                  ) : (
+                    ""
+                  )}
                   {formatPerDay(x, holidaysDateTime)}
-                </ListItemButton>
-                <LeaveRequestDetailsDialog
-                    open={openDialog}
-                    onClose={handleClose}
-                    leaveRequestId={x.id}
-                  />
-              </div>
+                </Button>
             </Tooltip>
-          ))
-        }
-      </List>
-    </div>
-  )
+          ))}
+        </Box>
+      )}
+      <LeaveRequestDetailsDialog
+        open={!!leaveRequestId}
+        onClose={handleClose}
+        leaveRequestId={leaveRequestId}
+      />
+    </>
+  );
+
   function getTooltip(leaveTypeId: string): string | undefined {
-    return props.value?.leaveTypes.find(x => x.id === leaveTypeId)?.name;
+    return props.value?.leaveTypes.find((x) => x.id === leaveTypeId)?.name;
   }
 
-  function formatPerDay(leaveRequest: LeaveRequestDto | undefined, holidays: DateTime[]): string {
+  function formatPerDay(
+    leaveRequest: LeaveRequestDto | undefined,
+    holidays: DateTime[],
+  ): string {
     if (!leaveRequest) {
       return "";
     }
     try {
-      const formatter = new DurationFormatter(holidays, props.value?.leaveTypes ?? []);
+      const formatter = new DurationFormatter(
+        holidays,
+        props.value?.leaveTypes ?? [],
+      );
       //TODO: Format with current date i.e. 9h should split with 8h and 1h.
       return formatter.formatPerDay(leaveRequest);
-    }
-    catch (e) {
+    } catch (e) {
       //TODO: log invalid date
       console.warn(e);
       return "";
@@ -125,4 +218,3 @@ export function RenderLeaveRequests(props: Readonly<GridRenderCellParams<
 function getCssClass(status: string, leaveTypeId: string): string {
   return `leave-request-${status} leave-type-${leaveTypeId}`;
 }
-
