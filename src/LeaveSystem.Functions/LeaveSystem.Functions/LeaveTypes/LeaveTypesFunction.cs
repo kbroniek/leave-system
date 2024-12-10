@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using static LeaveSystem.Shared.Dto.LeaveTypeDetailsDto;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 public class LeaveTypesFunction
@@ -32,8 +33,12 @@ public class LeaveTypesFunction
             containerName: "%LeaveTypesContainerName%",
             Connection  = "CosmosDBConnection",
             Id = "{leaveTypeId}",
-            PartitionKey = "{leaveTypeId}")] LeaveTypeDto leaveType) =>
-        new OkObjectResult(leaveType);
+            PartitionKey = "{leaveTypeId}")] LeaveTypeDetailsDto leaveType,
+        [CosmosDBInput(
+            databaseName: "%DatabaseName%",
+            containerName: "%LeaveTypesContainerName%",
+            SqlQuery = "SELECT c.id FROM c WHERE (c.state = 'Active' OR NOT IS_DEFINED(c.state)) AND c.baseLeaveTypeId = {leaveTypeId}",
+            Connection  = "CosmosDBConnection")] IEnumerable<LeaveTypeConnectedDto> connectedLeaveTypes) => new OkObjectResult(leaveType with { ConnectedLeaveTypes = connectedLeaveTypes });
 
     [Function(nameof(CreateLeaveType))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveTypeAdmin)}")]

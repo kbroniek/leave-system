@@ -1,12 +1,14 @@
 namespace LeaveSystem.Shared.Dto;
 using System;
 using System.Text.Json.Serialization;
+using static LeaveSystem.Shared.Dto.LeaveTypeDetailsDto;
 using static LeaveSystem.Shared.Dto.LeaveTypeDto;
 
 public record LeaveTypeDto(
     [property: JsonPropertyName("id")] Guid Id,
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("order")] int Order,
+    [property: JsonPropertyName("baseLeaveTypeId")] Guid? BaseLeaveTypeId,
     [property: JsonPropertyName("properties")] PropertiesDto? Properties,
     [property: JsonPropertyName("state")] LeaveTypeState State)
 {
@@ -23,3 +25,16 @@ public record LeaveTypeDto(
         Inactive,
     };
 }
+public record LeaveTypeDetailsDto(
+    [property: JsonPropertyName("id")] Guid Id,
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("order")] int Order,
+    [property: JsonPropertyName("baseLeaveTypeId")] Guid? BaseLeaveTypeId,
+    [property: JsonPropertyName("properties")] PropertiesDto? Properties,
+    [property: JsonPropertyName("state")] LeaveTypeState State,
+    [property: JsonPropertyName("connectedLeaveTypes")] IEnumerable<LeaveTypeConnectedDto>? ConnectedLeaveTypes)
+{
+
+    public record LeaveTypeConnectedDto(
+        [property: JsonPropertyName("id")] Guid Id);
+};

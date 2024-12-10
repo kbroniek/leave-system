@@ -25,6 +25,9 @@ export class HrTransformer {
     const holidayLeaveType = this.leaveTypes?.find(
       (x) => x.properties?.catalog === "Holiday",
     );
+    const onDemandLeaveType = this.leaveTypes?.find(
+      (x) => x.properties?.catalog === "OnDemand",
+    );
     const leaveTypesLeft = this.leaveTypes?.filter(
       (x) => x.properties?.catalog !== "Holiday",
     ) ?? [];
@@ -47,9 +50,9 @@ export class HrTransformer {
         (x) =>
           x.status === "Accepted" &&
           x.assignedTo.id === employee.id &&
-          x.leaveTypeId === holidayLeaveType?.id,
+          (x.leaveTypeId === holidayLeaveType?.id || x.leaveTypeId === onDemandLeaveType?.id),
       );
-      const approvedLeaveRequests = HrTransformer.getCountApprovedLeaveRequests(
+      const approvedLeaveRequests = HrTransformer.getCountLeaveRequests(
         leaveRequestsPerEmployee,
       );
       const limitLeft = approvedLeaveRequests
@@ -120,7 +123,7 @@ export class HrTransformer {
     }
     return counter;
   }
-  private static getCountApprovedLeaveRequests(
+  private static getCountLeaveRequests(
     leaveRequests: LeaveRequestDto[] | undefined,
   ) {
     if (!leaveRequests) {
@@ -128,7 +131,6 @@ export class HrTransformer {
     }
     const duration = LimitsCalculator.calculateTotalDuration(
       ...leaveRequests
-        .filter((x) => x.status === "Accepted")
         .map((x) => x.duration),
     );
     return duration;

@@ -17,7 +17,7 @@ using static LeaveSystem.Domain.LeaveRequests.Searching.ISearchLeaveRequestRepos
 
 internal class SearchLeaveRequestRepository(CosmosClient cosmosClient, string databaseName, string containerId, ILogger<SearchLeaveRequestRepository> logger) : ISearchLeaveRequestRepository
 {
-    private const int PageSize = 25;
+    private const int PageSize = 1000;
 
     public async Task<Result<(IEnumerable<PendingEventEntity> pendingEvents, string? continuationToken), Error>> GetPendingEvents(
         string? continuationToken, DateOnly dateFrom, DateOnly dateTo,

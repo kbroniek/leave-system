@@ -25,7 +25,7 @@ export const LeaveRequestsUsed = (params: {
   const limits = filterLimits(params.leaveLimits, leaveType?.id);
   const leaveRequestsFound = filterLeaveRequests(
     params.leaveRequests,
-    leaveType?.id,
+    [leaveType?.id],
   );
   const daysLimit = calculateLimitDays(limits) ?? 0;
   const daysUsed = calculateLeaveRequestDays(leaveRequestsFound) ?? 0;

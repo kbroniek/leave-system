@@ -1,6 +1,6 @@
 import Typography from "@mui/material/Typography";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
-import { LeaveTypeCatalog, LeaveTypeDto } from "../dtos/LeaveTypesDto";
+import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
@@ -11,6 +11,7 @@ import { DurationFormatter } from "../utils/DurationFormatter";
 import { LeaveRequestsUsed } from "./LeaveRequestsUsed";
 import {
   filterLeaveRequests,
+  findLeaveTypes as findLeaveType,
 } from "./Utils";
 import React from "react";
 import { LimitsCalculator } from "../utils/LimitsCalculator";
@@ -24,9 +25,10 @@ export const MyLeaveRequestsInfo = (params: {
   leaveLimits: LeaveLimitDto[] | undefined;
 }): JSX.Element => {
   const holidayLeaveType = findLeaveType(params.leaveTypes, "Holiday");
+  const onDemandLeaveType = findLeaveType(params.leaveTypes, "OnDemand");
   const holidayLeaveRequests = filterLeaveRequests(
     params.leaveRequests,
-    holidayLeaveType?.id,
+    [holidayLeaveType?.id, onDemandLeaveType?.id],
   );
   const holidayDuration = holidayLeaveRequests
     ? LimitsCalculator.calculateTotalDuration(...holidayLeaveRequests.map((x) => x.duration))
@@ -164,11 +166,4 @@ function TotalDuration(params: {
         : "-"}
     </Typography>
   );
-}
-
-function findLeaveType(
-  leaveTypes: LeaveTypeDto[] | undefined,
-  leaveTypeCatalog: LeaveTypeCatalog,
-) {
-  return leaveTypes?.find((x) => x.properties?.catalog === leaveTypeCatalog);
 }

@@ -9,10 +9,18 @@ X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
 ###
-# @name Get Leave Type
+# @name Get Leave Type holiday
 # @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavetypes/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
+GET {{baseUrl}}/leavetypes/ae752d4b-0368-4d46-8efa-9ef2ee248fa9
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Type on-demand
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavetypes/6e1a75ca-07dc-45aa-9451-57e1cefd7ee6
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
