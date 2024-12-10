@@ -5,12 +5,22 @@ import { useState, useEffect, ReactElement } from "react";
 export const Authorized = (props: AuthorizedProps) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const { instance } = useMsal();
-  const claimRoles = getRoles(instance);
   useEffect(() => {
-    setIsAuthorized(isInRoleInternal(props.roles, claimRoles));
-  }, [claimRoles, props.roles]);
+    if (props.roles === "CurrentUser") {
+      setIsAuthorized(
+        props.userId === instance.getActiveAccount()?.idTokenClaims?.sub,
+      );
+    } else {
+      const claimRoles = getRoles(instance);
+      setIsAuthorized(isInRoleInternal(props.roles, claimRoles));
+    }
+  }, [instance, props]);
 
-  return <>{isAuthorized ? props.authorized : props.unauthorized}</>;
+  return (
+    <>
+      {isAuthorized ? (props.children ?? props.authorized) : props.unauthorized}
+    </>
+  );
 };
 
 function getRoles(instance: IPublicClientApplication): RoleType[] | undefined {
@@ -35,11 +45,15 @@ export function isInRole(
   return isInRoleInternal(roles, getRoles(instance));
 }
 
-interface AuthorizedProps {
-  authorized: ReactElement;
+type RoleArgs =
+  | { roles: RoleType[] }
+  | { roles: "CurrentUser"; userId: string };
+
+type AuthorizedProps = {
+  authorized?: ReactElement;
+  children?: JSX.Element | JSX.Element[];
   unauthorized?: ReactElement;
-  roles: RoleType[];
-}
+} & RoleArgs;
 
 export type RoleType =
   | "Employee"
