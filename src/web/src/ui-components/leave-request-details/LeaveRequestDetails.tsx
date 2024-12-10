@@ -16,6 +16,7 @@ import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useNavigate } from "react-router-dom";
+import Box from "@mui/material/Box";
 
 const DataContent = (props: {leaveRequestId: string}) => {
   const { instance, inProgress } = useMsal();
@@ -81,7 +82,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
       onCancel={handleCancel}
     />
   ) : (
-    <Loading />
+    <Box sx={{minWidth: 170, minHeight: 170, textAlign: "center", alignContent: "center"}} ><Loading /></Box>
   );
 };
 

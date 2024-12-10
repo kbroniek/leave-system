@@ -16,6 +16,9 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { Authorized } from "../../components/Authorized";
+import LinkIcon from "@mui/icons-material/Link";
+import { Button } from "@mui/material";
+import { useNotifications } from "@toolpad/core/useNotifications";
 
 export default function ShowLeaveRequestsTimeline(
   props: Readonly<{
@@ -60,6 +63,7 @@ export default function ShowLeaveRequestsTimeline(
   };
   const [actionProgress, setActionProgress] = useState(false);
   const [remarksInput, setRemarksInput] = useState("");
+  const notifications = useNotifications();
 
   const handleAccept = async () => {
     setActionProgress(true);
@@ -76,13 +80,27 @@ export default function ShowLeaveRequestsTimeline(
     await props.onCancel(props.leaveRequest.leaveRequestId, remarksInput);
     setActionProgress(false);
   };
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/details/${props.leaveRequest.leaveRequestId}`);
+    notifications.show("Copied to clipboard", {
+      severity: "info",
+      autoHideDuration: 3000,
+    });
+  }
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
       <Grid container spacing={2}>
-        <Grid size={12}>
+        <Grid size={11}>
           <Typography variant="h5">
             {props.leaveRequest.assignedTo.name}
           </Typography>
+        </Grid>
+        <Grid size={1}>
+          <Button color="inherit" sx={{minWidth: 0, padding: 0}} onClick={handleCopyToClipboard}>
+            <LinkIcon />
+          </Button>
+        </Grid>
+        <Grid size={12}>
           <Divider />
         </Grid>
         <Grid size={6}>
@@ -215,21 +233,25 @@ export default function ShowLeaveRequestsTimeline(
                 Reject
               </LoadingButton>
             </Authorized>
-            {dateFrom > DateTime.local() ? (<Authorized
-              roles={"CurrentUser"}
-              userId={props.leaveRequest.assignedTo.id}
-              authorized={
-                <LoadingButton
-                  loading={actionProgress}
-                  loadingPosition="start"
-                  startIcon={<CancelIcon />}
-                  color="warning"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </LoadingButton>
-              }
-            />) : <></>}
+            {dateFrom > DateTime.local() ? (
+              <Authorized
+                roles={"CurrentUser"}
+                userId={props.leaveRequest.assignedTo.id}
+                authorized={
+                  <LoadingButton
+                    loading={actionProgress}
+                    loadingPosition="start"
+                    startIcon={<CancelIcon />}
+                    color="warning"
+                    onClick={handleCancel}
+                  >
+                    Cancel
+                  </LoadingButton>
+                }
+              />
+            ) : (
+              <></>
+            )}
           </ButtonGroup>
         </Grid>
         <Grid size={12}>
@@ -237,7 +259,7 @@ export default function ShowLeaveRequestsTimeline(
             id="remarks-multiline-static"
             label="Remarks"
             multiline
-            rows={4}
+            rows={1}
             variant="standard"
             sx={{ width: "100%" }}
             value={remarksInput}
