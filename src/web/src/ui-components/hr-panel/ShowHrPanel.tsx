@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import styled from "@mui/material/styles/styled";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
@@ -27,6 +28,7 @@ export const ShowHrPanel = (
     holidays: string[] | undefined;
   }>,
 ): JSX.Element => {
+  const navigate = useNavigate();
   const employees = EmployeesFinder.get(params.leaveRequests, params.employees);
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     [`& .${gridClasses.row}.even`]: {
@@ -38,10 +40,16 @@ export const ShowHrPanel = (
         },
       },
     },
+    '& .MuiDataGrid-row:hover': {
+      cursor: 'pointer'
+    }
   }));
   const holidayLeaveType = params.leaveTypes?.find(
     (x) => x.properties?.catalog === "Holiday",
   );
+  const redirectUserDetails = (userId: string) => {
+    navigate(`/user-leaves/${userId}`);
+  }
   const RenderSelectedXDays = (
     props: Readonly<
       GridRenderCellParams<GridValidRowModel>
@@ -123,6 +131,7 @@ export const ShowHrPanel = (
               getRowClassName={(params) =>
                 params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
               }
+              onRowClick={(e) => redirectUserDetails(e.id as string)}
             />
           </Grid>
           <Grid size={10}>
@@ -147,6 +156,7 @@ export const ShowHrPanel = (
               getRowClassName={(params) =>
                 params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
               }
+              onRowClick={(e) => redirectUserDetails(e.id as string)}
             />
           </Grid>
         </Grid>
