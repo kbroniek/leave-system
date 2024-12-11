@@ -101,10 +101,10 @@ export function ManageUsersTable(props: {
   };
 
   const columns: GridColDef[] = [
-    { field: "name", headerName: "Name", width: 200 },
+    { field: "name", headerName: t("Name"), width: 200 },
     {
       field: "jobTitle",
-      headerName: "Job title",
+      headerName: t("Job title"),
     },
     {
       field: "roles",
