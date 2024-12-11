@@ -12,6 +12,7 @@ import { App } from "./App";
 
 import "./index.css";
 import { NotificationsProvider } from "@toolpad/core/useNotifications";
+import './i18n';
 
 export const msalInstance = new PublicClientApplication(msalConfig);
 
