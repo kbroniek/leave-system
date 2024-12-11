@@ -23,6 +23,7 @@ import { UserDto } from "../dtos/UsersDto";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { useTranslation } from "react-i18next";
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -38,6 +39,7 @@ export function ManageUsersTable(props: {
   userOnChange: (user: UserDto) => Promise<void>;
 }) {
   const notifications = useNotifications();
+  const { t } = useTranslation();
   const rowsTemp: GridRowsProp = props.users.map((x) => ({
     ...x,
     name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name,
@@ -93,7 +95,7 @@ export function ManageUsersTable(props: {
 
   const processRowUpdateError = (e: unknown) => {
     console.warn("processRowUpdateError", e);
-    notifications.show("Something went wrong when updating row.", {
+    notifications.show(t("Something went wrong when updating row."), {
       severity: "error"
     });
   };
@@ -106,7 +108,7 @@ export function ManageUsersTable(props: {
     },
     {
       field: "roles",
-      headerName: "Roles",
+      headerName: t("Roles"),
       width: 220,
       editable: true,
       type: "singleSelect",
@@ -117,7 +119,7 @@ export function ManageUsersTable(props: {
     {
       field: "actions",
       type: "actions",
-      headerName: "Actions",
+      headerName: t("Actions"),
       width: 100,
       cellClassName: "actions",
       getActions: ({ id }) => {
@@ -127,7 +129,7 @@ export function ManageUsersTable(props: {
           return [
             <GridActionsCellItem
               icon={<SaveIcon />}
-              label="Save"
+              label={t("Save")}
               sx={{
                 color: "primary.main",
               }}
@@ -135,7 +137,7 @@ export function ManageUsersTable(props: {
             />,
             <GridActionsCellItem
               icon={<CancelIcon />}
-              label="Cancel"
+              label={t("Cancel")}
               className="textPrimary"
               onClick={handleCancelClick(id)}
               color="inherit"
@@ -146,14 +148,14 @@ export function ManageUsersTable(props: {
         return [
           <GridActionsCellItem
             icon={<EditIcon />}
-            label="Edit"
+            label={t("Edit")}
             className="textPrimary"
             onClick={handleEditClick(id)}
             color="inherit"
           />,
           <GridActionsCellItem
             icon={<DeleteIcon />}
-            label="Delete"
+            label={t("Delete")}
             onClick={handleDeleteClick(id)}
             color="inherit"
           />,

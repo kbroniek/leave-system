@@ -6,8 +6,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { AccountPicker } from "./AccountPicker";
 import Tooltip from "@mui/material/Tooltip";
+import { Trans, useTranslation } from "react-i18next";
 
 export const SignOutButton = () => {
+  const { t } = useTranslation();
   const { instance } = useMsal();
   const [accountSelectorOpen, setAccountSelectorOpen] = useState(false);
 
@@ -34,7 +36,7 @@ export const SignOutButton = () => {
   };
   return (
     <div>
-      <Tooltip title="Open settings">
+      <Tooltip title={t("Open settings")}>
       <IconButton
         onClick={(event) => setAnchorEl(event.currentTarget)}
         color="inherit"
@@ -59,10 +61,10 @@ export const SignOutButton = () => {
         onClose={() => setAnchorEl(null)}
       >
         <MenuItem onClick={() => handleAccountSelection()} key="switchAccount">
-          Switch Account
+          <Trans>Switch Account</Trans>
         </MenuItem>
         <MenuItem onClick={() => handleLogout("redirect")} key="logoutRedirect">
-          Logout
+          <Trans>Logout</Trans>
         </MenuItem>
       </Menu>
       <AccountPicker open={accountSelectorOpen} onClose={handleClose} />

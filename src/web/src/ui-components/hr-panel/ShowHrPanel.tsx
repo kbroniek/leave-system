@@ -12,10 +12,11 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid2";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
 import { HrTransformer } from "./HrTransformer";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { GridRenderCellParams } from "@mui/x-data-grid/models/params";
 import { GridValidRowModel } from "@mui/x-data-grid/models";
-import DoDisturbOnIcon from '@mui/icons-material/DoDisturbOn';
+import DoDisturbOnIcon from "@mui/icons-material/DoDisturbOn";
+import { useTranslation } from "react-i18next";
 
 const ODD_OPACITY = 0.2;
 const selectedXDaysNumber = 14;
@@ -29,6 +30,7 @@ export const ShowHrPanel = (
   }>,
 ): JSX.Element => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const employees = EmployeesFinder.get(params.leaveRequests, params.employees);
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     [`& .${gridClasses.row}.even`]: {
@@ -40,50 +42,52 @@ export const ShowHrPanel = (
         },
       },
     },
-    '& .MuiDataGrid-row:hover': {
-      cursor: 'pointer'
-    }
+    "& .MuiDataGrid-row:hover": {
+      cursor: "pointer",
+    },
   }));
   const holidayLeaveType = params.leaveTypes?.find(
     (x) => x.properties?.catalog === "Holiday",
   );
   const redirectUserDetails = (userId: string) => {
     navigate(`/user-leaves/${userId}`);
-  }
+  };
   const RenderSelectedXDays = (
-    props: Readonly<
-      GridRenderCellParams<GridValidRowModel>
-    >,
+    props: Readonly<GridRenderCellParams<GridValidRowModel>>,
   ): JSX.Element => {
     if (!props.row) {
       return <></>;
     }
-    return props.row["selectedXDays"] ? <CheckCircleIcon sx={{ verticalAlign: "middle"}} color="success"/> : <DoDisturbOnIcon sx={{ verticalAlign: "middle"}}/>;
+    return props.row["selectedXDays"] ? (
+      <CheckCircleIcon sx={{ verticalAlign: "middle" }} color="success" />
+    ) : (
+      <DoDisturbOnIcon sx={{ verticalAlign: "middle" }} />
+    );
   };
   const columns = [
     {
       field: "totalLimit",
-      headerName: "Total available vacation days",
+      headerName: t("Total available vacation days"),
     },
     {
       field: "limit",
-      headerName: "Number of days for the current year",
+      headerName: t("Number of days for the current year"),
     },
     {
       field: "overdueLimit",
-      headerName: "Number of days for previous years",
+      headerName: t("Number of days for previous years"),
     },
     {
       field: "limitLeft",
-      headerName: "Number of remaining vacation days",
+      headerName: t("Number of remaining vacation days"),
     },
     {
       field: "leaveTaken",
-      headerName: "Number of days in approved vacation days",
+      headerName: t("Number of days in approved vacation days"),
     },
     {
       field: "selectedXDays",
-      headerName: `${selectedXDaysNumber} days selected`,
+      headerName: `${selectedXDaysNumber} ${t("days selected")}`,
       renderCell: RenderSelectedXDays,
     },
   ].concat(
@@ -95,14 +99,14 @@ export const ShowHrPanel = (
       })) ?? [],
   );
   const transformer = new HrTransformer(
-    employees, 
-    params.leaveRequests, 
+    employees,
+    params.leaveRequests,
     params.holidays,
     params.leaveTypes,
     params.leaveLimits,
-    selectedXDaysNumber
+    selectedXDaysNumber,
   );
-  const hrPanelData = transformer.transform()
+  const hrPanelData = transformer.transform();
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
       {!params.leaveRequests ? (

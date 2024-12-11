@@ -25,6 +25,7 @@ import Paper from "@mui/material/Paper";
 import { isInRole } from "../../components/Authorized";
 import { DateTime } from "luxon";
 import { leaveRequestsStatuses } from "../utils/Status";
+import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -45,17 +46,18 @@ const DataContent = () => {
   const [statusesSearch, setStatusesSearch] = useState<string[]>(leaveRequestsStatuses.slice(0, 3));
   const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
+  const { t } = useTranslation();
 
   const onSubmit = async (model: SearchLeaveRequestModel) => {
     if (!model.dateFrom?.isValid) {
-      notifications.show("Date from is invalid. Choose correct date.", {
+      notifications.show(t("Date from is invalid. Choose correct date."), {
         severity: "warning",
         autoHideDuration: 3000,
       });
       return;
     }
     if (!model.dateTo?.isValid) {
-      notifications.show("Date to is invalid. Choose correct date.", {
+      notifications.show(t("Date to is invalid. Choose correct date."), {
         severity: "warning",
         autoHideDuration: 3000,
       });

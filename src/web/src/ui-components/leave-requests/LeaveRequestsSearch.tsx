@@ -14,6 +14,7 @@ import FormControl from "@mui/material/FormControl";
 import { EmployeeDto } from "../dtos/EmployeeDto";
 import Button from "@mui/material/Button";
 import { leaveRequestsStatuses } from "../utils/Status";
+import { Trans, useTranslation } from "react-i18next";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -35,6 +36,7 @@ export const LeaveRequestsSearch = (
 ) => {
   const theme = useTheme();
   const now = DateTime.now().startOf("day");
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -58,7 +60,7 @@ export const LeaveRequestsSearch = (
     return !!value && value.isValid;
   };
   const validateDate = (value: DateTime | undefined) => {
-    if (!dateIsValid(value)) return "This is required";
+    if (!dateIsValid(value)) return t("This is required");
   };
   const handleLeaveTypesChange = (
     event: SelectChangeEvent<typeof leaveTypes>,
@@ -121,13 +123,13 @@ export const LeaveRequestsSearch = (
             control={control}
             name="dateFrom"
             rules={{
-              required: "This is required",
+              required: t("This is required"),
               validate: { required: validateDate },
             }}
             render={({ field }) => {
               return (
                 <DatePicker
-                  label="Date from *"
+                  label={t("Date from *")}
                   value={field.value}
                   inputRef={field.ref}
                   onChange={(date: DateTime | null) => {
@@ -154,13 +156,13 @@ export const LeaveRequestsSearch = (
             control={control}
             name="dateTo"
             rules={{
-              required: "This is required",
+              required: t("This is required"),
               validate: { required: validateDate },
             }}
             render={({ field }) => {
               return (
                 <DatePicker
-                  label="Date to *"
+                  label={t("Date to *")}
                   value={field.value}
                   inputRef={field.ref}
                   onChange={(date: DateTime | null) => {
@@ -189,7 +191,7 @@ export const LeaveRequestsSearch = (
             </InputLabel>
             <Select
               labelId="multiple-leave-types-label"
-              label="Leave types"
+              label={t("Leave types")}
               id="multiple-leave-types"
               multiple
               sx={{ width: "100%" }}
@@ -230,7 +232,7 @@ export const LeaveRequestsSearch = (
             </InputLabel>
             <Select
               labelId="multiple-employees-label"
-              label="Employees"
+              label={t("Employees")}
               id="multiple-employees"
               multiple
               sx={{ width: "100%" }}
@@ -270,7 +272,7 @@ export const LeaveRequestsSearch = (
             </InputLabel>
             <Select
               labelId="multiple-statuses-label"
-              label="Statuses"
+              label={t("Statuses")}
               id="multiple-statuses"
               multiple
               sx={{ width: "100%" }}
@@ -310,7 +312,7 @@ export const LeaveRequestsSearch = (
             variant="contained"
             fullWidth
           >
-            Search
+            <Trans>Search</Trans>
           </Button>
         </Grid>
       </Grid>

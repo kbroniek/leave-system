@@ -24,10 +24,12 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
   const notifications = useNotifications();
+  const { t } = useTranslation();
   const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
   const [apiLeaveTypes, setApiLeaveTypes] = useState<
     LeaveTypesDto | undefined
@@ -68,7 +70,7 @@ const DataContent = () => {
       notifications.show,
     );
     if (response.status === 200) {
-      notifications.show("Limit is updated successfully", {
+      notifications.show(t("Limit is updated successfully"), {
         severity: "success",
         autoHideDuration: 3000,
       });

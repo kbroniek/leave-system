@@ -14,6 +14,7 @@ import { GridValidRowModel } from "@mui/x-data-grid/models/gridRows";
 import { LeaveStatusDto } from "../dtos/LeaveStatusDto";
 import { useState } from "react";
 import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
+import { useTranslation } from "react-i18next";
 
 const ODD_OPACITY = 0.2;
 export const MyLeaveRequestsTable = (params: {
@@ -21,6 +22,7 @@ export const MyLeaveRequestsTable = (params: {
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveStatuses: LeaveStatusDto[] | undefined;
 }): JSX.Element => {
+  const { t } = useTranslation();
   const [openDialog, setOpenDialog] = useState(false);
   const [showLeaveRequestId, setShowLeaveRequestId] = useState<string | undefined>(undefined);
   const handleClickOpen = () => {
@@ -36,7 +38,7 @@ export const MyLeaveRequestsTable = (params: {
     >,
   ): JSX.Element => {
     if (!props.row) {
-      return <>undefined</>;
+      return <>{t("undefined")}</>;
     }
     return (
       <>
@@ -50,7 +52,7 @@ export const MyLeaveRequestsTable = (params: {
     >,
   ): JSX.Element => {
     if (!props.row) {
-      return <>undefined</>;
+      return <>{t("undefined")}</>;
     }
     if (!params.leaveStatuses) {
       return <CircularProgress size="20px" />;
@@ -77,7 +79,7 @@ export const MyLeaveRequestsTable = (params: {
     >,
   ): JSX.Element => {
     if (!props.row) {
-      return <>undefined</>;
+      return <>{t("undefined")}</>;
     }
     if (!params.leaveTypes) {
       return <CircularProgress size="20px" />;
@@ -109,7 +111,7 @@ export const MyLeaveRequestsTable = (params: {
   }));
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
-      <Typography variant="h5">Leave requests</Typography>
+      <Typography variant="h5">{t("Leave requests")}</Typography>
       <Divider />
       {!params.leaveRequests ? (
         <CircularProgress />
@@ -117,18 +119,18 @@ export const MyLeaveRequestsTable = (params: {
         <StripedDataGrid
           rowHeight={40}
           columns={[
-            { field: "dateFrom", headerName: "From" },
-            { field: "dateTo", headerName: "To" },
+            { field: "dateFrom", headerName: t("From") },
+            { field: "dateTo", headerName: t("To") },
             {
               field: "days",
-              headerName: "Days",
+              headerName: t("Days"),
               renderCell: RenderDays,
               width: 30,
             },
-            { field: "status", headerName: "Status", renderCell: RenderStatus },
+            { field: "status", headerName: t("Status"), renderCell: RenderStatus },
             {
               field: "type",
-              headerName: "Type",
+              headerName: t("Type"),
               renderCell: RenderType,
               flex: 1,
             },

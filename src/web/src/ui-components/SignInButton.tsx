@@ -1,6 +1,7 @@
 import { useMsal } from "@azure/msal-react";
 import Button from "@mui/material/Button";
 import { loginRequest } from "../authConfig";
+import { Trans } from "react-i18next";
 
 export const SignInButton = () => {
     const { instance } = useMsal();
@@ -19,7 +20,7 @@ export const SignInButton = () => {
                 onClick={() => handleLogin("redirect")}
                 color="inherit"
             >
-                Login
+                <Trans>Login</Trans>
             </Button>
         </div>
     )

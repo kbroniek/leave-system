@@ -10,6 +10,7 @@ import {
 } from "./Utils";
 import React from "react";
 import { LimitsCalculator } from "../utils/LimitsCalculator";
+import { useTranslation } from "react-i18next";
 
 const defaultStyle = { paddingTop: "2px", textAlign: "right" };
 const titleStyle = { color: "text.secondary" };
@@ -21,6 +22,7 @@ export const LeaveRequestsUsed = (params: {
   text: string;
   leaveTypeCatalog: LeaveTypeCatalog;
 }): JSX.Element => {
+  const { t } = useTranslation();
   const leaveType = findLeaveType(params.leaveTypes, params.leaveTypeCatalog);
   const limits = filterLimits(params.leaveLimits, leaveType?.id);
   const leaveRequestsFound = filterLeaveRequests(
@@ -68,7 +70,7 @@ export const LeaveRequestsUsed = (params: {
                       !params.leaveLimits ||
                       !params.leaveRequests
                     }
-                    text={"Not used"}
+                    text={t("Not used")}
                   />
                 </Grid>
               </React.Fragment>
@@ -87,7 +89,7 @@ export const LeaveRequestsUsed = (params: {
                       !params.leaveLimits ||
                       !params.leaveRequests
                     }
-                    text={`Used (${u.dateFrom})`}
+                    text={`${t("Used")} (${u.dateFrom})`}
                   />
                 </Grid>
               </React.Fragment>

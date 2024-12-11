@@ -27,6 +27,7 @@ import { DurationFormatter } from "../utils/DurationFormatter";
 import { DateTime, Duration } from "luxon";
 import Button from "@mui/material/Button";
 import { v4 as uuidv4 } from "uuid";
+import { Trans, useTranslation } from "react-i18next";
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -44,6 +45,7 @@ export function ManageLimitsTable(props: {
   limitOnChange: (user: LeaveLimitCell) => Promise<boolean>;
 }) {
   const notifications = useNotifications();
+  const { t } = useTranslation();
 
   const missingEmployees = props.limits
     .filter((x) => !props.employees.find((e) => e.id === x.assignedToUserId))
@@ -54,7 +56,7 @@ export function ManageLimitsTable(props: {
   const employees = [
     {
       id: null,
-      name: "<All>",
+      name: t("<All>"),
     },
     ...props.employees
       .map((x) => ({
@@ -116,7 +118,7 @@ export function ManageLimitsTable(props: {
       row.state = "Inactive";
       await props.limitOnChange(row);
     } else {
-      notifications.show("Something went wrong when deleting row.", {
+      notifications.show(t("Something went wrong when deleting row."), {
         severity: "error",
       });
     }
@@ -149,7 +151,7 @@ export function ManageLimitsTable(props: {
 
   const processRowUpdateError = (e: unknown) => {
     console.warn("processRowUpdateError", e);
-    notifications.show("Something went wrong when updating row.", {
+    notifications.show(t("Something went wrong when updating row."), {
       severity: "error",
     });
   };
@@ -157,7 +159,7 @@ export function ManageLimitsTable(props: {
   const columns: GridColDef[] = [
     {
       field: "assignedToUserId",
-      headerName: "Employee",
+      headerName: t("Employee"),
       editable: true,
       minWidth: 220,
       type: "singleSelect",
@@ -168,7 +170,7 @@ export function ManageLimitsTable(props: {
     },
     {
       field: "leaveTypeId",
-      headerName: "Leave type",
+      headerName: t("Leave type"),
       editable: true,
       minWidth: 200,
       type: "singleSelect",
@@ -179,44 +181,44 @@ export function ManageLimitsTable(props: {
     },
     {
       field: "limit",
-      headerName: "Limit (d)",
+      headerName: t("Limit (d)"),
       editable: true,
       type: "number",
     },
     {
       field: "overdueLimit",
-      headerName: "Overdue limit (d)",
+      headerName: t("Overdue limit (d)"),
       editable: true,
       type: "number",
     },
     {
       field: "workingHours",
-      headerName: "Working hours (h)",
+      headerName: t("Working hours (h)"),
       editable: true,
       type: "number",
     },
     {
       field: "validSince",
-      headerName: "Valid since",
+      headerName: t("Valid since"),
       editable: true,
       type: "date",
     },
     {
       field: "validUntil",
-      headerName: "Valid until",
+      headerName: t("Valid until"),
       editable: true,
       type: "date",
     },
     {
       field: "description",
-      headerName: "Description",
+      headerName: t("Description"),
       editable: true,
       type: "string",
     },
     {
       field: "actions",
       type: "actions",
-      headerName: "Actions",
+      headerName: t("Actions"),
       width: 100,
       cellClassName: "actions",
       getActions: ({ id }) => {
@@ -226,7 +228,7 @@ export function ManageLimitsTable(props: {
           return [
             <GridActionsCellItem
               icon={<SaveIcon />}
-              label="Save"
+              label={t("Save")}
               sx={{
                 color: "primary.main",
               }}
@@ -234,7 +236,7 @@ export function ManageLimitsTable(props: {
             />,
             <GridActionsCellItem
               icon={<CancelIcon />}
-              label="Cancel"
+              label={t("Cancel")}
               className="textPrimary"
               onClick={handleCancelClick(id)}
               color="inherit"
@@ -245,14 +247,14 @@ export function ManageLimitsTable(props: {
         return [
           <GridActionsCellItem
             icon={<EditIcon />}
-            label="Edit"
+            label={t("Edit")}
             className="textPrimary"
             onClick={handleEditClick(id)}
             color="inherit"
           />,
           <GridActionsCellItem
             icon={<DeleteIcon />}
-            label="Delete"
+            label={t("Delete")}
             onClick={handleDeleteClick(id)}
             color="inherit"
           />,
@@ -329,7 +331,7 @@ function EditToolbar(defaultLeaveTypeId: string) {
     return (
       <GridToolbarContainer>
         <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-          Add record
+          <Trans>Add record</Trans>
         </Button>
       </GridToolbarContainer>
     );

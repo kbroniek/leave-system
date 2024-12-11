@@ -10,10 +10,12 @@ import { callApi, callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/Ap
 import { Authorized } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import { UserDto, UsersDto } from "../dtos/UsersDto";
+import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
   const notifications = useNotifications();
+  const { t } = useTranslation();
   const [apiUsers, setApiUsers] = useState<UsersDto | undefined>();
 
   const handleUserChange = async (user: UserDto): Promise<void> => {
@@ -22,7 +24,7 @@ const DataContent = () => {
       roles: user.roles
     }, notifications.show);
     if (response.status === 200) {
-      notifications.show("Roles is updated successfully", {
+      notifications.show(t("Roles is updated successfully"), {
         severity: "success",
         autoHideDuration: 3000,
       });

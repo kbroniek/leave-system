@@ -20,6 +20,7 @@ import Paper from "@mui/material/Paper"
 import TextField from "@mui/material/TextField"
 import Typography from "@mui/material/Typography"
 import Grid from "@mui/material/Grid2"
+import { useTranslation } from "react-i18next"
 
 const DataContent = (): JSX.Element => {
   const { instance, inProgress } = useMsal();
@@ -38,6 +39,7 @@ const DataContent = (): JSX.Element => {
     !queryYear ? DateTime.local().year : queryYear,
   );
   const [isCallApi, setIsCallApi] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isCallApi && inProgress === InteractionStatus.None) {
@@ -88,7 +90,7 @@ const DataContent = (): JSX.Element => {
     <>
     <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
       <Grid container spacing={0} sx={{justifyContent: "center"}}>
-        <Typography sx={{alignContent: "center", padding: 2}}>Year</Typography>
+        <Typography sx={{alignContent: "center", padding: 2}}>{t("Year")}</Typography>
         <TextField
           type="number"
           value={currentYear}
