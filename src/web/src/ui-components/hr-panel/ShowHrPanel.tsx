@@ -132,6 +132,7 @@ export const ShowHrPanel = (
               disableColumnMenu
               disableColumnFilter
               disableColumnSelector
+              disableColumnSorting
               getRowClassName={(params) =>
                 params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
               }
@@ -157,6 +158,7 @@ export const ShowHrPanel = (
               disableColumnMenu
               disableColumnFilter
               disableColumnSelector
+              disableColumnSorting
               getRowClassName={(params) =>
                 params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
               }
