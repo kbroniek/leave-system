@@ -21,7 +21,7 @@ import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import { leaveRequestsStatuses } from "../utils/Status";
 
-const DataContent = () => {
+const DataContent = (params: {userId?: string}) => {
   const { instance, inProgress } = useMsal();
   const [apiLeaveRequests, setApiLeaveRequests] =
     useState<LeaveRequestsResponseDto | null>(null);
@@ -42,7 +42,7 @@ const DataContent = () => {
   useEffect(() => {
     if (isCallApi && inProgress === InteractionStatus.None) {
       setIsCallApi(false);
-      const userId = instance.getActiveAccount()?.idTokenClaims?.sub;
+      const userId = params.userId ?? instance.getActiveAccount()?.idTokenClaims?.sub;
       const now = DateTime.fromObject({ year: currentYear });
       const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
       const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
@@ -52,12 +52,22 @@ const DataContent = () => {
       )
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      if(params.userId) {
+        callApiGet<LeaveLimitsDto>(
+          `/leavelimits?year=${currentYear}&userIds=${userId}`,
+          notifications.show,
+        )
+          .then((response) => setApiLeaveLimits(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      }
+      else {
       callApiGet<LeaveLimitsDto>(
         `/leavelimits/user?year=${currentYear}`,
         notifications.show,
       )
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+    }
       if (!apiLeaveTypes) {
         callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
           .then((response) => setApiLeaveTypes(response))
@@ -74,12 +84,8 @@ const DataContent = () => {
     }
   }, [
     inProgress,
-    instance,
-    notifications.show,
-    apiLeaveTypes,
-    apiLeaveStatuses,
     currentYear,
-    isCallApi,
+    isCallApi
   ]);
   return (
     <>
@@ -116,7 +122,7 @@ const DataContent = () => {
   );
 };
 
-export function MyLeaveRequests() {
+export function MyLeaveRequests(params: {userId?: string}) {
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}
@@ -125,8 +131,8 @@ export function MyLeaveRequests() {
       loadingComponent={LoadingAuth}
     >
       <Authorized
-        roles={["Employee"]}
-        authorized={<DataContent />}
+        roles={["Employee", "HumanResource", "GlobalAdmin"]}
+        authorized={<DataContent userId={params.userId} />}
         unauthorized={<Forbidden />}
       />
     </MsalAuthenticationTemplate>

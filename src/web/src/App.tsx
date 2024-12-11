@@ -15,6 +15,7 @@ import { HrPanel } from "./ui-components/hr-panel/HrPanel";
 import { ManageUsers } from "./ui-components/manage-users/ManageUsers";
 import { ManageLimits } from "./ui-components/manage-limits/ManageLimits";
 import { LeaveRequestDetailsPage } from "./ui-components/leave-request-details/LeaveRequestDetailsPage";
+import { MyLeaveRequestsPage } from "./ui-components/my-leave-requests/MyLeaveRequestsPage";
 
 
 export function App({ pca }: Readonly<AppProps>) {
@@ -44,6 +45,7 @@ function Pages() {
           <Route path="/claims" element={<Claims />} />
           <Route path="/submit-request" element={<SubmitLeaveRequest />} />
           <Route path="/my-leaves" element={<MyLeaveRequests />} />
+          <Route path="/user-leaves/:id" element={<MyLeaveRequestsPage />} />
           <Route path="/hr-panel" element={<HrPanel />} />
           <Route path="/users" element={<ManageUsers />} />
           <Route path="/limits" element={<ManageLimits />} />
