@@ -14,6 +14,7 @@ import FormControl from "@mui/material/FormControl";
 import { EmployeeDto } from "../dtos/EmployeeDto";
 import Button from "@mui/material/Button";
 import { leaveRequestsStatuses } from "../utils/Status";
+import { Trans, useTranslation } from "react-i18next";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -35,6 +36,7 @@ export const LeaveRequestsSearch = (
 ) => {
   const theme = useTheme();
   const now = DateTime.now().startOf("day");
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -58,7 +60,7 @@ export const LeaveRequestsSearch = (
     return !!value && value.isValid;
   };
   const validateDate = (value: DateTime | undefined) => {
-    if (!dateIsValid(value)) return "This is required";
+    if (!dateIsValid(value)) return t("This is required");
   };
   const handleLeaveTypesChange = (
     event: SelectChangeEvent<typeof leaveTypes>,
@@ -82,9 +84,7 @@ export const LeaveRequestsSearch = (
     setEmployees(values);
     setValue("employees", values ?? []);
   };
-  const handleStatusesChange = (
-    event: SelectChangeEvent<typeof employees>,
-  ) => {
+  const handleStatusesChange = (event: SelectChangeEvent<typeof employees>) => {
     const {
       target: { value },
     } = event;
@@ -104,14 +104,26 @@ export const LeaveRequestsSearch = (
         : theme.typography.fontWeightRegular,
     };
   }
-  const onSearch = async (value: SearchLeaveRequestModel, event?: React.BaseSyntheticEvent) => {
-    if(!isValid) {
+  const onSearch = async (
+    value: SearchLeaveRequestModel,
+    event?: React.BaseSyntheticEvent,
+  ) => {
+    if (!isValid) {
       return;
     }
-    value.employees = typeof value.employees === "string" ? (value.employees as string).split(",") : value.employees;
-    value.leaveTypes = typeof value.leaveTypes === "string" ? (value.leaveTypes as string).split(",") : value.leaveTypes;
-    value.statuses = typeof value.statuses === "string" ? (value.statuses as string).split(",") : value.statuses;
-    await params.onSubmit(value, event)
+    value.employees =
+      typeof value.employees === "string"
+        ? (value.employees as string).split(",")
+        : value.employees;
+    value.leaveTypes =
+      typeof value.leaveTypes === "string"
+        ? (value.leaveTypes as string).split(",")
+        : value.leaveTypes;
+    value.statuses =
+      typeof value.statuses === "string"
+        ? (value.statuses as string).split(",")
+        : value.statuses;
+    await params.onSubmit(value, event);
   };
   return (
     <form onSubmit={handleSubmit(onSearch)}>
@@ -121,13 +133,13 @@ export const LeaveRequestsSearch = (
             control={control}
             name="dateFrom"
             rules={{
-              required: "This is required",
+              required: t("This is required"),
               validate: { required: validateDate },
             }}
             render={({ field }) => {
               return (
                 <DatePicker
-                  label="Date from *"
+                  label={t("Date from *")}
                   value={field.value}
                   inputRef={field.ref}
                   onChange={(date: DateTime | null) => {
@@ -154,13 +166,13 @@ export const LeaveRequestsSearch = (
             control={control}
             name="dateTo"
             rules={{
-              required: "This is required",
+              required: t("This is required"),
               validate: { required: validateDate },
             }}
             render={({ field }) => {
               return (
                 <DatePicker
-                  label="Date to *"
+                  label={t("Date to *")}
                   value={field.value}
                   inputRef={field.ref}
                   onChange={(date: DateTime | null) => {
@@ -185,11 +197,11 @@ export const LeaveRequestsSearch = (
         <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <FormControl fullWidth>
             <InputLabel id="multiple-leave-types-label">
-              Leave types
+              <Trans>Leave types</Trans>
             </InputLabel>
             <Select
               labelId="multiple-leave-types-label"
-              label="Leave types"
+              label={t("Leave types")}
               id="multiple-leave-types"
               multiple
               sx={{ width: "100%" }}
@@ -226,11 +238,11 @@ export const LeaveRequestsSearch = (
         <Grid size={{ xs: 12, sm: 5, md: 2 }}>
           <FormControl fullWidth>
             <InputLabel id="multiple-employees-label">
-              Employees
+              <Trans>Employees</Trans>
             </InputLabel>
             <Select
               labelId="multiple-employees-label"
-              label="Employees"
+              label={t("Employees")}
               id="multiple-employees"
               multiple
               sx={{ width: "100%" }}
@@ -253,10 +265,7 @@ export const LeaveRequestsSearch = (
               MenuProps={MenuProps}
             >
               {params.employees?.map((item) => (
-                <MenuItem
-                  key={item.id}
-                  value={item.id}
-                >
+                <MenuItem key={item.id} value={item.id}>
                   {item.name}
                 </MenuItem>
               ))}
@@ -266,11 +275,11 @@ export const LeaveRequestsSearch = (
         <Grid size={{ xs: 12, sm: 5, md: 2 }}>
           <FormControl fullWidth>
             <InputLabel id="multiple-statuses-label">
-              Statuses
+              <Trans>Statuses</Trans>
             </InputLabel>
             <Select
               labelId="multiple-statuses-label"
-              label="Statuses"
+              label={t("Statuses")}
               id="multiple-statuses"
               multiple
               sx={{ width: "100%" }}
@@ -293,10 +302,7 @@ export const LeaveRequestsSearch = (
               MenuProps={MenuProps}
             >
               {leaveRequestsStatuses.map((item) => (
-                <MenuItem
-                  key={item}
-                  value={item}
-                >
+                <MenuItem key={item} value={item}>
                   {item}
                 </MenuItem>
               ))}
@@ -310,7 +316,7 @@ export const LeaveRequestsSearch = (
             variant="contained"
             fullWidth
           >
-            Search
+            <Trans>Search</Trans>
           </Button>
         </Grid>
       </Grid>

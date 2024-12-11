@@ -19,6 +19,7 @@ import { Authorized } from "../../components/Authorized";
 import LinkIcon from "@mui/icons-material/Link";
 import { Button } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { Trans, useTranslation } from "react-i18next";
 
 export default function ShowLeaveRequestsTimeline(
   props: Readonly<{
@@ -64,6 +65,7 @@ export default function ShowLeaveRequestsTimeline(
   const [actionProgress, setActionProgress] = useState(false);
   const [remarksInput, setRemarksInput] = useState("");
   const notifications = useNotifications();
+  const { t } = useTranslation();
 
   const handleAccept = async () => {
     setActionProgress(true);
@@ -82,7 +84,7 @@ export default function ShowLeaveRequestsTimeline(
   };
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(`${window.location.origin}/details/${props.leaveRequest.leaveRequestId}`);
-    notifications.show("Copied to clipboard", {
+    notifications.show(t("Copied to clipboard"), {
       severity: "info",
       autoHideDuration: 3000,
     });
@@ -105,7 +107,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Request type:
+            <Trans>Request type</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -115,7 +117,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Leave from - to:
+            <Trans>Leave from - to</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -125,7 +127,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Days:
+            <Trans>Days</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -135,7 +137,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Hours:
+            <Trans>Hours</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -145,7 +147,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Created date:
+            <Trans>Created date</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -155,7 +157,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Status:
+            <Trans>Status</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -165,7 +167,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Assigned to:
+            <Trans>Assigned to</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -175,7 +177,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Last modified by:
+            <Trans>Last modified by</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -185,7 +187,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Last modified date:
+            <Trans>Last modified date</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -195,7 +197,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            Remarks:
+            <Trans>Remarks</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -221,7 +223,7 @@ export default function ShowLeaveRequestsTimeline(
                 color="success"
                 onClick={handleAccept}
               >
-                Accept
+                <Trans>Accept</Trans>
               </LoadingButton>
               <LoadingButton
                 loading={actionProgress}
@@ -230,7 +232,7 @@ export default function ShowLeaveRequestsTimeline(
                 color="error"
                 onClick={handleReject}
               >
-                Reject
+                <Trans>Reject</Trans>
               </LoadingButton>
             </Authorized>
             {dateFrom > DateTime.local() ? (
@@ -245,7 +247,7 @@ export default function ShowLeaveRequestsTimeline(
                     color="warning"
                     onClick={handleCancel}
                   >
-                    Cancel
+                    <Trans>Cancel</Trans>
                   </LoadingButton>
                 }
               />
@@ -257,7 +259,7 @@ export default function ShowLeaveRequestsTimeline(
         <Grid size={12}>
           <TextField
             id="remarks-multiline-static"
-            label="Remarks"
+            label={t("Remarks")}
             multiline
             rows={1}
             variant="standard"

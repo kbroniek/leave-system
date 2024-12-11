@@ -28,8 +28,10 @@ import { v4 as uuidv4 } from "uuid";
 import { Authorized, isInRole } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
+  const { t } = useTranslation();
   const { instance, inProgress } = useMsal();
   const [apiLeaveRequests, setApiLeaveRequests] = useState<
     LeaveRequestsResponseDto | undefined
@@ -122,21 +124,21 @@ const DataContent = () => {
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
-      notifications.show("Date from is invalid. Choose correct date.", {
+      notifications.show(t("Date from is invalid. Choose correct date."), {
         severity: "warning",
         autoHideDuration: 3000,
       });
       return;
     }
     if (!model.dateTo?.isValid) {
-      notifications.show("Date to is invalid. Choose correct date.", {
+      notifications.show(t("Date to is invalid. Choose correct date."), {
         severity: "warning",
         autoHideDuration: 3000,
       });
       return;
     }
     if (!model.leaveType) {
-      notifications.show("Leave type is invalid. Choose correct item.", {
+      notifications.show(t("Leave type is invalid. Choose correct item."), {
         severity: "warning",
         autoHideDuration: 3000,
       });
@@ -144,7 +146,7 @@ const DataContent = () => {
     }
     if (!model.allDays) {
       notifications.show(
-        "Form is invalid. Can't read all days. Contact with administrator.",
+        t("Form is invalid. Can't read all days. Contact with administrator."),
         {
           severity: "warning",
           autoHideDuration: 3000,
@@ -154,7 +156,7 @@ const DataContent = () => {
     }
     if (!model.workingDays) {
       notifications.show(
-        "This leave type can not set in free day.Form is invalid. Can't read working days.",
+        t("This leave type can not set in free day.Form is invalid. Can't read working days."),
         {
           severity: "warning",
           autoHideDuration: 3000,
@@ -164,7 +166,7 @@ const DataContent = () => {
     }
     if (!model.workingHours) {
       notifications.show(
-        "Form is invalid. Can't read working hours. Check if you have added limits.",
+        t("Form is invalid. Can't read working hours. Check if you have added limits."),
         {
           severity: "warning",
           autoHideDuration: 3000,
@@ -174,7 +176,7 @@ const DataContent = () => {
     }
     if (!apiLeaveTypes) {
       notifications.show(
-        "Form is invalid. Can't read leave types. Contact with administrator.",
+        t("Form is invalid. Can't read leave types. Contact with administrator."),
         {
           severity: "warning",
           autoHideDuration: 3000,
@@ -215,7 +217,7 @@ const DataContent = () => {
     };
     const response = await callApi(url, "POST", body, notifications.show);
     if (response.status === 201) {
-      notifications.show("Leave Request is added successfully", {
+      notifications.show(t("Leave Request is added successfully"), {
         severity: "success",
         autoHideDuration: 3000,
       });

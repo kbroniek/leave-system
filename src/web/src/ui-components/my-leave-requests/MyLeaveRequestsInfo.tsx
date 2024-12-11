@@ -15,6 +15,7 @@ import {
 } from "./Utils";
 import React from "react";
 import { LimitsCalculator } from "../utils/LimitsCalculator";
+import { Trans, useTranslation } from "react-i18next";
 
 const defaultStyle = { paddingTop: "2px", textAlign: "right" };
 const titleStyle = { color: "text.secondary" };
@@ -24,6 +25,7 @@ export const MyLeaveRequestsInfo = (params: {
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
 }): JSX.Element => {
+  const { t } = useTranslation();
   const holidayLeaveType = findLeaveType(params.leaveTypes, "Holiday");
   const onDemandLeaveType = findLeaveType(params.leaveTypes, "OnDemand");
   const holidayLeaveRequests = filterLeaveRequests(
@@ -52,7 +54,7 @@ export const MyLeaveRequestsInfo = (params: {
         </Grid>
         <Grid size={11}>
           <Typography variant="body1" sx={titleStyle}>
-            Used
+            <Trans>Used</Trans>
           </Typography>
         </Grid>
         <Grid size={1}>
@@ -64,7 +66,7 @@ export const MyLeaveRequestsInfo = (params: {
         </Grid>
         <Grid size={11}>
           <Typography variant="body1" sx={titleStyle}>
-            Limit
+            <Trans>Limit</Trans>
           </Typography>
         </Grid>
         <Grid size={1}>
@@ -76,7 +78,7 @@ export const MyLeaveRequestsInfo = (params: {
         </Grid>
         <Grid size={11}>
           <Typography variant="body1" sx={titleStyle}>
-            Overdue limit
+            <Trans>Overdue limit</Trans>
           </Typography>
         </Grid>
         <Grid size={1}>
@@ -88,7 +90,7 @@ export const MyLeaveRequestsInfo = (params: {
         </Grid>
         <Grid size={11}>
           <Typography variant="body1" sx={titleStyle}>
-            Left
+            <Trans>Left</Trans>
           </Typography>
         </Grid>
         <Grid size={1}>
@@ -106,14 +108,14 @@ export const MyLeaveRequestsInfo = (params: {
           leaveRequests={params.leaveRequests}
           leaveLimits={params.leaveLimits}
           leaveTypes={params.leaveTypes}
-          text="On demand"
+          text={t("On demand")}
           leaveTypeCatalog="OnDemand"
         />
         <LeaveRequestsUsed
           leaveRequests={params.leaveRequests}
           leaveLimits={params.leaveLimits}
           leaveTypes={params.leaveTypes}
-          text="Free Saturday"
+          text={t("Free Saturday")}
           leaveTypeCatalog="Saturday"
         />
         <Grid size={12}>

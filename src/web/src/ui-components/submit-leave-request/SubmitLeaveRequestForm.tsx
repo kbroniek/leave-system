@@ -30,6 +30,8 @@ import { DaysCounter } from "../utils/DaysCounter";
 import { Loading } from "../../components/Loading";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import FormHelperText from "@mui/material/FormHelperText";
+import { Trans, useTranslation } from "react-i18next";
+import { useNotifications } from "@toolpad/core/useNotifications";
 
 const titleStyle = { color: "text.secondary" };
 const defaultStyle = { paddingTop: "1px", width: "max-content" };
@@ -55,6 +57,8 @@ export const SubmitLeaveRequestForm = (props: {
   onYearChanged: (year:string) => void;
   onUserIdChanged: (userId:string) => void;
 }) => {
+  const { t } = useTranslation();
+  const notifications = useNotifications();
   const now = DateTime.now().startOf("day");
   const getDefaultLeaveTypeId = () => {
     return props.leaveTypes?.find(() => true)?.id;
@@ -80,7 +84,7 @@ export const SubmitLeaveRequestForm = (props: {
 
   const employees = props.employees?.map(x => ({
       ...x,
-      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? "undefined"
+      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? t("undefined")
     }))
     .sort((a, b) => a.name?.localeCompare(b.name ?? "") ?? 0);
   const  getCurrenUser = (): string | undefined => {
@@ -95,7 +99,7 @@ export const SubmitLeaveRequestForm = (props: {
 
   const initUserId = getCurrenUser();
   const { ref: onBehalfRef, ...onBehalfInputProps } = register("onBehalf", {
-    required: "This is required",
+    required: t("This is required"),
     onChange: (e: {target: {value: string}}) => props.onUserIdChanged(e.target.value),
     value: initUserId
   });
@@ -119,12 +123,12 @@ export const SubmitLeaveRequestForm = (props: {
   };
 
   const validateDate = (value: DateTime | undefined) => {
-    if (!dateIsValid(value)) return "This is required";
+    if (!dateIsValid(value)) return t("This is required");
   };
 
   const onInvalid = (errors: FieldErrors<LeaveRequestFormModel>) => {
-    // TODO: show notification
-    alert(JSON.stringify(errors));
+    notifications.show(t("Form is invalid. Check the required fields."), {severity: "error"});
+    console.warn("Form is invalid.", JSON.stringify(errors));
   }
   if(dateFrom) {
     props.onYearChanged(dateFrom.toFormat("yyyy"));
@@ -137,7 +141,7 @@ export const SubmitLeaveRequestForm = (props: {
           sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}
         >
           <Typography component="h1" variant="h4" align="center">
-            Add leave request
+            <Trans>Add leave request</Trans>
           </Typography>
 
           <Box sx={{ my: 3 }}>
@@ -149,13 +153,13 @@ export const SubmitLeaveRequestForm = (props: {
                     employees ? (
                       <FormControl fullWidth>
                         <InputLabel id="select-label-add-on-behalf">
-                          Add on behalf of another user *
+                          <Trans>Add on behalf of another user *</Trans>
                         </InputLabel>
                         <Select
                           labelId="select-label-add-on-behalf"
                           id="select-add-on-behalf"
                           defaultValue={initUserId}
-                          label="Add on behalf of another user *"
+                          label={t("Add on behalf of another user *")}
                           inputRef={onBehalfRef}
                           {...onBehalfInputProps}
                         >
@@ -170,7 +174,7 @@ export const SubmitLeaveRequestForm = (props: {
                     ) : (
                       <Loading
                         linearProgress
-                        label="Add on behalf of another user *"
+                        label={t("Add on behalf of another user *")}
                       />
                     )
                   }
@@ -181,13 +185,13 @@ export const SubmitLeaveRequestForm = (props: {
                   control={control}
                   name="dateFrom"
                   rules={{
-                    required: "This is required",
+                    required: t("This is required"),
                     validate: { required: validateDate },
                   }}
                   render={({ field }) => {
                     return (
                       <DatePicker
-                        label="Date from *"
+                        label={t("Date from *")}
                         value={field.value}
                         inputRef={field.ref}
                         onChange={(date: DateTime | null) => {
@@ -214,13 +218,13 @@ export const SubmitLeaveRequestForm = (props: {
                   control={control}
                   name="dateTo"
                   rules={{
-                    required: "This is required",
+                    required: t("This is required"),
                     validate: { required: validateDate },
                   }}
                   render={({ field }) => {
                     return (
                       <DatePicker
-                        label="Date to *"
+                        label={t("Date to *")}
                         value={field.value}
                         inputRef={field.ref}
                         onChange={(date: DateTime | null) => {
@@ -246,13 +250,13 @@ export const SubmitLeaveRequestForm = (props: {
                 {props.leaveTypes ? (
                   <FormControl fullWidth>
                     <InputLabel id="select-label-leave-type">
-                      Leave type *
+                      <Trans>Leave type *</Trans>
                     </InputLabel>
                     <Select
                       labelId="select-label-leave-type"
                       id="select-leave-type"
                       defaultValue={getDefaultLeaveTypeId()}
-                      label="Leave type *"
+                      label={t("Leave type *")}
                       required
                       {...register("leaveType")}
                       onChange={(event) => {
@@ -276,12 +280,12 @@ export const SubmitLeaveRequestForm = (props: {
                     </Select>
                   </FormControl>
                 ) : (
-                  <Loading linearProgress label="Leave type *" />
+                  <Loading linearProgress label={t("Leave type *")} />
                 )}
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <TextField
-                  label="Remarks"
+                  label={t("Remarks")}
                   fullWidth
                   rows={2}
                   multiline
@@ -293,7 +297,7 @@ export const SubmitLeaveRequestForm = (props: {
 
           <Box sx={{ my: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Range
+              <Trans>Range</Trans>
             </Typography>
             {props.holidays ? (
               <Range
@@ -309,7 +313,7 @@ export const SubmitLeaveRequestForm = (props: {
 
           <Box sx={{ my: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Additional information
+              <Trans>Additional information</Trans>
             </Typography>
             {props.leaveLimits &&
             props.leaveRequests &&
@@ -338,11 +342,10 @@ export const SubmitLeaveRequestForm = (props: {
             disabled={!employees || !props.leaveTypes}
             loading={submitInProgress}
           >
-            Submit
+            <Trans>Submit</Trans>
           </LoadingButton>
         </Paper>
       </Container>
-      <input name="HiddenField2" type="hidden" value="fake" />
     </form>
   );
 };
@@ -353,6 +356,7 @@ const Range = (props: {
   dateTo: DateTime | null;
   setValue: UseFormSetValue<LeaveRequestFormModel>;
 }) => {
+  const { t } = useTranslation();
   const daysCounter = new DaysCounter(
     props.holidays.items.map((x) => DateTime.fromISO(x))
   );
@@ -360,9 +364,9 @@ const Range = (props: {
   let workingDays;
   let freeDays;
   if (!props.dateFrom?.isValid) {
-    allDays = workingDays = freeDays = "Date from is invalid. Please check it.";
+    allDays = workingDays = freeDays = t("Date from is invalid. Please check it.");
   } else if (!props.dateTo?.isValid) {
-    allDays = workingDays = freeDays = "Date to is invalid. Please check it.";
+    allDays = workingDays = freeDays = t("Date to is invalid. Please check it.");
   } else {
     allDays = DaysCounter.countAllDays(props.dateFrom, props.dateTo);
     workingDays = daysCounter.workingDays(props.dateFrom, props.dateTo);
@@ -374,7 +378,7 @@ const Range = (props: {
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          Calendar days:
+          <Trans>Calendar days</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -384,7 +388,7 @@ const Range = (props: {
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          Working days:
+          <Trans>Working days</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -394,7 +398,7 @@ const Range = (props: {
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          Free days:
+          <Trans>Free days</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -416,6 +420,7 @@ const AdditionalInfo = (props: {
   dateTo: DateTime | null;
   setValue: UseFormSetValue<LeaveRequestFormModel>;
 }) => {
+  const { t } = useTranslation();
   const connectedLeaveTypes = props.leaveTypes.filter(x => x.baseLeaveTypeId === props.leaveTypeId);
   const daysUsed = props.leaveRequests
     .filter((x) => x.leaveTypeId === props.leaveTypeId || connectedLeaveTypes.find(c => c.id === x.leaveTypeId))
@@ -426,15 +431,15 @@ const AdditionalInfo = (props: {
     );
 
   let availableDaysStr =
-    "There is no limit for this user, leave type or in that period";
+    t("There is no limit for this user, leave type or in that period");
   let availableDaysAfterAcceptanceStr = availableDaysStr;
   let currentLimit;
   if (!props.dateFrom?.isValid) {
     availableDaysStr = availableDaysAfterAcceptanceStr =
-      "Date from is invalid. Please check it.";
+      t("Date from is invalid. Please check it.");
   } else if (!props.dateTo?.isValid) {
     availableDaysStr = availableDaysAfterAcceptanceStr =
-      "Date to is invalid. Please check it.";
+      t("Date to is invalid. Please check it.");
   } else {
     const dateFrom = props.dateFrom;
     const dateTo = props.dateTo;
@@ -468,20 +473,20 @@ const AdditionalInfo = (props: {
       });
       availableDaysStr = availableDays
         ? DurationFormatter.format(availableDays, currentLimit.workingHours)
-        : "There is no limit";
+        : t("There is no limit");
       availableDaysAfterAcceptanceStr = availableDays
         ? DurationFormatter.format(
             availableDays.minus(currentRequestDaysDuration),
             currentLimit.workingHours
           )
-        : "There is no limit";
+        : t("There is no limit");
     }
   }
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          Available days:
+          <Trans>Available days</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -491,7 +496,7 @@ const AdditionalInfo = (props: {
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          Days available after request acceptance:
+          <Trans>Days available after request acceptance</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -501,7 +506,7 @@ const AdditionalInfo = (props: {
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          Days used:
+          <Trans>Days used</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>

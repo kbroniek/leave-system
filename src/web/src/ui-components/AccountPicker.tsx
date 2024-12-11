@@ -10,10 +10,12 @@ import PersonIcon from '@mui/icons-material/Person';
 import AddIcon from '@mui/icons-material/Add';
 import { b2cPolicies, loginRequest } from "../authConfig";
 import { AccountInfo } from '@azure/msal-browser';
+import { Trans, useTranslation } from "react-i18next";
 
 export const AccountPicker = (props: {onClose: (event: AccountInfo | null) => void, open: boolean}) => {
     const { instance, accounts } = useMsal();
     const { onClose, open } = props;
+    const { t } = useTranslation();
 
     const handleListItemClick = (account: AccountInfo | null) => {
         instance.setActiveAccount(account);
@@ -32,7 +34,7 @@ export const AccountPicker = (props: {onClose: (event: AccountInfo | null) => vo
 
     return (
         <Dialog onClose={(event: AccountInfo) => onClose(event)} aria-labelledby="simple-dialog-title" open={open}>
-          <DialogTitle id="simple-dialog-title">Set active account</DialogTitle>
+          <DialogTitle id="simple-dialog-title"><Trans>Set active account</Trans></DialogTitle>
           <List>
             {accounts.filter((account) => account.idTokenClaims?.['tfp'] !== b2cPolicies.names.signUpSignIn)
               .map((account) => (
@@ -52,7 +54,7 @@ export const AccountPicker = (props: {onClose: (event: AccountInfo | null) => vo
                   <AddIcon />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary="Add account" />
+              <ListItemText primary={t("Add account")} />
             </ListItem>
           </List>
         </Dialog>

@@ -14,16 +14,18 @@ import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import { Authorized, RoleType } from "../components/Authorized";
+import { useTranslation } from "react-i18next";
 
-const pages = [
-  { title: "Submit request", link: "/submit-request", roles: ["DecisionMaker", "GlobalAdmin", "Employee"] as RoleType[] },
-  { title: "My leaves", link: "/my-leaves", roles: ["Employee"] as RoleType[] },
-  { title: "HR Panel", link: "hr-panel", roles: ["GlobalAdmin", "HumanResource"] as RoleType[] },
-  { title: "Users", link: "/users", roles: ["UserAdmin", "GlobalAdmin"] as RoleType[] },
-  { title: "Manage limits", link: "/limits", roles: ["GlobalAdmin"] as RoleType[] },
-];
 
 function NavBar() {
+  const { t } = useTranslation();
+  const pages = [
+    { title: t("Submit request"), link: "/submit-request", roles: ["DecisionMaker", "GlobalAdmin", "Employee"] as RoleType[] },
+    { title: t("My leaves"), link: "/my-leaves", roles: ["Employee"] as RoleType[] },
+    { title: t("HR Panel"), link: "hr-panel", roles: ["GlobalAdmin", "HumanResource"] as RoleType[] },
+    { title: t("Users"), link: "/users", roles: ["UserAdmin", "GlobalAdmin"] as RoleType[] },
+    { title: t("Manage limits"), link: "/limits", roles: ["GlobalAdmin"] as RoleType[] },
+  ];
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -52,7 +54,7 @@ function NavBar() {
           <Link component={RouterLink} to="/" color="inherit">
             <img
               src="/logo.png"
-              alt="Bomed"
+              alt={t("company-title")}
               loading="lazy"
               className="logo-image"
             />

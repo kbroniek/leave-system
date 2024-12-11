@@ -17,6 +17,7 @@ import { HolidaysDto } from "../dtos/HolidaysDto";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
+import { useTranslation } from "react-i18next";
 
 const DataContent = (props: {leaveRequestId: string}) => {
   const { instance, inProgress } = useMsal();
@@ -26,6 +27,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
   const notifications = useNotifications();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   async function handleActionLeaveRequest(id: string, remarks: string, action: "accept" | "reject" | "cancel", successMessage: string) {
     const body = {
@@ -43,13 +45,13 @@ const DataContent = (props: {leaveRequestId: string}) => {
     }
   }
   const handleAccept = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(id, remarks, "accept", "Leave Request was accepted successfully");
+    await handleActionLeaveRequest(id, remarks, "accept", t("Leave Request was accepted successfully"));
   }
   const handleReject = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(id, remarks, "reject", "Leave Request was rejected successfully");
+    await handleActionLeaveRequest(id, remarks, "reject", t("Leave Request was rejected successfully"));
   }
   const handleCancel = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(id, remarks, "cancel", "Leave Request was cancelled successfully");
+    await handleActionLeaveRequest(id, remarks, "cancel", t("Leave Request was cancelled successfully"));
   }
 
   useEffect(() => {
@@ -59,7 +61,7 @@ const DataContent = (props: {leaveRequestId: string}) => {
           callApiGet<LeaveTypeDto>(`/leavetypes/${response.leaveTypeId}`, notifications.show)
             .then((response) => setApiLeaveType(response))
             .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-          callApiGet<HolidaysDto>("/settings/holidays?dateFrom=2024-08-21&dateTo=2024-11-01", notifications.show)
+          callApiGet<HolidaysDto>(`/settings/holidays?dateFrom=${response.dateFrom}&dateTo=${response.dateTo}`, notifications.show)
             .then((response) => setApiHolidays(response))
             .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
           setApiLeaveRequestDetails(response)

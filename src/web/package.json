@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "trans-extract": "i18next -o public/locales/en/translation.json -c public/locales/i18next-parser.config.mjs & i18next -o public/locales/pl/translation.json -c public/locales/i18next-parser.config.mjs"
   },
   "dependencies": {
     "@azure/msal-browser": "^3.1.0",
@@ -20,10 +21,14 @@
     "@mui/x-data-grid": "^7.19.0",
     "@mui/x-date-pickers": "^7.22.0",
     "@toolpad/core": "^0.9.0",
+    "i18next": "^24.0.5",
+    "i18next-browser-languagedetector": "^8.0.2",
+    "i18next-http-backend": "^3.0.1",
     "luxon": "^3.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.1",
+    "react-i18next": "^15.1.4",
     "react-router-dom": "^6.4.2",
     "uuid": "^11.0.2"
   },
@@ -37,6 +42,7 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
+    "i18next-parser": "^9.0.2",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
