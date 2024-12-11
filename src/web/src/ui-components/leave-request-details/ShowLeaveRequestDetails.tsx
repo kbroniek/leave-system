@@ -107,7 +107,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Request type:</Trans>
+            <Trans>Request type</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -117,7 +117,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Leave from - to:</Trans>
+            <Trans>Leave from - to</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -127,7 +127,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Days:</Trans>
+            <Trans>Days</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -137,7 +137,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Hours:</Trans>
+            <Trans>Hours</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -147,7 +147,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Created date:</Trans>
+            <Trans>Created date</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -157,7 +157,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Status:</Trans>
+            <Trans>Status</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -167,7 +167,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Assigned to:</Trans>
+            <Trans>Assigned to</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -177,7 +177,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Last modified by:</Trans>
+            <Trans>Last modified by</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -187,7 +187,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Last modified date:</Trans>
+            <Trans>Last modified date</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>
@@ -197,7 +197,7 @@ export default function ShowLeaveRequestsTimeline(
         </Grid>
         <Grid size={6}>
           <Typography variant="body1" sx={titleStyle}>
-            <Trans>Remarks:</Trans>
+            <Trans>Remarks</Trans>
           </Typography>
         </Grid>
         <Grid size={6}>

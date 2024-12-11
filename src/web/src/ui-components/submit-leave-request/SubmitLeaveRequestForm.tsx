@@ -378,7 +378,7 @@ const Range = (props: {
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          <Trans>Calendar days:</Trans>
+          <Trans>Calendar days</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -388,7 +388,7 @@ const Range = (props: {
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          <Trans>Working days:</Trans>
+          <Trans>Working days</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -398,7 +398,7 @@ const Range = (props: {
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          <Trans>Free days:</Trans>
+          <Trans>Free days</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -486,7 +486,7 @@ const AdditionalInfo = (props: {
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          <Trans>Available days:</Trans>
+          <Trans>Available days</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -496,7 +496,7 @@ const AdditionalInfo = (props: {
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          <Trans>Days available after request acceptance:</Trans>
+          <Trans>Days available after request acceptance</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
@@ -506,7 +506,7 @@ const AdditionalInfo = (props: {
       </Grid>
       <Grid size={{ xs: 12, sm: 4 }}>
         <Typography variant="body1" sx={titleStyle}>
-          <Trans>Days used:</Trans>
+          <Trans>Days used</Trans>
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 8 }}>
