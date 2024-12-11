@@ -14,7 +14,7 @@ import { GridValidRowModel } from "@mui/x-data-grid/models/gridRows";
 import { LeaveStatusDto } from "../dtos/LeaveStatusDto";
 import { useState } from "react";
 import { LeaveRequestDetailsDialog } from "../leave-request-details/LeaveRequestDetailsDialog";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 const ODD_OPACITY = 0.2;
 export const MyLeaveRequestsTable = (params: {
@@ -38,7 +38,7 @@ export const MyLeaveRequestsTable = (params: {
     >,
   ): JSX.Element => {
     if (!props.row) {
-      return <>{t("undefined")}</>;
+      return <><Trans>undefined</Trans></>;
     }
     return (
       <>
@@ -52,7 +52,7 @@ export const MyLeaveRequestsTable = (params: {
     >,
   ): JSX.Element => {
     if (!props.row) {
-      return <>{t("undefined")}</>;
+      return <><Trans>undefined</Trans></>;
     }
     if (!params.leaveStatuses) {
       return <CircularProgress size="20px" />;
@@ -79,7 +79,7 @@ export const MyLeaveRequestsTable = (params: {
     >,
   ): JSX.Element => {
     if (!props.row) {
-      return <>{t("undefined")}</>;
+      return <><Trans>undefined</Trans></>;
     }
     if (!params.leaveTypes) {
       return <CircularProgress size="20px" />;
@@ -111,7 +111,7 @@ export const MyLeaveRequestsTable = (params: {
   }));
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
-      <Typography variant="h5">{t("Leave requests")}</Typography>
+      <Typography variant="h5"><Trans>Leave requests</Trans></Typography>
       <Divider />
       {!params.leaveRequests ? (
         <CircularProgress />
