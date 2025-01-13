@@ -1,8 +1,8 @@
 # Leave system
 
 [![.NET](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml)
-[![DEV - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml/badge.svg?branch=develop)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml)
-[![DEV - Roles for B2C](https://github.com/kbroniek/leave-system/actions/workflows/roles_func-leave-system-west-europe-dev-01.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/roles_func-leave-system-west-europe-dev-01.yml)
+[![DEV 02 - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-kind-flower-056781103.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-kind-flower-056781103.yml)
+[![DEV - Roles for B2C - func-leave-system-dev-02](https://github.com/kbroniek/leave-system/actions/workflows/develop_func-leave-system-dev-02.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/develop_func-leave-system-dev-02.yml)
 
 System to manage leaves.
 
@@ -16,8 +16,6 @@ Reason: The number of static files was too large.
 ```
 
 Probably you have an error in your code. Check logs and find errors.
-
-## How to run a project (deprecated)
 
 ### Manual
 
