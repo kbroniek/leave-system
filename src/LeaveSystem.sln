@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LeaveSystem.Seed", "LeaveSy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Seed.Init", "LeaveSystem.Seed\LeaveSystem.Seed.Init\LeaveSystem.Seed.Init.csproj", "{B38298E9-1B22-4267-8FDD-BC8B3A15CC82}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaveSystem.Seed.PostgreSQL", "LeaveSystem.Seed\LeaveSystem.Seed.PostgreSQL\LeaveSystem.Seed.PostgreSQL.csproj", "{4F7FC479-5963-40EF-B397-54363A01BE27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{B38298E9-1B22-4267-8FDD-BC8B3A15CC82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B38298E9-1B22-4267-8FDD-BC8B3A15CC82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B38298E9-1B22-4267-8FDD-BC8B3A15CC82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F7FC479-5963-40EF-B397-54363A01BE27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F7FC479-5963-40EF-B397-54363A01BE27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F7FC479-5963-40EF-B397-54363A01BE27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F7FC479-5963-40EF-B397-54363A01BE27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,6 +94,7 @@ Global
 		{20ABC373-D21C-4729-A76A-36A0C50AF1D6} = {5B2659C4-1987-4EBD-8BF7-493CF34C258A}
 		{F89A7090-7B5F-427A-AB13-892207A9506B} = {5B2659C4-1987-4EBD-8BF7-493CF34C258A}
 		{B38298E9-1B22-4267-8FDD-BC8B3A15CC82} = {5675EE03-BC24-4149-BF9A-87BA2F8D0FEF}
+		{4F7FC479-5963-40EF-B397-54363A01BE27} = {5675EE03-BC24-4149-BF9A-87BA2F8D0FEF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E8762886-5B99-4DD1-B6A9-242FAC001B38}
