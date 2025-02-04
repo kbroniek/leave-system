@@ -1,4 +1,3 @@
-// See https://aka.ms/new-console-template for more information
 using LeaveSystem.Seed.PostgreSQL;
 using LeaveSystem.Seed.PostgreSQL.Model;
 using Microsoft.Azure.Cosmos;
@@ -10,11 +9,12 @@ Console.WriteLine("Configuring...");
 
 var services = ConfigureServices();
 
-var seeder = services.GetRequiredService<JsonSeeder>();
-await seeder.Seed("./Assets/LeaveStatusSettings.json");
-await seeder.Seed("./Assets/LeaveTypes.json");
+var jsonSeeder = services.GetRequiredService<JsonSeeder>();
+await jsonSeeder.Seed("./Assets/LeaveStatusSettings.json");
+await jsonSeeder.Seed("./Assets/LeaveTypes.json");
 
-
+var dbSeeder = services.GetRequiredService<DbSeeder>();
+await dbSeeder.SeedUsers();
 
 static IServiceProvider ConfigureServices()
 {
@@ -27,7 +27,8 @@ static IServiceProvider ConfigureServices()
     services.AddSingleton<IConfiguration>(configuration)
         .AddSingleton(_ => new CosmosClient(configuration.GetConnectionString("CosmosDBConnection")))
         .AddDbContext<OmbContext>(x => x.UseNpgsql(configuration.GetConnectionString("DefaultConnection")))
-        .AddSingleton<JsonSeeder>();
+        .AddSingleton<JsonSeeder>()
+        .AddSingleton<DbSeeder>();
 
     return services.BuildServiceProvider();
 }
