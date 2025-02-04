@@ -21,8 +21,10 @@ The seeder transfer data from PostgreSQL to CosmosDB and users to Azure B2C.
     "TenantId": "{guid}",
     "ClientId": "{guid}",
     "Secret": "{secret}",
-    "Scopes": "https://graph.microsoft.com/.default"
-  }
+    "Scopes": [ "https://graph.microsoft.com/.default" ]
+  },
+  "DefaultUsersPassword": "{secret}",
+  "B2CIssuer": "leavesystemdev02.onmicrosoft.com"
 }
 ```
 

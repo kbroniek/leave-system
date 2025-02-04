@@ -49,6 +49,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
                 .GetAsync(_ =>
                 {
                     _.QueryParameters.Select = ["id", "displayName", "givenName", "surname", "jobTitle"];
+                    //TODO: Only 15 items are allowed in the filter.
                     _.QueryParameters.Filter = ids.Length == 0 ? null : $"id in ({string.Join(",", ids.Select(id => $"'{id}'"))})";
                 }, cancellationToken);
             if (users is null)
