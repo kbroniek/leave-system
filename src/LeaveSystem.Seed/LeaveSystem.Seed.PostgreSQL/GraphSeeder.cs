@@ -82,11 +82,8 @@ internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, s
         }
         catch (Exception ex)
         {
-            var backup = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Error when creating user {email}");
-            Console.WriteLine(ex);
-            Console.ForegroundColor = backup;
+            $"Error when creating user {email}".WriteError();
+            ex.WriteError();
             return (false, null);
         }
     }
