@@ -9,16 +9,16 @@ using Newtonsoft.Json.Linq;
 
 internal class JsonSeeder(CosmosClient client)
 {
-    internal async Task Seed(string path)
+    internal async Task<IEnumerable<dynamic>> Seed(string path)
     {
         Database database = await client.CreateDatabaseIfNotExistsAsync("LeaveSystem");
-        var databaseName = Path.GetFileNameWithoutExtension(path);
-        Console.WriteLine($"Writing data to {databaseName}");
+        var containerName = Path.GetFileNameWithoutExtension(path);
+        Console.WriteLine($"Creating container {containerName}");
 
         var stream = await File.ReadAllTextAsync(path);
         var converter = new ExpandoObjectConverter();
         dynamic contents = JsonConvert.DeserializeObject(stream, new JsonSerializerSettings { Converters = { converter } });
-        var containerBuilder = database.DefineContainer(name: databaseName, partitionKeyPath: contents.partitionKey.ToString());
+        var containerBuilder = database.DefineContainer(name: containerName, partitionKeyPath: contents.partitionKey.ToString());
         if (contents.uniqueKeys is IEnumerable uniqueKeysCollection)
         {
             foreach (JValue uniqueKeysCombined in uniqueKeysCollection)
@@ -35,15 +35,17 @@ internal class JsonSeeder(CosmosClient client)
         Container container = await containerBuilder.CreateIfNotExistsAsync();
         if (contents.items is not IEnumerable items)
         {
-            Console.WriteLine($"The file {path} is not enumerable.");
-            return;
+            throw new InvalidOperationException($"The file {path} is not enumerable.");
         }
+        Console.WriteLine($"Writing data to {containerName}");
         var i = 0;
         foreach (var item in items)
         {
             await container.UpsertItemAsync(item);
+            Console.Write($"\rInserted {i} items");
             ++i;
         }
-        Console.WriteLine($"Saved {i} items to {databaseName}");
+        Console.WriteLine($"\rSaved {i} items to {containerName}");
+        return contents.items;
     }
 }

@@ -1,14 +1,17 @@
 namespace LeaveSystem.Seed.PostgreSQL;
 using System;
+using System.Data;
 using System.Threading.Tasks;
 using LeaveSystem.Seed.PostgreSQL.Model;
 using LeaveSystem.Shared.Auth;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.EntityFrameworkCore;
 
 internal class DbSeeder(CosmosClient client, OmbContext ombContext)
 {
     private const string DatabaseName = "LeaveSystem";
+    private const int DefaultWorkingHours = 8;
 
     internal async Task SeedRoles(IReadOnlyCollection<CreatedUser> users)
     {
@@ -42,7 +45,116 @@ internal class DbSeeder(CosmosClient client, OmbContext ombContext)
         Console.WriteLine($"Saved {i} items to the Roles table");
     }
 
-    private string? MapRoleName(string role) => role switch
+    internal async Task SeedLimits(IReadOnlyCollection<CreatedUser> users)
+    {
+        Console.WriteLine("Getting limits from DB");
+        var limits = await ombContext.Userleavelimits
+            .ToListAsync();
+        Database database = await client.CreateDatabaseIfNotExistsAsync(DatabaseName);
+        var container = database.GetContainer("LeaveLimits");
+        var containerLeaveTypes = database.GetContainer("LeaveTypes");
+        Console.WriteLine("Inserting limits to CosmosDB");
+        var infiniteLimitsInsertedCount = await InsertInfiniteLimits(limits, container, containerLeaveTypes);
+        var limitsForUsersInsertedCount = await InsertLimitsForUsers(limits, container, containerLeaveTypes, users);
+        Console.WriteLine($"\rSaved {infiniteLimitsInsertedCount + limitsForUsersInsertedCount} items to the Roles table");
+    }
+
+    internal async Task SeedLeaveRequests(IReadOnlyCollection<CreatedUser> users)
+    {
+
+    }
+
+    private static async Task<int> InsertLimitsForUsers(IReadOnlyCollection<Userleavelimit> limits, Container container, Container containerLeaveTypes, IReadOnlyCollection<CreatedUser> users)
+    {
+        var i = 0;
+        foreach (var limit in limits
+            .Where(x => x.Validsince != null))
+        {
+            var leaveTypeFromDB = await containerLeaveTypes.GetItemLinqQueryable<LeaveTypesEntity>()
+                .Where(x => x.oldId == limit.LeavetypeLeavetypeid)
+                .ToFeedIterator()
+                .FirstOrDefaultAsync();
+
+            if (leaveTypeFromDB == null)
+            {
+                $"Can't find leave type (id: {limit.LeavetypeLeavetypeid}) in the cosmosDB".WriteWarning();
+                continue;
+            }
+            var user = users.FirstOrDefault(x => x.OldId == limit.UserUserid);
+            if (user == null)
+            {
+                $"Can't find user (id: {limit.UserUserid}) in the graph users".WriteWarning();
+                continue;
+            }
+            var limitFromDb = await container.GetItemLinqQueryable<LimitEntity>()
+                .Where(x => x.oldId == limit.Userleavelimitid)
+                .ToFeedIterator()
+                .FirstOrDefaultAsync();
+
+            await container.UpsertItemAsync(new
+            {
+                id = limitFromDb?.id ?? Guid.NewGuid(),
+                limit = ConvertTime(limit.UserLimit),
+                overdueLimit = ConvertTime(limit.Overduelimit),
+                workingHours = TimeSpan.FromHours(DefaultWorkingHours).ToString(),
+                leaveTypeId = leaveTypeFromDB?.id,
+                validSince = limit.Validsince,
+                validUntil = limit.Validuntil,
+                assignedToUserId = user.Id,
+                oldId = limit.Userleavelimitid,
+                description = limit.Description,
+            });
+            ++i;
+            Console.Write($"\rInserted {i} items");
+        }
+
+        return i;
+
+    }
+
+    private static async Task<int> InsertInfiniteLimits(IReadOnlyCollection<Userleavelimit> limits, Container container, Container containerLeaveTypes)
+    {
+        var i = 0;
+        foreach (var limitGroupped in limits
+            .Where(x => x.Validsince == null)
+            .GroupBy(x => x.LeavetypeLeavetypeid))
+        {
+            var limit = limitGroupped.First();
+            var leaveTypeFromDB = await containerLeaveTypes.GetItemLinqQueryable<LeaveTypesEntity>()
+                .Where(x => x.oldId == limit.LeavetypeLeavetypeid)
+                .ToFeedIterator()
+                .FirstOrDefaultAsync();
+
+            if (leaveTypeFromDB == null)
+            {
+                $"Can't find leave type (id: {limit.LeavetypeLeavetypeid}) in the cosmosDB".WriteWarning();
+                continue;
+            }
+            var limitFromDb = await container.GetItemLinqQueryable<LimitEntity>()
+                .Where(x => x.oldId == limitGroupped.Key)
+                .ToFeedIterator()
+                .FirstOrDefaultAsync();
+
+            await container.UpsertItemAsync(new
+            {
+                id = limitFromDb?.id ?? Guid.NewGuid(),
+                limit = ConvertTime(limit.UserLimit),
+                leaveTypeId = leaveTypeFromDB?.id,
+                oldId = limitGroupped.Key //Intentionally set leave type instead of leave limit
+            });
+            ++i;
+            Console.Write($"\rInserted {i} items");
+        }
+
+        return i;
+    }
+
+    private static string? ConvertTime(double? limit) => limit is null or 0 ? null : TimeSpan.FromHours(limit.Value * DefaultWorkingHours).ToString();
+
+    private sealed record LeaveTypesEntity(Guid id, int oldId);
+    private sealed record LimitEntity(Guid id, int oldId);
+
+    private static string? MapRoleName(string role) => role switch
     {
         "ROLE_USER_ADMIN" => RoleType.UserAdmin.ToString(),
         "ROLE_ADMIN" => RoleType.GlobalAdmin.ToString(),

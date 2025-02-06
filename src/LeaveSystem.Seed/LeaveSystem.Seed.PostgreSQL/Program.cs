@@ -21,7 +21,9 @@ var graphSeeder = services.GetRequiredService<GraphSeeder>();
 var users = await graphSeeder.SeedUsers();
 
 var dbSeeder = services.GetRequiredService<DbSeeder>();
-await dbSeeder.SeedRoles(users);
+//await dbSeeder.SeedRoles(users);
+await dbSeeder.SeedLimits(users);
+await dbSeeder.SeedLeaveRequests(users);
 
 static IServiceProvider ConfigureServices()
 {
@@ -66,6 +68,40 @@ public static class ConsoleExtensions
     }
 }
 
+public static class FeedInteratorExtensions
+{
+    internal static async Task<(IReadOnlyList<T> results, string? continuationToken)> ToListAsync<T>(this FeedIterator<T> iterator, int pageSize = 100, CancellationToken cancellationToken = default)
+    {
+        using (iterator)
+        {
+            List<T> results = [];
+            while (iterator.HasMoreResults)
+            {
+                var queryResult = await iterator.ReadNextAsync(cancellationToken);
+                results.AddRange(queryResult);
+                if (results.Count >= pageSize)
+                {
+                    return (results, queryResult.ContinuationToken);
+                }
+            }
+
+            return (results, null);
+        }
+    }
+    internal static async Task<T?> FirstOrDefaultAsync<T>(this FeedIterator<T> iterator, CancellationToken cancellationToken = default)
+    {
+        using (iterator)
+        {
+            if (iterator.HasMoreResults)
+            {
+                var queryResult = await iterator.ReadNextAsync(cancellationToken);
+                return queryResult.FirstOrDefault();
+            }
+
+            return default;
+        }
+    }
+}
 
 public class GraphSettings
 {

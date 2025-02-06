@@ -21,23 +21,25 @@ internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, s
         }).ToListAsync();
         var usersFromGraph = await GetUsersFromGraph();
         var results = new List<CreatedUser>();
+        var i = 0;
         foreach (var user in users)
         {
-            Console.WriteLine($"Creating user {user.Email}");
             var userFound = usersFromGraph.FirstOrDefault(x => x.Mail == user.Email && x.GivenName == user.FirstName && x.Surname == user.LastName);
             if (userFound is not null)
             {
                 results.Add(new CreatedUser(userFound.Id, user.Userid, user.Email));
-                Console.WriteLine("User Found");
+                Console.WriteLine($"User found {user.Email}");
+                ++i;
                 continue;
             }
             var result = await CreateUser(user.Userid, user.Email, user.FirstName, user.LastName, user.JobTitle);
             if (result.Success)
             {
                 results.Add(result.User);
-                Console.WriteLine("User created");
+                Console.Write($"\rCreated {++i} items");
             }
         }
+        Console.WriteLine($"\rSaved {i} users to graph API");
         return results;
     }
 
