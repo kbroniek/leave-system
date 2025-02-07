@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.IdentityModel.Tokens;
 
 public class EmployeesFunction(IGetUserRepository getUserRepository)
 {
@@ -27,7 +26,7 @@ public class EmployeesFunction(IGetUserRepository getUserRepository)
             SqlQuery = $"SELECT c.id FROM c JOIN r IN c. roles WHERE r = \"{nameof(RoleType.Employee)}\"",
             Connection  = "CosmosDBConnection")] IEnumerable<RolesDto> roles, CancellationToken cancellationToken)
     {
-        var result = !roles.IsNullOrEmpty() ? await getUserRepository.GetUsers(roles.Select(x => x.Id).ToArray(), cancellationToken) : Result.Ok<IReadOnlyCollection<IGetUserRepository.User>, Error>([]);
+        var result = roles is null || !roles.Any() ? Result.Ok<IReadOnlyCollection<IGetUserRepository.User>, Error>([]) : await getUserRepository.GetUsers(roles.Select(x => x.Id).ToArray(), cancellationToken);
 
         return result.Match(
             (employees) => new OkObjectResult(employees.ToPagedListResponse()),
