@@ -11,6 +11,7 @@ using Microsoft.Graph.Models.ODataErrors;
 
 internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger) : IGetUserRepository
 {
+    private const int MaxSearchExpression = 15;
     private static readonly string[] Select = ["id", "displayName"];
 
     public async Task<Result<IGetUserRepository.User, Error>> GetUser(string id, CancellationToken cancellationToken)
@@ -42,6 +43,35 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
 
     public async Task<Result<IReadOnlyCollection<IGetUserRepository.User>, Error>> GetUsers(string[] ids, CancellationToken cancellationToken)
     {
+        var idsSequences = SplitToContiguousSequences(ids, MaxSearchExpression);
+        var users = new List<IGetUserRepository.User>();
+        foreach (var idsSequence in idsSequences)
+        {
+            var result = await GetUsersLimit(graphClientFactory, logger, idsSequence, cancellationToken);
+            if (result.IsFailure)
+            {
+                return result.Error;
+            }
+            users.AddRange(result.Value);
+        }
+        return users;
+    }
+
+    public static IEnumerable<T[]> SplitToContiguousSequences<T>(T[] items, int divideInto)
+    {
+        var currIdx = 0;
+        var enumerable = items.Select((item, index) => new
+        {
+            item,
+            divideIndicator = (index + 1) % divideInto != 0 ? currIdx : ++currIdx
+        });
+        return enumerable
+            .GroupBy(x => x.divideIndicator)
+            .Select(x => x.Select(x => x.item).ToArray());
+    }
+
+    private static async Task<Result<IReadOnlyCollection<IGetUserRepository.User>, Error>> GetUsersLimit(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger, string[] ids, CancellationToken cancellationToken)
+    {
         try
         {
             var graphClient = graphClientFactory.Create();
@@ -71,6 +101,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             return new Error(errorMessage, System.Net.HttpStatusCode.InternalServerError);
         }
     }
+
     private static async Task<List<IGetUserRepository.User>> GetAll(GraphServiceClient graphClient, UserCollectionResponse users, CancellationToken cancellationToken)
     {
         var graphUsers = new List<IGetUserRepository.User>();
