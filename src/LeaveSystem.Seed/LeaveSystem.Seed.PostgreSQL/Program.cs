@@ -11,18 +11,18 @@ Console.WriteLine("Configuring...");
 var services = ConfigureServices();
 
 var jsonSeeder = services.GetRequiredService<JsonSeeder>();
-//await jsonSeeder.Seed("./Assets/LeaveStatusSettings.json");
-//await jsonSeeder.Seed("./Assets/LeaveTypes.json");
-//await jsonSeeder.Seed("./Assets/LeaveLimits.json"); // Empty
-//await jsonSeeder.Seed("./Assets/LeaveRequests.json"); // Empty
-//await jsonSeeder.Seed("./Assets/Roles.json"); // Empty
+await jsonSeeder.Seed("./Assets/LeaveStatusSettings.json");
+await jsonSeeder.Seed("./Assets/LeaveTypes.json");
+await jsonSeeder.Seed("./Assets/LeaveLimits.json"); // Empty - only create a container
+await jsonSeeder.Seed("./Assets/LeaveRequests.json"); // Empty - only create a container
+await jsonSeeder.Seed("./Assets/Roles.json"); // Empty - only create a container
 
 var graphSeeder = services.GetRequiredService<GraphSeeder>();
 var users = await graphSeeder.SeedUsers();
 
 var dbSeeder = services.GetRequiredService<DbSeeder>();
-//await dbSeeder.SeedRoles(users);
-//await dbSeeder.SeedLimits(users);
+await dbSeeder.SeedRoles(users);
+await dbSeeder.SeedLimits(users);
 await dbSeeder.SeedLeaveRequests(users);
 
 static IServiceProvider ConfigureServices()
