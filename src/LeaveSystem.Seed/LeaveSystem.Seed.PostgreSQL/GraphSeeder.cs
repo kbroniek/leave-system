@@ -5,6 +5,7 @@ using LeaveSystem.Seed.PostgreSQL.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Microsoft.Graph.Models.Security;
 
 internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, string defaultUsersPassword, string issuer)
 {
@@ -27,7 +28,7 @@ internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, s
             var userFound = usersFromGraph.FirstOrDefault(x => x.Mail == user.Email && x.GivenName == user.FirstName && x.Surname == user.LastName);
             if (userFound is not null)
             {
-                results.Add(new CreatedUser(userFound.Id, user.Userid, user.Email));
+                results.Add(new CreatedUser(userFound.Id, user.Userid, user.Email, $"{user.FirstName} {user.LastName}"));
                 Console.WriteLine($"User found {user.Email}");
                 ++i;
                 continue;
@@ -80,7 +81,7 @@ internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, s
                 UserPrincipalName = $"{principalId}@{issuer}",
                 JobTitle = jobTitle
             });
-            return (true, new(addedUser.Id, userid, email));
+            return (true, new(addedUser.Id, userid, email, $"{firstName} {lastName}"));
         }
         catch (Exception ex)
         {
@@ -107,4 +108,4 @@ internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, s
     }
 }
 
-internal record CreatedUser(string Id, int OldId, string Email);
+internal record CreatedUser(string Id, int OldId, string Email, string Name);

@@ -22,7 +22,7 @@ var users = await graphSeeder.SeedUsers();
 
 var dbSeeder = services.GetRequiredService<DbSeeder>();
 //await dbSeeder.SeedRoles(users);
-await dbSeeder.SeedLimits(users);
+//await dbSeeder.SeedLimits(users);
 await dbSeeder.SeedLeaveRequests(users);
 
 static IServiceProvider ConfigureServices()
@@ -70,7 +70,7 @@ public static class ConsoleExtensions
 
 public static class FeedInteratorExtensions
 {
-    internal static async Task<(IReadOnlyList<T> results, string? continuationToken)> ToListAsync<T>(this FeedIterator<T> iterator, int pageSize = 100, CancellationToken cancellationToken = default)
+    internal static async Task<(IReadOnlyList<T> results, string? continuationToken)> ToListAsync<T>(this FeedIterator<T> iterator, int pageSize = 1000, CancellationToken cancellationToken = default)
     {
         using (iterator)
         {
