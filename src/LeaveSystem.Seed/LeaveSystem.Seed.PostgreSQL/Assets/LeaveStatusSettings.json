@@ -1,0 +1,33 @@
+{
+  "partitionKey": "/id",
+  "uniqueKeys": [
+    "/leaveRequestStatus"
+  ],
+  "items": [
+    {
+      "id": "2719cbba-6542-41ca-83a2-5854736ea3ba",
+      "leaveRequestStatus": "Pending",
+      "color": "#CFFF98"
+    },
+    {
+      "id": "934d8827-0cf3-418e-a629-a1cb9c54eb18",
+      "leaveRequestStatus": "Canceled",
+      "color": "lightgrey"
+    },
+    {
+      "id": "ea80bed5-2793-4a18-a3bd-fba6d9a3e632",
+      "leaveRequestStatus": "Accepted",
+      "color": "transparent"
+    },
+    {
+      "id": "843310c2-04d0-443f-a61d-515919204ef6",
+      "leaveRequestStatus": "Deprecated",
+      "color": "#890015"
+    },
+    {
+      "id": "25637518-a6cb-4c21-b1e1-7a08e61b87d3",
+      "leaveRequestStatus": "Rejected",
+      "color": "#663300"
+    }
+  ]
+}

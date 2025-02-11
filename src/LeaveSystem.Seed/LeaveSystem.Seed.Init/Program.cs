@@ -1,4 +1,3 @@
-
 using System.Collections;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
