@@ -10,13 +10,6 @@ on:
     paths:
       - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Roles/**'
       - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Shared/**'
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - develop
-    paths:
-      - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Roles/**'
-      - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Shared/**'
   workflow_dispatch:
 
 env:
