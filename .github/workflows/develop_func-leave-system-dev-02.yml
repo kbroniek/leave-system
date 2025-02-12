@@ -1,27 +1,17 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: DEV - Roles for B2C - func-leave-system-dev-02
+name: Build and deploy dotnet core project to Azure Function App - func-leave-system-dev-02
 
 on:
   push:
     branches:
       - develop
-    paths:
-      - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Roles/**'
-      - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Shared/**'
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - develop
-    paths:
-      - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Roles/**'
-      - 'src/LeaveSystem.Functions/LeaveSystem.Functions.Shared/**'
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'src/LeaveSystem.Functions/LeaveSystem.Functions.Roles' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '8.0.x' # set this to the dotnet version to use
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  DOTNET_VERSION: '8.0' # set this to the dotnet version to use
 
 jobs:
   build-and-deploy:
@@ -45,13 +35,13 @@ jobs:
           pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
           dotnet build --configuration Release --output ./output
           popd
-
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_02FDB5A13B8F41EB934A4020E81452E1 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CF5A632EAC254D41B0014D7533B3DA68 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_142689AE0AA74E16A8F8E4041E11497E }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_79D6DF3417CC40A28509D1B3C0CD3B56 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7BC34D3B4D744451AC68086211C302B0 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2C5B7596A0704341AA60C1438DAD93F4 }}
 
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
@@ -60,3 +50,4 @@ jobs:
           app-name: 'func-leave-system-dev-02'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+          
