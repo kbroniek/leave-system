@@ -1,94 +1,75 @@
-using System.Text;
-using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
-namespace LeaveSystem.Functions
+namespace LeaveSystem.Functions;
+
+public static class GetRoles
 {
-    public class GetRoles
+    [Function(nameof(GetRoles))]
+    public static async Task<IActionResult> Run(HttpRequest req, ILogger log)
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
-        {
-            PropertyNameCaseInsensitive = true
-        };
-        private static readonly CosmosLinqSerializerOptions LinqSerializerOptions = new()
-        {
-            PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
-        };
-        private readonly ILogger<GetRoles> logger;
+        log.LogInformation("C# HTTP trigger function processed a request.");
+        string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        dynamic data = JsonConvert.DeserializeObject(requestBody);
 
-        public GetRoles(ILogger<GetRoles> logger) => this.logger = logger;
+        // Read the correlation ID from the Microsoft Entra request    
+        string correlationId = data?.data.authenticationContext.correlationId;
 
-        [Function(nameof(GetRoles))]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req,
-            [CosmosDBInput(
-                databaseName: "LeaveSystem",
-                containerName: "Roles",
-                Connection = "CosmosDBConnection")] Container container)
-        {
-            logger.LogInformation("C# HTTP trigger function processed a request.");
-            if (!ValidateToken(req.Headers.Authorization))
-            {
-                logger.LogWarning("Wrong RestApi credentials.");
-                return new ObjectResult(new
-                {
-                    version = "1.0",
-                    status = 401,
-                    code = "errorCode",
-                    requestId = "requestId",
-                    userMessage = "Wrong RestApi credentials. Contact with administrators.",
-                    developerMessage = $"The provided code auth {req.Headers.Authorization} does not match the expected login and password."
-                })
-                { StatusCode = 401 };
-            }
-            var userIdModel = await JsonSerializer.DeserializeAsync<UserId>(req.Body, JsonSerializerOptions);
-            if (userIdModel is null)
-            {
-                return new NotFoundObjectResult("userId");
-            }
-
-            var userId = userIdModel.Id;
-            this.logger.LogInformation("Deserialized user id {UserId}.", userId);
-            var iterator = container.GetItemLinqQueryable<RolesModel>(linqSerializerOptions: LinqSerializerOptions)
-                .Where(r => r.Id == userId)
-                .ToFeedIterator();
-            var roles = iterator.HasMoreResults ?
-                (await iterator.ReadNextAsync()).FirstOrDefault()?.Roles :
-                null;
-            return new OkObjectResult(new { roles = roles ?? Enumerable.Empty<string>() });
-        }
-        private bool ValidateToken(string? header)
-        {
-            //Checking the header
-            if (!string.IsNullOrEmpty(header) && header.StartsWith("Basic", StringComparison.Ordinal))
-            {
-                //Extracting credentials
-                // Removing "Basic " Substring
-                var encodedUsernamePassword = header["Basic ".Length..].Trim();
-                //Decoding Base64
-                var encoding = Encoding.GetEncoding("iso-8859-1");
-                var usernamePassword = encoding.GetString(Convert.FromBase64String(encodedUsernamePassword));
-                //Splitting Username:Password
-                var seperatorIndex = usernamePassword.IndexOf(':');
-                // Extracting the individual username and password
-                var username = usernamePassword[..seperatorIndex];
-                var password = usernamePassword[(seperatorIndex + 1)..];
-                //Validating the credentials
-                return username == Environment.GetEnvironmentVariable("RestApiUsername") &&
-                    password == Environment.GetEnvironmentVariable("RestApiPassword");
-            }
-            else
-            {
-                logger.LogWarning("Header is missing");
-                return false;
-            }
-        }
+        // Claims to return to Microsoft Entra
+        ResponseContent r = new ResponseContent();
+        r.data.actions[0].claims.CorrelationId = correlationId;
+        r.data.actions[0].claims.ApiVersion = "1.0.0";
+        r.data.actions[0].claims.DateOfBirth = "01/01/2000";
+        r.data.actions[0].claims.CustomRoles.Add("Writer");
+        r.data.actions[0].claims.CustomRoles.Add("Editor");
+        return new OkObjectResult(r);
     }
-
-    public record UserId(Guid Id);
-    public record RolesModel(Guid Id, string[] Roles);
+}
+public class ResponseContent
+{
+    [JsonProperty("data")]
+    public Data data { get; set; }
+    public ResponseContent()
+    {
+        data = new Data();
+    }
+}
+public class Data
+{
+    [JsonProperty("@odata.type")]
+    public string odatatype { get; set; }
+    public List<Action> actions { get; set; }
+    public Data()
+    {
+        odatatype = "microsoft.graph.onTokenIssuanceStartResponseData";
+        actions = new List<Action>();
+        actions.Add(new Action());
+    }
+}
+public class Action
+{
+    [JsonProperty("@odata.type")]
+    public string odatatype { get; set; }
+    public Claims claims { get; set; }
+    public Action()
+    {
+        odatatype = "microsoft.graph.tokenIssuanceStart.provideClaimsForToken";
+        claims = new Claims();
+    }
+}
+public class Claims
+{
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public string CorrelationId { get; set; }
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+    public string DateOfBirth { get; set; }
+    public string ApiVersion { get; set; }
+    public List<string> CustomRoles { get; set; }
+    public Claims()
+    {
+        CustomRoles = new List<string>();
+    }
 }
