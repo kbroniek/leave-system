@@ -12,16 +12,17 @@ interface UserRolesCache {
 }
 
 interface UseUserRolesOptions {
-  cacheTimeout?: number; // in milliseconds, default 5 minutes
+  cacheTimeout?: number; // in milliseconds, default 10 minutes
   refetchOnWindowFocus?: boolean;
   enabled?: boolean;
 }
 
 const CACHE_KEY = "user_roles_cache";
-const DEFAULT_CACHE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const DEFAULT_CACHE_TIMEOUT = 10 * 60 * 1000; // 10 minutes - standardized
 
-// Global cache to share across hook instances
+// Global cache and promise to share across hook instances
 let globalCache: UserRolesCache | null = null;
+let ongoingFetch: Promise<RoleType[]> | null = null;
 const cacheListeners = new Set<() => void>();
 
 export const useUserRoles = (options: UseUserRolesOptions = {}) => {
@@ -76,42 +77,62 @@ export const useUserRoles = (options: UseUserRolesOptions = {}) => {
   }, []);
 
   const fetchUserRoles = useCallback(
-    async (userId: string, signal?: AbortSignal) => {
-      if (!userId || !enabled) return;
+    async (userId: string, signal?: AbortSignal): Promise<RoleType[]> => {
+      if (!userId || !enabled) return [];
 
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await callApiGet<{ roles: RoleType[] }>(
-          "/roles/me",
-          notifications.show,
-          signal,
-        );
-
-        if (signal?.aborted) return;
-
-        const newRoles = response.roles || [];
-        updateCache(newRoles, userId);
-        setRoles(newRoles);
-      } catch (err) {
-        if (signal?.aborted) return;
-
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch user roles";
-        setError(errorMessage);
-        console.error("Error fetching user roles:", err);
-        setRoles([]);
-      } finally {
-        if (!signal?.aborted) {
-          setIsLoading(false);
+      // If there's already a fetch in progress, wait for it
+      if (ongoingFetch) {
+        try {
+          return await ongoingFetch;
+        } catch (error) {
+          console.error("Error fetching user roles:", error);
+          // If the ongoing fetch failed, we'll start a new one
+          ongoingFetch = null;
         }
       }
+
+      // Start a new fetch and store the promise
+      ongoingFetch = (async (): Promise<RoleType[]> => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+          const response = await callApiGet<{ roles: RoleType[] }>(
+            "/roles/me",
+            notifications.show,
+            signal,
+          );
+
+          if (signal?.aborted) throw new Error("Request aborted");
+
+          const newRoles = response.roles || [];
+          updateCache(newRoles, userId);
+          setRoles(newRoles);
+          return newRoles;
+        } catch (err) {
+          if (signal?.aborted) throw err;
+
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to fetch user roles";
+          setError(errorMessage);
+          console.error("Error fetching user roles:", err);
+          setRoles([]);
+          throw err;
+        } finally {
+          if (!signal?.aborted) {
+            setIsLoading(false);
+          }
+          // Clear the ongoing fetch promise
+          ongoingFetch = null;
+        }
+      })();
+
+      return ongoingFetch;
     },
     [enabled, notifications.show, updateCache],
   );
 
-  const refetch = useCallback(() => {
+  const refetch = useCallback(async () => {
     const userId = getCurrentUserId();
     if (!userId) return;
 
@@ -122,7 +143,11 @@ export const useUserRoles = (options: UseUserRolesOptions = {}) => {
 
     // Create new abort controller
     abortControllerRef.current = new AbortController();
-    fetchUserRoles(userId, abortControllerRef.current.signal);
+    try {
+      await fetchUserRoles(userId, abortControllerRef.current.signal);
+    } catch {
+      // Error is already handled in fetchUserRoles
+    }
   }, [getCurrentUserId, fetchUserRoles]);
 
   const invalidateCache = useCallback(() => {
@@ -165,7 +190,9 @@ export const useUserRoles = (options: UseUserRolesOptions = {}) => {
 
     // Cache is invalid, fetch new data
     abortControllerRef.current = new AbortController();
-    fetchUserRoles(userId, abortControllerRef.current.signal);
+    fetchUserRoles(userId, abortControllerRef.current.signal).catch(() => {
+      // Error is already handled in fetchUserRoles
+    });
 
     return () => {
       if (abortControllerRef.current) {

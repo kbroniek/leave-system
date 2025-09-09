@@ -13,7 +13,7 @@ export function callApiGet<T>(
   signal?: AbortSignal,
 ): Promise<T> {
   return callApi(url, "GET", undefined, showNotification, signal).then(
-    (response) => response.json(),
+    (response) => response?.json(),
   );
 }
 
@@ -66,6 +66,7 @@ export async function callApi(
 
   if (response.status < 200 || response.status >= 300) {
     try {
+      console.warn("call api error", response);
       const errorBody = await response.json();
       showNotification(
         `Error: ${response.status}
@@ -78,7 +79,7 @@ export async function callApi(
         },
       );
     } catch (e) {
-      console.error(e);
+      console.error("call api error", e);
       showNotification(`Error: ${response.status} Something goes wrong.`, {
         severity: "error",
         autoHideDuration: 3000,

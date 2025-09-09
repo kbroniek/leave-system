@@ -8,7 +8,6 @@ export const Authorized = (props: AuthorizedProps) => {
   const { instance } = useMsal();
   const { roles: userRoles, isLoading } = useUserRoles({
     enabled: props.roles !== "CurrentUser", // Only fetch roles when needed
-    cacheTimeout: 10 * 60 * 1000, // 10 minutes cache
     refetchOnWindowFocus: true,
   });
 
