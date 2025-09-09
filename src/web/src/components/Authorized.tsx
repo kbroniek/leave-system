@@ -1,33 +1,16 @@
 import { useMsal } from "@azure/msal-react";
 import { useState, useEffect, ReactElement } from "react";
-import { callApiGet } from "../utils/ApiCall";
-import { useNotifications } from "@toolpad/core/useNotifications";
+import { useUserRoles } from "../hooks/useUserRoles";
+import { isInRoleInternal } from "../utils/roleUtils";
 
 export const Authorized = (props: AuthorizedProps) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [userRoles, setUserRoles] = useState<RoleType[] | undefined>(undefined);
   const { instance } = useMsal();
-  const notifications = useNotifications();
-
-  // Fetch roles from API
-  useEffect(() => {
-    const fetchUserRoles = async () => {
-      if (!instance.getActiveAccount()) return;
-
-      try {
-        const response = await callApiGet<{ roles: RoleType[] }>(
-          "/roles/me",
-          notifications.show,
-        );
-        setUserRoles(response.roles);
-      } catch (error) {
-        console.error("Error fetching user roles:", error);
-        setUserRoles([]);
-      }
-    };
-
-    fetchUserRoles();
-  }, [instance, notifications.show]);
+  const { roles: userRoles, isLoading } = useUserRoles({
+    enabled: props.roles !== "CurrentUser", // Only fetch roles when needed
+    cacheTimeout: 10 * 60 * 1000, // 10 minutes cache
+    refetchOnWindowFocus: true,
+  });
 
   useEffect(() => {
     if (props.roles === "CurrentUser") {
@@ -35,9 +18,14 @@ export const Authorized = (props: AuthorizedProps) => {
         props.userId === instance.getActiveAccount()?.idTokenClaims?.sub,
       );
     } else {
-      setIsAuthorized(isInRole(props.roles, userRoles));
+      // Don't authorize until roles are loaded (unless loading fails and we get empty array)
+      if (isLoading && userRoles === undefined) {
+        setIsAuthorized(false);
+      } else {
+        setIsAuthorized(isInRoleInternal(props.roles, userRoles));
+      }
     }
-  }, [instance, props, userRoles]);
+  }, [instance, props, userRoles, isLoading]);
 
   return (
     <>
@@ -46,14 +34,7 @@ export const Authorized = (props: AuthorizedProps) => {
   );
 };
 
-function isInRole(
-  roles: RoleType[],
-  claimRoles: RoleType[] | undefined,
-): boolean {
-  return Array.isArray(claimRoles)
-    ? !!claimRoles.find((c) => roles.includes(c))
-    : false;
-}
+// Moved utility functions to separate file to avoid fast refresh warnings
 
 type RoleArgs =
   | { roles: RoleType[] }
@@ -75,13 +56,5 @@ export type RoleType =
   | "GlobalAdmin"
   | "WorkingHoursAdmin";
 
-export const roleTypeNames = [
-  "Employee",
-  "LeaveLimitAdmin",
-  "LeaveTypeAdmin",
-  "DecisionMaker",
-  "HumanResource",
-  "UserAdmin",
-  "GlobalAdmin",
-  "WorkingHoursAdmin",
-];
+// Moved to utils/roleUtils.ts to avoid fast refresh warnings
+export { roleTypeNames } from "../utils/roleUtils";

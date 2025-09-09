@@ -10,9 +10,10 @@ import { ShowNotification } from "@toolpad/core/useNotifications";
 export function callApiGet<T>(
   url: string,
   showNotification: ShowNotification,
+  signal?: AbortSignal,
 ): Promise<T> {
-  return callApi(url, "GET", undefined, showNotification).then((response) =>
-    response.json(),
+  return callApi(url, "GET", undefined, showNotification, signal).then(
+    (response) => response.json(),
   );
 }
 
@@ -21,6 +22,7 @@ export async function callApi(
   method: "GET" | "POST" | "PUT",
   body: unknown,
   showNotification: ShowNotification,
+  signal?: AbortSignal,
 ): Promise<Response> {
   const account = msalInstance.getActiveAccount();
   if (!account) {
@@ -47,6 +49,7 @@ export async function callApi(
     method: method,
     headers: headers,
     body: body ? JSON.stringify(body) : undefined,
+    signal: signal,
   };
 
   const response = await fetch(
@@ -61,8 +64,7 @@ export async function callApi(
   });
 
   if (response.status < 200 || response.status >= 300) {
-    try
-    {
+    try {
       const errorBody = await response.json();
       showNotification(
         `Error: ${response.status}
@@ -74,16 +76,12 @@ export async function callApi(
           autoHideDuration: 3000,
         },
       );
-    }
-    catch(e) {
+    } catch (e) {
       console.error(e);
-      showNotification(
-        `Error: ${response.status} Something goes wrong.`,
-        {
-          severity: "error",
-          autoHideDuration: 3000,
-        },
-      );
+      showNotification(`Error: ${response.status} Something goes wrong.`, {
+        severity: "error",
+        autoHideDuration: 3000,
+      });
     }
   }
   return response;
