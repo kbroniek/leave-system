@@ -10,9 +10,10 @@ import { ShowNotification } from "@toolpad/core/useNotifications";
 export function callApiGet<T>(
   url: string,
   showNotification: ShowNotification,
+  signal?: AbortSignal,
 ): Promise<T> {
-  return callApi(url, "GET", undefined, showNotification).then((response) =>
-    response.json(),
+  return callApi(url, "GET", undefined, showNotification, signal).then(
+    (response) => response?.json(),
   );
 }
 
@@ -21,6 +22,7 @@ export async function callApi(
   method: "GET" | "POST" | "PUT",
   body: unknown,
   showNotification: ShowNotification,
+  signal?: AbortSignal,
 ): Promise<Response> {
   const account = msalInstance.getActiveAccount();
   if (!account) {
@@ -47,13 +49,15 @@ export async function callApi(
     method: method,
     headers: headers,
     body: body ? JSON.stringify(body) : undefined,
+    signal: signal,
   };
 
   const response = await fetch(
     `${import.meta.env.VITE_REACT_APP_API_URL}${url}`,
     options,
   ).catch((error) => {
-    showNotification(`Error: ${JSON.stringify(error)}`, {
+    console.error("callApi error", error);
+    showNotification(`Error: ${error.message}`, {
       severity: "error",
       autoHideDuration: 3000,
     });
@@ -61,8 +65,8 @@ export async function callApi(
   });
 
   if (response.status < 200 || response.status >= 300) {
-    try
-    {
+    try {
+      console.warn("call api error", response);
       const errorBody = await response.json();
       showNotification(
         `Error: ${response.status}
@@ -74,16 +78,12 @@ export async function callApi(
           autoHideDuration: 3000,
         },
       );
-    }
-    catch(e) {
-      console.error(e);
-      showNotification(
-        `Error: ${response.status} Something goes wrong.`,
-        {
-          severity: "error",
-          autoHideDuration: 3000,
-        },
-      );
+    } catch (e) {
+      console.error("call api error", e);
+      showNotification(`Error: ${response.status} Something goes wrong.`, {
+        severity: "error",
+        autoHideDuration: 3000,
+      });
     }
   }
   return response;

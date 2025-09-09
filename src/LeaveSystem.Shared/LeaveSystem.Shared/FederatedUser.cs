@@ -20,12 +20,10 @@ public record struct FederatedUser(string Id, string? Email, string? Name, IEnum
 
     public static IEnumerable<string> MapRoles(string? rolesRaw)
     {
-        if (string.IsNullOrWhiteSpace(rolesRaw))
-        {
-            return RolesResult.Empty.Roles;
-        }
-        var roleAttribute = JsonSerializer.Deserialize<RolesResult?>(rolesRaw) ?? RolesResult.Empty;
-        return roleAttribute.Roles;
+        // Roles are now fetched from CosmosDB instead of JWT claims
+        // This method is kept for backward compatibility but will always return empty roles
+        //TODO: Fetch roles from CosmosDB
+        return RolesResult.Empty.Roles;
     }
 }
 

@@ -14,11 +14,14 @@ using LeaveSystem.Functions.Holidays;
 using LeaveSystem.Functions.LeaveLimits;
 using LeaveSystem.Functions.LeaveLimits.Repositories;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
+using LeaveSystem.Functions.Auth;
 
 internal static class Config
 {
@@ -37,6 +40,8 @@ internal static class Config
         services.AddGraphFactory(configuration.GetSection("ManageAzureUsers"));
         var cosmosClientSettings = configuration.Get<CosmosSettings>() ?? throw CreateError(nameof(CosmosSettings));
         return services
+            .AddAuthorization()
+            .AddScoped<IClaimsTransformation, RoleClaimsTransformation>()
             .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection ?? throw CreateError(nameof(cosmosClientSettings.CosmosDBConnection))))
             .AddLeaveRequestServices()
             .AddLeaveRequestRepositories(
