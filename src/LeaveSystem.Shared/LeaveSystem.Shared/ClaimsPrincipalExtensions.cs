@@ -4,15 +4,16 @@ using LeaveSystem.Shared.Auth;
 namespace LeaveSystem.Shared;
 public static class ClaimsPrincipalExtensions
 {
+    public const string PreferredNameClaim = "preferred_username";
     public static FederatedUser CreateModel(this ClaimsPrincipal claimsPrincipal)
     {
         var firstName = claimsPrincipal.FindFirst(ClaimTypes.Surname) ?? claimsPrincipal.FindFirst("family_name");
         var lastName = claimsPrincipal.FindFirst(ClaimTypes.GivenName) ?? claimsPrincipal.FindFirst("given_name");
-        var id = claimsPrincipal.FindFirst("preferred_username");
+        var id = claimsPrincipal.FindFirst(PreferredNameClaim);
         var fullName = string.IsNullOrWhiteSpace(firstName?.Value) || string.IsNullOrWhiteSpace(lastName?.Value) ?
             claimsPrincipal.FindFirst("name")?.Value :
             $"{firstName.Value} {lastName.Value}";
-        var email = claimsPrincipal.FindFirst("emails");
+        var email = claimsPrincipal.FindFirst("emails") ?? id;
         // Roles are now fetched from CosmosDB instead of JWT claims
         // TODO: Fetch roles from CosmosDB
         return FederatedUser.Create(id?.Value, email?.Value, fullName, Enumerable.Empty<string>());
