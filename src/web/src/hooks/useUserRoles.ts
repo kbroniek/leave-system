@@ -3,6 +3,7 @@ import { useMsal } from "@azure/msal-react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { callApiGet } from "../utils/ApiCall";
 import { RoleType } from "../components/Authorized";
+import { isInRoleInternal } from "../utils/roleUtils";
 
 interface UserRolesCache {
   roles: RoleType[];
@@ -219,11 +220,7 @@ export const useHasRole = (requiredRoles: RoleType[]) => {
   const { roles, isLoading } = useUserRoles();
 
   const hasRole = useCallback(() => {
-    if (!roles || roles.length === 0) return false;
-    return (
-      requiredRoles.some((role) => roles.includes(role)) ||
-      roles.includes("GlobalAdmin")
-    );
+    return isInRoleInternal(requiredRoles, roles);
   }, [roles, requiredRoles]);
 
   return {

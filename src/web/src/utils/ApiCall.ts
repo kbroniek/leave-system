@@ -56,7 +56,8 @@ export async function callApi(
     `${import.meta.env.VITE_REACT_APP_API_URL}${url}`,
     options,
   ).catch((error) => {
-    showNotification(`Error: ${JSON.stringify(error)}`, {
+    console.error("callApi error", error);
+    showNotification(`Error: ${error.message}`, {
       severity: "error",
       autoHideDuration: 3000,
     });

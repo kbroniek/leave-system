@@ -22,7 +22,7 @@ import {
 } from "./LeaveRequestsSearch";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import { isInRole } from "../../components/Authorized";
+import { useHasRole } from "../../hooks/useUserRoles";
 import { DateTime } from "luxon";
 import { leaveRequestsStatuses } from "../utils/Status";
 import { useTranslation } from "react-i18next";
@@ -43,10 +43,16 @@ const DataContent = () => {
   const [dateTo, setDateTo] = useState<DateTime>(now.plus({ days: 14 }));
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
   const [employeesSearch, setEmployeesSearch] = useState<string[]>([]);
-  const [statusesSearch, setStatusesSearch] = useState<string[]>(leaveRequestsStatuses.slice(0, 3));
+  const [statusesSearch, setStatusesSearch] = useState<string[]>(
+    leaveRequestsStatuses.slice(0, 3),
+  );
   const [isCallApi, setIsCallApi] = useState(true);
   const notifications = useNotifications();
   const { t } = useTranslation();
+  const { hasRole: canViewAllEmployees } = useHasRole([
+    "DecisionMaker",
+    "GlobalAdmin",
+  ]);
 
   const onSubmit = async (model: SearchLeaveRequestModel) => {
     if (!model.dateFrom?.isValid) {
@@ -68,7 +74,7 @@ const DataContent = () => {
     setDateTo(model.dateTo);
     setLeaveTypes(model.leaveTypes);
     setEmployeesSearch(model.employees);
-    setStatusesSearch(model.statuses)
+    setStatusesSearch(model.statuses);
     setIsCallApi(true);
   };
 
@@ -101,7 +107,7 @@ const DataContent = () => {
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
 
       if (!apiEmployees) {
-        if (isInRole(instance, ["DecisionMaker", "GlobalAdmin"])) {
+        if (canViewAllEmployees) {
           callApiGet<EmployeesDto>("/employees", notifications.show)
             .then((response) => setApiEmployees(response))
             .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -120,13 +126,10 @@ const DataContent = () => {
         }
       }
     }
-  }, [
-    inProgress,
-    isCallApi
-  ]);
+  }, [inProgress, isCallApi, canViewAllEmployees]);
 
   const employeeToRender =
-    employeesSearch.length && employeesSearch.filter(x => !!x).length > 0
+    employeesSearch.length && employeesSearch.filter((x) => !!x).length > 0
       ? apiEmployees?.items.filter((x) => employeesSearch.includes(x.id))
       : apiEmployees?.items;
   return (
@@ -148,7 +151,9 @@ const DataContent = () => {
           <ShowLeaveRequestsTimeline
             leaveRequests={apiLeaveRequests}
             holidays={apiHolidays}
-            leaveStatuses={apiLeaveStatuses.items.filter(x => x.state === "Active")}
+            leaveStatuses={apiLeaveStatuses.items.filter(
+              (x) => x.state === "Active",
+            )}
             leaveTypes={apiLeaveTypes.items}
             employees={employeeToRender ?? []}
           />
