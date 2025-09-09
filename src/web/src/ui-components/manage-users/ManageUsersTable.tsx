@@ -18,7 +18,7 @@ import {
   GridRenderEditCellParams,
   useGridApiContext,
 } from "@mui/x-data-grid";
-import { roleTypeNames } from "../../components/Authorized";
+import { roleTypeNames } from "../../utils/roleUtils";
 import { UserDto } from "../dtos/UsersDto";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -96,7 +96,7 @@ export function ManageUsersTable(props: {
   const processRowUpdateError = (e: unknown) => {
     console.warn("processRowUpdateError", e);
     notifications.show(t("Something went wrong when updating row."), {
-      severity: "error"
+      severity: "error",
     });
   };
 

@@ -55,6 +55,3 @@ export type RoleType =
   | "UserAdmin"
   | "GlobalAdmin"
   | "WorkingHoursAdmin";
-
-// Moved to utils/roleUtils.ts to avoid fast refresh warnings
-export { roleTypeNames } from "../utils/roleUtils";
