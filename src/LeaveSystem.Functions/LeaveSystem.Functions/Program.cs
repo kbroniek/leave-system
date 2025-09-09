@@ -46,7 +46,8 @@ var host = new HostBuilder()
                 options.Audience = configuration.GetValue<string>("JwtBearerOptions_Audience") ?? throw new InvalidOperationException("Cannot find JwtBearerOptions_Audience in the configuration.");
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    NameClaimType = "name"
+                    NameClaimType = "name",
+                    RoleClaimType = ClaimTypes.Role
                 };
                 var authorizationHeaderName = configuration.GetValue<string>("JwtBearerOptions_AuthorizationHeaderName") ?? throw new InvalidOperationException("Cannot find authorizationHeaderName in the configuration.");
                 options.Events = new JwtBearerEvents

@@ -14,6 +14,7 @@ using LeaveSystem.Functions.Holidays;
 using LeaveSystem.Functions.LeaveLimits;
 using LeaveSystem.Functions.LeaveLimits.Repositories;
 using LeaveSystem.Functions.LeaveRequests.Repositories;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
@@ -40,7 +41,7 @@ internal static class Config
         var cosmosClientSettings = configuration.Get<CosmosSettings>() ?? throw CreateError(nameof(CosmosSettings));
         return services
             .AddAuthorization()
-            .AddScoped<IAuthorizationHandler, RoleRequirementHandler>()
+            .AddScoped<IClaimsTransformation, RoleClaimsTransformation>()
             .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection ?? throw CreateError(nameof(cosmosClientSettings.CosmosDBConnection))))
             .AddLeaveRequestServices()
             .AddLeaveRequestRepositories(
