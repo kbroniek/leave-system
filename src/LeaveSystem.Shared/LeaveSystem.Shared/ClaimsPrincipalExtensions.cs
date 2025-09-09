@@ -13,8 +13,9 @@ public static class ClaimsPrincipalExtensions
             claimsPrincipal.FindFirst("name")?.Value :
             $"{firstName.Value} {lastName.Value}";
         var email = claimsPrincipal.FindFirst("emails");
-        var rolesClaim = claimsPrincipal.FindFirst("extension_Role");
-        return FederatedUser.Create(id?.Value, email?.Value, fullName, rolesClaim?.Value);
+        // Roles are now fetched from CosmosDB instead of JWT claims
+        // TODO: Fetch roles from CosmosDB
+        return FederatedUser.Create(id?.Value, email?.Value, fullName, Enumerable.Empty<string>());
     }
 
     public static bool IsInRoles(this IEnumerable<string> roles, params RoleType[] roleTypes) =>
