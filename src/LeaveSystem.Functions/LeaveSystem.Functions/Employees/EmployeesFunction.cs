@@ -30,7 +30,7 @@ public class EmployeesFunction(IGetUserRepository getUserRepository)
 
         return result.Match(
             (employees) => new OkObjectResult(employees.ToPagedListResponse()),
-            error => error.ToObjectResult("Error occurred while getting roles."));
+            error => error.ToObjectResult("Error occurred while getting employees."));
     }
     public record RolesDto(string Id);
 }

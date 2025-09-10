@@ -1,15 +1,33 @@
 import { useMsal } from "@azure/msal-react";
 import { useState, useEffect, ReactElement } from "react";
-import { useUserRoles } from "../hooks/useUserRoles";
-import { isInRoleInternal } from "../utils/roleUtils";
+import { isInRole, RoleType } from "../utils/roleUtils";
+import { roleManager } from "../services/roleManager";
+import { CircularProgress, Box } from "@mui/material";
 
 export const Authorized = (props: AuthorizedProps) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [roleUpdateTrigger, setRoleUpdateTrigger] = useState(0);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const { instance } = useMsal();
-  const { roles: userRoles, isLoading } = useUserRoles({
-    enabled: props.roles !== "CurrentUser", // Only fetch roles when needed
-    refetchOnWindowFocus: true,
-  });
+
+  // Subscribe to role updates
+  useEffect(() => {
+    const unsubscribe = roleManager.addRoleUpdateListener(() => {
+      // Trigger re-evaluation by updating the state
+      setRoleUpdateTrigger((prev) => prev + 1);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Subscribe to loading state changes
+  useEffect(() => {
+    const unsubscribe = roleManager.addLoadingStateListener((loading) => {
+      setIsLoadingRoles(loading);
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (props.roles === "CurrentUser") {
@@ -17,14 +35,20 @@ export const Authorized = (props: AuthorizedProps) => {
         props.userId === instance.getActiveAccount()?.idTokenClaims?.sub,
       );
     } else {
-      // Don't authorize until roles are loaded (unless loading fails and we get empty array)
-      if (isLoading && userRoles === undefined) {
-        setIsAuthorized(false);
-      } else {
-        setIsAuthorized(isInRoleInternal(props.roles, userRoles));
-      }
+      setIsAuthorized(isInRole(instance, props.roles));
     }
-  }, [instance, props, userRoles, isLoading]);
+  }, [instance, props, roleUpdateTrigger]);
+
+  // Show loading spinner if roles are being fetched and no roles exist yet
+  if (isLoadingRoles) {
+    return (
+      props.loading ?? (
+        <Box display="flex" justifyContent="center" alignItems="center" p={2}>
+          <CircularProgress size={24} />
+        </Box>
+      )
+    );
+  }
 
   return (
     <>
@@ -32,8 +56,6 @@ export const Authorized = (props: AuthorizedProps) => {
     </>
   );
 };
-
-// Moved utility functions to separate file to avoid fast refresh warnings
 
 type RoleArgs =
   | { roles: RoleType[] }
@@ -43,14 +65,5 @@ type AuthorizedProps = {
   authorized?: ReactElement;
   children?: JSX.Element | JSX.Element[];
   unauthorized?: ReactElement;
+  loading?: ReactElement;
 } & RoleArgs;
-
-export type RoleType =
-  | "Employee"
-  | "LeaveLimitAdmin"
-  | "LeaveTypeAdmin"
-  | "DecisionMaker"
-  | "HumanResource"
-  | "UserAdmin"
-  | "GlobalAdmin"
-  | "WorkingHoursAdmin";

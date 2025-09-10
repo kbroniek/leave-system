@@ -13,21 +13,41 @@ import Menu from "@mui/material/Menu";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import { Authorized, RoleType } from "../components/Authorized";
+import { Authorized } from "../components/Authorized";
 import { useTranslation } from "react-i18next";
-
+import { RoleType } from "../utils/roleUtils";
 
 function NavBar() {
   const { t } = useTranslation();
   const pages = [
-    { title: t("Submit request"), link: "/submit-request", roles: ["DecisionMaker", "GlobalAdmin", "Employee"] as RoleType[] },
-    { title: t("My leaves"), link: "/my-leaves", roles: ["Employee"] as RoleType[] },
-    { title: t("HR Panel"), link: "hr-panel", roles: ["GlobalAdmin", "HumanResource"] as RoleType[] },
-    { title: t("Users"), link: "/users", roles: ["UserAdmin", "GlobalAdmin"] as RoleType[] },
-    { title: t("Manage limits"), link: "/limits", roles: ["GlobalAdmin"] as RoleType[] },
+    {
+      title: t("Submit request"),
+      link: "/submit-request",
+      roles: ["DecisionMaker", "GlobalAdmin", "Employee"] as RoleType[],
+    },
+    {
+      title: t("My leaves"),
+      link: "/my-leaves",
+      roles: ["Employee"] as RoleType[],
+    },
+    {
+      title: t("HR Panel"),
+      link: "hr-panel",
+      roles: ["GlobalAdmin", "HumanResource"] as RoleType[],
+    },
+    {
+      title: t("Users"),
+      link: "/users",
+      roles: ["UserAdmin", "GlobalAdmin"] as RoleType[],
+    },
+    {
+      title: t("Manage limits"),
+      link: "/limits",
+      roles: ["GlobalAdmin"] as RoleType[],
+    },
   ];
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -98,8 +118,11 @@ function NavBar() {
                       component={RouterLink}
                       to={page.link}
                     >
-                      <Typography sx={{ textAlign: "center" }}>{page.title}</Typography>
-                    </MenuItem>}
+                      <Typography sx={{ textAlign: "center" }}>
+                        {page.title}
+                      </Typography>
+                    </MenuItem>
+                  }
                 />
               ))}
             </Menu>
@@ -110,15 +133,16 @@ function NavBar() {
                 key={page.link}
                 roles={page.roles}
                 authorized={
-                <Button
-                  sx={{ my: 2, color: "white", display: "block" }}
-                  key={page.title}
-                  onClick={handleCloseNavMenu}
-                  component={RouterLink}
-                  to={page.link}
-                >
-                  {page.title}
-                </Button>}
+                  <Button
+                    sx={{ my: 2, color: "white", display: "block" }}
+                    key={page.title}
+                    onClick={handleCloseNavMenu}
+                    component={RouterLink}
+                    to={page.link}
+                  >
+                    {page.title}
+                  </Button>
+                }
               />
             ))}
           </Box>

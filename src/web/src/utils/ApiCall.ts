@@ -11,8 +11,9 @@ export function callApiGet<T>(
   url: string,
   showNotification: ShowNotification,
   signal?: AbortSignal,
+  account?: AccountInfo | null,
 ): Promise<T> {
-  return callApi(url, "GET", undefined, showNotification, signal).then(
+  return callApi(url, "GET", undefined, showNotification, signal, account).then(
     (response) => response?.json(),
   );
 }
@@ -23,8 +24,9 @@ export async function callApi(
   body: unknown,
   showNotification: ShowNotification,
   signal?: AbortSignal,
+  account?: AccountInfo | null,
 ): Promise<Response> {
-  const account = msalInstance.getActiveAccount();
+  account = account || msalInstance.getActiveAccount();
   if (!account) {
     throw Error(
       "No active account! Verify a user has been signed in and setActiveAccount has been called.",
@@ -79,7 +81,7 @@ export async function callApi(
         },
       );
     } catch (e) {
-      console.error("call api error", e);
+      console.error("call api exception", e);
       showNotification(`Error: ${response.status} Something goes wrong.`, {
         severity: "error",
         autoHideDuration: 3000,

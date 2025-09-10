@@ -8,8 +8,9 @@ import { theme } from "./styles/theme";
 import { NotificationsProvider } from "@toolpad/core/useNotifications";
 import { msalConfig } from "./authConfig";
 import { App } from "./App";
+import { roleManager } from "./services/roleManager";
 
-import './i18n';
+import "./i18n";
 import "./index.css";
 
 export const msalInstance = new PublicClientApplication(msalConfig);
@@ -25,15 +26,24 @@ msalInstance.initialize().then(() => {
     msalInstance.setActiveAccount(accounts[0]);
   }
 
-  msalInstance.addEventCallback((event: EventMessage) => {
+  msalInstance.addEventCallback(async (event: EventMessage) => {
     if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
       const payload = event.payload as AuthenticationResult;
       const account = payload.account;
       msalInstance.setActiveAccount(account);
+
+      // Fetch user roles after successful login
+      try {
+        const userId = account.homeAccountId || account.localAccountId;
+        await roleManager.fetchAndSetRoles(userId, undefined, undefined);
+      } catch (error) {
+        console.error("Failed to fetch roles after login:", error);
+        // Don't prevent the login flow if role fetching fails
+      }
     }
-    if(event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
-      console.error(event.eventType, event.error)
-      msalInstance.logoutRedirect({account: msalInstance.getActiveAccount()});
+    if (event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
+      console.error(event.eventType, event.error);
+      msalInstance.logoutRedirect({ account: msalInstance.getActiveAccount() });
     }
   });
 
@@ -46,6 +56,6 @@ msalInstance.initialize().then(() => {
           </NotificationsProvider>
         </ThemeProvider>
       </BrowserRouter>
-    </StrictMode>
+    </StrictMode>,
   );
-})
+});
