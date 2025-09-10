@@ -17,61 +17,65 @@ const isFirefox = firefox > 0; // Only needed if you need to support the redirec
  * To learn more about custom policies, visit: https://docs.microsoft.com/en-us/azure/active-directory-b2c/custom-policy-overview
  */
 export const b2cPolicies = {
-    names: {
-        signUpSignIn: import.meta.env.VITE_REACT_APP_B2C_POLICY_SIGNIN
+  names: {
+    signUpSignIn: import.meta.env.VITE_REACT_APP_B2C_POLICY_SIGNIN,
+  },
+  authorities: {
+    signUpSignIn: {
+      authority: import.meta.env.VITE_REACT_APP_AUTHORITY_SIGNIN,
     },
-    authorities: {
-        signUpSignIn: {
-            authority: import.meta.env.VITE_REACT_APP_AUTHORITY_SIGNIN
-        }
-    },
-    authorityDomain: import.meta.env.VITE_REACT_APP_AUTHORITY_DOMAIN
-}
+  },
+  authorityDomain: import.meta.env.VITE_REACT_APP_AUTHORITY_DOMAIN,
+};
 
 // Config object to be passed to Msal on creation
 export const msalConfig: Configuration = {
-    auth: {
-        clientId: import.meta.env.VITE_REACT_APP_B2C_CLIENT_ID,
-        authority: b2cPolicies.authorities.signUpSignIn.authority,
-        knownAuthorities: [b2cPolicies.authorityDomain],
-        redirectUri: "/",
-        postLogoutRedirectUri: "/"
-    },
-    cache: {
-        cacheLocation: "localStorage",
-        storeAuthStateInCookie: isIE || isEdge || isFirefox
-    },
-    system: {
-        allowNativeBroker: false, // Disables WAM Broker
-        loggerOptions: {
-            loggerCallback: (level: LogLevel, message: string, containsPii: boolean) => {
-                if (containsPii) {
-                    return;
-                }
-                switch (level) {
-                    case LogLevel.Error:
-                        console.error(message);
-                        return;
-                    case LogLevel.Info:
-                        console.info(message);
-                        return;
-                    case LogLevel.Verbose:
-                        console.debug(message);
-                        return;
-                    case LogLevel.Warning:
-                        console.warn(message);
-                        return;
-                    default:
-                        return;
-                }
-            }
+  auth: {
+    clientId: import.meta.env.VITE_REACT_APP_B2C_CLIENT_ID,
+    authority: b2cPolicies.authorities.signUpSignIn.authority,
+    knownAuthorities: [b2cPolicies.authorityDomain],
+    redirectUri: "/",
+    postLogoutRedirectUri: "/",
+  },
+  cache: {
+    cacheLocation: "localStorage",
+    storeAuthStateInCookie: isIE || isEdge || isFirefox,
+  },
+  system: {
+    allowNativeBroker: false, // Disables WAM Broker
+    loggerOptions: {
+      loggerCallback: (
+        level: LogLevel,
+        message: string,
+        containsPii: boolean,
+      ) => {
+        if (containsPii) {
+          return;
         }
-    }
+        switch (level) {
+          case LogLevel.Error:
+            console.error(message);
+            return;
+          case LogLevel.Info:
+            console.info(message);
+            return;
+          case LogLevel.Verbose:
+            console.debug(message);
+            return;
+          case LogLevel.Warning:
+            console.warn(message);
+            return;
+          default:
+            return;
+        }
+      },
+    },
+  },
 };
 
 // Scopes you add here will be prompted for consent during login
 export const loginRequest = {
-    scopes: [import.meta.env.VITE_REACT_APP_B2C_SCOPE_API]
+  scopes: [import.meta.env.VITE_REACT_APP_B2C_SCOPE_API],
 };
 
 /**
@@ -79,6 +83,6 @@ export const loginRequest = {
  * The current application coordinates were pre-registered in a B2C tenant.
  */
 export const apiConfig = {
-    scopes: [import.meta.env.VITE_REACT_APP_B2C_SCOPE_API],
-    uri: import.meta.env.VITE_REACT_APP_API_URL
+  scopes: [import.meta.env.VITE_REACT_APP_B2C_SCOPE_API],
+  uri: import.meta.env.VITE_REACT_APP_API_URL,
 };

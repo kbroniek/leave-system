@@ -9,7 +9,7 @@ import { NotificationsProvider } from "@toolpad/core/useNotifications";
 import { msalConfig } from "./authConfig";
 import { App } from "./App";
 
-import './i18n';
+import "./i18n";
 import "./index.css";
 
 export const msalInstance = new PublicClientApplication(msalConfig);
@@ -31,9 +31,9 @@ msalInstance.initialize().then(() => {
       const account = payload.account;
       msalInstance.setActiveAccount(account);
     }
-    if(event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
-      console.error(event.eventType, event.error)
-      msalInstance.logoutRedirect({account: msalInstance.getActiveAccount()});
+    if (event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
+      console.error(event.eventType, event.error);
+      msalInstance.logoutRedirect({ account: msalInstance.getActiveAccount() });
     }
   });
 
@@ -46,6 +46,6 @@ msalInstance.initialize().then(() => {
           </NotificationsProvider>
         </ThemeProvider>
       </BrowserRouter>
-    </StrictMode>
+    </StrictMode>,
   );
-})
+});
