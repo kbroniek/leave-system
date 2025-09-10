@@ -3,21 +3,8 @@ import { callApiGet } from "../utils/ApiCall";
 import { ShowNotification } from "@toolpad/core/useNotifications";
 const ROLES_LOCAL_STORAGE_KEY = "user.roles";
 class RoleManager {
-  private eventListeners: Array<() => void> = [];
   private isLoading = false;
   private loadingListeners: Array<(loading: boolean) => void> = [];
-
-  // Add listener for role updates
-  addRoleUpdateListener(callback: () => void): () => void {
-    this.eventListeners.push(callback);
-    // Return unsubscribe function
-    return () => {
-      const index = this.eventListeners.indexOf(callback);
-      if (index > -1) {
-        this.eventListeners.splice(index, 1);
-      }
-    };
-  }
 
   // Add listener for loading state changes
   addLoadingStateListener(callback: (loading: boolean) => void): () => void {
@@ -52,17 +39,6 @@ class RoleManager {
     }
   }
 
-  // Notify all listeners that roles have been updated
-  private notifyRoleUpdate(): void {
-    this.eventListeners.forEach((callback) => {
-      try {
-        callback();
-      } catch (error) {
-        console.error("Error in role update listener:", error);
-      }
-    });
-  }
-
   /**
    * Fetches roles from the API after login
    */
@@ -92,8 +68,6 @@ class RoleManager {
             `${ROLES_LOCAL_STORAGE_KEY}.${userId}`,
             JSON.stringify(roles),
           );
-          // Notify all listeners that roles have been updated
-          this.notifyRoleUpdate();
         } catch (e) {
           console.warn("Failed to store roles in localStorage:", e);
         }

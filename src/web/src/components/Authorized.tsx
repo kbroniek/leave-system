@@ -6,19 +6,8 @@ import { CircularProgress, Box } from "@mui/material";
 
 export const Authorized = (props: AuthorizedProps) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [roleUpdateTrigger, setRoleUpdateTrigger] = useState(0);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const { instance } = useMsal();
-
-  // Subscribe to role updates
-  useEffect(() => {
-    const unsubscribe = roleManager.addRoleUpdateListener(() => {
-      // Trigger re-evaluation by updating the state
-      setRoleUpdateTrigger((prev) => prev + 1);
-    });
-
-    return unsubscribe;
-  }, []);
 
   // Subscribe to loading state changes
   useEffect(() => {
@@ -37,7 +26,7 @@ export const Authorized = (props: AuthorizedProps) => {
     } else {
       setIsAuthorized(isInRole(instance, props.roles));
     }
-  }, [instance, props, roleUpdateTrigger]);
+  }, [instance, props, isLoadingRoles]);
 
   // Show loading spinner if roles are being fetched and no roles exist yet
   if (isLoadingRoles) {
