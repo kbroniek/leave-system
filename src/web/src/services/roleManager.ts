@@ -4,6 +4,8 @@ import { ShowNotification } from "@toolpad/core/useNotifications";
 const ROLES_LOCAL_STORAGE_KEY = "user.roles";
 class RoleManager {
   private eventListeners: Array<() => void> = [];
+  private isLoading = false;
+  private loadingListeners: Array<(loading: boolean) => void> = [];
 
   // Add listener for role updates
   addRoleUpdateListener(callback: () => void): () => void {
@@ -15,6 +17,39 @@ class RoleManager {
         this.eventListeners.splice(index, 1);
       }
     };
+  }
+
+  // Add listener for loading state changes
+  addLoadingStateListener(callback: (loading: boolean) => void): () => void {
+    this.loadingListeners.push(callback);
+    // Send current loading state immediately
+    callback(this.isLoading);
+    // Return unsubscribe function
+    return () => {
+      const index = this.loadingListeners.indexOf(callback);
+      if (index > -1) {
+        this.loadingListeners.splice(index, 1);
+      }
+    };
+  }
+
+  // Get current loading state
+  getLoadingState(): boolean {
+    return this.isLoading;
+  }
+
+  // Set loading state and notify listeners
+  private setLoadingState(loading: boolean): void {
+    if (this.isLoading !== loading) {
+      this.isLoading = loading;
+      this.loadingListeners.forEach((callback) => {
+        try {
+          callback(loading);
+        } catch (error) {
+          console.error("Error in loading state listener:", error);
+        }
+      });
+    }
   }
 
   // Notify all listeners that roles have been updated
@@ -36,6 +71,9 @@ class RoleManager {
     showNotification?: ShowNotification,
     signal?: AbortSignal,
   ): Promise<RoleType[]> {
+    this.setLoadingState(true);
+    localStorage.removeItem(`${ROLES_LOCAL_STORAGE_KEY}.${userId}`);
+
     try {
       // If we have a notification function, use it, otherwise use a simple no-op notification function
       const notificationFn: ShowNotification = showNotification || (() => "");
@@ -64,6 +102,8 @@ class RoleManager {
     } catch (error) {
       console.error("Error fetching roles:", error);
       throw error;
+    } finally {
+      this.setLoadingState(false);
     }
   }
 
