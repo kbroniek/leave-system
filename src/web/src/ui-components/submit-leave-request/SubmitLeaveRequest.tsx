@@ -25,8 +25,7 @@ import { DateTime, Duration } from "luxon";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { EmployeesDto } from "../dtos/EmployeesDto";
 import { v4 as uuidv4 } from "uuid";
-import { Authorized } from "../../components/Authorized";
-import { useHasRole } from "../../hooks/useUserRoles";
+import { Authorized, isInRole } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslation } from "react-i18next";
@@ -51,10 +50,6 @@ const DataContent = () => {
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const navigate = useNavigate();
   const notifications = useNotifications();
-  const { hasRole: isDecisionMaker } = useHasRole([
-    "DecisionMaker",
-    "GlobalAdmin",
-  ]);
 
   const callHolidays = useCallback(
     async (dateFromFormatted: string, dateToFormatted: string) =>
@@ -78,27 +73,26 @@ const DataContent = () => {
     [notifications.show, instance],
   );
 
-  const callLeaveLimits = useCallback(
-    (userId: string, year: string) =>
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits?year=${year}&userIds=${userId}`,
-        notifications.show,
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance)),
-    [notifications.show, instance],
-  );
+  const callLeaveLimits = (userId: string, year: string) =>
+    callApiGet<LeaveLimitsDto>(
+      `/leavelimits?year=${year}&userIds=${userId}`,
+      notifications.show,
+    )
+      .then((response) => setApiLeaveLimits(response))
+      .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
 
-  const callMyLimits = useCallback(
-    (year: string) => {
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits/user?year=${year}`,
-        notifications.show,
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-    },
-    [notifications.show, instance],
+  const callMyLimits = (year: string) => {
+    callApiGet<LeaveLimitsDto>(
+      `/leavelimits/user?year=${year}`,
+      notifications.show,
+    )
+      .then((response) => setApiLeaveLimits(response))
+      .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+  };
+
+  const isDecisionMaker = useCallback(
+    () => isInRole(instance, ["DecisionMaker", "GlobalAdmin"]),
+    [instance],
   );
 
   useEffect(() => {
@@ -116,7 +110,7 @@ const DataContent = () => {
 
       callHolidays(dateFromFormatted, dateToFormatted);
 
-      if (isDecisionMaker) {
+      if (isDecisionMaker()) {
         callApiGet<EmployeesDto>("/employees", notifications.show)
           .then((response) => setApiEmployees(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -134,7 +128,7 @@ const DataContent = () => {
         }
       }
     }
-  }, [inProgress, isDecisionMaker]);
+  }, [inProgress]);
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
@@ -259,18 +253,11 @@ const DataContent = () => {
     const dateToFormatted = currentDate.endOf("year").toFormat("yyyy-MM-dd");
     Promise.all([
       callLeaveRequests(dateFromFormatted, dateToFormatted, currentUserId),
-      isDecisionMaker
+      isDecisionMaker()
         ? callLeaveLimits(currentUserId, currentYear)
         : callMyLimits(currentYear),
     ]);
-  }, [
-    currentUserId,
-    currentYear,
-    isDecisionMaker,
-    callLeaveRequests,
-    callLeaveLimits,
-    callMyLimits,
-  ]);
+  }, [currentUserId, currentYear]);
 
   return (
     <Authorized

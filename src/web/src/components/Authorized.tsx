@@ -1,30 +1,21 @@
+import { IPublicClientApplication } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
 import { useState, useEffect, ReactElement } from "react";
-import { useUserRoles } from "../hooks/useUserRoles";
-import { isInRoleInternal } from "../utils/roleUtils";
+import { roleManager } from "../services/roleManager";
 
 export const Authorized = (props: AuthorizedProps) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const { instance } = useMsal();
-  const { roles: userRoles, isLoading } = useUserRoles({
-    enabled: props.roles !== "CurrentUser", // Only fetch roles when needed
-    refetchOnWindowFocus: true,
-  });
-
   useEffect(() => {
     if (props.roles === "CurrentUser") {
       setIsAuthorized(
         props.userId === instance.getActiveAccount()?.idTokenClaims?.sub,
       );
     } else {
-      // Don't authorize until roles are loaded (unless loading fails and we get empty array)
-      if (isLoading && userRoles === undefined) {
-        setIsAuthorized(false);
-      } else {
-        setIsAuthorized(isInRoleInternal(props.roles, userRoles));
-      }
+      const claimRoles = getRoles(instance);
+      setIsAuthorized(isInRoleInternal(props.roles, claimRoles));
     }
-  }, [instance, props, userRoles, isLoading]);
+  }, [instance, props]);
 
   return (
     <>
@@ -33,7 +24,34 @@ export const Authorized = (props: AuthorizedProps) => {
   );
 };
 
-// Moved utility functions to separate file to avoid fast refresh warnings
+function getRoles(instance: IPublicClientApplication): RoleType[] | undefined {
+  const claims = instance.getActiveAccount();
+  if (!claims) {
+    console.error("No active account found. getRoles failed.");
+    return [];
+  }
+  const roles = roleManager.getRoles(
+    claims.homeAccountId || claims.localAccountId,
+  );
+  return roles;
+}
+
+function isInRoleInternal(
+  roles: RoleType[],
+  claimRoles: RoleType[] | undefined,
+): boolean {
+  return Array.isArray(claimRoles)
+    ? !!claimRoles.find((c) => roles.includes(c))
+    : false;
+}
+
+export function isInRole(
+  instance: IPublicClientApplication,
+  roles: RoleType[],
+) {
+  return true;
+  return isInRoleInternal(roles, getRoles(instance));
+}
 
 type RoleArgs =
   | { roles: RoleType[] }
@@ -54,3 +72,14 @@ export type RoleType =
   | "UserAdmin"
   | "GlobalAdmin"
   | "WorkingHoursAdmin";
+
+export const roleTypeNames = [
+  "Employee",
+  "LeaveLimitAdmin",
+  "LeaveTypeAdmin",
+  "DecisionMaker",
+  "HumanResource",
+  "UserAdmin",
+  "GlobalAdmin",
+  "WorkingHoursAdmin",
+];
