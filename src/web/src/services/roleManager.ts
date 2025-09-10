@@ -1,4 +1,4 @@
-import { RoleType } from "../components/Authorized";
+import { RoleType } from "../utils/roleUtils";
 import { callApiGet } from "../utils/ApiCall";
 import { ShowNotification } from "@toolpad/core/useNotifications";
 const ROLES_LOCAL_STORAGE_KEY = "user.roles";

@@ -22,7 +22,7 @@ import {
 } from "./LeaveRequestsSearch";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import { isInRole } from "../../components/Authorized";
+import { isInRole } from "../../utils/roleUtils";
 import { DateTime } from "luxon";
 import { leaveRequestsStatuses } from "../utils/Status";
 import { useTranslation } from "react-i18next";

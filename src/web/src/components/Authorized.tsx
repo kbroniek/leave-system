@@ -1,7 +1,6 @@
-import { IPublicClientApplication } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
 import { useState, useEffect, ReactElement } from "react";
-import { roleManager } from "../services/roleManager";
+import { isInRole, RoleType } from "../utils/roleUtils";
 
 export const Authorized = (props: AuthorizedProps) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -12,8 +11,7 @@ export const Authorized = (props: AuthorizedProps) => {
         props.userId === instance.getActiveAccount()?.idTokenClaims?.sub,
       );
     } else {
-      const claimRoles = getRoles(instance);
-      setIsAuthorized(isInRoleInternal(props.roles, claimRoles));
+      setIsAuthorized(isInRole(instance, props.roles));
     }
   }, [instance, props]);
 
@@ -24,35 +22,6 @@ export const Authorized = (props: AuthorizedProps) => {
   );
 };
 
-function getRoles(instance: IPublicClientApplication): RoleType[] | undefined {
-  const claims = instance.getActiveAccount();
-  if (!claims) {
-    console.error("No active account found. getRoles failed.");
-    return [];
-  }
-  const roles = roleManager.getRoles(
-    claims.homeAccountId || claims.localAccountId,
-  );
-  return roles;
-}
-
-function isInRoleInternal(
-  roles: RoleType[],
-  claimRoles: RoleType[] | undefined,
-): boolean {
-  return Array.isArray(claimRoles)
-    ? !!claimRoles.find((c) => roles.includes(c))
-    : false;
-}
-
-export function isInRole(
-  instance: IPublicClientApplication,
-  roles: RoleType[],
-) {
-  return true;
-  return isInRoleInternal(roles, getRoles(instance));
-}
-
 type RoleArgs =
   | { roles: RoleType[] }
   | { roles: "CurrentUser"; userId: string };
@@ -62,24 +31,3 @@ type AuthorizedProps = {
   children?: JSX.Element | JSX.Element[];
   unauthorized?: ReactElement;
 } & RoleArgs;
-
-export type RoleType =
-  | "Employee"
-  | "LeaveLimitAdmin"
-  | "LeaveTypeAdmin"
-  | "DecisionMaker"
-  | "HumanResource"
-  | "UserAdmin"
-  | "GlobalAdmin"
-  | "WorkingHoursAdmin";
-
-export const roleTypeNames = [
-  "Employee",
-  "LeaveLimitAdmin",
-  "LeaveTypeAdmin",
-  "DecisionMaker",
-  "HumanResource",
-  "UserAdmin",
-  "GlobalAdmin",
-  "WorkingHoursAdmin",
-];
