@@ -30,7 +30,7 @@ public class UsersFunction(IGetUserRepository getUserRepository)
 
         return result.Match(
             (employees) => new OkObjectResult(employees.Select(x => Map(x, rolesFreeze)).ToPagedListResponse()),
-            error => error.ToObjectResult("Error occurred while getting roles."));
+            error => error.ToObjectResult("Error occurred while getting users."));
     }
 
     private static UserDto Map(User user, IReadOnlyCollection<RolesDto> roles) =>
