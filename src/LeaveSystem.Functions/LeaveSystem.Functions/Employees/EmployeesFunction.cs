@@ -26,7 +26,7 @@ public class EmployeesFunction(IGetUserRepository getUserRepository)
             SqlQuery = $"SELECT c.id FROM c JOIN r IN c. roles WHERE r = \"{nameof(RoleType.Employee)}\"",
             Connection  = "CosmosDBConnection")] IEnumerable<RolesDto> roles, CancellationToken cancellationToken)
     {
-        var result = roles is null || !roles.Any() ? Result.Ok<IReadOnlyCollection<IGetUserRepository.User>, Error>([]) : await getUserRepository.GetUsers(roles.Select(x => x.Id).ToArray(), cancellationToken);
+        var result = roles is null || !roles.Any() ? Result.Ok<IReadOnlyCollection<IGetUserRepository.User>, Error>([]) : await getUserRepository.GetUsers([.. roles.Select(x => x.Id)], cancellationToken);
 
         return result.Match(
             (employees) => new OkObjectResult(employees.ToPagedListResponse()),
