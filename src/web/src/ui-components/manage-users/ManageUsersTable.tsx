@@ -83,20 +83,33 @@ export function ManageUsersTable(props: {
   );
 
   const handleDeleteClick = useCallback(
-    (id: GridRowId) => () => {
+    (id: GridRowId) => async () => {
       if (isUpdating) return; // Prevent actions while updating
-      setRows((prevRows) => {
-        const item = prevRows.find((row) => row.id === id);
-        if (item) {
-          const updatedItem = { ...item, roles: [] };
-          return prevRows.map((row) => (row.id === id ? updatedItem : row));
-        } else {
-          console.warn("Can't find user. (handleDeleteClick)");
-          return prevRows;
+
+      const item = rows.find((row) => row.id === id);
+      if (item) {
+        const updatedItem: UserDto = { ...(item as UserDto), roles: [] };
+
+        // Update local state immediately for UI feedback
+        setRows((prevRows) =>
+          prevRows.map((row) => (row.id === id ? updatedItem : row)),
+        );
+
+        // Make API call to persist the change
+        try {
+          await userOnChange(updatedItem);
+        } catch (error) {
+          // Revert local state if API call fails
+          setRows((prevRows) =>
+            prevRows.map((row) => (row.id === id ? item : row)),
+          );
+          console.error("Failed to delete user roles:", error);
         }
-      });
+      } else {
+        console.warn("Can't find user. (handleDeleteClick)");
+      }
     },
-    [isUpdating],
+    [isUpdating, rows, userOnChange],
   );
 
   const handleCancelClick = useCallback(
