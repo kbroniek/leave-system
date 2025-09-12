@@ -43,11 +43,15 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
 
     public async Task<Result<IReadOnlyCollection<IGetUserRepository.User>, Error>> GetUsers(string[] ids, CancellationToken cancellationToken)
     {
+        if (ids.Length == 0)
+        {
+            return await GetUsersFromGraph(graphClientFactory, logger, ids, cancellationToken);
+        }
         var idsSequences = SplitToContiguousSequences(ids, MaxSearchExpression);
         var users = new List<IGetUserRepository.User>();
         foreach (var idsSequence in idsSequences)
         {
-            var result = await GetUsersLimit(graphClientFactory, logger, idsSequence, cancellationToken);
+            var result = await GetUsersFromGraph(graphClientFactory, logger, idsSequence, cancellationToken);
             if (result.IsFailure)
             {
                 return result.Error;
@@ -70,7 +74,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             .Select(x => x.Select(x => x.item).ToArray());
     }
 
-    private static async Task<Result<IReadOnlyCollection<IGetUserRepository.User>, Error>> GetUsersLimit(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger, string[] ids, CancellationToken cancellationToken)
+    private static async Task<Result<IReadOnlyCollection<IGetUserRepository.User>, Error>> GetUsersFromGraph(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger, string[] ids, CancellationToken cancellationToken)
     {
         try
         {
