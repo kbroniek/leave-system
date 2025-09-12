@@ -37,6 +37,11 @@ public readonly struct Result<TValue, TError>
             Func<TValue, TResult> success,
             Func<TError, TResult> failure) =>
         this.success ? success(Value) : failure(Error);
+
+
+    public Result<TResult, TError> Success<TResult>(
+            Func<TValue, TResult> success) =>
+        this.success ? success(Value) : Error;
 }
 
 public readonly struct Result<TError>

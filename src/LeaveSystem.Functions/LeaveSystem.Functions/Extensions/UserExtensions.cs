@@ -12,5 +12,5 @@ internal static class UserExtensions
 
     public static string GetUserId(this HttpContext context) => context.User.GetUserId();
     public static string GetUserId(this ClaimsPrincipal user) =>
-        user.FindFirst(ClaimsPrincipalExtensions.PreferredNameClaim)?.Value ?? throw new NotFoundException(nameof(HttpContent), ClaimsPrincipalExtensions.PreferredNameClaim);
+        user.FindFirst(ClaimsPrincipalExtensions.IdClaim)?.Value ?? throw new NotFoundException(nameof(HttpContent), ClaimsPrincipalExtensions.IdClaim);
 }
