@@ -1,17 +1,20 @@
 namespace LeaveSystem.Functions.GraphApi;
+
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Models.ODataErrors;
 
-internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger) : IGetUserRepository
+internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger, IMemoryCache memoryCache) : IGetUserRepository
 {
-    private const int MaxSearchExpression = 15;
+    private static readonly TimeSpan AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
     private static readonly string[] Select = ["id", "displayName"];
 
     public async Task<Result<IGetUserRepository.User, Error>> GetUser(string id, CancellationToken cancellationToken)
@@ -43,35 +46,31 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
 
     public async Task<Result<IReadOnlyCollection<IGetUserRepository.User>, Error>> GetUsers(string[] ids, CancellationToken cancellationToken)
     {
+        var allUsers = await GetUsersFromGraphCache(graphClientFactory, logger, [], cancellationToken);
         if (ids.Length == 0)
         {
-            return await GetUsersFromGraph(graphClientFactory, logger, ids, cancellationToken);
+            return allUsers;
         }
-        var idsSequences = SplitToContiguousSequences(ids, MaxSearchExpression);
-        var users = new List<IGetUserRepository.User>();
-        foreach (var idsSequence in idsSequences)
-        {
-            var result = await GetUsersFromGraph(graphClientFactory, logger, idsSequence, cancellationToken);
-            if (result.IsFailure)
-            {
-                return result.Error;
-            }
-            users.AddRange(result.Value);
-        }
-        return users;
+
+        return allUsers.Success(users =>
+            (IReadOnlyCollection<IGetUserRepository.User>)[.. users.Where(u => ids.Contains(u.Id))]);
     }
 
-    public static IEnumerable<T[]> SplitToContiguousSequences<T>(T[] items, int divideInto)
+    private async ValueTask<Result<IReadOnlyCollection<IGetUserRepository.User>, Error>> GetUsersFromGraphCache(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger, string[] ids, CancellationToken cancellationToken)
     {
-        var currIdx = 0;
-        var enumerable = items.Select((item, index) => new
+        var cacheKey = "users_all";
+        if (memoryCache.TryGetValue(cacheKey, out IReadOnlyCollection<IGetUserRepository.User>? cachedResult))
         {
-            item,
-            divideIndicator = (index + 1) % divideInto != 0 ? currIdx : ++currIdx
-        });
-        return enumerable
-            .GroupBy(x => x.divideIndicator)
-            .Select(x => x.Select(x => x.item).ToArray());
+            return Result.Ok<IReadOnlyCollection<IGetUserRepository.User>, Error>(cachedResult!);
+        }
+
+        var result = await GetUsersFromGraph(graphClientFactory, logger, ids, cancellationToken);
+        if (result.IsSuccess)
+        {
+            memoryCache.Set(cacheKey, result.Value, AbsoluteExpirationRelativeToNow);
+        }
+        return result;
+
     }
 
     private static async Task<Result<IReadOnlyCollection<IGetUserRepository.User>, Error>> GetUsersFromGraph(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger, string[] ids, CancellationToken cancellationToken)
