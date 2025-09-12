@@ -24,13 +24,13 @@ internal class LimitValidatorRepository(CosmosClient cosmosClient, string databa
             .ExecuteQuery(cancellationToken);
         if (limits.Count == 0)
         {
-            return new Error($"Cannot find limits for the leave type id: {leaveTypeId}. Add limits for the user {userId}.", System.Net.HttpStatusCode.UnprocessableEntity);
+            return new Error($"Cannot find limits for the leave type id: {leaveTypeId}. Add limits for the user {userId}.", System.Net.HttpStatusCode.UnprocessableEntity, ErrorCodes.LIMITS_NOT_CONFIGURED);
         }
 
         //Only assigned limits must be unique
         if (limits.Count(x => x.AssignedToUserId != null) > 1)
         {
-            return new Error($"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userId}.", System.Net.HttpStatusCode.UnprocessableEntity);
+            return new Error($"Two or more limits found which are the same for the leave type id: {leaveTypeId}. User {userId}.", System.Net.HttpStatusCode.UnprocessableEntity, ErrorCodes.DUPLICATE_LIMITS);
         }
         //Assigned limits has higher priority
         var limit = limits.OrderBy(x => x.AssignedToUserId).Last();

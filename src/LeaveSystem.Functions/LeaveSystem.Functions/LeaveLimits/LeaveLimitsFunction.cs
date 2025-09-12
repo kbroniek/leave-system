@@ -75,7 +75,7 @@ public class LeaveLimitsFunction(
     {
         if (leaveLimitId != leaveLimit.Id)
         {
-            return new(new Error($"{nameof(LeaveLimitDto.Id)} cannot be different than {nameof(leaveLimitId)}.", System.Net.HttpStatusCode.BadRequest)
+            return new(new Error($"{nameof(LeaveLimitDto.Id)} cannot be different than {nameof(leaveLimitId)}.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_ID_MISMATCH)
                     .ToObjectResult($"Error occurred while updating a leave type. LeaveLimit = {leaveLimit.Id}."));
         }
         var result = await createValidator.Validate(

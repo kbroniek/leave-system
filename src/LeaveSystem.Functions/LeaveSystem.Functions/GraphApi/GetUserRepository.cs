@@ -26,7 +26,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
                 .GetAsync(_ => _.QueryParameters.Select = Select, cancellationToken);
             if (user is null)
             {
-                return new Error($"Cannot find the graph user. UserId={id}", System.Net.HttpStatusCode.NotFound);
+                return new Error($"Cannot find the graph user. UserId={id}", System.Net.HttpStatusCode.NotFound, ErrorCodes.GRAPH_USER_NOT_FOUND);
             }
             return new IGetUserRepository.User(user.Id ?? id, user.DisplayName, null, null, null);
         }
@@ -34,13 +34,13 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
         {
             var errorMessage = "The resource is not found";
             logger.LogError(ex, "{Message}", $"{errorMessage}. UserId={id}");
-            return new Error(errorMessage, System.Net.HttpStatusCode.NotFound);
+            return new Error(errorMessage, System.Net.HttpStatusCode.NotFound, ErrorCodes.GRAPH_USER_NOT_FOUND);
         }
         catch (Exception ex)
         {
             var errorMessage = "Unexpected error occurred while getting data from GraphApi";
             logger.LogError(ex, "{Message}", $"{errorMessage}. UserId={id}");
-            return new Error(errorMessage, System.Net.HttpStatusCode.InternalServerError);
+            return new Error(errorMessage, System.Net.HttpStatusCode.InternalServerError, ErrorCodes.UNEXPECTED_GRAPH_ERROR);
         }
     }
 
@@ -96,13 +96,13 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
         {
             var errorMessage = "The resource is not found";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage, System.Net.HttpStatusCode.NotFound);
+            return new Error(errorMessage, System.Net.HttpStatusCode.NotFound, ErrorCodes.GRAPH_USER_NOT_FOUND);
         }
         catch (Exception ex)
         {
             var errorMessage = "Unexpected error occurred while getting data from GraphApi";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage, System.Net.HttpStatusCode.InternalServerError);
+            return new Error(errorMessage, System.Net.HttpStatusCode.InternalServerError, ErrorCodes.UNEXPECTED_GRAPH_ERROR);
         }
     }
 

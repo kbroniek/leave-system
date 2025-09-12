@@ -30,7 +30,7 @@ public class AcceptLeaveRequestServiceTests
         var leaveRequestId = Guid.NewGuid();
         mockReadService
             .Setup(repo => repo.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
-            .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound));
+            .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound, ErrorCodes.RESOURCE_NOT_FOUND));
 
         // Act
         var result = await acceptLeaveRequestService.Accept(leaveRequestId,
@@ -52,7 +52,7 @@ public class AcceptLeaveRequestServiceTests
         var leaveRequestId = Guid.NewGuid();
         var leaveRequest = new Mock<LeaveRequest>();
         leaveRequest.Setup(lr => lr.Accept(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<LeaveRequestUserDto>(), It.IsAny<DateTimeOffset>()))
-                    .Returns(new Error("Accept failed", HttpStatusCode.BadRequest))
+                    .Returns(new Error("Accept failed", HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT))
                     .Verifiable(Times.Once);
         leaveRequest.Setup(lr => lr.AssignedTo).Returns(user);
         mockValidator
@@ -93,7 +93,7 @@ public class AcceptLeaveRequestServiceTests
                 leaveRequestId, leaveRequest.Object.DateFrom, leaveRequest.Object.DateTo,
                 leaveRequest.Object.Duration, leaveRequest.Object.LeaveTypeId,
                 leaveRequest.Object.WorkingHours, leaveRequest.Object.AssignedTo.Id, cancellationToken))
-            .ReturnsAsync(new Error("Validation failed", HttpStatusCode.BadRequest));
+            .ReturnsAsync(new Error("Validation failed", HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT));
 
         // Act
         var result = await acceptLeaveRequestService.Accept(leaveRequestId, "Remarks", user, DateTimeOffset.Now, cancellationToken);

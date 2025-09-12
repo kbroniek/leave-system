@@ -63,7 +63,7 @@ public class LimitValidator(ILimitValidatorRepository leaveLimitsRepository, IUs
                 userId, leaveTypeId, nestedLeaveTypeIds, cancellationToken);
             if (CalculateRemainingLimit(limit.Value, overdueLimit, totalUsed + duration) < TimeSpan.Zero)
             {
-                return new Error($"You don't have enough free days for this type of leave. LeaveTypeId={leaveTypeId}", System.Net.HttpStatusCode.UnprocessableEntity);
+                return new Error($"You don't have enough free days for this type of leave. LeaveTypeId={leaveTypeId}", System.Net.HttpStatusCode.UnprocessableEntity, ErrorCodes.INSUFFICIENT_LEAVE_DAYS);
             }
         }
         return Result.Default;

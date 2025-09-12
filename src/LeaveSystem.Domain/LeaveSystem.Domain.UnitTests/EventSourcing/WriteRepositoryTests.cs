@@ -44,7 +44,7 @@ public class WriteRepositoryTests
         var eventSource = new FakeEventSource();
         eventSource.PendingEvents.Enqueue(new FakeEvent { StreamId = id, CreatedDate = DateTimeOffset.UtcNow });
 
-        var expectedError = new Error("Append failed", HttpStatusCode.InternalServerError);
+        var expectedError = new Error("Append failed", HttpStatusCode.InternalServerError, "APPEND_FAILED");
         mockAppendEventRepository
             .Setup(repo => repo.AppendToStreamAsync(It.IsAny<FakeEvent>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedError);  // Simulate failed append

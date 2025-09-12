@@ -21,7 +21,7 @@ public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysReposit
         Guard.Against.OutOfRange(dateTo, nameof(dateTo), firstDay, lastDay);
         if (dateFrom > dateTo)
         {
-            return new Error("Date from has to be less than date to.", HttpStatusCode.BadRequest);
+            return new Error("Date from has to be less than date to.", HttpStatusCode.BadRequest, ErrorCodes.INVALID_DATE_RANGE);
         }
 
         var includeFreeDaysResult = await leaveTypeRepository.IsIncludeFreeDays(leaveTypeId, cancellationToken);
@@ -35,13 +35,13 @@ public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysReposit
             var dateFromDayKind = DateOnlyCalculator.GetDayKind(dateFrom);
             if (dateFromDayKind != DateOnlyCalculator.DayKind.WORKDAY)
             {
-                return new Error("The date from is off work.", HttpStatusCode.BadRequest);
+                return new Error("The date from is off work.", HttpStatusCode.BadRequest, ErrorCodes.OFF_WORK_DATE);
             }
 
             var dateToDayKind = DateOnlyCalculator.GetDayKind(dateTo);
             if (dateToDayKind != DateOnlyCalculator.DayKind.WORKDAY)
             {
-                return new Error("The date to is off work.", HttpStatusCode.BadRequest);
+                return new Error("The date to is off work.", HttpStatusCode.BadRequest, ErrorCodes.OFF_WORK_DATE);
             }
         }
 

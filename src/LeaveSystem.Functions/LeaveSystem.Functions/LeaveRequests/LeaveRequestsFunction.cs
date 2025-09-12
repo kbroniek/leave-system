@@ -207,7 +207,7 @@ public class LeaveRequestsFunction(
             //Employee can only see his own leave request.
             if (userId != result.Value.AssignedTo.Id)
             {
-                return new Error("Permission denied.", System.Net.HttpStatusCode.Forbidden);
+                return new Error("Permission denied.", System.Net.HttpStatusCode.Forbidden, ErrorCodes.FORBIDDEN_OPERATION);
             }
         }
         return Result.Default;

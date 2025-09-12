@@ -60,19 +60,19 @@ internal static class CosmosExtensions
         {
             var errorMessage = "The resource is not found";
             logger.LogWarning(ex, "{Message}", errorMessage);
-            return new Error(errorMessage, HttpStatusCode.NotFound);
+            return new Error(errorMessage, HttpStatusCode.NotFound, ErrorCodes.RESOURCE_NOT_FOUND);
         }
         catch (CosmosException ex)
         {
             var errorMessage = "Unexpected error occurred while getting data from DB";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage, ex.StatusCode);
+            return new Error(errorMessage, ex.StatusCode, ErrorCodes.UNEXPECTED_DB_ERROR);
         }
         catch (Exception ex)
         {
             var errorMessage = "Unexpected error occurred while getting data from DB";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage, HttpStatusCode.InternalServerError);
+            return new Error(errorMessage, HttpStatusCode.InternalServerError, ErrorCodes.UNEXPECTED_DB_ERROR);
         }
     }
 }

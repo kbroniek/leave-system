@@ -25,11 +25,11 @@ internal class RolesRepository(CosmosClient cosmosClient, string databaseName, s
         var roles = results.Value;
         if (roles.Count == 0)
         {
-            return new Error($"Cannot find roles. UserId={id}", HttpStatusCode.NotFound);
+            return new Error($"Cannot find roles. UserId={id}", HttpStatusCode.NotFound, ErrorCodes.ROLES_NOT_FOUND);
         }
         if (roles.Count > 1)
         {
-            return new Error($"More than one role for the user. UserId={id}", HttpStatusCode.UnprocessableEntity);
+            return new Error($"More than one role for the user. UserId={id}", HttpStatusCode.UnprocessableEntity, ErrorCodes.DUPLICATE_ROLES);
         }
         return roles.Select(x => new IRolesRepository.UserRoles(x.Roles)).First();
     }

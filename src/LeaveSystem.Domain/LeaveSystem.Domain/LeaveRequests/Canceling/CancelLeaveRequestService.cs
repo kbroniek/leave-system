@@ -16,7 +16,7 @@ public class CancelLeaveRequestService(ReadService readService, WriteService wri
         }
         if (resultFindById.Value.DateFrom < DateOnly.FromDateTime(timeProvider.GetUtcNow().Date))
         {
-            return new Error("Canceling of past leave requests is not allowed.", System.Net.HttpStatusCode.Forbidden);
+            return new Error("Canceling of past leave requests is not allowed.", System.Net.HttpStatusCode.Forbidden, ErrorCodes.PAST_LEAVE_MODIFICATION);
         }
         var resultAccept = resultFindById.Value.Cancel(leaveRequestId, remarks, acceptedBy, createdDate);
         if (!resultAccept.IsSuccess)
