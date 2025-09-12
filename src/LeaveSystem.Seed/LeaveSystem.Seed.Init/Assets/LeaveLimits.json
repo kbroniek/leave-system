@@ -1,16 +1,14 @@
 {
   "partitionKey": "/id",
-  "uniqueKeys": [
-    "/assignedToUserId,/leaveTypeId,/validSince,/validUntil"
-  ],
+  "uniqueKeys": ["/assignedToUserId,/leaveTypeId,/validSince,/validUntil"],
   "items": [
     {
       "id": "51835ffd-c603-4ef3-8672-c78d930b0b3e",
       "limit": "8.16:00:00",
       "workingHours": "08:00:00",
       "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
-      "validSince": "2024-01-01",
-      "validUntil": "2024-12-31",
+      "validSince": "2025-01-01",
+      "validUntil": "2025-12-31",
       "assignedToUserId": "34cc6045-56c8-4b1b-a22d-f0d652f612fb"
     },
     {
@@ -18,8 +16,8 @@
       "limit": "32:00:00",
       "workingHours": "08:00:00",
       "leaveTypeId": "6e1a75ca-07dc-45aa-9451-57e1cefd7ee6",
-      "validSince": "2024-01-01",
-      "validUntil": "2024-12-31",
+      "validSince": "2025-01-01",
+      "validUntil": "2025-12-31",
       "assignedToUserId": "34cc6045-56c8-4b1b-a22d-f0d652f612fb"
     },
     {
@@ -27,10 +25,10 @@
       "limit": "08:00:00",
       "workingHours": "08:00:00",
       "leaveTypeId": "2dfb7d85-70d8-4acc-a565-62fde19b7cd1",
-      "validSince": "2024-01-01",
-      "validUntil": "2024-01-31",
+      "validSince": "2025-01-01",
+      "validUntil": "2025-01-31",
       "assignedToUserId": "34cc6045-56c8-4b1b-a22d-f0d652f612fb",
-      "description": "2024-01-06"
+      "description": "2025-01-06"
     },
     {
       "id": "3b8a8a97-992f-4965-abf8-fe5a9cf91862",
@@ -38,8 +36,8 @@
       "overdueLimit": "16:00:00",
       "workingHours": "08:00:00",
       "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
-      "validSince": "2024-01-01",
-      "validUntil": "2024-12-31",
+      "validSince": "2025-01-01",
+      "validUntil": "2025-12-31",
       "assignedToUserId": "6deb358d-6ae4-4037-a46a-9cf01d913376"
     },
     {
@@ -47,8 +45,8 @@
       "limit": "32:00:00",
       "workingHours": "08:00:00",
       "leaveTypeId": "6e1a75ca-07dc-45aa-9451-57e1cefd7ee6",
-      "validSince": "2024-01-01",
-      "validUntil": "2024-12-31",
+      "validSince": "2025-01-01",
+      "validUntil": "2025-12-31",
       "assignedToUserId": "6deb358d-6ae4-4037-a46a-9cf01d913376"
     },
     {
@@ -56,10 +54,10 @@
       "limit": "08:00:00",
       "workingHours": "08:00:00",
       "leaveTypeId": "2dfb7d85-70d8-4acc-a565-62fde19b7cd1",
-      "validSince": "2024-01-01",
-      "validUntil": "2024-01-31",
+      "validSince": "2025-01-01",
+      "validUntil": "2025-01-31",
       "assignedToUserId": "6deb358d-6ae4-4037-a46a-9cf01d913376",
-      "description": "2024-01-06"
+      "description": "2025-01-06"
     },
     {
       "id": "faf4ce07-c90e-49ab-9b05-c903d331b60b",
