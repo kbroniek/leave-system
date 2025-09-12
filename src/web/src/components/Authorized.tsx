@@ -5,7 +5,7 @@ import { roleManager } from "../services/roleManager";
 import { CircularProgress, Box } from "@mui/material";
 
 export const Authorized = (props: AuthorizedProps) => {
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | undefined>();
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const { instance } = useMsal();
 
@@ -39,7 +39,11 @@ export const Authorized = (props: AuthorizedProps) => {
     );
   }
 
-  return (
+  return isAuthorized === undefined ? (
+    <Box display="flex" justifyContent="center" alignItems="center" p={2}>
+      <CircularProgress size={24} />
+    </Box>
+  ) : (
     <>
       {isAuthorized ? (props.children ?? props.authorized) : props.unauthorized}
     </>
