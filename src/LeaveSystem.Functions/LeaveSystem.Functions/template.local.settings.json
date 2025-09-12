@@ -1,0 +1,25 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://polandcentral-0.in.applicationinsights.azure.com/;LiveEndpoint=https://polandcentral.livediagnostics.monitor.azure.com/;ApplicationId=00000000-0000-0000-0000-000000000000",
+    "CosmosDBConnection": "AccountEndpoint=https://{db-address}.documents.azure.com:443/;AccountKey={db-key};",
+    "JwtBearerOptions_Authority": "https://{domainName}.ciamlogin.com/{domainName}.onmicrosoft.com/v2.0/",
+    "JwtBearerOptions_Audience": "{audience}",
+    "JwtBearerOptions_AuthorizationHeaderName": "X-Authorization",
+    "DatabaseName": "LeaveSystem",
+    "LeaveRequestsContainerName": "LeaveRequests",
+    "LeaveTypesContainerName": "LeaveTypes",
+    "LeaveLimitsContainerName": "LeaveLimits",
+    "LeaveStatusSettingsContainerName": "LeaveStatusSettings",
+    "RolesContainerName": "Roles",
+    "ManageAzureUsers:TenantId": "{tenant-id}",
+    "ManageAzureUsers:ClientId": "{client-id}",
+    "ManageAzureUsers:Secret": "{secret}",
+    "ManageAzureUsers:Scopes:0": "https://graph.microsoft.com/.default"
+  },
+  "Host": {
+    "CORS": "http://localhost:5173"
+  }
+}
