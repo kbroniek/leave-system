@@ -61,7 +61,7 @@ public class CancelLeaveRequestServiceTests
         var leaveRequestId = Guid.NewGuid();
         mockReadService
             .Setup(rs => rs.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
-            .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound));
+            .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound, ErrorCodes.RESOURCE_NOT_FOUND));
 
         // Act
         var result = await cancelLeaveRequestService.Cancel(leaveRequestId, "Remarks", user, now, cancellationToken);
@@ -103,7 +103,7 @@ public class CancelLeaveRequestServiceTests
         var nowDateOnly = DateOnly.FromDateTime(now.AddDays(1).Date);
         leaveRequest.Setup(lr => lr.DateFrom).Returns(nowDateOnly);
         leaveRequest.Setup(lr => lr.Cancel(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<LeaveRequestUserDto>(), It.IsAny<DateTimeOffset>()))
-                    .Returns(new Error("Cancel failed", HttpStatusCode.BadRequest));
+                    .Returns(new Error("Cancel failed", HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT));
 
         mockReadService
             .Setup(rs => rs.FindById<LeaveRequest>(leaveRequestId, cancellationToken))

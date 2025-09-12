@@ -10,7 +10,7 @@ public class ImpositionValidator(IImpositionValidatorRepository impositionValida
         string userId, CancellationToken cancellationToken) =>
 
         await impositionValidatorRepository.IsExistValid(leaveRequestId, userId, dateFrom, dateTo, cancellationToken) ?
-            new Error("The other leave is overlapping with this date.", System.Net.HttpStatusCode.Conflict) :
+            new Error("The other leave is overlapping with this date.", System.Net.HttpStatusCode.Conflict, ErrorCodes.OVERLAPPING_LEAVE) :
             Result.Default;
 }
 public interface IImpositionValidatorRepository

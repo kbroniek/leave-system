@@ -36,19 +36,19 @@ internal class EventRepository(
         {
             var errorMessage = "This event already exists";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage, HttpStatusCode.Conflict);
+            return new Error(errorMessage, HttpStatusCode.Conflict, ErrorCodes.RESOURCE_CONFLICT);
         }
         catch (CosmosException ex)
         {
             var errorMessage = "Unexpected error occurred while inserting data to DB";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage, ex.StatusCode);
+            return new Error(errorMessage, ex.StatusCode, ErrorCodes.UNEXPECTED_DB_ERROR);
         }
         catch (Exception ex)
         {
             var errorMessage = "Unexpected error occurred while inserting data to DB";
             logger.LogError(ex, "{Message}", errorMessage);
-            return new Error(errorMessage, HttpStatusCode.InternalServerError);
+            return new Error(errorMessage, HttpStatusCode.InternalServerError, ErrorCodes.UNEXPECTED_DB_ERROR);
         }
     }
 

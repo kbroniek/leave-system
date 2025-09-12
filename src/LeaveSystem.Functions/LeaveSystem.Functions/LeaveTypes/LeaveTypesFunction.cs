@@ -50,7 +50,7 @@ public class LeaveTypesFunction
         {
             return new()
             {
-                Result = new Error($"{nameof(LeaveTypeDto.PropertiesDto.DefaultLimitDays)} cannot be less than 0.", System.Net.HttpStatusCode.BadRequest)
+                Result = new Error($"{nameof(LeaveTypeDto.PropertiesDto.DefaultLimitDays)} cannot be less than 0.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT)
                     .ToObjectResult($"Error occurred while creating a leave type. LeaveTypeId = {leaveType.Id}.")
             };
         }
@@ -72,7 +72,7 @@ public class LeaveTypesFunction
         {
             return new()
             {
-                Result = new Error($"{nameof(LeaveTypeDto.Id)} cannot be different than leaveTypeId.", System.Net.HttpStatusCode.BadRequest)
+                Result = new Error($"{nameof(LeaveTypeDto.Id)} cannot be different than leaveTypeId.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_ID_MISMATCH)
                     .ToObjectResult($"Error occurred while updating a leave type. LeaveTypeId = {leaveType.Id}.")
             };
         }
@@ -80,7 +80,7 @@ public class LeaveTypesFunction
         {
             return new()
             {
-                Result = new Error($"{nameof(LeaveTypeDto.PropertiesDto.DefaultLimitDays)} cannot be less than 0.", System.Net.HttpStatusCode.BadRequest)
+                Result = new Error($"{nameof(LeaveTypeDto.PropertiesDto.DefaultLimitDays)} cannot be less than 0.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT)
                     .ToObjectResult($"Error occurred while updating a leave type. LeaveTypeId = {leaveType.Id}.")
             };
         }

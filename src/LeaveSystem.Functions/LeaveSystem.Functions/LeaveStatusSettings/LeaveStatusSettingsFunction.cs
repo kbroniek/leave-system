@@ -112,7 +112,7 @@ public class LeaveStatusSettingsFunction(ILogger<LeaveStatusSettingsFunction> lo
     {
         if (leaveStatusSettingsId != leaveStatusSettings.Id)
         {
-            return new Error($"{nameof(LeaveStatusSettingsDto.Id)} cannot be different than LeaveStatusSettingsId.", System.Net.HttpStatusCode.BadRequest);
+            return new Error($"{nameof(LeaveStatusSettingsDto.Id)} cannot be different than LeaveStatusSettingsId.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_ID_MISMATCH);
         }
         return Validate(leaveStatusSettings);
     }
@@ -122,13 +122,13 @@ public class LeaveStatusSettingsFunction(ILogger<LeaveStatusSettingsFunction> lo
         {
             if (new ColorConverter().ConvertFromString(leaveStatusSettings.Color) is not Color)
             {
-                return new Error($"{nameof(LeaveStatusSettingsDto.Color)} is not valid hex color.", System.Net.HttpStatusCode.BadRequest);
+                return new Error($"{nameof(LeaveStatusSettingsDto.Color)} is not valid hex color.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_COLOR_FORMAT);
             }
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "{Message}", $"{nameof(LeaveStatusSettingsDto.Color)} is not valid hex color.");
-            return new Error($"{nameof(LeaveStatusSettingsDto.Color)} is not valid hex color.", System.Net.HttpStatusCode.BadRequest);
+            return new Error($"{nameof(LeaveStatusSettingsDto.Color)} is not valid hex color.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_COLOR_FORMAT);
         }
         return Result.Default;
     }

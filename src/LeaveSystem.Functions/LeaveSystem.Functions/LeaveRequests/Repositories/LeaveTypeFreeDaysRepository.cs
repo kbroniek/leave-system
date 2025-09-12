@@ -25,7 +25,7 @@ public class LeaveTypeFreeDaysRepository(CosmosClient cosmosClient, string datab
                 return entity.Properties.IncludeFreeDays;
             }
         }
-        return new Error($"Cannot find the leave type. Id={leaveTypeId}", System.Net.HttpStatusCode.NotFound);
+        return new Error($"Cannot find the leave type. Id={leaveTypeId}", System.Net.HttpStatusCode.NotFound, ErrorCodes.LEAVE_TYPE_NOT_FOUND);
     }
 
     private sealed record Entity(Guid Id, EntityProperties Properties);

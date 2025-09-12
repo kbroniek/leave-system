@@ -20,7 +20,7 @@ public class CreateLeaveRequestService(IReadEventsRepository readEventsRepositor
         // If MoveNextAsync() returns false, the enumerator is empty.
         if (await enumerator.MoveNextAsync())
         {
-            return new Error("The resource already exists.", System.Net.HttpStatusCode.Conflict);
+            return new Error("The resource already exists.", System.Net.HttpStatusCode.Conflict, ErrorCodes.RESOURCE_EXISTS);
         }
         var validateResult = await createLeaveRequestValidator.Validate(
             leaveRequestId, dateFrom, dateTo,

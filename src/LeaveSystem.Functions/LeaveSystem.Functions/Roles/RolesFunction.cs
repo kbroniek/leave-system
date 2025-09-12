@@ -38,7 +38,7 @@ public class RolesFunction(IRolesRepository rolesRepository)
         {
             return new()
             {
-                Result = new Error($"{nameof(RoleDto.Id)} cannot be different than userId.", System.Net.HttpStatusCode.BadRequest)
+                Result = new Error($"{nameof(RoleDto.Id)} cannot be different than userId.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_ID_MISMATCH)
                     .ToObjectResult($"Error occurred while updating a role. userId = {role.Id}.")
             };
         }
@@ -47,7 +47,7 @@ public class RolesFunction(IRolesRepository rolesRepository)
         {
             return new()
             {
-                Result = new Error($"{nameof(RoleDto.Roles)} is out of range.", System.Net.HttpStatusCode.BadRequest)
+                Result = new Error($"{nameof(RoleDto.Roles)} is out of range.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_ROLE)
                     .ToObjectResult($"Error occurred while updating a role. userId = {role.Id}.")
             };
         }

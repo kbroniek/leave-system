@@ -63,7 +63,7 @@ public class CreateLeaveRequestServiceTests
 
         mockValidator
             .Setup(v => v.Validate(leaveRequestId, dateFrom, dateTo, duration, leaveTypeId, It.IsAny<TimeSpan>(), user.Id, cancellationToken))
-            .ReturnsAsync(new Error("Validation failed", HttpStatusCode.BadRequest));
+            .ReturnsAsync(new Error("Validation failed", HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT));
 
         // Act
         var result = await createLeaveRequestService.CreateAsync(

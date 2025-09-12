@@ -75,7 +75,7 @@ public class LeaveRequest : IEventSource
     {
         if (Status is not LeaveRequestStatus.Init)
         {
-            return new Error($"Creating leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
+            return new Error($"Creating leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity, ErrorCodes.INVALID_STATUS_TRANSITION);
         }
         var @event = LeaveRequestCreated.Create(
             leaveRequestId,
@@ -97,11 +97,11 @@ public class LeaveRequest : IEventSource
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Rejected)
         {
-            return new Error($"Accepting leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
+            return new Error($"Accepting leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity, ErrorCodes.INVALID_STATUS_TRANSITION);
         }
         if (leaveRequestId != Id)
         {
-            return new Error($"Accepting leave request in different id is not allowed.", HttpStatusCode.Forbidden);
+            return new Error($"Accepting leave request in different id is not allowed.", HttpStatusCode.Forbidden, ErrorCodes.FORBIDDEN_OPERATION);
         }
 
         var @event = LeaveRequestAccepted.Create(Id, remarks, acceptedBy, createdDate);
@@ -113,11 +113,11 @@ public class LeaveRequest : IEventSource
     {
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
         {
-            return new Error($"Rejecting leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
+            return new Error($"Rejecting leave request in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity, ErrorCodes.INVALID_STATUS_TRANSITION);
         }
         if (leaveRequestId != Id)
         {
-            return new Error($"Rejecting leave request in different id is not allowed.", HttpStatusCode.Forbidden);
+            return new Error($"Rejecting leave request in different id is not allowed.", HttpStatusCode.Forbidden, ErrorCodes.FORBIDDEN_OPERATION);
         }
 
         var @event = LeaveRequestRejected.Create(Id, remarks, rejectedBy, createdDate);
@@ -130,15 +130,15 @@ public class LeaveRequest : IEventSource
     {
         if (!string.Equals(CreatedBy.Id, canceledBy.Id, StringComparison.OrdinalIgnoreCase))
         {
-            return new Error("Canceling a non-your leave request is not allowed.", HttpStatusCode.BadRequest);
+            return new Error("Canceling a non-your leave request is not allowed.", HttpStatusCode.BadRequest, ErrorCodes.UNAUTHORIZED_ACCESS);
         }
         if (leaveRequestId != Id)
         {
-            return new Error($"Canceling leave request in different id is not allowed.", HttpStatusCode.Forbidden);
+            return new Error($"Canceling leave request in different id is not allowed.", HttpStatusCode.Forbidden, ErrorCodes.FORBIDDEN_OPERATION);
         }
         if (Status is not LeaveRequestStatus.Pending and not LeaveRequestStatus.Accepted)
         {
-            return new Error($"Canceling leave requests in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity);
+            return new Error($"Canceling leave requests in '{Status}' status is not allowed.", HttpStatusCode.UnprocessableEntity, ErrorCodes.INVALID_STATUS_TRANSITION);
         }
 
         var @event = LeaveRequestCanceled.Create(Id, remarks, canceledBy, createdDate);

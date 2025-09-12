@@ -19,7 +19,7 @@ public class EmployeeService(IRolesRepository getRolesRepository, IGetUserReposi
         }
         if (!rolesResult.Value.Roles.Contains(nameof(RoleType.Employee)))
         {
-            return new Error($"Cannot find the employee. Id={id}", System.Net.HttpStatusCode.NotFound);
+            return new Error($"Cannot find the employee. Id={id}", System.Net.HttpStatusCode.NotFound, ErrorCodes.EMPLOYEE_NOT_FOUND);
         }
         var userResult = await getUserTask;
         if (userResult.IsFailure)

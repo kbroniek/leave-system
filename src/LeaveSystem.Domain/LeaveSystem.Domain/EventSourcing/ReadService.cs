@@ -21,7 +21,7 @@ public class ReadService(IReadEventsRepository readEventsRepository, ILogger<Rea
         {
             var errorMessage = $"Cannot find the resource id {id}";
             logger.LogError("{ErrorMessage}", errorMessage);
-            return new Error(errorMessage, HttpStatusCode.NotFound);
+            return new Error(errorMessage, HttpStatusCode.NotFound, ErrorCodes.RESOURCE_NOT_FOUND);
         }
         return leaveRequest;
     }

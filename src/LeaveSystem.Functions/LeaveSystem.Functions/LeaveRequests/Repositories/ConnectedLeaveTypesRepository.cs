@@ -22,7 +22,7 @@ internal class ConnectedLeaveTypesRepository(CosmosClient cosmosClient, string d
 
         if (leaveTypes.Count == 0)
         {
-            return new Error($"Cannot find the leave type. Id={leaveTypeId}", System.Net.HttpStatusCode.NotFound);
+            return new Error($"Cannot find the leave type. Id={leaveTypeId}", System.Net.HttpStatusCode.NotFound, ErrorCodes.LEAVE_TYPE_NOT_FOUND);
         }
 
         var nestedLeaveTypes = leaveTypes
@@ -31,7 +31,7 @@ internal class ConnectedLeaveTypesRepository(CosmosClient cosmosClient, string d
             .ToList();
         var currentLeaveType = leaveTypes.FirstOrDefault(l => l.Id == leaveTypeId);
         return currentLeaveType is null ?
-            new Error($"Cannot find the leave type. Id={leaveTypeId}", System.Net.HttpStatusCode.NotFound) :
+            new Error($"Cannot find the leave type. Id={leaveTypeId}", System.Net.HttpStatusCode.NotFound, ErrorCodes.LEAVE_TYPE_NOT_FOUND) :
             (nestedLeaveTypes, currentLeaveType.BaseLeaveTypeId);
     }
 

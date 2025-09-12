@@ -26,7 +26,7 @@ public class RejectLeaveRequestServiceTests
         var leaveRequestId = Guid.NewGuid();
         mockReadService
             .Setup(repo => repo.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
-            .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound));
+            .ReturnsAsync(new Error("Not Found", HttpStatusCode.NotFound, ErrorCodes.RESOURCE_NOT_FOUND));
 
         // Act
         var result = await rejectLeaveRequestService.Reject(leaveRequestId,
@@ -48,7 +48,7 @@ public class RejectLeaveRequestServiceTests
         var leaveRequestId = Guid.NewGuid();
         var leaveRequest = new Mock<LeaveRequest>();
         leaveRequest.Setup(lr => lr.Reject(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<LeaveRequestUserDto>(), It.IsAny<DateTimeOffset>()))
-                    .Returns(new Error("Reject failed", HttpStatusCode.BadRequest));
+                    .Returns(new Error("Reject failed", HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT));
 
         mockReadService
             .Setup(repo => repo.FindById<LeaveRequest>(leaveRequestId, cancellationToken))
