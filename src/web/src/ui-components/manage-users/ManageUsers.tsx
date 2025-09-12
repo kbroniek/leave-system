@@ -6,11 +6,8 @@ import { ErrorComponent } from "../../components/ErrorComponent";
 import { Loading, LoadingAuth } from "../../components/Loading";
 import { ManageUsersTable } from "./ManageUsersTable";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import {
-  callApi,
-  callApiGet,
-  ifErrorAcquireTokenRedirect,
-} from "../../utils/ApiCall";
+import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { useApiCall } from "../../hooks/useApiCall";
 import { Authorized } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import { UserDto, UsersDto } from "../dtos/UsersDto";
@@ -20,6 +17,7 @@ const DataContent = () => {
   const { instance, inProgress } = useMsal();
   const notifications = useNotifications();
   const { t } = useTranslation();
+  const { callApi } = useApiCall();
   const [apiUsers, setApiUsers] = useState<UsersDto | undefined>();
   const [isUpdating, setIsUpdating] = useState(false);
 

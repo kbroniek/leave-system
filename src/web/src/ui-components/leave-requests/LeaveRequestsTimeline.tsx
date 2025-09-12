@@ -8,7 +8,8 @@ import { loginRequest } from "../../authConfig";
 // Sample app imports
 import { Loading, LoadingAuth } from "../../components/Loading";
 import { ErrorComponent } from "../../components/ErrorComponent";
-import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { useApiCall } from "../../hooks/useApiCall";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
 import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
@@ -29,6 +30,7 @@ import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
+  const { callApiGet } = useApiCall();
   const [apiLeaveRequests, setApiLeaveRequests] =
     useState<LeaveRequestsResponseDto | null>(null);
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);

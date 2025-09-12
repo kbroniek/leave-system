@@ -35,7 +35,15 @@ msalInstance.initialize().then(() => {
       // Fetch user roles after successful login
       try {
         const userId = account.homeAccountId || account.localAccountId;
-        await roleManager.fetchAndSetRoles(userId, undefined, undefined);
+        // Note: We don't have access to the translation function here,
+        // so we pass undefined for the t parameter
+        await roleManager.fetchAndSetRoles(
+          userId,
+          undefined,
+          undefined,
+          account,
+          undefined,
+        );
       } catch (error) {
         console.error("Failed to fetch roles after login:", error);
         // Don't prevent the login flow if role fetching fails
