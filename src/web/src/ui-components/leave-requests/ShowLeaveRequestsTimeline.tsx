@@ -22,17 +22,29 @@ import { EmployeesFinder } from "../utils/EmployeesFinder";
 
 export const rowHeight = 30;
 
-export default function ShowLeaveRequestsTimeline(params: Readonly<{
-  leaveRequests: LeaveRequestsResponseDto,
-  holidays: HolidaysDto,
-  leaveStatuses: LeaveStatusDto[],
-  leaveTypes: LeaveTypeDto[],
-  employees: EmployeeDto[]
-}>): JSX.Element {
-  const employees = EmployeesFinder.get(params.leaveRequests.items, params.employees);
-  const leaveStatusesActive = params.leaveStatuses;
-  const leaveTypesActive = params.leaveTypes.filter(x => x.state === "Active");
-  const transformer = new LeaveRequestsTimelineTransformer(employees, params.leaveRequests, params.holidays, params.leaveTypes);
+export default function ShowLeaveRequestsTimeline(
+  params: Readonly<{
+    leaveRequests: LeaveRequestsResponseDto;
+    holidays: HolidaysDto;
+    leaveStatuses: LeaveStatusDto[];
+    leaveTypes: LeaveTypeDto[];
+    employees: EmployeeDto[];
+  }>,
+): JSX.Element {
+  const employees = EmployeesFinder.get(
+    params.leaveRequests?.items || [],
+    params.employees || [],
+  );
+  const leaveStatusesActive = params.leaveStatuses || [];
+  const leaveTypesActive = (params.leaveTypes || []).filter(
+    (x) => x.state === "Active",
+  );
+  const transformer = new LeaveRequestsTimelineTransformer(
+    employees,
+    params.leaveRequests,
+    params.holidays || { items: [] },
+    params.leaveTypes || [],
+  );
   const transformedData = transformer.transformToTable();
   const dates =
     transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
@@ -46,21 +58,25 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
           leaveRequests: v.leaveRequests,
           statuses: leaveStatusesActive,
           leaveTypes: leaveTypesActive,
-          holidays: params.holidays
+          holidays: params.holidays || { items: [] },
         } as RenderLeaveRequestModel,
       }),
-      {}
+      {},
     ),
   }));
 
-  const transformedHolidays = params.holidays.items.map(x => DateTime.fromISO(x));
+  const transformedHolidays = (params.holidays?.items || []).map((x) =>
+    DateTime.fromISO(x),
+  );
   const columns: GridColDef<GridValidRowModel[number]>[] = dates.map((x) => ({
     field: x.toISO()!,
     headerName: x.toFormat("dd"),
     width: 10,
     headerClassName: getDayCssClass(x, transformedHolidays),
     cellClassName: (params: GridCellParams<EmployeeDto, { date: DateTime }>) =>
-      !params.value ? "" : getDayCssClass(params.value.date, transformedHolidays),
+      !params.value
+        ? ""
+        : getDayCssClass(params.value.date, transformedHolidays),
     renderCell: RenderLeaveRequests,
   }));
 
@@ -71,14 +87,15 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
   const ODD_OPACITY = 0.2;
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     ".MuiDataGrid-cell": {
-      padding: 0
+      padding: 0,
     },
     [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
-      outline: 'transparent',
+      outline: "transparent",
     },
-    [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]: {
-      outline: 'none',
-    },
+    [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]:
+      {
+        outline: "none",
+      },
     [`& .${gridClasses["row--borderBottom"]}`]: {
       "& .timeline-day.weekend": {
         backgroundColor: "#e0e006;",
@@ -126,20 +143,20 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
       "&.Mui-selected": {
         backgroundColor: alpha(
           theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity
+          ODD_OPACITY + theme.palette.action.selectedOpacity,
         ),
         "&:hover": {
           backgroundColor: alpha(
             theme.palette.primary.main,
             ODD_OPACITY +
               theme.palette.action.selectedOpacity +
-              theme.palette.action.hoverOpacity
+              theme.palette.action.hoverOpacity,
           ),
           // Reset on touch devices, it doesn't add specificity
           "@media (hover: none)": {
             backgroundColor: alpha(
               theme.palette.primary.main,
-              ODD_OPACITY + theme.palette.action.selectedOpacity
+              ODD_OPACITY + theme.palette.action.selectedOpacity,
             ),
           },
         },
@@ -222,11 +239,11 @@ export default function ShowLeaveRequestsTimeline(params: Readonly<{
 }
 
 function getDayCssClass(date: DateTime, holidays: DateTime[]): string {
-  if (DateTime.local().startOf('day').equals(date)) {
+  if (DateTime.local().startOf("day").equals(date)) {
     return "timeline-day today";
   }
-  if (holidays.find(x => x.equals(date))) {
+  if (holidays.find((x) => x.equals(date))) {
     return "timeline-day holiday";
   }
-  return date.isWeekend ? "timeline-day weekend" : "timeline-day"
+  return date.isWeekend ? "timeline-day weekend" : "timeline-day";
 }
