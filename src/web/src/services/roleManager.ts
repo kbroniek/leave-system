@@ -1,6 +1,8 @@
 import { RoleType } from "../utils/roleUtils";
 import { callApiGet } from "../utils/ApiCall";
 import { ShowNotification } from "@toolpad/core/useNotifications";
+import type { TFunction } from "i18next";
+import { AccountInfo } from "@azure/msal-browser";
 const ROLES_LOCAL_STORAGE_KEY = "user.roles";
 class RoleManager {
   private isLoading = false;
@@ -46,6 +48,8 @@ class RoleManager {
     userId: string,
     showNotification?: ShowNotification,
     signal?: AbortSignal,
+    account?: AccountInfo | null,
+    t?: TFunction,
   ): Promise<RoleType[]> {
     this.setLoadingState(true);
     localStorage.removeItem(`${ROLES_LOCAL_STORAGE_KEY}.${userId}`);
@@ -58,6 +62,8 @@ class RoleManager {
         "/roles/me",
         notificationFn,
         signal,
+        account,
+        t,
       );
 
       const roles = response.roles || [];

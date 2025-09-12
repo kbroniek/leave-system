@@ -8,7 +8,8 @@ import { DateTime } from "luxon";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { useSearchParams } from "react-router-dom";
-import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { useApiCall } from "../../hooks/useApiCall";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { ShowMyLeaveRequests } from "./ShowMyLeaveRequests";
@@ -21,8 +22,9 @@ import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import { leaveRequestsStatuses } from "../utils/Status";
 
-const DataContent = (params: {userId?: string}) => {
+const DataContent = (params: { userId?: string }) => {
   const { instance, inProgress } = useMsal();
+  const { callApiGet } = useApiCall();
   const [apiLeaveRequests, setApiLeaveRequests] =
     useState<LeaveRequestsResponseDto | null>(null);
   const [apiLeaveStatuses, setApiLeaveStatuses] =
@@ -42,7 +44,8 @@ const DataContent = (params: {userId?: string}) => {
   useEffect(() => {
     if (isCallApi && inProgress === InteractionStatus.None) {
       setIsCallApi(false);
-      const userId = params.userId ?? instance.getActiveAccount()?.idTokenClaims?.sub;
+      const userId =
+        params.userId ?? instance.getActiveAccount()?.idTokenClaims?.sub;
       const now = DateTime.fromObject({ year: currentYear });
       const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
       const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
@@ -52,22 +55,21 @@ const DataContent = (params: {userId?: string}) => {
       )
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      if(params.userId) {
+      if (params.userId) {
         callApiGet<LeaveLimitsDto>(
           `/leavelimits?year=${currentYear}&userIds=${userId}`,
           notifications.show,
         )
           .then((response) => setApiLeaveLimits(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+      } else {
+        callApiGet<LeaveLimitsDto>(
+          `/leavelimits/user?year=${currentYear}`,
+          notifications.show,
+        )
+          .then((response) => setApiLeaveLimits(response))
+          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       }
-      else {
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits/user?year=${currentYear}`,
-        notifications.show,
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-    }
       if (!apiLeaveTypes) {
         callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
           .then((response) => setApiLeaveTypes(response))
@@ -82,11 +84,7 @@ const DataContent = (params: {userId?: string}) => {
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       }
     }
-  }, [
-    inProgress,
-    currentYear,
-    isCallApi
-  ]);
+  }, [inProgress, currentYear, isCallApi]);
   return (
     <>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
@@ -122,7 +120,7 @@ const DataContent = (params: {userId?: string}) => {
   );
 };
 
-export function MyLeaveRequests(params: {userId?: string}) {
+export function MyLeaveRequests(params: { userId?: string }) {
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}

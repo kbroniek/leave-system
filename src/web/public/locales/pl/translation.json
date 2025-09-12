@@ -103,5 +103,40 @@
   "Valid until": "Ważne do",
   "Working days": "Dni pracujące",
   "Working hours (h)": "Godziny pracy (h)",
-  "Year": "Rok"
+  "Year": "Rok",
+  "errors": {
+    "unknownError": "Wystąpił nieoczekiwany błąd",
+    "invalidInput": "Nieprawidłowe dane wejściowe: {{detail}}",
+    "invalidDateRange": "Nieprawidłowy zakres dat. Data rozpoczęcia musi być wcześniejsza niż data zakończenia",
+    "offWorkDate": "Wybrana data przypada na dzień wolny od pracy",
+    "resourceConflict": "Żądana operacja koliduje z istniejącymi danymi",
+    "resourceNotFound": "Nie znaleziono żądanego zasobu",
+    "resourceExists": "Zasób już istnieje",
+    "leaveTypeNotFound": "Nie znaleziono typu urlopu",
+    "userNotFound": "Nie znaleziono użytkownika",
+    "unexpectedGraphError": "Nieoczekiwany błąd podczas dostępu do danych użytkownika",
+    "unexpectedDatabaseError": "Wystąpił błąd bazy danych. Spróbuj ponownie później",
+    "insufficientLeaveDays": "Nie masz wystarczającej liczby dni urlopowych na ten wniosek",
+    "overlappingLeave": "Twój wniosek nakłada się z innym istniejącym wnioskiem urlopowym",
+    "invalidStatusTransition": "Nie można wykonać tej operacji w obecnym statusie",
+    "pastLeaveModification": "Nie można modyfikować przeszłych wniosków urlopowych",
+    "forbiddenOperation": "Nie masz uprawnień do wykonania tej operacji",
+    "employeeNotFound": "Nie znaleziono pracownika",
+    "unauthorizedAccess": "Nieautoryzowany dostęp. Sprawdź swoje uprawnienia",
+    "rolesNotFound": "Nie znaleziono ról użytkownika",
+    "limitsNotConfigured": "Limity urlopów nie są skonfigurowane. Skontaktuj się z administratorem",
+    "duplicateLimits": "Znaleziono zduplikowane limity urlopów. Skontaktuj się z administratorem",
+    "duplicateRoles": "Znaleziono zduplikowane role dla użytkownika",
+    "invalidColorFormat": "Podano nieprawidłowy format koloru",
+    "invalidIdMismatch": "Niezgodność ID w żądaniu",
+    "invalidRole": "Podano nieprawidłową rolę",
+    "queryParameterError": "Podano nieprawidłowe parametry zapytania",
+    "networkError": "Błąd sieci: {{message}}",
+    "parseError": "Nie udało się przetworzyć odpowiedzi serwera"
+  },
+  "errorBoundary": {
+    "title": "Coś poszło nie tak",
+    "errorCode": "Kod błędu: {{code}}",
+    "suggestion": "Odśwież stronę i spróbuj ponownie. Jeśli problem się powtarza, skontaktuj się z administratorem systemu."
+  }
 }

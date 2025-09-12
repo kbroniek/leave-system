@@ -9,11 +9,8 @@ import { loginRequest } from "../../authConfig";
 // Sample app imports
 import { LoadingAuth } from "../../components/Loading";
 import { ErrorComponent } from "../../components/ErrorComponent";
-import {
-  callApi,
-  callApiGet,
-  ifErrorAcquireTokenRedirect,
-} from "../../utils/ApiCall";
+import { ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { useApiCall } from "../../hooks/useApiCall";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
@@ -34,6 +31,7 @@ import { useTranslation } from "react-i18next";
 const DataContent = () => {
   const { t } = useTranslation();
   const { instance, inProgress } = useMsal();
+  const { callApi, callApiGet } = useApiCall();
   const [apiLeaveRequests, setApiLeaveRequests] = useState<
     LeaveRequestsResponseDto | undefined
   >();
@@ -60,7 +58,7 @@ const DataContent = () => {
       )
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance)),
-    [notifications.show, instance],
+    [callApiGet, notifications.show, instance],
   );
 
   const callLeaveRequests = useCallback(
@@ -71,25 +69,31 @@ const DataContent = () => {
       )
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance)),
-    [notifications.show, instance],
+    [callApiGet, notifications.show, instance],
   );
 
-  const callLeaveLimits = (userId: string, year: string) =>
-    callApiGet<LeaveLimitsDto>(
-      `/leavelimits?year=${year}&userIds=${userId}`,
-      notifications.show,
-    )
-      .then((response) => setApiLeaveLimits(response))
-      .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+  const callLeaveLimits = useCallback(
+    (userId: string, year: string) =>
+      callApiGet<LeaveLimitsDto>(
+        `/leavelimits?year=${year}&userIds=${userId}`,
+        notifications.show,
+      )
+        .then((response) => setApiLeaveLimits(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance)),
+    [callApiGet, notifications.show, instance],
+  );
 
-  const callMyLimits = (year: string) => {
-    callApiGet<LeaveLimitsDto>(
-      `/leavelimits/user?year=${year}`,
-      notifications.show,
-    )
-      .then((response) => setApiLeaveLimits(response))
-      .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-  };
+  const callMyLimits = useCallback(
+    (year: string) => {
+      callApiGet<LeaveLimitsDto>(
+        `/leavelimits/user?year=${year}`,
+        notifications.show,
+      )
+        .then((response) => setApiLeaveLimits(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+    },
+    [callApiGet, notifications.show, instance],
+  );
 
   const isDecisionMaker = useCallback(
     () => isInRole(instance, ["DecisionMaker", "GlobalAdmin"]),
@@ -129,7 +133,16 @@ const DataContent = () => {
         }
       }
     }
-  }, [inProgress]);
+  }, [
+    inProgress,
+    callApiGet,
+    callHolidays,
+    callMyLimits,
+    isDecisionMaker,
+    currentYear,
+    notifications.show,
+    instance,
+  ]);
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
@@ -258,7 +271,14 @@ const DataContent = () => {
         ? callLeaveLimits(currentUserId, currentYear)
         : callMyLimits(currentYear),
     ]);
-  }, [currentUserId, currentYear]);
+  }, [
+    currentUserId,
+    currentYear,
+    callLeaveRequests,
+    callLeaveLimits,
+    callMyLimits,
+    isDecisionMaker,
+  ]);
 
   return (
     <Authorized

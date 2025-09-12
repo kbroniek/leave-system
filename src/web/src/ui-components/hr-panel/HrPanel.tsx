@@ -1,29 +1,31 @@
-import { InteractionStatus, InteractionType } from "@azure/msal-browser"
-import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react"
-import { LoadingAuth } from "../../components/Loading"
-import { ErrorComponent } from "../../components/ErrorComponent"
-import { Authorized } from "../../components/Authorized"
-import { Forbidden } from "../../components/Forbidden"
+import { InteractionStatus, InteractionType } from "@azure/msal-browser";
+import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
+import { LoadingAuth } from "../../components/Loading";
+import { ErrorComponent } from "../../components/ErrorComponent";
+import { Authorized } from "../../components/Authorized";
+import { Forbidden } from "../../components/Forbidden";
 import { loginRequest } from "../../authConfig";
-import { useEffect, useState } from "react"
-import { ShowHrPanel } from "./ShowHrPanel"
-import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto"
-import { LeaveTypesDto } from "../dtos/LeaveTypesDto"
-import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto"
-import { useSearchParams } from "react-router-dom"
-import { useNotifications } from "@toolpad/core"
-import { DateTime } from "luxon"
-import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall"
-import { HolidaysDto } from "../dtos/HolidaysDto"
-import { EmployeesDto } from "../dtos/EmployeesDto"
-import Paper from "@mui/material/Paper"
-import TextField from "@mui/material/TextField"
-import Typography from "@mui/material/Typography"
-import Grid from "@mui/material/Grid2"
-import { Trans } from "react-i18next"
+import { useEffect, useState } from "react";
+import { ShowHrPanel } from "./ShowHrPanel";
+import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
+import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
+import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
+import { useSearchParams } from "react-router-dom";
+import { useNotifications } from "@toolpad/core";
+import { DateTime } from "luxon";
+import { ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
+import { useApiCall } from "../../hooks/useApiCall";
+import { HolidaysDto } from "../dtos/HolidaysDto";
+import { EmployeesDto } from "../dtos/EmployeesDto";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid2";
+import { Trans } from "react-i18next";
 
 const DataContent = (): JSX.Element => {
   const { instance, inProgress } = useMsal();
+  const { callApiGet } = useApiCall();
   const [apiLeaveRequests, setApiLeaveRequests] =
     useState<LeaveRequestsResponseDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(
@@ -70,7 +72,7 @@ const DataContent = (): JSX.Element => {
           .then((response) => setApiLeaveTypes(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       }
-      if(!apiEmployees) {
+      if (!apiEmployees) {
         callApiGet<EmployeesDto>("/employees", notifications.show)
           .then((response) => setApiEmployees(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -84,49 +86,56 @@ const DataContent = (): JSX.Element => {
     currentYear,
     isCallApi,
     apiEmployees,
+    callApiGet,
   ]);
   return (
     <>
-    <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
-      <Grid container spacing={0} sx={{justifyContent: "center"}}>
-        <Typography sx={{alignContent: "center", padding: 2}}><Trans>Year</Trans></Typography>
-        <TextField
-          type="number"
-          value={currentYear}
-          onChange={(v) => {
-            const value = Number(v.target.value);
-            if (value !== currentYear) {
-              setCurrentYear(value);
-              setSearchParams({ year: v.target.value });
-              setApiLeaveRequests(null);
-              setApiLeaveLimits(null);
-              setIsCallApi(true);
-            }
-          }}
+      <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
+        <Grid container spacing={0} sx={{ justifyContent: "center" }}>
+          <Typography sx={{ alignContent: "center", padding: 2 }}>
+            <Trans>Year</Trans>
+          </Typography>
+          <TextField
+            type="number"
+            value={currentYear}
+            onChange={(v) => {
+              const value = Number(v.target.value);
+              if (value !== currentYear) {
+                setCurrentYear(value);
+                setSearchParams({ year: v.target.value });
+                setApiLeaveRequests(null);
+                setApiLeaveLimits(null);
+                setIsCallApi(true);
+              }
+            }}
+          />
+        </Grid>
+      </Paper>
+      <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
+        <ShowHrPanel
+          leaveRequests={apiLeaveRequests?.items}
+          leaveTypes={apiLeaveTypes?.items.filter((x) => x.state === "Active")}
+          leaveLimits={apiLeaveLimits?.items.filter(
+            (x) => x.state === "Active",
+          )}
+          employees={apiEmployees?.items}
+          holidays={apiHolidays?.items}
         />
-      </Grid>
-    </Paper>
-    <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
-      <ShowHrPanel
-        leaveRequests={apiLeaveRequests?.items}
-        leaveTypes={apiLeaveTypes?.items.filter(x => x.state === "Active")}
-        leaveLimits={apiLeaveLimits?.items.filter(x => x.state === "Active")}
-        employees={apiEmployees?.items}
-        holidays={apiHolidays?.items}
-
-      />
-    </Paper>
+      </Paper>
     </>
   );
-}
-export const HrPanel = (): JSX.Element => <MsalAuthenticationTemplate
+};
+export const HrPanel = (): JSX.Element => (
+  <MsalAuthenticationTemplate
     interactionType={InteractionType.Redirect}
     authenticationRequest={loginRequest}
     errorComponent={ErrorComponent}
     loadingComponent={LoadingAuth}
->
+  >
     <Authorized
-        roles={["GlobalAdmin", "HumanResource"]}
-        authorized={<DataContent />}
-        unauthorized={<Forbidden />} />
-</MsalAuthenticationTemplate>
+      roles={["GlobalAdmin", "HumanResource"]}
+      authorized={<DataContent />}
+      unauthorized={<Forbidden />}
+    />
+  </MsalAuthenticationTemplate>
+);

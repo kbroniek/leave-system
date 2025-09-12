@@ -6,16 +6,31 @@ import {
 import { loginRequest } from "../authConfig";
 import { msalInstance } from "../main";
 import { ShowNotification } from "@toolpad/core/useNotifications";
+import { ApiError } from "../types";
+import {
+  getErrorMessage,
+  getErrorSeverity,
+  getAutoHideDuration,
+} from "./errorHandling";
+import type { TFunction } from "i18next";
 
+// Enhanced API call functions that support error code translation
 export function callApiGet<T>(
   url: string,
   showNotification: ShowNotification,
   signal?: AbortSignal,
   account?: AccountInfo | null,
+  t?: TFunction,
 ): Promise<T> {
-  return callApi(url, "GET", undefined, showNotification, signal, account).then(
-    (response) => response?.json(),
-  );
+  return callApi(
+    url,
+    "GET",
+    undefined,
+    showNotification,
+    signal,
+    account,
+    t,
+  ).then((response) => response?.json());
 }
 
 export async function callApi(
@@ -25,6 +40,7 @@ export async function callApi(
   showNotification: ShowNotification,
   signal?: AbortSignal,
   account?: AccountInfo | null,
+  t?: TFunction,
 ): Promise<Response> {
   account = account || msalInstance.getActiveAccount();
   if (!account) {
@@ -59,7 +75,10 @@ export async function callApi(
     options,
   ).catch((error) => {
     console.error("callApi error", error);
-    showNotification(`Error: ${error.message}`, {
+    const errorMessage = t
+      ? t("errors.networkError", { message: error.message })
+      : `Error: ${error.message}`;
+    showNotification(errorMessage, {
       severity: "error",
       autoHideDuration: 3000,
     });
@@ -67,28 +86,53 @@ export async function callApi(
   });
 
   if (response.status < 200 || response.status >= 300) {
-    try {
-      console.warn("call api error", response);
-      const errorBody = await response.json();
-      showNotification(
-        `Error: ${response.status}
-          ${errorBody.title}
-          ${errorBody.detail}
-          ${response.statusText}`,
-        {
-          severity: "error",
-          autoHideDuration: 3000,
-        },
-      );
-    } catch (e) {
-      console.error("call api exception", e);
-      showNotification(`Error: ${response.status} Something goes wrong.`, {
-        severity: "error",
-        autoHideDuration: 3000,
-      });
-    }
+    await handleApiErrorWithTranslation(response, showNotification, t);
   }
   return response;
+}
+
+// Enhanced error handler that uses translation function
+async function handleApiErrorWithTranslation(
+  response: Response,
+  showNotification: ShowNotification,
+  t?: TFunction,
+): Promise<void> {
+  try {
+    console.warn("API error occurred:", response);
+
+    const errorBody = (await response.json()) as ApiError;
+
+    // Extract error information
+    const error: ApiError = {
+      ...errorBody,
+      status: response.status,
+      errorCode: errorBody.errorCode || "UNKNOWN_ERROR",
+    };
+
+    // Get translated error message
+    const errorMessage = t
+      ? getErrorMessage(error, t)
+      : error.title || error.detail || "An unexpected error occurred";
+    const severity = getErrorSeverity(error.errorCode);
+    const autoHideDuration = getAutoHideDuration(error.errorCode);
+
+    // Show the notification
+    showNotification(errorMessage, {
+      severity,
+      autoHideDuration,
+    });
+  } catch (parseError) {
+    console.error("Failed to parse error response:", parseError);
+
+    // Fallback error handling
+    const fallbackMessage = t
+      ? t("errors.parseError")
+      : `Error ${response.status}: ${response.statusText || "Something went wrong"}`;
+    showNotification(fallbackMessage, {
+      severity: "error",
+      autoHideDuration: 5000,
+    });
+  }
 }
 
 export async function ifErrorAcquireTokenRedirect(
