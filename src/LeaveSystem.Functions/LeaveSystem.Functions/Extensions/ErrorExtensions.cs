@@ -15,7 +15,8 @@ internal static class ErrorExtensions
             Detail = error.Message,
             Status = (int)httpStatusCode,
             Instance = instance,
-            Type = type
+            Type = type,
+            Extensions = { { "errorCode", error.ErrorCode } }
         })
         {
             StatusCode = (int)httpStatusCode
