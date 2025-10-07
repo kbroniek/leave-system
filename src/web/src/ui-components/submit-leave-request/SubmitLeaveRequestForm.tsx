@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Typography from "@mui/material/Typography";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
@@ -56,6 +56,8 @@ export const SubmitLeaveRequestForm = (props: {
   onSubmit: SubmitHandler<LeaveRequestFormModel>;
   onYearChanged: (year: string) => void;
   onUserIdChanged: (userId: string) => void;
+  initialValues?: Partial<LeaveRequestFormModel>;
+  initialEmployee?: EmployeeDto;
 }) => {
   const { t } = useTranslation();
   const notifications = useNotifications();
@@ -70,15 +72,21 @@ export const SubmitLeaveRequestForm = (props: {
     register,
     formState: { errors, isValid },
     setValue,
-    getValues,
   } = useForm<LeaveRequestFormModel>({
     defaultValues: {
-      dateFrom: now,
-      dateTo: now,
+      dateFrom: props.initialValues?.dateFrom || now,
+      dateTo: props.initialValues?.dateTo || now,
+      onBehalf: props.initialValues?.onBehalf || props.initialEmployee?.id,
+      leaveType: props.initialValues?.leaveType,
+      remarks: props.initialValues?.remarks,
     },
   });
-  const [dateFrom, setDateFrom] = useState<DateTime | null>(now);
-  const [dateTo, setDateTo] = useState<DateTime | null>(now);
+  const [dateFrom, setDateFrom] = useState<DateTime | null>(
+    props.initialValues?.dateFrom || now,
+  );
+  const [dateTo, setDateTo] = useState<DateTime | null>(
+    props.initialValues?.dateTo || now,
+  );
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
   const [submitInProgress, setSubmitInProgress] = useState(false);
 
@@ -91,6 +99,11 @@ export const SubmitLeaveRequestForm = (props: {
     }))
     .sort((a, b) => a.name?.localeCompare(b.name ?? "") ?? 0);
   const getCurrenUser = (): string | undefined => {
+    // If initial employee is provided, use that
+    if (props.initialEmployee?.id) {
+      return props.initialEmployee.id;
+    }
+
     const claims = instance.getActiveAccount()?.idTokenClaims;
     if (!employees) {
       return;
@@ -107,10 +120,16 @@ export const SubmitLeaveRequestForm = (props: {
       props.onUserIdChanged(e.target.value),
     value: initUserId,
   });
-  const currentUserId = getValues().onBehalf;
-  if (currentUserId) {
-    props.onUserIdChanged(currentUserId);
-  }
+
+  const hasCalledInitialUserIdRef = useRef(false);
+
+  // Only call onUserIdChanged once on initial load if we have an initial user
+  useEffect(() => {
+    if (initUserId && !hasCalledInitialUserIdRef.current) {
+      props.onUserIdChanged(initUserId);
+      hasCalledInitialUserIdRef.current = true;
+    }
+  }, [initUserId, props]);
   const onSubmit = async (
     value: LeaveRequestFormModel,
     event?: React.BaseSyntheticEvent,
