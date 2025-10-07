@@ -83,12 +83,14 @@ export default function ShowLeaveRequestsTimeline(
     setActionProgress(false);
   };
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/details/${props.leaveRequest.leaveRequestId}`);
+    navigator.clipboard.writeText(
+      `${window.location.origin}/details/${props.leaveRequest.leaveRequestId}`,
+    );
     notifications.show(t("Copied to clipboard"), {
       severity: "info",
       autoHideDuration: 3000,
     });
-  }
+  };
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
       <Grid container spacing={2}>
@@ -98,7 +100,11 @@ export default function ShowLeaveRequestsTimeline(
           </Typography>
         </Grid>
         <Grid size={1}>
-          <Button color="inherit" sx={{minWidth: 0, padding: 0}} onClick={handleCopyToClipboard}>
+          <Button
+            color="inherit"
+            sx={{ minWidth: 0, padding: 0 }}
+            onClick={handleCopyToClipboard}
+          >
             <LinkIcon />
           </Button>
         </Grid>
@@ -235,7 +241,9 @@ export default function ShowLeaveRequestsTimeline(
                 <Trans>Reject</Trans>
               </LoadingButton>
             </Authorized>
-            {dateFrom > DateTime.local() ? (
+            {dateFrom > DateTime.local() &&
+            props.leaveRequest.status !== "Canceled" &&
+            props.leaveRequest.status !== "Rejected" ? (
               <Authorized
                 roles={"CurrentUser"}
                 userId={props.leaveRequest.assignedTo.id}
