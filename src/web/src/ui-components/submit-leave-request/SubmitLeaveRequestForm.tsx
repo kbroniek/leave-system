@@ -56,6 +56,8 @@ export const SubmitLeaveRequestForm = (props: {
   onSubmit: SubmitHandler<LeaveRequestFormModel>;
   onYearChanged: (year: string) => void;
   onUserIdChanged: (userId: string) => void;
+  initialValues?: Partial<LeaveRequestFormModel>;
+  initialEmployee?: EmployeeDto;
 }) => {
   const { t } = useTranslation();
   const notifications = useNotifications();
@@ -73,12 +75,19 @@ export const SubmitLeaveRequestForm = (props: {
     getValues,
   } = useForm<LeaveRequestFormModel>({
     defaultValues: {
-      dateFrom: now,
-      dateTo: now,
+      dateFrom: props.initialValues?.dateFrom || now,
+      dateTo: props.initialValues?.dateTo || now,
+      onBehalf: props.initialValues?.onBehalf || props.initialEmployee?.id,
+      leaveType: props.initialValues?.leaveType,
+      remarks: props.initialValues?.remarks,
     },
   });
-  const [dateFrom, setDateFrom] = useState<DateTime | null>(now);
-  const [dateTo, setDateTo] = useState<DateTime | null>(now);
+  const [dateFrom, setDateFrom] = useState<DateTime | null>(
+    props.initialValues?.dateFrom || now,
+  );
+  const [dateTo, setDateTo] = useState<DateTime | null>(
+    props.initialValues?.dateTo || now,
+  );
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
   const [submitInProgress, setSubmitInProgress] = useState(false);
 
@@ -91,6 +100,11 @@ export const SubmitLeaveRequestForm = (props: {
     }))
     .sort((a, b) => a.name?.localeCompare(b.name ?? "") ?? 0);
   const getCurrenUser = (): string | undefined => {
+    // If initial employee is provided, use that
+    if (props.initialEmployee?.id) {
+      return props.initialEmployee.id;
+    }
+
     const claims = instance.getActiveAccount()?.idTokenClaims;
     if (!employees) {
       return;

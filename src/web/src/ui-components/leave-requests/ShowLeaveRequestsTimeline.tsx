@@ -19,6 +19,11 @@ import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { EmployeeDto } from "../dtos/EmployeeDto";
 import { LeaveRequestsTimelineTransformer } from "./LeaveRequestsTimelineTransformer";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
+import { SubmitLeaveRequestDialog } from "../submit-leave-request/SubmitLeaveRequestDialog";
+import { LeaveRequestFormModel } from "../submit-leave-request/SubmitLeaveRequestForm";
+import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
+import { useState } from "react";
+import { SubmitHandler } from "react-hook-form";
 
 export const rowHeight = 30;
 
@@ -29,8 +34,30 @@ export default function ShowLeaveRequestsTimeline(
     leaveStatuses: LeaveStatusDto[];
     leaveTypes: LeaveTypeDto[];
     employees: EmployeeDto[];
+    leaveLimits?: LeaveLimitDto[];
+    onSubmitLeaveRequest?: SubmitHandler<LeaveRequestFormModel>;
+    onYearChanged?: (year: string) => void;
+    onUserIdChanged?: (userId: string) => void;
   }>,
 ): JSX.Element {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<DateTime | undefined>();
+  const [selectedEmployee, setSelectedEmployee] = useState<
+    EmployeeDto | undefined
+  >();
+
+  const handleAddLeaveRequest = (date: DateTime, employee: EmployeeDto) => {
+    setSelectedDate(date);
+    setSelectedEmployee(employee);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setSelectedDate(undefined);
+    setSelectedEmployee(undefined);
+  };
+
   const employees = EmployeesFinder.get(
     params.leaveRequests?.items || [],
     params.employees || [],
@@ -77,7 +104,12 @@ export default function ShowLeaveRequestsTimeline(
       !params.value
         ? ""
         : getDayCssClass(params.value.date, transformedHolidays),
-    renderCell: RenderLeaveRequests,
+    renderCell: (cellParams) => (
+      <RenderLeaveRequests
+        {...cellParams}
+        onAddLeaveRequest={handleAddLeaveRequest}
+      />
+    ),
   }));
 
   const groups: GridColumnGroupingModel = transformedData.header.map((x) => ({
@@ -234,6 +266,23 @@ export default function ShowLeaveRequestsTimeline(
           />
         </Grid>
       </Grid>
+
+      <SubmitLeaveRequestDialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        selectedDate={selectedDate}
+        selectedEmployee={selectedEmployee}
+        leaveRequests={params.leaveRequests?.items}
+        holidays={params.holidays}
+        leaveTypes={leaveTypesActive}
+        leaveLimits={params.leaveLimits}
+        employees={params.employees}
+        onSubmit={
+          params.onSubmitLeaveRequest || (() => Promise.resolve(undefined))
+        }
+        onYearChanged={params.onYearChanged || (() => {})}
+        onUserIdChanged={params.onUserIdChanged || (() => {})}
+      />
     </Box>
   );
 }

@@ -13,15 +13,27 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Box from "@mui/material/Box";
+import AddIcon from "@mui/icons-material/Add";
 
 export function RenderLeaveRequests(
-  props: Readonly<GridRenderCellParams<EmployeeDto, RenderLeaveRequestModel>>,
+  props: Readonly<
+    GridRenderCellParams<EmployeeDto, RenderLeaveRequestModel> & {
+      onAddLeaveRequest?: (date: DateTime, employee: EmployeeDto) => void;
+    }
+  >,
 ): JSX.Element {
   const [leaveRequestId, setLeaveRequestId] = useState<string | undefined>();
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+
   if (!props.value) {
     return <></>;
   }
+
+  const handleAddLeaveRequest = () => {
+    if (props.onAddLeaveRequest && props.value && props.row) {
+      props.onAddLeaveRequest(props.value.date, props.row as EmployeeDto);
+    }
+  };
   const handleClickOpen = (id: string) => {
     setLeaveRequestId(id);
   };
@@ -77,7 +89,7 @@ export function RenderLeaveRequests(
     },
     ".leave-request-border-menu": {
       height: "85%",
-      top: "1px"
+      top: "1px",
     },
     ...props.value?.statuses.reduce(
       (a, x) => ({
@@ -103,7 +115,35 @@ export function RenderLeaveRequests(
   };
   return (
     <>
-      {props.value.leaveRequests.length > 1 ? (
+      {props.value.leaveRequests.length === 0 ? (
+        // Empty cell - show add button
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            width: "100%",
+          }}
+        >
+          <Tooltip title="Add leave request">
+            <Button
+              onClick={handleAddLeaveRequest}
+              sx={{
+                padding: 0,
+                minWidth: "50px",
+                height: "29px",
+                color: "gray",
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                },
+              }}
+            >
+              <AddIcon fontSize="small" />
+            </Button>
+          </Tooltip>
+        </Box>
+      ) : props.value.leaveRequests.length > 1 ? (
         <>
           <Button
             id="basic-button"
@@ -129,18 +169,17 @@ export function RenderLeaveRequests(
                 key={`${x.id}-render-leave-request-detail`}
                 onClick={() => handleDialogOpenMenuClose(x.id)}
                 className={getCssClass(x.status, x.leaveTypeId)}
-
               >
                 {props.value?.date.equals(x.dateFrom) ? (
-                    <div className="leave-request-border-start leave-request-border-menu"></div>
-                  ) : (
-                    ""
-                  )}
-                  {props.value?.date.equals(x.dateTo) ? (
-                    <div className="leave-request-border-end leave-request-border-menu"></div>
-                  ) : (
-                    ""
-                  )}
+                  <div className="leave-request-border-start leave-request-border-menu"></div>
+                ) : (
+                  ""
+                )}
+                {props.value?.date.equals(x.dateTo) ? (
+                  <div className="leave-request-border-end leave-request-border-menu"></div>
+                ) : (
+                  ""
+                )}
                 {formatPerDay(x, holidaysDateTime)}
               </MenuItem>
             ))}
@@ -156,27 +195,29 @@ export function RenderLeaveRequests(
               title={getTooltip(x.leaveTypeId)}
               key={`${x.id}-leave-request-detail`}
             >
-                <Button
-                  variant="text"
-                  onClick={() => handleClickOpen(x.id)}
-                  className={getCssClass(
-                    x.status,
-                    x.leaveTypeId,
-                  )}
-                  sx={{padding: 0, minWidth: "50px", height: "29px", color: "black"}}
-                >
-                  {props.value?.date.equals(x.dateFrom) ? (
-                    <div className="leave-request-border-start"></div>
-                  ) : (
-                    ""
-                  )}
-                  {props.value?.date.equals(x.dateTo) ? (
-                    <div className="leave-request-border-end"></div>
-                  ) : (
-                    ""
-                  )}
-                  {formatPerDay(x, holidaysDateTime)}
-                </Button>
+              <Button
+                variant="text"
+                onClick={() => handleClickOpen(x.id)}
+                className={getCssClass(x.status, x.leaveTypeId)}
+                sx={{
+                  padding: 0,
+                  minWidth: "50px",
+                  height: "29px",
+                  color: "black",
+                }}
+              >
+                {props.value?.date.equals(x.dateFrom) ? (
+                  <div className="leave-request-border-start"></div>
+                ) : (
+                  ""
+                )}
+                {props.value?.date.equals(x.dateTo) ? (
+                  <div className="leave-request-border-end"></div>
+                ) : (
+                  ""
+                )}
+                {formatPerDay(x, holidaysDateTime)}
+              </Button>
             </Tooltip>
           ))}
         </Box>
