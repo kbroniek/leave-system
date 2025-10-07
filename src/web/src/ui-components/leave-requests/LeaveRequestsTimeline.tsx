@@ -197,7 +197,7 @@ const DataContent = () => {
     return response.status;
   };
 
-  const onYearChanged = (_year: string) => {
+  const onYearChanged = () => {
     // Handle year change if needed
   };
 

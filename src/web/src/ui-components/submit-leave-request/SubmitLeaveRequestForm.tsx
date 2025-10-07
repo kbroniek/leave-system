@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Typography from "@mui/material/Typography";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
@@ -72,7 +72,6 @@ export const SubmitLeaveRequestForm = (props: {
     register,
     formState: { errors, isValid },
     setValue,
-    getValues,
   } = useForm<LeaveRequestFormModel>({
     defaultValues: {
       dateFrom: props.initialValues?.dateFrom || now,
@@ -121,10 +120,16 @@ export const SubmitLeaveRequestForm = (props: {
       props.onUserIdChanged(e.target.value),
     value: initUserId,
   });
-  const currentUserId = getValues().onBehalf;
-  if (currentUserId) {
-    props.onUserIdChanged(currentUserId);
-  }
+
+  const hasCalledInitialUserIdRef = useRef(false);
+
+  // Only call onUserIdChanged once on initial load if we have an initial user
+  useEffect(() => {
+    if (initUserId && !hasCalledInitialUserIdRef.current) {
+      props.onUserIdChanged(initUserId);
+      hasCalledInitialUserIdRef.current = true;
+    }
+  }, [initUserId, props]);
   const onSubmit = async (
     value: LeaveRequestFormModel,
     event?: React.BaseSyntheticEvent,
