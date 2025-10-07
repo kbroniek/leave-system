@@ -121,12 +121,18 @@ const DataContent = () => {
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       } else {
         callMyLimits(currentYear);
-        if (claims?.sub) {
+        if (claims?.oid) {
+          const name = claims?.name ?? "";
+          const splitName = name.split(" ");
+          const firstName = (claims?.given_name as string) ?? splitName[0];
+          const lastName = (claims?.family_name as string) ?? splitName[1];
           setApiEmployees({
             items: [
               {
-                id: claims?.sub,
-                name: claims?.name ?? "",
+                id: claims?.oid,
+                name: name,
+                firstName: firstName,
+                lastName: lastName,
               },
             ],
           });
