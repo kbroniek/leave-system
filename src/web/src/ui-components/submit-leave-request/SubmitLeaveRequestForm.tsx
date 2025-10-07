@@ -54,8 +54,8 @@ export const SubmitLeaveRequestForm = (props: {
   leaveLimits: LeaveLimitDto[] | undefined;
   employees: EmployeeDto[] | undefined;
   onSubmit: SubmitHandler<LeaveRequestFormModel>;
-  onYearChanged: (year:string) => void;
-  onUserIdChanged: (userId:string) => void;
+  onYearChanged: (year: string) => void;
+  onUserIdChanged: (userId: string) => void;
 }) => {
   const { t } = useTranslation();
   const notifications = useNotifications();
@@ -82,38 +82,45 @@ export const SubmitLeaveRequestForm = (props: {
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
   const [submitInProgress, setSubmitInProgress] = useState(false);
 
-  const employees = props.employees?.map(x => ({
+  const employees = props.employees
+    ?.map((x) => ({
       ...x,
-      name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? t("undefined")
+      name: x.lastName
+        ? `${x.lastName} ${x.firstName}`
+        : (x.name ?? t("undefined")),
     }))
     .sort((a, b) => a.name?.localeCompare(b.name ?? "") ?? 0);
-  const  getCurrenUser = (): string | undefined => {
+  const getCurrenUser = (): string | undefined => {
     const claims = instance.getActiveAccount()?.idTokenClaims;
-    if(!employees) {
+    if (!employees) {
       return;
     }
-    const activeUser = employees.find((x) => x.id === claims?.sub);
+    const activeUser = employees.find((x) => x.id === claims?.oid);
     const employee = activeUser ?? employees.find(() => true);
     return employee?.id;
-  }
+  };
 
   const initUserId = getCurrenUser();
   const { ref: onBehalfRef, ...onBehalfInputProps } = register("onBehalf", {
     required: t("This is required"),
-    onChange: (e: {target: {value: string}}) => props.onUserIdChanged(e.target.value),
-    value: initUserId
+    onChange: (e: { target: { value: string } }) =>
+      props.onUserIdChanged(e.target.value),
+    value: initUserId,
   });
-  const currentUserId = getValues().onBehalf
-  if(currentUserId) {
-    props.onUserIdChanged(currentUserId)
+  const currentUserId = getValues().onBehalf;
+  if (currentUserId) {
+    props.onUserIdChanged(currentUserId);
   }
-  const onSubmit = async (value: LeaveRequestFormModel, event?: React.BaseSyntheticEvent) => {
-    if(!isValid) {
+  const onSubmit = async (
+    value: LeaveRequestFormModel,
+    event?: React.BaseSyntheticEvent,
+  ) => {
+    if (!isValid) {
       return;
     }
     setSubmitInProgress(true);
     // If it is an error disable in progress
-    if(!await props.onSubmit(value, event)) {
+    if (!(await props.onSubmit(value, event))) {
       setSubmitInProgress(false);
     }
   };
@@ -127,10 +134,12 @@ export const SubmitLeaveRequestForm = (props: {
   };
 
   const onInvalid = (errors: FieldErrors<LeaveRequestFormModel>) => {
-    notifications.show(t("Form is invalid. Check the required fields."), {severity: "error"});
+    notifications.show(t("Form is invalid. Check the required fields."), {
+      severity: "error",
+    });
     console.warn("Form is invalid.", JSON.stringify(errors));
-  }
-  if(dateFrom) {
+  };
+  if (dateFrom) {
     props.onYearChanged(dateFrom.toFormat("yyyy"));
   }
   return (
@@ -164,7 +173,12 @@ export const SubmitLeaveRequestForm = (props: {
                           {...onBehalfInputProps}
                         >
                           {employees.map((x) => (
-                            <MenuItem key={`add-on-behalf-${x.id}`} value={x.id}>{x.name}</MenuItem>
+                            <MenuItem
+                              key={`add-on-behalf-${x.id}`}
+                              value={x.id}
+                            >
+                              {x.name}
+                            </MenuItem>
                           ))}
                         </Select>
                         <FormHelperText sx={{ color: "red" }}>
@@ -358,15 +372,21 @@ const Range = (props: {
 }) => {
   const { t } = useTranslation();
   const daysCounter = new DaysCounter(
-    props.holidays.items.map((x) => DateTime.fromISO(x))
+    props.holidays.items.map((x) => DateTime.fromISO(x)),
   );
   let allDays;
   let workingDays;
   let freeDays;
   if (!props.dateFrom?.isValid) {
-    allDays = workingDays = freeDays = t("Date from is invalid. Please check it.");
+    allDays =
+      workingDays =
+      freeDays =
+        t("Date from is invalid. Please check it.");
   } else if (!props.dateTo?.isValid) {
-    allDays = workingDays = freeDays = t("Date to is invalid. Please check it.");
+    allDays =
+      workingDays =
+      freeDays =
+        t("Date to is invalid. Please check it.");
   } else {
     allDays = DaysCounter.countAllDays(props.dateFrom, props.dateTo);
     workingDays = daysCounter.workingDays(props.dateFrom, props.dateTo);
@@ -421,25 +441,34 @@ const AdditionalInfo = (props: {
   setValue: UseFormSetValue<LeaveRequestFormModel>;
 }) => {
   const { t } = useTranslation();
-  const connectedLeaveTypes = props.leaveTypes.filter(x => x.baseLeaveTypeId === props.leaveTypeId);
+  const connectedLeaveTypes = props.leaveTypes.filter(
+    (x) => x.baseLeaveTypeId === props.leaveTypeId,
+  );
   const daysUsed = props.leaveRequests
-    .filter((x) => x.leaveTypeId === props.leaveTypeId || connectedLeaveTypes.find(c => c.id === x.leaveTypeId))
+    .filter(
+      (x) =>
+        x.leaveTypeId === props.leaveTypeId ||
+        connectedLeaveTypes.find((c) => c.id === x.leaveTypeId),
+    )
     .map((x) => Duration.fromISO(x.duration))
     .reduce(
       (accumulator, current) => accumulator.plus(current),
-      Duration.fromMillis(0)
+      Duration.fromMillis(0),
     );
 
-  let availableDaysStr =
-    t("There is no limit for this user, leave type or in that period");
+  let availableDaysStr = t(
+    "There is no limit for this user, leave type or in that period",
+  );
   let availableDaysAfterAcceptanceStr = availableDaysStr;
   let currentLimit;
   if (!props.dateFrom?.isValid) {
-    availableDaysStr = availableDaysAfterAcceptanceStr =
-      t("Date from is invalid. Please check it.");
+    availableDaysStr = availableDaysAfterAcceptanceStr = t(
+      "Date from is invalid. Please check it.",
+    );
   } else if (!props.dateTo?.isValid) {
-    availableDaysStr = availableDaysAfterAcceptanceStr =
-      t("Date to is invalid. Please check it.");
+    availableDaysStr = availableDaysAfterAcceptanceStr = t(
+      "Date to is invalid. Please check it.",
+    );
   } else {
     const dateFrom = props.dateFrom;
     const dateTo = props.dateTo;
@@ -447,7 +476,7 @@ const AdditionalInfo = (props: {
       (x) =>
         x.leaveTypeId === props.leaveTypeId &&
         (!x.validSince || DateTime.fromISO(x.validSince) <= dateFrom) &&
-        (!x.validUntil || DateTime.fromISO(x.validUntil) >= dateTo)
+        (!x.validUntil || DateTime.fromISO(x.validUntil) >= dateTo),
     );
     if (currentLimit) {
       const limit = currentLimit.limit
@@ -460,7 +489,7 @@ const AdditionalInfo = (props: {
       const daysCounter = DaysCounter.create(
         props.leaveTypeId,
         props.leaveTypes,
-        props.holidays.items.map((x) => DateTime.fromISO(x))
+        props.holidays.items.map((x) => DateTime.fromISO(x)),
       );
       const availableDays = limitSum?.minus(daysUsed);
       const currentRequestDays = daysCounter.days(dateFrom, dateTo);
@@ -477,7 +506,7 @@ const AdditionalInfo = (props: {
       availableDaysAfterAcceptanceStr = availableDays
         ? DurationFormatter.format(
             availableDays.minus(currentRequestDaysDuration),
-            currentLimit.workingHours
+            currentLimit.workingHours,
           )
         : t("There is no limit");
     }
@@ -513,7 +542,7 @@ const AdditionalInfo = (props: {
         <Typography variant="body2" sx={defaultStyle}>
           {DurationFormatter.format(
             daysUsed,
-            currentLimit?.workingHours ?? findWorkingHours()
+            currentLimit?.workingHours ?? findWorkingHours(),
           )}
         </Typography>
       </Grid>

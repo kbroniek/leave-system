@@ -45,7 +45,7 @@ const DataContent = (params: { userId?: string }) => {
     if (isCallApi && inProgress === InteractionStatus.None) {
       setIsCallApi(false);
       const userId =
-        params.userId ?? instance.getActiveAccount()?.idTokenClaims?.sub;
+        params.userId ?? instance.getActiveAccount()?.idTokenClaims?.oid;
       const now = DateTime.fromObject({ year: currentYear });
       const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
       const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");

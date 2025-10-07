@@ -21,7 +21,7 @@ export const Authorized = (props: AuthorizedProps) => {
   useEffect(() => {
     if (props.roles === "CurrentUser") {
       setIsAuthorized(
-        props.userId === instance.getActiveAccount()?.idTokenClaims?.sub,
+        props.userId === instance.getActiveAccount()?.idTokenClaims?.oid,
       );
     } else {
       setIsAuthorized(isInRole(instance, props.roles));
