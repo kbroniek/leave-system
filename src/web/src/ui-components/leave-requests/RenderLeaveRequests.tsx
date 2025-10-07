@@ -139,7 +139,24 @@ export function RenderLeaveRequests(
                 },
               }}
             >
-              <AddIcon fontSize="small" />
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: "100%",
+                  "& .add-icon-hover": {
+                    opacity: 0,
+                    transition: "opacity 0.2s",
+                  },
+                  "&:hover .add-icon-hover": {
+                    opacity: 1,
+                  },
+                }}
+              >
+                <AddIcon fontSize="small" className="add-icon-hover" />
+              </Box>
             </Button>
           </Tooltip>
         </Box>
