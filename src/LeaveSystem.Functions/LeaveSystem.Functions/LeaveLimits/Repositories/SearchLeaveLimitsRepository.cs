@@ -57,7 +57,7 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
                 return result.Error;
             }
 
-            templates.AddRange(result.Value.results);
+            templates.AddRange(result.Value.results.Select(x => x with { OverdueLimit = null }));
             continuationToken = result.Value.continuationToken;
         }
         while (continuationToken != null);
