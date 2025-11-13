@@ -31,7 +31,7 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
     }
 
     public async Task<Result<IReadOnlyList<LeaveLimitDto>, Error>> GetLimitTemplatesForNewYear(
-        int templateYear, IEnumerable<Guid> saturdayLeaveTypeIds, CancellationToken cancellationToken)
+        int templateYear, Guid[] saturdayLeaveTypeIds, CancellationToken cancellationToken)
     {
         var firstDay = new DateOnly(templateYear, 1, 1);
         var lastDay = new DateOnly(templateYear, 12, 31);
@@ -44,10 +44,10 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
         do
         {
             var result = await container.GetItemLinqQueryable<LeaveLimitDto>(continuationToken: continuationToken, requestOptions: new QueryRequestOptions { MaxItemCount = pageSize })
-                .Where(x => x.State == LeaveLimitDto.LeaveLimitState.Active &&
-                    !saturdayLeaveTypeIds.Contains(x.LeaveTypeId) &&
-                    (!x.ValidSince.IsDefined() || x.ValidSince.IsNull() || x.ValidSince <= lastDay) &&
-                    (!x.ValidUntil.IsDefined() || x.ValidUntil.IsNull() || x.ValidUntil >= firstDay))
+                .Where(x =>
+                    (saturdayLeaveTypeIds.Length == 0 || !saturdayLeaveTypeIds.Contains(x.LeaveTypeId)) &&
+                    x.ValidSince <= lastDay &&
+                   x.ValidUntil >= firstDay)
                 .ToFeedIterator()
                 .ExecuteQuery(logger, pageSize, cancellationToken);
 
