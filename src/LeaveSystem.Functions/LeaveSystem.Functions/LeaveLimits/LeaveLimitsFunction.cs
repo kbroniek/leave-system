@@ -14,7 +14,7 @@ using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribut
 
 public class LeaveLimitsFunction(
     SearchLeaveLimitsRepository searchRepository,
-    CreateLeaveLimitsValidator createValidator,)
+    CreateLeaveLimitsValidator createValidator)
 {
     [Function(nameof(SearchUserLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
@@ -106,7 +106,14 @@ public class LeaveLimitsFunction(
     [Function(nameof(GenerateNewYearLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public async Task<IActionResult> GenerateNewYearLimits(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavelimits/generate-new-year")] HttpRequest req, CancellationToken cancellationToken)
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavelimits/generate-new-year")] HttpRequest req,
+        [CosmosDBInput(
+            databaseName: "%DatabaseName%",
+            containerName: "%LeaveTypesContainerName%",
+            Connection  = "CosmosDBConnection",
+            SqlQuery = "SELECT c.id FROM c WHERE c.properties.catalog = 'Saturday'"
+            )] IEnumerable<LeaveTypeDetailsDto> leaveTypes,
+        CancellationToken cancellationToken)
     {
         var yearParam = req.Query["year"].FirstOrDefault();
         if (!int.TryParse(yearParam, out var templateYear))
@@ -114,7 +121,8 @@ public class LeaveLimitsFunction(
             return new BadRequestObjectResult(new { error = "Invalid year parameter. Please provide a valid year." });
         }
 
-        var templatesResult = await searchRepository.GetLimitTemplatesForNewYear(templateYear, cancellationToken);
+        var templatesResult = await searchRepository.GetLimitTemplatesForNewYear(templateYear,
+            [.. leaveTypes.Select(t => t.Id)], cancellationToken);
         if (templatesResult.IsFailure)
         {
             return templatesResult.Error.ToObjectResult("Error occurred while retrieving limit templates.");
