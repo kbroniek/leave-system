@@ -30,4 +30,36 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
         return result;
     }
 
+    public async Task<Result<IReadOnlyList<LeaveLimitDto>, Error>> GetLimitTemplatesForNewYear(
+        int templateYear, CancellationToken cancellationToken)
+    {
+        var firstDay = new DateOnly(templateYear, 1, 1);
+        var lastDay = new DateOnly(templateYear, 12, 31);
+        var container = cosmosClient.GetContainer(databaseName, containerId);
+
+        var templates = new List<LeaveLimitDto>();
+        var continuationToken = (string?)null;
+
+        do
+        {
+            var result = await container.GetItemLinqQueryable<LeaveLimitDto>(continuationToken: continuationToken, requestOptions: new QueryRequestOptions { MaxItemCount = 100 })
+                .Where(x => x.State == LeaveLimitDto.LeaveLimitState.Active &&
+                    (!x.ValidSince.IsDefined() || x.ValidSince.IsNull() || x.ValidSince >= firstDay) &&
+                    (!x.ValidUntil.IsDefined() || x.ValidUntil.IsNull() || x.ValidUntil <= lastDay))
+                .ToFeedIterator()
+                .ExecuteQuery(logger, 100, cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return result.Error;
+            }
+
+            templates.AddRange(result.Value.results);
+            continuationToken = result.Value.continuationToken;
+        }
+        while (continuationToken != null);
+
+        return templates;
+    }
+
 }

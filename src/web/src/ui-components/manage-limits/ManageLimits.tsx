@@ -8,6 +8,7 @@ import {
   LeaveLimitCell as LeaveLimitItem,
   ManageLimitsTable,
 } from "./ManageLimitsTable";
+import { GenerateNewYearLimitsModal } from "./GenerateNewYearLimitsModal";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import {
   callApi,
@@ -24,6 +25,8 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
@@ -38,6 +41,8 @@ const DataContent = () => {
     LeaveLimitsDto | undefined
   >();
   const [currentYear, setCurrentYear] = useState<number>(DateTime.local().year);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] =
+    useState<boolean>(false);
 
   const handleLimitChange = async (item: LeaveLimitItem): Promise<boolean> => {
     const workingHours = item.workingHours ?? 8;
@@ -79,6 +84,18 @@ const DataContent = () => {
     return false;
   };
 
+  const handleLimitsGenerated = () => {
+    // Refresh the current limits data
+    if (inProgress === InteractionStatus.None) {
+      callApiGet<LeaveLimitsDto>(
+        `/leavelimits?year=${currentYear}`,
+        notifications.show,
+      )
+        .then((response) => setApiLeaveLimits(response))
+        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+    }
+  };
+
   useEffect(() => {
     if (inProgress === InteractionStatus.None) {
       callApiGet<EmployeesDto>("/employees", notifications.show)
@@ -94,7 +111,7 @@ const DataContent = () => {
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
-  }, [inProgress]);
+  }, [inProgress, currentYear, instance, notifications.show]);
 
   useEffect(() => {
     if (inProgress === InteractionStatus.None) {
@@ -105,11 +122,15 @@ const DataContent = () => {
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
     }
-  }, [currentYear]);
+  }, [currentYear, inProgress, instance, notifications.show]);
   return (
     <>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
-        <Grid container spacing={0} sx={{ justifyContent: "center" }}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ justifyContent: "center", alignItems: "center" }}
+        >
           <Typography sx={{ alignContent: "center", padding: 2 }}>
             Year
           </Typography>
@@ -124,6 +145,14 @@ const DataContent = () => {
               }
             }}
           />
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => setIsGenerateModalOpen(true)}
+            sx={{ marginLeft: 2 }}
+          >
+            {t("Generate New Year Limits")}
+          </Button>
         </Grid>
       </Paper>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
@@ -148,6 +177,15 @@ const DataContent = () => {
           unauthorized={<Forbidden />}
         />
       </Paper>
+      {apiEmployees && apiLeaveTypes && (
+        <GenerateNewYearLimitsModal
+          open={isGenerateModalOpen}
+          onClose={() => setIsGenerateModalOpen(false)}
+          employees={apiEmployees.items}
+          leaveTypes={apiLeaveTypes.items}
+          onLimitsGenerated={handleLimitsGenerated}
+        />
+      )}
     </>
   );
 };

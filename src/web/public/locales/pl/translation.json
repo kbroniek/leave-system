@@ -104,6 +104,13 @@
   "Working days": "Dni pracujące",
   "Working hours (h)": "Godziny pracy (h)",
   "Year": "Rok",
+  "Generate New Year Limits": "Generuj limity na nowy rok",
+  "Template Year:": "Rok szablonu:",
+  "Generate": "Generuj",
+  "Generating...": "Generowanie...",
+  "Save All Limits": "Zapisz wszystkie limity",
+  "Saving...": "Zapisywanie...",
+  "All limits saved successfully": "Wszystkie limity zapisano pomyślnie",
   "errors": {
     "unknownError": "Wystąpił nieoczekiwany błąd",
     "invalidInput": "Nieprawidłowe dane wejściowe: {{detail}}",

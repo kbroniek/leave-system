@@ -103,8 +103,80 @@ public class LeaveLimitsFunction(
         return new(new NoContentResult(), deletedLeaveLimit);
     }
 
+    [Function(nameof(GenerateNewYearLimits))]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
+    public async Task<IActionResult> GenerateNewYearLimits(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavelimits/generate-new-year")] HttpRequest req, CancellationToken cancellationToken)
+    {
+        var yearParam = req.Query["year"].FirstOrDefault();
+        if (!int.TryParse(yearParam, out var templateYear))
+        {
+            return new BadRequestObjectResult(new { error = "Invalid year parameter. Please provide a valid year." });
+        }
+
+        var templatesResult = await searchRepository.GetLimitTemplatesForNewYear(templateYear, cancellationToken);
+        if (templatesResult.IsFailure)
+        {
+            return templatesResult.Error.ToObjectResult("Error occurred while retrieving limit templates.");
+        }
+
+        var templates = templatesResult.Value;
+        var newYear = templateYear + 1;
+        var newYearLimits = new List<LeaveLimitDto>();
+
+        foreach (var template in templates)
+        {
+            var newLimit = template with
+            {
+                Id = Guid.NewGuid(),
+                ValidSince = template.ValidSince.HasValue ? new DateOnly(newYear, template.ValidSince.Value.Month, template.ValidSince.Value.Day) : new DateOnly(newYear, 1, 1),
+                ValidUntil = template.ValidUntil.HasValue ? new DateOnly(newYear, template.ValidUntil.Value.Month, template.ValidUntil.Value.Day) : new DateOnly(newYear, 12, 31)
+            };
+            newYearLimits.Add(newLimit);
+        }
+
+        return new OkObjectResult(new { items = newYearLimits });
+    }
+
+    [Function(nameof(BatchInsertLimits))]
+    //[Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
+    public async Task<BatchLeaveLimitOutput> BatchInsertLimits(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "leavelimits/batch")] HttpRequest req,
+        [FromBody] List<LeaveLimitDto> leaveLimits, CancellationToken cancellationToken)
+    {
+        var validatedLimits = new List<LeaveLimitDto>();
+        var errors = new List<string>();
+
+        foreach (var limit in leaveLimits)
+        {
+            var validationResult = await createValidator.Validate(
+                limit.ValidSince, limit.ValidUntil, limit.AssignedToUserId, limit.LeaveTypeId, limit.Id, cancellationToken);
+            
+            if (validationResult.IsFailure)
+            {
+                errors.Add($"Limit {limit.Id}: {validationResult.Error.Message}");
+            }
+            else
+            {
+                validatedLimits.Add(limit);
+            }
+        }
+
+        if (errors.Any())
+        {
+            return new(new BadRequestObjectResult(new { errors = errors }));
+        }
+
+        return new(new CreatedResult("/leavelimits/batch", new { items = validatedLimits, count = validatedLimits.Count }), validatedLimits);
+    }
+
     public record LeaveLimitOutput(
         [property: HttpResult] IActionResult Result,
         [property: CosmosDBOutput("%DatabaseName%", "%LeaveLimitsContainerName%",
             Connection = "CosmosDBConnection", CreateIfNotExists = true)] LeaveLimitDto? LeaveLimit = null);
+
+    public record BatchLeaveLimitOutput(
+        [property: HttpResult] IActionResult Result,
+        [property: CosmosDBOutput("%DatabaseName%", "%LeaveLimitsContainerName%",
+            Connection = "CosmosDBConnection", CreateIfNotExists = true)] List<LeaveLimitDto>? LeaveLimits = null);
 }
