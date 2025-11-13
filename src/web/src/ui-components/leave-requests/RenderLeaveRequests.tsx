@@ -14,6 +14,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
+import { useTranslation } from "react-i18next";
 
 export function RenderLeaveRequests(
   props: Readonly<
@@ -22,6 +23,7 @@ export function RenderLeaveRequests(
     }
   >,
 ): JSX.Element {
+  const { t } = useTranslation();
   const [leaveRequestId, setLeaveRequestId] = useState<string | undefined>();
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -126,7 +128,7 @@ export function RenderLeaveRequests(
             width: "100%",
           }}
         >
-          <Tooltip title="Add leave request">
+          <Tooltip title={t("Add leave request")}>
             <Button
               onClick={handleAddLeaveRequest}
               sx={{
