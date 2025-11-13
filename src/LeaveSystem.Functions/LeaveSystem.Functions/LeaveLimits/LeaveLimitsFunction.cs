@@ -14,7 +14,7 @@ using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribut
 
 public class LeaveLimitsFunction(
     SearchLeaveLimitsRepository searchRepository,
-    CreateLeaveLimitsValidator createValidator)
+    CreateLeaveLimitsValidator createValidator,)
 {
     [Function(nameof(SearchUserLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
@@ -139,7 +139,7 @@ public class LeaveLimitsFunction(
     }
 
     [Function(nameof(BatchInsertLimits))]
-    //[Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public async Task<BatchLeaveLimitOutput> BatchInsertLimits(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "leavelimits/batch")] HttpRequest req,
         [FromBody] List<LeaveLimitDto> leaveLimits, CancellationToken cancellationToken)
@@ -151,7 +151,7 @@ public class LeaveLimitsFunction(
         {
             var validationResult = await createValidator.Validate(
                 limit.ValidSince, limit.ValidUntil, limit.AssignedToUserId, limit.LeaveTypeId, limit.Id, cancellationToken);
-            
+
             if (validationResult.IsFailure)
             {
                 errors.Add($"Limit {limit.Id}: {validationResult.Error.Message}");
@@ -162,9 +162,9 @@ public class LeaveLimitsFunction(
             }
         }
 
-        if (errors.Any())
+        if (errors.Count != 0)
         {
-            return new(new BadRequestObjectResult(new { errors = errors }));
+            return new(new BadRequestObjectResult(new { errors }));
         }
 
         return new(new CreatedResult("/leavelimits/batch", new { items = validatedLimits, count = validatedLimits.Count }), validatedLimits);
