@@ -71,3 +71,35 @@ X-Authorization: Bearer {{bearerToken}}
 DELETE {{baseUrl}}/leavelimits/cd72ec1a-e461-4049-b9b9-db49f7bc58c0
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 204
+
+###
+# @name Generate New Year Limits
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits/generate-new-year?year=2024
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Batch Insert Limits
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leavelimits/batch
+X-Authorization: Bearer {{bearerToken}}
+Content-Type: application/json
+
+[
+  {
+    "id": "{{$guid}}",
+    "limit": "PT208H",
+    "overdueLimit": null,
+    "workingHours": "PT8H",
+    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "validSince": "2025-01-01",
+    "validUntil": "2025-12-31",
+    "assignedToUserId": null,
+    "state": "Active",
+    "description": "Generated limit for 2025"
+  }
+]
+?? status == 201
