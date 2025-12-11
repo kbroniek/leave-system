@@ -94,18 +94,26 @@ export default function ShowLeaveRequestsTimeline(
       position: "sticky",
       left: 0,
       zIndex: 1,
-      paddingLeft: "3px",
+      paddingLeft: "8px",
+      paddingRight: "8px",
       minWidth: 200,
       width: 200,
       borderRight: `1px solid ${theme.palette.divider}`,
+      backgroundColor: theme.palette.grey[100],
+      fontWeight: 500,
+      display: "flex",
+      alignItems: "center",
     },
     "& .employee-name-header": {
       position: "sticky",
       left: 0,
       top: 0,
       zIndex: 4,
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: theme.palette.grey[100],
       borderRight: `1px solid ${theme.palette.divider}`,
+      fontWeight: 600,
+      paddingLeft: "8px",
+      paddingRight: "8px",
     },
     "& .timeline-day.date-from": {
       color: "#ff0000",
@@ -136,12 +144,12 @@ export default function ShowLeaveRequestsTimeline(
         backgroundColor: "#FFDD96",
       },
       "& .employee-name-cell": {
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.grey[100],
       },
       "&:hover .employee-name-cell": {
-        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        backgroundColor: theme.palette.grey[200],
         "@media (hover: none)": {
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: theme.palette.grey[100],
         },
       },
     },
@@ -154,17 +162,17 @@ export default function ShowLeaveRequestsTimeline(
       },
       backgroundColor: theme.palette.grey[200],
       "& .employee-name-cell": {
-        backgroundColor: theme.palette.grey[200],
+        backgroundColor: theme.palette.grey[100],
       },
       "&:hover": {
         backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
         "& .employee-name-cell": {
-          backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+          backgroundColor: theme.palette.grey[200],
         },
         "@media (hover: none)": {
           backgroundColor: theme.palette.grey[200],
           "& .employee-name-cell": {
-            backgroundColor: theme.palette.grey[200],
+            backgroundColor: theme.palette.grey[100],
           },
         },
       },
