@@ -21,8 +21,27 @@ import { LeaveRequestFormModel } from "../submit-leave-request/SubmitLeaveReques
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { useState } from "react";
 import { SubmitHandler } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 export const rowHeight = 30;
+
+function getMonthTranslationKey(monthNumber: number): string {
+  const monthKeys = [
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+  ];
+  return monthKeys[monthNumber - 1] || "january";
+}
 
 export default function ShowLeaveRequestsTimeline(
   params: Readonly<{
@@ -37,6 +56,7 @@ export default function ShowLeaveRequestsTimeline(
     onUserIdChanged?: (userId: string) => void;
   }>,
 ): JSX.Element {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<DateTime | undefined>();
   const [selectedEmployee, setSelectedEmployee] = useState<
@@ -247,7 +267,21 @@ export default function ShowLeaveRequestsTimeline(
                     borderColor: "divider",
                   }}
                 >
-                  {monthGroup.date.toFormat("LLLL")}
+                  {(() => {
+                    const monthKey = getMonthTranslationKey(
+                      monthGroup.date.month,
+                    );
+                    const translationKey = `months.${monthKey}`;
+                    const translated = t(translationKey);
+                    // If translation returns the key itself (translation not found), use Luxon format
+                    if (
+                      translated === translationKey ||
+                      translated.startsWith("months.")
+                    ) {
+                      return monthGroup.date.toFormat("LLLL");
+                    }
+                    return translated;
+                  })()}
                 </TableCell>
               ))}
             </TableRow>

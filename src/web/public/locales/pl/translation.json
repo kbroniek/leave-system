@@ -145,5 +145,19 @@
     "title": "Coś poszło nie tak",
     "errorCode": "Kod błędu: {{code}}",
     "suggestion": "Odśwież stronę i spróbuj ponownie. Jeśli problem się powtarza, skontaktuj się z administratorem systemu."
+  },
+  "months": {
+    "january": "Styczeń",
+    "february": "Luty",
+    "march": "Marzec",
+    "april": "Kwiecień",
+    "may": "Maj",
+    "june": "Czerwiec",
+    "july": "Lipiec",
+    "august": "Sierpień",
+    "september": "Wrzesień",
+    "october": "Październik",
+    "november": "Listopad",
+    "december": "Grudzień"
   }
 }
