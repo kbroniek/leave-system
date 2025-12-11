@@ -105,13 +105,20 @@ export class LeaveRequestsTimelineTransformer {
         dateFrom.plus({ days: daysLeftDateFrom })
       ),
     });
+    
+    const dateToStart = DateTime.fromObject({
+      year: dateTo.year,
+      month: dateTo.month,
+      day: 1,
+    });
+    
     for (
       let currentDate = DateTime.fromObject({
         year: dateFrom.year,
         month: dateFrom.month,
         day: 1,
       }).plus({ month: 1 });
-      currentDate.month < dateTo.month;
+      currentDate < dateToStart;
       currentDate = currentDate.plus({ month: 1 })
     ) {
       const daysLeft =
@@ -124,15 +131,12 @@ export class LeaveRequestsTimelineTransformer {
         ),
       });
     }
-    if (dateFrom.month != dateTo.month) {
+    
+    if (dateFrom.month !== dateTo.month || dateFrom.year !== dateTo.year) {
       headerTable.push({
         date: dateTo,
         days: this.createDatesSequence(
-          DateTime.fromObject({
-            year: dateTo.year,
-            month: dateTo.month,
-            day: 1,
-          }),
+          dateToStart,
           dateTo
         ),
       });
