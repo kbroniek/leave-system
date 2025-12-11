@@ -63,10 +63,28 @@ export function GenerateNewYearLimitsModal({
 
     setIsSaving(true);
     try {
+      // Normalize all workingHours to ISO8601 format before sending
+      const normalizedLimits = generatedLimits.map((limit) => {
+        // If workingHours is not already in ISO8601 format, convert it
+        let workingHoursValue = limit.workingHours;
+        const duration = Duration.fromISO(workingHoursValue);
+        if (!duration.isValid) {
+          // Try to parse as a number (hours) and convert to ISO8601
+          const hours = parseFloat(workingHoursValue);
+          if (!isNaN(hours)) {
+            workingHoursValue = Duration.fromObject({ hours }).toISO();
+          }
+        }
+        return {
+          ...limit,
+          workingHours: workingHoursValue,
+        };
+      });
+
       const response = await callApi(
         `/leavelimits/batch`,
         "POST",
-        generatedLimits,
+        normalizedLimits,
         notifications.show,
       );
       if (response.status === 201) {
@@ -104,7 +122,7 @@ export function GenerateNewYearLimitsModal({
                 hours: item.overdueLimit * workingHours,
               }).toISO()
             : null,
-          workingHours: workingHours.toString(),
+          workingHours: Duration.fromObject({ hours: workingHours }).toISO(),
           validSince: item.validSince
             ? DateTime.fromJSDate(item.validSince).toFormat("yyyy-MM-dd")
             : null,
