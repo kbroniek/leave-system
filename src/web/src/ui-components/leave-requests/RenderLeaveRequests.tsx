@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { GridRenderCellParams } from "@mui/x-data-grid/models";
 import { DateTime } from "luxon";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import { rowHeight } from "./ShowLeaveRequestsTimeline";
@@ -17,11 +16,11 @@ import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
 
 export function RenderLeaveRequests(
-  props: Readonly<
-    GridRenderCellParams<EmployeeDto, RenderLeaveRequestModel> & {
-      onAddLeaveRequest?: (date: DateTime, employee: EmployeeDto) => void;
-    }
-  >,
+  props: Readonly<{
+    value: RenderLeaveRequestModel;
+    row: EmployeeDto;
+    onAddLeaveRequest?: (date: DateTime, employee: EmployeeDto) => void;
+  }>,
 ): JSX.Element {
   const { t } = useTranslation();
   const [leaveRequestId, setLeaveRequestId] = useState<string | undefined>();
@@ -33,7 +32,7 @@ export function RenderLeaveRequests(
 
   const handleAddLeaveRequest = () => {
     if (props.onAddLeaveRequest && props.value && props.row) {
-      props.onAddLeaveRequest(props.value.date, props.row as EmployeeDto);
+      props.onAddLeaveRequest(props.value.date, props.row);
     }
   };
   const handleClickOpen = (id: string) => {
