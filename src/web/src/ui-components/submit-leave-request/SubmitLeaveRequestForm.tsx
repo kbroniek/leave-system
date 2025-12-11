@@ -138,8 +138,9 @@ export const SubmitLeaveRequestForm = (props: {
       return;
     }
     setSubmitInProgress(true);
-    // If it is an error disable in progress
-    if (!(await props.onSubmit(value, event))) {
+    try {
+      await props.onSubmit(value, event);
+    } finally {
       setSubmitInProgress(false);
     }
   };
