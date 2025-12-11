@@ -79,7 +79,6 @@ export default function ShowLeaveRequestsTimeline(
     overflow: "auto",
     "& .MuiTableCell-root": {
       padding: 0,
-      border: "none",
       height: rowHeight,
       minWidth: 50,
       width: 50,
@@ -122,6 +121,9 @@ export default function ShowLeaveRequestsTimeline(
     },
     "& .timeline-day.holiday": {
       backgroundColor: "#FFDD96",
+    },
+    "& .month-separator": {
+      borderRight: "1px solid rgba(0, 0, 0, 0.5)",
     },
   }));
 
@@ -221,10 +223,15 @@ export default function ShowLeaveRequestsTimeline(
               >
                 {/* Empty header for employee name column */}
               </TableCell>
-              {transformedData.header.map((monthGroup) => (
+              {transformedData.header.map((monthGroup, monthIndex) => (
                 <TableCell
                   key={monthGroup.date.toISO()}
                   colSpan={monthGroup.days.length}
+                  className={
+                    monthIndex < transformedData.header.length - 1
+                      ? "month-separator"
+                      : ""
+                  }
                   sx={{
                     textAlign: "center",
                     fontWeight: "bold",
@@ -243,20 +250,30 @@ export default function ShowLeaveRequestsTimeline(
               >
                 {/* Empty header for employee name column */}
               </TableCell>
-              {transformedData.header.map((monthGroup) =>
-                monthGroup.days.map((day) => (
-                  <TableCell
-                    key={day.toISO()}
-                    className={getDayCssClass(day, transformedHolidays)}
-                    sx={{
-                      textAlign: "center",
-                      borderLeft: "1px solid",
-                      borderColor: "divider",
-                    }}
-                  >
-                    {day.toFormat("dd")}
-                  </TableCell>
-                )),
+              {transformedData.header.map((monthGroup, monthIndex) =>
+                monthGroup.days.map((day, dayIndex) => {
+                  const isLastDayOfMonth =
+                    dayIndex === monthGroup.days.length - 1;
+                  const isLastMonth =
+                    monthIndex === transformedData.header.length - 1;
+                  return (
+                    <TableCell
+                      key={day.toISO()}
+                      className={`${getDayCssClass(day, transformedHolidays)} ${
+                        isLastDayOfMonth && !isLastMonth
+                          ? "month-separator"
+                          : ""
+                      }`}
+                      sx={{
+                        textAlign: "center",
+                        borderLeft: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
+                      {day.toFormat("dd")}
+                    </TableCell>
+                  );
+                }),
               )}
             </TableRow>
           </TableHead>
@@ -269,34 +286,63 @@ export default function ShowLeaveRequestsTimeline(
                 <TableCell className="employee-name-cell">
                   {item.employee.name}
                 </TableCell>
-                {item.table.map((dayData) => {
-                  const renderModel: RenderLeaveRequestModel = {
-                    date: dayData.date,
-                    leaveRequests: dayData.leaveRequests,
-                    statuses: leaveStatusesActive,
-                    leaveTypes: leaveTypesActive,
-                    holidays: params.holidays || { items: [] },
-                  };
-                  return (
-                    <TableCell
-                      key={dayData.date.toISO()}
-                      className={getDayCssClass(
-                        dayData.date,
-                        transformedHolidays,
-                      )}
-                      sx={{
-                        borderLeft: "1px solid",
-                        borderColor: "divider",
-                      }}
-                    >
-                      <RenderLeaveRequests
-                        value={renderModel}
-                        row={item.employee}
-                        onAddLeaveRequest={handleAddLeaveRequest}
-                      />
-                    </TableCell>
-                  );
-                })}
+                {transformedData.header.map((monthGroup, monthIndex) =>
+                  monthGroup.days.map((day, dayIndex) => {
+                    const dayData = item.table.find((d) => d.date.equals(day));
+                    const isLastDayOfMonth =
+                      dayIndex === monthGroup.days.length - 1;
+                    const isLastMonth =
+                      monthIndex === transformedData.header.length - 1;
+
+                    if (!dayData) {
+                      return (
+                        <TableCell
+                          key={day.toISO()}
+                          className={`${getDayCssClass(day, transformedHolidays)} ${
+                            isLastDayOfMonth && !isLastMonth
+                              ? "month-separator"
+                              : ""
+                          }`}
+                          sx={{
+                            borderLeft: "1px solid",
+                            borderColor: "divider",
+                          }}
+                        />
+                      );
+                    }
+
+                    const renderModel: RenderLeaveRequestModel = {
+                      date: dayData.date,
+                      leaveRequests: dayData.leaveRequests,
+                      statuses: leaveStatusesActive,
+                      leaveTypes: leaveTypesActive,
+                      holidays: params.holidays || { items: [] },
+                    };
+                    return (
+                      <TableCell
+                        key={dayData.date.toISO()}
+                        className={`${getDayCssClass(
+                          dayData.date,
+                          transformedHolidays,
+                        )} ${
+                          isLastDayOfMonth && !isLastMonth
+                            ? "month-separator"
+                            : ""
+                        }`}
+                        sx={{
+                          borderLeft: "1px solid",
+                          borderColor: "divider",
+                        }}
+                      >
+                        <RenderLeaveRequests
+                          value={renderModel}
+                          row={item.employee}
+                          onAddLeaveRequest={handleAddLeaveRequest}
+                        />
+                      </TableCell>
+                    );
+                  }),
+                )}
               </TableRow>
             ))}
           </TableBody>
