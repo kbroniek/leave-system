@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import styled from "@mui/material/styles/styled";
+import { styled } from "@mui/material/styles";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
@@ -9,7 +9,7 @@ import { gridClasses } from "@mui/x-data-grid/constants";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
 import { HrTransformer } from "./HrTransformer";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -27,8 +27,8 @@ export const ShowHrPanel = (
     leaveLimits: LeaveLimitDto[] | undefined;
     employees: EmployeeDto[] | undefined;
     holidays: string[] | undefined;
-  }>,
-): JSX.Element => {
+  }>
+): React.ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const employees = EmployeesFinder.get(params.leaveRequests, params.employees);
@@ -47,14 +47,14 @@ export const ShowHrPanel = (
     },
   }));
   const holidayLeaveType = params.leaveTypes?.find(
-    (x) => x.properties?.catalog === "Holiday",
+    (x) => x.properties?.catalog === "Holiday"
   );
   const redirectUserDetails = (userId: string) => {
     navigate(`/user-leaves/${userId}`);
   };
   const RenderSelectedXDays = (
-    props: Readonly<GridRenderCellParams<GridValidRowModel>>,
-  ): JSX.Element => {
+    props: Readonly<GridRenderCellParams<GridValidRowModel>>
+  ): React.ReactElement => {
     if (!props.row) {
       return <></>;
     }
@@ -96,7 +96,7 @@ export const ShowHrPanel = (
       .map((x) => ({
         field: x.id,
         headerName: x.name,
-      })) ?? [],
+      })) ?? []
   );
   const transformer = new HrTransformer(
     employees,
@@ -104,7 +104,7 @@ export const ShowHrPanel = (
     params.holidays,
     params.leaveTypes,
     params.leaveLimits,
-    selectedXDaysNumber,
+    selectedXDaysNumber
   );
   const hrPanelData = transformer.transform();
   return (

@@ -2,7 +2,7 @@ import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import { LeaveStatusDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { MyLeaveRequestsInfo } from "./MyLeaveRequestsInfo";
 import { MyLeaveRequestsTable } from "./MyLeaveRequestsTable";
 import { Box, Divider, Typography } from "@mui/material";
@@ -12,7 +12,7 @@ export const ShowMyLeaveRequests = (params: {
   leaveStatuses: LeaveStatusDto[] | undefined;
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
-}): JSX.Element => {
+}): React.ReactElement => {
   return (
     <Grid container spacing={2} sx={{ width: "100%" }}>
       <Grid size={12}>

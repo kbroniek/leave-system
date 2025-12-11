@@ -6,7 +6,7 @@ import { DaysCounter } from "../utils/DaysCounter";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { DateTime, DateTimeFormatOptions } from "luxon";
 import { DurationFormatter } from "../utils/DurationFormatter";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -30,8 +30,8 @@ export default function ShowLeaveRequestsTimeline(
     onAccept: (id: string, remarks: string) => Promise<void>;
     onReject: (id: string, remarks: string) => Promise<void>;
     onCancel: (id: string, remarks: string) => Promise<void>;
-  }>,
-): JSX.Element {
+  }>
+): React.ReactElement {
   const titleStyle = { color: "text.secondary", textAlign: "right" };
   const defaultStyle = { paddingTop: "1px", width: "max-content" };
   const leaveTypeStyle = {
@@ -47,13 +47,13 @@ export default function ShowLeaveRequestsTimeline(
   const holidaysDateTime = props.holidays.items.map((x) => DateTime.fromISO(x));
   const daysCounter = new DaysCounter(
     holidaysDateTime,
-    props.leaveType.properties?.includeFreeDays ?? false,
+    props.leaveType.properties?.includeFreeDays ?? false
   );
   const dateFrom = DateTime.fromISO(props.leaveRequest.dateFrom);
   const dateTo = DateTime.fromISO(props.leaveRequest.dateTo);
   const createdDate = DateTime.fromISO(props.leaveRequest.createdDate);
   const lastModifiedDate = DateTime.fromISO(
-    props.leaveRequest.lastModifiedDate,
+    props.leaveRequest.lastModifiedDate
   );
   const formatDate: DateTimeFormatOptions = {
     weekday: "short",
@@ -84,7 +84,7 @@ export default function ShowLeaveRequestsTimeline(
   };
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(
-      `${window.location.origin}/details/${props.leaveRequest.leaveRequestId}`,
+      `${window.location.origin}/details/${props.leaveRequest.leaveRequestId}`
     );
     notifications.show(t("Copied to clipboard"), {
       severity: "info",

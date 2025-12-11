@@ -39,12 +39,11 @@ export const msalConfig: Configuration = {
     storeAuthStateInCookie: isIE || isEdge || isFirefox,
   },
   system: {
-    allowNativeBroker: false, // Disables WAM Broker
     loggerOptions: {
       loggerCallback: (
         level: LogLevel,
         message: string,
-        containsPii: boolean,
+        containsPii: boolean
       ) => {
         if (containsPii) {
           return;
