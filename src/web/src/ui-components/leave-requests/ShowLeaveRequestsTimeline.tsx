@@ -100,8 +100,6 @@ export default function ShowLeaveRequestsTimeline(
     "& .MuiTableCell-root": {
       padding: 0,
       height: rowHeight,
-      minWidth: 50,
-      width: 50,
     },
     "& .MuiTableCell-head": {
       position: "sticky",
@@ -116,8 +114,6 @@ export default function ShowLeaveRequestsTimeline(
       zIndex: 1,
       paddingLeft: "8px",
       paddingRight: "8px",
-      minWidth: 200,
-      width: 200,
       borderRight: `1px solid ${theme.palette.divider}`,
       backgroundColor: theme.palette.grey[100],
       fontWeight: 500,
