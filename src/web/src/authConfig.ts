@@ -17,9 +17,6 @@ const isFirefox = firefox > 0; // Only needed if you need to support the redirec
  * To learn more about custom policies, visit: https://docs.microsoft.com/en-us/azure/active-directory-b2c/custom-policy-overview
  */
 export const b2cPolicies = {
-  names: {
-    signUpSignIn: import.meta.env.VITE_REACT_APP_B2C_POLICY_SIGNIN,
-  },
   authorities: {
     signUpSignIn: {
       authority: import.meta.env.VITE_REACT_APP_AUTHORITY_SIGNIN,
