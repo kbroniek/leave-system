@@ -2,15 +2,12 @@ import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { DateTime } from "luxon";
 import { alpha, styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import { DataGrid } from "@mui/x-data-grid/DataGrid";
-import { gridClasses } from "@mui/x-data-grid";
-import {
-  GridCellParams,
-  GridColDef,
-  GridColumnGroupingModel,
-  GridValidRowModel,
-} from "@mui/x-data-grid/models";
-import Grid from "@mui/material/Grid2";
+import Table from "@mui/material/Table";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableBody from "@mui/material/TableBody";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
 import { RenderLeaveRequests } from "./RenderLeaveRequests";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { LeaveStatusDto } from "../dtos/LeaveStatusDto";
@@ -73,103 +70,110 @@ export default function ShowLeaveRequestsTimeline(
     params.leaveTypes || [],
   );
   const transformedData = transformer.transformToTable();
-  const dates =
-    transformedData.items.find(() => true)?.table.map((x) => x.date) ?? [];
-  const rows = transformedData.items.map((x) => ({
-    ...x.employee,
-    ...x.table.reduce(
-      (a, v) => ({
-        ...a,
-        [v.date.toISO()!]: {
-          date: v.date,
-          leaveRequests: v.leaveRequests,
-          statuses: leaveStatusesActive,
-          leaveTypes: leaveTypesActive,
-          holidays: params.holidays || { items: [] },
-        } as RenderLeaveRequestModel,
-      }),
-      {},
-    ),
-  }));
-
   const transformedHolidays = (params.holidays?.items || []).map((x) =>
     DateTime.fromISO(x),
   );
-  const columns: GridColDef<GridValidRowModel[number]>[] = dates.map((x) => ({
-    field: x.toISO()!,
-    headerName: x.toFormat("dd"),
-    width: 10,
-    headerClassName: getDayCssClass(x, transformedHolidays),
-    cellClassName: (params: GridCellParams<EmployeeDto, { date: DateTime }>) =>
-      !params.value
-        ? ""
-        : getDayCssClass(params.value.date, transformedHolidays),
-    renderCell: (cellParams) => (
-      <RenderLeaveRequests
-        {...cellParams}
-        onAddLeaveRequest={handleAddLeaveRequest}
-      />
-    ),
-  }));
-
-  const groups: GridColumnGroupingModel = transformedData.header.map((x) => ({
-    groupId: x.date.toFormat("LLLL"),
-    children: x.days.map((x) => ({ field: x.toISO()! })),
-  }));
   const ODD_OPACITY = 0.2;
-  const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
-    ".MuiDataGrid-cell": {
+  const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+    maxHeight: "100%",
+    overflow: "auto",
+    "& .MuiTableCell-root": {
       padding: 0,
+      height: rowHeight,
+      minWidth: 50,
+      width: 50,
     },
-    [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
-      outline: "transparent",
+    "& .MuiTableCell-head": {
+      position: "sticky",
+      top: 0,
+      zIndex: 3,
+      backgroundColor: theme.palette.background.paper,
+      borderBottom: `1px solid ${theme.palette.divider}`,
     },
-    [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]:
-      {
-        outline: "none",
-      },
-    [`& .${gridClasses["row--borderBottom"]}`]: {
-      "& .timeline-day.weekend": {
-        backgroundColor: "#e0e006;",
-      },
-      "& .timeline-day.holiday": {
-        backgroundColor: "#FFDD96;",
-      },
-      "& .timeline-day.today": {
-        backgroundColor: "#c0c0c0;",
-      },
+    "& .employee-name-cell": {
+      position: "sticky",
+      left: 0,
+      zIndex: 1,
+      paddingLeft: "8px",
+      paddingRight: "8px",
+      minWidth: 200,
+      width: 200,
+      borderRight: `1px solid ${theme.palette.divider}`,
+      backgroundColor: theme.palette.grey[100],
+      fontWeight: 500,
+      display: "flex",
+      alignItems: "center",
     },
-    [`& .${gridClasses.row}`]: {
-      "& .timeline-day.date-from": {
-        color: "#ff0000;",
-      },
-      "& .timeline-day.date-to": {
-        color: "#ff00ff;",
-      },
+    "& .employee-name-header": {
+      position: "sticky",
+      left: 0,
+      top: 0,
+      zIndex: 4,
+      backgroundColor: theme.palette.grey[100],
+      borderRight: `1px solid ${theme.palette.divider}`,
+      fontWeight: 600,
+      paddingLeft: "8px",
+      paddingRight: "8px",
+    },
+    "& .timeline-day.date-from": {
+      color: "#ff0000",
+    },
+    "& .timeline-day.date-to": {
+      color: "#ff00ff",
     },
     "& .timeline-day.today": {
-      backgroundColor: "#c0c0c0;",
+      backgroundColor: "#c0c0c0",
     },
-    [`& .${gridClasses.row}.odd`]: {
+    "& .timeline-day.weekend": {
+      backgroundColor: "#e0e006",
+    },
+    "& .timeline-day.holiday": {
+      backgroundColor: "#FFDD96",
+    },
+    "& .month-separator": {
+      borderRight: "1px solid rgba(0, 0, 0, 0.5)",
+    },
+  }));
+
+  const StyledTable = styled(Table)(({ theme }) => ({
+    "& .MuiTableRow.odd": {
       "& .timeline-day.weekend": {
-        backgroundColor: "#e0e006;",
+        backgroundColor: "#e0e006",
       },
       "& .timeline-day.holiday": {
-        backgroundColor: "#FFDD96;",
+        backgroundColor: "#FFDD96",
+      },
+      "& .employee-name-cell": {
+        backgroundColor: theme.palette.grey[100],
+      },
+      "&:hover .employee-name-cell": {
+        backgroundColor: theme.palette.grey[200],
+        "@media (hover: none)": {
+          backgroundColor: theme.palette.grey[100],
+        },
       },
     },
-    [`& .${gridClasses.row}.even`]: {
+    "& .MuiTableRow.even": {
       "& .timeline-day.weekend": {
-        backgroundColor: "#b8b82e;",
+        backgroundColor: "#b8b82e",
       },
       "& .timeline-day.holiday": {
-        backgroundColor: "#d4b97c;",
+        backgroundColor: "#d4b97c",
       },
       backgroundColor: theme.palette.grey[200],
+      "& .employee-name-cell": {
+        backgroundColor: theme.palette.grey[100],
+      },
       "&:hover": {
         backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+        "& .employee-name-cell": {
+          backgroundColor: theme.palette.grey[200],
+        },
         "@media (hover: none)": {
-          backgroundColor: "transparent",
+          backgroundColor: theme.palette.grey[200],
+          "& .employee-name-cell": {
+            backgroundColor: theme.palette.grey[100],
+          },
         },
       },
       "&.Mui-selected": {
@@ -177,6 +181,12 @@ export default function ShowLeaveRequestsTimeline(
           theme.palette.primary.main,
           ODD_OPACITY + theme.palette.action.selectedOpacity,
         ),
+        "& .employee-name-cell": {
+          backgroundColor: alpha(
+            theme.palette.primary.main,
+            ODD_OPACITY + theme.palette.action.selectedOpacity,
+          ),
+        },
         "&:hover": {
           backgroundColor: alpha(
             theme.palette.primary.main,
@@ -184,88 +194,168 @@ export default function ShowLeaveRequestsTimeline(
               theme.palette.action.selectedOpacity +
               theme.palette.action.hoverOpacity,
           ),
-          // Reset on touch devices, it doesn't add specificity
+          "& .employee-name-cell": {
+            backgroundColor: alpha(
+              theme.palette.primary.main,
+              ODD_OPACITY +
+                theme.palette.action.selectedOpacity +
+                theme.palette.action.hoverOpacity,
+            ),
+          },
           "@media (hover: none)": {
             backgroundColor: alpha(
               theme.palette.primary.main,
               ODD_OPACITY + theme.palette.action.selectedOpacity,
             ),
+            "& .employee-name-cell": {
+              backgroundColor: alpha(
+                theme.palette.primary.main,
+                ODD_OPACITY + theme.palette.action.selectedOpacity,
+              ),
+            },
           },
         },
       },
     },
   }));
 
-  const EmployeeStripedDataGrid = styled(StripedDataGrid)(() => ({
-    "& .MuiDataGrid-columnSeparator": {
-      display: "none",
-    },
-    "& .MuiDataGrid-filler": {
-      display: "none",
-    },
-    "& .MuiDataGrid-cell": {
-      paddingLeft: "3px",
-    },
-  }));
-
   return (
     <Box sx={{ maxWidth: "100%", overflow: "auto", flexGrow: 1 }}>
-      <Grid container spacing={0}>
-        <Grid size={2}>
-          <EmployeeStripedDataGrid
-            rowHeight={rowHeight}
-            columnHeaderHeight={rowHeight}
-            rows={transformedData.items.map((x) => x.employee)}
-            columns={[
-              {
-                field: "name",
-                headerName: "",
-                flex: 1,
-              },
-            ]}
-            columnGroupingModel={[
-              {
-                groupId: "name",
-                headerName: "",
-                children: [{ field: "name" }],
-              },
-            ]}
-            disableRowSelectionOnClick
-            hideFooter={true}
-            hideFooterPagination={true}
-            hideFooterSelectedRowCount={true}
-            disableColumnMenu
-            disableColumnSorting
-            disableColumnResize
-            disableColumnFilter
-            disableColumnSelector
-            getRowClassName={(params) =>
-              params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
-            }
-          />
-        </Grid>
-        <Grid size={10}>
-          <StripedDataGrid
-            rowHeight={rowHeight}
-            columnHeaderHeight={rowHeight}
-            rows={rows}
-            columns={columns}
-            columnGroupingModel={groups}
-            disableRowSelectionOnClick
-            hideFooter={true}
-            hideFooterPagination={true}
-            hideFooterSelectedRowCount={true}
-            disableColumnMenu
-            disableColumnSorting
-            disableColumnResize
-            disableColumnFilter
-            disableColumnSelector
-            getRowClassName={(params) =>
-              params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
-            }
-          />
-        </Grid>
-      </Grid>
+      <StyledTableContainer>
+        <StyledTable stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                className="employee-name-header"
+                sx={{ minWidth: 200, width: 200 }}
+              >
+                {/* Empty header for employee name column */}
+              </TableCell>
+              {transformedData.header.map((monthGroup, monthIndex) => (
+                <TableCell
+                  key={monthGroup.date.toISO()}
+                  colSpan={monthGroup.days.length}
+                  className={
+                    monthIndex < transformedData.header.length - 1
+                      ? "month-separator"
+                      : ""
+                  }
+                  sx={{
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    borderLeft: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  {monthGroup.date.toFormat("LLLL")}
+                </TableCell>
+              ))}
+            </TableRow>
+            <TableRow>
+              <TableCell
+                className="employee-name-header"
+                sx={{ minWidth: 200, width: 200 }}
+              >
+                {/* Empty header for employee name column */}
+              </TableCell>
+              {transformedData.header.map((monthGroup, monthIndex) =>
+                monthGroup.days.map((day, dayIndex) => {
+                  const isLastDayOfMonth =
+                    dayIndex === monthGroup.days.length - 1;
+                  const isLastMonth =
+                    monthIndex === transformedData.header.length - 1;
+                  return (
+                    <TableCell
+                      key={day.toISO()}
+                      className={`${getDayCssClass(day, transformedHolidays)} ${
+                        isLastDayOfMonth && !isLastMonth
+                          ? "month-separator"
+                          : ""
+                      }`}
+                      sx={{
+                        textAlign: "center",
+                        borderLeft: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
+                      {day.toFormat("dd")}
+                    </TableCell>
+                  );
+                }),
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {transformedData.items.map((item, rowIndex) => (
+              <TableRow
+                key={item.employee.id}
+                className={rowIndex % 2 === 0 ? "even" : "odd"}
+              >
+                <TableCell className="employee-name-cell">
+                  {item.employee.name}
+                </TableCell>
+                {transformedData.header.map((monthGroup, monthIndex) =>
+                  monthGroup.days.map((day, dayIndex) => {
+                    const dayData = item.table.find((d) => d.date.equals(day));
+                    const isLastDayOfMonth =
+                      dayIndex === monthGroup.days.length - 1;
+                    const isLastMonth =
+                      monthIndex === transformedData.header.length - 1;
+
+                    if (!dayData) {
+                      return (
+                        <TableCell
+                          key={day.toISO()}
+                          className={`${getDayCssClass(day, transformedHolidays)} ${
+                            isLastDayOfMonth && !isLastMonth
+                              ? "month-separator"
+                              : ""
+                          }`}
+                          sx={{
+                            borderLeft: "1px solid",
+                            borderColor: "divider",
+                          }}
+                        />
+                      );
+                    }
+
+                    const renderModel: RenderLeaveRequestModel = {
+                      date: dayData.date,
+                      leaveRequests: dayData.leaveRequests,
+                      statuses: leaveStatusesActive,
+                      leaveTypes: leaveTypesActive,
+                      holidays: params.holidays || { items: [] },
+                    };
+                    return (
+                      <TableCell
+                        key={dayData.date.toISO()}
+                        className={`${getDayCssClass(
+                          dayData.date,
+                          transformedHolidays,
+                        )} ${
+                          isLastDayOfMonth && !isLastMonth
+                            ? "month-separator"
+                            : ""
+                        }`}
+                        sx={{
+                          borderLeft: "1px solid",
+                          borderColor: "divider",
+                        }}
+                      >
+                        <RenderLeaveRequests
+                          value={renderModel}
+                          row={item.employee}
+                          onAddLeaveRequest={handleAddLeaveRequest}
+                        />
+                      </TableCell>
+                    );
+                  }),
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </StyledTable>
+      </StyledTableContainer>
 
       <SubmitLeaveRequestDialog
         open={dialogOpen}
