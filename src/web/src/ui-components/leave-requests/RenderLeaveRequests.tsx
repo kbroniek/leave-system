@@ -133,6 +133,7 @@ export function RenderLeaveRequests(
               sx={{
                 padding: 0,
                 minWidth: "50px",
+                width: "100%",
                 height: "29px",
                 color: "gray",
                 "&:hover": {
@@ -219,6 +220,7 @@ export function RenderLeaveRequests(
                 className={getCssClass(x.status, x.leaveTypeId)}
                 sx={{
                   padding: 0,
+                  width: "100%",
                   minWidth: "50px",
                   height: "29px",
                   color: "black",
