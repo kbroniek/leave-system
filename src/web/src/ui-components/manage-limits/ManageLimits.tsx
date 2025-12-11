@@ -22,7 +22,7 @@ import { LeaveLimitDto, LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { DateTime, Duration } from "luxon";
 import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -72,7 +72,7 @@ const DataContent = () => {
       `/leavelimits/${dto.id}`,
       "PUT",
       dto,
-      notifications.show,
+      notifications.show
     );
     if (response.status === 200) {
       notifications.show(t("Limit is updated successfully"), {
@@ -89,7 +89,7 @@ const DataContent = () => {
     if (inProgress === InteractionStatus.None) {
       callApiGet<LeaveLimitsDto>(
         `/leavelimits?year=${currentYear}`,
-        notifications.show,
+        notifications.show
       )
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -106,7 +106,7 @@ const DataContent = () => {
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       callApiGet<LeaveLimitsDto>(
         `/leavelimits?year=${currentYear}`,
-        notifications.show,
+        notifications.show
       )
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -117,7 +117,7 @@ const DataContent = () => {
     if (inProgress === InteractionStatus.None) {
       callApiGet<LeaveLimitsDto>(
         `/leavelimits?year=${currentYear}`,
-        notifications.show,
+        notifications.show
       )
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -163,10 +163,10 @@ const DataContent = () => {
               <ManageLimitsTable
                 employees={apiEmployees.items}
                 leaveTypes={apiLeaveTypes.items.filter(
-                  (x) => x.state === "Active",
+                  (x) => x.state === "Active"
                 )}
                 limits={apiLeaveLimits?.items.filter(
-                  (x) => x.state === "Active",
+                  (x) => x.state === "Active"
                 )}
                 limitOnChange={handleLimitChange}
               />

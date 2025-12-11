@@ -18,7 +18,7 @@ import TextField from "@mui/material/TextField";
 import { Authorized } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { leaveRequestsStatuses } from "../utils/Status";
 
@@ -30,14 +30,14 @@ const DataContent = (params: { userId?: string }) => {
   const [apiLeaveStatuses, setApiLeaveStatuses] =
     useState<LeaveStatusesDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(
-    null,
+    null
   );
   const [apiLeaveLimits, setApiLeaveLimits] = useState<LeaveLimitsDto | null>();
   const [searchParams, setSearchParams] = useSearchParams();
   const notifications = useNotifications();
   const queryYear = Number(searchParams.get("year"));
   const [currentYear, setCurrentYear] = useState<number>(
-    !queryYear ? DateTime.local().year : queryYear,
+    !queryYear ? DateTime.local().year : queryYear
   );
   const [isCallApi, setIsCallApi] = useState(true);
 
@@ -50,22 +50,24 @@ const DataContent = (params: { userId?: string }) => {
       const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
       const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
       callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&assignedToUserIds=${userId}${leaveRequestsStatuses.map((x) => `&statuses=${x}`).join("")}`,
-        notifications.show,
+        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&assignedToUserIds=${userId}${leaveRequestsStatuses
+          .map((x) => `&statuses=${x}`)
+          .join("")}`,
+        notifications.show
       )
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       if (params.userId) {
         callApiGet<LeaveLimitsDto>(
           `/leavelimits?year=${currentYear}&userIds=${userId}`,
-          notifications.show,
+          notifications.show
         )
           .then((response) => setApiLeaveLimits(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       } else {
         callApiGet<LeaveLimitsDto>(
           `/leavelimits/user?year=${currentYear}`,
-          notifications.show,
+          notifications.show
         )
           .then((response) => setApiLeaveLimits(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -78,7 +80,7 @@ const DataContent = (params: { userId?: string }) => {
       if (!apiLeaveStatuses) {
         callApiGet<LeaveStatusesDto>(
           "/settings/leavestatus",
-          notifications.show,
+          notifications.show
         )
           .then((response) => setApiLeaveStatuses(response))
           .catch((e) => ifErrorAcquireTokenRedirect(e, instance));

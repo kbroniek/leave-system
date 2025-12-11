@@ -3,16 +3,13 @@ import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 import { CircularProgress } from "@mui/material";
 import { Duration } from "luxon";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import { LeaveRequestsUsed } from "./LeaveRequestsUsed";
-import {
-  filterLeaveRequests,
-  findLeaveTypes as findLeaveType,
-} from "./Utils";
+import { filterLeaveRequests, findLeaveTypes as findLeaveType } from "./Utils";
 import React from "react";
 import { LimitsCalculator } from "../utils/LimitsCalculator";
 import { Trans, useTranslation } from "react-i18next";
@@ -24,26 +21,30 @@ export const MyLeaveRequestsInfo = (params: {
   leaveRequests: LeaveRequestDto[] | undefined;
   leaveTypes: LeaveTypeDto[] | undefined;
   leaveLimits: LeaveLimitDto[] | undefined;
-}): JSX.Element => {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const holidayLeaveType = findLeaveType(params.leaveTypes, "Holiday");
   const onDemandLeaveType = findLeaveType(params.leaveTypes, "OnDemand");
-  const holidayLeaveRequests = filterLeaveRequests(
-    params.leaveRequests,
-    [holidayLeaveType?.id, onDemandLeaveType?.id],
-  );
+  const holidayLeaveRequests = filterLeaveRequests(params.leaveRequests, [
+    holidayLeaveType?.id,
+    onDemandLeaveType?.id,
+  ]);
   const holidayDuration = holidayLeaveRequests
-    ? LimitsCalculator.calculateTotalDuration(...holidayLeaveRequests.map((x) => x.duration))
+    ? LimitsCalculator.calculateTotalDuration(
+        ...holidayLeaveRequests.map((x) => x.duration)
+      )
     : undefined;
-  const holidayLimits = params.leaveLimits?.filter(
-    (x) => x.leaveTypeId === holidayLeaveType?.id,
-  ) ?? [];
-  const { limit, overdueLimit, totalLimit } = LimitsCalculator.calculateLimits(...holidayLimits);
+  const holidayLimits =
+    params.leaveLimits?.filter((x) => x.leaveTypeId === holidayLeaveType?.id) ??
+    [];
+  const { limit, overdueLimit, totalLimit } = LimitsCalculator.calculateLimits(
+    ...holidayLimits
+  );
   const leaveTypesLeft = params.leaveTypes?.filter(
     (x) =>
       x.properties?.catalog !== "Holiday" &&
       x.properties?.catalog !== "Saturday" &&
-      x.properties?.catalog !== "OnDemand",
+      x.properties?.catalog !== "OnDemand"
   );
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
@@ -123,11 +124,11 @@ export const MyLeaveRequestsInfo = (params: {
         </Grid>
         {leaveTypesLeft?.map((x) => {
           const leaveRequestPerLeaveType = params.leaveRequests?.filter(
-            (lr) => lr.leaveTypeId === x.id,
+            (lr) => lr.leaveTypeId === x.id
           );
           const duration = leaveRequestPerLeaveType
             ? LimitsCalculator.calculateTotalDuration(
-                ...leaveRequestPerLeaveType.map((lr) => lr.duration),
+                ...leaveRequestPerLeaveType.map((lr) => lr.duration)
               )
             : undefined;
           return (
@@ -158,7 +159,7 @@ function TotalDuration(params: {
   isLoading: boolean;
   duration: Duration | undefined;
   workingHours: string | undefined;
-}): JSX.Element {
+}): React.ReactElement {
   return params.isLoading ? (
     <CircularProgress size="20px" />
   ) : (

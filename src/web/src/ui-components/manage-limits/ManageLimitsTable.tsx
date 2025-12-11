@@ -33,7 +33,7 @@ declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
     setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
     setRowModesModel: (
-      newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
+      newModel: (oldModel: GridRowModesModel) => GridRowModesModel
     ) => void;
   }
 }
@@ -61,7 +61,7 @@ export function ManageLimitsTable(props: {
     ...props.employees
       .map((x) => ({
         id: x.id,
-        name: x.lastName ? `${x.lastName} ${x.firstName}` : (x.name ?? x.id),
+        name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? x.id,
       }))
       .sort((l, r) => l.name?.localeCompare(r.name) ?? 0),
   ];
@@ -85,17 +85,17 @@ export function ManageLimitsTable(props: {
     .sort(
       (l, r) =>
         getName(l.assignedToUserId)?.localeCompare(
-          getName(r.assignedToUserId) ?? "",
-        ) ?? 0,
+          getName(r.assignedToUserId) ?? ""
+        ) ?? 0
     );
   const [rows, setRows] = React.useState<GridRowsProp>(rowsTransformed);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {},
+    {}
   );
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
-    event,
+    event
   ) => {
     if (params.reason === GridRowEditStopReasons.rowFocusOut) {
       event.defaultMuiPrevented = true;
@@ -139,8 +139,8 @@ export function ManageLimitsTable(props: {
   const processRowUpdate = async (newRow: GridRowModel) => {
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    if(!await props.limitOnChange(newRow as LeaveLimitCell)){
-      setRows(rows.filter((row) => (row.id !== newRow.id)));
+    if (!(await props.limitOnChange(newRow as LeaveLimitCell))) {
+      setRows(rows.filter((row) => row.id !== newRow.id));
     }
     return updatedRow;
   };
@@ -229,10 +229,8 @@ export function ManageLimitsTable(props: {
             <GridActionsCellItem
               icon={<SaveIcon />}
               label={t("Save")}
-              sx={{
-                color: "primary.main",
-              }}
               onClick={handleSaveClick(id)}
+              color="primary"
             />,
             <GridActionsCellItem
               icon={<CancelIcon />}
@@ -288,7 +286,7 @@ export function ManageLimitsTable(props: {
         slots={{
           toolbar: EditToolbar(
             props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")
-              ?.id ?? "",
+              ?.id ?? ""
           ),
         }}
         slotProps={{

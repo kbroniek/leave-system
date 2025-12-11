@@ -55,7 +55,7 @@ export default function ShowLeaveRequestsTimeline(
     onYearChanged?: (year: string) => void;
     onUserIdChanged?: (userId: string) => void;
   }>,
-): JSX.Element {
+): React.ReactElement {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<DateTime | undefined>();
