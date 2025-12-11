@@ -24,7 +24,7 @@ import {
 } from "react-hook-form";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { DaysCounter } from "../utils/DaysCounter";
 import { Loading } from "../../components/Loading";

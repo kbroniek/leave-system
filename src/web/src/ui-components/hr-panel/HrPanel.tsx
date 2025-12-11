@@ -20,16 +20,16 @@ import { EmployeesDto } from "../dtos/EmployeesDto";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { Trans } from "react-i18next";
 
-const DataContent = (): JSX.Element => {
+const DataContent = (): React.ReactElement => {
   const { instance, inProgress } = useMsal();
   const { callApiGet } = useApiCall();
   const [apiLeaveRequests, setApiLeaveRequests] =
     useState<LeaveRequestsResponseDto | null>(null);
   const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(
-    null,
+    null
   );
   const [apiLeaveLimits, setApiLeaveLimits] = useState<LeaveLimitsDto | null>();
   const [apiHolidays, setApiHolidays] = useState<HolidaysDto | undefined>();
@@ -38,7 +38,7 @@ const DataContent = (): JSX.Element => {
   const notifications = useNotifications();
   const queryYear = Number(searchParams.get("year"));
   const [currentYear, setCurrentYear] = useState<number>(
-    !queryYear ? DateTime.local().year : queryYear,
+    !queryYear ? DateTime.local().year : queryYear
   );
   const [isCallApi, setIsCallApi] = useState(true);
 
@@ -50,20 +50,20 @@ const DataContent = (): JSX.Element => {
       const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
       callApiGet<LeaveRequestsResponseDto>(
         `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
-        notifications.show,
+        notifications.show
       )
         .then((response) => setApiLeaveRequests(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
       callApiGet<LeaveLimitsDto>(
         `/leavelimits?year=${currentYear}`,
-        notifications.show,
+        notifications.show
       )
         .then((response) => setApiLeaveLimits(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
 
       callApiGet<HolidaysDto>(
         `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
-        notifications.show,
+        notifications.show
       )
         .then((response) => setApiHolidays(response))
         .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
@@ -116,7 +116,7 @@ const DataContent = (): JSX.Element => {
           leaveRequests={apiLeaveRequests?.items}
           leaveTypes={apiLeaveTypes?.items.filter((x) => x.state === "Active")}
           leaveLimits={apiLeaveLimits?.items.filter(
-            (x) => x.state === "Active",
+            (x) => x.state === "Active"
           )}
           employees={apiEmployees?.items}
           holidays={apiHolidays?.items}
@@ -125,7 +125,7 @@ const DataContent = (): JSX.Element => {
     </>
   );
 };
-export const HrPanel = (): JSX.Element => (
+export const HrPanel = (): React.ReactElement => (
   <MsalAuthenticationTemplate
     interactionType={InteractionType.Redirect}
     authenticationRequest={loginRequest}

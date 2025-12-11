@@ -1,6 +1,6 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type { AppProps } from "./types";
 import { CustomNavigationClient } from "./NavigationClient";
 import { PageLayout } from "./ui-components/PageLayout";

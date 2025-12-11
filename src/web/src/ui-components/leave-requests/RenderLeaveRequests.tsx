@@ -21,7 +21,7 @@ export function RenderLeaveRequests(
     row: EmployeeDto;
     onAddLeaveRequest?: (date: DateTime, employee: EmployeeDto) => void;
   }>,
-): JSX.Element {
+): React.ReactElement {
   const { t } = useTranslation();
   const [leaveRequestId, setLeaveRequestId] = useState<string | undefined>();
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);

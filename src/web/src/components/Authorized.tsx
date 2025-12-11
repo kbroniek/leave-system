@@ -21,7 +21,7 @@ export const Authorized = (props: AuthorizedProps) => {
   useEffect(() => {
     if (props.roles === "CurrentUser") {
       setIsAuthorized(
-        props.userId === instance.getActiveAccount()?.idTokenClaims?.oid,
+        props.userId === instance.getActiveAccount()?.idTokenClaims?.oid
       );
     } else {
       setIsAuthorized(isInRole(instance, props.roles));
@@ -45,7 +45,7 @@ export const Authorized = (props: AuthorizedProps) => {
     </Box>
   ) : (
     <>
-      {isAuthorized ? (props.children ?? props.authorized) : props.unauthorized}
+      {isAuthorized ? props.children ?? props.authorized : props.unauthorized}
     </>
   );
 };
@@ -56,7 +56,7 @@ type RoleArgs =
 
 type AuthorizedProps = {
   authorized?: ReactElement;
-  children?: JSX.Element | JSX.Element[];
+  children?: React.ReactNode;
   unauthorized?: ReactElement;
   loading?: ReactElement;
 } & RoleArgs;

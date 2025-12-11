@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { DatePicker } from "@mui/x-date-pickers";
 import { DateTime } from "luxon";
 import { useState } from "react";
@@ -32,7 +32,7 @@ export const LeaveRequestsSearch = (
     leaveTypes: LeaveTypeDto[] | undefined;
     employees: EmployeeDto[];
     onSubmit: SubmitHandler<SearchLeaveRequestModel>;
-  }>,
+  }>
 ) => {
   const theme = useTheme();
   const now = DateTime.now().startOf("day");
@@ -50,7 +50,7 @@ export const LeaveRequestsSearch = (
     },
   });
   const [dateFrom, setDateFrom] = useState<DateTime | null>(
-    now.minus({ days: 14 }),
+    now.minus({ days: 14 })
   );
   const [dateTo, setDateTo] = useState<DateTime | null>(now.plus({ days: 14 }));
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
@@ -63,7 +63,7 @@ export const LeaveRequestsSearch = (
     if (!dateIsValid(value)) return t("This is required");
   };
   const handleLeaveTypesChange = (
-    event: SelectChangeEvent<typeof leaveTypes>,
+    event: SelectChangeEvent<typeof leaveTypes>
   ) => {
     const {
       target: { value },
@@ -74,7 +74,7 @@ export const LeaveRequestsSearch = (
     setValue("leaveTypes", values ?? []);
   };
   const handleEmployeesChange = (
-    event: SelectChangeEvent<typeof employees>,
+    event: SelectChangeEvent<typeof employees>
   ) => {
     const {
       target: { value },
@@ -96,7 +96,7 @@ export const LeaveRequestsSearch = (
   function getStyles(
     name: string,
     personName: readonly string[],
-    theme: Theme,
+    theme: Theme
   ) {
     return {
       fontWeight: personName.includes(name)
@@ -106,7 +106,7 @@ export const LeaveRequestsSearch = (
   }
   const onSearch = async (
     value: SearchLeaveRequestModel,
-    event?: React.BaseSyntheticEvent,
+    event?: React.BaseSyntheticEvent
   ) => {
     if (!isValid) {
       return;

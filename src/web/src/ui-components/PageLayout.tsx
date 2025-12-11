@@ -1,7 +1,7 @@
 import NavBar from "./NavBar";
-
+import React from "react";
 export const PageLayout = (props: {
-  children: JSX.Element | JSX.Element[];
+  children: React.ReactNode | React.ReactNode[];
 }) => {
   return (
     <>

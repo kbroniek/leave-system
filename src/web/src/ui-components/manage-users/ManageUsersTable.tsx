@@ -30,7 +30,7 @@ declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
     setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
     setRowModesModel: (
-      newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
+      newModel: (oldModel: GridRowModesModel) => GridRowModesModel
     ) => void;
   }
 }
@@ -49,7 +49,7 @@ export function ManageUsersTable(props: {
   }));
   const [rows, setRows] = React.useState(rowsTemp);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
-    {},
+    {}
   );
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = useCallback(
@@ -58,7 +58,7 @@ export function ManageUsersTable(props: {
         event.defaultMuiPrevented = true;
       }
     },
-    [],
+    []
   );
 
   const handleEditClick = useCallback(
@@ -68,7 +68,7 @@ export function ManageUsersTable(props: {
         [id]: { mode: GridRowModes.Edit },
       }));
     },
-    [],
+    []
   );
 
   const handleSaveClick = useCallback(
@@ -79,7 +79,7 @@ export function ManageUsersTable(props: {
         [id]: { mode: GridRowModes.View },
       }));
     },
-    [isUpdating],
+    [isUpdating]
   );
 
   const handleDeleteClick = useCallback(
@@ -92,7 +92,7 @@ export function ManageUsersTable(props: {
 
         // Update local state immediately for UI feedback
         setRows((prevRows) =>
-          prevRows.map((row) => (row.id === id ? updatedItem : row)),
+          prevRows.map((row) => (row.id === id ? updatedItem : row))
         );
 
         // Make API call to persist the change
@@ -101,7 +101,7 @@ export function ManageUsersTable(props: {
         } catch (error) {
           // Revert local state if API call fails
           setRows((prevRows) =>
-            prevRows.map((row) => (row.id === id ? item : row)),
+            prevRows.map((row) => (row.id === id ? item : row))
           );
           console.error("Failed to delete user roles:", error);
         }
@@ -109,7 +109,7 @@ export function ManageUsersTable(props: {
         console.warn("Can't find user. (handleDeleteClick)");
       }
     },
-    [isUpdating, rows, userOnChange],
+    [isUpdating, rows, userOnChange]
   );
 
   const handleCancelClick = useCallback(
@@ -119,25 +119,25 @@ export function ManageUsersTable(props: {
         [id]: { mode: GridRowModes.View, ignoreModifications: true },
       }));
     },
-    [],
+    []
   );
 
   const processRowUpdate = useCallback(
     async (updatedRow: GridRowModel) => {
       setRows((prevRows) =>
-        prevRows.map((row) => (row.id === updatedRow.id ? updatedRow : row)),
+        prevRows.map((row) => (row.id === updatedRow.id ? updatedRow : row))
       );
       await userOnChange(updatedRow as UserDto);
       return updatedRow;
     },
-    [userOnChange],
+    [userOnChange]
   );
 
   const handleRowModesModelChange = useCallback(
     (newRowModesModel: GridRowModesModel) => {
       setRowModesModel(newRowModesModel);
     },
-    [],
+    []
   );
 
   const processRowUpdateError = useCallback(
@@ -148,7 +148,7 @@ export function ManageUsersTable(props: {
         autoHideDuration: 5000,
       });
     },
-    [notifications, t],
+    [notifications, t]
   );
 
   const columns: GridColDef[] = React.useMemo(
@@ -184,9 +184,7 @@ export function ManageUsersTable(props: {
                 icon={<SaveIcon />}
                 label={t("Save")}
                 disabled={isUpdating}
-                sx={{
-                  color: isUpdating ? "grey.500" : "primary.main",
-                }}
+                color={isUpdating ? "inherit" : "primary"}
                 onClick={handleSaveClick(id)}
               />,
               <GridActionsCellItem
@@ -230,7 +228,7 @@ export function ManageUsersTable(props: {
       handleCancelClick,
       handleEditClick,
       handleDeleteClick,
-    ],
+    ]
   );
 
   return (
