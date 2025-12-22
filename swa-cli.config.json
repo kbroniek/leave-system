@@ -7,7 +7,7 @@
       "apiLanguage": "dotnetisolated",
       "apiVersion": "8.0",
       "appBuildCommand": "npm run build:swa",
-      "apiBuildCommand": "dotnet publish ../../../src/LeaveSystem.Functions/LeaveSystem.Functions -c Release -o ./out/deploy/api",
+      "apiBuildCommand": "dotnet publish ../../../src/LeaveSystem.Functions/LeaveSystem.Functions -c Release -o .",
       "run": "npm run dev",
       "appDevserverUrl": "http://localhost:5173",
       "appName": "swa-leave-system-dev-local-03",
