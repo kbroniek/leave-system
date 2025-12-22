@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:swa": "tsc -b && cross-env VITE_BUILD_OUT_DIR=../../out/deploy/app vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "trans-extract": "i18next -o public/locales/en/translation.json -c public/locales/i18next-parser.config.mjs & i18next -o public/locales/pl/translation.json -c public/locales/i18next-parser.config.mjs"
@@ -35,9 +36,11 @@
   "devDependencies": {
     "@eslint/js": "^9.35.0",
     "@types/luxon": "^3.7.1",
+    "@types/node": "^25.0.3",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react-swc": "^4.0.1",
+    "cross-env": "^7.0.3",
     "eslint": "^9.35.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

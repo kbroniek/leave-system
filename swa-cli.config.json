@@ -1,0 +1,17 @@
+{
+  "configurations": {
+    "leave-system": {
+      "appLocation": "src/web",
+      "apiLocation": "./out/deploy/api",
+      "outputLocation": "./out/deploy/app",
+      "apiLanguage": "dotnetisolated",
+      "apiVersion": "8.0",
+      "appBuildCommand": "npm run build:swa",
+      "apiBuildCommand": "dotnet publish ../../../src/LeaveSystem.Functions/LeaveSystem.Functions -c Release -o .",
+      "run": "npm run dev",
+      "appDevserverUrl": "http://localhost:5173",
+      "appName": "swa-leave-system-dev-local-03",
+      "resourceGroup": "rg-leave-system-dev-local-01"
+    }
+  }
+}

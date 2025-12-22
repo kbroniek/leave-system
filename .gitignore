@@ -367,3 +367,7 @@ src/.idea
 
 # input for app secrets
 secrets.json
+
+# TypeScript build info
+*.tsbuildinfo
+.env

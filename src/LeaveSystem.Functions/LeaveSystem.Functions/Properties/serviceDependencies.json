@@ -4,8 +4,7 @@
       "type": "appInsights"
     },
     "storage1": {
-      "type": "storage",
-      "connectionId": "AzureWebJobsStorage"
+      "type": "storage"
     }
   }
 }
