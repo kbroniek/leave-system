@@ -370,3 +370,4 @@ secrets.json
 
 # TypeScript build info
 *.tsbuildinfo
+.env
