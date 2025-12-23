@@ -1,8 +1,7 @@
 # Leave system
 
 [![.NET](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml)
-[![DEV 02 - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-kind-flower-056781103.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-kind-flower-056781103.yml)
-[![DEV - Roles for B2C - func-leave-system-dev-02](https://github.com/kbroniek/leave-system/actions/workflows/develop_func-leave-system-dev-02.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/develop_func-leave-system-dev-02.yml)
+[![DEV - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml)
 
 System to manage leaves.
 
