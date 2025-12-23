@@ -8,7 +8,7 @@ import { DateTime, DateTimeFormatOptions } from "luxon";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import ButtonGroup from "@mui/material/ButtonGroup";
+import Stack from "@mui/material/Stack";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
@@ -216,18 +216,44 @@ export default function ShowLeaveRequestsTimeline(
           sx={{
             display: "flex",
             justifyContent: "center",
-            p: 1,
+            p: 2,
             m: 1,
           }}
         >
-          <ButtonGroup variant="contained" aria-label="Basic button group">
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
             <Authorized roles={["DecisionMaker", "GlobalAdmin"]}>
               <LoadingButton
                 loading={actionProgress}
                 loadingPosition="start"
                 startIcon={<ThumbUpIcon />}
                 color="success"
+                variant="contained"
                 onClick={handleAccept}
+                sx={{
+                  minWidth: 140,
+                  padding: "10px 24px",
+                  fontSize: "0.9375rem",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  transition: "all 0.2s ease-in-out",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": {
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": {
+                    transform: "translateY(0)",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  },
+                }}
               >
                 <Trans>Accept</Trans>
               </LoadingButton>
@@ -236,7 +262,26 @@ export default function ShowLeaveRequestsTimeline(
                 loadingPosition="start"
                 startIcon={<ThumbDownIcon />}
                 color="error"
+                variant="contained"
                 onClick={handleReject}
+                sx={{
+                  minWidth: 140,
+                  padding: "10px 24px",
+                  fontSize: "0.9375rem",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  transition: "all 0.2s ease-in-out",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": {
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": {
+                    transform: "translateY(0)",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  },
+                }}
               >
                 <Trans>Reject</Trans>
               </LoadingButton>
@@ -253,7 +298,26 @@ export default function ShowLeaveRequestsTimeline(
                     loadingPosition="start"
                     startIcon={<CancelIcon />}
                     color="warning"
+                    variant="contained"
                     onClick={handleCancel}
+                    sx={{
+                      minWidth: 140,
+                      padding: "10px 24px",
+                      fontSize: "0.9375rem",
+                      fontWeight: 500,
+                      textTransform: "none",
+                      borderRadius: "8px",
+                      transition: "all 0.2s ease-in-out",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      "&:hover": {
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                        transform: "translateY(-1px)",
+                      },
+                      "&:active": {
+                        transform: "translateY(0)",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      },
+                    }}
                   >
                     <Trans>Cancel</Trans>
                   </LoadingButton>
@@ -262,7 +326,7 @@ export default function ShowLeaveRequestsTimeline(
             ) : (
               <></>
             )}
-          </ButtonGroup>
+          </Stack>
         </Grid>
         <Grid size={12}>
           <TextField
