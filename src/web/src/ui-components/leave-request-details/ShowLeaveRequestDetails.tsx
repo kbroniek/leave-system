@@ -8,7 +8,7 @@ import { DateTime, DateTimeFormatOptions } from "luxon";
 import { DurationFormatter } from "../utils/DurationFormatter";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import ButtonGroup from "@mui/material/ButtonGroup";
+import Stack from "@mui/material/Stack";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
@@ -17,6 +17,7 @@ import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { Authorized } from "../../components/Authorized";
 import LinkIcon from "@mui/icons-material/Link";
+import CloseIcon from "@mui/icons-material/Close";
 import { Button } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { Trans, useTranslation } from "react-i18next";
@@ -30,6 +31,7 @@ export default function ShowLeaveRequestsTimeline(
     onAccept: (id: string, remarks: string) => Promise<void>;
     onReject: (id: string, remarks: string) => Promise<void>;
     onCancel: (id: string, remarks: string) => Promise<void>;
+    onClose?: () => void;
   }>
 ): React.ReactElement {
   const titleStyle = { color: "text.secondary", textAlign: "right" };
@@ -94,7 +96,7 @@ export default function ShowLeaveRequestsTimeline(
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
       <Grid container spacing={2}>
-        <Grid size={11}>
+        <Grid size={props.onClose ? 10 : 11}>
           <Typography variant="h5">
             {props.leaveRequest.assignedTo.name}
           </Typography>
@@ -104,10 +106,23 @@ export default function ShowLeaveRequestsTimeline(
             color="inherit"
             sx={{ minWidth: 0, padding: 0 }}
             onClick={handleCopyToClipboard}
+            aria-label="Copy link"
           >
             <LinkIcon />
           </Button>
         </Grid>
+        {props.onClose && (
+          <Grid size={1}>
+            <Button
+              color="inherit"
+              sx={{ minWidth: 0, padding: 0 }}
+              onClick={props.onClose}
+              aria-label="Close"
+            >
+              <CloseIcon />
+            </Button>
+          </Grid>
+        )}
         <Grid size={12}>
           <Divider />
         </Grid>
@@ -216,18 +231,44 @@ export default function ShowLeaveRequestsTimeline(
           sx={{
             display: "flex",
             justifyContent: "center",
-            p: 1,
+            p: 2,
             m: 1,
           }}
         >
-          <ButtonGroup variant="contained" aria-label="Basic button group">
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
             <Authorized roles={["DecisionMaker", "GlobalAdmin"]}>
               <LoadingButton
                 loading={actionProgress}
                 loadingPosition="start"
                 startIcon={<ThumbUpIcon />}
                 color="success"
+                variant="contained"
                 onClick={handleAccept}
+                sx={{
+                  minWidth: 140,
+                  padding: "10px 24px",
+                  fontSize: "0.9375rem",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  transition: "all 0.2s ease-in-out",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": {
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": {
+                    transform: "translateY(0)",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  },
+                }}
               >
                 <Trans>Accept</Trans>
               </LoadingButton>
@@ -236,7 +277,26 @@ export default function ShowLeaveRequestsTimeline(
                 loadingPosition="start"
                 startIcon={<ThumbDownIcon />}
                 color="error"
+                variant="contained"
                 onClick={handleReject}
+                sx={{
+                  minWidth: 140,
+                  padding: "10px 24px",
+                  fontSize: "0.9375rem",
+                  fontWeight: 500,
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  transition: "all 0.2s ease-in-out",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": {
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": {
+                    transform: "translateY(0)",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  },
+                }}
               >
                 <Trans>Reject</Trans>
               </LoadingButton>
@@ -253,7 +313,26 @@ export default function ShowLeaveRequestsTimeline(
                     loadingPosition="start"
                     startIcon={<CancelIcon />}
                     color="warning"
+                    variant="contained"
                     onClick={handleCancel}
+                    sx={{
+                      minWidth: 140,
+                      padding: "10px 24px",
+                      fontSize: "0.9375rem",
+                      fontWeight: 500,
+                      textTransform: "none",
+                      borderRadius: "8px",
+                      transition: "all 0.2s ease-in-out",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      "&:hover": {
+                        boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
+                        transform: "translateY(-1px)",
+                      },
+                      "&:active": {
+                        transform: "translateY(0)",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                      },
+                    }}
                   >
                     <Trans>Cancel</Trans>
                   </LoadingButton>
@@ -262,7 +341,7 @@ export default function ShowLeaveRequestsTimeline(
             ) : (
               <></>
             )}
-          </ButtonGroup>
+          </Stack>
         </Grid>
         <Grid size={12}>
           <TextField

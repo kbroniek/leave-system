@@ -1,4 +1,5 @@
 import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
 import { LeaveRequestDetails } from "./LeaveRequestDetails";
 
 export interface LeaveRequestDetailsDialogProps {
@@ -15,8 +16,15 @@ export function LeaveRequestDetailsDialog(props: LeaveRequestDetailsDialogProps)
     };
 
     return (
-        <Dialog onClose={handleClose} open={open}>
-            {props.leaveRequestId ? <LeaveRequestDetails leaveRequestId={props.leaveRequestId} /> : <></>}
+        <Dialog 
+            onClose={handleClose} 
+            open={open}
+            maxWidth="sm"
+            fullWidth
+        >
+            <DialogContent dividers>
+                {props.leaveRequestId ? <LeaveRequestDetails leaveRequestId={props.leaveRequestId} onClose={handleClose} /> : <></>}
+            </DialogContent>
         </Dialog>
     );
 }
