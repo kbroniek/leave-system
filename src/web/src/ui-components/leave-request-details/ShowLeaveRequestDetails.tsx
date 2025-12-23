@@ -17,6 +17,7 @@ import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { Authorized } from "../../components/Authorized";
 import LinkIcon from "@mui/icons-material/Link";
+import CloseIcon from "@mui/icons-material/Close";
 import { Button } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { Trans, useTranslation } from "react-i18next";
@@ -30,6 +31,7 @@ export default function ShowLeaveRequestsTimeline(
     onAccept: (id: string, remarks: string) => Promise<void>;
     onReject: (id: string, remarks: string) => Promise<void>;
     onCancel: (id: string, remarks: string) => Promise<void>;
+    onClose?: () => void;
   }>
 ): React.ReactElement {
   const titleStyle = { color: "text.secondary", textAlign: "right" };
@@ -94,7 +96,7 @@ export default function ShowLeaveRequestsTimeline(
   return (
     <Box sx={{ flexGrow: 1 }} margin={2}>
       <Grid container spacing={2}>
-        <Grid size={11}>
+        <Grid size={props.onClose ? 10 : 11}>
           <Typography variant="h5">
             {props.leaveRequest.assignedTo.name}
           </Typography>
@@ -104,10 +106,23 @@ export default function ShowLeaveRequestsTimeline(
             color="inherit"
             sx={{ minWidth: 0, padding: 0 }}
             onClick={handleCopyToClipboard}
+            aria-label="Copy link"
           >
             <LinkIcon />
           </Button>
         </Grid>
+        {props.onClose && (
+          <Grid size={1}>
+            <Button
+              color="inherit"
+              sx={{ minWidth: 0, padding: 0 }}
+              onClick={props.onClose}
+              aria-label="Close"
+            >
+              <CloseIcon />
+            </Button>
+          </Grid>
+        )}
         <Grid size={12}>
           <Divider />
         </Grid>

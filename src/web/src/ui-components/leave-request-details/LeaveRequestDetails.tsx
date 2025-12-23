@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { useTranslation } from "react-i18next";
 
-const DataContent = (props: { leaveRequestId: string }) => {
+const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) => {
   const { instance, inProgress } = useMsal();
   const { callApi, callApiGet } = useApiCall();
   const [apiLeaveRequestDetails, setApiLeaveRequestDetails] =
@@ -127,6 +127,7 @@ const DataContent = (props: { leaveRequestId: string }) => {
       onAccept={handleAccept}
       onReject={handleReject}
       onCancel={handleCancel}
+      onClose={props.onClose}
     />
   ) : (
     <Box
@@ -143,7 +144,7 @@ const DataContent = (props: { leaveRequestId: string }) => {
 };
 
 export function LeaveRequestDetails(
-  props: Readonly<{ leaveRequestId: string }>,
+  props: Readonly<{ leaveRequestId: string; onClose?: () => void }>,
 ) {
   return (
     <MsalAuthenticationTemplate
@@ -152,7 +153,7 @@ export function LeaveRequestDetails(
       errorComponent={ErrorComponent}
       loadingComponent={LoadingAuth}
     >
-      <DataContent leaveRequestId={props.leaveRequestId} />
+      <DataContent leaveRequestId={props.leaveRequestId} onClose={props.onClose} />
     </MsalAuthenticationTemplate>
   );
 }
