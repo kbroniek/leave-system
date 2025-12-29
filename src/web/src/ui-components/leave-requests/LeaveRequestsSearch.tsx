@@ -20,17 +20,6 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import Collapse from "@mui/material/Collapse";
 import Tooltip from "@mui/material/Tooltip";
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
 const datePickerTextFieldSx = {
   "& .MuiPickersSectionList-root": {
     padding: "9.5px 0px",
@@ -276,7 +265,6 @@ export const LeaveRequestsSearch = (
                         ))}
                       </Box>
                     )}
-                    MenuProps={MenuProps}
                   >
                     {params.leaveTypes?.map((item) => (
                       <MenuItem
@@ -317,7 +305,6 @@ export const LeaveRequestsSearch = (
                         ))}
                       </Box>
                     )}
-                    MenuProps={MenuProps}
                   >
                     {params.employees?.map((item) => (
                       <MenuItem key={item.id} value={item.id}>
@@ -354,7 +341,6 @@ export const LeaveRequestsSearch = (
                         ))}
                       </Box>
                     )}
-                    MenuProps={MenuProps}
                   >
                     {leaveRequestsStatuses.map((item) => (
                       <MenuItem key={item} value={item}>
