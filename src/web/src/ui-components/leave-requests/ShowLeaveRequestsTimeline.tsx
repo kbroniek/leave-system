@@ -54,7 +54,7 @@ export default function ShowLeaveRequestsTimeline(
     onSubmitLeaveRequest?: SubmitHandler<LeaveRequestFormModel>;
     onYearChanged?: (year: string) => void;
     onUserIdChanged?: (userId: string) => void;
-  }>,
+  }>
 ): React.ReactElement {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -77,21 +77,21 @@ export default function ShowLeaveRequestsTimeline(
 
   const employees = EmployeesFinder.get(
     params.leaveRequests?.items || [],
-    params.employees || [],
+    params.employees || []
   );
   const leaveStatusesActive = params.leaveStatuses || [];
   const leaveTypesActive = (params.leaveTypes || []).filter(
-    (x) => x.state === "Active",
+    (x) => x.state === "Active"
   );
   const transformer = new LeaveRequestsTimelineTransformer(
     employees,
     params.leaveRequests,
     params.holidays || { items: [] },
-    params.leaveTypes || [],
+    params.leaveTypes || []
   );
   const transformedData = transformer.transformToTable();
   const transformedHolidays = (params.holidays?.items || []).map((x) =>
-    DateTime.fromISO(x),
+    DateTime.fromISO(x)
   );
   const ODD_OPACITY = 0.2;
   const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
@@ -115,7 +115,7 @@ export default function ShowLeaveRequestsTimeline(
       paddingLeft: "8px",
       paddingRight: "8px",
       borderRight: `1px solid ${theme.palette.divider}`,
-      backgroundColor: theme.palette.grey[100],
+      backgroundColor: theme.palette.background.paper,
       fontWeight: 500,
       display: "flex",
       alignItems: "center",
@@ -152,85 +152,33 @@ export default function ShowLeaveRequestsTimeline(
   }));
 
   const StyledTable = styled(Table)(({ theme }) => ({
-    "& .MuiTableRow.odd": {
-      "& .timeline-day.weekend": {
-        backgroundColor: "#e0e006",
-      },
-      "& .timeline-day.holiday": {
-        backgroundColor: "#FFDD96",
-      },
-      "& .employee-name-cell": {
-        backgroundColor: theme.palette.grey[100],
-      },
-      "&:hover .employee-name-cell": {
-        backgroundColor: theme.palette.grey[200],
-        "@media (hover: none)": {
-          backgroundColor: theme.palette.grey[100],
-        },
+    "& .MuiTableRow-root": {
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
       },
     },
-    "& .MuiTableRow.even": {
+    "& .MuiTableRow-root.odd": {
       "& .timeline-day.weekend": {
         backgroundColor: "#b8b82e",
+        "&:hover": {
+          backgroundColor: alpha("#b8b82e", ODD_OPACITY),
+        },
       },
       "& .timeline-day.holiday": {
         backgroundColor: "#d4b97c",
+        "&:hover": {
+          backgroundColor: alpha("#d4b97c", ODD_OPACITY),
+        },
       },
-      backgroundColor: theme.palette.grey[200],
       "& .employee-name-cell": {
         backgroundColor: theme.palette.grey[100],
+        "&:hover": {
+          backgroundColor: alpha(theme.palette.grey[100], ODD_OPACITY),
+        },
       },
+      backgroundColor: theme.palette.grey[200],
       "&:hover": {
         backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
-        "& .employee-name-cell": {
-          backgroundColor: theme.palette.grey[200],
-        },
-        "@media (hover: none)": {
-          backgroundColor: theme.palette.grey[200],
-          "& .employee-name-cell": {
-            backgroundColor: theme.palette.grey[100],
-          },
-        },
-      },
-      "&.Mui-selected": {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          ODD_OPACITY + theme.palette.action.selectedOpacity,
-        ),
-        "& .employee-name-cell": {
-          backgroundColor: alpha(
-            theme.palette.primary.main,
-            ODD_OPACITY + theme.palette.action.selectedOpacity,
-          ),
-        },
-        "&:hover": {
-          backgroundColor: alpha(
-            theme.palette.primary.main,
-            ODD_OPACITY +
-              theme.palette.action.selectedOpacity +
-              theme.palette.action.hoverOpacity,
-          ),
-          "& .employee-name-cell": {
-            backgroundColor: alpha(
-              theme.palette.primary.main,
-              ODD_OPACITY +
-                theme.palette.action.selectedOpacity +
-                theme.palette.action.hoverOpacity,
-            ),
-          },
-          "@media (hover: none)": {
-            backgroundColor: alpha(
-              theme.palette.primary.main,
-              ODD_OPACITY + theme.palette.action.selectedOpacity,
-            ),
-            "& .employee-name-cell": {
-              backgroundColor: alpha(
-                theme.palette.primary.main,
-                ODD_OPACITY + theme.palette.action.selectedOpacity,
-              ),
-            },
-          },
-        },
       },
     },
   }));
@@ -265,7 +213,7 @@ export default function ShowLeaveRequestsTimeline(
                 >
                   {(() => {
                     const monthKey = getMonthTranslationKey(
-                      monthGroup.date.month,
+                      monthGroup.date.month
                     );
                     const translationKey = `months.${monthKey}`;
                     const translated = t(translationKey);
@@ -311,7 +259,7 @@ export default function ShowLeaveRequestsTimeline(
                       {day.toFormat("dd")}
                     </TableCell>
                   );
-                }),
+                })
               )}
             </TableRow>
           </TableHead>
@@ -336,7 +284,10 @@ export default function ShowLeaveRequestsTimeline(
                       return (
                         <TableCell
                           key={day.toISO()}
-                          className={`${getDayCssClass(day, transformedHolidays)} ${
+                          className={`${getDayCssClass(
+                            day,
+                            transformedHolidays
+                          )} ${
                             isLastDayOfMonth && !isLastMonth
                               ? "month-separator"
                               : ""
@@ -361,7 +312,7 @@ export default function ShowLeaveRequestsTimeline(
                         key={dayData.date.toISO()}
                         className={`${getDayCssClass(
                           dayData.date,
-                          transformedHolidays,
+                          transformedHolidays
                         )} ${
                           isLastDayOfMonth && !isLastMonth
                             ? "month-separator"
@@ -379,7 +330,7 @@ export default function ShowLeaveRequestsTimeline(
                         />
                       </TableCell>
                     );
-                  }),
+                  })
                 )}
               </TableRow>
             ))}
