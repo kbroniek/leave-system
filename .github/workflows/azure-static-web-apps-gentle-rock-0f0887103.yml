@@ -33,6 +33,12 @@ jobs:
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
+        env:
+          VITE_REACT_APP_API_URL: ${{ vars.VITE_REACT_APP_API_URL }}
+          VITE_REACT_APP_AUTHORITY_SIGNIN: ${{ vars.VITE_REACT_APP_AUTHORITY_SIGNIN }}
+          VITE_REACT_APP_AUTHORITY_DOMAIN: ${{ vars.VITE_REACT_APP_AUTHORITY_DOMAIN }}
+          VITE_REACT_APP_B2C_CLIENT_ID: ${{ vars.VITE_REACT_APP_B2C_CLIENT_ID }}
+          VITE_REACT_APP_B2C_SCOPE_API: ${{ vars.VITE_REACT_APP_B2C_SCOPE_API }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_BAY_0E74EC203 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
