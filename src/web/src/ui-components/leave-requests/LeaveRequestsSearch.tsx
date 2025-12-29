@@ -233,12 +233,16 @@ export const LeaveRequestsSearch = (
           size={{ xs: 12, sm: 2, md: 2 }}
           sx={{
             ml: "auto",
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "flex-start",
           }}
         >
-          <Button sx={{ height: "56px" }} type="submit" variant="contained">
+          <Button
+            fullWidth
+            sx={{
+              height: "40px",
+            }}
+            type="submit"
+            variant="contained"
+          >
             <Trans>Search</Trans>
           </Button>
         </Grid>
