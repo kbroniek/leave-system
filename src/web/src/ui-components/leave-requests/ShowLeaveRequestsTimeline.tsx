@@ -222,7 +222,8 @@ export default function ShowLeaveRequestsTimeline(
                     borderColor: "divider",
                   }}
                 >
-                  {(() => getMonthTranslation(monthGroup.date))()}
+                  {(() => getMonthTranslation(monthGroup.date))()}{" "}
+                  {monthGroup.date.year}
                 </TableCell>
               ))}
             </TableRow>
