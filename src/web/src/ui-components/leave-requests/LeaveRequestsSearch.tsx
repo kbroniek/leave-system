@@ -208,7 +208,7 @@ export const LeaveRequestsSearch = (
             }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+        <Grid size={{ xs: 12, sm: 2, md: 2 }}>
           <Tooltip
             title={
               showAdvancedFilters
@@ -230,7 +230,7 @@ export const LeaveRequestsSearch = (
           </Tooltip>
         </Grid>
         <Grid
-          size={{ xs: 12, sm: 2, md: 2 }}
+          size={{ xs: 12, sm: 4, md: 2 }}
           sx={{
             ml: "auto",
           }}
