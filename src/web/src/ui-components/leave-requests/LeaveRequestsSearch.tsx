@@ -15,15 +15,14 @@ import { EmployeeDto } from "../dtos/EmployeeDto";
 import Button from "@mui/material/Button";
 import { leaveRequestsStatuses } from "../utils/Status";
 import { Trans, useTranslation } from "react-i18next";
+import IconButton from "@mui/material/IconButton";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import Collapse from "@mui/material/Collapse";
+import Tooltip from "@mui/material/Tooltip";
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
+const datePickerTextFieldSx = {
+  "& .MuiPickersSectionList-root": {
+    padding: "9.5px 0px",
   },
 };
 
@@ -56,6 +55,8 @@ export const LeaveRequestsSearch = (
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
   const [employees, setEmployees] = useState<string[] | undefined>([]);
   const [statuses, setStatuses] = useState<string[] | undefined>([]);
+  const [showAdvancedFilters, setShowAdvancedFilters] =
+    useState<boolean>(false);
   const dateIsValid = (value: DateTime | null | undefined): boolean => {
     return !!value && value.isValid;
   };
@@ -154,6 +155,7 @@ export const LeaveRequestsSearch = (
                     textField: {
                       error: !dateIsValid(dateFrom),
                       helperText: errors?.dateFrom?.message,
+                      sx: datePickerTextFieldSx,
                     },
                   }}
                 />
@@ -187,6 +189,7 @@ export const LeaveRequestsSearch = (
                     textField: {
                       error: !dateIsValid(dateTo),
                       helperText: errors?.dateTo?.message,
+                      sx: datePickerTextFieldSx,
                     },
                   }}
                 />
@@ -194,130 +197,161 @@ export const LeaveRequestsSearch = (
             }}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-          <FormControl fullWidth>
-            <InputLabel id="multiple-leave-types-label">
-              <Trans>Leave types</Trans>
-            </InputLabel>
-            <Select
-              labelId="multiple-leave-types-label"
-              label={t("Leave types")}
-              id="multiple-leave-types"
-              multiple
-              sx={{ width: "100%" }}
-              value={leaveTypes}
-              {...register("leaveTypes")}
-              onChange={handleLeaveTypesChange}
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip
-                      key={value}
-                      label={
-                        params.leaveTypes?.find((x) => x.id === value)?.name ??
-                        value
-                      }
-                    />
-                  ))}
-                </Box>
-              )}
-              MenuProps={MenuProps}
-            >
-              {params.leaveTypes?.map((item) => (
-                <MenuItem
-                  key={item.id}
-                  value={item.id}
-                  style={getStyles(item.id, leaveTypes ?? [], theme)}
-                >
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 5, md: 2 }}>
-          <FormControl fullWidth>
-            <InputLabel id="multiple-employees-label">
-              <Trans>Employees</Trans>
-            </InputLabel>
-            <Select
-              labelId="multiple-employees-label"
-              label={t("Employees")}
-              id="multiple-employees"
-              multiple
-              sx={{ width: "100%" }}
-              value={employees}
-              {...register("employees")}
-              onChange={handleEmployeesChange}
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip
-                      key={value}
-                      label={
-                        params.employees.find((x) => x.id === value)?.name ??
-                        value
-                      }
-                    />
-                  ))}
-                </Box>
-              )}
-              MenuProps={MenuProps}
-            >
-              {params.employees?.map((item) => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 5, md: 2 }}>
-          <FormControl fullWidth>
-            <InputLabel id="multiple-statuses-label">
-              <Trans>Statuses</Trans>
-            </InputLabel>
-            <Select
-              labelId="multiple-statuses-label"
-              label={t("Statuses")}
-              id="multiple-statuses"
-              multiple
-              sx={{ width: "100%" }}
-              value={statuses}
-              {...register("statuses")}
-              onChange={handleStatusesChange}
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip
-                      key={value}
-                      label={
-                        params.employees.find((x) => x.id === value)?.name ??
-                        value
-                      }
-                    />
-                  ))}
-                </Box>
-              )}
-              MenuProps={MenuProps}
-            >
-              {leaveRequestsStatuses.map((item) => (
-                <MenuItem key={item} value={item}>
-                  {item}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
         <Grid size={{ xs: 12, sm: 2, md: 2 }}>
+          <Tooltip
+            title={
+              showAdvancedFilters
+                ? t("Hide advanced filters")
+                : t("Show advanced filters")
+            }
+          >
+            <IconButton
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              color={showAdvancedFilters ? "primary" : "default"}
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1,
+              }}
+            >
+              <FilterListIcon />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+        <Grid
+          size={{ xs: 12, sm: 4, md: 2 }}
+          sx={{
+            ml: "auto",
+          }}
+        >
           <Button
-            sx={{ height: "100%" }}
+            fullWidth
+            sx={{
+              height: "40px",
+            }}
             type="submit"
             variant="contained"
-            fullWidth
           >
             <Trans>Search</Trans>
           </Button>
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <Collapse in={showAdvancedFilters}>
+            <Grid container spacing={1} sx={{ mt: 0.5 }}>
+              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="multiple-leave-types-label">
+                    <Trans>Leave types</Trans>
+                  </InputLabel>
+                  <Select
+                    labelId="multiple-leave-types-label"
+                    label={t("Leave types")}
+                    id="multiple-leave-types"
+                    multiple
+                    sx={{ width: "100%" }}
+                    value={leaveTypes}
+                    {...register("leaveTypes")}
+                    onChange={handleLeaveTypesChange}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip
+                            key={value}
+                            label={
+                              params.leaveTypes?.find((x) => x.id === value)
+                                ?.name ?? value
+                            }
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  >
+                    {params.leaveTypes?.map((item) => (
+                      <MenuItem
+                        key={item.id}
+                        value={item.id}
+                        style={getStyles(item.id, leaveTypes ?? [], theme)}
+                      >
+                        {item.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 5, md: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="multiple-employees-label">
+                    <Trans>Employees</Trans>
+                  </InputLabel>
+                  <Select
+                    labelId="multiple-employees-label"
+                    label={t("Employees")}
+                    id="multiple-employees"
+                    multiple
+                    sx={{ width: "100%" }}
+                    value={employees}
+                    {...register("employees")}
+                    onChange={handleEmployeesChange}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip
+                            key={value}
+                            label={
+                              params.employees.find((x) => x.id === value)
+                                ?.name ?? value
+                            }
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  >
+                    {params.employees?.map((item) => (
+                      <MenuItem key={item.id} value={item.id}>
+                        {item.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 5, md: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel id="multiple-statuses-label">
+                    <Trans>Statuses</Trans>
+                  </InputLabel>
+                  <Select
+                    labelId="multiple-statuses-label"
+                    label={t("Statuses")}
+                    id="multiple-statuses"
+                    multiple
+                    sx={{ width: "100%" }}
+                    value={statuses}
+                    {...register("statuses")}
+                    onChange={handleStatusesChange}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip
+                            key={value}
+                            label={
+                              leaveRequestsStatuses.find((s) => s === value) ??
+                              value
+                            }
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  >
+                    {leaveRequestsStatuses.map((item) => (
+                      <MenuItem key={item} value={item}>
+                        {item}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Collapse>
         </Grid>
       </Grid>
     </form>

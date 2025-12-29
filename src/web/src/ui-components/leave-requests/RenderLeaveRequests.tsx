@@ -13,16 +13,14 @@ import MenuItem from "@mui/material/MenuItem";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
-import { useTranslation } from "react-i18next";
 
 export function RenderLeaveRequests(
   props: Readonly<{
     value: RenderLeaveRequestModel;
     row: EmployeeDto;
     onAddLeaveRequest?: (date: DateTime, employee: EmployeeDto) => void;
-  }>,
+  }>
 ): React.ReactElement {
-  const { t } = useTranslation();
   const [leaveRequestId, setLeaveRequestId] = useState<string | undefined>();
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -99,7 +97,7 @@ export function RenderLeaveRequests(
           backgroundImage: `-webkit-linear-gradient(-121.5deg, ${x.color}, ${x.color} 50.5%, transparent 50%, transparent 100%)`,
         },
       }),
-      {},
+      {}
     ),
     ...props.value?.leaveTypes.reduce(
       (a, x) => ({
@@ -111,7 +109,7 @@ export function RenderLeaveRequests(
           },
         },
       }),
-      {},
+      {}
     ),
   };
   return (
@@ -127,40 +125,38 @@ export function RenderLeaveRequests(
             width: "100%",
           }}
         >
-          <Tooltip title={t("Add leave request")}>
-            <Button
-              onClick={handleAddLeaveRequest}
+          <Button
+            onClick={handleAddLeaveRequest}
+            sx={{
+              padding: 0,
+              minWidth: "50px",
+              width: "100%",
+              height: "29px",
+              color: "gray",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.04)",
+              },
+            }}
+          >
+            <Box
               sx={{
-                padding: 0,
-                minWidth: "50px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 width: "100%",
-                height: "29px",
-                color: "gray",
-                "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                height: "100%",
+                "& .add-icon-hover": {
+                  opacity: 0,
+                  transition: "opacity 0.2s",
+                },
+                "&:hover .add-icon-hover": {
+                  opacity: 1,
                 },
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "100%",
-                  height: "100%",
-                  "& .add-icon-hover": {
-                    opacity: 0,
-                    transition: "opacity 0.2s",
-                  },
-                  "&:hover .add-icon-hover": {
-                    opacity: 1,
-                  },
-                }}
-              >
-                <AddIcon fontSize="small" className="add-icon-hover" />
-              </Box>
-            </Button>
-          </Tooltip>
+              <AddIcon fontSize="small" className="add-icon-hover" />
+            </Box>
+          </Button>
         </Box>
       ) : props.value.leaveRequests.length > 1 ? (
         <>
@@ -256,7 +252,7 @@ export function RenderLeaveRequests(
 
   function formatPerDay(
     leaveRequest: LeaveRequestDto | undefined,
-    holidays: DateTime[],
+    holidays: DateTime[]
   ): string {
     if (!leaveRequest) {
       return "";
@@ -264,7 +260,7 @@ export function RenderLeaveRequests(
     try {
       const formatter = new DurationFormatter(
         holidays,
-        props.value?.leaveTypes ?? [],
+        props.value?.leaveTypes ?? []
       );
       //TODO: Format with current date i.e. 9h should split with 8h and 1h.
       return formatter.formatPerDay(leaveRequest);
