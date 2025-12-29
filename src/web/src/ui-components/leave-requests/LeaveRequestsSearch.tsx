@@ -221,6 +221,19 @@ export const LeaveRequestsSearch = (
             </IconButton>
           </Tooltip>
         </Grid>
+        <Grid
+          size={{ xs: 12, sm: 2, md: 2 }}
+          sx={{
+            ml: "auto",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "flex-start",
+          }}
+        >
+          <Button sx={{ height: "56px" }} type="submit" variant="contained">
+            <Trans>Search</Trans>
+          </Button>
+        </Grid>
         <Grid size={{ xs: 12 }}>
           <Collapse in={showAdvancedFilters}>
             <Grid container spacing={1} sx={{ mt: 0.5 }}>
@@ -341,16 +354,6 @@ export const LeaveRequestsSearch = (
               </Grid>
             </Grid>
           </Collapse>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 2, md: 2 }}>
-          <Button
-            sx={{ height: "100%" }}
-            type="submit"
-            variant="contained"
-            fullWidth
-          >
-            <Trans>Search</Trans>
-          </Button>
         </Grid>
       </Grid>
     </form>
