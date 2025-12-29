@@ -92,21 +92,12 @@ const StyledTable = styled(Table)(({ theme }) => ({
   "& .MuiTableRow-root.odd": {
     "& .timeline-day.weekend": {
       backgroundColor: "#b8b82e",
-      "&:hover": {
-        backgroundColor: alpha("#b8b82e", ODD_OPACITY),
-      },
     },
     "& .timeline-day.holiday": {
       backgroundColor: "#d4b97c",
-      "&:hover": {
-        backgroundColor: alpha("#d4b97c", ODD_OPACITY),
-      },
     },
     "& .employee-name-cell": {
       backgroundColor: theme.palette.grey[100],
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.grey[100], ODD_OPACITY),
-      },
     },
     backgroundColor: theme.palette.grey[200],
     "&:hover": {
