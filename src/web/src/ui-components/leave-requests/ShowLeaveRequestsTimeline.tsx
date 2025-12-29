@@ -111,7 +111,7 @@ export default function ShowLeaveRequestsTimeline(
     "& .employee-name-cell": {
       position: "sticky",
       left: 0,
-      zIndex: 1,
+      zIndex: 401,
       paddingLeft: "8px",
       paddingRight: "8px",
       borderRight: `1px solid ${theme.palette.divider}`,
