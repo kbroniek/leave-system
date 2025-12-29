@@ -31,6 +31,12 @@ const MenuProps = {
   },
 };
 
+const datePickerTextFieldSx = {
+  "& .MuiPickersSectionList-root": {
+    padding: "9.5px 0px",
+  },
+};
+
 export const LeaveRequestsSearch = (
   params: Readonly<{
     leaveTypes: LeaveTypeDto[] | undefined;
@@ -160,6 +166,7 @@ export const LeaveRequestsSearch = (
                     textField: {
                       error: !dateIsValid(dateFrom),
                       helperText: errors?.dateFrom?.message,
+                      sx: datePickerTextFieldSx,
                     },
                   }}
                 />
@@ -193,6 +200,7 @@ export const LeaveRequestsSearch = (
                     textField: {
                       error: !dateIsValid(dateTo),
                       helperText: errors?.dateTo?.message,
+                      sx: datePickerTextFieldSx,
                     },
                   }}
                 />
