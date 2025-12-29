@@ -24,6 +24,96 @@ import { SubmitHandler } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 export const rowHeight = 30;
+const ODD_OPACITY = 0.2;
+
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+  maxHeight: "100%",
+  overflow: "auto",
+  "& .MuiTableCell-root": {
+    padding: 0,
+    height: rowHeight,
+  },
+  "& .MuiTableCell-head": {
+    position: "sticky",
+    top: 0,
+    zIndex: 3,
+    backgroundColor: theme.palette.background.paper,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+  },
+  "& .employee-name-cell": {
+    position: "sticky",
+    left: 0,
+    zIndex: 401,
+    paddingLeft: "8px",
+    paddingRight: "8px",
+    borderRight: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+    fontWeight: 500,
+    display: "flex",
+    alignItems: "center",
+  },
+  "& .employee-name-header": {
+    position: "sticky",
+    left: 0,
+    top: 0,
+    zIndex: 4,
+    backgroundColor: theme.palette.grey[100],
+    borderRight: `1px solid ${theme.palette.divider}`,
+    fontWeight: 600,
+    paddingLeft: "8px",
+    paddingRight: "8px",
+  },
+  "& .timeline-day.date-from": {
+    color: "#ff0000",
+  },
+  "& .timeline-day.date-to": {
+    color: "#ff00ff",
+  },
+  "& .timeline-day.today": {
+    backgroundColor: "#c0c0c0",
+  },
+  "& .timeline-day.weekend": {
+    backgroundColor: "#e0e006",
+  },
+  "& .timeline-day.holiday": {
+    backgroundColor: "#FFDD96",
+  },
+  "& .month-separator": {
+    borderRight: "1px solid rgba(0, 0, 0, 0.5)",
+  },
+}));
+
+const StyledTable = styled(Table)(({ theme }) => ({
+  "& .MuiTableRow-root": {
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+    },
+  },
+  "& .MuiTableRow-root.odd": {
+    "& .timeline-day.weekend": {
+      backgroundColor: "#b8b82e",
+      "&:hover": {
+        backgroundColor: alpha("#b8b82e", ODD_OPACITY),
+      },
+    },
+    "& .timeline-day.holiday": {
+      backgroundColor: "#d4b97c",
+      "&:hover": {
+        backgroundColor: alpha("#d4b97c", ODD_OPACITY),
+      },
+    },
+    "& .employee-name-cell": {
+      backgroundColor: theme.palette.grey[100],
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.grey[100], ODD_OPACITY),
+      },
+    },
+    backgroundColor: theme.palette.grey[200],
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
+    },
+  },
+}));
 
 function getMonthTranslationKey(monthNumber: number): string {
   const monthKeys = [
@@ -104,95 +194,6 @@ export default function ShowLeaveRequestsTimeline(
   const transformedHolidays = (params.holidays?.items || []).map((x) =>
     DateTime.fromISO(x)
   );
-  const ODD_OPACITY = 0.2;
-  const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-    maxHeight: "100%",
-    overflow: "auto",
-    "& .MuiTableCell-root": {
-      padding: 0,
-      height: rowHeight,
-    },
-    "& .MuiTableCell-head": {
-      position: "sticky",
-      top: 0,
-      zIndex: 3,
-      backgroundColor: theme.palette.background.paper,
-      borderBottom: `1px solid ${theme.palette.divider}`,
-    },
-    "& .employee-name-cell": {
-      position: "sticky",
-      left: 0,
-      zIndex: 401,
-      paddingLeft: "8px",
-      paddingRight: "8px",
-      borderRight: `1px solid ${theme.palette.divider}`,
-      backgroundColor: theme.palette.background.paper,
-      fontWeight: 500,
-      display: "flex",
-      alignItems: "center",
-    },
-    "& .employee-name-header": {
-      position: "sticky",
-      left: 0,
-      top: 0,
-      zIndex: 4,
-      backgroundColor: theme.palette.grey[100],
-      borderRight: `1px solid ${theme.palette.divider}`,
-      fontWeight: 600,
-      paddingLeft: "8px",
-      paddingRight: "8px",
-    },
-    "& .timeline-day.date-from": {
-      color: "#ff0000",
-    },
-    "& .timeline-day.date-to": {
-      color: "#ff00ff",
-    },
-    "& .timeline-day.today": {
-      backgroundColor: "#c0c0c0",
-    },
-    "& .timeline-day.weekend": {
-      backgroundColor: "#e0e006",
-    },
-    "& .timeline-day.holiday": {
-      backgroundColor: "#FFDD96",
-    },
-    "& .month-separator": {
-      borderRight: "1px solid rgba(0, 0, 0, 0.5)",
-    },
-  }));
-
-  const StyledTable = styled(Table)(({ theme }) => ({
-    "& .MuiTableRow-root": {
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
-      },
-    },
-    "& .MuiTableRow-root.odd": {
-      "& .timeline-day.weekend": {
-        backgroundColor: "#b8b82e",
-        "&:hover": {
-          backgroundColor: alpha("#b8b82e", ODD_OPACITY),
-        },
-      },
-      "& .timeline-day.holiday": {
-        backgroundColor: "#d4b97c",
-        "&:hover": {
-          backgroundColor: alpha("#d4b97c", ODD_OPACITY),
-        },
-      },
-      "& .employee-name-cell": {
-        backgroundColor: theme.palette.grey[100],
-        "&:hover": {
-          backgroundColor: alpha(theme.palette.grey[100], ODD_OPACITY),
-        },
-      },
-      backgroundColor: theme.palette.grey[200],
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.primary.main, ODD_OPACITY),
-      },
-    },
-  }));
 
   return (
     <Box sx={{ maxWidth: "100%", overflow: "auto", flexGrow: 1 }}>
