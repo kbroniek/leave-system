@@ -75,6 +75,17 @@ export default function ShowLeaveRequestsTimeline(
     setSelectedEmployee(undefined);
   };
 
+  const getMonthTranslation = (date: DateTime) => {
+    const monthKey = getMonthTranslationKey(date.month);
+    const translationKey = `months.${monthKey}`;
+    const translated = t(translationKey);
+    // If translation returns the key itself (translation not found), use Luxon format
+    if (translated === translationKey || translated.startsWith("months.")) {
+      return date.toFormat("LLLL");
+    }
+    return translated;
+  };
+
   const employees = EmployeesFinder.get(
     params.leaveRequests?.items || [],
     params.employees || []
@@ -211,21 +222,7 @@ export default function ShowLeaveRequestsTimeline(
                     borderColor: "divider",
                   }}
                 >
-                  {(() => {
-                    const monthKey = getMonthTranslationKey(
-                      monthGroup.date.month
-                    );
-                    const translationKey = `months.${monthKey}`;
-                    const translated = t(translationKey);
-                    // If translation returns the key itself (translation not found), use Luxon format
-                    if (
-                      translated === translationKey ||
-                      translated.startsWith("months.")
-                    ) {
-                      return monthGroup.date.toFormat("LLLL");
-                    }
-                    return translated;
-                  })()}
+                  {(() => getMonthTranslation(monthGroup.date))()}
                 </TableCell>
               ))}
             </TableRow>
