@@ -14,7 +14,7 @@ import { UserDto, UsersDto } from "../dtos/UsersDto";
 import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
-  const { instance, inProgress } = useMsal();
+  const { inProgress } = useMsal();
   const notifications = useNotifications();
   const { t } = useTranslation();
 
@@ -27,7 +27,7 @@ const DataContent = () => {
 
   // Use TanStack Query mutation for updating user roles
   const updateUserMutation = useApiMutation({
-    onSuccess: (response, variables) => {
+    onSuccess: (response) => {
       if (response.status === 200) {
         notifications.show(t("Roles is updated successfully"), {
           severity: "success",
@@ -55,7 +55,7 @@ const DataContent = () => {
         },
       });
     },
-    [updateUserMutation],
+    [updateUserMutation]
   );
 
   if (isLoading) {

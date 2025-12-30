@@ -22,7 +22,7 @@ import Grid from "@mui/material/Grid";
 import { Trans } from "react-i18next";
 
 const DataContent = (): React.ReactElement => {
-  const { instance, inProgress } = useMsal();
+  const { inProgress } = useMsal();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryYear = Number(searchParams.get("year"));
   const [currentYear, setCurrentYear] = useState<number>(

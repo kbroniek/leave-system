@@ -39,31 +39,54 @@ const DataContent = () => {
   const [leaveTypes, setLeaveTypes] = useState<string[] | undefined>([]);
   const [employeesSearch, setEmployeesSearch] = useState<string[]>([]);
   const [statusesSearch, setStatusesSearch] = useState<string[]>(
-    leaveRequestsStatuses.slice(0, 3),
+    leaveRequestsStatuses.slice(0, 3)
   );
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
-  const [selectedYear, setSelectedYear] = useState<string>(DateTime.now().toFormat("yyyy"));
+  const [selectedYear, setSelectedYear] = useState<string>(
+    DateTime.now().toFormat("yyyy")
+  );
   const notifications = useNotifications();
   const { t } = useTranslation();
 
   const isDecisionMaker = useCallback(
     () => isInRole(instance, ["DecisionMaker", "GlobalAdmin"]),
-    [instance],
+    [instance]
   );
 
   // Build query URL for leave requests
-  const leaveRequestsUrl = `/leaverequests?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employeesSearch.map((x) => `&assignedToUserIds=${x}`).join("")}${leaveTypes?.map((x) => `&leaveTypeIds=${x}`).join("")}${statusesSearch.map((x) => `&statuses=${x}`).join("")}`;
+  const leaveRequestsUrl = `/leaverequests?dateFrom=${dateFrom.toFormat(
+    "yyyy-MM-dd"
+  )}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}${employeesSearch
+    .map((x) => `&assignedToUserIds=${x}`)
+    .join("")}${leaveTypes
+    ?.map((x) => `&leaveTypeIds=${x}`)
+    .join("")}${statusesSearch.map((x) => `&statuses=${x}`).join("")}`;
 
   // Use TanStack Query for all API calls
   const { data: apiLeaveRequests } = useApiQuery<LeaveRequestsResponseDto>(
-    ["leaveRequests", "timeline", dateFrom.toFormat("yyyy-MM-dd"), dateTo.toFormat("yyyy-MM-dd"), employeesSearch.join(","), leaveTypes?.join(","), statusesSearch.join(",")],
+    [
+      "leaveRequests",
+      "timeline",
+      dateFrom.toFormat("yyyy-MM-dd"),
+      dateTo.toFormat("yyyy-MM-dd"),
+      employeesSearch.join(","),
+      leaveTypes?.join(","),
+      statusesSearch.join(","),
+    ],
     leaveRequestsUrl,
     { enabled: inProgress === InteractionStatus.None }
   );
 
   const { data: apiHolidays } = useApiQuery<HolidaysDto>(
-    ["holidays", "timeline", dateFrom.toFormat("yyyy-MM-dd"), dateTo.toFormat("yyyy-MM-dd")],
-    `/settings/holidays?dateFrom=${dateFrom.toFormat("yyyy-MM-dd")}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}`,
+    [
+      "holidays",
+      "timeline",
+      dateFrom.toFormat("yyyy-MM-dd"),
+      dateTo.toFormat("yyyy-MM-dd"),
+    ],
+    `/settings/holidays?dateFrom=${dateFrom.toFormat(
+      "yyyy-MM-dd"
+    )}&dateTo=${dateTo.toFormat("yyyy-MM-dd")}`,
     { enabled: inProgress === InteractionStatus.None }
   );
 
@@ -114,8 +137,15 @@ const DataContent = () => {
         } as EmployeesDto;
       }
     }
-    return apiEmployees;
-  }, [isDecisionMaker, inProgress, instance, apiEmployees]);
+
+    const employeesToRender =
+      employeesSearch.length && employeesSearch.filter((x) => !!x).length > 0
+        ? apiEmployees?.items.filter((x) => employeesSearch.includes(x.id))
+        : apiEmployees?.items;
+    return {
+      items: employeesToRender ?? [],
+    } as EmployeesDto;
+  }, [isDecisionMaker, inProgress, instance, apiEmployees, employeesSearch]);
 
   const finalEmployees = employeesFromToken();
 
@@ -129,10 +159,7 @@ const DataContent = () => {
         });
       }
     },
-    invalidateQueries: [
-      ["leaveRequests"],
-      ["leaveLimits"],
-    ],
+    invalidateQueries: [["leaveRequests"], ["leaveLimits"]],
   });
 
   const onSubmitLeaveRequest = async (model: LeaveRequestFormModel) => {
@@ -163,52 +190,52 @@ const DataContent = () => {
         {
           severity: "warning",
           autoHideDuration: 3000,
-        },
+        }
       );
       return;
     }
     if (!model.workingDays) {
       notifications.show(
         t(
-          "This leave type can not set in free day.Form is invalid. Can't read working days.",
+          "This leave type can not set in free day.Form is invalid. Can't read working days."
         ),
         {
           severity: "warning",
           autoHideDuration: 3000,
-        },
+        }
       );
       return;
     }
     if (!model.workingHours) {
       notifications.show(
         t(
-          "Form is invalid. Can't read working hours. Check if you have added limits.",
+          "Form is invalid. Can't read working hours. Check if you have added limits."
         ),
         {
           severity: "warning",
           autoHideDuration: 3000,
-        },
+        }
       );
       return;
     }
     if (!apiLeaveTypes) {
       notifications.show(
         t(
-          "Form is invalid. Can't read leave types. Contact with administrator.",
+          "Form is invalid. Can't read leave types. Contact with administrator."
         ),
         {
           severity: "warning",
           autoHideDuration: 3000,
-        },
+        }
       );
       return;
     }
     const calculateDuration = (): Duration => {
       const leaveType = apiLeaveTypes.items.find(
-        (x) => x.id === model.leaveType,
+        (x) => x.id === model.leaveType
       );
       const duration =
-        (leaveType?.properties?.includeFreeDays ?? true)
+        leaveType?.properties?.includeFreeDays ?? true
           ? model.workingHours!.as("milliseconds") * model.allDays!
           : model.workingHours!.as("milliseconds") * model.workingDays!;
 
@@ -267,10 +294,6 @@ const DataContent = () => {
     setStatusesSearch(model.statuses);
   };
 
-  const employeeToRender =
-    employeesSearch.length && employeesSearch.filter((x) => !!x).length > 0
-      ? apiEmployees?.items.filter((x) => employeesSearch.includes(x.id))
-      : apiEmployees?.items;
   return (
     <>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%" }}>
@@ -291,7 +314,7 @@ const DataContent = () => {
             leaveRequests={apiLeaveRequests}
             holidays={apiHolidays}
             leaveStatuses={apiLeaveStatuses.items.filter(
-              (x) => x.state === "Active",
+              (x) => x.state === "Active"
             )}
             leaveTypes={apiLeaveTypes.items}
             employees={finalEmployees?.items ?? []}

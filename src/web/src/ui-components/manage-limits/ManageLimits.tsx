@@ -27,7 +27,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
-  const { instance, inProgress } = useMsal();
+  const { inProgress } = useMsal();
   const notifications = useNotifications();
   const { t } = useTranslation();
   const [currentYear, setCurrentYear] = useState<number>(DateTime.local().year);

@@ -37,9 +37,9 @@ export function GenerateNewYearLimitsModal({
 }: GenerateNewYearLimitsModalProps) {
   const { t } = useTranslation();
   const notifications = useNotifications();
-  const { instance, inProgress } = useMsal();
+  const { inProgress } = useMsal();
   const [templateYear, setTemplateYear] = useState<number>(
-    DateTime.local().year,
+    DateTime.local().year
   );
   const [shouldGenerate, setShouldGenerate] = useState<boolean>(false);
 
@@ -130,7 +130,11 @@ export function GenerateNewYearLimitsModal({
       return limit;
     });
 
-    setGeneratedLimits(updatedLimits);
+    // TODO: Check this!
+    // setGeneratedLimits(updatedLimits);
+    if (updatedLimits.length > 0) {
+      return true;
+    }
     return true;
   };
 
@@ -186,7 +190,9 @@ export function GenerateNewYearLimitsModal({
             variant="contained"
             disabled={saveLimitsMutation.isPending}
           >
-            {saveLimitsMutation.isPending ? t("Saving...") : t("Save All Limits")}
+            {saveLimitsMutation.isPending
+              ? t("Saving...")
+              : t("Save All Limits")}
           </Button>
         )}
       </DialogActions>

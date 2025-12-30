@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Msal imports
@@ -32,7 +32,7 @@ const DataContent = () => {
   const { t } = useTranslation();
   const { instance, inProgress } = useMsal();
   const [currentYear, setCurrentYear] = useState<string>(
-    DateTime.local().toFormat("yyyy"),
+    DateTime.local().toFormat("yyyy")
   );
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ const DataContent = () => {
 
   const isDecisionMaker = useCallback(
     () => isInRole(instance, ["DecisionMaker", "GlobalAdmin"]),
-    [instance],
+    [instance]
   );
 
   const currentDate = DateTime.local();
@@ -75,12 +75,19 @@ const DataContent = () => {
   const { data: apiLeaveLimitsForUser } = useApiQuery<LeaveLimitsDto>(
     ["leaveLimits", currentUserId, currentYear],
     `/leavelimits?year=${currentYear}&userIds=${currentUserId}`,
-    { enabled: inProgress === InteractionStatus.None && !!currentUserId && isDecisionMaker() }
+    {
+      enabled:
+        inProgress === InteractionStatus.None &&
+        !!currentUserId &&
+        isDecisionMaker(),
+    }
   );
 
   const { data: apiLeaveRequests } = useApiQuery<LeaveRequestsResponseDto>(
     ["leaveRequests", "submit", currentUserId, currentYear],
-    `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}${currentUserId ? `&AssignedToUserIds=${currentUserId}` : ""}`,
+    `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}${
+      currentUserId ? `&AssignedToUserIds=${currentUserId}` : ""
+    }`,
     { enabled: inProgress === InteractionStatus.None && !!currentUserId }
   );
 
@@ -121,10 +128,7 @@ const DataContent = () => {
         navigate("/");
       }
     },
-    invalidateQueries: [
-      ["leaveRequests"],
-      ["leaveLimits"],
-    ],
+    invalidateQueries: [["leaveRequests"], ["leaveLimits"]],
   });
 
   const onSubmit = async (model: LeaveRequestFormModel) => {
@@ -155,53 +159,53 @@ const DataContent = () => {
         {
           severity: "warning",
           autoHideDuration: 3000,
-        },
+        }
       );
       return;
     }
     if (!model.workingDays) {
       notifications.show(
         t(
-          "This leave type can not set in free day.Form is invalid. Can't read working days.",
+          "This leave type can not set in free day.Form is invalid. Can't read working days."
         ),
         {
           severity: "warning",
           autoHideDuration: 3000,
-        },
+        }
       );
       return;
     }
     if (!model.workingHours) {
       notifications.show(
         t(
-          "Form is invalid. Can't read working hours. Check if you have added limits.",
+          "Form is invalid. Can't read working hours. Check if you have added limits."
         ),
         {
           severity: "warning",
           autoHideDuration: 3000,
-        },
+        }
       );
       return;
     }
     if (!apiLeaveTypes) {
       notifications.show(
         t(
-          "Form is invalid. Can't read leave types. Contact with administrator.",
+          "Form is invalid. Can't read leave types. Contact with administrator."
         ),
         {
           severity: "warning",
           autoHideDuration: 3000,
-        },
+        }
       );
       // TODO: Email to the administrator and admin name
       return;
     }
     const calculateDuration = (): Duration => {
       const leaveType = apiLeaveTypes.items.find(
-        (x) => x.id === model.leaveType,
+        (x) => x.id === model.leaveType
       );
       const duration =
-        (leaveType?.properties?.includeFreeDays ?? true)
+        leaveType?.properties?.includeFreeDays ?? true
           ? model.workingHours!.as("milliseconds") * model.allDays!
           : model.workingHours!.as("milliseconds") * model.workingDays!;
 
@@ -229,9 +233,8 @@ const DataContent = () => {
     submitLeaveRequestMutation.mutate({ url, method: "POST", body });
   };
 
-  const finalLeaveLimits = isDecisionMaker() && currentUserId 
-    ? apiLeaveLimitsForUser 
-    : apiLeaveLimits;
+  const finalLeaveLimits =
+    isDecisionMaker() && currentUserId ? apiLeaveLimitsForUser : apiLeaveLimits;
 
   return (
     <Authorized
@@ -242,7 +245,7 @@ const DataContent = () => {
           holidays={apiHolidays}
           leaveTypes={apiLeaveTypes?.items.filter((x) => x.state === "Active")}
           leaveLimits={finalLeaveLimits?.items.filter(
-            (x) => x.state === "Active",
+            (x) => x.state === "Active"
           )}
           employees={finalEmployees?.items}
           onSubmit={onSubmit}

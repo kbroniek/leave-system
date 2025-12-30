@@ -15,8 +15,11 @@ import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { useTranslation } from "react-i18next";
 
-const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) => {
-  const { instance, inProgress } = useMsal();
+const DataContent = (props: {
+  leaveRequestId: string;
+  onClose?: () => void;
+}) => {
+  const { inProgress } = useMsal();
   const notifications = useNotifications();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -32,14 +35,28 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
   const { data: apiLeaveType } = useApiQuery<LeaveTypeDto>(
     ["leaveType", apiLeaveRequestDetails?.leaveTypeId],
     `/leavetypes/${apiLeaveRequestDetails?.leaveTypeId}`,
-    { enabled: inProgress === InteractionStatus.None && !!apiLeaveRequestDetails?.leaveTypeId }
+    {
+      enabled:
+        inProgress === InteractionStatus.None &&
+        !!apiLeaveRequestDetails?.leaveTypeId,
+    }
   );
 
   // Fetch holidays based on leave request date range
   const { data: apiHolidays } = useApiQuery<HolidaysDto>(
-    ["holidays", "details", apiLeaveRequestDetails?.dateFrom, apiLeaveRequestDetails?.dateTo],
+    [
+      "holidays",
+      "details",
+      apiLeaveRequestDetails?.dateFrom,
+      apiLeaveRequestDetails?.dateTo,
+    ],
     `/settings/holidays?dateFrom=${apiLeaveRequestDetails?.dateFrom}&dateTo=${apiLeaveRequestDetails?.dateTo}`,
-    { enabled: inProgress === InteractionStatus.None && !!apiLeaveRequestDetails?.dateFrom && !!apiLeaveRequestDetails?.dateTo }
+    {
+      enabled:
+        inProgress === InteractionStatus.None &&
+        !!apiLeaveRequestDetails?.dateFrom &&
+        !!apiLeaveRequestDetails?.dateTo,
+    }
   );
 
   // Fetch leave statuses
@@ -50,7 +67,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
   );
 
   // Create mutation for leave request actions
-  const actionLeaveRequestMutation = useApiMutation<unknown, { remark: string }>({
+  const actionLeaveRequestMutation = useApiMutation<{ remark: string }>({
     onSuccess: (response) => {
       if (response.status === 200) {
         navigate("/");
@@ -68,7 +85,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
     id: string,
     remarks: string,
     action: "accept" | "reject" | "cancel",
-    successMessage: string,
+    successMessage: string
   ) {
     actionLeaveRequestMutation.mutate(
       {
@@ -92,7 +109,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
       id,
       remarks,
       "accept",
-      t("Leave Request was accepted successfully"),
+      t("Leave Request was accepted successfully")
     );
   };
   const handleReject = async (id: string, remarks: string) => {
@@ -100,7 +117,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
       id,
       remarks,
       "reject",
-      t("Leave Request was rejected successfully"),
+      t("Leave Request was rejected successfully")
     );
   };
   const handleCancel = async (id: string, remarks: string) => {
@@ -108,7 +125,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
       id,
       remarks,
       "cancel",
-      t("Leave Request was cancelled successfully"),
+      t("Leave Request was cancelled successfully")
     );
   };
 
@@ -120,7 +137,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
       leaveRequest={apiLeaveRequestDetails}
       statusColor={
         apiLeaveStatuses.items.find(
-          (x) => x.leaveRequestStatus === apiLeaveRequestDetails.status,
+          (x) => x.leaveRequestStatus === apiLeaveRequestDetails.status
         )?.color ?? "transparent"
       }
       leaveType={apiLeaveType}
@@ -145,7 +162,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
 };
 
 export function LeaveRequestDetails(
-  props: Readonly<{ leaveRequestId: string; onClose?: () => void }>,
+  props: Readonly<{ leaveRequestId: string; onClose?: () => void }>
 ) {
   return (
     <MsalAuthenticationTemplate
@@ -154,7 +171,10 @@ export function LeaveRequestDetails(
       errorComponent={ErrorComponent}
       loadingComponent={LoadingAuth}
     >
-      <DataContent leaveRequestId={props.leaveRequestId} onClose={props.onClose} />
+      <DataContent
+        leaveRequestId={props.leaveRequestId}
+        onClose={props.onClose}
+      />
     </MsalAuthenticationTemplate>
   );
 }
