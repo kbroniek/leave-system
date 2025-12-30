@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
@@ -10,11 +10,8 @@ import {
 } from "./ManageLimitsTable";
 import { GenerateNewYearLimitsModal } from "./GenerateNewYearLimitsModal";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import {
-  callApi,
-  callApiGet,
-  ifErrorAcquireTokenRedirect,
-} from "../../utils/ApiCall";
+import { useApiQuery } from "../../hooks/useApiQuery";
+import { useApiMutation } from "../../hooks/useApiMutation";
 import { Authorized } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import { EmployeesDto } from "../dtos/EmployeesDto";
@@ -30,19 +27,42 @@ import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
 
 const DataContent = () => {
-  const { instance, inProgress } = useMsal();
+  const { inProgress } = useMsal();
   const notifications = useNotifications();
   const { t } = useTranslation();
-  const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
-  const [apiLeaveTypes, setApiLeaveTypes] = useState<
-    LeaveTypesDto | undefined
-  >();
-  const [apiLeaveLimits, setApiLeaveLimits] = useState<
-    LeaveLimitsDto | undefined
-  >();
   const [currentYear, setCurrentYear] = useState<number>(DateTime.local().year);
   const [isGenerateModalOpen, setIsGenerateModalOpen] =
     useState<boolean>(false);
+
+  // Use TanStack Query for all API calls
+  const { data: apiEmployees } = useApiQuery<EmployeesDto>(
+    ["employees"],
+    "/employees",
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  const { data: apiLeaveTypes } = useApiQuery<LeaveTypesDto>(
+    ["leaveTypes"],
+    "/leavetypes",
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  const { data: apiLeaveLimits } = useApiQuery<LeaveLimitsDto>(
+    ["leaveLimits", "manage", currentYear],
+    `/leavelimits?year=${currentYear}`,
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  // Create mutation for updating limits
+  const updateLimitMutation = useApiMutation({
+    onSuccess: () => {
+      notifications.show(t("Limit is updated successfully"), {
+        severity: "success",
+        autoHideDuration: 3000,
+      });
+    },
+    invalidateQueries: [["leaveLimits", "manage", currentYear]],
+  });
 
   const handleLimitChange = async (item: LeaveLimitItem): Promise<boolean> => {
     const workingHours = item.workingHours ?? 8;
@@ -68,61 +88,17 @@ const DataContent = () => {
         : null,
       state: item.state,
     };
-    const response = await callApi(
-      `/leavelimits/${dto.id}`,
-      "PUT",
-      dto,
-      notifications.show
-    );
-    if (response.status === 200) {
-      notifications.show(t("Limit is updated successfully"), {
-        severity: "success",
-        autoHideDuration: 3000,
-      });
-      return true;
-    }
-    return false;
+    updateLimitMutation.mutate({
+      url: `/leavelimits/${dto.id}`,
+      method: "PUT",
+      body: dto,
+    });
+    return true;
   };
 
   const handleLimitsGenerated = () => {
-    // Refresh the current limits data
-    if (inProgress === InteractionStatus.None) {
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits?year=${currentYear}`,
-        notifications.show
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-    }
+    // Query will automatically refetch due to invalidation
   };
-
-  useEffect(() => {
-    if (inProgress === InteractionStatus.None) {
-      callApiGet<EmployeesDto>("/employees", notifications.show)
-        .then((response) => setApiEmployees(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
-        .then((response) => setApiLeaveTypes(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits?year=${currentYear}`,
-        notifications.show
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-    }
-  }, [inProgress, currentYear, instance, notifications.show]);
-
-  useEffect(() => {
-    if (inProgress === InteractionStatus.None) {
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits?year=${currentYear}`,
-        notifications.show
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-    }
-  }, [currentYear, inProgress, instance, notifications.show]);
   return (
     <>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
@@ -141,7 +117,6 @@ const DataContent = () => {
               const value = Number(v.target.value);
               if (value !== currentYear) {
                 setCurrentYear(value);
-                setApiLeaveLimits(undefined);
               }
             }}
           />

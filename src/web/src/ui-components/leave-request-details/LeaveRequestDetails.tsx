@@ -1,15 +1,10 @@
-import { useEffect, useState } from "react";
-
-// Msal imports
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
 import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { loginRequest } from "../../authConfig";
-
-// Sample app imports
 import { Loading, LoadingAuth } from "../../components/Loading";
 import { ErrorComponent } from "../../components/ErrorComponent";
-import { ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
-import { useApiCall } from "../../hooks/useApiCall";
+import { useApiQuery } from "../../hooks/useApiQuery";
+import { useApiMutation } from "../../hooks/useApiMutation";
 import { LeaveRequestDetailsDto } from "./LeaveRequestDetailsDto";
 import ShowLeaveRequestDetails from "./ShowLeaveRequestDetails";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
@@ -20,50 +15,101 @@ import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { useTranslation } from "react-i18next";
 
-const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) => {
-  const { instance, inProgress } = useMsal();
-  const { callApi, callApiGet } = useApiCall();
-  const [apiLeaveRequestDetails, setApiLeaveRequestDetails] =
-    useState<LeaveRequestDetailsDto | null>(null);
-  const [apiLeaveStatuses, setApiLeaveStatuses] =
-    useState<LeaveStatusesDto | null>(null);
-  const [apiLeaveType, setApiLeaveType] = useState<LeaveTypeDto | null>(null);
-  const [apiHolidays, setApiHolidays] = useState<HolidaysDto | null>(null);
+const DataContent = (props: {
+  leaveRequestId: string;
+  onClose?: () => void;
+}) => {
+  const { inProgress } = useMsal();
   const notifications = useNotifications();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  // Use TanStack Query for fetching leave request details
+  const { data: apiLeaveRequestDetails } = useApiQuery<LeaveRequestDetailsDto>(
+    ["leaveRequestDetails", props.leaveRequestId],
+    `/leaverequests/${props.leaveRequestId}`,
+    { enabled: inProgress === InteractionStatus.None && !!props.leaveRequestId }
+  );
+
+  // Fetch leave type based on leave request details
+  const { data: apiLeaveType } = useApiQuery<LeaveTypeDto>(
+    ["leaveType", apiLeaveRequestDetails?.leaveTypeId],
+    `/leavetypes/${apiLeaveRequestDetails?.leaveTypeId}`,
+    {
+      enabled:
+        inProgress === InteractionStatus.None &&
+        !!apiLeaveRequestDetails?.leaveTypeId,
+    }
+  );
+
+  // Fetch holidays based on leave request date range
+  const { data: apiHolidays } = useApiQuery<HolidaysDto>(
+    [
+      "holidays",
+      "details",
+      apiLeaveRequestDetails?.dateFrom,
+      apiLeaveRequestDetails?.dateTo,
+    ],
+    `/settings/holidays?dateFrom=${apiLeaveRequestDetails?.dateFrom}&dateTo=${apiLeaveRequestDetails?.dateTo}`,
+    {
+      enabled:
+        inProgress === InteractionStatus.None &&
+        !!apiLeaveRequestDetails?.dateFrom &&
+        !!apiLeaveRequestDetails?.dateTo,
+    }
+  );
+
+  // Fetch leave statuses
+  const { data: apiLeaveStatuses } = useApiQuery<LeaveStatusesDto>(
+    ["leaveStatuses"],
+    "/settings/leavestatus",
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  // Create mutation for leave request actions
+  const actionLeaveRequestMutation = useApiMutation<{ remark: string }>({
+    onSuccess: (response) => {
+      if (response.status === 200) {
+        navigate("/");
+        // TODO: Handle it better - invalidate queries instead of reload
+        window.location.reload();
+      }
+    },
+    invalidateQueries: [
+      ["leaveRequestDetails", props.leaveRequestId],
+      ["leaveRequests"],
+    ],
+  });
 
   async function handleActionLeaveRequest(
     id: string,
     remarks: string,
     action: "accept" | "reject" | "cancel",
-    successMessage: string,
+    successMessage: string
   ) {
-    const body = {
-      remark: remarks,
-    };
-    const response = await callApi(
-      `/leaverequests/${id}/${action}`,
-      "PUT",
-      body,
-      notifications.show,
+    actionLeaveRequestMutation.mutate(
+      {
+        url: `/leaverequests/${id}/${action}`,
+        method: "PUT",
+        body: { remark: remarks },
+      },
+      {
+        onSuccess: () => {
+          notifications.show(successMessage, {
+            severity: "success",
+            autoHideDuration: 3000,
+          });
+        },
+      }
     );
-    if (response.status === 200) {
-      notifications.show(successMessage, {
-        severity: "success",
-        autoHideDuration: 3000,
-      });
-      navigate("/");
-      //TOD: Handle it better
-      window.location.reload();
-    }
   }
+
   const handleAccept = async (id: string, remarks: string) => {
     await handleActionLeaveRequest(
       id,
       remarks,
       "accept",
-      t("Leave Request was accepted successfully"),
+      t("Leave Request was accepted successfully")
     );
   };
   const handleReject = async (id: string, remarks: string) => {
@@ -71,7 +117,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
       id,
       remarks,
       "reject",
-      t("Leave Request was rejected successfully"),
+      t("Leave Request was rejected successfully")
     );
   };
   const handleCancel = async (id: string, remarks: string) => {
@@ -79,37 +125,9 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
       id,
       remarks,
       "cancel",
-      t("Leave Request was cancelled successfully"),
+      t("Leave Request was cancelled successfully")
     );
   };
-
-  useEffect(() => {
-    if (inProgress === InteractionStatus.None) {
-      callApiGet<LeaveRequestDetailsDto>(
-        `/leaverequests/${props.leaveRequestId}`,
-        notifications.show,
-      )
-        .then((response) => {
-          callApiGet<LeaveTypeDto>(
-            `/leavetypes/${response.leaveTypeId}`,
-            notifications.show,
-          )
-            .then((response) => setApiLeaveType(response))
-            .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-          callApiGet<HolidaysDto>(
-            `/settings/holidays?dateFrom=${response.dateFrom}&dateTo=${response.dateTo}`,
-            notifications.show,
-          )
-            .then((response) => setApiHolidays(response))
-            .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-          setApiLeaveRequestDetails(response);
-        })
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveStatusesDto>("/settings/leavestatus", notifications.show)
-        .then((response) => setApiLeaveStatuses(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-    }
-  }, [inProgress, callApiGet, notifications.show, instance]);
 
   return apiLeaveRequestDetails &&
     apiLeaveStatuses &&
@@ -119,7 +137,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
       leaveRequest={apiLeaveRequestDetails}
       statusColor={
         apiLeaveStatuses.items.find(
-          (x) => x.leaveRequestStatus === apiLeaveRequestDetails.status,
+          (x) => x.leaveRequestStatus === apiLeaveRequestDetails.status
         )?.color ?? "transparent"
       }
       leaveType={apiLeaveType}
@@ -144,7 +162,7 @@ const DataContent = (props: { leaveRequestId: string; onClose?: () => void }) =>
 };
 
 export function LeaveRequestDetails(
-  props: Readonly<{ leaveRequestId: string; onClose?: () => void }>,
+  props: Readonly<{ leaveRequestId: string; onClose?: () => void }>
 ) {
   return (
     <MsalAuthenticationTemplate
@@ -153,7 +171,10 @@ export function LeaveRequestDetails(
       errorComponent={ErrorComponent}
       loadingComponent={LoadingAuth}
     >
-      <DataContent leaveRequestId={props.leaveRequestId} onClose={props.onClose} />
+      <DataContent
+        leaveRequestId={props.leaveRequestId}
+        onClose={props.onClose}
+      />
     </MsalAuthenticationTemplate>
   );
 }

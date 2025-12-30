@@ -5,16 +5,14 @@ import { ErrorComponent } from "../../components/ErrorComponent";
 import { Authorized } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import { loginRequest } from "../../authConfig";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ShowHrPanel } from "./ShowHrPanel";
 import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { useSearchParams } from "react-router-dom";
-import { useNotifications } from "@toolpad/core";
 import { DateTime } from "luxon";
-import { ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
-import { useApiCall } from "../../hooks/useApiCall";
+import { useApiQuery } from "../../hooks/useApiQuery";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { EmployeesDto } from "../dtos/EmployeesDto";
 import Paper from "@mui/material/Paper";
@@ -24,70 +22,47 @@ import Grid from "@mui/material/Grid";
 import { Trans } from "react-i18next";
 
 const DataContent = (): React.ReactElement => {
-  const { instance, inProgress } = useMsal();
-  const { callApiGet } = useApiCall();
-  const [apiLeaveRequests, setApiLeaveRequests] =
-    useState<LeaveRequestsResponseDto | null>(null);
-  const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(
-    null
-  );
-  const [apiLeaveLimits, setApiLeaveLimits] = useState<LeaveLimitsDto | null>();
-  const [apiHolidays, setApiHolidays] = useState<HolidaysDto | undefined>();
-  const [apiEmployees, setApiEmployees] = useState<EmployeesDto | undefined>();
+  const { inProgress } = useMsal();
   const [searchParams, setSearchParams] = useSearchParams();
-  const notifications = useNotifications();
   const queryYear = Number(searchParams.get("year"));
   const [currentYear, setCurrentYear] = useState<number>(
     !queryYear ? DateTime.local().year : queryYear
   );
-  const [isCallApi, setIsCallApi] = useState(true);
 
-  useEffect(() => {
-    if (isCallApi && inProgress === InteractionStatus.None) {
-      setIsCallApi(false);
-      const now = DateTime.fromObject({ year: currentYear });
-      const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
-      const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
-      callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
-        notifications.show
-      )
-        .then((response) => setApiLeaveRequests(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      callApiGet<LeaveLimitsDto>(
-        `/leavelimits?year=${currentYear}`,
-        notifications.show
-      )
-        .then((response) => setApiLeaveLimits(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
+  const now = DateTime.fromObject({ year: currentYear });
+  const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
+  const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
 
-      callApiGet<HolidaysDto>(
-        `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
-        notifications.show
-      )
-        .then((response) => setApiHolidays(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      if (!apiLeaveTypes) {
-        callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
-          .then((response) => setApiLeaveTypes(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      }
-      if (!apiEmployees) {
-        callApiGet<EmployeesDto>("/employees", notifications.show)
-          .then((response) => setApiEmployees(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      }
-    }
-  }, [
-    inProgress,
-    instance,
-    notifications.show,
-    apiLeaveTypes,
-    currentYear,
-    isCallApi,
-    apiEmployees,
-    callApiGet,
-  ]);
+  // Use TanStack Query for all API calls
+  const { data: apiLeaveRequests } = useApiQuery<LeaveRequestsResponseDto>(
+    ["leaveRequests", "hr", currentYear],
+    `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  const { data: apiLeaveLimits } = useApiQuery<LeaveLimitsDto>(
+    ["leaveLimits", "hr", currentYear],
+    `/leavelimits?year=${currentYear}`,
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  const { data: apiHolidays } = useApiQuery<HolidaysDto>(
+    ["holidays", currentYear],
+    `/settings/holidays?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}`,
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  const { data: apiLeaveTypes } = useApiQuery<LeaveTypesDto>(
+    ["leaveTypes"],
+    "/leavetypes",
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  const { data: apiEmployees } = useApiQuery<EmployeesDto>(
+    ["employees"],
+    "/employees",
+    { enabled: inProgress === InteractionStatus.None }
+  );
   return (
     <>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
@@ -103,9 +78,6 @@ const DataContent = (): React.ReactElement => {
               if (value !== currentYear) {
                 setCurrentYear(value);
                 setSearchParams({ year: v.target.value });
-                setApiLeaveRequests(null);
-                setApiLeaveLimits(null);
-                setIsCallApi(true);
               }
             }}
           />
