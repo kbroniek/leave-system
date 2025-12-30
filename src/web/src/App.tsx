@@ -16,7 +16,20 @@ import { ManageUsers } from "./ui-components/manage-users/ManageUsers";
 import { ManageLimits } from "./ui-components/manage-limits/ManageLimits";
 import { LeaveRequestDetailsPage } from "./ui-components/leave-request-details/LeaveRequestDetailsPage";
 import { MyLeaveRequestsPage } from "./ui-components/my-leave-requests/MyLeaveRequestsPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
+
+// Create a QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 export function App({ pca }: Readonly<AppProps>) {
   // The next 3 lines are optional. This is how you configure MSAL to take advantage of the router's navigate functions when MSAL redirects between pages in your app
@@ -25,15 +38,18 @@ export function App({ pca }: Readonly<AppProps>) {
   pca.setNavigationClient(navigationClient);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterLuxon}>
-      <MsalProvider instance={pca}>
-        <PageLayout>
-            <Grid container justifyContent="center">
-                <Pages />
-            </Grid>
-        </PageLayout>
-      </MsalProvider>
-    </LocalizationProvider>
+    <QueryClientProvider client={queryClient}>
+      <LocalizationProvider dateAdapter={AdapterLuxon}>
+        <MsalProvider instance={pca}>
+          <PageLayout>
+              <Grid container justifyContent="center">
+                  <Pages />
+              </Grid>
+          </PageLayout>
+        </MsalProvider>
+      </LocalizationProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 

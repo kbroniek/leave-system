@@ -1,15 +1,13 @@
 import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ErrorComponent } from "../../components/ErrorComponent";
 import { LoadingAuth } from "../../components/Loading";
 import { loginRequest } from "../../authConfig";
 import { DateTime } from "luxon";
-import { useNotifications } from "@toolpad/core/useNotifications";
 import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { useSearchParams } from "react-router-dom";
-import { ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
-import { useApiCall } from "../../hooks/useApiCall";
+import { useApiQuery } from "../../hooks/useApiQuery";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { ShowMyLeaveRequests } from "./ShowMyLeaveRequests";
@@ -24,69 +22,46 @@ import { leaveRequestsStatuses } from "../utils/Status";
 
 const DataContent = (params: { userId?: string }) => {
   const { instance, inProgress } = useMsal();
-  const { callApiGet } = useApiCall();
-  const [apiLeaveRequests, setApiLeaveRequests] =
-    useState<LeaveRequestsResponseDto | null>(null);
-  const [apiLeaveStatuses, setApiLeaveStatuses] =
-    useState<LeaveStatusesDto | null>(null);
-  const [apiLeaveTypes, setApiLeaveTypes] = useState<LeaveTypesDto | null>(
-    null
-  );
-  const [apiLeaveLimits, setApiLeaveLimits] = useState<LeaveLimitsDto | null>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const notifications = useNotifications();
   const queryYear = Number(searchParams.get("year"));
   const [currentYear, setCurrentYear] = useState<number>(
     !queryYear ? DateTime.local().year : queryYear
   );
-  const [isCallApi, setIsCallApi] = useState(true);
+  
+  const userId = params.userId ?? instance.getActiveAccount()?.idTokenClaims?.oid;
+  const now = DateTime.fromObject({ year: currentYear });
+  const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
+  const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
+  const leaveRequestsUrl = `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&assignedToUserIds=${userId}${leaveRequestsStatuses
+    .map((x) => `&statuses=${x}`)
+    .join("")}`;
 
-  useEffect(() => {
-    if (isCallApi && inProgress === InteractionStatus.None) {
-      setIsCallApi(false);
-      const userId =
-        params.userId ?? instance.getActiveAccount()?.idTokenClaims?.oid;
-      const now = DateTime.fromObject({ year: currentYear });
-      const dateFromFormatted = now.startOf("year").toFormat("yyyy-MM-dd");
-      const dateToFormatted = now.endOf("year").toFormat("yyyy-MM-dd");
-      callApiGet<LeaveRequestsResponseDto>(
-        `/leaverequests?dateFrom=${dateFromFormatted}&dateTo=${dateToFormatted}&assignedToUserIds=${userId}${leaveRequestsStatuses
-          .map((x) => `&statuses=${x}`)
-          .join("")}`,
-        notifications.show
-      )
-        .then((response) => setApiLeaveRequests(response))
-        .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      if (params.userId) {
-        callApiGet<LeaveLimitsDto>(
-          `/leavelimits?year=${currentYear}&userIds=${userId}`,
-          notifications.show
-        )
-          .then((response) => setApiLeaveLimits(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      } else {
-        callApiGet<LeaveLimitsDto>(
-          `/leavelimits/user?year=${currentYear}`,
-          notifications.show
-        )
-          .then((response) => setApiLeaveLimits(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      }
-      if (!apiLeaveTypes) {
-        callApiGet<LeaveTypesDto>("/leavetypes", notifications.show)
-          .then((response) => setApiLeaveTypes(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      }
-      if (!apiLeaveStatuses) {
-        callApiGet<LeaveStatusesDto>(
-          "/settings/leavestatus",
-          notifications.show
-        )
-          .then((response) => setApiLeaveStatuses(response))
-          .catch((e) => ifErrorAcquireTokenRedirect(e, instance));
-      }
-    }
-  }, [inProgress, currentYear, isCallApi]);
+  // Use TanStack Query for all API calls
+  const { data: apiLeaveRequests } = useApiQuery<LeaveRequestsResponseDto>(
+    ["leaveRequests", userId, currentYear],
+    leaveRequestsUrl,
+    { enabled: inProgress === InteractionStatus.None && !!userId }
+  );
+
+  const { data: apiLeaveLimits } = useApiQuery<LeaveLimitsDto>(
+    ["leaveLimits", userId, currentYear],
+    params.userId 
+      ? `/leavelimits?year=${currentYear}&userIds=${userId}`
+      : `/leavelimits/user?year=${currentYear}`,
+    { enabled: inProgress === InteractionStatus.None && !!userId }
+  );
+
+  const { data: apiLeaveTypes } = useApiQuery<LeaveTypesDto>(
+    ["leaveTypes"],
+    "/leavetypes",
+    { enabled: inProgress === InteractionStatus.None }
+  );
+
+  const { data: apiLeaveStatuses } = useApiQuery<LeaveStatusesDto>(
+    ["leaveStatuses"],
+    "/settings/leavestatus",
+    { enabled: inProgress === InteractionStatus.None }
+  );
   return (
     <>
       <Paper elevation={3} sx={{ margin: "3px 0", width: "100%", padding: 1 }}>
@@ -102,9 +77,6 @@ const DataContent = (params: { userId?: string }) => {
               if (value !== currentYear) {
                 setCurrentYear(value);
                 setSearchParams({ year: v.target.value });
-                setApiLeaveRequests(null);
-                setApiLeaveLimits(null);
-                setIsCallApi(true);
               }
             }}
           />
