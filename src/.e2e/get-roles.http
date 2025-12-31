@@ -1,0 +1,10 @@
+# @import ./secrets.http
+
+###
+# @name Get Roles
+# @reject-unauthorized
+POST {{baseUrlRoles}}/GetRoles
+Authorization: Basic {{technicalB2CUsername}} {{technicalB2CPassword}}
+{
+    "id": "{{userRoleB2C}}"
+}

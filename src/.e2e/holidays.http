@@ -1,0 +1,9 @@
+# @import ./login.http
+
+###
+# @name Get Users
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/settings/holidays?dateFrom=2024-01-01&dateTo=2024-12-31
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200

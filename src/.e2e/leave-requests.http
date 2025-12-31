@@ -1,0 +1,126 @@
+# @import ./login.http
+
+###
+# @name Search Leave Requests
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leaverequests?dateFrom=2024-08-21&dateTo=2024-09-23&assignedToUserIds=4e67827b-f93a-40c3-96f1-9193bdfac06d&assignedToUserIds=c188430f-3abd-4885-80f5-75e1b44f7b2b&Statuses=Init&Statuses=Pending&Statuses=Accepted&Statuses=Canceled&Statuses=Rejected&Statuses=Deprecated
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Request
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Create Leave Request (holiday)
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leaverequests
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde75",
+    "dateFrom": "2024-09-02",
+    "dateTo": "2024-09-04",
+    "duration": "P1D",
+    "workingHours": "PT8H",
+    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "remark": "My custom holiday leave"
+}
+
+###
+# @name Create Leave Request (sick)
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leaverequests
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde75",
+    "dateFrom": "2024-08-23",
+    "dateTo": "2024-08-25",
+    "duration": "P1D",
+    "workingHours": "PT8H",
+    "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
+    "remark": "My custom sick leave"
+}
+
+###
+# @name Create Leave Request (occasional)
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leaverequests
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde74",
+    "dateFrom": "2024-08-21",
+    "dateTo": "2024-08-23",
+    "duration": "P1D",
+    "workingHours": "PT8H",
+    "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
+    "remark": "My custom occasional leave"
+}
+
+###
+# @name Create Leave Request on behalf
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leaverequests/onbehalf
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+    "dateFrom": "2024-08-23",
+    "dateTo": "2024-08-23",
+    "duration": "PT8H",
+    "workingHours": "PT8H",
+    "leaveTypeId": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
+    "remark": "My custom occasional leave",
+    "assignedToId": "c188430f-3abd-4885-80f5-75e1b44f7b2b"
+}
+
+###
+# @name Accept Leave Request
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde71/accept
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{
+    "remark": "accepted by me"
+}
+
+###
+# @name Reject Leave Request
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde72/reject
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{
+    "remark": "rejected by me"
+}
+
+###
+# @name Cancel Leave Request
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/leaverequests/1769e6ea-a351-45bb-a518-a08f59fdde73/cancel
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{
+    "remark": "canceled by me"
+}

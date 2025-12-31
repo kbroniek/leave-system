@@ -1,0 +1,62 @@
+import { useMsal } from "@azure/msal-react";
+import { useState, useEffect, ReactElement } from "react";
+import { isInRole, RoleType } from "../utils/roleUtils";
+import { roleManager } from "../services/roleManager";
+import { CircularProgress, Box } from "@mui/material";
+
+export const Authorized = (props: AuthorizedProps) => {
+  const [isAuthorized, setIsAuthorized] = useState<boolean | undefined>();
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const { instance } = useMsal();
+
+  // Subscribe to loading state changes
+  useEffect(() => {
+    const unsubscribe = roleManager.addLoadingStateListener((loading) => {
+      setIsLoadingRoles(loading);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (props.roles === "CurrentUser") {
+      setIsAuthorized(
+        props.userId === instance.getActiveAccount()?.idTokenClaims?.oid
+      );
+    } else {
+      setIsAuthorized(isInRole(instance, props.roles));
+    }
+  }, [instance, props, isLoadingRoles]);
+
+  // Show loading spinner if roles are being fetched and no roles exist yet
+  if (isLoadingRoles) {
+    return (
+      props.loading ?? (
+        <Box display="flex" justifyContent="center" alignItems="center" p={2}>
+          <CircularProgress size={24} />
+        </Box>
+      )
+    );
+  }
+
+  return isAuthorized === undefined ? (
+    <Box display="flex" justifyContent="center" alignItems="center" p={2}>
+      <CircularProgress size={24} />
+    </Box>
+  ) : (
+    <>
+      {isAuthorized ? props.children ?? props.authorized : props.unauthorized}
+    </>
+  );
+};
+
+type RoleArgs =
+  | { roles: RoleType[] }
+  | { roles: "CurrentUser"; userId: string };
+
+type AuthorizedProps = {
+  authorized?: ReactElement;
+  children?: React.ReactNode;
+  unauthorized?: ReactElement;
+  loading?: ReactElement;
+} & RoleArgs;

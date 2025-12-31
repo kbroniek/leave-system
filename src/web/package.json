@@ -1,0 +1,59 @@
+{
+  "name": "leave-system-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0 <21 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:swa": "tsc -b && cross-env VITE_BUILD_OUT_DIR=../../out/deploy/app vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "trans-extract": "i18next -o public/locales/en/translation.json -c public/locales/i18next-parser.config.mjs & i18next -o public/locales/pl/translation.json -c public/locales/i18next-parser.config.mjs"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^4.22.1",
+    "@azure/msal-react": "^3.0.19",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.2",
+    "@mui/lab": "7.0.0-beta.17",
+    "@mui/material": "^7.3.2",
+    "@mui/x-data-grid": "^8.11.2",
+    "@mui/x-date-pickers": "^8.11.2",
+    "@tanstack/react-query": "^5.62.13",
+    "@tanstack/react-query-devtools": "^5.62.13",
+    "@toolpad/core": "^0.16.0",
+    "i18next": "^25.5.2",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next-http-backend": "^3.0.2",
+    "luxon": "^3.7.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.62.0",
+    "react-i18next": "^15.7.3",
+    "react-router-dom": "^7.8.2",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/luxon": "^3.7.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "i18next-parser": "^9.3.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4"
+  }
+}

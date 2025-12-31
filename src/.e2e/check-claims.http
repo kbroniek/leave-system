@@ -1,0 +1,8 @@
+# @import ./login.http
+
+###
+# @name Check Claims
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/CheckClaims
+X-Authorization: Bearer {{bearerToken}}

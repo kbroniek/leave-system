@@ -1,0 +1,74 @@
+# @import ./login.http
+
+###
+# @name Get Leave Types
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavetypes
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Type holiday
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavetypes/ae752d4b-0368-4d46-8efa-9ef2ee248fa9
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Type on-demand
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavetypes/6e1a75ca-07dc-45aa-9451-57e1cefd7ee6
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Create Leave Type
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leavetypes
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "id": "d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5",
+    "name": "dummy leave type",
+    "order": 1,
+    "properties": {
+        "color": "#FF00FF",
+        "includeFreeDays": false,
+        "defaultLimitDays": 100,
+        "catalog": "Holiday"
+    },
+    "state": "Active"
+}
+
+###
+# @name Update Leave Type
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/leavetypes/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{
+    "id": "d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5",
+    "name": "dummy leave type",
+    "order": 1,
+    "properties": {
+        "color": "#FF00FF",
+        "includeFreeDays": false,
+        "defaultLimitDays": 100,
+        "catalog": "Holiday"
+    }
+}
+
+###
+# @name Delete Leave Type
+# @ref Login
+# @reject-unauthorized
+DELETE {{baseUrl}}/leavetypes/d1e31c22-c8a3-45d2-a904-fca7bbdb2bb5
+X-Authorization: Bearer {{bearerToken}}
+?? status == 204

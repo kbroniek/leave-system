@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" PolicySchemaVersion="0.3.0.0"
+    TenantId="{Settings:Tenant}.onmicrosoft.com"
+    PolicyId="B2C_1A_ROPC_Auth"
+    PublicPolicyUri="http://{Settings:Tenant}.onmicrosoft.com/B2C_1A_ROPC_Auth"
+    DeploymentMode="Development"
+    UserJourneyRecorderEndpoint="urn:journeyrecorder:applicationinsights">
+
+    <BasePolicy>
+        <TenantId>{Settings:Tenant}.onmicrosoft.com</TenantId>
+        <PolicyId>B2C_1A_TrustFrameworkExtensions_Roles</PolicyId>
+    </BasePolicy>
+
+    <UserJourneys>
+        <UserJourney Id="ResourceOwnerPasswordCredentials">
+            <PreserveOriginalAssertion>false</PreserveOriginalAssertion>
+            <OrchestrationSteps>
+                <OrchestrationStep Order="1" Type="ClaimsExchange">
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="ResourceOwnerFlow"
+                            TechnicalProfileReferenceId="ResourceOwnerPasswordCredentials-OAUTH2" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+                <OrchestrationStep Order="2" Type="ClaimsExchange">
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="AADUserReadWithObjectId"
+                            TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+                <OrchestrationStep Order="3" Type="ClaimsExchange">
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="GetRolesClaimsExchange"
+                            TechnicalProfileReferenceId="GetRolesViaHttp" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+                <OrchestrationStep Order="4" Type="SendClaims"
+                    CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+            </OrchestrationSteps>
+        </UserJourney>
+    </UserJourneys>
+    <RelyingParty>
+        <DefaultUserJourney ReferenceId="ResourceOwnerPasswordCredentials" />
+        <UserJourneyBehaviors>
+            <JourneyInsights
+                TelemetryEngine="ApplicationInsights"
+                InstrumentationKey="{Settings:ApplicationInsightsKey}"
+                DeveloperMode="{Settings:InsightsDeveloperMode}"
+                ClientEnabled="true"
+                ServerEnabled="true"
+                TelemetryVersion="1.0.0" />
+        </UserJourneyBehaviors>
+        <TechnicalProfile Id="PolicyProfile">
+            <DisplayName>PolicyProfile</DisplayName>
+            <Protocol Name="OpenIdConnect" />
+            <OutputClaims>
+                <OutputClaim ClaimTypeReferenceId="displayName" />
+                <OutputClaim ClaimTypeReferenceId="givenName" />
+                <OutputClaim ClaimTypeReferenceId="surname" />
+                <OutputClaim ClaimTypeReferenceId="roles" />
+                <OutputClaim ClaimTypeReferenceId="signInName" />
+                <OutputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="sub" />
+                <OutputClaim ClaimTypeReferenceId="tenantId" AlwaysUseDefaultValue="true"
+                    DefaultValue="{Policy:TenantObjectId}" />
+            </OutputClaims>
+            <SubjectNamingInfo ClaimType="sub" />
+        </TechnicalProfile>
+    </RelyingParty>
+</TrustFrameworkPolicy>

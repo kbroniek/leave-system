@@ -1,0 +1,105 @@
+# @import ./login.http
+
+###
+# @name Get User Leave Limits
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits/user?year=2024
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Limits
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits?year=2024&pagesize=1
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Get Leave Limit
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits/cd72ec1a-e461-4049-b9b9-db49f7bc58c0
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Create Leave Limit
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leavelimits
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 201
+{
+    "id": "cd72ec1a-e461-4049-b9b9-db49f7bc58c0",
+    "limit": "P8DT16H",
+    "overdueLimit": null,
+    "workingHours": "PT8H",
+    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "validSince": "2025-01-01",
+    "validUntil": "2025-12-31",
+    "assignedToUserId": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+    "description": "Dummy limit"
+}
+
+###
+# @name Update Leave Limit
+# @ref Login
+# @reject-unauthorized
+PUT {{baseUrl}}/leavelimits/cd72ec1a-e461-4049-b9b9-db49f7bc58c0
+Content-Type: application/json
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{
+    "id": "cd72ec1a-e461-4049-b9b9-db49f7bc58c0",
+    "limit": "P8DT16H",
+    "overdueLimit": null,
+    "workingHours": "PT8H",
+    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "validSince": "2026-01-01",
+    "validUntil": "2026-12-31",
+    "assignedToUserId": "4e67827b-f93a-40c3-96f1-9193bdfac06d",
+    "description": "Dummy limit"
+}
+
+###
+# @name Delete Leave Limit
+# @ref Login
+# @reject-unauthorized
+DELETE {{baseUrl}}/leavelimits/cd72ec1a-e461-4049-b9b9-db49f7bc58c0
+X-Authorization: Bearer {{bearerToken}}
+?? status == 204
+
+###
+# @name Generate New Year Limits
+# @ref Login
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits/generate-new-year?year=2024
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+
+###
+# @name Batch Insert Limits
+# @ref Login
+# @reject-unauthorized
+POST {{baseUrl}}/leavelimits/batch
+X-Authorization: Bearer {{bearerToken}}
+Content-Type: application/json
+
+[
+  {
+    "id": "{{$guid}}",
+    "limit": "PT208H",
+    "overdueLimit": null,
+    "workingHours": "PT8H",
+    "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+    "validSince": "2025-01-01",
+    "validUntil": "2025-12-31",
+    "assignedToUserId": null,
+    "state": "Active",
+    "description": "Generated limit for 2025"
+  }
+]
+?? status == 201

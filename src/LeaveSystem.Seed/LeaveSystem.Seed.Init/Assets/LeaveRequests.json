@@ -1,0 +1,98 @@
+{
+  "partitionKey": "/streamId",
+  "items": [
+    {
+      "id": "a9b32f81-2354-4594-8858-455500ee323c",
+      "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+      "body": {
+        "leaveRequestId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+        "dateFrom": "2025-08-22",
+        "dateTo": "2025-08-22",
+        "duration": "08:00:00",
+        "leaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+        "remarks": "I have an appointment",
+        "createdBy": {
+          "id": "34cc6045-56c8-4b1b-a22d-f0d652f612fb",
+          "name": "Karol Broniek"
+        },
+        "assignedTo": {
+          "id": "34cc6045-56c8-4b1b-a22d-f0d652f612fb",
+          "name": "Karol Broniek"
+        },
+        "workingHours": "08:00:00",
+        "createdDate": "2025-08-26T07:40:37.5491579+00:00",
+        "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Creating.LeaveRequestCreated, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    },
+    {
+      "id": "3ae53b2c-44ce-4e41-a988-4ac3ce8178fd",
+      "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+      "body": {
+        "leaveRequestId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7",
+        "remarks": "accepted by me",
+        "acceptedBy": {
+          "id": "34cc6045-56c8-4b1b-a22d-f0d652f612fb",
+          "name": "Karol Broniek"
+        },
+        "createdDate": "2025-08-26T07:41:00.1442402+00:00",
+        "streamId": "ae6cdc66-dbc4-4307-b09b-e0be50f955b7"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Accepting.LeaveRequestAccepted, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    },
+    {
+      "id": "7a9da254-61dc-43b1-867e-05da94fa44ad",
+      "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+      "body": {
+        "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+        "dateFrom": "2025-08-21",
+        "dateTo": "2025-08-21",
+        "duration": "08:00:00",
+        "leaveTypeId": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
+        "remarks": "I need to leave",
+        "createdBy": {
+          "id": "2923fea5-d1c7-40b4-8f9e-769f7cc6e22c",
+          "name": "Olgierd Urbanek"
+        },
+        "assignedTo": {
+          "id": "2923fea5-d1c7-40b4-8f9e-769f7cc6e22c",
+          "name": "Olgierd Urbanek"
+        },
+        "workingHours": "08:00:00",
+        "createdDate": "2025-09-01T15:13:32.6939386+02:00",
+        "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Creating.LeaveRequestCreated, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    },
+    {
+      "id": "b98f8193-3e47-4fff-aea9-da7ef2e23390",
+      "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+      "body": {
+        "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+        "remarks": null,
+        "rejectedBy": {
+          "id": "2923fea5-d1c7-40b4-8f9e-769f7cc6e22c",
+          "name": "Olgierd Urbanek"
+        },
+        "createdDate": "2025-09-01T15:13:52.08901+02:00",
+        "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Rejecting.LeaveRequestRejected, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    },
+    {
+      "id": "3c9381c0-7abf-465f-a56d-7d7aae049212",
+      "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+      "body": {
+        "leaveRequestId": "1769e6ea-a351-45bb-a518-a08f59fdde71",
+        "remarks": "accepted by me",
+        "acceptedBy": {
+          "id": "2923fea5-d1c7-40b4-8f9e-769f7cc6e22c",
+          "name": "Olgierd Urbanek"
+        },
+        "createdDate": "2025-09-01T15:16:17.9512307+02:00",
+        "streamId": "1769e6ea-a351-45bb-a518-a08f59fdde71"
+      },
+      "eventType": "LeaveSystem.Domain.LeaveRequests.Accepting.LeaveRequestAccepted, LeaveSystem.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+    }
+  ]
+}

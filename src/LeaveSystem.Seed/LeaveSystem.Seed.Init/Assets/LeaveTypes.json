@@ -1,0 +1,161 @@
+{
+  "partitionKey": "/id",
+  "uniqueKeys": [
+    "/name", "/order"
+  ],
+  "items": [
+    {
+      "id": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+      "name": "urlop wypoczynkowy",
+      "order": 1,
+      "properties": {
+        "color": "transparent",
+        "includeFreeDays": false,
+        "defaultLimitDays": 26,
+        "catalog": "Holiday"
+      }
+    },
+    {
+      "id": "6e1a75ca-07dc-45aa-9451-57e1cefd7ee6",
+      "name": "urlop na żądanie",
+      "baseLeaveTypeId": "ae752d4b-0368-4d46-8efa-9ef2ee248fa9",
+      "order": 2,
+      "properties": {
+        "color": "#FF8933",
+        "includeFreeDays": false,
+        "defaultLimitDays": 4,
+        "catalog": "OnDemand"
+      }
+    },
+    {
+      "id": "c91558cc-5d58-4a77-b46e-e6a69ac14cf4",
+      "name": "niezdolność do pracy z powodu choroby",
+      "order": 3,
+      "properties": {
+        "color": "#FF3333",
+        "includeFreeDays": true,
+        "defaultLimitDays": 26,
+        "catalog": "Sick"
+      }
+    },
+    {
+      "id": "2dfb7d85-70d8-4acc-a565-62fde19b7cd1",
+      "name": "urlop za sobotę",
+      "order": 4,
+      "properties": {
+        "color": "#FFFF33",
+        "includeFreeDays": false,
+        "defaultLimitDays": 1,
+        "catalog": "Saturday"
+      }
+    },
+    {
+      "id": "5f722feb-ac94-491e-b30a-db1be3b05124",
+      "name": "opieka nad dzieckiem do 14 lat - art. 188 KP",
+      "order": 5,
+      "properties": {
+        "color": "#FF4DA6",
+        "includeFreeDays": false
+      }
+    },
+    {
+      "id": "8e86e74e-b18c-486d-99e6-bada7a0e0ca9",
+      "name": "urlop okolicznościowy",
+      "order": 6,
+      "properties": {
+        "color": "#30D5C8",
+        "includeFreeDays": false
+      }
+    },
+    {
+      "id": "d06fda84-38f1-497d-a5f2-cece46572908",
+      "name": "urlop szkoleniowy",
+      "order": 7,
+      "properties": {
+        "color": "transparent",
+        "includeFreeDays": true
+      }
+    },
+    {
+      "id": "a74c9aaf-125e-4b15-aa02-6d51ae28bfb9",
+      "name": "urlop wychowawczy",
+      "order": 9,
+      "properties": {
+        "color": "#2EB82B",
+        "includeFreeDays": true
+      }
+    },
+    {
+      "id": "38842453-1be8-4bbf-848a-252bcf2f4acd",
+      "name": "urlop macierzyński",
+      "order": 10,
+      "properties": {
+        "color": "#FF99DD",
+        "includeFreeDays": true
+      }
+    },
+    {
+      "id": "c20c4b40-54e5-43c1-8002-82e3b44d4c9b",
+      "name": "urlop ojcowski",
+      "order": 11,
+      "properties": {
+        "color": "#FF99DD",
+        "includeFreeDays": true
+      }
+    },
+    {
+      "id": "892d36a7-6733-4858-a1a7-459da6c7bb7b",
+      "name": "urlop tacierzyński",
+      "order": 12,
+      "properties": {
+        "color": "#FF99DD",
+        "includeFreeDays": true
+      }
+    },
+    {
+      "id": "0b0f26ce-91be-4d34-bc2a-eeab19d7da6d",
+      "name": "opieka nad chorym dzieckiem lub innym członkiem rodziny",
+      "order": 13,
+      "properties": {
+        "color": "#FF3333",
+        "includeFreeDays": true
+      }
+    },
+    {
+      "id": "b4841697-4ff9-4fbd-95d8-b8895694310b",
+      "name": "urlop od firmy",
+      "order": 14,
+      "properties": {
+        "color": "transparent",
+        "includeFreeDays": false
+      }
+    },
+    {
+      "id": "e8b348ae-3b3b-40eb-8174-15c3a3b19888",
+      "name": "urlop bezpłatny",
+      "order": 15,
+      "properties": {
+        "color": "#0033CC",
+        "includeFreeDays": true
+      }
+    },
+    {
+      "id": "2c9abfa2-edd2-417c-8786-0d7d469b5b4b",
+      "name": "nieobecność usprawiedliwiona płatna",
+      "order": 16,
+      "properties": {
+        "color": "#FF3333",
+        "includeFreeDays": true
+      }
+    },
+    {
+      "id": "b2f8ecee-b45d-43ea-a4db-c92923d2845a",
+      "name": "nieobecność nieusprawiedliwiona",
+      "order": 17,
+      "properties": {
+        "color": "#0066FF",
+        "includeFreeDays": true
+      }
+    }
+  ]
+}

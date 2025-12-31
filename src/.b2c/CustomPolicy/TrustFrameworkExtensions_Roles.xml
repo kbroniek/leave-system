@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" PolicySchemaVersion="0.3.0.0"
+    TenantId="{Settings:Tenant}.onmicrosoft.com"
+    PolicyId="B2C_1A_TrustFrameworkExtensions_Roles"
+  DeploymentMode="Development"
+    UserJourneyRecorderEndpoint="urn:journeyrecorder:applicationinsights"
+    PublicPolicyUri="http://{Settings:Tenant}.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions_Roles">
+
+    <BasePolicy>
+        <TenantId>{Settings:Tenant}.onmicrosoft.com</TenantId>
+        <PolicyId>B2C_1A_TrustFrameworkExtensions_SSPR</PolicyId>
+    </BasePolicy>
+
+    <ClaimsProviders>
+        <ClaimsProvider>
+            <DisplayName>HTTP Request Technical Profiles</DisplayName>
+            <TechnicalProfiles>
+                <TechnicalProfile Id="GetRolesViaHttp">
+                    <DisplayName>Get the user's roles</DisplayName>
+                    <Protocol Name="Proprietary"
+                        Handler="Web.TPEngine.Providers.RestfulProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+                    <Metadata>
+                        <Item Key="ServiceUrl">{Settings:RoleEndpointUrl}</Item>
+                        <Item Key="SendClaimsIn">Body</Item>
+                        <Item Key="AuthenticationType">Basic</Item>
+                        <Item Key="AllowInsecureAuthInProduction">true</Item>
+                        <Item Key="DebugMode">true</Item>
+                    </Metadata>
+                    <CryptographicKeys>
+                        <Key Id="BasicAuthenticationUsername"
+                            StorageReferenceId="B2C_1A_RestApiUsername" />
+                        <Key Id="BasicAuthenticationPassword"
+                            StorageReferenceId="B2C_1A_RestApiPassword" />
+                    </CryptographicKeys>
+                    <InputClaims>
+                        <InputClaim ClaimTypeReferenceId="displayName" PartnerClaimType="email" />
+                        <InputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="id" />
+                    </InputClaims>
+                    <OutputClaims>
+                        <OutputClaim ClaimTypeReferenceId="roles" PartnerClaimType="roles" />
+                    </OutputClaims>
+                </TechnicalProfile>
+            </TechnicalProfiles>
+        </ClaimsProvider>
+    </ClaimsProviders>
+    <UserJourneys>
+
+        <UserJourney Id="SignUpOrSignIn-Roles">
+            <OrchestrationSteps>
+
+                <OrchestrationStep Order="1" Type="CombinedSignInAndSignUp"
+                    ContentDefinitionReferenceId="api.signuporsignin">
+                    <ClaimsProviderSelections>
+                        <ClaimsProviderSelection
+                            ValidationClaimsExchangeId="LocalAccountSigninEmailExchange" />
+                        <ClaimsProviderSelection TargetClaimsExchangeId="ForgotPasswordExchange" />
+                    </ClaimsProviderSelections>
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="LocalAccountSigninEmailExchange"
+                            TechnicalProfileReferenceId="SelfAsserted-LocalAccountSignin-Email" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+
+                <!-- Check if the user has selected to sign in using one of the social providers -->
+                <OrchestrationStep Order="2" Type="ClaimsExchange">
+                    <Preconditions>
+                        <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
+                            <Value>objectId</Value>
+                            <Action>SkipThisOrchestrationStep</Action>
+                        </Precondition>
+                    </Preconditions>
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="SignUpWithLogonEmailExchange"
+                            TechnicalProfileReferenceId="LocalAccountSignUpWithLogonEmail" />
+                        <ClaimsExchange Id="ForgotPasswordExchange"
+                            TechnicalProfileReferenceId="ForgotPassword" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+
+                <OrchestrationStep Order="3" Type="InvokeSubJourney">
+                    <Preconditions>
+                        <Precondition Type="ClaimsExist" ExecuteActionsIf="false">
+                            <Value>isForgotPassword</Value>
+                            <Action>SkipThisOrchestrationStep</Action>
+                        </Precondition>
+                    </Preconditions>
+                    <JourneyList>
+                        <Candidate SubJourneyReferenceId="PasswordReset" />
+                    </JourneyList>
+                </OrchestrationStep>
+
+                <OrchestrationStep Order="4" Type="ClaimsExchange">
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="GetRolesClaimsExchange"
+                            TechnicalProfileReferenceId="GetRolesViaHttp" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+
+                <OrchestrationStep Order="5" Type="SendClaims"
+                    CpimIssuerTechnicalProfileReferenceId="JwtIssuer" />
+
+            </OrchestrationSteps>
+            <ClientDefinition ReferenceId="DefaultWeb" />
+        </UserJourney>
+    </UserJourneys>
+    <SubJourneys>
+        <SubJourney Id="PasswordReset" Type="Call">
+            <OrchestrationSteps>
+                <!-- Validate user's email address. Run this step only when user resets the
+                password-->
+                <OrchestrationStep Order="1" Type="ClaimsExchange">
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="PasswordResetUsingEmailAddressExchange"
+                            TechnicalProfileReferenceId="LocalAccountDiscoveryUsingEmailAddress" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+
+                <!-- Collect and persist a new password. Run this step only when user resets the
+                password-->
+                <OrchestrationStep Order="2" Type="ClaimsExchange">
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="NewCredentials"
+                            TechnicalProfileReferenceId="LocalAccountWritePasswordUsingObjectId" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+
+                <OrchestrationStep Order="3" Type="ClaimsExchange">
+                    <ClaimsExchanges>
+                        <ClaimsExchange Id="ReadClaims"
+                            TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
+                    </ClaimsExchanges>
+                </OrchestrationStep>
+            </OrchestrationSteps>
+        </SubJourney>
+    </SubJourneys>
+</TrustFrameworkPolicy>
