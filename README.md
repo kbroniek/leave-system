@@ -2,6 +2,7 @@
 
 [![.NET](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml)
 [![DEV - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml)
+[![BoMed - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-icy-river-08fed3e03.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-icy-river-08fed3e03.yml)
 
 System to manage leaves.
 
@@ -25,6 +26,6 @@ Check this [Readme](https://github.com/kbroniek/leave-system-iac).
 If you have the error when you deploy PR in to the Azure:
 
 > The content server has rejected the request with: BadRequest
-Reason: The number of static files was too large.
+> Reason: The number of static files was too large.
 
 Probably you have an error in your code. Check logs and find errors.
