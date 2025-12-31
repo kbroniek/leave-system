@@ -1,50 +1,82 @@
-# React + TypeScript + Vite
+# Leave System - New Implementation
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a reimplementation of the leave system using modern React patterns with TanStack Query and Azure MSAL.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **@azure/msal-react** + **@azure/msal-browser** - Azure AD B2C authentication
+- **TanStack Query (React Query)** - Server state management
+- **Material-UI (MUI)** - Component library
+- **React Router** - Client-side routing
+- **Luxon** - Date/time handling
+- **i18next** - Internationalization (Polish/English)
+- **Vite** - Build tool
 
-## Expanding the ESLint configuration
+## Key Features
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- Azure AD B2C authentication with MSAL
+- Role-based access control (RBAC)
+- Server state management with TanStack Query
+- Automatic cache invalidation and refetching
+- Optimistic updates for better UX
+- Internationalization support (Polish and English)
+- Responsive Material-UI design
+- Type-safe API client
 
-- Configure the top-level `parserOptions` property like this:
+## Project Structure
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+src/
+├── components/         # Reusable UI components
+├── config/            # Configuration files (auth, i18n)
+├── hooks/             # TanStack Query hooks for API calls
+├── pages/             # Page components (routes)
+├── services/          # Business logic services (API client, role manager)
+├── styles/            # Theme and global styles
+└── utils/             # Utility functions
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Getting Started
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+### Prerequisites
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+- Node.js 18+
+- pnpm (recommended) or npm
+
+### Installation
+
+```bash
+pnpm install
+```
+
+### Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+VITE_REACT_APP_B2C_CLIENT_ID=your_client_id
+VITE_REACT_APP_AUTHORITY_SIGNIN=your_authority_signin
+VITE_REACT_APP_AUTHORITY_DOMAIN=your_authority_domain
+VITE_REACT_APP_B2C_SCOPE_API=your_api_scope
+VITE_REACT_APP_API_URL=your_api_url
+```
+
+### Development
+
+```bash
+pnpm dev
+```
+
+### Build
+
+```bash
+pnpm build
+```
+
+### Build for Azure Static Web Apps
+
+```bash
+pnpm build:swa
 ```
