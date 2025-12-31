@@ -9,6 +9,7 @@ on:
       - "src/LeaveSystem.Shared/**"
       - "src/LeaveSystem.Functions/LeaveSystem.Functions/**"
       - "src/LeaveSystem.Domain/LeaveSystem.Domain/**"
+      - ".github/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
@@ -18,6 +19,7 @@ on:
       - "src/LeaveSystem.Shared/**"
       - "src/LeaveSystem.Functions/LeaveSystem.Functions/**"
       - "src/LeaveSystem.Domain/LeaveSystem.Domain/**"
+      - ".github/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml"
 
 jobs:
   build_and_deploy_job:

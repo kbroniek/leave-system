@@ -1,8 +1,11 @@
 {
-  "name": "react-swa-full-stack-app",
+  "name": "leave-system-web",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20.19.0 <21 || >=22.12.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
