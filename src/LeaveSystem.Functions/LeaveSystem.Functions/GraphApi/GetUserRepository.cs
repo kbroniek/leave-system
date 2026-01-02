@@ -81,7 +81,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             var users = await graphClient.Users
                 .GetAsync(_ =>
                 {
-                    _.QueryParameters.Select = ["id", "displayName", "givenName", "surname", "jobTitle"];
+                    _.QueryParameters.Select = ["id", "displayName", "givenName", "surname", "jobTitle", "accountEnabled"];
                     //TODO: Only 15 items are allowed in the filter.
                     _.QueryParameters.Filter = ids.Length == 0 ? null : $"id in ({string.Join(",", ids.Select(id => $"'{id}'"))})";
                 }, cancellationToken);
@@ -122,5 +122,5 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
         return graphUsers;
     }
     private static IGetUserRepository.User CreateUserModel(User user) =>
-            new(user.Id, user.DisplayName, user.GivenName, user.Surname, user.JobTitle);
+            new(user.Id, user.DisplayName, user.GivenName, user.Surname, user.JobTitle, user.AccountEnabled ?? true);
 }
