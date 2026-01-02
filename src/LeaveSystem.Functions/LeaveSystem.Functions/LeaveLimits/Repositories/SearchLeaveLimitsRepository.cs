@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string databaseName, string containerId, ILogger<SearchLeaveLimitsRepository> logger)
 {
-    private const int MaxPageSize = 25;
+    private const int MaxPageSize = 1000;
 
     public async Task<Result<(IReadOnlyList<LeaveLimitDto> limits, string? continuationToken), Error>> GetLimits(
         int year, string[] assignedToUserIds, Guid[] leaveTypeIds,
