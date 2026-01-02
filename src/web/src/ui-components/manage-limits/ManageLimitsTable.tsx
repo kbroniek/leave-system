@@ -1,5 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
@@ -385,9 +387,7 @@ export function ManageLimitsTable(props: {
 
   return (
     <Box
-      ref={gridContainerRef}
       sx={{
-        height: 500,
         width: "100%",
         "& .actions": {
           color: "text.secondary",
@@ -397,25 +397,53 @@ export function ManageLimitsTable(props: {
         },
       }}
     >
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        processRowUpdate={processRowUpdate}
-        onProcessRowUpdateError={processRowUpdateError}
-        slots={{
-          toolbar: EditToolbar(
-            props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")
-              ?.id ?? ""
-          ),
+      <Box
+        ref={gridContainerRef}
+        sx={{
+          height: 500,
+          width: "100%",
         }}
-        slotProps={{
-          toolbar: { setRows, setRowModesModel },
-        }}
-      />
+      >
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          editMode="row"
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={handleRowModesModelChange}
+          onRowEditStop={handleRowEditStop}
+          processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={processRowUpdateError}
+          hideFooter={true}
+          slots={{
+            toolbar: EditToolbar(
+              props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")
+                ?.id ?? ""
+            ),
+          }}
+          slotProps={{
+            toolbar: { setRows, setRowModesModel },
+          }}
+        />
+      </Box>
+      {isLoadingMore && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            padding: 2,
+            backgroundColor: "background.paper",
+            borderTop: 1,
+            borderColor: "divider",
+          }}
+        >
+          <CircularProgress size={20} />
+          <Typography variant="body2" color="text.secondary">
+            {t("Loading more...")}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }

@@ -210,7 +210,9 @@ const DataContent = () => {
                   )}
                   limits={accumulatedLimits.filter((x) => x.state === "Active")}
                   limitOnChange={handleLimitChange}
-                  onLoadMore={continuationToken ? handleLoadMore : undefined}
+                  onLoadMore={
+                    continuationToken ? () => void handleLoadMore() : undefined
+                  }
                   isLoadingMore={isLoadingMore}
                 />
               </>
