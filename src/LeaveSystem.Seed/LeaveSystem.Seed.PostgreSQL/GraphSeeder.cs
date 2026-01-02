@@ -5,7 +5,6 @@ using LeaveSystem.Seed.PostgreSQL.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
-using Microsoft.Graph.Models.Security;
 
 internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, string defaultUsersPassword, string issuer)
 {
@@ -85,6 +84,13 @@ internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, s
         }
         catch (Exception ex)
         {
+            if (ex.Message.Contains("Another object with the same value for property proxyAddresses already exists"))
+            {
+                var emailSplit = email.Split('@');
+                var newEmail = $"{emailSplit[0]}+{Random.Shared.Next(1, 9)}@{emailSplit[1]}";
+                $"Error when creating user {email} {firstName} {lastName}. Try another approach. New email {newEmail}. {ex.Message}".WriteWarning();
+                return await CreateUser(userid, newEmail, firstName, lastName, jobTitle);
+            }
             $"Error when creating user {email}".WriteError();
             ex.WriteError();
             return (false, null);
