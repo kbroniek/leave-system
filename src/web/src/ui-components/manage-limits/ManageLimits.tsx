@@ -20,7 +20,6 @@ import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
 import { DateTime, Duration } from "luxon";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -211,24 +210,9 @@ const DataContent = () => {
                   )}
                   limits={accumulatedLimits.filter((x) => x.state === "Active")}
                   limitOnChange={handleLimitChange}
+                  onLoadMore={continuationToken ? handleLoadMore : undefined}
+                  isLoadingMore={isLoadingMore}
                 />
-                {continuationToken && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      padding: 2,
-                    }}
-                  >
-                    <Button
-                      variant="outlined"
-                      onClick={() => void handleLoadMore()}
-                      disabled={isLoadingMore}
-                    >
-                      {isLoadingMore ? t("Loading...") : t("Load More")}
-                    </Button>
-                  </Box>
-                )}
               </>
             ) : (
               <Loading />

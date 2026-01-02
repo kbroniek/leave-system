@@ -43,6 +43,8 @@ export function ManageLimitsTable(props: {
   leaveTypes: LeaveTypeDto[];
   limits: LeaveLimitDto[];
   limitOnChange: (user: LeaveLimitCell) => Promise<boolean>;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
 }) {
   const notifications = useNotifications();
   const { t } = useTranslation();
@@ -300,8 +302,90 @@ export function ManageLimitsTable(props: {
     },
   ];
 
+  const gridContainerRef = React.useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const { onLoadMore, isLoadingMore } = props;
+
+  // Handle infinite scroll
+  React.useEffect(() => {
+    const container = gridContainerRef.current;
+    if (!container || !onLoadMore) return;
+
+    const handleScroll = () => {
+      // Clear any existing timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Debounce scroll events
+      scrollTimeoutRef.current = setTimeout(() => {
+        const scrollElement = container.querySelector(
+          ".MuiDataGrid-virtualScroller"
+        );
+        if (!scrollElement) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+        // Load more when user is within 100px of the bottom
+        const threshold = 100;
+        if (
+          scrollHeight - scrollTop - clientHeight < threshold &&
+          !isLoadingMore
+        ) {
+          onLoadMore();
+        }
+      }, 100);
+    };
+
+    // Use MutationObserver to detect when DataGrid renders the scroll element
+    const observer = new MutationObserver(() => {
+      const scrollElement = container.querySelector(
+        ".MuiDataGrid-virtualScroller"
+      );
+      if (scrollElement) {
+        // Check if listener is already attached
+        if (!scrollElement.hasAttribute("data-scroll-listener-attached")) {
+          scrollElement.setAttribute("data-scroll-listener-attached", "true");
+          scrollElement.addEventListener("scroll", handleScroll);
+        }
+      }
+    });
+
+    // Start observing
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Also try immediately in case it's already rendered
+    const scrollElement = container.querySelector(
+      ".MuiDataGrid-virtualScroller"
+    );
+    if (
+      scrollElement &&
+      !scrollElement.hasAttribute("data-scroll-listener-attached")
+    ) {
+      scrollElement.setAttribute("data-scroll-listener-attached", "true");
+      scrollElement.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      observer.disconnect();
+      const scrollElement = container.querySelector(
+        ".MuiDataGrid-virtualScroller"
+      );
+      if (scrollElement) {
+        scrollElement.removeEventListener("scroll", handleScroll);
+        scrollElement.removeAttribute("data-scroll-listener-attached");
+      }
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [onLoadMore, isLoadingMore]);
+
   return (
     <Box
+      ref={gridContainerRef}
       sx={{
         height: 500,
         width: "100%",
