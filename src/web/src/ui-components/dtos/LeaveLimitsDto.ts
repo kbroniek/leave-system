@@ -1,5 +1,6 @@
 export interface LeaveLimitsDto {
   items: LeaveLimitDto[];
+  continuationToken: string | null;
 }
 export interface LeaveLimitDto {
   id: string;

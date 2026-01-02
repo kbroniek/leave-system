@@ -1,18 +1,25 @@
-# @import ./login.http
+
 
 ###
 # @name Get User Leave Limits
-# @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavelimits/user?year=2024
+GET {{baseUrl}}/leavelimits/user?year=2025
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 
 ###
 # @name Get Leave Limits
-# @ref Login
 # @reject-unauthorized
-GET {{baseUrl}}/leavelimits?year=2024&pagesize=1
+GET {{baseUrl}}/leavelimits?year=2025
+X-Authorization: Bearer {{bearerToken}}
+?? status == 200
+{{
+    exports.continuationToken = encodeURIComponent(response.parsedBody.continuationToken);
+}}
+###
+# @name Get Leave Limits - Page 2
+# @reject-unauthorized
+GET {{baseUrl}}/leavelimits?year=2025&continuationToken={{continuationToken}}
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
 

@@ -5,11 +5,11 @@ import { ErrorComponent } from "../../components/ErrorComponent";
 import { Authorized } from "../../components/Authorized";
 import { Forbidden } from "../../components/Forbidden";
 import { loginRequest } from "../../authConfig";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShowHrPanel } from "./ShowHrPanel";
 import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { LeaveTypesDto } from "../dtos/LeaveTypesDto";
-import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
+import { LeaveLimitDto, LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { useSearchParams } from "react-router-dom";
 import { DateTime } from "luxon";
 import { useApiQuery } from "../../hooks/useApiQuery";
@@ -20,9 +20,15 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import { Trans } from "react-i18next";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 
 const DataContent = (): React.ReactElement => {
-  const { inProgress } = useMsal();
+  const { inProgress, instance } = useMsal();
+  const notifications = useNotifications();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryYear = Number(searchParams.get("year"));
   const [currentYear, setCurrentYear] = useState<number>(
@@ -40,11 +46,49 @@ const DataContent = (): React.ReactElement => {
     { enabled: inProgress === InteractionStatus.None }
   );
 
-  const { data: apiLeaveLimits } = useApiQuery<LeaveLimitsDto>(
-    ["leaveLimits", "hr", currentYear],
-    `/leavelimits?year=${currentYear}`,
-    { enabled: inProgress === InteractionStatus.None }
-  );
+  // Use infinite query for leave limits with continuation tokens
+  const {
+    data: leaveLimitsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<LeaveLimitsDto>({
+    queryKey: ["leaveLimits", "hr", currentYear],
+    queryFn: async ({ pageParam }) => {
+      const account = instance.getActiveAccount();
+      const url = pageParam
+        ? `/leavelimits?year=${currentYear}&pageSize=1000&continuationToken=${encodeURIComponent(
+            pageParam as string
+          )}`
+        : `/leavelimits?year=${currentYear}&pageSize=1000`;
+      try {
+        return await callApiGet<LeaveLimitsDto>(
+          url,
+          notifications.show,
+          undefined,
+          account,
+          t
+        );
+      } catch (error) {
+        await ifErrorAcquireTokenRedirect(error, instance);
+        throw error;
+      }
+    },
+    getNextPageParam: (lastPage) => lastPage.continuationToken ?? undefined,
+    initialPageParam: undefined,
+    enabled: inProgress === InteractionStatus.None,
+  });
+
+  // Fetch all pages automatically when there are more pages
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Flatten all pages into a single array
+  const accumulatedLimits: LeaveLimitDto[] =
+    leaveLimitsData?.pages.flatMap((page) => page.items) ?? [];
 
   const { data: apiHolidays } = useApiQuery<HolidaysDto>(
     ["holidays", currentYear],
@@ -87,9 +131,7 @@ const DataContent = (): React.ReactElement => {
         <ShowHrPanel
           leaveRequests={apiLeaveRequests?.items}
           leaveTypes={apiLeaveTypes?.items.filter((x) => x.state === "Active")}
-          leaveLimits={apiLeaveLimits?.items.filter(
-            (x) => x.state === "Active"
-          )}
+          leaveLimits={accumulatedLimits.filter((x) => x.state === "Active")}
           employees={apiEmployees?.items}
           holidays={apiHolidays?.items}
         />
