@@ -46,4 +46,6 @@ public static class ErrorCodes
     public const string INVALID_ID_MISMATCH = "INVALID_ID_MISMATCH";
     public const string INVALID_ROLE = "INVALID_ROLE";
     public const string QUERY_PARAMETER_ERROR = "QUERY_PARAMETER_ERROR";
+
+    public const string EMPLOYEE_ACCOUNT_DISABLED = "EMPLOYEE_ACCOUNT_DISABLED";
 }

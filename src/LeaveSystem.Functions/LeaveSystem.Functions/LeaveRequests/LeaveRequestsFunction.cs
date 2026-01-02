@@ -122,7 +122,6 @@ public class LeaveRequestsFunction(
             leaveRequestDto.LeaveTypeId,
             leaveRequestDto.Remark,
             userModel,
-            //TODO Check if user exists and active in graph API
             new LeaveRequestUserDto(employeeResult.Value.Id, employeeResult.Value.Name),
             leaveRequestDto.WorkingHours,
             DateTimeOffset.Now,

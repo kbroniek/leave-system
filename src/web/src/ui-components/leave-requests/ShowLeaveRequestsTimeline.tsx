@@ -167,9 +167,13 @@ export default function ShowLeaveRequestsTimeline(
     return translated;
   };
 
-  const employees = EmployeesFinder.get(
+  const allEmployees = EmployeesFinder.get(
     params.leaveRequests?.items || [],
     params.employees || []
+  );
+  // Filter out disabled employees
+  const employees = allEmployees.filter(
+    (employee) => employee.accountEnabled !== false
   );
   const leaveStatusesActive = params.leaveStatuses || [];
   const leaveTypesActive = (params.leaveTypes || []).filter(

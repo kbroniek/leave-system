@@ -2,6 +2,7 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
@@ -86,6 +87,15 @@ export function ManageLimitsTable(props: {
     (id: string | null): string | null | undefined =>
       allEmployees.find((x) => x.id === id)?.name,
     [allEmployees]
+  );
+
+  const isEmployeeDisabled = React.useCallback(
+    (id: string | null): boolean => {
+      if (id === null) return false;
+      const employee = props.employees.find((e) => e.id === id);
+      return employee ? employee.accountEnabled === false : false;
+    },
+    [props.employees]
   );
 
   const rowsTransformed: LeaveLimitCell[] = React.useMemo(
@@ -210,6 +220,39 @@ export function ManageLimitsTable(props: {
         const name1 = allEmployees.find((emp) => emp.id === v1)?.name ?? "";
         const name2 = allEmployees.find((emp) => emp.id === v2)?.name ?? "";
         return name1.localeCompare(name2);
+      },
+      renderCell: (params) => {
+        const employeeId = params.value as string | null;
+        const employeeName = getName(employeeId);
+        const isDisabled = isEmployeeDisabled(employeeId);
+
+        const cellContent = (
+          <Typography
+            component="span"
+            sx={{
+              textDecoration: isDisabled ? "line-through" : "none",
+              color: isDisabled ? "text.disabled" : "inherit",
+              opacity: isDisabled ? 0.6 : 1,
+            }}
+          >
+            {employeeName ?? employeeId}
+          </Typography>
+        );
+
+        if (isDisabled) {
+          return (
+            <Tooltip title={t("This user is disabled")} arrow>
+              <Box
+                component="span"
+                sx={{ display: "inline-block", width: "100%" }}
+              >
+                {cellContent}
+              </Box>
+            </Tooltip>
+          );
+        }
+
+        return cellContent;
       },
     },
     {

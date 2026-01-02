@@ -10,6 +10,8 @@ import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
 import { HrTransformer } from "./HrTransformer";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -17,6 +19,7 @@ import { GridRenderCellParams } from "@mui/x-data-grid/models/params";
 import { GridValidRowModel } from "@mui/x-data-grid/models";
 import DoDisturbOnIcon from "@mui/icons-material/DoDisturbOn";
 import { useTranslation } from "react-i18next";
+import * as React from "react";
 
 const ODD_OPACITY = 0.2;
 const selectedXDaysNumber = 14;
@@ -32,6 +35,14 @@ export const ShowHrPanel = (
   const navigate = useNavigate();
   const { t } = useTranslation();
   const employees = EmployeesFinder.get(params.leaveRequests, params.employees);
+
+  const isEmployeeDisabled = React.useCallback(
+    (employeeId: string): boolean => {
+      const employee = params.employees?.find((e) => e.id === employeeId);
+      return employee ? employee.accountEnabled === false : false;
+    },
+    [params.employees]
+  );
   const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
     [`& .${gridClasses.row}.even`]: {
       backgroundColor: theme.palette.grey[200],
@@ -122,6 +133,39 @@ export const ShowHrPanel = (
                   field: "name",
                   headerName: "",
                   flex: 1,
+                  renderCell: (cellParams) => {
+                    const employeeId = cellParams.row.id as string;
+                    const employeeName = cellParams.value as string;
+                    const isDisabled = isEmployeeDisabled(employeeId);
+
+                    const cellContent = (
+                      <Typography
+                        component="span"
+                        sx={{
+                          textDecoration: isDisabled ? "line-through" : "none",
+                          color: isDisabled ? "text.disabled" : "inherit",
+                          opacity: isDisabled ? 0.6 : 1,
+                        }}
+                      >
+                        {employeeName}
+                      </Typography>
+                    );
+
+                    if (isDisabled) {
+                      return (
+                        <Tooltip title={t("This user is disabled")} arrow>
+                          <Box
+                            component="span"
+                            sx={{ display: "inline-block", width: "100%" }}
+                          >
+                            {cellContent}
+                          </Box>
+                        </Tooltip>
+                      );
+                    }
+
+                    return cellContent;
+                  },
                 },
               ]}
               rows={employees}
