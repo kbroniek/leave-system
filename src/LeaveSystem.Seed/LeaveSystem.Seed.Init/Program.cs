@@ -5,6 +5,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
+var environment = "dev";
+var skipProdAssets = environment == "dev" ? Array.Empty<string>() : [
+    "LeaveLimits",
+    "LeaveRequests",
+    "Roles"
+];
+
 Console.WriteLine("Connecting to the DB.");
 var assets = Directory.GetFiles("Assets", "*.json");
 var configuration = new ConfigurationBuilder()
@@ -24,7 +31,7 @@ foreach (var asset in assets)
     var converter = new ExpandoObjectConverter();
     dynamic contents = JsonConvert.DeserializeObject(stream, new JsonSerializerSettings { Converters = { converter } });
     var containerBuilder = database.DefineContainer(name: fileName, partitionKeyPath: contents.partitionKey.ToString());
-    if (contents.uniqueKeys is IEnumerable uniqueKeysCollection)
+    if (!skipProdAssets.Contains(fileName) && contents.uniqueKeys is IEnumerable uniqueKeysCollection)
     {
         foreach (JValue uniqueKeysCombined in uniqueKeysCollection)
         {
