@@ -202,13 +202,13 @@ export function ManageLimitsTable(props: {
       editable: true,
       minWidth: 220,
       type: "singleSelect",
-      valueOptions: employees.map((x) => ({
+      valueOptions: allEmployees.map((x) => ({
         value: x.id,
-        label: x.name ?? x.id,
+        label: x.name,
       })),
       sortComparator: (v1, v2) => {
-        const name1 = employees.find((emp) => emp.id === v1)?.name ?? "";
-        const name2 = employees.find((emp) => emp.id === v2)?.name ?? "";
+        const name1 = allEmployees.find((emp) => emp.id === v1)?.name ?? "";
+        const name2 = allEmployees.find((emp) => emp.id === v2)?.name ?? "";
         return name1.localeCompare(name2);
       },
     },
