@@ -213,6 +213,7 @@ internal class DbSeeder(CosmosClient client, OmbContext ombContext)
                 validUntil = limit.Validuntil,
                 assignedToUserId = user.Id,
                 description = limit.Description,
+                state = "Active",
                 oldId = limit.Userleavelimitid,
             });
             ++i;
@@ -251,6 +252,7 @@ internal class DbSeeder(CosmosClient client, OmbContext ombContext)
                 id = limitFromDb?.id ?? Guid.NewGuid(),
                 limit = ConvertLimitToTime(limit.UserLimit),
                 leaveTypeId = leaveTypeFromDB?.id,
+                state = "Active",
                 oldId = limitGroupped.Key //Intentionally set leave type instead of leave limit
             });
             ++i;

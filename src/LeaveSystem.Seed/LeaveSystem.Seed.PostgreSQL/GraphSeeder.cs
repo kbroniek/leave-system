@@ -24,7 +24,7 @@ internal class GraphSeeder(OmbContext context, GraphServiceClient graphClient, s
         var i = 0;
         foreach (var user in users)
         {
-            var userFound = usersFromGraph.FirstOrDefault(x => x.Mail == user.Email && x.GivenName == user.FirstName && x.Surname == user.LastName);
+            var userFound = usersFromGraph.FirstOrDefault(x => x.GivenName == user.FirstName && x.Surname == user.LastName);
             if (userFound is not null)
             {
                 results.Add(new CreatedUser(userFound.Id, user.Userid, user.Email, $"{user.FirstName} {user.LastName}"));
