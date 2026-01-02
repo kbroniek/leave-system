@@ -47,51 +47,86 @@ export function ManageLimitsTable(props: {
   const notifications = useNotifications();
   const { t } = useTranslation();
 
-  const missingEmployees = props.limits
-    .filter((x) => !props.employees.find((e) => e.id === x.assignedToUserId))
-    .map((x) => ({
-      id: x.assignedToUserId,
-      name: x.assignedToUserId,
-    }));
-  const employees = [
-    {
-      id: null,
-      name: t("<All>"),
-    },
-    ...props.employees
-      .map((x) => ({
-        id: x.id,
-        name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? x.id,
-      }))
-      .sort((l, r) => l.name?.localeCompare(r.name) ?? 0),
-  ];
-  const allEmployees = missingEmployees.concat(employees);
-  const getName = (id: string | null): string | null | undefined =>
-    allEmployees.find((x) => x.id === id)?.name;
+  const missingEmployees = React.useMemo(
+    () =>
+      props.limits
+        .filter(
+          (x) => !props.employees.find((e) => e.id === x.assignedToUserId)
+        )
+        .map((x) => ({
+          id: x.assignedToUserId,
+          name: x.assignedToUserId,
+        })),
+    [props.limits, props.employees]
+  );
+  const employees = React.useMemo(
+    () => [
+      {
+        id: null,
+        name: t("<All>"),
+      },
+      ...props.employees
+        .map((x) => ({
+          id: x.id,
+          name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? x.id,
+        }))
+        .sort((l, r) => l.name?.localeCompare(r.name) ?? 0),
+    ],
+    [props.employees, t]
+  );
+  const allEmployees = React.useMemo(
+    () => missingEmployees.concat(employees),
+    [missingEmployees, employees]
+  );
+  const getName = React.useCallback(
+    (id: string | null): string | null | undefined =>
+      allEmployees.find((x) => x.id === id)?.name,
+    [allEmployees]
+  );
 
-  const rowsTransformed: LeaveLimitCell[] = props.limits
-    .map((x) => ({
-      ...x,
-      limit: x.limit ? DurationFormatter.days(x.limit, x.workingHours) : null,
-      overdueLimit: x.overdueLimit
-        ? DurationFormatter.days(x.overdueLimit, x.workingHours)
-        : null,
-      workingHours: x.workingHours
-        ? Duration.fromISO(x.workingHours).as("hours")
-        : null,
-      validSince: x.validSince ? new Date(Date.parse(x.validSince)) : null,
-      validUntil: x.validUntil ? new Date(Date.parse(x.validUntil)) : null,
-    }))
-    .sort(
-      (l, r) =>
-        getName(l.assignedToUserId)?.localeCompare(
-          getName(r.assignedToUserId) ?? ""
-        ) ?? 0
-    );
+  const rowsTransformed: LeaveLimitCell[] = React.useMemo(
+    () =>
+      props.limits
+        .map((x) => ({
+          ...x,
+          limit: x.limit
+            ? DurationFormatter.days(x.limit, x.workingHours)
+            : null,
+          overdueLimit: x.overdueLimit
+            ? DurationFormatter.days(x.overdueLimit, x.workingHours)
+            : null,
+          workingHours: x.workingHours
+            ? Duration.fromISO(x.workingHours).as("hours")
+            : null,
+          validSince: x.validSince ? new Date(Date.parse(x.validSince)) : null,
+          validUntil: x.validUntil ? new Date(Date.parse(x.validUntil)) : null,
+        }))
+        .sort(
+          (l, r) =>
+            getName(l.assignedToUserId)?.localeCompare(
+              getName(r.assignedToUserId) ?? ""
+            ) ?? 0
+        ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.limits, props.employees, allEmployees]
+  );
   const [rows, setRows] = React.useState<GridRowsProp>(rowsTransformed);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+  // Update rows when props.limits changes, using a ref to prevent infinite loops
+  const prevLimitsRef = React.useRef<string>("");
+  React.useEffect(() => {
+    // Create a stable key from limits IDs to detect actual changes
+    const limitsKey = props.limits.map((l) => l.id).join(",");
+    if (prevLimitsRef.current !== limitsKey) {
+      prevLimitsRef.current = limitsKey;
+      setRows(rowsTransformed);
+    }
+    // Only depend on props.limits to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.limits]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -106,7 +141,7 @@ export function ManageLimitsTable(props: {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSaveClick = (id: GridRowId) => async () => {
+  const handleSaveClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
@@ -227,12 +262,14 @@ export function ManageLimitsTable(props: {
         if (isInEditMode) {
           return [
             <GridActionsCellItem
+              key="save"
               icon={<SaveIcon />}
               label={t("Save")}
               onClick={handleSaveClick(id)}
               color="primary"
             />,
             <GridActionsCellItem
+              key="cancel"
               icon={<CancelIcon />}
               label={t("Cancel")}
               className="textPrimary"
@@ -244,6 +281,7 @@ export function ManageLimitsTable(props: {
 
         return [
           <GridActionsCellItem
+            key="edit"
             icon={<EditIcon />}
             label={t("Edit")}
             className="textPrimary"
@@ -251,9 +289,10 @@ export function ManageLimitsTable(props: {
             color="inherit"
           />,
           <GridActionsCellItem
+            key="delete"
             icon={<DeleteIcon />}
             label={t("Delete")}
-            onClick={handleDeleteClick(id)}
+            onClick={() => void handleDeleteClick(id)()}
             color="inherit"
           />,
         ];
@@ -297,8 +336,8 @@ export function ManageLimitsTable(props: {
   );
 }
 
-function EditToolbar(defaultLeaveTypeId: string) {
-  return (props: GridSlotProps["toolbar"]) => {
+const EditToolbar = (defaultLeaveTypeId: string) => {
+  const ToolbarComponent = (props: GridSlotProps["toolbar"]) => {
     const { setRows, setRowModesModel } = props;
 
     const handleClick = () => {
@@ -334,7 +373,9 @@ function EditToolbar(defaultLeaveTypeId: string) {
       </GridToolbarContainer>
     );
   };
-}
+  ToolbarComponent.displayName = "EditToolbar";
+  return ToolbarComponent;
+};
 
 export interface LeaveLimitCell {
   id: string;
