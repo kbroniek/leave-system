@@ -2,7 +2,7 @@
 
 [![.NET](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/dotnet.yml)
 [![DEV - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-gentle-rock-0f0887103.yml)
-[![BoMed - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-icy-river-08fed3e03.yml/badge.svg)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-icy-river-08fed3e03.yml)
+[![BoMed - SWA](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-icy-river-08fed3e03.yml/badge.svg?branch=master)](https://github.com/kbroniek/leave-system/actions/workflows/azure-static-web-apps-icy-river-08fed3e03.yml)
 
 System to manage leaves.
 
