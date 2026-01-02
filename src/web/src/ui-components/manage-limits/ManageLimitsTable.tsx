@@ -206,6 +206,11 @@ export function ManageLimitsTable(props: {
         value: x.id,
         label: x.name,
       })),
+      sortComparator: (v1, v2) => {
+        const name1 = employees.find((emp) => emp.id === v1)?.name ?? "";
+        const name2 = employees.find((emp) => emp.id === v2)?.name ?? "";
+        return name1.localeCompare(name2);
+      },
     },
     {
       field: "leaveTypeId",
