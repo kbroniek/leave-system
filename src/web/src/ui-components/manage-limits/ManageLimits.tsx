@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { InteractionStatus, InteractionType } from "@azure/msal-browser";
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../authConfig";
@@ -25,14 +25,24 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
+import { callApiGet, ifErrorAcquireTokenRedirect } from "../../utils/ApiCall";
 
 const DataContent = () => {
-  const { inProgress } = useMsal();
+  const { inProgress, instance } = useMsal();
   const notifications = useNotifications();
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [currentYear, setCurrentYear] = useState<number>(DateTime.local().year);
   const [isGenerateModalOpen, setIsGenerateModalOpen] =
     useState<boolean>(false);
+  const [accumulatedLimits, setAccumulatedLimits] = useState<LeaveLimitDto[]>(
+    []
+  );
+  const [continuationToken, setContinuationToken] = useState<string | null>(
+    null
+  );
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
 
   // Use TanStack Query for all API calls
   const { data: apiEmployees } = useApiQuery<EmployeesDto>(
@@ -52,6 +62,18 @@ const DataContent = () => {
     `/leavelimits?year=${currentYear}`,
     { enabled: inProgress === InteractionStatus.None }
   );
+
+  // Reset accumulated limits when year changes or initial data loads
+  useEffect(() => {
+    if (apiLeaveLimits) {
+      setAccumulatedLimits(apiLeaveLimits.items);
+      const token =
+        apiLeaveLimits.continuationToken !== undefined
+          ? apiLeaveLimits.continuationToken
+          : null;
+      setContinuationToken(token);
+    }
+  }, [apiLeaveLimits, currentYear]);
 
   // Create mutation for updating limits
   const updateLimitMutation = useApiMutation({
@@ -93,11 +115,56 @@ const DataContent = () => {
       method: "PUT",
       body: dto,
     });
-    return true;
+    return Promise.resolve(true);
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (!continuationToken || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      const account = instance.getActiveAccount();
+      const url = `/leavelimits?year=${currentYear}&continuationToken=${encodeURIComponent(
+        continuationToken
+      )}`;
+      const nextPage = await callApiGet<LeaveLimitsDto>(
+        url,
+        notifications.show,
+        undefined,
+        account,
+        t
+      );
+
+      if (nextPage) {
+        setAccumulatedLimits((prev) => [...prev, ...nextPage.items]);
+        const token =
+          nextPage.continuationToken !== undefined
+            ? nextPage.continuationToken
+            : null;
+        setContinuationToken(token);
+      }
+    } catch (error) {
+      await ifErrorAcquireTokenRedirect(error, instance);
+      notifications.show(t("Failed to load more limits"), {
+        severity: "error",
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [
+    continuationToken,
+    currentYear,
+    isLoadingMore,
+    instance,
+    notifications,
+    t,
+  ]);
 
   const handleLimitsGenerated = () => {
     // Query will automatically refetch due to invalidation
+    void queryClient.invalidateQueries({
+      queryKey: ["leaveLimits", "manage", currentYear],
+    });
   };
   return (
     <>
@@ -135,16 +202,20 @@ const DataContent = () => {
           roles={["LeaveLimitAdmin", "GlobalAdmin"]}
           authorized={
             apiEmployees && apiLeaveTypes && apiLeaveLimits ? (
-              <ManageLimitsTable
-                employees={apiEmployees.items}
-                leaveTypes={apiLeaveTypes.items.filter(
-                  (x) => x.state === "Active"
-                )}
-                limits={apiLeaveLimits?.items.filter(
-                  (x) => x.state === "Active"
-                )}
-                limitOnChange={handleLimitChange}
-              />
+              <>
+                <ManageLimitsTable
+                  employees={apiEmployees.items}
+                  leaveTypes={apiLeaveTypes.items.filter(
+                    (x) => x.state === "Active"
+                  )}
+                  limits={accumulatedLimits.filter((x) => x.state === "Active")}
+                  limitOnChange={handleLimitChange}
+                  onLoadMore={
+                    continuationToken ? () => void handleLoadMore() : undefined
+                  }
+                  isLoadingMore={isLoadingMore}
+                />
+              </>
             ) : (
               <Loading />
             )

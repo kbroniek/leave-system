@@ -82,20 +82,21 @@ export const SubmitLeaveRequestForm = (props: {
     },
   });
   const [dateFrom, setDateFrom] = useState<DateTime | null>(
-    props.initialValues?.dateFrom || now,
+    props.initialValues?.dateFrom || now
   );
   const [dateTo, setDateTo] = useState<DateTime | null>(
-    props.initialValues?.dateTo || now,
+    props.initialValues?.dateTo || now
   );
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
   const [submitInProgress, setSubmitInProgress] = useState(false);
 
   const employees = props.employees
-    ?.map((x) => ({
+    ?.filter((x) => x.accountEnabled !== false)
+    .map((x) => ({
       ...x,
       name: x.lastName
         ? `${x.lastName} ${x.firstName}`
-        : (x.name ?? t("undefined")),
+        : x.name ?? t("undefined"),
     }))
     .sort((a, b) => a.name?.localeCompare(b.name ?? "") ?? 0);
   const getCurrenUser = (): string | undefined => {
@@ -132,7 +133,7 @@ export const SubmitLeaveRequestForm = (props: {
   }, [initUserId, props]);
   const onSubmit = async (
     value: LeaveRequestFormModel,
-    event?: React.BaseSyntheticEvent,
+    event?: React.BaseSyntheticEvent
   ) => {
     if (!isValid) {
       return;
@@ -392,7 +393,7 @@ const Range = (props: {
 }) => {
   const { t } = useTranslation();
   const daysCounter = new DaysCounter(
-    props.holidays.items.map((x) => DateTime.fromISO(x)),
+    props.holidays.items.map((x) => DateTime.fromISO(x))
   );
   let allDays;
   let workingDays;
@@ -462,32 +463,32 @@ const AdditionalInfo = (props: {
 }) => {
   const { t } = useTranslation();
   const connectedLeaveTypes = props.leaveTypes.filter(
-    (x) => x.baseLeaveTypeId === props.leaveTypeId,
+    (x) => x.baseLeaveTypeId === props.leaveTypeId
   );
   const daysUsed = props.leaveRequests
     .filter(
       (x) =>
         x.leaveTypeId === props.leaveTypeId ||
-        connectedLeaveTypes.find((c) => c.id === x.leaveTypeId),
+        connectedLeaveTypes.find((c) => c.id === x.leaveTypeId)
     )
     .map((x) => Duration.fromISO(x.duration))
     .reduce(
       (accumulator, current) => accumulator.plus(current),
-      Duration.fromMillis(0),
+      Duration.fromMillis(0)
     );
 
   let availableDaysStr = t(
-    "There is no limit for this user, leave type or in that period",
+    "There is no limit for this user, leave type or in that period"
   );
   let availableDaysAfterAcceptanceStr = availableDaysStr;
   let currentLimit;
   if (!props.dateFrom?.isValid) {
     availableDaysStr = availableDaysAfterAcceptanceStr = t(
-      "Date from is invalid. Please check it.",
+      "Date from is invalid. Please check it."
     );
   } else if (!props.dateTo?.isValid) {
     availableDaysStr = availableDaysAfterAcceptanceStr = t(
-      "Date to is invalid. Please check it.",
+      "Date to is invalid. Please check it."
     );
   } else {
     const dateFrom = props.dateFrom;
@@ -496,7 +497,7 @@ const AdditionalInfo = (props: {
       (x) =>
         x.leaveTypeId === props.leaveTypeId &&
         (!x.validSince || DateTime.fromISO(x.validSince) <= dateFrom) &&
-        (!x.validUntil || DateTime.fromISO(x.validUntil) >= dateTo),
+        (!x.validUntil || DateTime.fromISO(x.validUntil) >= dateTo)
     );
     if (currentLimit) {
       const limit = currentLimit.limit
@@ -509,7 +510,7 @@ const AdditionalInfo = (props: {
       const daysCounter = DaysCounter.create(
         props.leaveTypeId,
         props.leaveTypes,
-        props.holidays.items.map((x) => DateTime.fromISO(x)),
+        props.holidays.items.map((x) => DateTime.fromISO(x))
       );
       const availableDays = limitSum?.minus(daysUsed);
       const currentRequestDays = daysCounter.days(dateFrom, dateTo);
@@ -526,7 +527,7 @@ const AdditionalInfo = (props: {
       availableDaysAfterAcceptanceStr = availableDays
         ? DurationFormatter.format(
             availableDays.minus(currentRequestDaysDuration),
-            currentLimit.workingHours,
+            currentLimit.workingHours
           )
         : t("There is no limit");
     }
@@ -562,7 +563,7 @@ const AdditionalInfo = (props: {
         <Typography variant="body2" sx={defaultStyle}>
           {DurationFormatter.format(
             daysUsed,
-            currentLimit?.workingHours ?? findWorkingHours(),
+            currentLimit?.workingHours ?? findWorkingHours()
           )}
         </Typography>
       </Grid>

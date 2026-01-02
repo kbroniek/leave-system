@@ -1,5 +1,8 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
@@ -43,55 +46,101 @@ export function ManageLimitsTable(props: {
   leaveTypes: LeaveTypeDto[];
   limits: LeaveLimitDto[];
   limitOnChange: (user: LeaveLimitCell) => Promise<boolean>;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
 }) {
   const notifications = useNotifications();
   const { t } = useTranslation();
 
-  const missingEmployees = props.limits
-    .filter((x) => !props.employees.find((e) => e.id === x.assignedToUserId))
-    .map((x) => ({
-      id: x.assignedToUserId,
-      name: x.assignedToUserId,
-    }));
-  const employees = [
-    {
-      id: null,
-      name: t("<All>"),
-    },
-    ...props.employees
-      .map((x) => ({
-        id: x.id,
-        name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? x.id,
-      }))
-      .sort((l, r) => l.name?.localeCompare(r.name) ?? 0),
-  ];
-  const allEmployees = missingEmployees.concat(employees);
-  const getName = (id: string | null): string | null | undefined =>
-    allEmployees.find((x) => x.id === id)?.name;
+  const missingEmployees = React.useMemo(
+    () =>
+      props.limits
+        .filter(
+          (x) => !props.employees.find((e) => e.id === x.assignedToUserId)
+        )
+        .map((x) => ({
+          id: x.assignedToUserId,
+          name: x.assignedToUserId,
+        })),
+    [props.limits, props.employees]
+  );
+  const employees = React.useMemo(
+    () => [
+      {
+        id: null,
+        name: t("<All>"),
+      },
+      ...props.employees
+        .map((x) => ({
+          id: x.id,
+          name: x.lastName ? `${x.lastName} ${x.firstName}` : x.name ?? x.id,
+        }))
+        .sort((l, r) => l.name?.localeCompare(r.name) ?? 0),
+    ],
+    [props.employees, t]
+  );
+  const allEmployees = React.useMemo(
+    () => missingEmployees.concat(employees),
+    [missingEmployees, employees]
+  );
+  const getName = React.useCallback(
+    (id: string | null): string | null | undefined =>
+      allEmployees.find((x) => x.id === id)?.name,
+    [allEmployees]
+  );
 
-  const rowsTransformed: LeaveLimitCell[] = props.limits
-    .map((x) => ({
-      ...x,
-      limit: x.limit ? DurationFormatter.days(x.limit, x.workingHours) : null,
-      overdueLimit: x.overdueLimit
-        ? DurationFormatter.days(x.overdueLimit, x.workingHours)
-        : null,
-      workingHours: x.workingHours
-        ? Duration.fromISO(x.workingHours).as("hours")
-        : null,
-      validSince: x.validSince ? new Date(Date.parse(x.validSince)) : null,
-      validUntil: x.validUntil ? new Date(Date.parse(x.validUntil)) : null,
-    }))
-    .sort(
-      (l, r) =>
-        getName(l.assignedToUserId)?.localeCompare(
-          getName(r.assignedToUserId) ?? ""
-        ) ?? 0
-    );
+  const isEmployeeDisabled = React.useCallback(
+    (id: string | null): boolean => {
+      if (id === null) return false;
+      const employee = props.employees.find((e) => e.id === id);
+      return employee ? employee.accountEnabled === false : false;
+    },
+    [props.employees]
+  );
+
+  const rowsTransformed: LeaveLimitCell[] = React.useMemo(
+    () =>
+      props.limits
+        .map((x) => ({
+          ...x,
+          limit: x.limit
+            ? DurationFormatter.days(x.limit, x.workingHours)
+            : null,
+          overdueLimit: x.overdueLimit
+            ? DurationFormatter.days(x.overdueLimit, x.workingHours)
+            : null,
+          workingHours: x.workingHours
+            ? Duration.fromISO(x.workingHours).as("hours")
+            : null,
+          validSince: x.validSince ? new Date(Date.parse(x.validSince)) : null,
+          validUntil: x.validUntil ? new Date(Date.parse(x.validUntil)) : null,
+        }))
+        .sort(
+          (l, r) =>
+            getName(l.assignedToUserId)?.localeCompare(
+              getName(r.assignedToUserId) ?? ""
+            ) ?? 0
+        ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.limits, props.employees, allEmployees]
+  );
   const [rows, setRows] = React.useState<GridRowsProp>(rowsTransformed);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+
+  // Update rows when props.limits changes, using a ref to prevent infinite loops
+  const prevLimitsRef = React.useRef<string>("");
+  React.useEffect(() => {
+    // Create a stable key from limits IDs to detect actual changes
+    const limitsKey = props.limits.map((l) => l.id).join(",");
+    if (prevLimitsRef.current !== limitsKey) {
+      prevLimitsRef.current = limitsKey;
+      setRows(rowsTransformed);
+    }
+    // Only depend on props.limits to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.limits]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -106,7 +155,7 @@ export function ManageLimitsTable(props: {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSaveClick = (id: GridRowId) => async () => {
+  const handleSaveClick = (id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
@@ -163,10 +212,48 @@ export function ManageLimitsTable(props: {
       editable: true,
       minWidth: 220,
       type: "singleSelect",
-      valueOptions: employees.map((x) => ({
+      valueOptions: allEmployees.map((x) => ({
         value: x.id,
         label: x.name,
       })),
+      sortComparator: (v1, v2) => {
+        const name1 = allEmployees.find((emp) => emp.id === v1)?.name ?? "";
+        const name2 = allEmployees.find((emp) => emp.id === v2)?.name ?? "";
+        return name1.localeCompare(name2);
+      },
+      renderCell: (params) => {
+        const employeeId = params.value as string | null;
+        const employeeName = getName(employeeId);
+        const isDisabled = isEmployeeDisabled(employeeId);
+
+        const cellContent = (
+          <Typography
+            component="span"
+            sx={{
+              textDecoration: isDisabled ? "line-through" : "none",
+              color: isDisabled ? "text.disabled" : "inherit",
+              opacity: isDisabled ? 0.6 : 1,
+            }}
+          >
+            {employeeName ?? employeeId}
+          </Typography>
+        );
+
+        if (isDisabled) {
+          return (
+            <Tooltip title={t("This user is disabled")} arrow>
+              <Box
+                component="span"
+                sx={{ display: "inline-block", width: "100%" }}
+              >
+                {cellContent}
+              </Box>
+            </Tooltip>
+          );
+        }
+
+        return cellContent;
+      },
     },
     {
       field: "leaveTypeId",
@@ -227,12 +314,14 @@ export function ManageLimitsTable(props: {
         if (isInEditMode) {
           return [
             <GridActionsCellItem
+              key="save"
               icon={<SaveIcon />}
               label={t("Save")}
               onClick={handleSaveClick(id)}
               color="primary"
             />,
             <GridActionsCellItem
+              key="cancel"
               icon={<CancelIcon />}
               label={t("Cancel")}
               className="textPrimary"
@@ -244,6 +333,7 @@ export function ManageLimitsTable(props: {
 
         return [
           <GridActionsCellItem
+            key="edit"
             icon={<EditIcon />}
             label={t("Edit")}
             className="textPrimary"
@@ -251,9 +341,10 @@ export function ManageLimitsTable(props: {
             color="inherit"
           />,
           <GridActionsCellItem
+            key="delete"
             icon={<DeleteIcon />}
             label={t("Delete")}
-            onClick={handleDeleteClick(id)}
+            onClick={() => void handleDeleteClick(id)()}
             color="inherit"
           />,
         ];
@@ -261,10 +352,90 @@ export function ManageLimitsTable(props: {
     },
   ];
 
+  const gridContainerRef = React.useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const { onLoadMore, isLoadingMore } = props;
+
+  // Handle infinite scroll
+  React.useEffect(() => {
+    const container = gridContainerRef.current;
+    if (!container || !onLoadMore) return;
+
+    const handleScroll = () => {
+      // Clear any existing timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Debounce scroll events
+      scrollTimeoutRef.current = setTimeout(() => {
+        const scrollElement = container.querySelector(
+          ".MuiDataGrid-virtualScroller"
+        );
+        if (!scrollElement) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+        // Load more when user is within 100px of the bottom
+        const threshold = 100;
+        if (
+          scrollHeight - scrollTop - clientHeight < threshold &&
+          !isLoadingMore
+        ) {
+          onLoadMore();
+        }
+      }, 100);
+    };
+
+    // Use MutationObserver to detect when DataGrid renders the scroll element
+    const observer = new MutationObserver(() => {
+      const scrollElement = container.querySelector(
+        ".MuiDataGrid-virtualScroller"
+      );
+      if (scrollElement) {
+        // Check if listener is already attached
+        if (!scrollElement.hasAttribute("data-scroll-listener-attached")) {
+          scrollElement.setAttribute("data-scroll-listener-attached", "true");
+          scrollElement.addEventListener("scroll", handleScroll);
+        }
+      }
+    });
+
+    // Start observing
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Also try immediately in case it's already rendered
+    const scrollElement = container.querySelector(
+      ".MuiDataGrid-virtualScroller"
+    );
+    if (
+      scrollElement &&
+      !scrollElement.hasAttribute("data-scroll-listener-attached")
+    ) {
+      scrollElement.setAttribute("data-scroll-listener-attached", "true");
+      scrollElement.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      observer.disconnect();
+      const scrollElement = container.querySelector(
+        ".MuiDataGrid-virtualScroller"
+      );
+      if (scrollElement) {
+        scrollElement.removeEventListener("scroll", handleScroll);
+        scrollElement.removeAttribute("data-scroll-listener-attached");
+      }
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [onLoadMore, isLoadingMore]);
+
   return (
     <Box
       sx={{
-        height: 500,
         width: "100%",
         "& .actions": {
           color: "text.secondary",
@@ -274,31 +445,58 @@ export function ManageLimitsTable(props: {
         },
       }}
     >
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
-        processRowUpdate={processRowUpdate}
-        onProcessRowUpdateError={processRowUpdateError}
-        slots={{
-          toolbar: EditToolbar(
-            props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")
-              ?.id ?? ""
-          ),
+      <Box
+        ref={gridContainerRef}
+        sx={{
+          height: 500,
+          width: "100%",
         }}
-        slotProps={{
-          toolbar: { setRows, setRowModesModel },
-        }}
-      />
+      >
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          editMode="row"
+          rowModesModel={rowModesModel}
+          onRowModesModelChange={handleRowModesModelChange}
+          onRowEditStop={handleRowEditStop}
+          processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={processRowUpdateError}
+          slots={{
+            toolbar: EditToolbar(
+              props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")
+                ?.id ?? ""
+            ),
+          }}
+          slotProps={{
+            toolbar: { setRows, setRowModesModel },
+          }}
+        />
+      </Box>
+      {isLoadingMore && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            padding: 2,
+            backgroundColor: "background.paper",
+            borderTop: 1,
+            borderColor: "divider",
+          }}
+        >
+          <CircularProgress size={20} />
+          <Typography variant="body2" color="text.secondary">
+            {t("Loading more...")}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }
 
-function EditToolbar(defaultLeaveTypeId: string) {
-  return (props: GridSlotProps["toolbar"]) => {
+const EditToolbar = (defaultLeaveTypeId: string) => {
+  const ToolbarComponent = (props: GridSlotProps["toolbar"]) => {
     const { setRows, setRowModesModel } = props;
 
     const handleClick = () => {
@@ -334,7 +532,9 @@ function EditToolbar(defaultLeaveTypeId: string) {
       </GridToolbarContainer>
     );
   };
-}
+  ToolbarComponent.displayName = "EditToolbar";
+  return ToolbarComponent;
+};
 
 export interface LeaveLimitCell {
   id: string;
