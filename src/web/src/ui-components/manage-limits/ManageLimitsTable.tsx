@@ -204,7 +204,7 @@ export function ManageLimitsTable(props: {
       type: "singleSelect",
       valueOptions: employees.map((x) => ({
         value: x.id,
-        label: x.name,
+        label: x.name ?? x.id,
       })),
       sortComparator: (v1, v2) => {
         const name1 = employees.find((emp) => emp.id === v1)?.name ?? "";
@@ -418,7 +418,6 @@ export function ManageLimitsTable(props: {
           onRowEditStop={handleRowEditStop}
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={processRowUpdateError}
-          hideFooter={true}
           slots={{
             toolbar: EditToolbar(
               props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")
