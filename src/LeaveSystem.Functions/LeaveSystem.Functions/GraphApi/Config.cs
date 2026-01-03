@@ -1,6 +1,7 @@
 namespace LeaveSystem.Functions.GraphApi;
 
 using LeaveSystem.Domain.LeaveRequests.Creating;
+using LeaveSystem.Domain.Users;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +22,7 @@ public static class Config
             .AddScoped<IGraphClientFactory, GraphClientFactory>(_ => GraphClientFactory.Create(
                 settings.TenantId, settings.ClientId,
                 settings.Secret, settings.Scopes))
-            .AddScoped<IGetUserRepository, GetUserRepository>();
+            .AddScoped<IGetUserRepository, GetUserRepository>()
+            .AddScoped<UpdateUserRepository>();
     }
 }

@@ -40,7 +40,7 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
 
         var templates = new List<LeaveLimitDto>();
         var continuationToken = (string?)null;
-        var pageSize = 100;
+        var pageSize = 1000;
 
         do
         {
