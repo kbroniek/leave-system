@@ -1,7 +1,7 @@
 namespace LeaveSystem.Functions.Users;
 
+using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests.Creating;
-using LeaveSystem.Domain.Users;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Functions.GraphApi;
 using LeaveSystem.Shared.Auth;
@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using static LeaveSystem.Domain.LeaveRequests.Creating.IGetUserRepository;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 public class UsersFunction(IGetUserRepository getUserRepository, UpdateUserRepository updateUserRepository)
 {
@@ -35,21 +36,34 @@ public class UsersFunction(IGetUserRepository getUserRepository, UpdateUserRepos
             error => error.ToObjectResult("Error occurred while getting users."));
     }
 
-    [Function(nameof(DisableUser))]
+    [Function(nameof(UpdateUser))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.UserAdmin)}")]
-    public async Task<IActionResult> DisableUser(
+    public async Task<IActionResult> UpdateUser(
         [HttpTrigger(
             AuthorizationLevel.Anonymous,
             "patch",
-            Route = "users/{userId}/disable")] HttpRequest req,
+            Route = "users/{userId}")] HttpRequest req,
         string userId,
+        [FromBody] UpdateUserDto updateUserDto,
         CancellationToken cancellationToken)
     {
-        var result = await updateUserRepository.EnableUser(userId, false, cancellationToken);
+        if (updateUserDto is null)
+        {
+            return new Error("Update user data is required.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT)
+                .ToObjectResult($"Error occurred while updating user. UserId={userId}.");
+        }
+
+        if (!updateUserDto.AccountEnabled.HasValue && updateUserDto.JobTitle is null)
+        {
+            return new Error("At least one property (accountEnabled or jobTitle) must be provided.", System.Net.HttpStatusCode.BadRequest, ErrorCodes.INVALID_INPUT)
+                .ToObjectResult($"Error occurred while updating user. UserId={userId}.");
+        }
+
+        var result = await updateUserRepository.UpdateUser(userId, updateUserDto, cancellationToken);
 
         return result.Match<IActionResult>(
-            () => new OkObjectResult(new { message = "User disabled successfully", userId }),
-            error => error.ToObjectResult($"Error occurred while disabling user. UserId={userId}."));
+            () => new OkObjectResult(new { message = "User updated successfully", userId }),
+            error => error.ToObjectResult($"Error occurred while updating user. UserId={userId}."));
     }
 
     private static UserDto Map(User user, IReadOnlyCollection<RolesDto> roles) =>
