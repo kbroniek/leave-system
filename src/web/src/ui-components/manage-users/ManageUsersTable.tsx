@@ -85,33 +85,17 @@ export function ManageUsersTable(props: {
   );
 
   const handleDeleteClick = useCallback(
-    (id: GridRowId) => async () => {
-      if (isUpdating) return; // Prevent actions while updating
-
-      const item = rows.find((row) => row.id === id);
-      if (item) {
-        const updatedItem: UserDto = { ...(item as UserDto), roles: [] };
-
-        // Update local state immediately for UI feedback
-        setRows((prevRows) =>
-          prevRows.map((row) => (row.id === id ? updatedItem : row))
-        );
-
-        // Make API call to persist the change
-        try {
-          await userOnChange(updatedItem);
-        } catch (error) {
-          // Revert local state if API call fails
-          setRows((prevRows) =>
-            prevRows.map((row) => (row.id === id ? item : row))
-          );
-          console.error("Failed to delete user roles:", error);
+    () => () =>
+      notifications.show(
+        t(
+          "You need to edit user in the Azure portal https://portal.azure.com/"
+        ),
+        {
+          severity: "warning",
+          autoHideDuration: 3000,
         }
-      } else {
-        console.warn("Can't find user. (handleDeleteClick)");
-      }
-    },
-    [isUpdating, rows, userOnChange]
+      ),
+    [notifications, t]
   );
 
   const handleCancelClick = useCallback(
@@ -248,7 +232,7 @@ export function ManageUsersTable(props: {
               icon={<DeleteIcon />}
               label={t("Delete")}
               disabled={isUpdating}
-              onClick={handleDeleteClick(id)}
+              onClick={handleDeleteClick()}
               color="inherit"
             />,
           ];
