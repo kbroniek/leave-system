@@ -14,7 +14,7 @@ using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribut
 public class LeaveTypesFunction
 {
     [Function(nameof(GetLeaveTypes))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.HumanResource)}")]
     public IActionResult GetLeaveTypes(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavetypes")] HttpRequest req,
         [CosmosDBInput(

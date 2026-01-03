@@ -15,7 +15,7 @@ public record GetHolidaysQuery(DateOnly DateFrom, DateOnly DateTo);
 public class HolidaysFunction(HolidaysService holidaysService, ILogger<HolidaysFunction> logger)
 {
     [Function(nameof(GetHolidays))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)}")]
     public IActionResult GetHolidays(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "settings/holidays")] HttpRequest req
         )
