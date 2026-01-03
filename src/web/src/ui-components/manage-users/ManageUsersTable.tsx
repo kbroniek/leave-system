@@ -272,6 +272,11 @@ export function ManageUsersTable(props: {
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
         onProcessRowUpdateError={processRowUpdateError}
+        initialState={{
+          sorting: {
+            sortModel: [{ field: "name", sort: "asc" }],
+          },
+        }}
         slotProps={{
           toolbar: { setRows, setRowModesModel },
         }}
