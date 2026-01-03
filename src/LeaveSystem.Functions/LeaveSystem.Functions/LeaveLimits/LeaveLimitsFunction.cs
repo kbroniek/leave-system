@@ -35,7 +35,7 @@ public class LeaveLimitsFunction(
     }
 
     [Function(nameof(SearchLeaveLimits))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.LeaveLimitAdmin)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.LeaveLimitAdmin)},{nameof(RoleType.HumanResource)}")]
     public async Task<IActionResult> SearchLeaveLimits(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavelimits")] HttpRequest req, CancellationToken cancellationToken)
     {

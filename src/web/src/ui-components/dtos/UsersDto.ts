@@ -1,11 +1,12 @@
 export interface UsersDto {
-    items: UserDto[];
+  items: UserDto[];
 }
 export interface UserDto {
-    id: string;
-    name: string;
-    firstName?: string;
-    lastName?: string;
-    jobTitle?: string;
-    roles: string[]
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  jobTitle?: string;
+  roles: string[];
+  accountEnabled?: boolean;
 }

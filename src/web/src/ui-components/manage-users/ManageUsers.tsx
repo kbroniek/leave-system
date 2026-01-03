@@ -25,18 +25,18 @@ const DataContent = () => {
     { enabled: inProgress === InteractionStatus.None }
   );
 
-  // Use TanStack Query mutation for updating user roles
+  // Use TanStack Query mutation for updating user properties and roles
   const updateUserMutation = useApiMutation({
     onSuccess: (response) => {
       if (response.status === 200) {
-        notifications.show(t("Roles is updated successfully"), {
+        notifications.show(t("User updated successfully"), {
           severity: "success",
           autoHideDuration: 3000,
         });
       }
     },
     onError: () => {
-      notifications.show(t("Failed to update user roles"), {
+      notifications.show(t("Failed to update user"), {
         severity: "error",
         autoHideDuration: 5000,
       });
@@ -47,10 +47,10 @@ const DataContent = () => {
   const handleUserChange = useCallback(
     async (user: UserDto): Promise<void> => {
       updateUserMutation.mutate({
-        url: `/roles/${user.id}`,
-        method: "PUT",
+        url: `/users/${user.id}`,
+        method: "PATCH",
         body: {
-          id: user.id,
+          jobTitle: user.jobTitle,
           roles: user.roles,
         },
       });

@@ -31,7 +31,7 @@ public class LeaveRequestsFunction(
     EmployeeService employeeService)
 {
     [Function(nameof(SearchLeaveRequests))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)}")]
     public async Task<IActionResult> SearchLeaveRequests([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",
@@ -41,7 +41,8 @@ public class LeaveRequestsFunction(
         // If user has greater privilege then can read all data. Otherwise can read only his leave requests.
         var isGlobalAdmin = req.HttpContext.User.IsInRole(nameof(RoleType.GlobalAdmin));
         var isDecisionMaker = req.HttpContext.User.IsInRole(nameof(RoleType.DecisionMaker));
-        var limitToUserIds = isGlobalAdmin || isDecisionMaker ? queryResult.AssignedToUserIds : [req.HttpContext.GetUserId()];
+        var isHumanResource = req.HttpContext.User.IsInRole(nameof(RoleType.HumanResource));
+        var limitToUserIds = isGlobalAdmin || isDecisionMaker || isHumanResource ? queryResult.AssignedToUserIds : [req.HttpContext.GetUserId()];
 
         var result = await searchLeaveRequestService.Search(
             queryResult.ContinuationToken, queryResult.DateFrom, queryResult.DateTo,
@@ -58,7 +59,7 @@ public class LeaveRequestsFunction(
     }
 
     [Function(nameof(GetLeaveRequest))]
-    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
+    [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)}")]
     public async Task<IActionResult> GetLeaveRequest([HttpTrigger(
         AuthorizationLevel.Anonymous,
         "get",

@@ -1,9 +1,50 @@
-# @import ./login.http
+@userId = 00000000-0000-0000-0000-000000000000
 
 ###
 # @name Get Users
-# @ref Login
 # @reject-unauthorized
 GET {{baseUrl}}/users
 X-Authorization: Bearer {{bearerToken}}
 ?? status == 200
+
+###
+# @name Update User - Disable Account
+PATCH {{baseUrl}}/users/{{userId}}
+X-Authorization: Bearer {{bearerToken}}
+Content-Type: application/json
+
+{
+  "accountEnabled": false
+}
+?? status == 200
+
+###
+# @name Update User - Enable Account
+PATCH {{baseUrl}}/users/{{userId}}
+X-Authorization: Bearer {{bearerToken}}
+Content-Type: application/json
+
+{
+  "accountEnabled": true
+}
+
+###
+# @name Update User - Update Job Title Only
+PATCH {{baseUrl}}/users/{{userId}}
+X-Authorization: Bearer {{bearerToken}}
+Content-Type: application/json
+
+{
+  "jobTitle": "Senior Software Engineer"
+}
+
+###
+# @name  Update User - Update Both AccountEnabled and JobTitle
+PATCH {{baseUrl}}/users/{{userId}}
+X-Authorization: Bearer {{bearerToken}}
+Content-Type: application/json
+
+{
+  "accountEnabled": true,
+  "jobTitle": "Senior Software Engineer"
+}

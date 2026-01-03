@@ -25,6 +25,8 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslation } from "react-i18next";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -83,33 +85,17 @@ export function ManageUsersTable(props: {
   );
 
   const handleDeleteClick = useCallback(
-    (id: GridRowId) => async () => {
-      if (isUpdating) return; // Prevent actions while updating
-
-      const item = rows.find((row) => row.id === id);
-      if (item) {
-        const updatedItem: UserDto = { ...(item as UserDto), roles: [] };
-
-        // Update local state immediately for UI feedback
-        setRows((prevRows) =>
-          prevRows.map((row) => (row.id === id ? updatedItem : row))
-        );
-
-        // Make API call to persist the change
-        try {
-          await userOnChange(updatedItem);
-        } catch (error) {
-          // Revert local state if API call fails
-          setRows((prevRows) =>
-            prevRows.map((row) => (row.id === id ? item : row))
-          );
-          console.error("Failed to delete user roles:", error);
+    () => () =>
+      notifications.show(
+        t(
+          "You need to edit user in the Azure portal https://portal.azure.com/"
+        ),
+        {
+          severity: "warning",
+          autoHideDuration: 3000,
         }
-      } else {
-        console.warn("Can't find user. (handleDeleteClick)");
-      }
-    },
-    [isUpdating, rows, userOnChange]
+      ),
+    [notifications, t]
   );
 
   const handleCancelClick = useCallback(
@@ -153,10 +139,43 @@ export function ManageUsersTable(props: {
 
   const columns: GridColDef[] = React.useMemo(
     () => [
-      { field: "name", headerName: t("Name"), width: 200 },
+      {
+        field: "name",
+        headerName: t("Name"),
+        width: 200,
+        renderCell: (params) => {
+          const row = params.row as UserDto;
+          const isDisabled = row.accountEnabled === false;
+
+          const cellContent = (
+            <Typography
+              component="span"
+              sx={{
+                textDecoration: isDisabled ? "line-through" : "none",
+                color: isDisabled ? "text.disabled" : "inherit",
+                opacity: isDisabled ? 0.6 : 1,
+              }}
+            >
+              {params.value}
+            </Typography>
+          );
+
+          if (isDisabled) {
+            return (
+              <Tooltip title={t("This user is disabled")} arrow>
+                {cellContent}
+              </Tooltip>
+            );
+          }
+
+          return cellContent;
+        },
+      },
       {
         field: "jobTitle",
         headerName: t("Job title"),
+        width: 200,
+        editable: false,
       },
       {
         field: "roles",
@@ -213,7 +232,7 @@ export function ManageUsersTable(props: {
               icon={<DeleteIcon />}
               label={t("Delete")}
               disabled={isUpdating}
-              onClick={handleDeleteClick(id)}
+              onClick={handleDeleteClick()}
               color="inherit"
             />,
           ];
@@ -253,6 +272,11 @@ export function ManageUsersTable(props: {
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
         onProcessRowUpdateError={processRowUpdateError}
+        initialState={{
+          sorting: {
+            sortModel: [{ field: "name", sort: "asc" }],
+          },
+        }}
         slotProps={{
           toolbar: { setRows, setRowModesModel },
         }}
