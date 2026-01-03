@@ -25,6 +25,8 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslation } from "react-i18next";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
@@ -153,12 +155,43 @@ export function ManageUsersTable(props: {
 
   const columns: GridColDef[] = React.useMemo(
     () => [
-      { field: "name", headerName: t("Name"), width: 200 },
+      {
+        field: "name",
+        headerName: t("Name"),
+        width: 200,
+        renderCell: (params) => {
+          const row = params.row as UserDto;
+          const isDisabled = row.accountEnabled === false;
+
+          const cellContent = (
+            <Typography
+              component="span"
+              sx={{
+                textDecoration: isDisabled ? "line-through" : "none",
+                color: isDisabled ? "text.disabled" : "inherit",
+                opacity: isDisabled ? 0.6 : 1,
+              }}
+            >
+              {params.value}
+            </Typography>
+          );
+
+          if (isDisabled) {
+            return (
+              <Tooltip title={t("This user is disabled")} arrow>
+                {cellContent}
+              </Tooltip>
+            );
+          }
+
+          return cellContent;
+        },
+      },
       {
         field: "jobTitle",
         headerName: t("Job title"),
         width: 200,
-        editable: !isUpdating, // Disable editing while updating
+        editable: false,
       },
       {
         field: "roles",
