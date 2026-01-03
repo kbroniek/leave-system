@@ -157,6 +157,8 @@ export function ManageUsersTable(props: {
       {
         field: "jobTitle",
         headerName: t("Job title"),
+        width: 200,
+        editable: !isUpdating, // Disable editing while updating
       },
       {
         field: "roles",

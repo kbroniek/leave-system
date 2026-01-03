@@ -10,7 +10,7 @@ import { callApi, ifErrorAcquireTokenRedirect } from "../utils/ApiCall";
 import { AccountInfo } from "@azure/msal-browser";
 
 /**
- * Custom hook for POST/PUT API calls using TanStack Query mutations
+ * Custom hook for POST/PUT/PATCH API calls using TanStack Query mutations
  */
 export function useApiMutation<TVariables = unknown>(options?: {
   onSuccess?: (data: Response, variables: TVariables) => void;
@@ -26,7 +26,7 @@ export function useApiMutation<TVariables = unknown>(options?: {
   return useMutation<
     Response,
     unknown,
-    { url: string; method: "POST" | "PUT"; body: TVariables }
+    { url: string; method: "POST" | "PUT" | "PATCH"; body: TVariables }
   >({
     mutationFn: async ({ url, method, body }) => {
       const account = options?.account || instance.getActiveAccount();
@@ -57,5 +57,5 @@ export function useApiMutation<TVariables = unknown>(options?: {
     onError: (error, variables) => {
       options?.onError?.(error, variables.body);
     },
-  } as UseMutationOptions<Response, unknown, { url: string; method: "POST" | "PUT"; body: TVariables }>);
+  } as UseMutationOptions<Response, unknown, { url: string; method: "POST" | "PUT" | "PATCH"; body: TVariables }>);
 }

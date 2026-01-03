@@ -20,7 +20,7 @@ export function callApiGet<T>(
   showNotification: ShowNotification,
   signal?: AbortSignal,
   account?: AccountInfo | null,
-  t?: TFunction,
+  t?: TFunction
 ): Promise<T> {
   return callApi(
     url,
@@ -29,23 +29,23 @@ export function callApiGet<T>(
     showNotification,
     signal,
     account,
-    t,
+    t
   ).then((response) => response?.json());
 }
 
 export async function callApi(
   url: string,
-  method: "GET" | "POST" | "PUT",
+  method: "GET" | "POST" | "PUT" | "PATCH",
   body: unknown,
   showNotification: ShowNotification,
   signal?: AbortSignal,
   account?: AccountInfo | null,
-  t?: TFunction,
+  t?: TFunction
 ): Promise<Response> {
   account = account || msalInstance.getActiveAccount();
   if (!account) {
     throw Error(
-      "No active account! Verify a user has been signed in and setActiveAccount has been called.",
+      "No active account! Verify a user has been signed in and setActiveAccount has been called."
     );
   }
 
@@ -72,7 +72,7 @@ export async function callApi(
 
   const response = await fetch(
     `${import.meta.env.VITE_REACT_APP_API_URL}${url}`,
-    options,
+    options
   ).catch((error) => {
     console.error("callApi error", error);
     const errorMessage = t
@@ -95,7 +95,7 @@ export async function callApi(
 async function handleApiErrorWithTranslation(
   response: Response,
   showNotification: ShowNotification,
-  t?: TFunction,
+  t?: TFunction
 ): Promise<void> {
   try {
     console.warn("API error occurred:", response);
@@ -127,7 +127,9 @@ async function handleApiErrorWithTranslation(
     // Fallback error handling
     const fallbackMessage = t
       ? t("errors.parseError")
-      : `Error ${response.status}: ${response.statusText || "Something went wrong"}`;
+      : `Error ${response.status}: ${
+          response.statusText || "Something went wrong"
+        }`;
     showNotification(fallbackMessage, {
       severity: "error",
       autoHideDuration: 5000,
@@ -137,7 +139,7 @@ async function handleApiErrorWithTranslation(
 
 export async function ifErrorAcquireTokenRedirect(
   error: unknown,
-  instance: IPublicClientApplication,
+  instance: IPublicClientApplication
 ) {
   if (error instanceof InteractionRequiredAuthError) {
     await instance.acquireTokenRedirect({
