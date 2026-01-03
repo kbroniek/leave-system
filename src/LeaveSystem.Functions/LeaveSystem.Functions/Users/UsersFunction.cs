@@ -127,7 +127,7 @@ public class UsersFunction(IGetUserRepository getUserRepository, UpdateUserRepos
     }
 
     private static UserDto Map(User user, IReadOnlyCollection<RolesDto> roles) =>
-        new(user.Id, user.Name, user.FirstName, user.LastName, roles.FirstOrDefault(x => x.Id == user.Id)?.Roles ?? [], user.JobTitle);
+        new(user.Id, user.Name, user.FirstName, user.LastName, roles.FirstOrDefault(x => x.Id == user.Id)?.Roles ?? [], user.JobTitle, user.AccountEnabled);
 
     public record RolesDto(string Id, string[] Roles);
 }
