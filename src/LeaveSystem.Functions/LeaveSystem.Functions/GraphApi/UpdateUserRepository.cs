@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Models.ODataErrors;
 
-internal class UpdateUserRepository(IGraphClientFactory graphClientFactory, ILogger<UpdateUserRepository> logger)
+public class UpdateUserRepository(IGraphClientFactory graphClientFactory, ILogger<UpdateUserRepository> logger)
 {
     public async Task<Result<Error>> UpdateUser(string id, UpdateUserDto updateUserDto, CancellationToken cancellationToken)
     {
