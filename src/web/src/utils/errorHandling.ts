@@ -1,6 +1,19 @@
 import { TFunction } from "i18next";
 import { ErrorCodes, ApiError } from "../types";
 
+// Format error message to show both title and detail
+export const formatErrorMessage = (error: ApiError): string => {
+  const { title, detail } = error;
+
+  if (title && detail) {
+    // Show both title and detail when both are available
+    return `${title}: ${detail}`;
+  }
+
+  // Fallback to whichever is available
+  return title ?? detail ?? "An unexpected error occurred";
+};
+
 // Error code to user-friendly message mapping
 export const getErrorMessage = (error: ApiError, t: TFunction): string => {
   const { errorCode, detail, title } = error;
@@ -43,15 +56,29 @@ export const getErrorMessage = (error: ApiError, t: TFunction): string => {
     [ErrorCodes.QUERY_PARAMETER_ERROR]: t("errors.queryParameterError"),
   };
 
-  // Return the mapped message or fall back to the original title/detail
-  return (
-    errorMessages[errorCode] || title || detail || t("errors.unknownError")
-  );
+  // Return the mapped message with title/detail appended, or fall back to formatted title/detail
+  const mappedMessage = errorMessages[errorCode];
+  if (mappedMessage) {
+    // If we have a mapped message and both title/detail exist, append detail
+    if (title && detail) {
+      return `${mappedMessage}: ${title}: ${detail}`;
+    }
+    if (title) {
+      return `${mappedMessage}: ${title}`;
+    }
+    if (detail) {
+      return `${mappedMessage}: ${detail}`;
+    }
+    return mappedMessage;
+  }
+
+  // Fall back to formatted title/detail
+  return formatErrorMessage(error);
 };
 
 // Determine error severity based on error code
 export const getErrorSeverity = (
-  errorCode: string,
+  errorCode: string
 ): "error" | "warning" | "info" => {
   const warningSeverityCodes = [
     ErrorCodes.INVALID_INPUT,
