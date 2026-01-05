@@ -11,6 +11,7 @@ import {
   getErrorMessage,
   getErrorSeverity,
   getAutoHideDuration,
+  formatErrorMessage,
 } from "./errorHandling";
 import type { TFunction } from "i18next";
 
@@ -109,10 +110,10 @@ async function handleApiErrorWithTranslation(
       errorCode: errorBody.errorCode || "UNKNOWN_ERROR",
     };
 
-    // Get translated error message
+    // Get translated error message with both title and detail
     const errorMessage = t
       ? getErrorMessage(error, t)
-      : error.title || error.detail || "An unexpected error occurred";
+      : formatErrorMessage(error);
     const severity = getErrorSeverity(error.errorCode);
     const autoHideDuration = getAutoHideDuration(error.errorCode);
 

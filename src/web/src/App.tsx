@@ -22,11 +22,6 @@ const Logout = lazy(() =>
 const Claims = lazy(() =>
   import("./pages/Claims").then((module) => ({ default: module.Claims }))
 );
-const SubmitLeaveRequest = lazy(() =>
-  import("./ui-components/submit-leave-request/SubmitLeaveRequest").then(
-    (module) => ({ default: module.SubmitLeaveRequest })
-  )
-);
 const MyLeaveRequests = lazy(() =>
   import("./ui-components/my-leave-requests/MyLeaveRequests").then(
     (module) => ({ default: module.MyLeaveRequests })
@@ -116,7 +111,6 @@ function Pages() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/" element={<Home />} />
         <Route path="/claims" element={<Claims />} />
-        <Route path="/submit-request" element={<SubmitLeaveRequest />} />
         <Route path="/my-leaves" element={<MyLeaveRequests />} />
         <Route path="/user-leaves/:id" element={<MyLeaveRequestsPage />} />
         <Route path="/hr-panel" element={<HrPanel />} />
