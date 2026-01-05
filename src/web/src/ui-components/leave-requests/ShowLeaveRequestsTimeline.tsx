@@ -337,16 +337,6 @@ export default function ShowLeaveRequestsTimeline(
         onClose={handleCloseDialog}
         selectedDate={selectedDate}
         selectedEmployee={selectedEmployee}
-        leaveRequests={params.leaveRequests?.items}
-        holidays={params.holidays}
-        leaveTypes={leaveTypesActive}
-        leaveLimits={params.leaveLimits}
-        employees={params.employees}
-        onSubmit={
-          params.onSubmitLeaveRequest || (() => Promise.resolve(undefined))
-        }
-        onYearChanged={params.onYearChanged || (() => {})}
-        onUserIdChanged={params.onUserIdChanged || (() => {})}
       />
     </Box>
   );

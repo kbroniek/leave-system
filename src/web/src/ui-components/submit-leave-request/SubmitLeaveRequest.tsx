@@ -21,6 +21,7 @@ import {
 import { DateTime, Duration } from "luxon";
 import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 import { EmployeesDto } from "../dtos/EmployeesDto";
+import { EmployeeDto } from "../dtos/EmployeeDto";
 import { v4 as uuidv4 } from "uuid";
 import { Authorized } from "../../components/Authorized";
 import { isInRole } from "../../utils/roleUtils";
@@ -28,13 +29,27 @@ import { Forbidden } from "../../components/Forbidden";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTranslation } from "react-i18next";
 
-const DataContent = () => {
+interface DataContentProps {
+  initialDate?: DateTime;
+  initialEmployee?: EmployeeDto;
+  onSuccess?: () => void;
+  hideNavigation?: boolean;
+}
+
+const DataContent = ({
+  initialDate,
+  initialEmployee,
+  onSuccess,
+  hideNavigation = false,
+}: DataContentProps) => {
   const { t } = useTranslation();
   const { instance, inProgress } = useMsal();
   const [currentYear, setCurrentYear] = useState<string>(
-    DateTime.local().toFormat("yyyy")
+    initialDate?.toFormat("yyyy") ?? DateTime.local().toFormat("yyyy")
   );
-  const [currentUserId, setCurrentUserId] = useState<string | undefined>();
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(
+    initialEmployee?.id
+  );
   const navigate = useNavigate();
   const notifications = useNotifications();
 
@@ -125,13 +140,17 @@ const DataContent = () => {
           severity: "success",
           autoHideDuration: 3000,
         });
-        navigate("/");
+        if (onSuccess) {
+          onSuccess();
+        } else if (!hideNavigation) {
+          void navigate("/");
+        }
       }
     },
     invalidateQueries: [["leaveRequests"], ["leaveLimits"]],
   });
 
-  const onSubmit = async (model: LeaveRequestFormModel) => {
+  const onSubmit = (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
       notifications.show(t("Date from is invalid. Choose correct date."), {
         severity: "warning",
@@ -230,7 +249,7 @@ const DataContent = () => {
       remark: model.remarks,
       assignedToId: isNotOnBehalf ? undefined : model.onBehalf,
     };
-    submitLeaveRequestMutation.mutate({ url, method: "POST", body });
+    void submitLeaveRequestMutation.mutate({ url, method: "POST", body });
   };
 
   const finalLeaveLimits =
@@ -251,6 +270,12 @@ const DataContent = () => {
           onSubmit={onSubmit}
           onYearChanged={setCurrentYear}
           onUserIdChanged={setCurrentUserId}
+          initialValues={{
+            dateFrom: initialDate,
+            dateTo: initialDate,
+            onBehalf: initialEmployee?.id,
+          }}
+          initialEmployee={initialEmployee}
         />
       }
       unauthorized={<Forbidden />}
@@ -258,7 +283,21 @@ const DataContent = () => {
   );
 };
 
-export function SubmitLeaveRequest() {
+interface SubmitLeaveRequestProps {
+  initialDate?: DateTime;
+  initialEmployee?: EmployeeDto;
+  onSuccess?: () => void;
+  hideNavigation?: boolean;
+}
+
+export function SubmitLeaveRequest(
+  {
+    initialDate,
+    initialEmployee,
+    onSuccess,
+    hideNavigation,
+  }: SubmitLeaveRequestProps = {} as SubmitLeaveRequestProps
+) {
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}
@@ -266,7 +305,12 @@ export function SubmitLeaveRequest() {
       errorComponent={ErrorComponent}
       loadingComponent={LoadingAuth}
     >
-      <DataContent />
+      <DataContent
+        initialDate={initialDate}
+        initialEmployee={initialEmployee}
+        onSuccess={onSuccess}
+        hideNavigation={hideNavigation}
+      />
     </MsalAuthenticationTemplate>
   );
 }
