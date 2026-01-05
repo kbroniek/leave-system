@@ -58,6 +58,7 @@ export const SubmitLeaveRequestForm = (props: {
   onUserIdChanged: (userId: string) => void;
   initialValues?: Partial<LeaveRequestFormModel>;
   initialEmployee?: EmployeeDto;
+  isSubmitting?: boolean;
 }) => {
   const { t } = useTranslation();
   const notifications = useNotifications();
@@ -88,7 +89,6 @@ export const SubmitLeaveRequestForm = (props: {
     props.initialValues?.dateTo ?? now
   );
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
-  const [submitInProgress, setSubmitInProgress] = useState(false);
 
   const employees = props.employees
     ?.filter((x) => x.accountEnabled !== false)
@@ -141,12 +141,7 @@ export const SubmitLeaveRequestForm = (props: {
     if (!isValid) {
       return;
     }
-    setSubmitInProgress(true);
-    try {
-      await props.onSubmit(value, event);
-    } finally {
-      setSubmitInProgress(false);
-    }
+    await props.onSubmit(value, event);
   };
 
   const dateIsValid = (value: DateTime | null | undefined): boolean => {
@@ -382,8 +377,8 @@ export const SubmitLeaveRequestForm = (props: {
             variant="contained"
             sx={{ mt: 3, ml: 1 }}
             fullWidth
-            disabled={!employees || !props.leaveTypes}
-            loading={submitInProgress}
+            disabled={!employees || !props.leaveTypes || props.isSubmitting}
+            loading={props.isSubmitting ?? false}
           >
             <Trans>Submit</Trans>
           </LoadingButton>

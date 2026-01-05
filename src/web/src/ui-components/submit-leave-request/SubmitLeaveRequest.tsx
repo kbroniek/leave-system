@@ -144,6 +144,8 @@ const DataContent = ({
     invalidateQueries: [["leaveRequests"], ["leaveLimits"]],
   });
 
+  const isSubmitting = submitLeaveRequestMutation.isPending;
+
   const onSubmit = (model: LeaveRequestFormModel) => {
     if (!model.dateFrom?.isValid) {
       notifications.show(t("Date from is invalid. Choose correct date."), {
@@ -270,6 +272,7 @@ const DataContent = ({
             onBehalf: initialEmployee?.id,
           }}
           initialEmployee={initialEmployee}
+          isSubmitting={isSubmitting}
         />
       }
       unauthorized={<Forbidden />}
