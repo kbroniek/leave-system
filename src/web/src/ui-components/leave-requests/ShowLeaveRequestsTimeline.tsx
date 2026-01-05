@@ -17,10 +17,7 @@ import { EmployeeDto } from "../dtos/EmployeeDto";
 import { LeaveRequestsTimelineTransformer } from "./LeaveRequestsTimelineTransformer";
 import { EmployeesFinder } from "../utils/EmployeesFinder";
 import { SubmitLeaveRequestDialog } from "../submit-leave-request/SubmitLeaveRequestDialog";
-import { LeaveRequestFormModel } from "../submit-leave-request/SubmitLeaveRequestForm";
-import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
 import { useState } from "react";
-import { SubmitHandler } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 export const rowHeight = 30;
@@ -131,10 +128,6 @@ export default function ShowLeaveRequestsTimeline(
     leaveStatuses: LeaveStatusDto[];
     leaveTypes: LeaveTypeDto[];
     employees: EmployeeDto[];
-    leaveLimits?: LeaveLimitDto[];
-    onSubmitLeaveRequest?: SubmitHandler<LeaveRequestFormModel>;
-    onYearChanged?: (year: string) => void;
-    onUserIdChanged?: (userId: string) => void;
   }>
 ): React.ReactElement {
   const { t } = useTranslation();
@@ -337,16 +330,6 @@ export default function ShowLeaveRequestsTimeline(
         onClose={handleCloseDialog}
         selectedDate={selectedDate}
         selectedEmployee={selectedEmployee}
-        leaveRequests={params.leaveRequests?.items}
-        holidays={params.holidays}
-        leaveTypes={leaveTypesActive}
-        leaveLimits={params.leaveLimits}
-        employees={params.employees}
-        onSubmit={
-          params.onSubmitLeaveRequest || (() => Promise.resolve(undefined))
-        }
-        onYearChanged={params.onYearChanged || (() => {})}
-        onUserIdChanged={params.onUserIdChanged || (() => {})}
       />
     </Box>
   );

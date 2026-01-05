@@ -28,7 +28,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             {
                 return new Error($"Cannot find the graph user. UserId={id}", System.Net.HttpStatusCode.NotFound, ErrorCodes.GRAPH_USER_NOT_FOUND);
             }
-            return new IGetUserRepository.User(user.Id ?? id, user.DisplayName, null, null, null, null);
+            return new IGetUserRepository.User(user.Id ?? id, user.DisplayName, null, null, null, user.AccountEnabled);
         }
         catch (ODataError ex) when (ex.ResponseStatusCode == 404)
         {

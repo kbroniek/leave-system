@@ -5,30 +5,14 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { DateTime } from "luxon";
 import { EmployeeDto } from "../dtos/EmployeeDto";
-import { LeaveRequestDto } from "../dtos/LeaveRequestsDto";
-import { HolidaysDto } from "../dtos/HolidaysDto";
-import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
-import { LeaveLimitDto } from "../dtos/LeaveLimitsDto";
-import {
-  SubmitLeaveRequestForm,
-  LeaveRequestFormModel,
-} from "./SubmitLeaveRequestForm";
+import { SubmitLeaveRequest } from "./SubmitLeaveRequest";
 import { Trans } from "react-i18next";
-import { SubmitHandler } from "react-hook-form";
 
 interface SubmitLeaveRequestDialogProps {
   open: boolean;
   onClose: () => void;
   selectedDate?: DateTime;
   selectedEmployee?: EmployeeDto;
-  leaveRequests?: LeaveRequestDto[];
-  holidays?: HolidaysDto;
-  leaveTypes?: LeaveTypeDto[];
-  leaveLimits?: LeaveLimitDto[];
-  employees?: EmployeeDto[];
-  onSubmit: SubmitHandler<LeaveRequestFormModel>;
-  onYearChanged: (year: string) => void;
-  onUserIdChanged: (userId: string) => void;
 }
 
 export function SubmitLeaveRequestDialog({
@@ -36,33 +20,7 @@ export function SubmitLeaveRequestDialog({
   onClose,
   selectedDate,
   selectedEmployee,
-  leaveRequests,
-  holidays,
-  leaveTypes,
-  leaveLimits,
-  employees,
-  onSubmit,
-  onYearChanged,
-  onUserIdChanged,
 }: SubmitLeaveRequestDialogProps) {
-  const handleSubmit: SubmitHandler<LeaveRequestFormModel> = async (
-    data,
-    event,
-  ) => {
-    const result = await onSubmit(data, event);
-    if (result === 201) {
-      onClose();
-    }
-    return result;
-  };
-
-  // Prepare initial values for the form
-  const initialValues: Partial<LeaveRequestFormModel> = {
-    dateFrom: selectedDate,
-    dateTo: selectedDate,
-    onBehalf: selectedEmployee?.id,
-  };
-
   return (
     <Dialog
       open={open}
@@ -89,17 +47,10 @@ export function SubmitLeaveRequestDialog({
         </IconButton>
       </DialogTitle>
       <DialogContent dividers>
-        <SubmitLeaveRequestForm
-          leaveRequests={leaveRequests}
-          holidays={holidays}
-          leaveTypes={leaveTypes}
-          leaveLimits={leaveLimits}
-          employees={employees}
-          onSubmit={handleSubmit}
-          onYearChanged={onYearChanged}
-          onUserIdChanged={onUserIdChanged}
-          initialValues={initialValues}
+        <SubmitLeaveRequest
+          initialDate={selectedDate}
           initialEmployee={selectedEmployee}
+          onSuccess={onClose}
         />
       </DialogContent>
     </Dialog>

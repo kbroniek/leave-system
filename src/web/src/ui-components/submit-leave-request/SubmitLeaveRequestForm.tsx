@@ -58,6 +58,7 @@ export const SubmitLeaveRequestForm = (props: {
   onUserIdChanged: (userId: string) => void;
   initialValues?: Partial<LeaveRequestFormModel>;
   initialEmployee?: EmployeeDto;
+  isSubmitting?: boolean;
 }) => {
   const { t } = useTranslation();
   const notifications = useNotifications();
@@ -74,21 +75,20 @@ export const SubmitLeaveRequestForm = (props: {
     setValue,
   } = useForm<LeaveRequestFormModel>({
     defaultValues: {
-      dateFrom: props.initialValues?.dateFrom || now,
-      dateTo: props.initialValues?.dateTo || now,
-      onBehalf: props.initialValues?.onBehalf || props.initialEmployee?.id,
+      dateFrom: props.initialValues?.dateFrom ?? now,
+      dateTo: props.initialValues?.dateTo ?? now,
+      onBehalf: props.initialValues?.onBehalf ?? props.initialEmployee?.id,
       leaveType: props.initialValues?.leaveType,
       remarks: props.initialValues?.remarks,
     },
   });
   const [dateFrom, setDateFrom] = useState<DateTime | null>(
-    props.initialValues?.dateFrom || now
+    props.initialValues?.dateFrom ?? now
   );
   const [dateTo, setDateTo] = useState<DateTime | null>(
-    props.initialValues?.dateTo || now
+    props.initialValues?.dateTo ?? now
   );
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
-  const [submitInProgress, setSubmitInProgress] = useState(false);
 
   const employees = props.employees
     ?.filter((x) => x.accountEnabled !== false)
@@ -135,15 +135,13 @@ export const SubmitLeaveRequestForm = (props: {
     value: LeaveRequestFormModel,
     event?: React.BaseSyntheticEvent
   ) => {
+    if (event) {
+      event.preventDefault();
+    }
     if (!isValid) {
       return;
     }
-    setSubmitInProgress(true);
-    try {
-      await props.onSubmit(value, event);
-    } finally {
-      setSubmitInProgress(false);
-    }
+    await props.onSubmit(value, event);
   };
 
   const dateIsValid = (value: DateTime | null | undefined): boolean => {
@@ -164,7 +162,12 @@ export const SubmitLeaveRequestForm = (props: {
     props.onYearChanged(dateFrom.toFormat("yyyy"));
   }
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void handleSubmit(onSubmit, onInvalid)(e);
+      }}
+    >
       <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
         <Paper
           variant="outlined"
@@ -374,8 +377,8 @@ export const SubmitLeaveRequestForm = (props: {
             variant="contained"
             sx={{ mt: 3, ml: 1 }}
             fullWidth
-            disabled={!employees || !props.leaveTypes}
-            loading={submitInProgress}
+            disabled={!employees || !props.leaveTypes || props.isSubmitting}
+            loading={props.isSubmitting ?? false}
           >
             <Trans>Submit</Trans>
           </LoadingButton>

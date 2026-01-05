@@ -11,7 +11,6 @@ import { LeaveStatusesDto } from "../dtos/LeaveStatusDto";
 import { LeaveTypeDto } from "../dtos/LeaveTypesDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import { useTranslation } from "react-i18next";
 
@@ -21,7 +20,6 @@ const DataContent = (props: {
 }) => {
   const { inProgress } = useMsal();
   const notifications = useNotifications();
-  const navigate = useNavigate();
   const { t } = useTranslation();
 
   // Use TanStack Query for fetching leave request details
@@ -70,9 +68,11 @@ const DataContent = (props: {
   const actionLeaveRequestMutation = useApiMutation<{ remark: string }>({
     onSuccess: (response) => {
       if (response.status === 200) {
-        navigate("/");
-        // TODO: Handle it better - invalidate queries instead of reload
-        window.location.reload();
+        // Cache invalidation will automatically refresh the data
+        // If there's an onClose callback (e.g., dialog), call it
+        if (props.onClose) {
+          props.onClose();
+        }
       }
     },
     invalidateQueries: [
@@ -81,13 +81,15 @@ const DataContent = (props: {
     ],
   });
 
-  async function handleActionLeaveRequest(
+  const isActionInProgress = actionLeaveRequestMutation.isPending;
+
+  function handleActionLeaveRequest(
     id: string,
     remarks: string,
     action: "accept" | "reject" | "cancel",
     successMessage: string
   ) {
-    actionLeaveRequestMutation.mutate(
+    void actionLeaveRequestMutation.mutate(
       {
         url: `/leaverequests/${id}/${action}`,
         method: "PUT",
@@ -104,24 +106,24 @@ const DataContent = (props: {
     );
   }
 
-  const handleAccept = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(
+  const handleAccept = (id: string, remarks: string) => {
+    handleActionLeaveRequest(
       id,
       remarks,
       "accept",
       t("Leave Request was accepted successfully")
     );
   };
-  const handleReject = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(
+  const handleReject = (id: string, remarks: string) => {
+    handleActionLeaveRequest(
       id,
       remarks,
       "reject",
       t("Leave Request was rejected successfully")
     );
   };
-  const handleCancel = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(
+  const handleCancel = (id: string, remarks: string) => {
+    handleActionLeaveRequest(
       id,
       remarks,
       "cancel",
@@ -146,6 +148,7 @@ const DataContent = (props: {
       onReject={handleReject}
       onCancel={handleCancel}
       onClose={props.onClose}
+      isActionInProgress={isActionInProgress}
     />
   ) : (
     <Box
