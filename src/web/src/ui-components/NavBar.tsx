@@ -16,39 +16,47 @@ import MenuItem from "@mui/material/MenuItem";
 import { Authorized } from "../components/Authorized";
 import { useTranslation } from "react-i18next";
 import { RoleType } from "../utils/roleUtils";
+import { SubmitLeaveRequestDialog } from "./submit-leave-request/SubmitLeaveRequestDialog";
 
 function NavBar() {
   const { t } = useTranslation();
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
+    null
+  );
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+
   const pages = [
     {
       title: t("Submit request"),
       link: "/submit-request",
       roles: ["DecisionMaker", "GlobalAdmin", "Employee"] as RoleType[],
+      isDialog: true,
     },
     {
       title: t("My leaves"),
       link: "/my-leaves",
       roles: ["Employee"] as RoleType[],
+      isDialog: false,
     },
     {
       title: t("HR Panel"),
       link: "hr-panel",
       roles: ["GlobalAdmin", "HumanResource"] as RoleType[],
+      isDialog: false,
     },
     {
       title: t("Users"),
       link: "/users",
       roles: ["UserAdmin", "GlobalAdmin"] as RoleType[],
+      isDialog: false,
     },
     {
       title: t("Manage limits"),
       link: "/limits",
       roles: ["GlobalAdmin"] as RoleType[],
+      isDialog: false,
     },
   ];
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
-    null,
-  );
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -56,6 +64,15 @@ function NavBar() {
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
+  };
+
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+    handleCloseNavMenu();
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
   };
 
   const style = {
@@ -112,16 +129,24 @@ function NavBar() {
                   key={page.link}
                   roles={page.roles}
                   authorized={
-                    <MenuItem
-                      key={page.title}
-                      onClick={handleCloseNavMenu}
-                      component={RouterLink}
-                      to={page.link}
-                    >
-                      <Typography sx={{ textAlign: "center" }}>
-                        {page.title}
-                      </Typography>
-                    </MenuItem>
+                    page.isDialog ? (
+                      <MenuItem key={page.title} onClick={handleOpenDialog}>
+                        <Typography sx={{ textAlign: "center" }}>
+                          {page.title}
+                        </Typography>
+                      </MenuItem>
+                    ) : (
+                      <MenuItem
+                        key={page.title}
+                        onClick={handleCloseNavMenu}
+                        component={RouterLink}
+                        to={page.link}
+                      >
+                        <Typography sx={{ textAlign: "center" }}>
+                          {page.title}
+                        </Typography>
+                      </MenuItem>
+                    )
                   }
                 />
               ))}
@@ -133,15 +158,25 @@ function NavBar() {
                 key={page.link}
                 roles={page.roles}
                 authorized={
-                  <Button
-                    sx={{ my: 2, color: "white", display: "block" }}
-                    key={page.title}
-                    onClick={handleCloseNavMenu}
-                    component={RouterLink}
-                    to={page.link}
-                  >
-                    {page.title}
-                  </Button>
+                  page.isDialog ? (
+                    <Button
+                      sx={{ my: 2, color: "white", display: "block" }}
+                      key={page.title}
+                      onClick={handleOpenDialog}
+                    >
+                      {page.title}
+                    </Button>
+                  ) : (
+                    <Button
+                      sx={{ my: 2, color: "white", display: "block" }}
+                      key={page.title}
+                      onClick={handleCloseNavMenu}
+                      component={RouterLink}
+                      to={page.link}
+                    >
+                      {page.title}
+                    </Button>
+                  )
                 }
               />
             ))}
@@ -150,6 +185,7 @@ function NavBar() {
           <SignInSignOutButton />
         </Toolbar>
       </Container>
+      <SubmitLeaveRequestDialog open={dialogOpen} onClose={handleCloseDialog} />
     </AppBar>
   );
 }

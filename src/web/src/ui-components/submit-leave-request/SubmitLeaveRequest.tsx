@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 // Msal imports
 import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
@@ -33,14 +32,12 @@ interface DataContentProps {
   initialDate?: DateTime;
   initialEmployee?: EmployeeDto;
   onSuccess?: () => void;
-  hideNavigation?: boolean;
 }
 
 const DataContent = ({
   initialDate,
   initialEmployee,
   onSuccess,
-  hideNavigation = false,
 }: DataContentProps) => {
   const { t } = useTranslation();
   const { instance, inProgress } = useMsal();
@@ -50,7 +47,6 @@ const DataContent = ({
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(
     initialEmployee?.id
   );
-  const navigate = useNavigate();
   const notifications = useNotifications();
 
   const isDecisionMaker = useCallback(
@@ -142,8 +138,6 @@ const DataContent = ({
         });
         if (onSuccess) {
           onSuccess();
-        } else if (!hideNavigation) {
-          void navigate("/");
         }
       }
     },
@@ -287,7 +281,6 @@ interface SubmitLeaveRequestProps {
   initialDate?: DateTime;
   initialEmployee?: EmployeeDto;
   onSuccess?: () => void;
-  hideNavigation?: boolean;
 }
 
 export function SubmitLeaveRequest(
@@ -295,7 +288,6 @@ export function SubmitLeaveRequest(
     initialDate,
     initialEmployee,
     onSuccess,
-    hideNavigation,
   }: SubmitLeaveRequestProps = {} as SubmitLeaveRequestProps
 ) {
   return (
@@ -309,7 +301,6 @@ export function SubmitLeaveRequest(
         initialDate={initialDate}
         initialEmployee={initialEmployee}
         onSuccess={onSuccess}
-        hideNavigation={hideNavigation}
       />
     </MsalAuthenticationTemplate>
   );

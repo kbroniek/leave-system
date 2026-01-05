@@ -135,6 +135,9 @@ export const SubmitLeaveRequestForm = (props: {
     value: LeaveRequestFormModel,
     event?: React.BaseSyntheticEvent
   ) => {
+    if (event) {
+      event.preventDefault();
+    }
     if (!isValid) {
       return;
     }
@@ -164,7 +167,12 @@ export const SubmitLeaveRequestForm = (props: {
     props.onYearChanged(dateFrom.toFormat("yyyy"));
   }
   return (
-    <form onSubmit={() => void handleSubmit(onSubmit, onInvalid)}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void handleSubmit(onSubmit, onInvalid)(e);
+      }}
+    >
       <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
         <Paper
           variant="outlined"

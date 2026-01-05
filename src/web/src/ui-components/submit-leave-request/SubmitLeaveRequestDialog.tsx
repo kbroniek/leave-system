@@ -51,7 +51,6 @@ export function SubmitLeaveRequestDialog({
           initialDate={selectedDate}
           initialEmployee={selectedEmployee}
           onSuccess={onClose}
-          hideNavigation={true}
         />
       </DialogContent>
     </Dialog>
