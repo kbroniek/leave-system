@@ -9,7 +9,6 @@ import { loginRequest } from "../../authConfig";
 import { Loading, LoadingAuth } from "../../components/Loading";
 import { ErrorComponent } from "../../components/ErrorComponent";
 import { useApiQuery } from "../../hooks/useApiQuery";
-import { useApiMutation } from "../../hooks/useApiMutation";
 import ShowLeaveRequestsTimeline from "./ShowLeaveRequestsTimeline";
 import { LeaveRequestsResponseDto } from "../dtos/LeaveRequestsDto";
 import { HolidaysDto } from "../dtos/HolidaysDto";
@@ -24,12 +23,9 @@ import {
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { isInRole } from "../../utils/roleUtils";
-import { DateTime, Duration } from "luxon";
+import { DateTime } from "luxon";
 import { leaveRequestsStatuses } from "../utils/Status";
 import { useTranslation } from "react-i18next";
-import { LeaveRequestFormModel } from "../submit-leave-request/SubmitLeaveRequestForm";
-import { v4 as uuidv4 } from "uuid";
-import { LeaveLimitsDto } from "../dtos/LeaveLimitsDto";
 
 const DataContent = () => {
   const { instance, inProgress } = useMsal();
@@ -40,10 +36,6 @@ const DataContent = () => {
   const [employeesSearch, setEmployeesSearch] = useState<string[]>([]);
   const [statusesSearch, setStatusesSearch] = useState<string[]>(
     leaveRequestsStatuses.slice(0, 3)
-  );
-  const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
-  const [selectedYear, setSelectedYear] = useState<string>(
-    DateTime.now().toFormat("yyyy")
   );
   const notifications = useNotifications();
   const { t } = useTranslation();
@@ -186,9 +178,6 @@ const DataContent = () => {
             )}
             leaveTypes={apiLeaveTypes.items}
             employees={finalEmployees?.items ?? []}
-            leaveLimits={apiLeaveLimits?.items}
-            onYearChanged={onYearChanged}
-            onUserIdChanged={onUserIdChanged}
           />
         ) : (
           <Box sx={{ justifyContent: "center", display: "flex" }}>

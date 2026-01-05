@@ -74,18 +74,18 @@ export const SubmitLeaveRequestForm = (props: {
     setValue,
   } = useForm<LeaveRequestFormModel>({
     defaultValues: {
-      dateFrom: props.initialValues?.dateFrom || now,
-      dateTo: props.initialValues?.dateTo || now,
-      onBehalf: props.initialValues?.onBehalf || props.initialEmployee?.id,
+      dateFrom: props.initialValues?.dateFrom ?? now,
+      dateTo: props.initialValues?.dateTo ?? now,
+      onBehalf: props.initialValues?.onBehalf ?? props.initialEmployee?.id,
       leaveType: props.initialValues?.leaveType,
       remarks: props.initialValues?.remarks,
     },
   });
   const [dateFrom, setDateFrom] = useState<DateTime | null>(
-    props.initialValues?.dateFrom || now
+    props.initialValues?.dateFrom ?? now
   );
   const [dateTo, setDateTo] = useState<DateTime | null>(
-    props.initialValues?.dateTo || now
+    props.initialValues?.dateTo ?? now
   );
   const [leaveTypeId, setLeaveTypeId] = useState<string | undefined>();
   const [submitInProgress, setSubmitInProgress] = useState(false);
@@ -164,7 +164,7 @@ export const SubmitLeaveRequestForm = (props: {
     props.onYearChanged(dateFrom.toFormat("yyyy"));
   }
   return (
-    <form onSubmit={handleSubmit(onSubmit, onInvalid)}>
+    <form onSubmit={() => void handleSubmit(onSubmit, onInvalid)}>
       <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
         <Paper
           variant="outlined"
