@@ -81,9 +81,9 @@ public class ExceptionHandlingMiddleware : IFunctionsWorkerMiddleware
             [];
         var problemDetails = new ProblemDetails
         {
-            Detail = "Global exception handler",
+            Title = "Global exception handler",
             Status = status,
-            Title = message ?? ex.Message,
+            Detail = message ?? ex.Message,
             Extensions = extensions
         };
         httpContext.Response.Headers.ContentType = "application/problem+json; charset=utf-8";
