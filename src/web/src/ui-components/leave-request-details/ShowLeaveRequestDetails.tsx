@@ -28,10 +28,11 @@ export default function ShowLeaveRequestsTimeline(
     statusColor: string;
     leaveType: LeaveTypeDto;
     holidays: HolidaysDto;
-    onAccept: (id: string, remarks: string) => Promise<void>;
-    onReject: (id: string, remarks: string) => Promise<void>;
-    onCancel: (id: string, remarks: string) => Promise<void>;
+    onAccept: (id: string, remarks: string) => void;
+    onReject: (id: string, remarks: string) => void;
+    onCancel: (id: string, remarks: string) => void;
     onClose?: () => void;
+    isActionInProgress?: boolean;
   }>
 ): React.ReactElement {
   const titleStyle = { color: "text.secondary", textAlign: "right" };
@@ -64,28 +65,22 @@ export default function ShowLeaveRequestsTimeline(
     hour: "2-digit",
     minute: "2-digit",
   };
-  const [actionProgress, setActionProgress] = useState(false);
   const [remarksInput, setRemarksInput] = useState("");
   const notifications = useNotifications();
   const { t } = useTranslation();
+  const isActionInProgress = props.isActionInProgress ?? false;
 
-  const handleAccept = async () => {
-    setActionProgress(true);
-    await props.onAccept(props.leaveRequest.leaveRequestId, remarksInput);
-    setActionProgress(false);
+  const handleAccept = () => {
+    props.onAccept(props.leaveRequest.leaveRequestId, remarksInput);
   };
-  const handleReject = async () => {
-    setActionProgress(true);
-    await props.onReject(props.leaveRequest.leaveRequestId, remarksInput);
-    setActionProgress(false);
+  const handleReject = () => {
+    props.onReject(props.leaveRequest.leaveRequestId, remarksInput);
   };
-  const handleCancel = async () => {
-    setActionProgress(true);
-    await props.onCancel(props.leaveRequest.leaveRequestId, remarksInput);
-    setActionProgress(false);
+  const handleCancel = () => {
+    props.onCancel(props.leaveRequest.leaveRequestId, remarksInput);
   };
   const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(
+    void navigator.clipboard.writeText(
       `${window.location.origin}/details/${props.leaveRequest.leaveRequestId}`
     );
     notifications.show(t("Copied to clipboard"), {
@@ -245,12 +240,13 @@ export default function ShowLeaveRequestsTimeline(
           >
             <Authorized roles={["DecisionMaker", "GlobalAdmin"]}>
               <LoadingButton
-                loading={actionProgress}
+                loading={isActionInProgress}
                 loadingPosition="start"
                 startIcon={<ThumbUpIcon />}
                 color="success"
                 variant="contained"
                 onClick={handleAccept}
+                disabled={isActionInProgress}
                 sx={{
                   minWidth: 140,
                   padding: "10px 24px",
@@ -273,12 +269,13 @@ export default function ShowLeaveRequestsTimeline(
                 <Trans>Accept</Trans>
               </LoadingButton>
               <LoadingButton
-                loading={actionProgress}
+                loading={isActionInProgress}
                 loadingPosition="start"
                 startIcon={<ThumbDownIcon />}
                 color="error"
                 variant="contained"
                 onClick={handleReject}
+                disabled={isActionInProgress}
                 sx={{
                   minWidth: 140,
                   padding: "10px 24px",
@@ -309,12 +306,13 @@ export default function ShowLeaveRequestsTimeline(
                 userId={props.leaveRequest.assignedTo.id}
                 authorized={
                   <LoadingButton
-                    loading={actionProgress}
+                    loading={isActionInProgress}
                     loadingPosition="start"
                     startIcon={<CancelIcon />}
                     color="warning"
                     variant="contained"
                     onClick={handleCancel}
+                    disabled={isActionInProgress}
                     sx={{
                       minWidth: 140,
                       padding: "10px 24px",

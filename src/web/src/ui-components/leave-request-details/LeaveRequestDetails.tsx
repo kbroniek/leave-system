@@ -81,13 +81,15 @@ const DataContent = (props: {
     ],
   });
 
-  async function handleActionLeaveRequest(
+  const isActionInProgress = actionLeaveRequestMutation.isPending;
+
+  function handleActionLeaveRequest(
     id: string,
     remarks: string,
     action: "accept" | "reject" | "cancel",
     successMessage: string
   ) {
-    actionLeaveRequestMutation.mutate(
+    void actionLeaveRequestMutation.mutate(
       {
         url: `/leaverequests/${id}/${action}`,
         method: "PUT",
@@ -104,24 +106,24 @@ const DataContent = (props: {
     );
   }
 
-  const handleAccept = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(
+  const handleAccept = (id: string, remarks: string) => {
+    handleActionLeaveRequest(
       id,
       remarks,
       "accept",
       t("Leave Request was accepted successfully")
     );
   };
-  const handleReject = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(
+  const handleReject = (id: string, remarks: string) => {
+    handleActionLeaveRequest(
       id,
       remarks,
       "reject",
       t("Leave Request was rejected successfully")
     );
   };
-  const handleCancel = async (id: string, remarks: string) => {
-    await handleActionLeaveRequest(
+  const handleCancel = (id: string, remarks: string) => {
+    handleActionLeaveRequest(
       id,
       remarks,
       "cancel",
@@ -146,6 +148,7 @@ const DataContent = (props: {
       onReject={handleReject}
       onCancel={handleCancel}
       onClose={props.onClose}
+      isActionInProgress={isActionInProgress}
     />
   ) : (
     <Box
