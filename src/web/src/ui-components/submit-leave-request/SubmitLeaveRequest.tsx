@@ -43,7 +43,7 @@ const DataContent = () => {
     [instance]
   );
 
-  const currentDate = DateTime.local();
+  const currentDate = DateTime.fromFormat(currentYear, "yyyy");
   const dateFromFormatted = currentDate.startOf("year").toFormat("yyyy-MM-dd");
   const dateToFormatted = currentDate.endOf("year").toFormat("yyyy-MM-dd");
 
