@@ -14,11 +14,10 @@ public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysReposit
         TimeSpan workingHours,
         CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow();
-        var firstDay = DateOnly.FromDateTime(now.GetFirstDayOfYear().Date);
-        var lastDay = DateOnly.FromDateTime(now.GetLastDayOfYear().Date);
-        Guard.Against.OutOfRange(dateFrom, nameof(dateFrom), firstDay, lastDay);
-        Guard.Against.OutOfRange(dateTo, nameof(dateTo), firstDay, lastDay);
+        if (dateFrom.Year != dateTo.Year)
+        {
+            return new Error("Date from and date to must be in the same year.", HttpStatusCode.BadRequest, ErrorCodes.INVALID_DATE_RANGE);
+        }
         if (dateFrom > dateTo)
         {
             return new Error("Date from has to be less than date to.", HttpStatusCode.BadRequest, ErrorCodes.INVALID_DATE_RANGE);
