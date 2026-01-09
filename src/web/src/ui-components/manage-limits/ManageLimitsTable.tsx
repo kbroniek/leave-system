@@ -38,6 +38,7 @@ declare module "@mui/x-data-grid" {
     setRowModesModel: (
       newModel: (oldModel: GridRowModesModel) => GridRowModesModel
     ) => void;
+    defaultLeaveTypeId: string;
   }
 }
 
@@ -433,6 +434,36 @@ export function ManageLimitsTable(props: {
     };
   }, [onLoadMore, isLoadingMore]);
 
+  // Function to add a new limit row
+  const addNewLimit = React.useCallback(() => {
+    const id = uuidv4();
+    const now = DateTime.now();
+    const firstDay = now.startOf("year");
+    const lastDay = now.endOf("year");
+    const defaultLeaveTypeId =
+      props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")?.id ??
+      props.leaveTypes[0]?.id ??
+      "";
+    const newRow: LeaveLimitCell & { isNew: boolean } = {
+      id,
+      assignedToUserId: null,
+      description: null,
+      leaveTypeId: defaultLeaveTypeId,
+      limit: 26,
+      overdueLimit: null,
+      workingHours: 8,
+      state: "Active",
+      validSince: firstDay.toJSDate(),
+      validUntil: lastDay.toJSDate(),
+      isNew: true,
+    };
+    setRows((oldRows) => [...oldRows, newRow]);
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "assignedToUserId" },
+    }));
+  }, [props.leaveTypes, setRows, setRowModesModel]);
+
   return (
     <Box
       sx={{
@@ -445,6 +476,24 @@ export function ManageLimitsTable(props: {
         },
       }}
     >
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          padding: 1,
+          borderBottom: 1,
+          borderColor: "divider",
+        }}
+      >
+        <Button
+          color="primary"
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={addNewLimit}
+        >
+          <Trans>Add New Limit</Trans>
+        </Button>
+      </Box>
       <Box
         ref={gridContainerRef}
         sx={{
@@ -462,13 +511,19 @@ export function ManageLimitsTable(props: {
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={processRowUpdateError}
           slots={{
-            toolbar: EditToolbar(
-              props.leaveTypes.find((x) => x.properties?.catalog === "Holiday")
-                ?.id ?? ""
-            ),
+            toolbar: EditToolbar,
           }}
           slotProps={{
-            toolbar: { setRows, setRowModesModel },
+            toolbar: {
+              setRows,
+              setRowModesModel,
+              defaultLeaveTypeId:
+                props.leaveTypes.find(
+                  (x) => x.properties?.catalog === "Holiday"
+                )?.id ??
+                props.leaveTypes[0]?.id ??
+                "",
+            },
           }}
         />
       </Box>
@@ -495,46 +550,42 @@ export function ManageLimitsTable(props: {
   );
 }
 
-const EditToolbar = (defaultLeaveTypeId: string) => {
-  const ToolbarComponent = (props: GridSlotProps["toolbar"]) => {
-    const { setRows, setRowModesModel } = props;
+function EditToolbar(props: GridSlotProps["toolbar"]) {
+  const { setRows, setRowModesModel, defaultLeaveTypeId } = props;
 
-    const handleClick = () => {
-      const id = uuidv4();
-      const now = DateTime.now();
-      const firstDay = now.startOf("year");
-      const lastDay = now.endOf("year");
-      const newRow: LeaveLimitCell & { isNew: boolean } = {
-        id,
-        assignedToUserId: null,
-        description: null,
-        leaveTypeId: defaultLeaveTypeId,
-        limit: 26,
-        overdueLimit: null,
-        workingHours: 8,
-        state: "Active",
-        validSince: firstDay.toJSDate(),
-        validUntil: lastDay.toJSDate(),
-        isNew: true,
-      };
-      setRows((oldRows) => [...oldRows, newRow]);
-      setRowModesModel((oldModel) => ({
-        ...oldModel,
-        [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
-      }));
+  const handleClick = () => {
+    const id = uuidv4();
+    const now = DateTime.now();
+    const firstDay = now.startOf("year");
+    const lastDay = now.endOf("year");
+    const newRow: LeaveLimitCell & { isNew: boolean } = {
+      id,
+      assignedToUserId: null,
+      description: null,
+      leaveTypeId: defaultLeaveTypeId,
+      limit: 26,
+      overdueLimit: null,
+      workingHours: 8,
+      state: "Active",
+      validSince: firstDay.toJSDate(),
+      validUntil: lastDay.toJSDate(),
+      isNew: true,
     };
-
-    return (
-      <GridToolbarContainer>
-        <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-          <Trans>Add record</Trans>
-        </Button>
-      </GridToolbarContainer>
-    );
+    setRows((oldRows) => [...oldRows, newRow]);
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "assignedToUserId" },
+    }));
   };
-  ToolbarComponent.displayName = "EditToolbar";
-  return ToolbarComponent;
-};
+
+  return (
+    <GridToolbarContainer>
+      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+        <Trans>Add record</Trans>
+      </Button>
+    </GridToolbarContainer>
+  );
+}
 
 export interface LeaveLimitCell {
   id: string;
