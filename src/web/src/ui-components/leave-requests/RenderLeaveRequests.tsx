@@ -184,6 +184,7 @@ export function RenderLeaveRequests(
                 key={`${x.id}-render-leave-request-detail`}
                 onClick={() => handleDialogOpenMenuClose(x.id)}
                 className={getCssClass(x.status, x.leaveTypeId)}
+                sx={{ textTransform: "none" }}
               >
                 {props.value?.date.equals(x.dateFrom) ? (
                   <div className="leave-request-border-start leave-request-border-menu"></div>
@@ -220,7 +221,9 @@ export function RenderLeaveRequests(
                   minWidth: "50px",
                   height: "29px",
                   color: "black",
+                  textTransform: "none",
                 }}
+                lang="en"
               >
                 {props.value?.date.equals(x.dateFrom) ? (
                   <div className="leave-request-border-start"></div>
