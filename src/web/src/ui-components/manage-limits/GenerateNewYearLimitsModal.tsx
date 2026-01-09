@@ -69,7 +69,7 @@ export function GenerateNewYearLimitsModal({
     setShouldGenerate(true);
   };
 
-  const handleSaveAll = async () => {
+  const handleSaveAll = () => {
     if (!generatedLimits) return;
 
     // Normalize all workingHours to ISO8601 format before sending
@@ -97,9 +97,9 @@ export function GenerateNewYearLimitsModal({
     });
   };
 
-  const handleLimitChange = async (item: LeaveLimitCell): Promise<boolean> => {
+  const handleLimitChange = (item: LeaveLimitCell): Promise<boolean> => {
     // Update the generated limits in memory for preview
-    if (!generatedLimits) return false;
+    if (!generatedLimits) return Promise.resolve(false);
 
     const updatedLimits: LeaveLimitDto[] = generatedLimits.map((limit) => {
       if (limit.id === item.id) {
@@ -133,9 +133,9 @@ export function GenerateNewYearLimitsModal({
     // TODO: Check this!
     // setGeneratedLimits(updatedLimits);
     if (updatedLimits.length > 0) {
-      return true;
+      return Promise.resolve(true);
     }
-    return true;
+    return Promise.resolve(true);
   };
 
   const handleClose = () => {

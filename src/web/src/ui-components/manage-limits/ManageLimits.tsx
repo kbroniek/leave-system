@@ -75,13 +75,19 @@ const DataContent = () => {
     }
   }, [apiLeaveLimits, currentYear]);
 
-  // Create mutation for updating limits
-  const updateLimitMutation = useApiMutation({
-    onSuccess: () => {
-      notifications.show(t("Limit is updated successfully"), {
-        severity: "success",
-        autoHideDuration: 3000,
-      });
+  // Create mutation for updating/creating limits
+  const updateLimitMutation = useApiMutation<LeaveLimitDto>({
+    onSuccess: (response) => {
+      const isCreate = response.status === 201;
+      notifications.show(
+        isCreate
+          ? t("Limit is created successfully")
+          : t("Limit is updated successfully"),
+        {
+          severity: "success",
+          autoHideDuration: 3000,
+        }
+      );
     },
     invalidateQueries: [["leaveLimits", "manage", currentYear]],
   });
@@ -110,9 +116,13 @@ const DataContent = () => {
         : null,
       state: item.state,
     };
+
+    // Check if this is a new limit (doesn't exist in accumulated limits)
+    const isNewLimit = !accumulatedLimits.some((limit) => limit.id === dto.id);
+
     updateLimitMutation.mutate({
-      url: `/leavelimits/${dto.id}`,
-      method: "PUT",
+      url: isNewLimit ? `/leavelimits` : `/leavelimits/${dto.id}`,
+      method: isNewLimit ? "POST" : "PUT",
       body: dto,
     });
     return Promise.resolve(true);
