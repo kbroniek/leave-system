@@ -76,9 +76,9 @@ const DataContent = () => {
   }, [apiLeaveLimits, currentYear]);
 
   // Create mutation for updating/creating limits
-  const updateLimitMutation = useApiMutation({
-    onSuccess: (_, variables: { method: string }) => {
-      const isCreate = variables.method === "POST";
+  const updateLimitMutation = useApiMutation<LeaveLimitDto>({
+    onSuccess: (response) => {
+      const isCreate = response.status === 201;
       notifications.show(
         isCreate
           ? t("Limit is created successfully")
