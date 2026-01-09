@@ -8,6 +8,8 @@ using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Domain.LeaveRequests.Getting;
 using LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Domain.LeaveRequests.Searching;
+using LeaveSystem.Domain.LeaveRequests.Creating;
+using LeaveSystem.Functions.Email;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.GraphApi;
 using LeaveSystem.Functions.Holidays;
@@ -43,6 +45,7 @@ internal static class Config
             .AddAuthorization()
             .AddScoped<IClaimsTransformation, RoleClaimsTransformation>()
             .AddScoped(sp => BuildCosmosDbClient(cosmosClientSettings.CosmosDBConnection ?? throw CreateError(nameof(cosmosClientSettings.CosmosDBConnection))))
+            .AddScoped<IEmailService, LeaveSystem.Functions.Email.EmailService>()
             .AddLeaveRequestServices()
             .AddLeaveRequestRepositories(
                 cosmosClientSettings.DatabaseName ?? throw CreateError(nameof(cosmosClientSettings.DatabaseName)),
@@ -135,6 +138,12 @@ internal static class Config
                     databaseName,
                     rolesContainerName,
                     sp.GetRequiredService<ILogger<RolesRepository>>()
+                ))
+            .AddScoped<IDecisionMakerRepository>(sp => new DecisionMakerRepository(
+                    sp.GetRequiredService<CosmosClient>(),
+                    databaseName,
+                    rolesContainerName,
+                    sp.GetRequiredService<ILogger<DecisionMakerRepository>>()
                 ))
             .AddScoped(sp => new SearchLeaveLimitsRepository(
                     sp.GetRequiredService<CosmosClient>(),

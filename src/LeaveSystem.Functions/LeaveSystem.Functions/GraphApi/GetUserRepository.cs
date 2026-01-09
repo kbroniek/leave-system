@@ -15,7 +15,7 @@ using Microsoft.Graph.Models.ODataErrors;
 internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger, IMemoryCache memoryCache) : IGetUserRepository
 {
     private static readonly TimeSpan AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-    private static readonly string[] Select = ["id", "displayName", "accountEnabled"];
+    private static readonly string[] Select = ["id", "displayName", "accountEnabled", "mail", "userPrincipalName"];
 
     public async Task<Result<IGetUserRepository.User, Error>> GetUser(string id, CancellationToken cancellationToken)
     {
@@ -28,7 +28,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             {
                 return new Error($"Cannot find the graph user. UserId={id}", System.Net.HttpStatusCode.NotFound, ErrorCodes.GRAPH_USER_NOT_FOUND);
             }
-            return new IGetUserRepository.User(user.Id ?? id, user.DisplayName, null, null, null, user.AccountEnabled);
+            return new IGetUserRepository.User(user.Id ?? id, user.DisplayName, null, null, null, user.AccountEnabled, user.Mail ?? user.UserPrincipalName);
         }
         catch (ODataError ex) when (ex.ResponseStatusCode == 404)
         {
@@ -81,7 +81,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             var users = await graphClient.Users
                 .GetAsync(_ =>
                 {
-                    _.QueryParameters.Select = ["id", "displayName", "givenName", "surname", "jobTitle", "accountEnabled"];
+                    _.QueryParameters.Select = ["id", "displayName", "givenName", "surname", "jobTitle", "accountEnabled", "mail", "userPrincipalName"];
                     //TODO: Only 15 items are allowed in the filter.
                     _.QueryParameters.Filter = ids.Length == 0 ? null : $"id in ({string.Join(",", ids.Select(id => $"'{id}'"))})";
                 }, cancellationToken);
@@ -122,5 +122,5 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
         return graphUsers;
     }
     private static IGetUserRepository.User CreateUserModel(User user) =>
-            new(user.Id, user.DisplayName, user.GivenName, user.Surname, user.JobTitle, user.AccountEnabled);
+            new(user.Id, user.DisplayName, user.GivenName, user.Surname, user.JobTitle, user.AccountEnabled, user.Mail ?? user.UserPrincipalName);
 }

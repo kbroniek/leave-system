@@ -2,10 +2,16 @@ namespace LeaveSystem.Domain.LeaveRequests.Rejecting;
 using LeaveSystem.Domain.EventSourcing;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
+using LeaveSystem.Domain.LeaveRequests;
+using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
 
-public class RejectLeaveRequestService(ReadService readService, WriteService writeService)
+public class RejectLeaveRequestService(
+    ReadService readService,
+    WriteService writeService,
+    IEmailService? emailService,
+    IGetUserRepository? getUserRepository)
 {
     public async Task<Result<LeaveRequest, Error>> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
     {
@@ -19,6 +25,49 @@ public class RejectLeaveRequestService(ReadService readService, WriteService wri
         {
             return resultAccept;
         }
-        return await writeService.Write(resultAccept.Value, cancellationToken);
+        var writeResult = await writeService.Write(resultAccept.Value, cancellationToken);
+        
+        // Send email asynchronously (fire-and-forget) after successful rejection
+        if (writeResult.IsSuccess && emailService != null && getUserRepository != null)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await SendLeaveRequestRejectedEmailAsync(
+                        writeResult.Value,
+                        acceptedBy.Name ?? acceptedBy.Id,
+                        emailService,
+                        getUserRepository,
+                        cancellationToken);
+                }
+                catch
+                {
+                    // Silently ignore errors in fire-and-forget email sending
+                }
+            }, cancellationToken);
+        }
+        
+        return writeResult;
+    }
+
+    private static async Task SendLeaveRequestRejectedEmailAsync(
+        LeaveRequest leaveRequest,
+        string decisionMakerName,
+        IEmailService emailService,
+        IGetUserRepository getUserRepository,
+        CancellationToken cancellationToken)
+    {
+        // Get leave request owner email
+        var ownerResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
+        if (ownerResult.IsFailure || string.IsNullOrWhiteSpace(ownerResult.Value.Email))
+        {
+            return;
+        }
+
+        var subject = "Leave Request Rejected";
+        var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
+            leaveRequest, "Rejected", decisionMakerName);
+        await emailService.SendEmailAsync(ownerResult.Value.Email!, subject, htmlContent, cancellationToken);
     }
 }

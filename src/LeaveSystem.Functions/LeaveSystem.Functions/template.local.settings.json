@@ -16,7 +16,8 @@
     "ManageAzureUsers:TenantId": "{tenant-id}",
     "ManageAzureUsers:ClientId": "{client-id}",
     "ManageAzureUsers:Secret": "{secret}",
-    "ManageAzureUsers:Scopes:0": "https://graph.microsoft.com/.default"
+    "ManageAzureUsers:Scopes:0": "https://graph.microsoft.com/.default",
+    "CommunicationServicesConnectionString": "{acs-connection-string}"
   },
   "Host": {
     "CORS": "http://localhost:5173"
