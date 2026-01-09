@@ -181,7 +181,7 @@ public class LeaveRequestsFunction(
     {
         // TODO: Optimize performance
         var resultGet = await getLeaveRequestService.Get(leaveRequestId, cancellationToken);
-        var resultPermission = IfDifferentEmployeThenReturnError(req.HttpContext.User, resultGet);
+        var resultPermission = IfDifferentEmployeeThenReturnError(req.HttpContext.User, resultGet);
         if (resultPermission.IsFailure)
         {
             return resultPermission.Error.ToObjectResult($"Error occurred while getting a leave request details. LeaveRequestId = {leaveRequestId}.");
@@ -199,7 +199,7 @@ public class LeaveRequestsFunction(
             error => error.ToObjectResult($"Error occurred while canceling a leave request. LeaveRequestId = {leaveRequestId}."));
     }
 
-    private static Result<Error> IfDifferentEmployeThenReturnError(ClaimsPrincipal user, Result<LeaveRequest, Error> result)
+    private static Result<Error> IfDifferentEmployeeThenReturnError(ClaimsPrincipal user, Result<LeaveRequest, Error> result)
     {
         if (result.IsSuccess && !user.IsInRole(nameof(RoleType.DecisionMaker)) && !user.IsInRole(nameof(RoleType.GlobalAdmin)))
         {
