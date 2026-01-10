@@ -17,7 +17,8 @@
     "ManageAzureUsers:ClientId": "{client-id}",
     "ManageAzureUsers:Secret": "{secret}",
     "ManageAzureUsers:Scopes:0": "https://graph.microsoft.com/.default",
-    "CommunicationServicesConnectionString": "{acs-connection-string}"
+    "CommunicationServicesConnectionString": "{acs-connection-string}",
+    "EmailSenderAddress": "" // Optional: Use custom domain (e.g., "noreply@yourcompany.com"). Leave empty to use ACS default free domain.
   },
   "Host": {
     "CORS": "http://localhost:5173"

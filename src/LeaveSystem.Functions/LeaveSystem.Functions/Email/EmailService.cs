@@ -19,6 +19,7 @@ internal class EmailService : IEmailService
 
     public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
     {
+        _logger = logger;
         var connectionString = configuration["CommunicationServicesConnectionString"];
         if (string.IsNullOrWhiteSpace(connectionString))
         {
@@ -26,8 +27,21 @@ internal class EmailService : IEmailService
         }
 
         _emailClient = new EmailClient(connectionString);
-        _senderAddress = "DoNotReply@leave-system.azurecomm.net"; // Default ACS domain, can be configured
-        _logger = logger;
+
+        // Get sender address from configuration, fallback to default if not configured
+        var configuredSender = configuration["EmailSenderAddress"];
+        if (string.IsNullOrWhiteSpace(configuredSender))
+        {
+            // Fallback to default ACS domain format if not configured
+            // This should match the default domain provided by Azure Communication Services
+            _senderAddress = "DoNotReply@azurecomm.net";
+            _logger.LogWarning("EmailSenderAddress not configured, using default: {DefaultSender}", _senderAddress);
+        }
+        else
+        {
+            _senderAddress = configuredSender;
+            _logger.LogInformation("Using configured email sender address: {SenderAddress}", _senderAddress);
+        }
     }
 
     public async Task SendEmailAsync(string to, string subject, string htmlContent, CancellationToken cancellationToken = default)
@@ -45,7 +59,7 @@ internal class EmailService : IEmailService
                 Html = htmlContent
             };
 
-            var emailMessage = new EmailMessage(_senderAddress, new EmailAddress(to), emailContent);
+            var emailMessage = new EmailMessage(_senderAddress, to, emailContent);
 
             _logger.LogInformation("Sending email to {To} with subject {Subject}", to, subject);
             var emailSendOperation = await _emailClient.SendAsync(WaitUntil.Started, emailMessage, cancellationToken);
