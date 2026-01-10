@@ -4,7 +4,7 @@ using Ardalis.GuardClauses;
 using LeaveSystem.Domain;
 using LeaveSystem.Shared;
 
-public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysRepository leaveTypeRepository)
+public class BasicValidator(ILeaveTypeFreeDaysRepository leaveTypeRepository)
 {
     public virtual async Task<Result<Error>> Validate(
         DateOnly dateFrom,
@@ -55,5 +55,5 @@ public class BasicValidator(TimeProvider timeProvider, ILeaveTypeFreeDaysReposit
 
 public interface ILeaveTypeFreeDaysRepository
 {
-    Task<Result<bool?, Error>> IsIncludeFreeDays(Guid leaveTypeId, CancellationToken cancellationToken);
+    public Task<Result<bool?, Error>> IsIncludeFreeDays(Guid leaveTypeId, CancellationToken cancellationToken);
 }

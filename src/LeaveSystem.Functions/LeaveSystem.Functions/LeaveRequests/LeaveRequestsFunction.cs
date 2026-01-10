@@ -66,7 +66,7 @@ public class LeaveRequestsFunction(
         Route = "leaverequests/{leaveRequestId:guid}")] HttpRequest req, Guid leaveRequestId, CancellationToken cancellationToken)
     {
         var result = await getLeaveRequestService.Get(leaveRequestId, cancellationToken);
-        var resultPermission = IfDifferentEmployeThenReturnError(req.HttpContext.User, result);
+        var resultPermission = IfDifferentEmployeeThenReturnError(req.HttpContext.User, result);
         if (resultPermission.IsFailure)
         {
             return resultPermission.Error.ToObjectResult($"Error occurred while getting a leave request details. LeaveRequestId = {leaveRequestId}.");

@@ -1,9 +1,11 @@
 namespace LeaveSystem.Functions.LeaveRequests.Repositories;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using LeaveSystem.Domain;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Auth;
