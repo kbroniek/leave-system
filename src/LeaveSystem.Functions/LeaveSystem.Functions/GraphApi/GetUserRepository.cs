@@ -15,7 +15,7 @@ using Microsoft.Graph.Models.ODataErrors;
 internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger<GetUserRepository> logger, IMemoryCache memoryCache) : IGetUserRepository
 {
     private static readonly TimeSpan AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-    private static readonly string[] Select = ["id", "displayName", "accountEnabled", "mail", "userPrincipalName"];
+    private static readonly string[] Select = ["id", "displayName", "accountEnabled", "mail", "userPrincipalName", "identities"];
 
     public async Task<Result<IGetUserRepository.User, Error>> GetUser(string id, CancellationToken cancellationToken)
     {
@@ -28,7 +28,7 @@ internal class GetUserRepository(IGraphClientFactory graphClientFactory, ILogger
             {
                 return new Error($"Cannot find the graph user. UserId={id}", System.Net.HttpStatusCode.NotFound, ErrorCodes.GRAPH_USER_NOT_FOUND);
             }
-            return new IGetUserRepository.User(user.Id ?? id, user.DisplayName, null, null, null, user.AccountEnabled, user.Mail ?? user.UserPrincipalName);
+            return new IGetUserRepository.User(user.Id ?? id, user.DisplayName, null, null, null, user.AccountEnabled, user.Identities?.FirstOrDefault(i => i.SignInType == "emailAddress")?.IssuerAssignedId ?? user.Mail ?? user.UserPrincipalName);
         }
         catch (ODataError ex) when (ex.ResponseStatusCode == 404)
         {

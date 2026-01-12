@@ -1,7 +1,7 @@
 namespace LeaveSystem.Domain.LeaveRequests.Canceling;
-using LeaveSystem.Domain.EventSourcing;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
+using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
@@ -32,53 +32,50 @@ public class CancelLeaveRequestService(
             return resultAccept;
         }
         var writeResult = await writeService.Write(resultAccept.Value, cancellationToken);
-        
+
         // Send emails asynchronously (fire-and-forget) after successful cancellation
         if (writeResult.IsSuccess && emailService != null && decisionMakerRepository != null && getUserRepository != null)
         {
-            _ = Task.Run(async () =>
+            // Get DecisionMaker user IDs
+            var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
+            if (decisionMakerIdsResult.IsSuccess)
             {
-                try
+                _ = Task.Run(async () =>
                 {
-                    await SendLeaveRequestCanceledEmailsAsync(
-                        writeResult.Value,
-                        emailService,
-                        decisionMakerRepository,
-                        getUserRepository,
-                        cancellationToken);
-                }
-                catch
-                {
-                    // Silently ignore errors in fire-and-forget email sending
-                }
-            }, cancellationToken);
+                    try
+                    {
+                        await SendLeaveRequestCanceledEmailsAsync(
+                            writeResult.Value,
+                            emailService,
+                            decisionMakerIdsResult.Value,
+                            getUserRepository,
+                            cancellationToken);
+                    }
+                    catch
+                    {
+                        // Silently ignore errors in fire-and-forget email sending
+                    }
+                }, cancellationToken);
+            }
         }
-        
+
         return writeResult;
     }
 
     private static async Task SendLeaveRequestCanceledEmailsAsync(
         LeaveRequest leaveRequest,
         IEmailService emailService,
-        IDecisionMakerRepository decisionMakerRepository,
+        IReadOnlyCollection<string> decisionMakerIds,
         IGetUserRepository getUserRepository,
         CancellationToken cancellationToken)
     {
-        // Get DecisionMaker user IDs
-        var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
-        if (decisionMakerIdsResult.IsFailure)
-        {
-            return;
-        }
-
-        var decisionMakerIds = decisionMakerIdsResult.Value.ToList();
         if (decisionMakerIds.Count == 0)
         {
             return;
         }
 
         // Get DecisionMaker emails
-        var decisionMakersResult = await getUserRepository.GetUsers(decisionMakerIds.ToArray(), cancellationToken);
+        var decisionMakersResult = await getUserRepository.GetUsers([.. decisionMakerIds], cancellationToken);
         if (decisionMakersResult.IsFailure)
         {
             return;

@@ -38,7 +38,7 @@ public class AcceptLeaveRequestService(
             return resultAccept;
         }
         var writeResult = await writeService.Write(resultAccept.Value, cancellationToken);
-        
+
         // Send email asynchronously (fire-and-forget) after successful acceptance
         if (writeResult.IsSuccess && emailService != null && getUserRepository != null)
         {
@@ -59,7 +59,7 @@ public class AcceptLeaveRequestService(
                 }
             }, cancellationToken);
         }
-        
+
         return writeResult;
     }
 

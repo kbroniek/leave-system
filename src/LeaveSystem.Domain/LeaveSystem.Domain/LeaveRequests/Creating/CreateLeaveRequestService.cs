@@ -48,52 +48,49 @@ public class CreateLeaveRequestService(
             return result;
         }
         var writeResult = await writeService.Write(result.Value, cancellationToken);
-        
+
         // Send emails asynchronously (fire-and-forget) after successful creation
         if (writeResult.IsSuccess && emailService != null && decisionMakerRepository != null && getUserRepository != null)
         {
-            _ = Task.Run(async () =>
+            // Get DecisionMaker user IDs
+            var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
+            if (decisionMakerIdsResult.IsSuccess)
             {
-                try
+                _ = Task.Run(async () =>
                 {
-                    await SendLeaveRequestCreatedEmailsAsync(
-                        writeResult.Value,
-                        emailService,
-                        decisionMakerRepository,
-                        getUserRepository,
-                        cancellationToken);
-                }
-                catch
-                {
-                    // Silently ignore errors in fire-and-forget email sending
-                }
-            }, cancellationToken);
+                    try
+                    {
+                        await SendLeaveRequestCreatedEmailsAsync(
+                            writeResult.Value,
+                            emailService,
+                            decisionMakerIdsResult.Value,
+                            getUserRepository,
+                            cancellationToken);
+                    }
+                    catch
+                    {
+                        // Silently ignore errors in fire-and-forget email sending
+                    }
+                }, cancellationToken);
+            }
         }
-        
+
         return writeResult;
     }
 
     private static async Task SendLeaveRequestCreatedEmailsAsync(
         LeaveRequest leaveRequest,
         IEmailService emailService,
-        IDecisionMakerRepository decisionMakerRepository,
+        IReadOnlyCollection<string> decisionMakerIds,
         IGetUserRepository getUserRepository,
         CancellationToken cancellationToken)
     {
-        // Get DecisionMaker user IDs
-        var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
-        if (decisionMakerIdsResult.IsFailure)
-        {
-            return;
-        }
-
-        var decisionMakerIds = decisionMakerIdsResult.Value.ToList();
         var recipientEmails = new List<string>();
 
         // Get DecisionMaker emails
         if (decisionMakerIds.Count > 0)
         {
-            var decisionMakersResult = await getUserRepository.GetUsers(decisionMakerIds.ToArray(), cancellationToken);
+            var decisionMakersResult = await getUserRepository.GetUsers([.. decisionMakerIds], cancellationToken);
             if (decisionMakersResult.IsSuccess)
             {
                 recipientEmails.AddRange(decisionMakersResult.Value
