@@ -6,6 +6,7 @@ using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
+using Microsoft.Extensions.Logging;
 
 public class CancelLeaveRequestService(
     ReadService readService,
@@ -13,7 +14,8 @@ public class CancelLeaveRequestService(
     TimeProvider timeProvider,
     IEmailService? emailService,
     IDecisionMakerRepository? decisionMakerRepository,
-    IGetUserRepository? getUserRepository)
+    IGetUserRepository? getUserRepository,
+    ILogger<CancelLeaveRequestService>? logger)
 {
     public async Task<Result<LeaveRequest, Error>> Cancel(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null)
     {
@@ -38,6 +40,7 @@ public class CancelLeaveRequestService(
         {
             // Capture language before async task
             var emailLanguage = language;
+            var serviceLogger = logger;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
             if (decisionMakerIdsResult.IsSuccess)
@@ -52,6 +55,7 @@ public class CancelLeaveRequestService(
                             decisionMakerIdsResult.Value,
                             getUserRepository,
                             emailLanguage,
+                            serviceLogger,
                             cancellationToken);
                     }
                     catch
@@ -71,31 +75,40 @@ public class CancelLeaveRequestService(
         IReadOnlyCollection<string> decisionMakerIds,
         IGetUserRepository getUserRepository,
         string? language,
+        ILogger<CancelLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
-        if (decisionMakerIds.Count == 0)
+        try
         {
-            return;
+            if (decisionMakerIds.Count == 0)
+            {
+                return;
+            }
+
+            // Get DecisionMaker emails
+            var decisionMakersResult = await getUserRepository.GetUsers([.. decisionMakerIds], cancellationToken);
+            if (decisionMakersResult.IsFailure)
+            {
+                return;
+            }
+
+            var recipientEmails = decisionMakersResult.Value
+                .Where(u => !string.IsNullOrWhiteSpace(u.Email))
+                .Select(u => u.Email!)
+                .ToList();
+
+            // Send emails
+            if (recipientEmails.Count > 0)
+            {
+                var subject = "Leave Request Canceled";
+                var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language);
+                await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, cancellationToken);
+            }
         }
-
-        // Get DecisionMaker emails
-        var decisionMakersResult = await getUserRepository.GetUsers([.. decisionMakerIds], cancellationToken);
-        if (decisionMakersResult.IsFailure)
+        catch (Exception ex)
         {
-            return;
-        }
-
-        var recipientEmails = decisionMakersResult.Value
-            .Where(u => !string.IsNullOrWhiteSpace(u.Email))
-            .Select(u => u.Email!)
-            .ToList();
-
-        // Send emails
-        if (recipientEmails.Count > 0)
-        {
-            var subject = "Leave Request Canceled";
-            var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language);
-            await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, cancellationToken);
+            logger?.LogError(ex, "Error occurred while sending leave request canceled email. LeaveRequestId: {LeaveRequestId}, EmployeeId: {EmployeeId}",
+                leaveRequest.Id, leaveRequest.AssignedTo.Id);
         }
     }
 }

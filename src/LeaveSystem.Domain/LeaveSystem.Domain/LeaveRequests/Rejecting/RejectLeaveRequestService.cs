@@ -1,17 +1,19 @@
 namespace LeaveSystem.Domain.LeaveRequests.Rejecting;
-using LeaveSystem.Domain.EventSourcing;
 using System.Threading.Tasks;
 using LeaveSystem.Domain;
+using LeaveSystem.Domain.EventSourcing;
 using LeaveSystem.Domain.LeaveRequests;
 using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
+using Microsoft.Extensions.Logging;
 
 public class RejectLeaveRequestService(
     ReadService readService,
     WriteService writeService,
     IEmailService? emailService,
-    IGetUserRepository? getUserRepository)
+    IGetUserRepository? getUserRepository,
+    ILogger<RejectLeaveRequestService>? logger)
 {
     public async Task<Result<LeaveRequest, Error>> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null)
     {
@@ -32,6 +34,7 @@ public class RejectLeaveRequestService(
         {
             // Capture language before async task
             var emailLanguage = language;
+            var serviceLogger = logger;
             _ = Task.Run(async () =>
             {
                 try
@@ -42,6 +45,7 @@ public class RejectLeaveRequestService(
                         emailService,
                         getUserRepository,
                         emailLanguage,
+                        serviceLogger,
                         cancellationToken);
                 }
                 catch
@@ -60,18 +64,27 @@ public class RejectLeaveRequestService(
         IEmailService emailService,
         IGetUserRepository getUserRepository,
         string? language,
+        ILogger<RejectLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
-        // Get leave request owner email
-        var ownerResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
-        if (ownerResult.IsFailure || string.IsNullOrWhiteSpace(ownerResult.Value.Email))
+        try
         {
-            return;
-        }
+            // Get leave request owner email
+            var ownerResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
+            if (ownerResult.IsFailure || string.IsNullOrWhiteSpace(ownerResult.Value.Email))
+            {
+                return;
+            }
 
-        var subject = "Leave Request Rejected";
-        var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
-            leaveRequest, "Rejected", decisionMakerName, language: language);
-        await emailService.SendEmailAsync(ownerResult.Value.Email!, subject, htmlContent, cancellationToken);
+            var subject = "Leave Request Rejected";
+            var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
+                leaveRequest, "Rejected", decisionMakerName, language: language);
+            await emailService.SendEmailAsync(ownerResult.Value.Email!, subject, htmlContent, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Error occurred while sending leave request rejected email. LeaveRequestId: {LeaveRequestId}, EmployeeId: {EmployeeId}",
+                leaveRequest.Id, leaveRequest.AssignedTo.Id);
+        }
     }
 }
