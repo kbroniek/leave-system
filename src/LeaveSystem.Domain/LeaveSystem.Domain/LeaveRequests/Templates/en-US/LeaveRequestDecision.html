@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'><style>
+body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+.container { max-width: 600px; margin: 0 auto; padding: 20px; }
+.header { background-color: {HEADER_COLOR}; color: white; padding: 20px; text-align: center; }
+.content { background-color: #f9f9f9; padding: 20px; margin-top: 20px; }
+.info-row { margin: 10px 0; }
+.label { font-weight: bold; color: #666; }
+.value { color: #333; }
+.footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
+</style></head>
+<body>
+<div class='container'>
+<div class='header'><h1>Leave Request {DECISION}</h1></div>
+<div class='content'>
+<p>Your leave request has been <strong>{DECISION_LOWER}</strong> by {DECISION_MAKER_NAME}.</p>
+<div class='info-row'><span class='label'>Leave Request ID:</span> <span class='value'>{LEAVE_REQUEST_ID}</span></div>
+<div class='info-row'><span class='label'>Date From:</span> <span class='value'>{DATE_FROM}</span></div>
+<div class='info-row'><span class='label'>Date To:</span> <span class='value'>{DATE_TO}</span></div>
+<div class='info-row'><span class='label'>Duration:</span> <span class='value'>{DURATION}</span></div>
+<div class='info-row'><span class='label'>Working Hours:</span> <span class='value'>{WORKING_HOURS}</span></div>
+{LEAVE_TYPE_ROW}
+{REMARKS_ROW}
+<div class='info-row'><span class='label'>Status:</span> <span class='value'>{STATUS}</span></div>
+<div class='info-row'><span class='label'>Decision Date:</span> <span class='value'>{DECISION_DATE}</span></div>
+</div>
+<div class='footer'>
+<p>This is an automated notification from the Leave System.</p>
+</div>
+</div>
+</body>
+</html>
