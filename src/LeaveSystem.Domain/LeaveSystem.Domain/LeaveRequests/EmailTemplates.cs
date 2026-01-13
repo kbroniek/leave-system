@@ -3,7 +3,6 @@ namespace LeaveSystem.Domain.LeaveRequests;
 using System;
 using System.Linq;
 using System.Text;
-using LeaveSystem.Shared.LeaveRequests;
 
 public static class EmailTemplates
 {
@@ -37,7 +36,7 @@ public static class EmailTemplates
         {
             html.AppendLine("<div class='info-row'><span class='label'>Leave Type:</span> <span class='value'>" + EscapeHtml(leaveTypeName) + "</span></div>");
         }
-        if (leaveRequest.Remarks.Any())
+        if (leaveRequest.Remarks.Count != 0)
         {
             var latestRemark = leaveRequest.Remarks.OrderByDescending(r => r.CreatedDate).First();
             html.AppendLine("<div class='info-row'><span class='label'>Remarks:</span> <span class='value'>" + EscapeHtml(latestRemark.Remarks) + "</span></div>");
@@ -130,7 +129,7 @@ public static class EmailTemplates
         {
             html.AppendLine("<div class='info-row'><span class='label'>Leave Type:</span> <span class='value'>" + EscapeHtml(leaveTypeName) + "</span></div>");
         }
-        if (leaveRequest.Remarks.Any())
+        if (leaveRequest.Remarks.Count != 0)
         {
             var latestRemark = leaveRequest.Remarks.OrderByDescending(r => r.CreatedDate).First();
             html.AppendLine("<div class='info-row'><span class='label'>Remarks:</span> <span class='value'>" + EscapeHtml(latestRemark.Remarks) + "</span></div>");
@@ -150,7 +149,10 @@ public static class EmailTemplates
     private static string EscapeHtml(string? text)
     {
         if (string.IsNullOrEmpty(text))
+        {
             return string.Empty;
+        }
+
         return text
             .Replace("&", "&amp;")
             .Replace("<", "&lt;")
