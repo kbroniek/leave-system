@@ -135,21 +135,31 @@ public static class EmailTemplates
     private static string LoadTemplate(string templateName, string language)
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = $"LeaveSystem.Domain.LeaveRequests.Templates.{language}.{templateName}.html";
+
+        // .NET SDK converts hyphens in folder names to underscores in embedded resource names
+        var languageForResource = language.Replace("-", "_");
+        var resourceName = $"LeaveSystem.Domain.LeaveRequests.Templates.{languageForResource}.{templateName}.html";
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
-        if (stream == null)
+        if (stream != null)
         {
-            // Fallback to en-US if template not found
-            if (language != "en-US")
-            {
-                return LoadTemplate(templateName, "en-US");
-            }
-            throw new InvalidOperationException($"Template '{templateName}' for language '{language}' not found.");
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            return reader.ReadToEnd();
         }
 
-        using var reader = new StreamReader(stream, Encoding.UTF8);
-        return reader.ReadToEnd();
+        // Fallback to en-US if template not found
+        if (language != "en-US")
+        {
+            return LoadTemplate(templateName, "en-US");
+        }
+
+        // If still not found, list available resources for debugging
+        var availableResources = assembly.GetManifestResourceNames();
+        var availableResourcesList = string.Join(", ", availableResources);
+        throw new InvalidOperationException(
+            $"Template '{templateName}' for language '{language}' not found. " +
+            $"Tried resource name: {resourceName}. " +
+            $"Available resources: {availableResourcesList}");
     }
 
     private static string ReplacePlaceholders(string template, Dictionary<string, string> placeholders)
