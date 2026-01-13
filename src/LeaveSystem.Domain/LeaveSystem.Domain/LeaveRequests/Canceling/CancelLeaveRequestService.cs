@@ -15,7 +15,7 @@ public class CancelLeaveRequestService(
     IDecisionMakerRepository? decisionMakerRepository,
     IGetUserRepository? getUserRepository)
 {
-    public async Task<Result<LeaveRequest, Error>> Cancel(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
+    public async Task<Result<LeaveRequest, Error>> Cancel(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null)
     {
         var resultFindById = await readService.FindById<LeaveRequest>(leaveRequestId, cancellationToken);
         if (!resultFindById.IsSuccess)
@@ -36,6 +36,8 @@ public class CancelLeaveRequestService(
         // Send emails asynchronously (fire-and-forget) after successful cancellation
         if (writeResult.IsSuccess && emailService != null && decisionMakerRepository != null && getUserRepository != null)
         {
+            // Capture language before async task
+            var emailLanguage = language;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
             if (decisionMakerIdsResult.IsSuccess)
@@ -49,6 +51,7 @@ public class CancelLeaveRequestService(
                             emailService,
                             decisionMakerIdsResult.Value,
                             getUserRepository,
+                            emailLanguage,
                             cancellationToken);
                     }
                     catch
@@ -67,6 +70,7 @@ public class CancelLeaveRequestService(
         IEmailService emailService,
         IReadOnlyCollection<string> decisionMakerIds,
         IGetUserRepository getUserRepository,
+        string? language,
         CancellationToken cancellationToken)
     {
         if (decisionMakerIds.Count == 0)
@@ -90,7 +94,7 @@ public class CancelLeaveRequestService(
         if (recipientEmails.Count > 0)
         {
             var subject = "Leave Request Canceled";
-            var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest);
+            var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language);
             await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, cancellationToken);
         }
     }

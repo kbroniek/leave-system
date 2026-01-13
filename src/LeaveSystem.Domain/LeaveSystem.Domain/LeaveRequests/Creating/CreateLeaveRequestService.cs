@@ -20,7 +20,8 @@ public class CreateLeaveRequestService(
         TimeSpan duration, Guid leaveTypeId, string? remarks,
         LeaveRequestUserDto createdBy, LeaveRequestUserDto assignedTo,
         TimeSpan workingHours, DateTimeOffset createdDate,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        string? language = null)
     {
         var streamEnumerable = readEventsRepository.ReadStreamAsync(leaveRequestId, cancellationToken).WithCancellation(cancellationToken);
         var enumerator = streamEnumerable.GetAsyncEnumerator();
@@ -52,6 +53,8 @@ public class CreateLeaveRequestService(
         // Send emails asynchronously (fire-and-forget) after successful creation
         if (writeResult.IsSuccess && emailService != null && decisionMakerRepository != null && getUserRepository != null)
         {
+            // Capture language before async task
+            var emailLanguage = language;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
             if (decisionMakerIdsResult.IsSuccess)
@@ -65,6 +68,7 @@ public class CreateLeaveRequestService(
                             emailService,
                             decisionMakerIdsResult.Value,
                             getUserRepository,
+                            emailLanguage,
                             cancellationToken);
                     }
                     catch
@@ -83,6 +87,7 @@ public class CreateLeaveRequestService(
         IEmailService emailService,
         IReadOnlyCollection<string> decisionMakerIds,
         IGetUserRepository getUserRepository,
+        string? language,
         CancellationToken cancellationToken)
     {
         var recipientEmails = new List<string>();
@@ -113,7 +118,7 @@ public class CreateLeaveRequestService(
         if (recipientEmails.Count > 0)
         {
             var subject = "New Leave Request Created";
-            var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest);
+            var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language);
             await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, cancellationToken);
         }
     }

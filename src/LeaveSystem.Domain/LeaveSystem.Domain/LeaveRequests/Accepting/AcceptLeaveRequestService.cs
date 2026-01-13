@@ -15,7 +15,7 @@ public class AcceptLeaveRequestService(
     IEmailService? emailService,
     IGetUserRepository? getUserRepository)
 {
-    public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken)
+    public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null)
     {
         var resultFindById = await readService.FindById<LeaveRequest>(leaveRequestId, cancellationToken);
         if (resultFindById.IsFailure)
@@ -42,6 +42,8 @@ public class AcceptLeaveRequestService(
         // Send email asynchronously (fire-and-forget) after successful acceptance
         if (writeResult.IsSuccess && emailService != null && getUserRepository != null)
         {
+            // Capture language before async task
+            var emailLanguage = language;
             _ = Task.Run(async () =>
             {
                 try
@@ -51,6 +53,7 @@ public class AcceptLeaveRequestService(
                         acceptedBy.Name ?? acceptedBy.Id,
                         emailService,
                         getUserRepository,
+                        emailLanguage,
                         cancellationToken);
                 }
                 catch
@@ -68,6 +71,7 @@ public class AcceptLeaveRequestService(
         string decisionMakerName,
         IEmailService emailService,
         IGetUserRepository getUserRepository,
+        string? language,
         CancellationToken cancellationToken)
     {
         // Get leave request owner email
@@ -79,7 +83,7 @@ public class AcceptLeaveRequestService(
 
         var subject = "Leave Request Accepted";
         var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
-            leaveRequest, "Accepted", decisionMakerName);
+            leaveRequest, "Accepted", decisionMakerName, language: language);
         await emailService.SendEmailAsync(ownerResult.Value.Email!, subject, htmlContent, cancellationToken);
     }
 }
