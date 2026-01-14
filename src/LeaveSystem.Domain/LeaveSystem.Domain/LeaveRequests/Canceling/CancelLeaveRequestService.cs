@@ -102,7 +102,7 @@ public class CancelLeaveRequestService(
             // Send emails
             if (recipients.Count > 0)
             {
-                var subject = "Leave Request Canceled";
+                var subject = EmailTemplates.GetEmailSubject("Leave Request Canceled", language);
                 var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language);
                 await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, decisionMakerName, cancellationToken);
             }

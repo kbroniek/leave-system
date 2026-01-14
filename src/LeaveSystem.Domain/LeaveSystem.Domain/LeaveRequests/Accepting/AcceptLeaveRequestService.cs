@@ -88,7 +88,7 @@ public class AcceptLeaveRequestService(
                 return;
             }
 
-            var subject = "Leave Request Accepted";
+            var subject = EmailTemplates.GetEmailSubject("Leave Request Accepted", language);
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
                 leaveRequest, "Accepted", decisionMakerName, language: language);
             var recipient = new IEmailService.EmailRecipient(ownerResult.Value.Email!, ownerResult.Value.Name);

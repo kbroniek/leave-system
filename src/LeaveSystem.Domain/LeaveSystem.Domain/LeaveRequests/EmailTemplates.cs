@@ -22,7 +22,11 @@ public static class EmailTemplates
             ["hour"] = "hour",
             ["hours"] = "hours",
             ["minute"] = "minute",
-            ["minutes"] = "minutes"
+            ["minutes"] = "minutes",
+            ["Leave Request Accepted"] = "Leave Request Accepted",
+            ["Leave Request Rejected"] = "Leave Request Rejected",
+            ["Leave Request Canceled"] = "Leave Request Canceled",
+            ["New Leave Request Created"] = "New Leave Request Created"
         },
         ["pl-PL"] = new Dictionary<string, string>
         {
@@ -35,7 +39,11 @@ public static class EmailTemplates
             ["hour"] = "godzina",
             ["hours"] = "godzin",
             ["minute"] = "minuta",
-            ["minutes"] = "minut"
+            ["minutes"] = "minut",
+            ["Leave Request Accepted"] = "Wniosek o urlop zaakceptowany",
+            ["Leave Request Rejected"] = "Wniosek o urlop odrzucony",
+            ["Leave Request Canceled"] = "Wniosek o urlop anulowany",
+            ["New Leave Request Created"] = "Nowy wniosek o urlop utworzony"
         }
     };
 
@@ -114,6 +122,12 @@ public static class EmailTemplates
             ["STATUS"] = leaveRequest.Status.ToString(),
             ["CANCELED_DATE"] = leaveRequest.LastModifiedDate.ToString("yyyy-MM-dd HH:mm")
         });
+    }
+
+    public static string GetEmailSubject(string subjectKey, string? language = null)
+    {
+        language = NormalizeLanguage(language);
+        return Translations[language].TryGetValue(subjectKey, out var translation) ? translation : subjectKey;
     }
 
     private static string NormalizeLanguage(string? language)

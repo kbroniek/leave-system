@@ -126,7 +126,7 @@ public class CreateLeaveRequestService(
             // Send emails
             if (recipients.Count > 0)
             {
-                var subject = "New Leave Request Created";
+                var subject = EmailTemplates.GetEmailSubject("New Leave Request Created", language);
                 var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language);
                 await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, creatorName, cancellationToken);
             }

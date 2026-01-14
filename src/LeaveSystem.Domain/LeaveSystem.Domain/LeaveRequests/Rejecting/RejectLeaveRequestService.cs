@@ -76,7 +76,7 @@ public class RejectLeaveRequestService(
                 return;
             }
 
-            var subject = "Leave Request Rejected";
+            var subject = EmailTemplates.GetEmailSubject("Leave Request Rejected", language);
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
                 leaveRequest, "Rejected", decisionMakerName, language: language);
             var recipient = new IEmailService.EmailRecipient(ownerResult.Value.Email!, ownerResult.Value.Name);
