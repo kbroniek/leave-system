@@ -44,35 +44,8 @@ internal class EmailService : IEmailService
         }
     }
 
-    public async Task SendEmailAsync(IEmailService.EmailRecipient recipient, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(recipient.Email))
-        {
-            _logger.LogWarning("Cannot send email: recipient email address is empty");
-            return;
-        }
-
-        try
-        {
-            var emailContent = new EmailContent(subject)
-            {
-                Html = htmlContent
-            };
-
-            // Azure Communication Services Email API only accepts plain email address in senderAddress
-            // Display names are not supported in the senderAddress field
-            var emailAddress = new EmailAddress(recipient.Email, recipient.Name);
-            var emailMessage = new EmailMessage(_senderAddress, emailAddress, emailContent);
-
-            _logger.LogInformation("Sending email to {To} with subject {Subject} from {Sender}", recipient.Email, subject, _senderAddress);
-            var emailSendOperation = await _emailClient.SendAsync(WaitUntil.Started, emailMessage, cancellationToken);
-            _logger.LogInformation("Email sent successfully to {To}. Operation ID: {OperationId}", recipient.Email, emailSendOperation.Id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while sending email to {To}", recipient.Email);
-        }
-    }
+    public async Task SendEmailAsync(IEmailService.EmailRecipient recipient, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default) =>
+        await SendBulkEmailAsync([recipient], subject, htmlContent, senderFullName, cancellationToken);
 
     public async Task SendBulkEmailAsync(IEnumerable<IEmailService.EmailRecipient> recipients, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
     {
