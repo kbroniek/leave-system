@@ -57,6 +57,7 @@ public class CreateLeaveRequestService(
         {
             var emailLanguage = language;
             var creatorName = createdBy.Name ?? createdBy.Email;
+            var replyToEmail = createdBy.Email;
             var serviceLogger = logger;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
@@ -71,6 +72,7 @@ public class CreateLeaveRequestService(
                             emailService,
                             decisionMakerIdsResult.Value,
                             creatorName,
+                            replyToEmail,
                             getUserRepository,
                             emailLanguage,
                             serviceLogger,
@@ -92,6 +94,7 @@ public class CreateLeaveRequestService(
         IEmailService emailService,
         IReadOnlyCollection<string> decisionMakerIds,
         string creatorName,
+        string? replyToEmail,
         IGetUserRepository getUserRepository,
         string? language,
         ILogger<CreateLeaveRequestService>? logger,
@@ -128,7 +131,7 @@ public class CreateLeaveRequestService(
             {
                 var subject = EmailTemplates.GetEmailSubject("New Leave Request Created", language, creatorName);
                 var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language);
-                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, cancellationToken);
+                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, replyToEmail, cancellationToken);
             }
         }
         catch (Exception ex)

@@ -46,6 +46,7 @@ public class AcceptLeaveRequestService(
         {
             var emailLanguage = language;
             var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email;
+            var replyToEmail = acceptedBy.Email;
             var serviceLogger = logger;
             _ = Task.Run(async () =>
             {
@@ -54,6 +55,7 @@ public class AcceptLeaveRequestService(
                     await SendLeaveRequestAcceptedEmailAsync(
                         writeResult.Value,
                         decisionMakerName,
+                        replyToEmail,
                         emailService,
                         getUserRepository,
                         emailLanguage,
@@ -73,6 +75,7 @@ public class AcceptLeaveRequestService(
     private static async Task SendLeaveRequestAcceptedEmailAsync(
         LeaveRequest leaveRequest,
         string? decisionMakerName,
+        string? replyToEmail,
         IEmailService emailService,
         IGetUserRepository getUserRepository,
         string? language,
@@ -92,7 +95,7 @@ public class AcceptLeaveRequestService(
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
                 leaveRequest, "Accepted", decisionMakerName, language: language);
             var recipient = new IEmailService.EmailRecipient(ownerResult.Value.Email!, ownerResult.Value.Name);
-            await emailService.SendEmailAsync(recipient, subject, htmlContent, cancellationToken);
+            await emailService.SendEmailAsync(recipient, subject, htmlContent, replyToEmail, cancellationToken);
         }
         catch (Exception ex)
         {

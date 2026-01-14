@@ -44,10 +44,10 @@ internal class EmailService : IEmailService
         }
     }
 
-    public async Task SendEmailAsync(IEmailService.EmailRecipient recipient, string subject, string htmlContent, CancellationToken cancellationToken = default) =>
-        await SendBulkEmailAsync([recipient], subject, htmlContent, cancellationToken);
+    public async Task SendEmailAsync(IEmailService.EmailRecipient recipient, string subject, string htmlContent, string? replyToEmail = null, CancellationToken cancellationToken = default) =>
+        await SendBulkEmailAsync([recipient], subject, htmlContent, replyToEmail, cancellationToken);
 
-    public async Task SendBulkEmailAsync(IEnumerable<IEmailService.EmailRecipient> recipients, string subject, string htmlContent, CancellationToken cancellationToken = default)
+    public async Task SendBulkEmailAsync(IEnumerable<IEmailService.EmailRecipient> recipients, string subject, string htmlContent, string? replyToEmail = null, CancellationToken cancellationToken = default)
     {
         var recipientList = recipients?.Where(r => !string.IsNullOrWhiteSpace(r.Email)).ToList();
         if (recipientList == null || recipientList.Count == 0)
@@ -65,8 +65,14 @@ internal class EmailService : IEmailService
             var emailRecipients = new EmailRecipients([.. recipientList.Select(recipient => new EmailAddress(recipient.Email, recipient.Name))]);
             var emailMessage = new EmailMessage(_senderAddress, emailRecipients, emailContent);
 
+            // Set Reply-To header if provided
+            if (!string.IsNullOrWhiteSpace(replyToEmail))
+            {
+                emailMessage.ReplyTo.Add(new EmailAddress(replyToEmail));
+            }
+
             var recipientsString = string.Join(", ", recipientList.Select(r => r.Email));
-            _logger.LogInformation("Sending email to {To} with subject {Subject} from {Sender}", recipientsString, subject, _senderAddress);
+            _logger.LogInformation("Sending email to {To} with subject {Subject} from {Sender} (Reply-To: {ReplyTo})", recipientsString, subject, _senderAddress, replyToEmail ?? "none");
             var emailSendOperation = await _emailClient.SendAsync(WaitUntil.Started, emailMessage, cancellationToken);
             _logger.LogInformation("Email sent successfully to {To}. Operation ID: {OperationId}", recipientsString, emailSendOperation.Id);
         }

@@ -40,6 +40,7 @@ public class CancelLeaveRequestService(
         {
             var emailLanguage = language;
             var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email;
+            var replyToEmail = acceptedBy.Email;
             var serviceLogger = logger;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
@@ -54,6 +55,7 @@ public class CancelLeaveRequestService(
                             emailService,
                             decisionMakerIdsResult.Value,
                             decisionMakerName,
+                            replyToEmail,
                             getUserRepository,
                             emailLanguage,
                             serviceLogger,
@@ -75,6 +77,7 @@ public class CancelLeaveRequestService(
         IEmailService emailService,
         IReadOnlyCollection<string> decisionMakerIds,
         string decisionMakerName,
+        string? replyToEmail,
         IGetUserRepository getUserRepository,
         string? language,
         ILogger<CancelLeaveRequestService>? logger,
@@ -104,7 +107,7 @@ public class CancelLeaveRequestService(
             {
                 var subject = EmailTemplates.GetEmailSubject("Leave Request Canceled", language, decisionMakerName);
                 var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language);
-                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, cancellationToken);
+                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, replyToEmail, cancellationToken);
             }
         }
         catch (Exception ex)
