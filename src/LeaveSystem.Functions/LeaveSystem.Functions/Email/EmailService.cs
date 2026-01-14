@@ -62,9 +62,6 @@ internal class EmailService : IEmailService
             {
                 Html = htmlContent
             };
-
-            // Azure Communication Services Email API only accepts plain email address in senderAddress
-            // Display names are not supported in the senderAddress field
             var emailRecipients = new EmailRecipients([.. recipientList.Select(recipient => new EmailAddress(recipient.Email, recipient.Name))]);
             var emailMessage = new EmailMessage(_senderAddress, emailRecipients, emailContent);
 

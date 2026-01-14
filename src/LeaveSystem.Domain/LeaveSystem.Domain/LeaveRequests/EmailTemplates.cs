@@ -26,7 +26,11 @@ public static class EmailTemplates
             ["Leave Request Accepted"] = "Leave Request Accepted",
             ["Leave Request Rejected"] = "Leave Request Rejected",
             ["Leave Request Canceled"] = "Leave Request Canceled",
-            ["New Leave Request Created"] = "New Leave Request Created"
+            ["New Leave Request Created"] = "New Leave Request Created",
+            ["Leave Request Accepted"] = "Leave Request Accepted by {0}",
+            ["Leave Request Rejected"] = "Leave Request Rejected by {0}",
+            ["Leave Request Canceled"] = "Leave Request Canceled by {0}",
+            ["New Leave Request Created"] = "New Leave Request Created by {0}"
         },
         ["pl-PL"] = new Dictionary<string, string>
         {
@@ -43,7 +47,11 @@ public static class EmailTemplates
             ["Leave Request Accepted"] = "Wniosek o urlop zaakceptowany",
             ["Leave Request Rejected"] = "Wniosek o urlop odrzucony",
             ["Leave Request Canceled"] = "Wniosek o urlop anulowany",
-            ["New Leave Request Created"] = "Nowy wniosek o urlop utworzony"
+            ["New Leave Request Created"] = "Nowy wniosek o urlop utworzony",
+            ["Leave Request Accepted"] = "Wniosek o urlop zaakceptowany przez {0}",
+            ["Leave Request Rejected"] = "Wniosek o urlop odrzucony przez {0}",
+            ["Leave Request Canceled"] = "Wniosek o urlop anulowany przez {0}",
+            ["New Leave Request Created"] = "Nowy wniosek o urlop utworzony przez {0}"
         }
     };
 
@@ -124,9 +132,18 @@ public static class EmailTemplates
         });
     }
 
-    public static string GetEmailSubject(string subjectKey, string? language = null)
+    public static string GetEmailSubject(string subjectKey, string? language = null, string? name = null)
     {
         language = NormalizeLanguage(language);
+
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            if (Translations[language].TryGetValue(subjectKey, out var translationWithName))
+            {
+                return string.Format(translationWithName, name);
+            }
+        }
+
         return Translations[language].TryGetValue(subjectKey, out var translation) ? translation : subjectKey;
     }
 
