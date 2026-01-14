@@ -23,7 +23,7 @@ public class CreateLeaveRequestService(
         LeaveRequestUserDto createdBy, LeaveRequestUserDto assignedTo,
         TimeSpan workingHours, DateTimeOffset createdDate,
         CancellationToken cancellationToken,
-        string? language = null)
+        string? language = null, string? baseUrl = null)
     {
         var streamEnumerable = readEventsRepository.ReadStreamAsync(leaveRequestId, cancellationToken).WithCancellation(cancellationToken);
         var enumerator = streamEnumerable.GetAsyncEnumerator();
@@ -75,6 +75,7 @@ public class CreateLeaveRequestService(
                             replyToEmail,
                             getUserRepository,
                             emailLanguage,
+                            baseUrl,
                             serviceLogger,
                             cancellationToken);
                     }
@@ -97,6 +98,7 @@ public class CreateLeaveRequestService(
         string? replyToEmail,
         IGetUserRepository getUserRepository,
         string? language,
+        string? baseUrl,
         ILogger<CreateLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
@@ -130,7 +132,7 @@ public class CreateLeaveRequestService(
             if (recipients.Count > 0)
             {
                 var subject = EmailTemplates.GetEmailSubject("New Leave Request Created", language, creatorName);
-                var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language);
+                var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language, baseUrl: baseUrl);
                 await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, replyToEmail, cancellationToken);
             }
         }

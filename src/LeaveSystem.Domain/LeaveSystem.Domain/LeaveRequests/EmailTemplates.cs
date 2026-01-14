@@ -30,7 +30,8 @@ public static class EmailTemplates
             ["Leave Request Accepted"] = "Leave Request Accepted by {0}",
             ["Leave Request Rejected"] = "Leave Request Rejected by {0}",
             ["Leave Request Canceled"] = "Leave Request Canceled by {0}",
-            ["New Leave Request Created"] = "New Leave Request Created by {0}"
+            ["New Leave Request Created"] = "New Leave Request Created by {0}",
+            ["View Leave Request Details"] = "View Leave Request Details"
         },
         ["pl-PL"] = new Dictionary<string, string>
         {
@@ -51,14 +52,21 @@ public static class EmailTemplates
             ["Leave Request Accepted"] = "Wniosek o urlop zaakceptowany przez {0}",
             ["Leave Request Rejected"] = "Wniosek o urlop odrzucony przez {0}",
             ["Leave Request Canceled"] = "Wniosek o urlop anulowany przez {0}",
-            ["New Leave Request Created"] = "Nowy wniosek o urlop utworzony przez {0}"
+            ["New Leave Request Created"] = "Nowy wniosek o urlop utworzony przez {0}",
+            ["View Leave Request Details"] = "Zobacz szczegóły wniosku"
         }
     };
 
-    public static string CreateLeaveRequestCreatedEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null)
+    public static string CreateLeaveRequestCreatedEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestCreated", language);
+        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl) 
+            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}" 
+            : string.Empty;
+        var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
+            ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
+            : string.Empty;
         return ReplacePlaceholders(template, new Dictionary<string, string>
         {
             ["LEAVE_REQUEST_ID"] = leaveRequest.Id.ToString(),
@@ -74,11 +82,13 @@ public static class EmailTemplates
                 ? GetRemarksRow(leaveRequest.Remarks.OrderByDescending(r => r.CreatedDate).First().Remarks, language)
                 : string.Empty,
             ["STATUS"] = leaveRequest.Status.ToString(),
-            ["CREATED_DATE"] = leaveRequest.CreatedDate.ToString("yyyy-MM-dd HH:mm")
+            ["CREATED_DATE"] = leaveRequest.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
+            ["LEAVE_REQUEST_LINK_URL"] = EscapeHtml(leaveRequestLinkUrl),
+            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText)
         });
     }
 
-    public static string CreateLeaveRequestDecisionEmail(LeaveRequest leaveRequest, string decision, string? decisionMakerName, string? leaveTypeName = null, string? language = null)
+    public static string CreateLeaveRequestDecisionEmail(LeaveRequest leaveRequest, string decision, string? decisionMakerName, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestDecision", language);
@@ -86,6 +96,12 @@ public static class EmailTemplates
         var translatedDecision = Translations[language].TryGetValue(decision, out var trans) ? trans : decision;
         var translatedDecisionLower = Translations[language].TryGetValue(decisionLower, out var transLower) ? transLower : decisionLower;
         var headerColor = decision == "Accepted" ? "#107c10" : "#d13438";
+        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl) 
+            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}" 
+            : string.Empty;
+        var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
+            ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
+            : string.Empty;
 
         return ReplacePlaceholders(template, new Dictionary<string, string>
         {
@@ -105,14 +121,22 @@ public static class EmailTemplates
                 ? GetRemarksRow(leaveRequest.Remarks.OrderByDescending(r => r.CreatedDate).First().Remarks, language)
                 : string.Empty,
             ["STATUS"] = leaveRequest.Status.ToString(),
-            ["DECISION_DATE"] = leaveRequest.LastModifiedDate.ToString("yyyy-MM-dd HH:mm")
+            ["DECISION_DATE"] = leaveRequest.LastModifiedDate.ToString("yyyy-MM-dd HH:mm"),
+            ["LEAVE_REQUEST_LINK_URL"] = EscapeHtml(leaveRequestLinkUrl),
+            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText)
         });
     }
 
-    public static string CreateLeaveRequestCanceledEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null)
+    public static string CreateLeaveRequestCanceledEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestCanceled", language);
+        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl) 
+            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}" 
+            : string.Empty;
+        var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
+            ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
+            : string.Empty;
         return ReplacePlaceholders(template, new Dictionary<string, string>
         {
             ["LEAVE_REQUEST_ID"] = leaveRequest.Id.ToString(),
@@ -128,7 +152,9 @@ public static class EmailTemplates
                 ? GetRemarksRow(leaveRequest.Remarks.OrderByDescending(r => r.CreatedDate).First().Remarks, language)
                 : string.Empty,
             ["STATUS"] = leaveRequest.Status.ToString(),
-            ["CANCELED_DATE"] = leaveRequest.LastModifiedDate.ToString("yyyy-MM-dd HH:mm")
+            ["CANCELED_DATE"] = leaveRequest.LastModifiedDate.ToString("yyyy-MM-dd HH:mm"),
+            ["LEAVE_REQUEST_LINK_URL"] = EscapeHtml(leaveRequestLinkUrl),
+            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText)
         });
     }
 

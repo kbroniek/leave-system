@@ -17,7 +17,7 @@ public class AcceptLeaveRequestService(
     IGetUserRepository? getUserRepository,
     ILogger<AcceptLeaveRequestService>? logger)
 {
-    public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null)
+    public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null, string? baseUrl = null)
     {
         var resultFindById = await readService.FindById<LeaveRequest>(leaveRequestId, cancellationToken);
         if (resultFindById.IsFailure)
@@ -59,6 +59,7 @@ public class AcceptLeaveRequestService(
                         emailService,
                         getUserRepository,
                         emailLanguage,
+                        baseUrl,
                         serviceLogger,
                         cancellationToken);
                 }
@@ -79,6 +80,7 @@ public class AcceptLeaveRequestService(
         IEmailService emailService,
         IGetUserRepository getUserRepository,
         string? language,
+        string? baseUrl,
         ILogger<AcceptLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
@@ -93,7 +95,7 @@ public class AcceptLeaveRequestService(
 
             var subject = EmailTemplates.GetEmailSubject("Leave Request Accepted", language, decisionMakerName);
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
-                leaveRequest, "Accepted", decisionMakerName, language: language);
+                leaveRequest, "Accepted", decisionMakerName, language: language, baseUrl: baseUrl);
             var recipient = new IEmailService.EmailRecipient(ownerResult.Value.Email!, ownerResult.Value.Name);
             await emailService.SendEmailAsync(recipient, subject, htmlContent, replyToEmail, cancellationToken);
         }

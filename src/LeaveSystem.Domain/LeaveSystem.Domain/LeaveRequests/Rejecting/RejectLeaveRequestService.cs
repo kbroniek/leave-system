@@ -15,7 +15,7 @@ public class RejectLeaveRequestService(
     IGetUserRepository? getUserRepository,
     ILogger<RejectLeaveRequestService>? logger)
 {
-    public async Task<Result<LeaveRequest, Error>> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null)
+    public async Task<Result<LeaveRequest, Error>> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null, string? baseUrl = null)
     {
         var resultFindById = await readService.FindById<LeaveRequest>(leaveRequestId, cancellationToken);
         if (!resultFindById.IsSuccess)
@@ -47,6 +47,7 @@ public class RejectLeaveRequestService(
                         emailService,
                         getUserRepository,
                         emailLanguage,
+                        baseUrl,
                         serviceLogger,
                         cancellationToken);
                 }
@@ -67,6 +68,7 @@ public class RejectLeaveRequestService(
         IEmailService emailService,
         IGetUserRepository getUserRepository,
         string? language,
+        string? baseUrl,
         ILogger<RejectLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
@@ -81,7 +83,7 @@ public class RejectLeaveRequestService(
 
             var subject = EmailTemplates.GetEmailSubject("Leave Request Rejected", language, decisionMakerName);
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
-                leaveRequest, "Rejected", decisionMakerName, language: language);
+                leaveRequest, "Rejected", decisionMakerName, language: language, baseUrl: baseUrl);
             var recipient = new IEmailService.EmailRecipient(ownerResult.Value.Email!, ownerResult.Value.Name);
             await emailService.SendEmailAsync(recipient, subject, htmlContent, replyToEmail, cancellationToken);
         }

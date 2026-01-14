@@ -17,7 +17,7 @@ public class CancelLeaveRequestService(
     IGetUserRepository? getUserRepository,
     ILogger<CancelLeaveRequestService>? logger)
 {
-    public async Task<Result<LeaveRequest, Error>> Cancel(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null)
+    public async Task<Result<LeaveRequest, Error>> Cancel(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null, string? baseUrl = null)
     {
         var resultFindById = await readService.FindById<LeaveRequest>(leaveRequestId, cancellationToken);
         if (!resultFindById.IsSuccess)
@@ -58,6 +58,7 @@ public class CancelLeaveRequestService(
                             replyToEmail,
                             getUserRepository,
                             emailLanguage,
+                            baseUrl,
                             serviceLogger,
                             cancellationToken);
                     }
@@ -80,6 +81,7 @@ public class CancelLeaveRequestService(
         string? replyToEmail,
         IGetUserRepository getUserRepository,
         string? language,
+        string? baseUrl,
         ILogger<CancelLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
@@ -106,7 +108,7 @@ public class CancelLeaveRequestService(
             if (recipients.Count > 0)
             {
                 var subject = EmailTemplates.GetEmailSubject("Leave Request Canceled", language, decisionMakerName);
-                var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language);
+                var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language, baseUrl: baseUrl);
                 await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, replyToEmail, cancellationToken);
             }
         }

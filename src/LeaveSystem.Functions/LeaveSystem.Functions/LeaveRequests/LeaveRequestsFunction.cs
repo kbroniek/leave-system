@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Configuration;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 public class LeaveRequestsFunction(
@@ -28,7 +29,8 @@ public class LeaveRequestsFunction(
     AcceptLeaveRequestService acceptLeaveRequestService,
     RejectLeaveRequestService rejectLeaveRequestService,
     CancelLeaveRequestService cancelLeaveRequestService,
-    EmployeeService employeeService)
+    EmployeeService employeeService,
+    IConfiguration configuration)
 {
     [Function(nameof(SearchLeaveRequests))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)}")]
@@ -86,6 +88,7 @@ public class LeaveRequestsFunction(
     {
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var language = req.GetLanguage();
+        var baseUrl = configuration["FrontendBaseUrl"] ?? "http://localhost:5173";
         var result = await createLeaveRequestService.CreateAsync(
             leaveRequestDto.LeaveRequestId,
             leaveRequestDto.DateFrom,
@@ -98,7 +101,8 @@ public class LeaveRequestsFunction(
             leaveRequestDto.WorkingHours,
             DateTimeOffset.Now,
             cancellationToken,
-            language);
+            language,
+            baseUrl);
         return result.Match<IActionResult>(
             leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
             error => error.ToObjectResult($"Error occurred while creating a leave request. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
@@ -118,6 +122,7 @@ public class LeaveRequestsFunction(
         }
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var language = req.GetLanguage();
+        var baseUrl = configuration["FrontendBaseUrl"] ?? "http://localhost:5173";
         var result = await createLeaveRequestService.CreateAsync(
             leaveRequestDto.LeaveRequestId,
             leaveRequestDto.DateFrom,
@@ -130,7 +135,8 @@ public class LeaveRequestsFunction(
             leaveRequestDto.WorkingHours,
             DateTimeOffset.Now,
             cancellationToken,
-            language);
+            language,
+            baseUrl);
         return result.Match<IActionResult>(
             leaveRequest => new CreatedResult($"leaverequest/{leaveRequestDto.LeaveRequestId}", Map(leaveRequest)),
             error => error.ToObjectResult($"An error occurred while creating a leave request on behalf of another user. LeaveRequestId = {leaveRequestDto.LeaveRequestId}."));
@@ -145,13 +151,15 @@ public class LeaveRequestsFunction(
     {
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var language = req.GetLanguage();
+        var baseUrl = configuration["FrontendBaseUrl"] ?? "http://localhost:5173";
         var result = await acceptLeaveRequestService.Accept(
             leaveRequestId,
             changeStatus.Remark,
             userModel,
             DateTimeOffset.Now,
             cancellationToken,
-            language
+            language,
+            baseUrl
         );
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
@@ -167,13 +175,15 @@ public class LeaveRequestsFunction(
     {
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var language = req.GetLanguage();
+        var baseUrl = configuration["FrontendBaseUrl"] ?? "http://localhost:5173";
         var result = await rejectLeaveRequestService.Reject(
             leaveRequestId,
             changeStatus.Remark,
             userModel,
             DateTimeOffset.Now,
             cancellationToken,
-            language
+            language,
+            baseUrl
         );
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
@@ -196,13 +206,15 @@ public class LeaveRequestsFunction(
         }
         var userModel = req.HttpContext.User.CreateModel().MapToLeaveRequestUser();
         var language = req.GetLanguage();
+        var baseUrl = configuration["FrontendBaseUrl"] ?? "http://localhost:5173";
         var result = await cancelLeaveRequestService.Cancel(
             leaveRequestId,
             changeStatus.Remark,
             userModel,
             DateTimeOffset.Now,
             cancellationToken,
-            language
+            language,
+            baseUrl
         );
         return result.Match<IActionResult>(
             leaveRequest => new OkObjectResult(Map(leaveRequest)),
