@@ -99,7 +99,7 @@ public class CreateLeaveRequestService(
     {
         try
         {
-            var recipientEmails = new List<string>();
+            var recipients = new List<IEmailService.EmailRecipient>();
 
             // Get DecisionMaker emails
             if (decisionMakerIds.Count > 0)
@@ -107,9 +107,9 @@ public class CreateLeaveRequestService(
                 var decisionMakersResult = await getUserRepository.GetUsers([.. decisionMakerIds], cancellationToken);
                 if (decisionMakersResult.IsSuccess)
                 {
-                    recipientEmails.AddRange(decisionMakersResult.Value
+                    recipients.AddRange(decisionMakersResult.Value
                         .Where(u => !string.IsNullOrWhiteSpace(u.Email))
-                        .Select(u => u.Email!));
+                        .Select(u => new IEmailService.EmailRecipient(u.Email!, u.Name)));
                 }
             }
 
@@ -119,16 +119,16 @@ public class CreateLeaveRequestService(
                 var assignedUserResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
                 if (assignedUserResult.IsSuccess && !string.IsNullOrWhiteSpace(assignedUserResult.Value.Email))
                 {
-                    recipientEmails.Add(assignedUserResult.Value.Email!);
+                    recipients.Add(new IEmailService.EmailRecipient(assignedUserResult.Value.Email!, assignedUserResult.Value.Name));
                 }
             }
 
             // Send emails
-            if (recipientEmails.Count > 0)
+            if (recipients.Count > 0)
             {
                 var subject = "New Leave Request Created";
                 var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language);
-                await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, creatorName, cancellationToken);
+                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, creatorName, cancellationToken);
             }
         }
         catch (Exception ex)

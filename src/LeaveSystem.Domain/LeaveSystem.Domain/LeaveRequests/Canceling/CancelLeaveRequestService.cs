@@ -94,17 +94,17 @@ public class CancelLeaveRequestService(
                 return;
             }
 
-            var recipientEmails = decisionMakersResult.Value
+            var recipients = decisionMakersResult.Value
                 .Where(u => !string.IsNullOrWhiteSpace(u.Email))
-                .Select(u => u.Email!)
+                .Select(u => new IEmailService.EmailRecipient(u.Email!, u.Name))
                 .ToList();
 
             // Send emails
-            if (recipientEmails.Count > 0)
+            if (recipients.Count > 0)
             {
                 var subject = "Leave Request Canceled";
                 var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language);
-                await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, decisionMakerName, cancellationToken);
+                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, decisionMakerName, cancellationToken);
             }
         }
         catch (Exception ex)

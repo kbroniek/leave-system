@@ -44,9 +44,9 @@ internal class EmailService : IEmailService
         }
     }
 
-    public async Task SendEmailAsync(string to, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
+    public async Task SendEmailAsync(IEmailService.EmailRecipient recipient, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(to))
+        if (string.IsNullOrWhiteSpace(recipient.Email))
         {
             _logger.LogWarning("Cannot send email: recipient email address is empty");
             return;
@@ -59,44 +59,50 @@ internal class EmailService : IEmailService
                 Html = htmlContent
             };
 
-            // Format sender address as "Full Name <sender@domain.com>" if name is provided
-            var senderAddress = FormatSenderAddress(senderFullName);
+            // Azure Communication Services Email API only accepts plain email address in senderAddress
+            // Display names are not supported in the senderAddress field
+            var emailAddress = new EmailAddress(recipient.Email, recipient.Name);
+            var emailMessage = new EmailMessage(_senderAddress, emailAddress, emailContent);
 
-            var emailMessage = new EmailMessage(senderAddress, to, emailContent);
-
-            _logger.LogInformation("Sending email to {To} with subject {Subject} from {Sender}", to, subject, senderAddress);
+            _logger.LogInformation("Sending email to {To} with subject {Subject} from {Sender}", recipient.Email, subject, _senderAddress);
             var emailSendOperation = await _emailClient.SendAsync(WaitUntil.Started, emailMessage, cancellationToken);
-            _logger.LogInformation("Email sent successfully to {To}. Operation ID: {OperationId}", to, emailSendOperation.Id);
+            _logger.LogInformation("Email sent successfully to {To}. Operation ID: {OperationId}", recipient.Email, emailSendOperation.Id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while sending email to {To}", to);
-            // Fire-and-forget: log error but don't throw
+            _logger.LogError(ex, "Error occurred while sending email to {To}", recipient.Email);
         }
     }
 
-    public async Task SendBulkEmailAsync(IEnumerable<string> recipients, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
+    public async Task SendBulkEmailAsync(IEnumerable<IEmailService.EmailRecipient> recipients, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
     {
-        var recipientList = recipients?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList();
+        var recipientList = recipients?.Where(r => !string.IsNullOrWhiteSpace(r.Email)).ToList();
         if (recipientList == null || recipientList.Count == 0)
         {
             _logger.LogWarning("Cannot send bulk email: no valid recipients provided");
             return;
         }
 
-        var tasks = recipientList.Select(recipient =>
-            SendEmailAsync(recipient, subject, htmlContent, senderFullName, cancellationToken)
-        );
-
-        await Task.WhenAll(tasks);
-    }
-
-    private string FormatSenderAddress(string? fullName)
-    {
-        if (!string.IsNullOrWhiteSpace(fullName))
+        try
         {
-            return $"{fullName.Trim()} <{_senderAddress}>";
+            var emailContent = new EmailContent(subject)
+            {
+                Html = htmlContent
+            };
+
+            // Azure Communication Services Email API only accepts plain email address in senderAddress
+            // Display names are not supported in the senderAddress field
+            var emailRecipients = new EmailRecipients([.. recipientList.Select(recipient => new EmailAddress(recipient.Email, recipient.Name))]);
+            var emailMessage = new EmailMessage(_senderAddress, emailRecipients, emailContent);
+
+            var recipientsString = string.Join(", ", recipientList.Select(r => r.Email));
+            _logger.LogInformation("Sending email to {To} with subject {Subject} from {Sender}", recipientsString, subject, _senderAddress);
+            var emailSendOperation = await _emailClient.SendAsync(WaitUntil.Started, emailMessage, cancellationToken);
+            _logger.LogInformation("Email sent successfully to {To}. Operation ID: {OperationId}", recipientsString, emailSendOperation.Id);
         }
-        return _senderAddress;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while sending email to {To}", string.Join(", ", recipientList.Select(r => r.Email)));
+        }
     }
 }
