@@ -34,7 +34,9 @@ public class RejectLeaveRequestService(
         {
             var emailLanguage = language;
             var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email;
-            var replyToEmail = acceptedBy.Email;
+            var replyToEmail = !string.IsNullOrWhiteSpace(acceptedBy.Email)
+                ? new IEmailService.EmailAddress(acceptedBy.Email, acceptedBy.Name)
+                : (IEmailService.EmailAddress?)null;
             var serviceLogger = logger;
             _ = Task.Run(async () =>
             {
@@ -64,7 +66,7 @@ public class RejectLeaveRequestService(
     private static async Task SendLeaveRequestRejectedEmailAsync(
         LeaveRequest leaveRequest,
         string decisionMakerName,
-        string? replyToEmail,
+        IEmailService.EmailAddress? replyToEmail,
         IEmailService emailService,
         IGetUserRepository getUserRepository,
         string? language,
@@ -84,7 +86,7 @@ public class RejectLeaveRequestService(
             var subject = EmailTemplates.GetEmailSubject("Leave Request Rejected", language, decisionMakerName);
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
                 leaveRequest, "Rejected", decisionMakerName, language: language, baseUrl: baseUrl);
-            var recipient = new IEmailService.EmailRecipient(ownerResult.Value.Email!, ownerResult.Value.Name);
+            var recipient = new IEmailService.EmailAddress(ownerResult.Value.Email!, ownerResult.Value.Name);
             await emailService.SendEmailAsync(recipient, subject, htmlContent, replyToEmail, cancellationToken);
         }
         catch (Exception ex)

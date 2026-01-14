@@ -61,8 +61,8 @@ public static class EmailTemplates
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestCreated", language);
-        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl) 
-            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}" 
+        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl)
+            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}"
             : string.Empty;
         var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
             ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
@@ -96,8 +96,8 @@ public static class EmailTemplates
         var translatedDecision = Translations[language].TryGetValue(decision, out var trans) ? trans : decision;
         var translatedDecisionLower = Translations[language].TryGetValue(decisionLower, out var transLower) ? transLower : decisionLower;
         var headerColor = decision == "Accepted" ? "#107c10" : "#d13438";
-        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl) 
-            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}" 
+        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl)
+            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}"
             : string.Empty;
         var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
             ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
@@ -131,8 +131,8 @@ public static class EmailTemplates
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestCanceled", language);
-        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl) 
-            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}" 
+        var leaveRequestLinkUrl = !string.IsNullOrWhiteSpace(baseUrl)
+            ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}"
             : string.Empty;
         var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
             ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")

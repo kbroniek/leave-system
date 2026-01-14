@@ -40,7 +40,9 @@ public class CancelLeaveRequestService(
         {
             var emailLanguage = language;
             var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email;
-            var replyToEmail = acceptedBy.Email;
+            var replyToEmail = !string.IsNullOrWhiteSpace(acceptedBy.Email)
+                ? new IEmailService.EmailAddress(acceptedBy.Email, acceptedBy.Name)
+                : (IEmailService.EmailAddress?)null;
             var serviceLogger = logger;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
@@ -78,7 +80,7 @@ public class CancelLeaveRequestService(
         IEmailService emailService,
         IReadOnlyCollection<string> decisionMakerIds,
         string decisionMakerName,
-        string? replyToEmail,
+        IEmailService.EmailAddress? replyToEmail,
         IGetUserRepository getUserRepository,
         string? language,
         string? baseUrl,
@@ -101,7 +103,7 @@ public class CancelLeaveRequestService(
 
             var recipients = decisionMakersResult.Value
                 .Where(u => !string.IsNullOrWhiteSpace(u.Email))
-                .Select(u => new IEmailService.EmailRecipient(u.Email!, u.Name))
+                .Select(u => new IEmailService.EmailAddress(u.Email!, u.Name))
                 .ToList();
 
             // Send emails

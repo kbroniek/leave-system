@@ -57,7 +57,9 @@ public class CreateLeaveRequestService(
         {
             var emailLanguage = language;
             var creatorName = createdBy.Name ?? createdBy.Email;
-            var replyToEmail = createdBy.Email;
+            var replyToEmail = !string.IsNullOrWhiteSpace(createdBy.Email)
+                ? new IEmailService.EmailAddress(createdBy.Email, createdBy.Name)
+                : (IEmailService.EmailAddress?)null;
             var serviceLogger = logger;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
@@ -95,7 +97,7 @@ public class CreateLeaveRequestService(
         IEmailService emailService,
         IReadOnlyCollection<string> decisionMakerIds,
         string creatorName,
-        string? replyToEmail,
+        IEmailService.EmailAddress? replyToEmail,
         IGetUserRepository getUserRepository,
         string? language,
         string? baseUrl,
@@ -104,7 +106,7 @@ public class CreateLeaveRequestService(
     {
         try
         {
-            var recipients = new List<IEmailService.EmailRecipient>();
+            var recipients = new List<IEmailService.EmailAddress>();
 
             // Get DecisionMaker emails
             if (decisionMakerIds.Count > 0)
@@ -114,7 +116,7 @@ public class CreateLeaveRequestService(
                 {
                     recipients.AddRange(decisionMakersResult.Value
                         .Where(u => !string.IsNullOrWhiteSpace(u.Email))
-                        .Select(u => new IEmailService.EmailRecipient(u.Email!, u.Name)));
+                        .Select(u => new IEmailService.EmailAddress(u.Email!, u.Name)));
                 }
             }
 
@@ -124,7 +126,7 @@ public class CreateLeaveRequestService(
                 var assignedUserResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
                 if (assignedUserResult.IsSuccess && !string.IsNullOrWhiteSpace(assignedUserResult.Value.Email))
                 {
-                    recipients.Add(new IEmailService.EmailRecipient(assignedUserResult.Value.Email!, assignedUserResult.Value.Name));
+                    recipients.Add(new IEmailService.EmailAddress(assignedUserResult.Value.Email!, assignedUserResult.Value.Name));
                 }
             }
 

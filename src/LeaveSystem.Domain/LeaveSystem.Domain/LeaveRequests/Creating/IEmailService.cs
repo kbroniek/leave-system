@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 public interface IEmailService
 {
-    Task SendEmailAsync(EmailRecipient recipient, string subject, string htmlContent, string? replyToEmail = null, CancellationToken cancellationToken = default);
-    Task SendBulkEmailAsync(IEnumerable<EmailRecipient> recipients, string subject, string htmlContent, string? replyToEmail = null, CancellationToken cancellationToken = default);
+    Task SendEmailAsync(EmailAddress recipient, string subject, string htmlContent, EmailAddress? replyToEmail = null, CancellationToken cancellationToken = default);
+    Task SendBulkEmailAsync(IEnumerable<EmailAddress> recipients, string subject, string htmlContent, EmailAddress? replyToEmail = null, CancellationToken cancellationToken = default);
 
-    public record EmailRecipient(string Email, string? Name);
+    public record struct EmailAddress(string Email, string? Name);
 }
