@@ -31,16 +31,16 @@ public class EmployeeService(IRolesRepository getRolesRepository, IGetUserReposi
             return new Error($"Employee account is disabled. Id={id}", System.Net.HttpStatusCode.Forbidden, ErrorCodes.EMPLOYEE_ACCOUNT_DISABLED);
 
         }
-        return new Employee(userResult.Value.Id, userResult.Value.Name);
+        return new Employee(userResult.Value.Id, userResult.Value.Name, userResult.Value.Email);
     }
-    public record Employee(string Id, string? Name);
+    public record Employee(string Id, string? Name, string? Email);
 }
 
 public interface IGetUserRepository
 {
     Task<Result<User, Error>> GetUser(string id, CancellationToken cancellationToken);
     Task<Result<IReadOnlyCollection<User>, Error>> GetUsers(string[] ids, CancellationToken cancellationToken);
-    public record User(string Id, string? Name, string? FirstName, string? LastName, string? JobTitle, bool? AccountEnabled);
+    public record User(string Id, string? Name, string? FirstName, string? LastName, string? JobTitle, bool? AccountEnabled, string? Email);
 }
 
 public interface IRolesRepository

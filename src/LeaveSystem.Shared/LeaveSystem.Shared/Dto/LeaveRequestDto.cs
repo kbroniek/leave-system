@@ -2,7 +2,7 @@ namespace LeaveSystem.Shared.Dto;
 using System;
 using LeaveSystem.Shared.LeaveRequests;
 
-public record LeaveRequestUserDto(string Id, string? Name);
+public record LeaveRequestUserDto(string Id, string? Name, string? Email);
 
 public record GetLeaveRequestDto(Guid LeaveRequestId, DateOnly DateFrom, DateOnly DateTo, TimeSpan Duration, Guid LeaveTypeId, LeaveRequestStatus Status, LeaveRequestUserDto AssignedTo, LeaveRequestUserDto LastModifiedBy, LeaveRequestUserDto CreatedBy, TimeSpan WorkingHours, DateTimeOffset CreatedDate, DateTimeOffset LastModifiedDate, IEnumerable<GetLeaveRequestDto.RemarksDto> Remarks)
 {

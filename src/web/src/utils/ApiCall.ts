@@ -14,6 +14,7 @@ import {
   formatErrorMessage,
 } from "./errorHandling";
 import type { TFunction } from "i18next";
+import i18n from "i18next";
 
 // Enhanced API call functions that support error code translation
 export function callApiGet<T>(
@@ -60,6 +61,10 @@ export async function callApi(
   const bearer = `Bearer ${accessToken}`;
 
   headers.append("X-Authorization", bearer);
+  // Add Accept-Language header based on current i18n language
+  const currentLanguage = i18n.language || "pl";
+  const languageCode = currentLanguage === "pl" ? "pl-PL" : "en-US";
+  headers.append("Accept-Language", languageCode);
   if (body) {
     headers.append("Content-Type", "application/json");
   }
