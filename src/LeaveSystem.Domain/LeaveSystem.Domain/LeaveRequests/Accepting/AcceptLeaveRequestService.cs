@@ -44,8 +44,8 @@ public class AcceptLeaveRequestService(
         // Send email asynchronously (fire-and-forget) after successful acceptance
         if (writeResult.IsSuccess && emailService != null && getUserRepository != null)
         {
-            // Capture language before async task
             var emailLanguage = language;
+            var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email;
             var serviceLogger = logger;
             _ = Task.Run(async () =>
             {
@@ -53,7 +53,7 @@ public class AcceptLeaveRequestService(
                 {
                     await SendLeaveRequestAcceptedEmailAsync(
                         writeResult.Value,
-                        acceptedBy.Name ?? acceptedBy.Id,
+                        decisionMakerName,
                         emailService,
                         getUserRepository,
                         emailLanguage,
@@ -72,7 +72,7 @@ public class AcceptLeaveRequestService(
 
     private static async Task SendLeaveRequestAcceptedEmailAsync(
         LeaveRequest leaveRequest,
-        string decisionMakerName,
+        string? decisionMakerName,
         IEmailService emailService,
         IGetUserRepository getUserRepository,
         string? language,
@@ -91,7 +91,7 @@ public class AcceptLeaveRequestService(
             var subject = "Leave Request Accepted";
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
                 leaveRequest, "Accepted", decisionMakerName, language: language);
-            await emailService.SendEmailAsync(ownerResult.Value.Email!, subject, htmlContent, cancellationToken);
+            await emailService.SendEmailAsync(ownerResult.Value.Email!, subject, htmlContent, decisionMakerName, cancellationToken);
         }
         catch (Exception ex)
         {

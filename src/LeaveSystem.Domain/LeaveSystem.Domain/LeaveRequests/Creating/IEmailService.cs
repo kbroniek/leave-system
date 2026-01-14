@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 public interface IEmailService
 {
-    Task SendEmailAsync(string to, string subject, string htmlContent, CancellationToken cancellationToken = default);
-    Task SendBulkEmailAsync(IEnumerable<string> recipients, string subject, string htmlContent, CancellationToken cancellationToken = default);
+    Task SendEmailAsync(string to, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default);
+    Task SendBulkEmailAsync(IEnumerable<string> recipients, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default);
 }

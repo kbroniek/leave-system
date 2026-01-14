@@ -31,9 +31,9 @@ public class EmployeeService(IRolesRepository getRolesRepository, IGetUserReposi
             return new Error($"Employee account is disabled. Id={id}", System.Net.HttpStatusCode.Forbidden, ErrorCodes.EMPLOYEE_ACCOUNT_DISABLED);
 
         }
-        return new Employee(userResult.Value.Id, userResult.Value.Name);
+        return new Employee(userResult.Value.Id, userResult.Value.Name, userResult.Value.Email);
     }
-    public record Employee(string Id, string? Name);
+    public record Employee(string Id, string? Name, string? Email);
 }
 
 public interface IGetUserRepository

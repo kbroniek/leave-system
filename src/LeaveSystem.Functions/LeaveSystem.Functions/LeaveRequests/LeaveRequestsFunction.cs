@@ -126,7 +126,7 @@ public class LeaveRequestsFunction(
             leaveRequestDto.LeaveTypeId,
             leaveRequestDto.Remark,
             userModel,
-            new LeaveRequestUserDto(employeeResult.Value.Id, employeeResult.Value.Name),
+            new LeaveRequestUserDto(employeeResult.Value.Id, employeeResult.Value.Name, employeeResult.Value.Email),
             leaveRequestDto.WorkingHours,
             DateTimeOffset.Now,
             cancellationToken,

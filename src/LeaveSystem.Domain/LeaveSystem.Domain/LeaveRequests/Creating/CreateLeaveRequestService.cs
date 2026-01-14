@@ -55,8 +55,8 @@ public class CreateLeaveRequestService(
         // Send emails asynchronously (fire-and-forget) after successful creation
         if (writeResult.IsSuccess && emailService != null && decisionMakerRepository != null && getUserRepository != null)
         {
-            // Capture language before async task
             var emailLanguage = language;
+            var creatorName = createdBy.Name ?? createdBy.Email;
             var serviceLogger = logger;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
@@ -70,6 +70,7 @@ public class CreateLeaveRequestService(
                             writeResult.Value,
                             emailService,
                             decisionMakerIdsResult.Value,
+                            creatorName,
                             getUserRepository,
                             emailLanguage,
                             serviceLogger,
@@ -90,6 +91,7 @@ public class CreateLeaveRequestService(
         LeaveRequest leaveRequest,
         IEmailService emailService,
         IReadOnlyCollection<string> decisionMakerIds,
+        string creatorName,
         IGetUserRepository getUserRepository,
         string? language,
         ILogger<CreateLeaveRequestService>? logger,
@@ -126,7 +128,7 @@ public class CreateLeaveRequestService(
             {
                 var subject = "New Leave Request Created";
                 var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language);
-                await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, cancellationToken);
+                await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, creatorName, cancellationToken);
             }
         }
         catch (Exception ex)

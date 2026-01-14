@@ -44,7 +44,7 @@ internal class EmailService : IEmailService
         }
     }
 
-    public async Task SendEmailAsync(string to, string subject, string htmlContent, CancellationToken cancellationToken = default)
+    public async Task SendEmailAsync(string to, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(to))
         {
@@ -59,9 +59,12 @@ internal class EmailService : IEmailService
                 Html = htmlContent
             };
 
-            var emailMessage = new EmailMessage(_senderAddress, to, emailContent);
+            // Format sender address as "Full Name <sender@domain.com>" if name is provided
+            var senderAddress = FormatSenderAddress(senderFullName);
 
-            _logger.LogInformation("Sending email to {To} with subject {Subject}", to, subject);
+            var emailMessage = new EmailMessage(senderAddress, to, emailContent);
+
+            _logger.LogInformation("Sending email to {To} with subject {Subject} from {Sender}", to, subject, senderAddress);
             var emailSendOperation = await _emailClient.SendAsync(WaitUntil.Started, emailMessage, cancellationToken);
             _logger.LogInformation("Email sent successfully to {To}. Operation ID: {OperationId}", to, emailSendOperation.Id);
         }
@@ -72,7 +75,7 @@ internal class EmailService : IEmailService
         }
     }
 
-    public async Task SendBulkEmailAsync(IEnumerable<string> recipients, string subject, string htmlContent, CancellationToken cancellationToken = default)
+    public async Task SendBulkEmailAsync(IEnumerable<string> recipients, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
     {
         var recipientList = recipients?.Where(r => !string.IsNullOrWhiteSpace(r)).ToList();
         if (recipientList == null || recipientList.Count == 0)
@@ -82,9 +85,18 @@ internal class EmailService : IEmailService
         }
 
         var tasks = recipientList.Select(recipient =>
-            SendEmailAsync(recipient, subject, htmlContent, cancellationToken)
+            SendEmailAsync(recipient, subject, htmlContent, senderFullName, cancellationToken)
         );
 
         await Task.WhenAll(tasks);
+    }
+
+    private string FormatSenderAddress(string? fullName)
+    {
+        if (!string.IsNullOrWhiteSpace(fullName))
+        {
+            return $"{fullName.Trim()} <{_senderAddress}>";
+        }
+        return _senderAddress;
     }
 }

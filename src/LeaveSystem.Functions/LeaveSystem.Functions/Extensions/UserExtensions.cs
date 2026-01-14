@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 internal static class UserExtensions
 {
     public static LeaveRequestUserDto MapToLeaveRequestUser(this FederatedUser user) =>
-        new(user.Id, user.Name ?? user.Email);
+        new(user.Id, user.Name ?? user.Email, user.Email);
 
     public static string GetUserId(this HttpContext context) => context.User.GetUserId();
     public static string GetUserId(this ClaimsPrincipal user) =>

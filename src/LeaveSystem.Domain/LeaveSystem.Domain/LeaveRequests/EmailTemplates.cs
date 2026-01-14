@@ -62,7 +62,7 @@ public static class EmailTemplates
         });
     }
 
-    public static string CreateLeaveRequestDecisionEmail(LeaveRequest leaveRequest, string decision, string decisionMakerName, string? leaveTypeName = null, string? language = null)
+    public static string CreateLeaveRequestDecisionEmail(LeaveRequest leaveRequest, string decision, string? decisionMakerName, string? leaveTypeName = null, string? language = null)
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestDecision", language);

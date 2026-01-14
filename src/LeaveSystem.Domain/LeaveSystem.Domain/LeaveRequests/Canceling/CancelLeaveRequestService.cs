@@ -38,8 +38,8 @@ public class CancelLeaveRequestService(
         // Send emails asynchronously (fire-and-forget) after successful cancellation
         if (writeResult.IsSuccess && emailService != null && decisionMakerRepository != null && getUserRepository != null)
         {
-            // Capture language before async task
             var emailLanguage = language;
+            var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email;
             var serviceLogger = logger;
             // Get DecisionMaker user IDs
             var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
@@ -53,6 +53,7 @@ public class CancelLeaveRequestService(
                             writeResult.Value,
                             emailService,
                             decisionMakerIdsResult.Value,
+                            decisionMakerName,
                             getUserRepository,
                             emailLanguage,
                             serviceLogger,
@@ -73,6 +74,7 @@ public class CancelLeaveRequestService(
         LeaveRequest leaveRequest,
         IEmailService emailService,
         IReadOnlyCollection<string> decisionMakerIds,
+        string decisionMakerName,
         IGetUserRepository getUserRepository,
         string? language,
         ILogger<CancelLeaveRequestService>? logger,
@@ -102,7 +104,7 @@ public class CancelLeaveRequestService(
             {
                 var subject = "Leave Request Canceled";
                 var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language);
-                await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, cancellationToken);
+                await emailService.SendBulkEmailAsync(recipientEmails, subject, htmlContent, decisionMakerName, cancellationToken);
             }
         }
         catch (Exception ex)
