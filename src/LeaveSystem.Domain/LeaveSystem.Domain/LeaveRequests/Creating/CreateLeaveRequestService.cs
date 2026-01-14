@@ -128,7 +128,7 @@ public class CreateLeaveRequestService(
             {
                 var subject = EmailTemplates.GetEmailSubject("New Leave Request Created", language, creatorName);
                 var htmlContent = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language);
-                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, creatorName, cancellationToken);
+                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, cancellationToken);
             }
         }
         catch (Exception ex)

@@ -44,10 +44,10 @@ internal class EmailService : IEmailService
         }
     }
 
-    public async Task SendEmailAsync(IEmailService.EmailRecipient recipient, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default) =>
-        await SendBulkEmailAsync([recipient], subject, htmlContent, senderFullName, cancellationToken);
+    public async Task SendEmailAsync(IEmailService.EmailRecipient recipient, string subject, string htmlContent, CancellationToken cancellationToken = default) =>
+        await SendBulkEmailAsync([recipient], subject, htmlContent, cancellationToken);
 
-    public async Task SendBulkEmailAsync(IEnumerable<IEmailService.EmailRecipient> recipients, string subject, string htmlContent, string? senderFullName = null, CancellationToken cancellationToken = default)
+    public async Task SendBulkEmailAsync(IEnumerable<IEmailService.EmailRecipient> recipients, string subject, string htmlContent, CancellationToken cancellationToken = default)
     {
         var recipientList = recipients?.Where(r => !string.IsNullOrWhiteSpace(r.Email)).ToList();
         if (recipientList == null || recipientList.Count == 0)

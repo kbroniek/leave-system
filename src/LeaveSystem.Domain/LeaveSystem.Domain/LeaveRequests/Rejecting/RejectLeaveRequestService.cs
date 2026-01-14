@@ -80,7 +80,7 @@ public class RejectLeaveRequestService(
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
                 leaveRequest, "Rejected", decisionMakerName, language: language);
             var recipient = new IEmailService.EmailRecipient(ownerResult.Value.Email!, ownerResult.Value.Name);
-            await emailService.SendEmailAsync(recipient, subject, htmlContent, decisionMakerName, cancellationToken);
+            await emailService.SendEmailAsync(recipient, subject, htmlContent, cancellationToken);
         }
         catch (Exception ex)
         {
