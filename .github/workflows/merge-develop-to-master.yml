@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
 
     steps:
       - name: Checkout repository
@@ -38,3 +39,15 @@ jobs:
 
       - name: Push changes to master
         run: git push origin master
+
+      - name: Trigger Azure Static Web Apps workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'azure-static-web-apps-icy-river-08fed3e03.yml',
+              ref: 'master'
+            });
