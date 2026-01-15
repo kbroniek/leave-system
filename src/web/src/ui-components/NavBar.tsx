@@ -53,7 +53,7 @@ function NavBar() {
     {
       title: t("Manage limits"),
       link: "/limits",
-      roles: ["GlobalAdmin"] as RoleType[],
+      roles: ["LeaveLimitAdmin", "GlobalAdmin"] as RoleType[],
       isDialog: false,
     },
   ];
