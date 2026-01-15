@@ -1,0 +1,40 @@
+name: Merge Develop to Master on Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  merge-develop-to-master:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch all branches
+        run: git fetch origin
+
+      - name: Checkout master branch
+        run: git checkout master
+
+      - name: Pull latest master
+        run: git pull origin master
+
+      - name: Merge develop into master
+        run: |
+          git merge origin/develop --ff-only
+
+      - name: Push changes to master
+        run: git push origin master
