@@ -14,7 +14,7 @@ using Microsoft.Azure.Functions.Worker;
 public class EmployeesFunction(IGetUserRepository getUserRepository)
 {
 
-    [Function("GetEmployee")]
+    [Function(nameof(GetEmployees))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.DecisionMaker)},{nameof(RoleType.HumanResource)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public async Task<IActionResult> GetEmployees([HttpTrigger(
         AuthorizationLevel.Anonymous,

@@ -21,4 +21,13 @@
     <ProjectReference Include="..\..\LeaveSystem.Shared\LeaveSystem.Shared\LeaveSystem.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="LeaveRequests\Templates\en-US\*.html" />
+    <EmbeddedResource Include="LeaveRequests\Templates\pl-PL\*.html" />
+  </ItemGroup>
+  
+  <PropertyGroup>
+    <RootNamespace>LeaveSystem.Domain</RootNamespace>
+  </PropertyGroup>
+
 </Project>

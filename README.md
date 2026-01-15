@@ -21,6 +21,10 @@ Database is CosmosDB.
 
 Check this [Readme](https://github.com/kbroniek/leave-system-iac).
 
+## Documentation
+
+For detailed documentation on features and components, see the [docs](./docs/) directory.
+
 ## Troubleshooting
 
 If you have the error when you deploy PR in to the Azure:

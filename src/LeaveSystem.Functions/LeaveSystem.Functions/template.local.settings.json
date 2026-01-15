@@ -16,7 +16,10 @@
     "ManageAzureUsers:TenantId": "{tenant-id}",
     "ManageAzureUsers:ClientId": "{client-id}",
     "ManageAzureUsers:Secret": "{secret}",
-    "ManageAzureUsers:Scopes:0": "https://graph.microsoft.com/.default"
+    "ManageAzureUsers:Scopes:0": "https://graph.microsoft.com/.default",
+    "CommunicationServicesConnectionString": "{acs-connection-string}",
+    "EmailSenderAddress": "DoNotReply@00000000-0000-0000-0000-000000000000.azurecomm.net",
+    "FrontendBaseUrl": "http://localhost:5173"
   },
   "Host": {
     "CORS": "http://localhost:5173"
