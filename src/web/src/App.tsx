@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
 import Grid from "@mui/material/Grid";
@@ -11,6 +11,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useTranslation } from "react-i18next";
 
 // Lazy load routes for code splitting
 const Home = lazy(() =>
@@ -73,6 +74,12 @@ export function App({ pca }: Readonly<AppProps>) {
   const navigate = useNavigate();
   const navigationClient = new CustomNavigationClient(navigate);
   pca.setNavigationClient(navigationClient);
+  const { t } = useTranslation();
+
+  // Set document title using translation
+  useEffect(() => {
+    document.title = t("Leave System");
+  }, [t]);
 
   return (
     <QueryClientProvider client={queryClient}>
