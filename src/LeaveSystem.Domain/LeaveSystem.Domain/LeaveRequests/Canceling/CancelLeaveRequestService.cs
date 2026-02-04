@@ -111,7 +111,7 @@ public class CancelLeaveRequestService(
             {
                 var subject = EmailTemplates.GetEmailSubject("Leave Request Canceled", language, decisionMakerName);
                 var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language, baseUrl: baseUrl);
-                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, replyToEmail, cancellationToken);
+                await emailService.SendBulkEmailAsync(recipients, subject, htmlContent, replyToEmail, attachments: null, cancellationToken);
             }
         }
         catch (Exception ex)

@@ -99,7 +99,7 @@ public class AcceptLeaveRequestService(
             var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
                 leaveRequest, "Accepted", decisionMakerName, language: language, baseUrl: baseUrl);
             var recipient = new IEmailService.EmailAddress(ownerResult.Value.Email!, ownerResult.Value.Name);
-            await emailService.SendEmailAsync(recipient, subject, htmlContent, replyToEmail, cancellationToken);
+            await emailService.SendEmailAsync(recipient, subject, htmlContent, replyToEmail, attachments: null, cancellationToken);
         }
         catch (Exception ex)
         {
