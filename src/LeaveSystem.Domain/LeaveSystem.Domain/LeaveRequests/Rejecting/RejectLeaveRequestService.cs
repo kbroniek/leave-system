@@ -84,10 +84,35 @@ public class RejectLeaveRequestService(
             }
 
             var subject = EmailTemplates.GetEmailSubject("Leave Request Rejected", language, decisionMakerName);
-            var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
-                leaveRequest, "Rejected", decisionMakerName, language: language, baseUrl: baseUrl);
             var recipient = new IEmailService.EmailAddress(ownerResult.Value.Email!, ownerResult.Value.Name);
-            await emailService.SendEmailAsync(recipient, subject, htmlContent, replyToEmail, attachments: null, cancellationToken);
+
+            // Check if the assigned user originally received a calendar event (assignedTo != createdBy)
+            // If so, include cancellation .ics attachment
+            var includeCalendarRemoval = leaveRequest.AssignedTo.Id != leaveRequest.CreatedBy.Id;
+            IEnumerable<IEmailService.EmailAttachment>? attachments = null;
+
+            if (includeCalendarRemoval)
+            {
+                try
+                {
+                    // Generate cancellation .ics file
+                    var icsContent = CalendarEventGenerator.GenerateCancellationIcsFile(leaveRequest, leaveTypeName: null, language: language);
+                    var calendarAttachment = new IEmailService.EmailAttachment(
+                        $"leave-request-{leaveRequest.Id}-cancellation.ics",
+                        "text/calendar",
+                        icsContent);
+                    attachments = [calendarAttachment];
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail - send email without attachment
+                    logger?.LogWarning(ex, "Failed to generate cancellation calendar attachment for rejected leave request {LeaveRequestId}. Sending email without attachment.", leaveRequest.Id);
+                }
+            }
+
+            var htmlContent = EmailTemplates.CreateLeaveRequestDecisionEmail(
+                leaveRequest, "Rejected", decisionMakerName, language: language, baseUrl: baseUrl, includeCalendarRemovalNote: includeCalendarRemoval);
+            await emailService.SendEmailAsync(recipient, subject, htmlContent, replyToEmail, attachments, cancellationToken);
         }
         catch (Exception ex)
         {

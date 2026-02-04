@@ -78,6 +78,70 @@ public static class CalendarEventGenerator
         return Encoding.UTF8.GetBytes(icsContent.ToString());
     }
 
+    /// <summary>
+    /// Generates an RFC 5545 compliant cancellation iCalendar (.ics) file content for a leave request.
+    /// This is used to remove or cancel an existing calendar event.
+    /// </summary>
+    /// <param name="leaveRequest">The leave request to generate cancellation event for.</param>
+    /// <param name="leaveTypeName">Optional leave type name to include in the event summary.</param>
+    /// <param name="language">Optional language code for localization (currently not used but reserved for future use).</param>
+    /// <returns>Byte array containing the cancellation .ics file content encoded in UTF-8.</returns>
+    public static byte[] GenerateCancellationIcsFile(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null)
+    {
+        var icsContent = new StringBuilder();
+
+        // iCalendar header with METHOD:CANCEL for cancellation
+        icsContent.AppendLine("BEGIN:VCALENDAR");
+        icsContent.AppendLine("VERSION:2.0");
+        icsContent.AppendLine("PRODID:-//Leave System//Leave Request Calendar//EN");
+        icsContent.AppendLine("CALSCALE:GREGORIAN");
+        icsContent.AppendLine("METHOD:CANCEL");
+
+        // Event
+        icsContent.AppendLine("BEGIN:VEVENT");
+
+        // Unique identifier - MUST be the same as the original event for calendar clients to match and remove it
+        icsContent.AppendLine($"UID:leave-request-{leaveRequest.Id}@leavesystem");
+
+        // Event summary (title) - same as original
+        var summary = !string.IsNullOrWhiteSpace(leaveTypeName)
+            ? $"Leave Request - {EscapeIcsText(leaveTypeName)}"
+            : "Leave Request";
+        icsContent.AppendLine($"SUMMARY:{EscapeIcsText(summary)}");
+
+        // Event description - indicate cancellation
+        var description = BuildCancellationDescription(leaveRequest, leaveTypeName);
+        icsContent.AppendLine($"DESCRIPTION:{EscapeIcsText(description)}");
+
+        // Status: CANCELLED for cancelled/rejected events
+        icsContent.AppendLine("STATUS:CANCELLED");
+
+        // All-day event: Use DATE value type (same as original)
+        var startDate = FormatIcsDate(leaveRequest.DateFrom);
+        icsContent.AppendLine($"DTSTART;VALUE=DATE:{startDate}");
+
+        var endDate = FormatIcsDate(leaveRequest.DateTo.AddDays(1));
+        icsContent.AppendLine($"DTEND;VALUE=DATE:{endDate}");
+
+        // Updated timestamps
+        var now = FormatIcsDateTime(DateTimeOffset.UtcNow);
+        icsContent.AppendLine($"DTSTAMP:{now}");
+        icsContent.AppendLine($"CREATED:{FormatIcsDateTime(leaveRequest.CreatedDate)}");
+        icsContent.AppendLine($"LAST-MODIFIED:{FormatIcsDateTime(leaveRequest.LastModifiedDate)}");
+
+        // Sequence number - increment from original (use 1 as we don't track sequence)
+        icsContent.AppendLine("SEQUENCE:1");
+
+        // Event end
+        icsContent.AppendLine("END:VEVENT");
+
+        // Calendar end
+        icsContent.AppendLine("END:VCALENDAR");
+
+        // Convert to UTF-8 byte array
+        return Encoding.UTF8.GetBytes(icsContent.ToString());
+    }
+
     private static string BuildDescription(LeaveRequest leaveRequest, string? leaveTypeName)
     {
         var description = new StringBuilder();
@@ -111,6 +175,45 @@ public static class CalendarEventGenerator
 
         description.AppendLine();
         description.Append($"Status: {leaveRequest.Status}");
+
+        return description.ToString();
+    }
+
+    private static string BuildCancellationDescription(LeaveRequest leaveRequest, string? leaveTypeName)
+    {
+        var description = new StringBuilder();
+        description.Append($"Leave Request ID: {leaveRequest.Id}");
+        description.AppendLine();
+        description.Append($"Employee: {leaveRequest.AssignedTo.Name ?? leaveRequest.AssignedTo.Id}");
+        description.AppendLine();
+        description.Append($"Date From: {leaveRequest.DateFrom:yyyy-MM-dd}");
+        description.AppendLine();
+        description.Append($"Date To: {leaveRequest.DateTo:yyyy-MM-dd}");
+        description.AppendLine();
+        description.Append($"Duration: {FormatDuration(leaveRequest.Duration)}");
+        description.AppendLine();
+        description.Append($"Working Hours: {FormatDuration(leaveRequest.WorkingHours)}");
+
+        if (!string.IsNullOrWhiteSpace(leaveTypeName))
+        {
+            description.AppendLine();
+            description.Append($"Leave Type: {leaveTypeName}");
+        }
+
+        if (leaveRequest.Remarks.Count > 0)
+        {
+            var latestRemark = leaveRequest.Remarks.OrderByDescending(r => r.CreatedDate).First();
+            if (!string.IsNullOrWhiteSpace(latestRemark.Remarks))
+            {
+                description.AppendLine();
+                description.Append($"Remarks: {latestRemark.Remarks}");
+            }
+        }
+
+        description.AppendLine();
+        description.Append($"Status: {leaveRequest.Status}");
+        description.AppendLine();
+        description.Append("This leave request has been cancelled or rejected. Please remove this event from your calendar.");
 
         return description.ToString();
     }

@@ -90,7 +90,7 @@ public static class EmailTemplates
         });
     }
 
-    public static string CreateLeaveRequestDecisionEmail(LeaveRequest leaveRequest, string decision, string? decisionMakerName, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
+    public static string CreateLeaveRequestDecisionEmail(LeaveRequest leaveRequest, string decision, string? decisionMakerName, string? leaveTypeName = null, string? language = null, string? baseUrl = null, bool includeCalendarRemovalNote = false)
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestDecision", language);
@@ -104,6 +104,7 @@ public static class EmailTemplates
         var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
             ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
             : string.Empty;
+        var calendarRemovalNote = includeCalendarRemovalNote && decision == "Rejected" ? GetCalendarRemovalNote(language) : string.Empty;
 
         return ReplacePlaceholders(template, new Dictionary<string, string>
         {
@@ -125,11 +126,12 @@ public static class EmailTemplates
             ["STATUS"] = leaveRequest.Status.ToString(),
             ["DECISION_DATE"] = leaveRequest.LastModifiedDate.ToString("yyyy-MM-dd HH:mm"),
             ["LEAVE_REQUEST_LINK_URL"] = EscapeHtml(leaveRequestLinkUrl),
-            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText)
+            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText),
+            ["CALENDAR_REMOVAL_NOTE"] = calendarRemovalNote
         });
     }
 
-    public static string CreateLeaveRequestCanceledEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
+    public static string CreateLeaveRequestCanceledEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null, bool includeCalendarRemovalNote = false)
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestCanceled", language);
@@ -139,6 +141,7 @@ public static class EmailTemplates
         var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
             ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
             : string.Empty;
+        var calendarRemovalNote = includeCalendarRemovalNote ? GetCalendarRemovalNote(language) : string.Empty;
         return ReplacePlaceholders(template, new Dictionary<string, string>
         {
             ["LEAVE_REQUEST_ID"] = leaveRequest.Id.ToString(),
@@ -156,7 +159,8 @@ public static class EmailTemplates
             ["STATUS"] = leaveRequest.Status.ToString(),
             ["CANCELED_DATE"] = leaveRequest.LastModifiedDate.ToString("yyyy-MM-dd HH:mm"),
             ["LEAVE_REQUEST_LINK_URL"] = EscapeHtml(leaveRequestLinkUrl),
-            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText)
+            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText),
+            ["CALENDAR_REMOVAL_NOTE"] = calendarRemovalNote
         });
     }
 
@@ -248,6 +252,14 @@ public static class EmailTemplates
         var note = language == "pl-PL"
             ? "Do tego e-maila dołączono plik kalendarza (.ics), który możesz otworzyć, aby dodać te daty do swojego kalendarza."
             : "A calendar file (.ics) is attached to this email. You can add these dates to your calendar by opening the attachment.";
+        return $"<div class='info-row' style='margin-top: 15px; padding: 10px; background-color: #e8f4f8; border-left: 3px solid #0078d4;'><span class='value'>{EscapeHtml(note)}</span></div>";
+    }
+
+    private static string GetCalendarRemovalNote(string language)
+    {
+        var note = language == "pl-PL"
+            ? "Do tego e-maila dołączono plik anulowania kalendarza (.ics). Otwarcie załącznika usunie to wydarzenie z Twojego kalendarza. Jeśli wydarzenie nie zostanie automatycznie usunięte, usuń je ręcznie z kalendarza."
+            : "A cancellation calendar file (.ics) is attached to this email. Opening the attachment will remove this event from your calendar. If the event doesn't automatically remove, please delete it manually from your calendar.";
         return $"<div class='info-row' style='margin-top: 15px; padding: 10px; background-color: #e8f4f8; border-left: 3px solid #0078d4;'><span class='value'>{EscapeHtml(note)}</span></div>";
     }
 
