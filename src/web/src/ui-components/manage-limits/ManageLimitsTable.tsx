@@ -17,7 +17,7 @@ import {
   GridEventListener,
   GridRowId,
   GridRowEditStopReasons,
-  GridToolbarContainer,
+  Toolbar,
   GridSlotProps,
   useGridApiRef,
   GridValidRowModel,
@@ -689,11 +689,11 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
   };
 
   return (
-    <GridToolbarContainer>
+    <Toolbar>
       <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
         <Trans>Add record</Trans>
       </Button>
-    </GridToolbarContainer>
+    </Toolbar>
   );
 }
 
