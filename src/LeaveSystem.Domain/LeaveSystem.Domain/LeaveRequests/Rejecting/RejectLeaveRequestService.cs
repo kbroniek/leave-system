@@ -96,7 +96,7 @@ public class RejectLeaveRequestService(
                 try
                 {
                     // Generate cancellation .ics file
-                    var icsContent = CalendarEventGenerator.GenerateCancellationIcsFile(leaveRequest, leaveTypeName: null, language: language);
+                    var icsContent = CalendarEventGenerator.GenerateCancellationIcsFile(leaveRequest, leaveTypeName: null, language: language, baseUrl: baseUrl);
                     var calendarAttachment = new IEmailService.EmailAttachment(
                         $"leave-request-{leaveRequest.Id}-cancellation.ics",
                         "text/calendar",

@@ -14,8 +14,9 @@ public static class CalendarEventGenerator
     /// <param name="leaveRequest">The leave request to generate calendar event for.</param>
     /// <param name="leaveTypeName">Optional leave type name to include in the event summary.</param>
     /// <param name="language">Optional language code for localization (currently not used but reserved for future use).</param>
+    /// <param name="baseUrl">Optional base URL for creating a link to view the leave request details.</param>
     /// <returns>Byte array containing the .ics file content encoded in UTF-8.</returns>
-    public static byte[] GenerateIcsFile(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null)
+    public static byte[] GenerateIcsFile(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
     {
         var icsContent = new StringBuilder();
 
@@ -39,8 +40,15 @@ public static class CalendarEventGenerator
         icsContent.AppendLine($"SUMMARY:{EscapeIcsText(summary)}");
 
         // Event description
-        var description = BuildDescription(leaveRequest, leaveTypeName);
+        var description = BuildDescription(leaveRequest, leaveTypeName, baseUrl);
         icsContent.AppendLine($"DESCRIPTION:{EscapeIcsText(description)}");
+
+        // URL to view leave request details (if baseUrl is provided)
+        if (!string.IsNullOrWhiteSpace(baseUrl))
+        {
+            var leaveRequestUrl = $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}";
+            icsContent.AppendLine($"URL:{EscapeIcsText(leaveRequestUrl)}");
+        }
 
         // Status: TENTATIVE for pending requests
         var status = leaveRequest.Status == LeaveRequestStatus.Pending ? "TENTATIVE" : "CONFIRMED";
@@ -85,8 +93,9 @@ public static class CalendarEventGenerator
     /// <param name="leaveRequest">The leave request to generate cancellation event for.</param>
     /// <param name="leaveTypeName">Optional leave type name to include in the event summary.</param>
     /// <param name="language">Optional language code for localization (currently not used but reserved for future use).</param>
+    /// <param name="baseUrl">Optional base URL for creating a link to view the leave request details.</param>
     /// <returns>Byte array containing the cancellation .ics file content encoded in UTF-8.</returns>
-    public static byte[] GenerateCancellationIcsFile(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null)
+    public static byte[] GenerateCancellationIcsFile(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
     {
         var icsContent = new StringBuilder();
 
@@ -109,9 +118,16 @@ public static class CalendarEventGenerator
             : "Leave Request";
         icsContent.AppendLine($"SUMMARY:{EscapeIcsText(summary)}");
 
+        var leaveRequestUrl = !string.IsNullOrWhiteSpace(baseUrl) ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}" : null;
         // Event description - indicate cancellation
-        var description = BuildCancellationDescription(leaveRequest, leaveTypeName);
+        var description = BuildCancellationDescription(leaveRequest, leaveTypeName, leaveRequestUrl);
         icsContent.AppendLine($"DESCRIPTION:{EscapeIcsText(description)}");
+
+        // URL to view leave request details (if baseUrl is provided)
+        if (leaveRequestUrl != null)
+        {
+            icsContent.AppendLine($"URL:{EscapeIcsText(leaveRequestUrl)}");
+        }
 
         // Status: CANCELLED for cancelled/rejected events
         icsContent.AppendLine("STATUS:CANCELLED");
@@ -142,7 +158,7 @@ public static class CalendarEventGenerator
         return Encoding.UTF8.GetBytes(icsContent.ToString());
     }
 
-    private static string BuildDescription(LeaveRequest leaveRequest, string? leaveTypeName)
+    private static string BuildDescription(LeaveRequest leaveRequest, string? leaveTypeName, string? baseUrl = null)
     {
         var description = new StringBuilder();
         description.Append($"Leave Request ID: {leaveRequest.Id}");
@@ -176,10 +192,17 @@ public static class CalendarEventGenerator
         description.AppendLine();
         description.Append($"Status: {leaveRequest.Status}");
 
+        if (!string.IsNullOrWhiteSpace(baseUrl))
+        {
+            description.AppendLine();
+            description.AppendLine();
+            description.Append($"View Leave Request: {baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}");
+        }
+
         return description.ToString();
     }
 
-    private static string BuildCancellationDescription(LeaveRequest leaveRequest, string? leaveTypeName)
+    private static string BuildCancellationDescription(LeaveRequest leaveRequest, string? leaveTypeName, string? leaveRequestUrl = null)
     {
         var description = new StringBuilder();
         description.Append($"Leave Request ID: {leaveRequest.Id}");
@@ -214,6 +237,13 @@ public static class CalendarEventGenerator
         description.Append($"Status: {leaveRequest.Status}");
         description.AppendLine();
         description.Append("This leave request has been cancelled or rejected. Please remove this event from your calendar.");
+
+        if (leaveRequestUrl != null)
+        {
+            description.AppendLine();
+            description.AppendLine();
+            description.Append($"View Leave Request: {leaveRequestUrl}");
+        }
 
         return description.ToString();
     }

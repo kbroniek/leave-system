@@ -120,8 +120,8 @@ public class CancelLeaveRequestService(
                 var assignedUserResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
                 if (assignedUserResult.IsSuccess && !string.IsNullOrWhiteSpace(assignedUserResult.Value.Email))
                 {
-                    // Generate cancellation .ics file
-                    var icsContent = CalendarEventGenerator.GenerateCancellationIcsFile(leaveRequest, leaveTypeName: null, language: language);
+                        // Generate cancellation .ics file
+                        var icsContent = CalendarEventGenerator.GenerateCancellationIcsFile(leaveRequest, leaveTypeName: null, language: language, baseUrl: baseUrl);
                     var calendarAttachment = new IEmailService.EmailAttachment(
                         $"leave-request-{leaveRequest.Id}-cancellation.ics",
                         "text/calendar",

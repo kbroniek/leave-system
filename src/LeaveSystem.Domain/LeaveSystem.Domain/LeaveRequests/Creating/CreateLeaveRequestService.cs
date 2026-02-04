@@ -137,7 +137,7 @@ public class CreateLeaveRequestService(
                 try
                 {
                     // Generate calendar attachment
-                    var icsContent = CalendarEventGenerator.GenerateIcsFile(leaveRequest, leaveTypeName: null, language: language);
+                    var icsContent = CalendarEventGenerator.GenerateIcsFile(leaveRequest, leaveTypeName: null, language: language, baseUrl: baseUrl);
                     var calendarAttachment = new IEmailService.EmailAttachment(
                         $"leave-request-{leaveRequest.Id}.ics",
                         "text/calendar",
