@@ -44,10 +44,10 @@ internal class EmailService : IEmailService
         }
     }
 
-    public async Task SendEmailAsync(IEmailService.EmailAddress recipient, string subject, string htmlContent, IEmailService.EmailAddress? replyToEmail = null, CancellationToken cancellationToken = default) =>
-        await SendBulkEmailAsync([recipient], subject, htmlContent, replyToEmail, cancellationToken);
+    public async Task SendEmailAsync(IEmailService.EmailAddress recipient, string subject, string htmlContent, IEmailService.EmailAddress? replyToEmail = null, IEnumerable<IEmailService.EmailAttachment>? attachments = null, CancellationToken cancellationToken = default) =>
+        await SendBulkEmailAsync([recipient], subject, htmlContent, replyToEmail, attachments, cancellationToken);
 
-    public async Task SendBulkEmailAsync(IEnumerable<IEmailService.EmailAddress> recipients, string subject, string htmlContent, IEmailService.EmailAddress? replyToEmail = null, CancellationToken cancellationToken = default)
+    public async Task SendBulkEmailAsync(IEnumerable<IEmailService.EmailAddress> recipients, string subject, string htmlContent, IEmailService.EmailAddress? replyToEmail = null, IEnumerable<IEmailService.EmailAttachment>? attachments = null, CancellationToken cancellationToken = default)
     {
         var recipientList = recipients?.Where(r => !string.IsNullOrWhiteSpace(r.Email)).ToList();
         if (recipientList == null || recipientList.Count == 0)
@@ -69,6 +69,20 @@ internal class EmailService : IEmailService
             if (replyToEmail.HasValue && !string.IsNullOrWhiteSpace(replyToEmail.Value.Email))
             {
                 emailMessage.ReplyTo.Add(new EmailAddress(replyToEmail.Value.Email, replyToEmail.Value.Name));
+            }
+
+            // Add attachments if provided
+            if (attachments != null)
+            {
+                foreach (var attachment in attachments)
+                {
+                    var emailAttachment = new Azure.Communication.Email.EmailAttachment(
+                        attachment.Name,
+                        attachment.ContentType,
+                        BinaryData.FromBytes(attachment.Content));
+                    emailMessage.Attachments.Add(emailAttachment);
+                }
+                _logger.LogInformation("Added {AttachmentCount} attachment(s) to email", emailMessage.Attachments.Count);
             }
 
             var recipientsString = string.Join(", ", recipientList.Select(r => r.Email));

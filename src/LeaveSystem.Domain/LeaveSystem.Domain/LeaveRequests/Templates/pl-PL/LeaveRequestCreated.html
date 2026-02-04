@@ -47,7 +47,7 @@
     <div class="container">
       <div class="header"><h1>Nowy Wniosek o Urlop</h1></div>
       <div class="content">
-        <p>Utworzono nowy wniosek o urlop, który wymaga Twojej recenzji.</p>
+        <p>{INTRO_TEXT}</p>
         <div class="info-row">
           <span class="label">ID Wniosku:</span>
           <span class="value">{LEAVE_REQUEST_ID}</span>
@@ -80,6 +80,7 @@
           <span class="label">Data Utworzenia:</span>
           <span class="value">{CREATED_DATE}</span>
         </div>
+        {CALENDAR_ATTACHMENT_NOTE}
         <div class="info-row" style="margin-top: 20px; text-align: center">
           <a
             href="{LEAVE_REQUEST_LINK_URL}"

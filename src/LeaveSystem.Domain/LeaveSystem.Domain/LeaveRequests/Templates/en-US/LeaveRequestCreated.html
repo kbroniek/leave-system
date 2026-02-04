@@ -47,7 +47,7 @@
     <div class="container">
       <div class="header"><h1>New Leave Request</h1></div>
       <div class="content">
-        <p>A new leave request has been created and requires your review.</p>
+        <p>{INTRO_TEXT}</p>
         <div class="info-row">
           <span class="label">Leave Request ID:</span>
           <span class="value">{LEAVE_REQUEST_ID}</span>
@@ -80,6 +80,7 @@
           <span class="label">Created Date:</span>
           <span class="value">{CREATED_DATE}</span>
         </div>
+        {CALENDAR_ATTACHMENT_NOTE}
         <div class="info-row" style="margin-top: 20px; text-align: center">
           <a
             href="{LEAVE_REQUEST_LINK_URL}"
