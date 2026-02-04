@@ -11,8 +11,8 @@ using Microsoft.Extensions.Logging;
 public class RejectLeaveRequestService(
     ReadService readService,
     WriteService writeService,
-    IEmailService? emailService,
-    IGetUserRepository? getUserRepository,
+    IEmailService emailService,
+    IGetUserRepository getUserRepository,
     ILogger<RejectLeaveRequestService>? logger)
 {
     public async Task<Result<LeaveRequest, Error>> Reject(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null, string? baseUrl = null)
@@ -29,49 +29,31 @@ public class RejectLeaveRequestService(
         }
         var writeResult = await writeService.Write(resultAccept.Value, cancellationToken);
 
-        // Send email asynchronously (fire-and-forget) after successful rejection
-        if (writeResult.IsSuccess && emailService != null && getUserRepository != null)
+        // Send email asynchronously after successful rejection
+        if (writeResult.IsSuccess)
         {
-            var emailLanguage = language;
-            var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email;
+            var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email ?? "unknown";
             var replyToEmail = !string.IsNullOrWhiteSpace(acceptedBy.Email)
                 ? new IEmailService.EmailAddress(acceptedBy.Email, acceptedBy.Name)
                 : (IEmailService.EmailAddress?)null;
-            var serviceLogger = logger;
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await SendLeaveRequestRejectedEmailAsync(
-                        writeResult.Value,
-                        decisionMakerName,
-                        replyToEmail,
-                        emailService,
-                        getUserRepository,
-                        emailLanguage,
-                        baseUrl,
-                        serviceLogger,
-                        cancellationToken);
-                }
-                catch
-                {
-                    // Silently ignore errors in fire-and-forget email sending
-                }
-            }, cancellationToken);
+            await SendLeaveRequestRejectedEmailAsync(
+                writeResult.Value,
+                decisionMakerName,
+                replyToEmail,
+                language,
+                baseUrl,
+                cancellationToken);
         }
 
         return writeResult;
     }
 
-    private static async Task SendLeaveRequestRejectedEmailAsync(
+    private async Task SendLeaveRequestRejectedEmailAsync(
         LeaveRequest leaveRequest,
         string decisionMakerName,
         IEmailService.EmailAddress? replyToEmail,
-        IEmailService emailService,
-        IGetUserRepository getUserRepository,
         string? language,
         string? baseUrl,
-        ILogger<RejectLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
         try

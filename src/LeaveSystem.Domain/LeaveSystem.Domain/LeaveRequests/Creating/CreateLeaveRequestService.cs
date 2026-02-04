@@ -12,9 +12,9 @@ public class CreateLeaveRequestService(
     IReadEventsRepository readEventsRepository,
     CreateLeaveRequestValidator createLeaveRequestValidator,
     WriteService writeService,
-    IEmailService? emailService,
-    IDecisionMakerRepository? decisionMakerRepository,
-    IGetUserRepository? getUserRepository,
+    IEmailService emailService,
+    IDecisionMakerRepository decisionMakerRepository,
+    IGetUserRepository getUserRepository,
     ILogger<CreateLeaveRequestService>? logger)
 {
     public async Task<Result<LeaveRequest, Error>> CreateAsync(
@@ -52,72 +52,55 @@ public class CreateLeaveRequestService(
         }
         var writeResult = await writeService.Write(result.Value, cancellationToken);
 
-        // Send emails asynchronously (fire-and-forget) after successful creation
-        if (writeResult.IsSuccess && emailService != null && decisionMakerRepository != null && getUserRepository != null)
+        // Send emails asynchronously after successful creation
+        if (writeResult.IsSuccess)
         {
-            var emailLanguage = language;
-            var creatorName = createdBy.Name ?? createdBy.Email;
+            var creatorName = createdBy.Name ?? createdBy.Email ?? "unknown";
             var replyToEmail = !string.IsNullOrWhiteSpace(createdBy.Email)
                 ? new IEmailService.EmailAddress(createdBy.Email, createdBy.Name)
                 : (IEmailService.EmailAddress?)null;
-            var serviceLogger = logger;
-            // Get DecisionMaker user IDs
-            var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
-            if (decisionMakerIdsResult.IsSuccess)
-            {
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await SendLeaveRequestCreatedEmailsAsync(
-                            writeResult.Value,
-                            emailService,
-                            decisionMakerIdsResult.Value,
-                            creatorName,
-                            replyToEmail,
-                            getUserRepository,
-                            emailLanguage,
-                            baseUrl,
-                            serviceLogger,
-                            cancellationToken);
-                    }
-                    catch
-                    {
-                        // Silently ignore errors in fire-and-forget email sending
-                    }
-                }, cancellationToken);
-            }
+            await SendLeaveRequestCreatedEmailsAsync(
+                writeResult.Value,
+                creatorName,
+                replyToEmail,
+                language,
+                baseUrl,
+                cancellationToken);
         }
 
         return writeResult;
     }
 
-    private static async Task SendLeaveRequestCreatedEmailsAsync(
+    private async Task SendLeaveRequestCreatedEmailsAsync(
         LeaveRequest leaveRequest,
-        IEmailService emailService,
-        IReadOnlyCollection<string> decisionMakerIds,
         string creatorName,
         IEmailService.EmailAddress? replyToEmail,
-        IGetUserRepository getUserRepository,
         string? language,
         string? baseUrl,
-        ILogger<CreateLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
         try
         {
+            var decisionMakerIdsResult = await decisionMakerRepository.GetDecisionMakerUserIds(cancellationToken);
+            if (decisionMakerIdsResult.IsFailure)
+            {
+                return;
+            }
+            var decisionMakerIds = decisionMakerIdsResult.Value;
+            if (decisionMakerIds.Count == 0)
+            {
+                return;
+            }
+
             var decisionMakerRecipients = new List<IEmailService.EmailAddress>();
 
             // Get DecisionMaker emails
-            if (decisionMakerIds.Count > 0)
+            var decisionMakersResult = await getUserRepository.GetUsers([.. decisionMakerIds], cancellationToken);
+            if (decisionMakersResult.IsSuccess)
             {
-                var decisionMakersResult = await getUserRepository.GetUsers([.. decisionMakerIds], cancellationToken);
-                if (decisionMakersResult.IsSuccess)
-                {
-                    decisionMakerRecipients.AddRange(decisionMakersResult.Value
-                        .Where(u => !string.IsNullOrWhiteSpace(u.Email))
-                        .Select(u => new IEmailService.EmailAddress(u.Email!, u.Name)));
-                }
+                decisionMakerRecipients.AddRange(decisionMakersResult.Value
+                    .Where(u => !string.IsNullOrWhiteSpace(u.Email))
+                    .Select(u => new IEmailService.EmailAddress(u.Email!, u.Name)));
             }
 
             var subject = EmailTemplates.GetEmailSubject("New Leave Request Created", language, creatorName);

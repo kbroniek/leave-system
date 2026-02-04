@@ -222,25 +222,22 @@ Add to `LeaveSystem.Functions/LeaveSystem.Functions/template.local.settings.json
 
 ### Asynchronous Email Sending
 
-All email sending operations use a fire-and-forget pattern:
+All email sending operations are awaited directly:
 
 ```csharp
-_ = Task.Run(async () =>
+try
 {
-    try
-    {
-        await SendEmailAsync(...);
-    }
-    catch
-    {
-        // Silently ignore errors in fire-and-forget email sending
-    }
-}, cancellationToken);
+    await SendEmailAsync(...);
+}
+catch
+{
+    // Silently ignore errors in email sending
+}
 ```
 
 This ensures that:
 
-- Email sending doesn't block the main operation
+- Email sending completes before the operation returns
 - Failures are logged but don't affect leave request processing
 - The system remains responsive even if email service is unavailable
 

@@ -13,8 +13,8 @@ public class AcceptLeaveRequestService(
     ReadService readService,
     WriteService writeService,
     CreateLeaveRequestValidator validator,
-    IEmailService? emailService,
-    IGetUserRepository? getUserRepository,
+    IEmailService emailService,
+    IGetUserRepository getUserRepository,
     ILogger<AcceptLeaveRequestService>? logger)
 {
     public async Task<Result<LeaveRequest, Error>> Accept(Guid leaveRequestId, string? remarks, LeaveRequestUserDto acceptedBy, DateTimeOffset createdDate, CancellationToken cancellationToken, string? language = null, string? baseUrl = null)
@@ -41,49 +41,31 @@ public class AcceptLeaveRequestService(
         }
         var writeResult = await writeService.Write(resultAccept.Value, cancellationToken);
 
-        // Send email asynchronously (fire-and-forget) after successful acceptance
-        if (writeResult.IsSuccess && emailService != null && getUserRepository != null)
+        // Send email asynchronously after successful acceptance
+        if (writeResult.IsSuccess)
         {
-            var emailLanguage = language;
-            var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email;
+            var decisionMakerName = acceptedBy.Name ?? acceptedBy.Email ?? "unknown";
             var replyToEmail = !string.IsNullOrWhiteSpace(acceptedBy.Email)
                 ? new IEmailService.EmailAddress(acceptedBy.Email, acceptedBy.Name)
                 : (IEmailService.EmailAddress?)null;
-            var serviceLogger = logger;
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await SendLeaveRequestAcceptedEmailAsync(
-                        writeResult.Value,
-                        decisionMakerName,
-                        replyToEmail,
-                        emailService,
-                        getUserRepository,
-                        emailLanguage,
-                        baseUrl,
-                        serviceLogger,
-                        cancellationToken);
-                }
-                catch
-                {
-                    // Silently ignore errors in fire-and-forget email sending
-                }
-            }, cancellationToken);
+            await SendLeaveRequestAcceptedEmailAsync(
+                writeResult.Value,
+                decisionMakerName,
+                replyToEmail,
+                language,
+                baseUrl,
+                cancellationToken);
         }
 
         return writeResult;
     }
 
-    private static async Task SendLeaveRequestAcceptedEmailAsync(
+    private async Task SendLeaveRequestAcceptedEmailAsync(
         LeaveRequest leaveRequest,
-        string? decisionMakerName,
+        string decisionMakerName,
         IEmailService.EmailAddress? replyToEmail,
-        IEmailService emailService,
-        IGetUserRepository getUserRepository,
         string? language,
         string? baseUrl,
-        ILogger<AcceptLeaveRequestService>? logger,
         CancellationToken cancellationToken)
     {
         try
