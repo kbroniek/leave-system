@@ -79,7 +79,7 @@ internal class EmailService : IEmailService
                     var emailAttachment = new Azure.Communication.Email.EmailAttachment(
                         attachment.Name,
                         attachment.ContentType,
-                        Convert.ToBase64String(attachment.Content));
+                        BinaryData.FromBytes(attachment.Content));
                     emailMessage.Attachments.Add(emailAttachment);
                 }
                 _logger.LogInformation("Added {AttachmentCount} attachment(s) to email", emailMessage.Attachments.Count);
