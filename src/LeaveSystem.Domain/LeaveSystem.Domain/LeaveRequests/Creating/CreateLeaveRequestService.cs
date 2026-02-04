@@ -107,7 +107,6 @@ public class CreateLeaveRequestService(
         try
         {
             var decisionMakerRecipients = new List<IEmailService.EmailAddress>();
-            IEmailService.EmailAddress? assignedUserRecipient = null;
 
             // Get DecisionMaker emails
             if (decisionMakerIds.Count > 0)
@@ -121,28 +120,20 @@ public class CreateLeaveRequestService(
                 }
             }
 
-            // If created on behalf (assignedTo != createdBy), also send to assigned user
-            if (leaveRequest.AssignedTo.Id != leaveRequest.CreatedBy.Id)
-            {
-                var assignedUserResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
-                if (assignedUserResult.IsSuccess && !string.IsNullOrWhiteSpace(assignedUserResult.Value.Email))
-                {
-                    assignedUserRecipient = new IEmailService.EmailAddress(assignedUserResult.Value.Email!, assignedUserResult.Value.Name);
-                }
-            }
-
             var subject = EmailTemplates.GetEmailSubject("New Leave Request Created", language, creatorName);
 
             // Send email to decision makers (without calendar attachment)
             if (decisionMakerRecipients.Count > 0)
             {
-                var htmlContentForDecisionMakers = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarNote: false);
+                var htmlContentForDecisionMakers = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarNote: false, isForDecisionMaker: true);
                 await emailService.SendBulkEmailAsync(decisionMakerRecipients, subject, htmlContentForDecisionMakers, replyToEmail, attachments: null, cancellationToken);
             }
 
             // Send email to assigned user with calendar attachment (if different from creator)
-            if (assignedUserRecipient.HasValue)
+            var assignedUserResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
+            if (assignedUserResult.IsSuccess && !string.IsNullOrWhiteSpace(assignedUserResult.Value.Email))
             {
+                var assignedUserRecipient = new IEmailService.EmailAddress(assignedUserResult.Value.Email!, assignedUserResult.Value.Name);
                 try
                 {
                     // Generate calendar attachment
@@ -152,10 +143,10 @@ public class CreateLeaveRequestService(
                         "text/calendar",
                         icsContent);
 
-                    // Include calendar note in email content for assigned user
-                    var htmlContentForAssignedUser = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarNote: true);
+                    // Include calendar note in email content for assigned user (informational, not requiring decision)
+                    var htmlContentForAssignedUser = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarNote: true, isForDecisionMaker: false);
                     await emailService.SendEmailAsync(
-                        assignedUserRecipient.Value,
+                        assignedUserRecipient,
                         subject,
                         htmlContentForAssignedUser,
                         replyToEmail,
@@ -166,9 +157,9 @@ public class CreateLeaveRequestService(
                 {
                     // Log error but don't fail - send email without attachment as fallback
                     logger?.LogWarning(ex, "Failed to generate calendar attachment for leave request {LeaveRequestId}. Sending email without attachment.", leaveRequest.Id);
-                    var htmlContentFallback = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarNote: false);
+                    var htmlContentFallback = EmailTemplates.CreateLeaveRequestCreatedEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarNote: false, isForDecisionMaker: false);
                     await emailService.SendEmailAsync(
-                        assignedUserRecipient.Value,
+                        assignedUserRecipient,
                         subject,
                         htmlContentFallback,
                         replyToEmail,

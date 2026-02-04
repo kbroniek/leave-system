@@ -115,59 +115,55 @@ public class CancelLeaveRequestService(
             }
 
             // Send cancellation email to assigned user with calendar removal (if they originally received calendar event)
-            // Check if assigned user != creator (same logic as creation - calendar was sent to assigned user)
-            if (leaveRequest.AssignedTo.Id != leaveRequest.CreatedBy.Id)
+            try
             {
+                var assignedUserResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
+                if (assignedUserResult.IsSuccess && !string.IsNullOrWhiteSpace(assignedUserResult.Value.Email))
+                {
+                    // Generate cancellation .ics file
+                    var icsContent = CalendarEventGenerator.GenerateCancellationIcsFile(leaveRequest, leaveTypeName: null, language: language);
+                    var calendarAttachment = new IEmailService.EmailAttachment(
+                        $"leave-request-{leaveRequest.Id}-cancellation.ics",
+                        "text/calendar",
+                        icsContent);
+
+                    // Send email with cancellation .ics attachment
+                    var subject = EmailTemplates.GetEmailSubject("Leave Request Canceled", language, decisionMakerName);
+                    var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarRemovalNote: true);
+                    var assignedUserRecipient = new IEmailService.EmailAddress(assignedUserResult.Value.Email!, assignedUserResult.Value.Name);
+                    await emailService.SendEmailAsync(
+                        assignedUserRecipient,
+                        subject,
+                        htmlContent,
+                        replyToEmail,
+                        attachments: [calendarAttachment],
+                        cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail - send email without attachment as fallback
+                logger?.LogWarning(ex, "Failed to generate or send cancellation calendar attachment for leave request {LeaveRequestId}. Sending email without attachment.", leaveRequest.Id);
                 try
                 {
                     var assignedUserResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
                     if (assignedUserResult.IsSuccess && !string.IsNullOrWhiteSpace(assignedUserResult.Value.Email))
                     {
-                        // Generate cancellation .ics file
-                        var icsContent = CalendarEventGenerator.GenerateCancellationIcsFile(leaveRequest, leaveTypeName: null, language: language);
-                        var calendarAttachment = new IEmailService.EmailAttachment(
-                            $"leave-request-{leaveRequest.Id}-cancellation.ics",
-                            "text/calendar",
-                            icsContent);
-
-                        // Send email with cancellation .ics attachment
                         var subject = EmailTemplates.GetEmailSubject("Leave Request Canceled", language, decisionMakerName);
-                        var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarRemovalNote: true);
+                        var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarRemovalNote: false);
                         var assignedUserRecipient = new IEmailService.EmailAddress(assignedUserResult.Value.Email!, assignedUserResult.Value.Name);
                         await emailService.SendEmailAsync(
                             assignedUserRecipient,
                             subject,
                             htmlContent,
                             replyToEmail,
-                            attachments: [calendarAttachment],
+                            attachments: null,
                             cancellationToken);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception fallbackEx)
                 {
-                    // Log error but don't fail - send email without attachment as fallback
-                    logger?.LogWarning(ex, "Failed to generate or send cancellation calendar attachment for leave request {LeaveRequestId}. Sending email without attachment.", leaveRequest.Id);
-                    try
-                    {
-                        var assignedUserResult = await getUserRepository.GetUser(leaveRequest.AssignedTo.Id, cancellationToken);
-                        if (assignedUserResult.IsSuccess && !string.IsNullOrWhiteSpace(assignedUserResult.Value.Email))
-                        {
-                            var subject = EmailTemplates.GetEmailSubject("Leave Request Canceled", language, decisionMakerName);
-                            var htmlContent = EmailTemplates.CreateLeaveRequestCanceledEmail(leaveRequest, language: language, baseUrl: baseUrl, includeCalendarRemovalNote: false);
-                            var assignedUserRecipient = new IEmailService.EmailAddress(assignedUserResult.Value.Email!, assignedUserResult.Value.Name);
-                            await emailService.SendEmailAsync(
-                                assignedUserRecipient,
-                                subject,
-                                htmlContent,
-                                replyToEmail,
-                                attachments: null,
-                                cancellationToken);
-                        }
-                    }
-                    catch (Exception fallbackEx)
-                    {
-                        logger?.LogError(fallbackEx, "Failed to send cancellation email to assigned user. LeaveRequestId: {LeaveRequestId}", leaveRequest.Id);
-                    }
+                    logger?.LogError(fallbackEx, "Failed to send cancellation email to assigned user. LeaveRequestId: {LeaveRequestId}", leaveRequest.Id);
                 }
             }
         }

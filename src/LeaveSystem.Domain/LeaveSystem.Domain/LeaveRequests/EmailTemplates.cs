@@ -57,7 +57,7 @@ public static class EmailTemplates
         }
     };
 
-    public static string CreateLeaveRequestCreatedEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null, bool includeCalendarNote = false)
+    public static string CreateLeaveRequestCreatedEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null, bool includeCalendarNote = false, bool isForDecisionMaker = true)
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestCreated", language);
@@ -68,6 +68,7 @@ public static class EmailTemplates
             ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
             : string.Empty;
         var calendarNote = includeCalendarNote ? GetCalendarAttachmentNote(language) : string.Empty;
+        var introText = GetLeaveRequestCreatedIntroText(language, isForDecisionMaker);
         return ReplacePlaceholders(template, new Dictionary<string, string>
         {
             ["LEAVE_REQUEST_ID"] = leaveRequest.Id.ToString(),
@@ -86,7 +87,8 @@ public static class EmailTemplates
             ["CREATED_DATE"] = leaveRequest.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
             ["LEAVE_REQUEST_LINK_URL"] = EscapeHtml(leaveRequestLinkUrl),
             ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText),
-            ["CALENDAR_ATTACHMENT_NOTE"] = calendarNote
+            ["CALENDAR_ATTACHMENT_NOTE"] = calendarNote,
+            ["INTRO_TEXT"] = introText
         });
     }
 
@@ -261,6 +263,22 @@ public static class EmailTemplates
             ? "Do tego e-maila dołączono plik anulowania kalendarza (.ics). Otwarcie załącznika usunie to wydarzenie z Twojego kalendarza. Jeśli wydarzenie nie zostanie automatycznie usunięte, usuń je ręcznie z kalendarza."
             : "A cancellation calendar file (.ics) is attached to this email. Opening the attachment will remove this event from your calendar. If the event doesn't automatically remove, please delete it manually from your calendar.";
         return $"<div class='info-row' style='margin-top: 15px; padding: 10px; background-color: #e8f4f8; border-left: 3px solid #0078d4;'><span class='value'>{EscapeHtml(note)}</span></div>";
+    }
+
+    private static string GetLeaveRequestCreatedIntroText(string language, bool isForDecisionMaker)
+    {
+        if (isForDecisionMaker)
+        {
+            return language == "pl-PL"
+                ? "Utworzono nowy wniosek o urlop, który wymaga Twojej recenzji."
+                : "A new leave request has been created and requires your review.";
+        }
+        else
+        {
+            return language == "pl-PL"
+                ? "Utworzono wniosek o urlop dla Ciebie."
+                : "A leave request has been created for you.";
+        }
     }
 
     private static string EscapeHtml(string? text)
