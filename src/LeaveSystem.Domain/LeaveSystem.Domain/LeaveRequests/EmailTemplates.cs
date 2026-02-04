@@ -57,7 +57,7 @@ public static class EmailTemplates
         }
     };
 
-    public static string CreateLeaveRequestCreatedEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
+    public static string CreateLeaveRequestCreatedEmail(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null, bool includeCalendarNote = false)
     {
         language = NormalizeLanguage(language);
         var template = LoadTemplate("LeaveRequestCreated", language);
@@ -67,6 +67,7 @@ public static class EmailTemplates
         var leaveRequestLinkText = !string.IsNullOrWhiteSpace(baseUrl)
             ? (Translations[language].TryGetValue("View Leave Request Details", out var linkText) ? linkText : "View Leave Request Details")
             : string.Empty;
+        var calendarNote = includeCalendarNote ? GetCalendarAttachmentNote(language) : string.Empty;
         return ReplacePlaceholders(template, new Dictionary<string, string>
         {
             ["LEAVE_REQUEST_ID"] = leaveRequest.Id.ToString(),
@@ -84,7 +85,8 @@ public static class EmailTemplates
             ["STATUS"] = leaveRequest.Status.ToString(),
             ["CREATED_DATE"] = leaveRequest.CreatedDate.ToString("yyyy-MM-dd HH:mm"),
             ["LEAVE_REQUEST_LINK_URL"] = EscapeHtml(leaveRequestLinkUrl),
-            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText)
+            ["LEAVE_REQUEST_LINK_TEXT"] = EscapeHtml(leaveRequestLinkText),
+            ["CALENDAR_ATTACHMENT_NOTE"] = calendarNote
         });
     }
 
@@ -239,6 +241,14 @@ public static class EmailTemplates
     {
         var label = language == "pl-PL" ? "Uwagi:" : "Remarks:";
         return $"<div class='info-row'><span class='label'>{label}</span> <span class='value'>{EscapeHtml(remarks)}</span></div>";
+    }
+
+    private static string GetCalendarAttachmentNote(string language)
+    {
+        var note = language == "pl-PL"
+            ? "Do tego e-maila dołączono plik kalendarza (.ics), który możesz otworzyć, aby dodać te daty do swojego kalendarza."
+            : "A calendar file (.ics) is attached to this email. You can add these dates to your calendar by opening the attachment.";
+        return $"<div class='info-row' style='margin-top: 15px; padding: 10px; background-color: #e8f4f8; border-left: 3px solid #0078d4;'><span class='value'>{EscapeHtml(note)}</span></div>";
     }
 
     private static string EscapeHtml(string? text)
