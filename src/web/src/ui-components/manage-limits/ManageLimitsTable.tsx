@@ -21,6 +21,7 @@ import {
   GridRowEditStopReasons,
   GridToolbarContainer,
   GridSlotProps,
+  useGridApiRef,
 } from "@mui/x-data-grid";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { EmployeeDto } from "../dtos/EmployeeDto";
@@ -52,6 +53,7 @@ export function ManageLimitsTable(props: {
 }) {
   const notifications = useNotifications();
   const { t } = useTranslation();
+  const apiRef = useGridApiRef();
 
   const missingEmployees = React.useMemo(
     () =>
@@ -125,21 +127,45 @@ export function ManageLimitsTable(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.limits, props.employees, allEmployees]
   );
-  const [rows, setRows] = React.useState<GridRowsProp>(rowsTransformed);
+  const [rows, setRows] = React.useState<LeaveLimitCell[]>(rowsTransformed);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
   );
+  // Track if we just added a new row to prevent useEffect from clearing it
+  const justAddedRowRef = React.useRef<boolean>(false);
 
   // Update rows when props.limits changes, using a ref to prevent infinite loops
   const prevLimitsRef = React.useRef<string>("");
   React.useEffect(() => {
     // Create a stable key from limits IDs to detect actual changes
     const limitsKey = props.limits.map((l) => l.id).join(",");
-    if (prevLimitsRef.current !== limitsKey) {
-      prevLimitsRef.current = limitsKey;
-      setRows(rowsTransformed);
+
+    // Only update if the limits actually changed (different IDs)
+    if (prevLimitsRef.current === limitsKey) {
+      // Limits haven't changed, don't update rows
+      return;
     }
+
+    prevLimitsRef.current = limitsKey;
+
+    // Always preserve rows that are new (not yet saved) when updating from props
+    setRows((currentRows) => {
+      // Check if there are any unsaved new rows in the current state
+      const existingNewRows = currentRows.filter(
+        (row) => (row as LeaveLimitCell & { isNew?: boolean }).isNew === true
+      );
+
+      // Always preserve new rows, even if we're updating from props
+      if (existingNewRows.length > 0) {
+        // Merge: use new rows from props, but keep unsaved new rows
+        return [...rowsTransformed, ...existingNewRows];
+      } else {
+        // No unsaved rows, safe to replace entirely
+        return rowsTransformed;
+      }
+    });
     // Only depend on props.limits to avoid infinite loops
+    // rowsTransformed is recalculated when props.limits changes, so we use it directly
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.limits]);
 
@@ -186,10 +212,10 @@ export function ManageLimitsTable(props: {
     }
   };
 
-  const processRowUpdate = async (newRow: GridRowModel) => {
+  const processRowUpdate = async (newRow: LeaveLimitCell) => {
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    if (!(await props.limitOnChange(newRow as LeaveLimitCell))) {
+    if (!(await props.limitOnChange(newRow))) {
       setRows(rows.filter((row) => row.id !== newRow.id));
     }
     return updatedRow;
@@ -217,6 +243,14 @@ export function ManageLimitsTable(props: {
         value: x.id,
         label: x.name,
       })),
+      valueGetter: (value) => {
+        // Convert null to empty string for React input compatibility
+        return value ?? "";
+      },
+      valueSetter: (value, row) => {
+        // Convert empty string back to null for data model
+        return { ...row, assignedToUserId: value === "" ? null : value };
+      },
       sortComparator: (v1, v2) => {
         const name1 = allEmployees.find((emp) => emp.id === v1)?.name ?? "";
         const name2 = allEmployees.find((emp) => emp.id === v2)?.name ?? "";
@@ -436,6 +470,12 @@ export function ManageLimitsTable(props: {
 
   // Function to add a new limit row
   const addNewLimit = React.useCallback(() => {
+    if (!props.leaveTypes || props.leaveTypes.length === 0) {
+      notifications.show(t("Cannot add new limit: no leave types available"), {
+        severity: "error",
+      });
+      return;
+    }
     const id = uuidv4();
     const now = DateTime.now();
     const firstDay = now.startOf("year");
@@ -457,12 +497,60 @@ export function ManageLimitsTable(props: {
       validUntil: lastDay.toJSDate(),
       isNew: true,
     };
-    setRows((oldRows) => [...oldRows, newRow]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "assignedToUserId" },
-    }));
-  }, [props.leaveTypes, setRows, setRowModesModel]);
+    // Set flag to prevent useEffect from clearing the new row
+    justAddedRowRef.current = true;
+    setRows((oldRows) => {
+      // Insert the new row in the correct sorted position
+      // Since it has assignedToUserId: null, it should be at the top (sorted by employee name)
+      const newRowEmployeeName = getName(newRow.assignedToUserId) ?? "";
+      const insertIndex = oldRows.findIndex((row) => {
+        const rowEmployeeName = getName(row.assignedToUserId) ?? "";
+        return newRowEmployeeName.localeCompare(rowEmployeeName) <= 0;
+      });
+
+      const insertAt = insertIndex === -1 ? oldRows.length : insertIndex;
+      const newRows = [...oldRows];
+      newRows.splice(insertAt, 0, newRow);
+
+      return newRows;
+    });
+    setRowModesModel((oldModel) => {
+      return {
+        ...oldModel,
+        [id]: { mode: GridRowModes.Edit, fieldToFocus: "assignedToUserId" },
+      };
+    });
+
+    // Scroll to the new row after a delay to ensure it's rendered and sorted
+    setTimeout(() => {
+      try {
+        if (apiRef.current) {
+          // Get all row IDs to find the index of our new row
+          const allRowIds = apiRef.current.getAllRowIds();
+          const rowIndex = allRowIds.indexOf(id);
+
+          if (rowIndex >= 0) {
+            // Scroll to the row using scrollToIndexes
+            apiRef.current.scrollToIndexes({ rowIndex });
+
+            // Try to select the row to make it more visible
+            try {
+              apiRef.current.selectRow(id, true, true);
+            } catch (e) {
+              // Selection might not be enabled, that's okay
+            }
+          }
+        }
+      } catch (error) {
+        // Silently handle scroll errors
+      }
+    }, 300);
+
+    // Reset flag after a longer delay to allow state to settle and prevent useEffect from running
+    setTimeout(() => {
+      justAddedRowRef.current = false;
+    }, 500);
+  }, [props.leaveTypes, notifications, t]);
 
   return (
     <Box
@@ -489,7 +577,12 @@ export function ManageLimitsTable(props: {
           color="primary"
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={addNewLimit}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            addNewLimit();
+          }}
+          data-testid="add-new-limit-button"
         >
           <Trans>Add New Limit</Trans>
         </Button>
@@ -502,6 +595,7 @@ export function ManageLimitsTable(props: {
         }}
       >
         <DataGrid
+          apiRef={apiRef}
           rows={rows}
           columns={columns}
           editMode="row"
@@ -510,6 +604,7 @@ export function ManageLimitsTable(props: {
           onRowEditStop={handleRowEditStop}
           processRowUpdate={processRowUpdate}
           onProcessRowUpdateError={processRowUpdateError}
+          getRowId={(row: LeaveLimitCell) => row.id}
           slots={{
             toolbar: EditToolbar,
           }}
