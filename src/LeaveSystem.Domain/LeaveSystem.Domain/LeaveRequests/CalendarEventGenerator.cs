@@ -64,76 +64,20 @@ public static class CalendarEventGenerator
     /// <returns>Byte array containing the .ics file content encoded in UTF-8.</returns>
     public static byte[] GenerateIcsFile(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
     {
-        var icsContent = new StringBuilder();
-
-        // iCalendar header
-        icsContent.AppendLine("BEGIN:VCALENDAR");
-        icsContent.AppendLine("VERSION:2.0");
-        icsContent.AppendLine("PRODID:-//Leave System//Leave Request Calendar//EN");
-        icsContent.AppendLine("CALSCALE:GREGORIAN");
-        icsContent.AppendLine("METHOD:PUBLISH");
-
-        // Event
-        icsContent.AppendLine("BEGIN:VEVENT");
-
-        // Unique identifier based on leave request ID
-        icsContent.AppendLine($"UID:leave-request-{leaveRequest.Id}@leavesystem");
-
-        // Normalize language
         language = NormalizeLanguage(language);
-
-        // Event summary (title)
-        var leaveRequestLabel = GetTranslation("Leave Request", language);
-        var summary = !string.IsNullOrWhiteSpace(leaveTypeName)
-            ? $"{leaveRequestLabel} - {EscapeIcsText(leaveTypeName)}"
-            : leaveRequestLabel;
-        icsContent.AppendLine($"SUMMARY:{EscapeIcsText(summary)}");
-
-        // Event description
-        var description = BuildDescription(leaveRequest, leaveTypeName, baseUrl, language);
-        icsContent.AppendLine($"DESCRIPTION:{EscapeIcsText(description)}");
-
-        // URL to view leave request details (if baseUrl is provided)
-        if (!string.IsNullOrWhiteSpace(baseUrl))
-        {
-            var leaveRequestUrl = $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}";
-            icsContent.AppendLine($"URL:{EscapeIcsText(leaveRequestUrl)}");
-        }
-
-        // Status: TENTATIVE for pending requests
         var status = leaveRequest.Status == LeaveRequestStatus.Pending ? "TENTATIVE" : "CONFIRMED";
-        icsContent.AppendLine($"STATUS:{status}");
+        var description = BuildDescription(leaveRequest, leaveTypeName, baseUrl, language, includeCancellationMessage: false);
 
-        // All-day event: Use DATE value type (no time component)
-        // Start date (DateFrom)
-        var startDate = FormatIcsDate(leaveRequest.DateFrom);
-        icsContent.AppendLine($"DTSTART;VALUE=DATE:{startDate}");
-
-        // End date: For all-day events, end date should be the day after DateTo
-        // (iCalendar all-day events are exclusive of the end date)
-        var endDate = FormatIcsDate(leaveRequest.DateTo.AddDays(1));
-        icsContent.AppendLine($"DTEND;VALUE=DATE:{endDate}");
-
-        // Created timestamp
-        var created = FormatIcsDateTime(leaveRequest.CreatedDate);
-        icsContent.AppendLine($"DTSTAMP:{created}");
-        icsContent.AppendLine($"CREATED:{created}");
-
-        // Last modified timestamp
-        var lastModified = FormatIcsDateTime(leaveRequest.LastModifiedDate);
-        icsContent.AppendLine($"LAST-MODIFIED:{lastModified}");
-
-        // Sequence number (starts at 0)
-        icsContent.AppendLine("SEQUENCE:0");
-
-        // Event end
-        icsContent.AppendLine("END:VEVENT");
-
-        // Calendar end
-        icsContent.AppendLine("END:VCALENDAR");
-
-        // Convert to UTF-8 byte array
-        return Encoding.UTF8.GetBytes(icsContent.ToString());
+        return BuildIcsFile(
+            leaveRequest,
+            leaveTypeName,
+            language,
+            baseUrl,
+            method: "PUBLISH",
+            status,
+            description,
+            dtStamp: leaveRequest.CreatedDate,
+            sequence: 0);
     }
 
     /// <summary>
@@ -147,94 +91,144 @@ public static class CalendarEventGenerator
     /// <returns>Byte array containing the cancellation .ics file content encoded in UTF-8.</returns>
     public static byte[] GenerateCancellationIcsFile(LeaveRequest leaveRequest, string? leaveTypeName = null, string? language = null, string? baseUrl = null)
     {
+        language = NormalizeLanguage(language);
+        var description = BuildDescription(leaveRequest, leaveTypeName, baseUrl, language, includeCancellationMessage: true);
+
+        return BuildIcsFile(
+            leaveRequest,
+            leaveTypeName,
+            language,
+            baseUrl,
+            method: "CANCEL",
+            status: "CANCELLED",
+            description,
+            dtStamp: DateTimeOffset.UtcNow,
+            sequence: 1);
+    }
+
+    private static byte[] BuildIcsFile(
+        LeaveRequest leaveRequest,
+        string? leaveTypeName,
+        string language,
+        string? baseUrl,
+        string method,
+        string status,
+        string description,
+        DateTimeOffset dtStamp,
+        int sequence)
+    {
         var icsContent = new StringBuilder();
 
-        // iCalendar header with METHOD:CANCEL for cancellation
+        AppendCalendarHeader(icsContent, method);
+        AppendEventHeader(icsContent, leaveRequest);
+        AppendEventSummary(icsContent, leaveTypeName, language);
+        AppendEventDescription(icsContent, description);
+        AppendEventUrl(icsContent, baseUrl, leaveRequest.Id);
+        AppendEventStatus(icsContent, status);
+        AppendEventDates(icsContent, leaveRequest.DateFrom, leaveRequest.DateTo);
+        AppendEventTimestamps(icsContent, leaveRequest.CreatedDate, leaveRequest.LastModifiedDate, dtStamp);
+        AppendEventSequence(icsContent, sequence);
+        AppendEventFooter(icsContent);
+        AppendCalendarFooter(icsContent);
+
+        return Encoding.UTF8.GetBytes(icsContent.ToString());
+    }
+
+    private static void AppendCalendarHeader(StringBuilder icsContent, string method)
+    {
         icsContent.AppendLine("BEGIN:VCALENDAR");
         icsContent.AppendLine("VERSION:2.0");
         icsContent.AppendLine("PRODID:-//Leave System//Leave Request Calendar//EN");
         icsContent.AppendLine("CALSCALE:GREGORIAN");
-        icsContent.AppendLine("METHOD:CANCEL");
+        icsContent.AppendLine($"METHOD:{method}");
+    }
 
-        // Event
+    private static void AppendEventHeader(StringBuilder icsContent, LeaveRequest leaveRequest)
+    {
         icsContent.AppendLine("BEGIN:VEVENT");
-
-        // Unique identifier - MUST be the same as the original event for calendar clients to match and remove it
         icsContent.AppendLine($"UID:leave-request-{leaveRequest.Id}@leavesystem");
+    }
 
-        // Normalize language
-        language = NormalizeLanguage(language);
-
-        // Event summary (title) - same as original
-        var leaveRequestLabel = GetTranslation("Leave Request", language);
-        var summary = !string.IsNullOrWhiteSpace(leaveTypeName)
-            ? $"{leaveRequestLabel} - {EscapeIcsText(leaveTypeName)}"
-            : leaveRequestLabel;
+    private static void AppendEventSummary(StringBuilder icsContent, string? leaveTypeName, string language)
+    {
+        var summary = BuildSummary(leaveTypeName, language);
         icsContent.AppendLine($"SUMMARY:{EscapeIcsText(summary)}");
+    }
 
-        // Event description - indicate cancellation
-        var description = BuildCancellationDescription(leaveRequest, leaveTypeName, baseUrl, language);
+    private static void AppendEventDescription(StringBuilder icsContent, string description)
+    {
         icsContent.AppendLine($"DESCRIPTION:{EscapeIcsText(description)}");
+    }
 
-        // URL to view leave request details (if baseUrl is provided)
+    private static void AppendEventUrl(StringBuilder icsContent, string? baseUrl, Guid leaveRequestId)
+    {
         if (!string.IsNullOrWhiteSpace(baseUrl))
         {
-            var leaveRequestUrl = $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}";
+            var leaveRequestUrl = BuildLeaveRequestUrl(baseUrl, leaveRequestId);
             icsContent.AppendLine($"URL:{EscapeIcsText(leaveRequestUrl)}");
         }
+    }
 
-        // Status: CANCELLED for cancelled/rejected events
-        icsContent.AppendLine("STATUS:CANCELLED");
+    private static void AppendEventStatus(StringBuilder icsContent, string status)
+    {
+        icsContent.AppendLine($"STATUS:{status}");
+    }
 
-        // All-day event: Use DATE value type (same as original)
-        var startDate = FormatIcsDate(leaveRequest.DateFrom);
+    private static void AppendEventDates(StringBuilder icsContent, DateOnly dateFrom, DateOnly dateTo)
+    {
+        var startDate = FormatIcsDate(dateFrom);
         icsContent.AppendLine($"DTSTART;VALUE=DATE:{startDate}");
 
-        var endDate = FormatIcsDate(leaveRequest.DateTo.AddDays(1));
+        // End date: For all-day events, end date should be the day after DateTo
+        // (iCalendar all-day events are exclusive of the end date)
+        var endDate = FormatIcsDate(dateTo.AddDays(1));
         icsContent.AppendLine($"DTEND;VALUE=DATE:{endDate}");
+    }
 
-        // Updated timestamps
-        var now = FormatIcsDateTime(DateTimeOffset.UtcNow);
-        icsContent.AppendLine($"DTSTAMP:{now}");
-        icsContent.AppendLine($"CREATED:{FormatIcsDateTime(leaveRequest.CreatedDate)}");
-        icsContent.AppendLine($"LAST-MODIFIED:{FormatIcsDateTime(leaveRequest.LastModifiedDate)}");
+    private static void AppendEventTimestamps(StringBuilder icsContent, DateTimeOffset createdDate, DateTimeOffset lastModifiedDate, DateTimeOffset dtStamp)
+    {
+        icsContent.AppendLine($"DTSTAMP:{FormatIcsDateTime(dtStamp)}");
+        icsContent.AppendLine($"CREATED:{FormatIcsDateTime(createdDate)}");
+        icsContent.AppendLine($"LAST-MODIFIED:{FormatIcsDateTime(lastModifiedDate)}");
+    }
 
-        // Sequence number - increment from original (use 1 as we don't track sequence)
-        icsContent.AppendLine("SEQUENCE:1");
+    private static void AppendEventSequence(StringBuilder icsContent, int sequence)
+    {
+        icsContent.AppendLine($"SEQUENCE:{sequence}");
+    }
 
-        // Event end
+    private static void AppendEventFooter(StringBuilder icsContent)
+    {
         icsContent.AppendLine("END:VEVENT");
+    }
 
-        // Calendar end
+    private static void AppendCalendarFooter(StringBuilder icsContent)
+    {
         icsContent.AppendLine("END:VCALENDAR");
-
-        // Convert to UTF-8 byte array
-        return Encoding.UTF8.GetBytes(icsContent.ToString());
     }
 
-    private static string BuildDescription(LeaveRequest leaveRequest, string? leaveTypeName, string? baseUrl = null, string language = "en-US")
+    private static string BuildSummary(string? leaveTypeName, string language)
+    {
+        var leaveRequestLabel = GetTranslation("Leave Request", language);
+        return !string.IsNullOrWhiteSpace(leaveTypeName)
+            ? $"{leaveRequestLabel} - {leaveTypeName}"
+            : leaveRequestLabel;
+    }
+
+    private static string BuildLeaveRequestUrl(string baseUrl, Guid leaveRequestId)
+    {
+        return $"{baseUrl.TrimEnd('/')}/details/{leaveRequestId}";
+    }
+
+    private static string BuildDescription(LeaveRequest leaveRequest, string? leaveTypeName, string? baseUrl = null, string language = "en-US", bool includeCancellationMessage = false)
     {
         var description = new StringBuilder();
 
-        var leaveRequestIdLabel = GetTranslation("Leave Request ID", language);
-        description.Append($"{leaveRequestIdLabel}: {leaveRequest.Id}");
-        description.AppendLine();
-
-        var employeeLabel = GetTranslation("Employee", language);
-        description.Append($"{employeeLabel}: {leaveRequest.AssignedTo.Name ?? leaveRequest.AssignedTo.Id}");
-        description.AppendLine();
-
-        var dateFromLabel = GetTranslation("Date From", language);
-        description.Append($"{dateFromLabel}: {leaveRequest.DateFrom:yyyy-MM-dd}");
-        description.AppendLine();
-
-        var dateToLabel = GetTranslation("Date To", language);
-        description.Append($"{dateToLabel}: {leaveRequest.DateTo:yyyy-MM-dd}");
-        description.AppendLine();
-
-        var durationLabel = GetTranslation("Duration", language);
-        description.Append($"{durationLabel}: {FormatDuration(leaveRequest.Duration, language)}");
-        description.AppendLine();
+        AppendDescriptionField(description, "Leave Request ID", leaveRequest.Id.ToString(), language);
+        AppendDescriptionField(description, "Employee", leaveRequest.AssignedTo.Name ?? leaveRequest.AssignedTo.Id, language);
+        AppendDescriptionField(description, "Date From", leaveRequest.DateFrom.ToString("yyyy-MM-dd"), language);
+        AppendDescriptionField(description, "Date To", leaveRequest.DateTo.ToString("yyyy-MM-dd"), language);
+        AppendDescriptionField(description, "Duration", FormatDuration(leaveRequest.Duration, language), language);
 
         var workingHoursLabel = GetTranslation("Working Hours", language);
         description.Append($"{workingHoursLabel}: {FormatDuration(leaveRequest.WorkingHours, language)}");
@@ -242,98 +236,59 @@ public static class CalendarEventGenerator
         if (!string.IsNullOrWhiteSpace(leaveTypeName))
         {
             description.AppendLine();
-            var leaveTypeLabel = GetTranslation("Leave Type", language);
-            description.Append($"{leaveTypeLabel}: {leaveTypeName}");
+            AppendDescriptionField(description, "Leave Type", leaveTypeName, language, addNewLine: false);
         }
 
-        if (leaveRequest.Remarks.Count > 0)
-        {
-            var latestRemark = leaveRequest.Remarks.OrderByDescending(r => r.CreatedDate).First();
-            if (!string.IsNullOrWhiteSpace(latestRemark.Remarks))
-            {
-                description.AppendLine();
-                var remarksLabel = GetTranslation("Remarks", language);
-                description.Append($"{remarksLabel}: {latestRemark.Remarks}");
-            }
-        }
+        AppendRemarks(description, leaveRequest, language);
 
         description.AppendLine();
-        var statusLabel = GetTranslation("Status", language);
-        description.Append($"{statusLabel}: {leaveRequest.Status}");
+        AppendDescriptionField(description, "Status", leaveRequest.Status.ToString(), language, addNewLine: false);
 
-        if (!string.IsNullOrWhiteSpace(baseUrl))
+        if (includeCancellationMessage)
         {
             description.AppendLine();
-            description.AppendLine();
-            var viewLabel = GetTranslation("View Leave Request", language);
-            description.Append($"{viewLabel}: {baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}");
+            var cancellationMessage = GetTranslation("This leave request has been cancelled or rejected. Please remove this event from your calendar.", language);
+            description.Append(cancellationMessage);
         }
+
+        AppendViewLink(description, baseUrl, leaveRequest.Id, language);
 
         return description.ToString();
     }
 
-    private static string BuildCancellationDescription(LeaveRequest leaveRequest, string? leaveTypeName, string? baseUrl = null, string language = "en-US")
+    private static void AppendDescriptionField(StringBuilder description, string labelKey, string value, string language, bool addNewLine = true)
     {
-        var description = new StringBuilder();
-
-        var leaveRequestIdLabel = GetTranslation("Leave Request ID", language);
-        description.Append($"{leaveRequestIdLabel}: {leaveRequest.Id}");
-        description.AppendLine();
-
-        var employeeLabel = GetTranslation("Employee", language);
-        description.Append($"{employeeLabel}: {leaveRequest.AssignedTo.Name ?? leaveRequest.AssignedTo.Id}");
-        description.AppendLine();
-
-        var dateFromLabel = GetTranslation("Date From", language);
-        description.Append($"{dateFromLabel}: {leaveRequest.DateFrom:yyyy-MM-dd}");
-        description.AppendLine();
-
-        var dateToLabel = GetTranslation("Date To", language);
-        description.Append($"{dateToLabel}: {leaveRequest.DateTo:yyyy-MM-dd}");
-        description.AppendLine();
-
-        var durationLabel = GetTranslation("Duration", language);
-        description.Append($"{durationLabel}: {FormatDuration(leaveRequest.Duration, language)}");
-        description.AppendLine();
-
-        var workingHoursLabel = GetTranslation("Working Hours", language);
-        description.Append($"{workingHoursLabel}: {FormatDuration(leaveRequest.WorkingHours, language)}");
-
-        if (!string.IsNullOrWhiteSpace(leaveTypeName))
+        var label = GetTranslation(labelKey, language);
+        description.Append($"{label}: {value}");
+        if (addNewLine)
         {
             description.AppendLine();
-            var leaveTypeLabel = GetTranslation("Leave Type", language);
-            description.Append($"{leaveTypeLabel}: {leaveTypeName}");
         }
+    }
 
+    private static void AppendRemarks(StringBuilder description, LeaveRequest leaveRequest, string language)
+    {
         if (leaveRequest.Remarks.Count > 0)
         {
             var latestRemark = leaveRequest.Remarks.OrderByDescending(r => r.CreatedDate).First();
             if (!string.IsNullOrWhiteSpace(latestRemark.Remarks))
             {
                 description.AppendLine();
-                var remarksLabel = GetTranslation("Remarks", language);
-                description.Append($"{remarksLabel}: {latestRemark.Remarks}");
+                AppendDescriptionField(description, "Remarks", latestRemark.Remarks, language, addNewLine: false);
             }
         }
+    }
 
-        description.AppendLine();
-        var statusLabel = GetTranslation("Status", language);
-        description.Append($"{statusLabel}: {leaveRequest.Status}");
-        description.AppendLine();
-
-        var cancellationMessage = GetTranslation("This leave request has been cancelled or rejected. Please remove this event from your calendar.", language);
-        description.Append(cancellationMessage);
-
+    private static void AppendViewLink(StringBuilder description, string? baseUrl, Guid leaveRequestId, string language)
+    {
         if (!string.IsNullOrWhiteSpace(baseUrl))
         {
             description.AppendLine();
             description.AppendLine();
             var viewLabel = GetTranslation("View Leave Request", language);
-            description.Append($"{viewLabel}: {baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}");
+            var leaveRequestUrl = BuildLeaveRequestUrl(baseUrl, leaveRequestId);
+            description.Append($"{viewLabel}: {leaveRequestUrl}");
         }
-
-        return description.ToString();
     }
 
     private static string FormatDuration(TimeSpan duration, string language = "en-US")
