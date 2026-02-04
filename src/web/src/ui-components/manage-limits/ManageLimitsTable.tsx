@@ -9,7 +9,6 @@ import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import {
-  GridRowsProp,
   GridRowModesModel,
   GridRowModes,
   DataGrid,
@@ -21,6 +20,7 @@ import {
   GridToolbarContainer,
   GridSlotProps,
   useGridApiRef,
+  GridValidRowModel,
 } from "@mui/x-data-grid";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { EmployeeDto } from "../dtos/EmployeeDto";
@@ -34,7 +34,11 @@ import { Trans, useTranslation } from "react-i18next";
 
 declare module "@mui/x-data-grid" {
   interface ToolbarPropsOverrides {
-    setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+    setRows: (
+      newRows: (
+        oldRows: readonly GridValidRowModel[]
+      ) => readonly GridValidRowModel[]
+    ) => void;
     setRowModesModel: (
       newModel: (oldModel: GridRowModesModel) => GridRowModesModel
     ) => void;
@@ -129,6 +133,18 @@ export function ManageLimitsTable(props: {
   const [rows, setRows] = React.useState<LeaveLimitCell[]>(rowsTransformed);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
+  );
+
+  // Wrapper function to adapt React's setRows to MUI's expected signature
+  const setRowsWrapper = React.useCallback(
+    (
+      newRows: (
+        oldRows: readonly GridValidRowModel[]
+      ) => readonly GridValidRowModel[]
+    ) => {
+      setRows((oldRows) => newRows(oldRows) as LeaveLimitCell[]);
+    },
+    []
   );
   // Track if we just added a new row to prevent useEffect from clearing it
   const justAddedRowRef = React.useRef<boolean>(false);
@@ -609,7 +625,7 @@ export function ManageLimitsTable(props: {
           }}
           slotProps={{
             toolbar: {
-              setRows,
+              setRows: setRowsWrapper,
               setRowModesModel,
               defaultLeaveTypeId:
                 props.leaveTypes.find(
