@@ -17,7 +17,6 @@ import {
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
-  GridRowModel,
   GridRowEditStopReasons,
   GridToolbarContainer,
   GridSlotProps,
@@ -190,7 +189,7 @@ export function ManageLimitsTable(props: {
     const deleteItem = rows.find((row) => row.id === id);
     setRows(rows.filter((row) => row.id !== id));
     if (deleteItem) {
-      const row = deleteItem as LeaveLimitCell;
+      const row = deleteItem;
       row.state = "Inactive";
       await props.limitOnChange(row);
     } else {
@@ -247,7 +246,7 @@ export function ManageLimitsTable(props: {
         // Convert null to empty string for React input compatibility
         return value ?? "";
       },
-      valueSetter: (value, row) => {
+      valueSetter: (value: string | null, row: LeaveLimitCell) => {
         // Convert empty string back to null for data model
         return { ...row, assignedToUserId: value === "" ? null : value };
       },
@@ -536,12 +535,12 @@ export function ManageLimitsTable(props: {
             // Try to select the row to make it more visible
             try {
               apiRef.current.selectRow(id, true, true);
-            } catch (e) {
+            } catch {
               // Selection might not be enabled, that's okay
             }
           }
         }
-      } catch (error) {
+      } catch {
         // Silently handle scroll errors
       }
     }, 300);
@@ -684,6 +683,7 @@ function EditToolbar(props: GridSlotProps["toolbar"]) {
 
 export interface LeaveLimitCell {
   id: string;
+  isNew?: boolean;
   limit: number | null;
   overdueLimit: number | null;
   workingHours: number | null;
