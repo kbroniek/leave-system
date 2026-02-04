@@ -81,23 +81,22 @@ public static class CalendarEventGenerator
 
         // Normalize language
         language = NormalizeLanguage(language);
-        var translations = Translations[language];
 
         // Event summary (title)
-        var leaveRequestLabel = translations.TryGetValue("Leave Request", out var summaryText) ? summaryText : "Leave Request";
+        var leaveRequestLabel = GetTranslation("Leave Request", language);
         var summary = !string.IsNullOrWhiteSpace(leaveTypeName)
             ? $"{leaveRequestLabel} - {EscapeIcsText(leaveTypeName)}"
             : leaveRequestLabel;
         icsContent.AppendLine($"SUMMARY:{EscapeIcsText(summary)}");
 
-        var leaveRequestUrl = !string.IsNullOrWhiteSpace(baseUrl) ? $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}" : null;
         // Event description
-        var description = BuildDescription(leaveRequest, leaveTypeName, leaveRequestUrl, language);
+        var description = BuildDescription(leaveRequest, leaveTypeName, baseUrl, language);
         icsContent.AppendLine($"DESCRIPTION:{EscapeIcsText(description)}");
 
         // URL to view leave request details (if baseUrl is provided)
-        if (leaveRequestUrl != null)
+        if (!string.IsNullOrWhiteSpace(baseUrl))
         {
+            var leaveRequestUrl = $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}";
             icsContent.AppendLine($"URL:{EscapeIcsText(leaveRequestUrl)}");
         }
 
@@ -165,10 +164,9 @@ public static class CalendarEventGenerator
 
         // Normalize language
         language = NormalizeLanguage(language);
-        var translations = Translations[language];
 
         // Event summary (title) - same as original
-        var leaveRequestLabel = translations.TryGetValue("Leave Request", out var summaryText) ? summaryText : "Leave Request";
+        var leaveRequestLabel = GetTranslation("Leave Request", language);
         var summary = !string.IsNullOrWhiteSpace(leaveTypeName)
             ? $"{leaveRequestLabel} - {EscapeIcsText(leaveTypeName)}"
             : leaveRequestLabel;
@@ -179,8 +177,9 @@ public static class CalendarEventGenerator
         icsContent.AppendLine($"DESCRIPTION:{EscapeIcsText(description)}");
 
         // URL to view leave request details (if baseUrl is provided)
-        if (leaveRequestUrl != null)
+        if (!string.IsNullOrWhiteSpace(baseUrl))
         {
+            var leaveRequestUrl = $"{baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}";
             icsContent.AppendLine($"URL:{EscapeIcsText(leaveRequestUrl)}");
         }
 
@@ -213,38 +212,37 @@ public static class CalendarEventGenerator
         return Encoding.UTF8.GetBytes(icsContent.ToString());
     }
 
-    private static string BuildDescription(LeaveRequest leaveRequest, string? leaveTypeName, string? leaveRequestUrl = null, string language = "en-US")
+    private static string BuildDescription(LeaveRequest leaveRequest, string? leaveTypeName, string? baseUrl = null, string language = "en-US")
     {
-        var translations = Translations[language];
         var description = new StringBuilder();
-        
-        var leaveRequestIdLabel = translations.TryGetValue("Leave Request ID", out var idLabel) ? idLabel : "Leave Request ID";
+
+        var leaveRequestIdLabel = GetTranslation("Leave Request ID", language);
         description.Append($"{leaveRequestIdLabel}: {leaveRequest.Id}");
         description.AppendLine();
-        
-        var employeeLabel = translations.TryGetValue("Employee", out var empLabel) ? empLabel : "Employee";
+
+        var employeeLabel = GetTranslation("Employee", language);
         description.Append($"{employeeLabel}: {leaveRequest.AssignedTo.Name ?? leaveRequest.AssignedTo.Id}");
         description.AppendLine();
-        
-        var dateFromLabel = translations.TryGetValue("Date From", out var fromLabel) ? fromLabel : "Date From";
+
+        var dateFromLabel = GetTranslation("Date From", language);
         description.Append($"{dateFromLabel}: {leaveRequest.DateFrom:yyyy-MM-dd}");
         description.AppendLine();
-        
-        var dateToLabel = translations.TryGetValue("Date To", out var toLabel) ? toLabel : "Date To";
+
+        var dateToLabel = GetTranslation("Date To", language);
         description.Append($"{dateToLabel}: {leaveRequest.DateTo:yyyy-MM-dd}");
         description.AppendLine();
-        
-        var durationLabel = translations.TryGetValue("Duration", out var durLabel) ? durLabel : "Duration";
+
+        var durationLabel = GetTranslation("Duration", language);
         description.Append($"{durationLabel}: {FormatDuration(leaveRequest.Duration, language)}");
         description.AppendLine();
-        
-        var workingHoursLabel = translations.TryGetValue("Working Hours", out var whLabel) ? whLabel : "Working Hours";
+
+        var workingHoursLabel = GetTranslation("Working Hours", language);
         description.Append($"{workingHoursLabel}: {FormatDuration(leaveRequest.WorkingHours, language)}");
 
         if (!string.IsNullOrWhiteSpace(leaveTypeName))
         {
             description.AppendLine();
-            var leaveTypeLabel = translations.TryGetValue("Leave Type", out var ltLabel) ? ltLabel : "Leave Type";
+            var leaveTypeLabel = GetTranslation("Leave Type", language);
             description.Append($"{leaveTypeLabel}: {leaveTypeName}");
         }
 
@@ -254,21 +252,21 @@ public static class CalendarEventGenerator
             if (!string.IsNullOrWhiteSpace(latestRemark.Remarks))
             {
                 description.AppendLine();
-                var remarksLabel = translations.TryGetValue("Remarks", out var remLabel) ? remLabel : "Remarks";
+                var remarksLabel = GetTranslation("Remarks", language);
                 description.Append($"{remarksLabel}: {latestRemark.Remarks}");
             }
         }
 
         description.AppendLine();
-        var statusLabel = translations.TryGetValue("Status", out var statLabel) ? statLabel : "Status";
+        var statusLabel = GetTranslation("Status", language);
         description.Append($"{statusLabel}: {leaveRequest.Status}");
 
-        if (leaveRequestUrl != null)
+        if (!string.IsNullOrWhiteSpace(baseUrl))
         {
             description.AppendLine();
             description.AppendLine();
-            var viewLabel = translations.TryGetValue("View Leave Request", out var viewText) ? viewText : "View Leave Request";
-            description.Append($"{viewLabel}: {leaveRequestUrl}");
+            var viewLabel = GetTranslation("View Leave Request", language);
+            description.Append($"{viewLabel}: {baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}");
         }
 
         return description.ToString();
@@ -276,36 +274,35 @@ public static class CalendarEventGenerator
 
     private static string BuildCancellationDescription(LeaveRequest leaveRequest, string? leaveTypeName, string? baseUrl = null, string language = "en-US")
     {
-        var translations = Translations[language];
         var description = new StringBuilder();
-        
-        var leaveRequestIdLabel = translations.TryGetValue("Leave Request ID", out var idLabel) ? idLabel : "Leave Request ID";
+
+        var leaveRequestIdLabel = GetTranslation("Leave Request ID", language);
         description.Append($"{leaveRequestIdLabel}: {leaveRequest.Id}");
         description.AppendLine();
-        
-        var employeeLabel = translations.TryGetValue("Employee", out var empLabel) ? empLabel : "Employee";
+
+        var employeeLabel = GetTranslation("Employee", language);
         description.Append($"{employeeLabel}: {leaveRequest.AssignedTo.Name ?? leaveRequest.AssignedTo.Id}");
         description.AppendLine();
-        
-        var dateFromLabel = translations.TryGetValue("Date From", out var fromLabel) ? fromLabel : "Date From";
+
+        var dateFromLabel = GetTranslation("Date From", language);
         description.Append($"{dateFromLabel}: {leaveRequest.DateFrom:yyyy-MM-dd}");
         description.AppendLine();
-        
-        var dateToLabel = translations.TryGetValue("Date To", out var toLabel) ? toLabel : "Date To";
+
+        var dateToLabel = GetTranslation("Date To", language);
         description.Append($"{dateToLabel}: {leaveRequest.DateTo:yyyy-MM-dd}");
         description.AppendLine();
-        
-        var durationLabel = translations.TryGetValue("Duration", out var durLabel) ? durLabel : "Duration";
+
+        var durationLabel = GetTranslation("Duration", language);
         description.Append($"{durationLabel}: {FormatDuration(leaveRequest.Duration, language)}");
         description.AppendLine();
-        
-        var workingHoursLabel = translations.TryGetValue("Working Hours", out var whLabel) ? whLabel : "Working Hours";
+
+        var workingHoursLabel = GetTranslation("Working Hours", language);
         description.Append($"{workingHoursLabel}: {FormatDuration(leaveRequest.WorkingHours, language)}");
 
         if (!string.IsNullOrWhiteSpace(leaveTypeName))
         {
             description.AppendLine();
-            var leaveTypeLabel = translations.TryGetValue("Leave Type", out var ltLabel) ? ltLabel : "Leave Type";
+            var leaveTypeLabel = GetTranslation("Leave Type", language);
             description.Append($"{leaveTypeLabel}: {leaveTypeName}");
         }
 
@@ -315,26 +312,24 @@ public static class CalendarEventGenerator
             if (!string.IsNullOrWhiteSpace(latestRemark.Remarks))
             {
                 description.AppendLine();
-                var remarksLabel = translations.TryGetValue("Remarks", out var remLabel) ? remLabel : "Remarks";
+                var remarksLabel = GetTranslation("Remarks", language);
                 description.Append($"{remarksLabel}: {latestRemark.Remarks}");
             }
         }
 
         description.AppendLine();
-        var statusLabel = translations.TryGetValue("Status", out var statLabel) ? statLabel : "Status";
+        var statusLabel = GetTranslation("Status", language);
         description.Append($"{statusLabel}: {leaveRequest.Status}");
         description.AppendLine();
-        
-        var cancellationMessage = translations.TryGetValue("This leave request has been cancelled or rejected. Please remove this event from your calendar.", out var cancelMsg) 
-            ? cancelMsg 
-            : "This leave request has been cancelled or rejected. Please remove this event from your calendar.";
+
+        var cancellationMessage = GetTranslation("This leave request has been cancelled or rejected. Please remove this event from your calendar.", language);
         description.Append(cancellationMessage);
 
-        if (leaveRequestUrl != null)
+        if (!string.IsNullOrWhiteSpace(baseUrl))
         {
             description.AppendLine();
             description.AppendLine();
-            var viewLabel = translations.TryGetValue("View Leave Request", out var viewText) ? viewText : "View Leave Request";
+            var viewLabel = GetTranslation("View Leave Request", language);
             description.Append($"{viewLabel}: {baseUrl.TrimEnd('/')}/details/{leaveRequest.Id}");
         }
 
@@ -343,22 +338,20 @@ public static class CalendarEventGenerator
 
     private static string FormatDuration(TimeSpan duration, string language = "en-US")
     {
-        var translations = Translations[language];
-        
         if (duration.Days > 0)
         {
             var dayKey = duration.Days == 1 ? "day" : "days";
-            var dayWord = translations.TryGetValue(dayKey, out var dayTrans) ? dayTrans : dayKey;
+            var dayWord = GetTranslation(dayKey, language);
             return $"{duration.Days} {dayWord}";
         }
         if (duration.Hours > 0)
         {
             var hourKey = duration.Hours == 1 ? "hour" : "hours";
-            var hourWord = translations.TryGetValue(hourKey, out var hourTrans) ? hourTrans : hourKey;
+            var hourWord = GetTranslation(hourKey, language);
             return $"{duration.Hours} {hourWord}";
         }
         var minuteKey = duration.Minutes == 1 ? "minute" : "minutes";
-        var minuteWord = translations.TryGetValue(minuteKey, out var minTrans) ? minTrans : minuteKey;
+        var minuteWord = GetTranslation(minuteKey, language);
         return $"{duration.Minutes} {minuteWord}";
     }
 
@@ -376,6 +369,19 @@ public static class CalendarEventGenerator
             "en" or "en-US" or "English" => "en-US",
             _ => "en-US"
         };
+    }
+
+    private static string GetTranslation(string key, string language)
+    {
+        if (Translations.TryGetValue(language, out var languageTranslations))
+        {
+            if (languageTranslations.TryGetValue(key, out var translation))
+            {
+                return translation;
+            }
+        }
+
+        return key;
     }
 
     private static string FormatIcsDate(DateOnly date)
