@@ -4,6 +4,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using LeaveSystem.Shared.LeaveRequests;
 
 public static class CalendarEventGenerator
 {
