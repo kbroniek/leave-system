@@ -39,15 +39,15 @@ export function GenerateNewYearLimitsModal({
   const notifications = useNotifications();
   const { inProgress } = useMsal();
   const [templateYear, setTemplateYear] = useState<number>(
-    DateTime.local().year
+    DateTime.local().year - 1
   );
-  const [shouldGenerate, setShouldGenerate] = useState<boolean>(false);
+  const [generationCounter, setGenerationCounter] = useState<number>(0);
 
   // Use TanStack Query for generating limits
   const { data: generatedLimitsData, isLoading } = useApiQuery<LeaveLimitsDto>(
-    ["generateLimits", templateYear],
+    ["generateLimits", templateYear, generationCounter],
     `/leavelimits/generate-new-year?year=${templateYear}`,
-    { enabled: shouldGenerate && inProgress === InteractionStatus.None && open }
+    { enabled: generationCounter > 0 && inProgress === InteractionStatus.None && open }
   );
 
   const generatedLimits = generatedLimitsData?.items ?? null;
@@ -66,7 +66,7 @@ export function GenerateNewYearLimitsModal({
   });
 
   const handleGenerate = () => {
-    setShouldGenerate(true);
+    setGenerationCounter((prev) => prev + 1);
   };
 
   const handleSaveAll = () => {
@@ -139,7 +139,7 @@ export function GenerateNewYearLimitsModal({
   };
 
   const handleClose = () => {
-    setShouldGenerate(false);
+    setGenerationCounter(0);
     onClose();
   };
 

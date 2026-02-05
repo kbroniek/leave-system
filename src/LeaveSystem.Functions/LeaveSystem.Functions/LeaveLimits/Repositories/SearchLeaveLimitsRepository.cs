@@ -64,7 +64,9 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
 
         if (saturdayLeaveTypeIds.Length > 0)
         {
-            AddSaturdayLimit(templates, firstDay, lastDay, saturdayLeaveTypeIds[0]);
+            var firstDayNew = new DateOnly(templateYear + 1, 1, 1);
+            var lastDayNew = new DateOnly(templateYear + 1, 12, 31);
+            AddSaturdayLimit(templates, firstDayNew, lastDayNew, saturdayLeaveTypeIds[0]);
         }
 
         return templates;
