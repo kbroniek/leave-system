@@ -2,6 +2,7 @@ namespace LeaveSystem.Functions.LeaveRequests.Repositories;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using LeaveSystem.Domain.LeaveRequests.Creating;
 using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Functions.EventSourcing;
 using LeaveSystem.Functions.Extensions;
@@ -19,7 +20,8 @@ internal class ImpositionValidatorRepository(
     {
         var container = cosmosClient.GetContainer(databaseName, containerId);
         var pendingEvents = await container.GetItemLinqQueryable<EventModel<PendingEventEntity>>()
-            .Where(x => x.StreamId != leaveRequestId && x.Body.AssignedTo.Id == createdById && (
+            .Where(x => x.StreamId != leaveRequestId && x.Body.AssignedTo.Id == createdById &&
+                x.EventType == typeof(LeaveRequestCreated).AssemblyQualifiedName! && (
                 (x.Body.DateFrom <= dateTo && x.Body.DateTo >= dateTo) ||
                 (x.Body.DateFrom <= dateFrom && x.Body.DateTo >= dateFrom) ||
                 (x.Body.DateFrom >= dateFrom && x.Body.DateTo <= dateTo) ||
