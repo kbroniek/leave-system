@@ -2,6 +2,7 @@ namespace LeaveSystem.Functions.LeaveLimits;
 
 using System.Threading;
 using LeaveSystem.Domain;
+using LeaveSystem.Domain.LeaveLimits;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Functions.LeaveLimits.Repositories;
 using LeaveSystem.Shared.Auth;
@@ -14,7 +15,9 @@ using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribut
 
 public class LeaveLimitsFunction(
     SearchLeaveLimitsRepository searchRepository,
-    CreateLeaveLimitsValidator createValidator)
+    CreateLeaveLimitsValidator createValidator,
+    GenerateNewYearLimitsService generateNewYearLimitsService,
+    LeaveRequestEventsRepository eventsRepository)
 {
     [Function(nameof(SearchUserLeaveLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.Employee)},{nameof(RoleType.DecisionMaker)}")]
@@ -106,42 +109,57 @@ public class LeaveLimitsFunction(
     [Function(nameof(GenerateNewYearLimits))]
     [Authorize(Roles = $"{nameof(RoleType.GlobalAdmin)},{nameof(RoleType.LeaveLimitAdmin)}")]
     public async Task<IActionResult> GenerateNewYearLimits(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavelimits/generate-new-year")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "leavelimits/generate-new-year/{templateYear:int}")] HttpRequest req,
+        int templateYear,
         [CosmosDBInput(
             databaseName: "%DatabaseName%",
             containerName: "%LeaveTypesContainerName%",
             Connection  = "CosmosDBConnection",
             SqlQuery = "SELECT c.id FROM c WHERE c.properties.catalog = 'Saturday'"
-            )] IEnumerable<LeaveTypeDetailsDto> leaveTypes,
+            )] IEnumerable<LeaveTypeDetailsDto> saturdayLeaveTypes,
         CancellationToken cancellationToken)
     {
-        var yearParam = req.Query["year"].FirstOrDefault();
-        if (!int.TryParse(yearParam, out var templateYear))
-        {
-            return new BadRequestObjectResult(new { error = "Invalid year parameter. Please provide a valid year." });
-        }
+        // Fetch all necessary data at the beginning of the function
+        var saturdayLeaveTypeIds = saturdayLeaveTypes.Select(t => t.Id).ToArray();
 
-        var templatesResult = await searchRepository.GetLimitTemplatesForNewYear(templateYear,
-            [.. leaveTypes.Select(t => t.Id)], cancellationToken);
+        // 1. Get template limits for the year (excluding Saturday leave types)
+        var templatesResult = await searchRepository.GetLimitTemplatesForNewYear(
+            templateYear,
+            saturdayLeaveTypeIds,
+            cancellationToken);
+
         if (templatesResult.IsFailure)
         {
             return templatesResult.Error.ToObjectResult("Error occurred while retrieving limit templates.");
         }
 
-        var templates = templatesResult.Value;
-        var newYear = templateYear + 1;
-        var newYearLimits = new List<LeaveLimitDto>();
-
-        foreach (var template in templates)
+        // 2. Get all pending leave request events for the template year
+        var pendingEventsResult = await eventsRepository.GetPendingEventsForYear(templateYear, cancellationToken);
+        if (pendingEventsResult.IsFailure)
         {
-            var newLimit = template with
-            {
-                Id = Guid.NewGuid(),
-                ValidSince = template.ValidSince.HasValue ? new DateOnly(newYear, template.ValidSince.Value.Month, template.ValidSince.Value.Day) : new DateOnly(newYear, 1, 1),
-                ValidUntil = template.ValidUntil.HasValue ? new DateOnly(newYear, template.ValidUntil.Value.Month, template.ValidUntil.Value.Day) : new DateOnly(newYear, 12, 31)
-            };
-            newYearLimits.Add(newLimit);
+            return pendingEventsResult.Error.ToObjectResult("Error occurred while retrieving pending events.");
         }
+
+        var pendingEvents = pendingEventsResult.Value;
+
+        // 3. Get cancelled stream IDs
+        var streamIds = pendingEvents.Select(e => e.StreamId).ToList();
+        var cancelledStreamIdsResult = await eventsRepository.GetCancelledStreamIds(streamIds, cancellationToken);
+        if (cancelledStreamIdsResult.IsFailure)
+        {
+            return cancelledStreamIdsResult.Error.ToObjectResult("Error occurred while retrieving cancelled events.");
+        }
+
+        var cancelledStreamIds = cancelledStreamIdsResult.Value;
+
+        // All calculations are done in the domain service
+        var saturdayLeaveTypeId = saturdayLeaveTypes.FirstOrDefault()?.Id;
+        var newYearLimits = generateNewYearLimitsService.GenerateNewYearLimits(
+            templatesResult.Value,
+            pendingEvents,
+            cancelledStreamIds,
+            templateYear,
+            saturdayLeaveTypeId);
 
         return new OkObjectResult(new { items = newYearLimits });
     }

@@ -1,6 +1,7 @@
 namespace LeaveSystem.Functions.LeaveLimits.Repositories;
 
 using LeaveSystem.Domain;
+using LeaveSystem.Domain.LeaveRequests.Creating.Validators;
 using LeaveSystem.Functions.Extensions;
 using LeaveSystem.Shared;
 using LeaveSystem.Shared.Dto;
@@ -9,7 +10,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Extensions.Logging;
 
-public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string databaseName, string containerId, ILogger<SearchLeaveLimitsRepository> logger)
+public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string databaseName, string containerId, ILogger<SearchLeaveLimitsRepository> logger, IUsedLeavesRepository usedLeavesRepository)
 {
     private const int MaxPageSize = 1000;
 
@@ -62,6 +63,9 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
         }
         while (continuationToken != null);
 
+        // Calculate overdue limits based on unused leave from the previous year
+        await CalculateOverdueLimits(templates, templateYear, cancellationToken);
+
         if (saturdayLeaveTypeIds.Length > 0)
         {
             var firstDayNew = new DateOnly(templateYear + 1, 1, 1);
@@ -70,6 +74,61 @@ public class SearchLeaveLimitsRepository(CosmosClient cosmosClient, string datab
         }
 
         return templates;
+    }
+
+    private async Task CalculateOverdueLimits(
+        List<LeaveLimitDto> templates,
+        int templateYear,
+        CancellationToken cancellationToken)
+    {
+        var firstDay = new DateOnly(templateYear, 1, 1);
+        var lastDay = new DateOnly(templateYear, 12, 31);
+
+        // Use for loop with index to avoid collection modification during enumeration
+        for (var i = 0; i < templates.Count; i++)
+        {
+            // Skip if no user assigned (global limits don't have overdue)
+            var template = templates[i];
+            if (string.IsNullOrEmpty(template.AssignedToUserId))
+            {
+                continue;
+            }
+
+            // Skip if no limit set
+            if (template.Limit == null)
+            {
+                continue;
+            }
+
+            try
+            {
+                // Get used leaves duration for this user and leave type in the template year
+                // Pass Guid.Empty as leaveRequestId to get all used leaves (excluding none)
+                var usedDuration = await usedLeavesRepository.GetUsedLeavesDuration(
+                    Guid.Empty, // Exclude no requests - get all used leaves
+                    template.ValidSince ?? firstDay,
+                    template.ValidUntil ?? lastDay,
+                    template.AssignedToUserId!,
+                    template.LeaveTypeId,
+                    [], // No nested leave types for this calculation
+                    cancellationToken);
+
+                // Calculate overdue limit: what's left from the limit that wasn't used
+                // overdueLimit = max(0, limit - used)
+                var limitValue = template.Limit.Value;
+                var remainingLimit = limitValue - usedDuration;
+                var overdueLimit = remainingLimit > TimeSpan.Zero ? remainingLimit : TimeSpan.Zero;
+
+                // Update the template with calculated overdue limit
+                templates[i] = template with { OverdueLimit = overdueLimit };
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to calculate overdue limit for limit {LimitId}, user {UserId}, leaveType {LeaveTypeId}",
+                    template.Id, template.AssignedToUserId, template.LeaveTypeId);
+                // Continue with null overdue limit if calculation fails
+            }
+        }
     }
 
     public void AddSaturdayLimit(
