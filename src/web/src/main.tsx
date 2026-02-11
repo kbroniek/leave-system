@@ -16,9 +16,6 @@ import "./index.css";
 export const msalInstance = new PublicClientApplication(msalConfig);
 
 msalInstance.initialize().then(() => {
-  // Optional - This will update account state if a user signs in from another tab or window
-  msalInstance.enableAccountStorageEvents();
-
   // Default to using the first account if no account is active on page load
   const accounts = msalInstance.getAllAccounts();
   if (!msalInstance.getActiveAccount() && accounts.length > 0) {
