@@ -39,7 +39,7 @@ export function GenerateNewYearLimitsModal({
   const notifications = useNotifications();
   const { inProgress } = useMsal();
   const [templateYear, setTemplateYear] = useState<number>(
-    DateTime.local().year - 1
+    DateTime.local().year - 1,
   );
   const [generationCounter, setGenerationCounter] = useState<number>(0);
 
@@ -47,7 +47,10 @@ export function GenerateNewYearLimitsModal({
   const { data: generatedLimitsData, isLoading } = useApiQuery<LeaveLimitsDto>(
     ["generateLimits", templateYear, generationCounter],
     `/leavelimits/generate-new-year?year=${templateYear}`,
-    { enabled: generationCounter > 0 && inProgress === InteractionStatus.None && open }
+    {
+      enabled:
+        generationCounter > 0 && inProgress === InteractionStatus.None && open,
+    },
   );
 
   const generatedLimits = generatedLimitsData?.items ?? null;
