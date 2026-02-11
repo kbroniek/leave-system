@@ -1,5 +1,5 @@
 import { PublicClientApplication, EventType } from "@azure/msal-browser";
-import type { EventMessage, AuthenticationResult } from "@azure/msal-browser";
+import type { EventMessage, AccountInfo } from "@azure/msal-browser";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -19,14 +19,13 @@ msalInstance.initialize().then(() => {
   // Default to using the first account if no account is active on page load
   const accounts = msalInstance.getAllAccounts();
   if (!msalInstance.getActiveAccount() && accounts.length > 0) {
-    // Account selection logic is app dependent. Adjust as needed for different use cases.
     msalInstance.setActiveAccount(accounts[0]);
   }
 
   msalInstance.addEventCallback(async (event: EventMessage) => {
     if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
-      const payload = event.payload as AuthenticationResult;
-      const account = payload.account;
+      debugger;
+      const account = event.payload as AccountInfo;
       msalInstance.setActiveAccount(account);
 
       // Fetch user roles after successful login
