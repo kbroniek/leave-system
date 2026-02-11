@@ -24,7 +24,6 @@ msalInstance.initialize().then(() => {
 
   msalInstance.addEventCallback(async (event: EventMessage) => {
     if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
-      debugger;
       const account = event.payload as AccountInfo;
       msalInstance.setActiveAccount(account);
 
